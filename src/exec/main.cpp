@@ -266,18 +266,58 @@ int main(int argc, char *argv[])
     tbox::plog << "Compiled without OpenMP.\n";
 #endif
     
-    int viz_dump_interval = 0;
-    if (main_db->keyExists("viz_dump_interval"))
+    bool is_viz_dumping = false;
+    std::string viz_dump_setting;
+    int viz_dump_timestep_interval = 0;
+    double viz_dump_time_interval = 0.0;
+    std::string visit_dump_dirname;
+    int visit_number_procs_per_file = 1;
+    
+    if (main_db->keyExists("viz_dump_setting"))
     {
-        viz_dump_interval = main_db->getInteger("viz_dump_interval");
+        viz_dump_setting = main_db->getString("viz_dump_setting");
+        
+        if ((viz_dump_setting != "CONSTANT_TIME_INTERVAL") &&
+            (viz_dump_setting != "CONSTANT_TIMESTEP_INTERVAL"))
+        {
+            TBOX_ERROR("Unknown viz_dump_setting string = "
+                << viz_dump_setting
+                << " found in input."
+                << std::endl);   
+        }
+        
+        is_viz_dumping = true;
     }
     
-    const std::string visit_dump_dirname =
-        main_db->getStringWithDefault("viz_dump_dirname", base_name + ".visit");
-    
-    int visit_number_procs_per_file = 1;
-    if (viz_dump_interval > 0)
+    if (is_viz_dumping)
     {
+        if (main_db->keyExists("viz_dump_interval"))
+        {
+            if (viz_dump_setting == "CONSTANT_TIME_INTERVAL")
+            {
+                viz_dump_time_interval = main_db->getDouble("viz_dump_interval");
+            }
+            else if (viz_dump_setting == "CONSTANT_TIMESTEP_INTERVAL")
+            {
+                viz_dump_timestep_interval = main_db->getInteger("viz_dump_interval");
+            }
+            else
+            {
+                TBOX_ERROR("Unknown viz_dump_setting = "
+                    << viz_dump_setting
+                    << "."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            TBOX_ERROR("Key data 'viz_dump_interval' not found in input."
+                    << std::endl);
+        }
+        
+        visit_dump_dirname =
+            main_db->getStringWithDefault("viz_dump_dirname", base_name + ".visit");
+        
         if (main_db->keyExists("visit_number_procs_per_file"))
         {
            visit_number_procs_per_file = main_db->getInteger("visit_number_procs_per_file");
@@ -464,7 +504,7 @@ int main(int argc, char *argv[])
     
     t_write_viz->start();
 #ifdef HAVE_HDF5
-    if (viz_dump_interval > 0)
+    if (is_viz_dumping)
     {
         visit_data_writer->writePlotData(
             patch_hierarchy,
@@ -481,6 +521,9 @@ int main(int argc, char *argv[])
     
     double loop_time = time_integrator->getIntegratorTime();
     double loop_time_end = time_integrator->getEndTime();
+    double last_viz_dump_time = floor(time_integrator->getIntegratorTime()/viz_dump_time_interval)*
+        viz_dump_time_interval;
+    
     
     while (loop_time < loop_time_end && time_integrator->stepsRemaining())
     {
@@ -521,12 +564,39 @@ int main(int argc, char *argv[])
          */
         t_write_viz->start();
 #ifdef HAVE_HDF5
-        if ((viz_dump_interval > 0) && (iteration_num % viz_dump_interval) == 0)
+        if (is_viz_dumping)
         {
-            visit_data_writer->writePlotData(
-                patch_hierarchy,
-                iteration_num,
-                loop_time);
+            if (viz_dump_setting == "CONSTANT_TIME_INTERVAL")
+            {
+                if (loop_time >= last_viz_dump_time + viz_dump_time_interval)
+                {
+                    visit_data_writer->writePlotData(
+                        patch_hierarchy,
+                        iteration_num,
+                        loop_time);
+                    
+                    last_viz_dump_time =
+                        floor(loop_time/viz_dump_time_interval)*
+                            viz_dump_time_interval;
+                }
+            }
+            else if (viz_dump_setting == "CONSTANT_TIMESTEP_INTERVAL")
+            {
+                if ((iteration_num % viz_dump_timestep_interval) == 0)
+                {
+                    visit_data_writer->writePlotData(
+                        patch_hierarchy,
+                        iteration_num,
+                        loop_time);
+                }
+            }
+            else
+            {
+                TBOX_ERROR("Unknown viz_dump_setting = "
+                    << viz_dump_setting
+                    << "."
+                    << std::endl); 
+            }
         }
 #endif
         t_write_viz->stop();
@@ -536,12 +606,35 @@ int main(int argc, char *argv[])
      * Write out data of the last time step.
      */
     int iteration_num = time_integrator->getIntegratorStep();
-    if ((viz_dump_interval > 0) && (iteration_num % viz_dump_interval) != 0)
+    if (is_viz_dumping)
     {
-        visit_data_writer->writePlotData(
-            patch_hierarchy,
-            iteration_num,
-            loop_time);
+        if (viz_dump_setting == "CONSTANT_TIME_INTERVAL")
+        {
+            if (loop_time < last_viz_dump_time + viz_dump_time_interval)
+            {
+                visit_data_writer->writePlotData(
+                    patch_hierarchy,
+                    iteration_num,
+                    loop_time);
+            }
+        }
+        else if (viz_dump_setting == "CONSTANT_TIMESTEP_INTERVAL")
+        {
+            if ((iteration_num % viz_dump_timestep_interval) != 0)
+            {
+                visit_data_writer->writePlotData(
+                    patch_hierarchy,
+                    iteration_num,
+                    loop_time);
+            }
+        }
+        else
+        {
+            TBOX_ERROR("Unknown viz_dump_setting = "
+                << viz_dump_setting
+                << "."
+                << std::endl); 
+        }
     }
     
     tbox::plog << "GriddingAlgorithm statistics:\n";
