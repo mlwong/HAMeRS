@@ -4183,6 +4183,8 @@ Euler::tagGradientDetectorCells(
     
     const double* dx = patch_geom->getDx();
     
+    NULL_USE(dx);
+    
     boost::shared_ptr<pdat::CellData<int> > tags(
         BOOST_CAST<pdat::CellData<int>, hier::PatchData>(
             patch.getPatchData(tag_indx)));
@@ -4258,6 +4260,8 @@ Euler::tagGradientDetectorCells(
                                                    + pow(fabs(rho[idx_wghost_y[0]] - 2*rho[idx_wghost_y[1]] + rho[idx_wghost_y[2]])/
                                                    (fabs(rho[idx_wghost_y[1]] - rho[idx_wghost_y[0]])
                                                    + fabs(rho[idx_wghost_y[2]] - rho[idx_wghost_y[1]]) + 1.0e-40), 2.0))/sqrt(2.0);
+                        
+                        NULL_USE(detector_rho);
                         
                         if (rho[idx_wghost_x[1]] > 6.5 && rho[idx_wghost_x[1]] < 8.5)
                         {
