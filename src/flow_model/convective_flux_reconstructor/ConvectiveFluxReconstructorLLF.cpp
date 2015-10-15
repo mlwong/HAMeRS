@@ -67,15 +67,18 @@ ConvectiveFluxReconstructorLLF::putToRestart(
 
 /*
  * Compute the convective fluxes and sources due to hyperbolization
- * of the equtions.
+ * of the equations.
  */
 void
-ConvectiveFluxReconstructorLLF::computeConvectiveFluxAndSource(
+ConvectiveFluxReconstructorLLF::computeConvectiveFluxesAndSources(
     hier::Patch& patch,
     const double time,
     const double dt,
+    const int RK_step_number,
     const boost::shared_ptr<hier::VariableContext> data_context)
-{    
+{
+    NULL_USE(RK_step_number);
+    
     if (d_set_variables == true)
     {
         // Get the dimensions of box that covers the interior of patch.
@@ -177,7 +180,7 @@ ConvectiveFluxReconstructorLLF::computeConvectiveFluxAndSource(
                         sp_x[idx] = fabs(u[idx]) + c[idx];
                     }
                     
-                    // Compute the flux in the x direction.
+                    // Compute the fluxes in the x direction.
                     for (int i = 0; i < interior_dims[0] + 1; i++)
                     {
                         // Compute the indices of left cell, right cell and face.
@@ -260,7 +263,7 @@ ConvectiveFluxReconstructorLLF::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the x direction.
+                    // Compute the fluxes in the x direction.
                     for (int j = 0; j < interior_dims[1]; j++)
                     {
                         for (int i = 0; i < interior_dims[0] + 1; i++)
@@ -298,7 +301,7 @@ ConvectiveFluxReconstructorLLF::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the y direction.
+                    // Compute the fluxes in the y direction.
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
                         for (int j = 0; j < interior_dims[1] + 1; j++)
@@ -400,7 +403,7 @@ ConvectiveFluxReconstructorLLF::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the x direction.
+                    // Compute the fluxes in the x direction.
                     for (int k = 0; k < interior_dims[2]; k++)
                     {
                         for (int j = 0; j < interior_dims[1]; j++)
@@ -446,7 +449,7 @@ ConvectiveFluxReconstructorLLF::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the y direction.
+                    // Compute the fluxes in the y direction.
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
                         for (int k = 0; k < interior_dims[2]; k++)
@@ -492,7 +495,7 @@ ConvectiveFluxReconstructorLLF::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the z direction.
+                    // Compute the fluxes in the z direction.
                     for (int j = 0; j < interior_dims[1]; j++)
                     {
                         for (int i = 0; i < interior_dims[0]; i++)
@@ -661,7 +664,7 @@ ConvectiveFluxReconstructorLLF::computeConvectiveFluxAndSource(
                         sp_x[idx] = fabs(u[idx]) + c[idx];
                     }
                     
-                    // Compute the flux in the x direction and velocity components at the face
+                    // Compute the fluxes in the x direction and velocity components at the face
                     // normal to the x direction.
                     double* u_intercell = velocity_intercell->getPointer(0, 0);
                     for (int i = 0; i < interior_dims[0] + 1; i++)
@@ -810,7 +813,7 @@ ConvectiveFluxReconstructorLLF::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the x direction and velocity components at the face
+                    // Compute the fluxes in the x direction and velocity components at the face
                     // normal to the x direction.
                     double* u_intercell = velocity_intercell->getPointer(0, 0);
                     double* v_intercell = velocity_intercell->getPointer(0, 1);
@@ -871,7 +874,7 @@ ConvectiveFluxReconstructorLLF::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the y direction and velocity components at the face
+                    // Compute the fluxes in the y direction and velocity components at the face
                     // normal to the y direction.
                     u_intercell = velocity_intercell->getPointer(1, 0);
                     v_intercell = velocity_intercell->getPointer(1, 1);
@@ -1060,7 +1063,7 @@ ConvectiveFluxReconstructorLLF::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the x direction and velocity components at the face
+                    // Compute the fluxes in the x direction and velocity components at the face
                     // normal to the x direction.
                     double* u_intercell = velocity_intercell->getPointer(0, 0);
                     double* v_intercell = velocity_intercell->getPointer(0, 1);
@@ -1135,7 +1138,7 @@ ConvectiveFluxReconstructorLLF::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the y direction and velocity components at the face
+                    // Compute the fluxes in the y direction and velocity components at the face
                     // normal to the y direction.
                     u_intercell = velocity_intercell->getPointer(1, 0);
                     v_intercell = velocity_intercell->getPointer(1, 1);
@@ -1210,7 +1213,7 @@ ConvectiveFluxReconstructorLLF::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the z direction and velocity components at the face
+                    // Compute the fluxes in the z direction and velocity components at the face
                     // normal to the z direction.
                     u_intercell = velocity_intercell->getPointer(2, 0);
                     v_intercell = velocity_intercell->getPointer(2, 1);
@@ -1497,7 +1500,7 @@ ConvectiveFluxReconstructorLLF::computeConvectiveFluxAndSource(
                         sp_x[idx] = fabs(u[idx]) + c[idx];
                     }
                     
-                    // Compute the flux in the x direction and velocity components at the face
+                    // Compute the fluxes in the x direction and velocity components at the face
                     // normal to the x direction.
                     double* u_intercell = velocity_intercell->getPointer(0, 0);
                     for (int i = 0; i < interior_dims[0] + 1; i++)
@@ -1670,7 +1673,7 @@ ConvectiveFluxReconstructorLLF::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the x direction and velocity components at the face
+                    // Compute the fluxes in the x direction and velocity components at the face
                     // normal to the x direction.
                     double* u_intercell = velocity_intercell->getPointer(0, 0);
                     double* v_intercell = velocity_intercell->getPointer(0, 1);
@@ -1737,7 +1740,7 @@ ConvectiveFluxReconstructorLLF::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the y direction and velocity components at the face
+                    // Compute the fluxes in the y direction and velocity components at the face
                     // normal to the y direction.
                     u_intercell = velocity_intercell->getPointer(1, 0);
                     v_intercell = velocity_intercell->getPointer(1, 1);
@@ -1745,7 +1748,7 @@ ConvectiveFluxReconstructorLLF::computeConvectiveFluxAndSource(
                     {
                         for (int j = 0; j < interior_dims[1] + 1; j++)
                         {
-                            // Compute the indices of bottom cell, top cell and flux.
+                            // Compute the indices of bottom cell, top cell and fluxes.
                             const int idx_cell_B = (i + d_num_ghosts[0]) +
                                 (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
                             
@@ -1951,7 +1954,7 @@ ConvectiveFluxReconstructorLLF::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the x direction and velocity components at the face
+                    // Compute the fluxes in the x direction and velocity components at the face
                     // normal to the x direction.
                     double* u_intercell = velocity_intercell->getPointer(0, 0);
                     double* v_intercell = velocity_intercell->getPointer(0, 1);
@@ -2032,7 +2035,7 @@ ConvectiveFluxReconstructorLLF::computeConvectiveFluxAndSource(
                         }
                     }
                        
-                    // Compute the flux in the y direction and velocity components at the face
+                    // Compute the fluxes in the y direction and velocity components at the face
                     // normal to the y direction.
                     u_intercell = velocity_intercell->getPointer(1, 0);
                     v_intercell = velocity_intercell->getPointer(1, 1);
@@ -2113,7 +2116,7 @@ ConvectiveFluxReconstructorLLF::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the z direction and velocity components at the face
+                    // Compute the fluxes in the z direction and velocity components at the face
                     // normal to the z direction.
                     u_intercell = velocity_intercell->getPointer(2, 0);
                     v_intercell = velocity_intercell->getPointer(2, 1);

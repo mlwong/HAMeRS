@@ -32,6 +32,15 @@
 #include "SAMRAI/appu/CartesianBoundaryUtilities2.h"
 #include "SAMRAI/appu/CartesianBoundaryUtilities3.h"
 
+#include "flow_model/convective_flux_reconstructor/ConvectiveFluxReconstructorLLF.hpp"
+#include "flow_model/convective_flux_reconstructor/ConvectiveFluxReconstructorFirstOrderHLLC.hpp"
+#include "flow_model/convective_flux_reconstructor/ConvectiveFluxReconstructorWENO-JS5-LLF.hpp"
+#include "flow_model/convective_flux_reconstructor/ConvectiveFluxReconstructorWENO-CU6-M2-LLF.hpp"
+#include "flow_model/convective_flux_reconstructor/ConvectiveFluxReconstructorWCNS-JS5-HLLC-HLL.hpp"
+#include "flow_model/convective_flux_reconstructor/ConvectiveFluxReconstructorWCNS-CU6-M2-HLLC-HLL.hpp"
+#include "flow_model/convective_flux_reconstructor/ConvectiveFluxReconstructorWCNS-HW6-HLLC-HLL.hpp"
+#include "flow_model/convective_flux_reconstructor/ConvectiveFluxReconstructorWCNS-HW6-LD-HLLC-HLL.hpp"
+
 #include <cfloat>
 #include <cmath>
 #include <cstdio>
@@ -87,7 +96,8 @@ Euler::Euler(
         d_mass_fraction(NULL),
         d_volume_fraction(NULL),
         d_convective_flux(NULL),
-        d_source(NULL)      
+        d_source(NULL),
+        d_is_preserving_positivity(false)
 {
     TBOX_ASSERT(!object_name.empty());
     TBOX_ASSERT(input_db);
@@ -106,7 +116,7 @@ Euler::Euler(
         t_advance_steps = tbox::TimerManager::getManager()->
             getTimer("Euler::advanceSingleStep()");
         t_synchronize_hyperbloicfluxes = tbox::TimerManager::getManager()->
-            getTimer("Euler::Euler::synchronizeHyperbolicFlux()");
+            getTimer("Euler::Euler::synchronizeHyperbolicFluxes()");
         t_setphysbcs = tbox::TimerManager::getManager()->
             getTimer("Euler::setPhysicalBoundaryConditions()");
         t_taggradient = tbox::TimerManager::getManager()->
@@ -297,6 +307,30 @@ Euler::Euler(
             d_equation_of_state,
             d_shock_capturing_scheme_db));
     }
+    else if (shock_capturing_scheme_str == "WENO_JS5_LLF")
+    {
+        d_conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorWENO_JS5_LLF(
+            "WENO-JS5-LLF",
+            d_dim,
+            d_grid_geometry,
+            d_flow_model,
+            d_num_eqn,
+            d_num_species,
+            d_equation_of_state,
+            d_shock_capturing_scheme_db));
+    }
+    else if (shock_capturing_scheme_str == "WENO_CU6_M2_LLF")
+    {
+        d_conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorWENO_CU6_M2_LLF(
+            "WENO-CU6-M2-LLF",
+            d_dim,
+            d_grid_geometry,
+            d_flow_model,
+            d_num_eqn,
+            d_num_species,
+            d_equation_of_state,
+            d_shock_capturing_scheme_db));
+    }
     else if (shock_capturing_scheme_str == "WCNS_JS5_HLLC_HLL")
     {
         d_conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL(
@@ -309,10 +343,10 @@ Euler::Euler(
             d_equation_of_state,
             d_shock_capturing_scheme_db));
     }
-    else if (shock_capturing_scheme_str == "WCNS_HW56_HLLC_HLL")
+    else if (shock_capturing_scheme_str == "WCNS_CU6_M2_HLLC_HLL")
     {
-        d_conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorWCNS_HW56_HLLC_HLL(
-            "WCNS-HW56-HLLC-HLL",
+        d_conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorWCNS_CU6_M2_HLLC_HLL(
+            "WCNS-CU6-M2-HLLC-HLL",
             d_dim,
             d_grid_geometry,
             d_flow_model,
@@ -321,10 +355,22 @@ Euler::Euler(
             d_equation_of_state,
             d_shock_capturing_scheme_db));
     }
-    else if (shock_capturing_scheme_str == "TEST")
+    else if (shock_capturing_scheme_str == "WCNS_HW6_HLLC_HLL")
     {
-        d_conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorTest(
-            "TEST",
+        d_conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorWCNS_HW6_HLLC_HLL(
+            "WCNS-HW6-HLLC-HLL",
+            d_dim,
+            d_grid_geometry,
+            d_flow_model,
+            d_num_eqn,
+            d_num_species,
+            d_equation_of_state,
+            d_shock_capturing_scheme_db));
+    }
+    else if (shock_capturing_scheme_str == "WCNS_HW6_LD_HLLC_HLL")
+    {
+        d_conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorWCNS_HW6_LD_HLLC_HLL(
+            "WCNS-HW6-LD-HLLC-HLL",
             d_dim,
             d_grid_geometry,
             d_flow_model,
@@ -347,7 +393,7 @@ Euler::Euler(
      * Initialize the number of ghost cells needed.
      */
     d_num_ghosts = d_conv_flux_reconstructor->
-        getConvertiveFluxNumberOfGhostCells();
+        getConvectiveFluxNumberOfGhostCells();
     
     /*
      * Initialize the number of ghost cells and boost::shared_ptr of the variables
@@ -920,7 +966,9 @@ Euler::initializeDataOnPatch(
             BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                 patch.getPatchGeometry()));
         
+#ifdef DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(patch_geom);
+#endif
         
         const double* const dx = patch_geom->getDx();
         const double* const patch_xlo = patch_geom->getXLower();
@@ -957,7 +1005,70 @@ Euler::initializeDataOnPatch(
                 }
                 else if (d_dim == tbox::Dimension(2))
                 {
-                    if (d_project_name == "2D wedge flow")
+                    if (d_project_name == "2D double-Mach reflection")
+                    {
+                        // Initialize data for a 2D double-Mach reflection problem.
+                        double* rho   = density->getPointer(0);
+                        double* rho_u = momentum->getPointer(0);
+                        double* rho_v = momentum->getPointer(1);
+                        double* E     = total_energy->getPointer(0);
+                        
+                        const double x_0 = 1.0/6.0;
+                        
+                        const double gamma = 1.4;
+                        
+                        const double rho_post_shock = 8.0;
+                        const double u_post_shock   = 8.25*cos(M_PI/6.0);
+                        const double v_post_shock   = -8.25*sin(M_PI/6.0);
+                        const double p_post_shock   = 116.5;
+                        
+                        const double rho_pre_shock  = 1.4;
+                        const double u_pre_shock    = 0.0;
+                        const double v_pre_shock    = 0.0;
+                        const double p_pre_shock    = 1.0;
+                        
+                        const double rho_u_post_shock = rho_post_shock*u_post_shock;
+                        const double rho_v_post_shock = rho_post_shock*v_post_shock;
+                        
+                        const double rho_u_pre_shock  = rho_pre_shock*u_pre_shock;
+                        const double rho_v_pre_shock  = rho_pre_shock*v_pre_shock;
+                        
+                        const double E_pre_shock = p_pre_shock/(gamma - 1.0) +
+                            0.5*rho_pre_shock*(u_pre_shock*u_pre_shock + v_pre_shock*v_pre_shock);
+                        
+                        const double E_post_shock = p_post_shock/(gamma - 1.0) +
+                            0.5*rho_post_shock*(u_post_shock*u_post_shock + v_post_shock*v_post_shock);
+                            
+                        for (int j = 0; j < patch_dims[1]; j++)
+                        {
+                            for (int i = 0; i < patch_dims[0]; i++)
+                            {
+                                // Compute index into linear data array.
+                                int idx_cell = i + j*patch_dims[0];
+                                
+                                // Compute the coordinates.
+                                double x[2];
+                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                
+                                if (x[0] < x_0 + x[1]*sqrt(1.0/3.0) )
+                                {
+                                    rho[idx_cell] = rho_post_shock;
+                                    rho_u[idx_cell] = rho_u_post_shock;
+                                    rho_v[idx_cell] = rho_v_post_shock;
+                                    E[idx_cell] = E_post_shock;
+                                }
+                                else
+                                {
+                                    rho[idx_cell] = rho_pre_shock;
+                                    rho_u[idx_cell] = rho_u_pre_shock;
+                                    rho_v[idx_cell] = rho_v_pre_shock;
+                                    E[idx_cell] = E_pre_shock;
+                                }
+                            }
+                        }
+                    }
+                    else if (d_project_name == "2D wedge flow")
                     {
                         // Initialize data for a 2D density wave advection problem.
                         double* rho   = density->getPointer(0);
@@ -984,17 +1095,17 @@ Euler::initializeDataOnPatch(
                             for (int i = 0; i < patch_dims[0]; i++)
                             {
                                 // Compute index into linear data array.
-                                int idx = i + j*patch_dims[0];
+                                int idx_cell = i + j*patch_dims[0];
                                 
-                                rho[idx]   = rho_inf;
-                                rho_u[idx] = rho_inf*u_inf;
-                                rho_v[idx] = rho_inf*v_inf;
-                                E[idx]     = p_inf/(gamma - 1.0) + 0.5*rho_inf*(
+                                rho[idx_cell]   = rho_inf;
+                                rho_u[idx_cell] = rho_inf*u_inf;
+                                rho_v[idx_cell] = rho_inf*v_inf;
+                                E[idx_cell]     = p_inf/(gamma - 1.0) + 0.5*rho_inf*(
                                     u_inf*u_inf + v_inf*v_inf);
                             }
                         }
                     }
-                    else
+                    else if (d_project_name == "Advection of 2D density wave")
                     {
                         // Initialize data for a 2D density wave advection problem.
                         double* rho   = density->getPointer(0);
@@ -1029,10 +1140,10 @@ Euler::initializeDataOnPatch(
                             for (int i = 0; i < patch_dims[0]; i++)
                             {
                                 // Compute index into linear data array.
-                                int idx = i + j*patch_dims[0];
+                                int idx_cell = i + j*patch_dims[0];
                                 
                                 // Compute the coordinates.
-                                double* x = new double[2];
+                                double x[2];
                                 x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
                                 x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
                                 
@@ -1041,202 +1152,168 @@ Euler::initializeDataOnPatch(
                                     (x[1] >= y_a) &&
                                     (x[1] <= y_b))
                                 {
-                                    rho[idx]   = rho_i;
-                                    rho_u[idx] = rho_i*u_i;
-                                    rho_v[idx] = rho_i*v_i;
-                                    E[idx]     = p_i/(gamma - 1.0) + 0.5*rho_i*(u_i*u_i +
+                                    rho[idx_cell]   = rho_i;
+                                    rho_u[idx_cell] = rho_i*u_i;
+                                    rho_v[idx_cell] = rho_i*v_i;
+                                    E[idx_cell]     = p_i/(gamma - 1.0) + 0.5*rho_i*(u_i*u_i +
                                         v_i*v_i);
                                 }
                                 else
                                 {
-                                    rho[idx]   = rho_o;
-                                    rho_u[idx] = rho_o*u_o;
-                                    rho_v[idx] = rho_o*v_o;
-                                    E[idx]     = p_o/(gamma - 1.0) + 0.5*rho_o*(u_o*u_o +
+                                    rho[idx_cell]   = rho_o;
+                                    rho_u[idx_cell] = rho_o*u_o;
+                                    rho_v[idx_cell] = rho_o*v_o;
+                                    E[idx_cell]     = p_o/(gamma - 1.0) + 0.5*rho_o*(u_o*u_o +
                                         v_o*v_o);
                                 }
-                                
-                                // Free the memory.
-                                delete[] x;
                             }
                         }
                     }
-                    
-                    // Initialize data for a 2D density wave advection problem.
-                    /*
-                    double* rho   = density->getPointer(0);
-                    double* rho_u = momentum->getPointer(0);
-                    double* rho_v = momentum->getPointer(1);
-                    double* E     = total_energy->getPointer(0);
-                    
-                    const double a = 1.0/3*(domain_xlo[0] + domain_xhi[0]);
-                    const double b = 2.0/3*(domain_xlo[0] + domain_xhi[0]);
-                    
-                    double gamma = d_equation_of_state->getSpeciesThermodynamicProperty(
-                        "gamma",
-                        0);
-                    
-                    for (int j = 0; j < patch_dims[1]; j++)
+                    else
                     {
-                        for (int i = 0; i < patch_dims[0]; i++)
-                        {
-                            // Compute index into linear data array.
-                            // Note: the data is stored in Fortran order.
-                            int idx = i + j*patch_dims[0];
-                            
-                            // Compute the coordinates
-                            double* x = new double[2];
-                            x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
-                            x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
-                            
-                            if (x[0] <= a || x[0] >= b)
-                            {
-                                rho[idx]   = 1.0;
-                                rho_u[idx] = 1.0;
-                                rho_v[idx] = 0.0;
-                                E[idx]     = 1.0/(gamma - 1.0) + 0.5*(rho_u[idx]*rho_u[idx]
-                                                + rho_v[idx]*rho_v[idx])/rho[idx];
-                            }
-                            else
-                            {
-                                rho[idx]   = 10.0;
-                                rho_u[idx] = 10.0;
-                                rho_v[idx] = 0.0;
-                                E[idx]     = 1.0/(gamma - 1.0) + 0.5*(rho_u[idx]*rho_u[idx]
-                                                + rho_v[idx]*rho_v[idx])/rho[idx];
-                            }
-                                            
-                            // Free the memory.
-                            delete[] x;
-                        }
+                        TBOX_ERROR(d_object_name
+                                   << ": "
+                                   << "Cannot initialize data for unknown problem."
+                                   << std::endl);
                     }
-                    */
-                    
-                    /*
-                    // Initialize data for a 2D Sod shock tube problem.
-                    
-                    double* rho   = density->getPointer(0);
-                    double* rho_u = momentum->getPointer(0);
-                    double* rho_v = momentum->getPointer(1);
-                    double* E     = total_energy->getPointer(0);
-                    
-                    const double half_x = 0.5*(domain_xlo[0] + domain_xhi[0]);
-                    
-                    for (int j = 0; j < patch_dims[1]; j++)
-                    {
-                        for (int i = 0; i < patch_dims[0]; i++)
-                        {
-                            // Compute index into linear data array.
-                            // Note: the data is stored in Fortran order.
-                            int idx = i + j*patch_dims[0];
-                            
-                            // Compute the coordinates
-                            double *x = new double[2];
-                            x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
-                            x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
-                            
-                            if (x[0] <= half_x)
-                            {
-                                rho[idx]   = 1.0;
-                                rho_u[idx] = 0.0;
-                                rho_v[idx] = 0.0;
-                                E[idx]     = 1.0/(d_species_gamma[0] - 1.0);
-                            }
-                            else
-                            {
-                                rho[idx]   = 0.125;
-                                rho_u[idx] = 0.0;
-                                rho_v[idx] = 0.0;
-                                E[idx]     = 0.1/(d_species_gamma[0] - 1.0);
-                            }
-                                            
-                            // Free the memory.
-                            delete[] x;
-                        }
-                    }
-                    */
                 }
                 else if (d_dim == tbox::Dimension(3))
                 {
-                    // Initialize data for a 3D density wave advection problem.
-                    double* rho   = density->getPointer(0);
-                    double* rho_u = momentum->getPointer(0);
-                    double* rho_v = momentum->getPointer(1);
-                    double* rho_w = momentum->getPointer(2);
-                    double* E     = total_energy->getPointer(0);
-                    
-                    const double x_a = 1.0/3*(domain_xlo[0] + domain_xhi[0]);
-                    const double x_b = 2.0/3*(domain_xlo[0] + domain_xhi[0]);
-                    
-                    const double y_a = 1.0/3*(domain_xlo[1] + domain_xhi[1]);
-                    const double y_b = 2.0/3*(domain_xlo[1] + domain_xhi[1]);
-                    
-                    const double z_a = 1.0/3*(domain_xlo[2] + domain_xhi[2]);
-                    const double z_b = 2.0/3*(domain_xlo[2] + domain_xhi[2]);
-                    
-                    double gamma = d_equation_of_state->getSpeciesThermodynamicProperty(
-                        "gamma",
-                        0);
-                    
-                    // Initial conditions inside the cube.
-                    double rho_i = 10.0;
-                    double u_i   = 1.0;
-                    double v_i   = 1.0;
-                    double w_i   = 1.0;
-                    double p_i   = 1.0;
-                    
-                    // Initial conditions outside the cube.
-                    double rho_o = 1.0;
-                    double u_o   = 1.0;
-                    double v_o   = 1.0;
-                    double w_o   = 1.0;
-                    double p_o   = 1.0;
-                    
-                    for (int k = 0; k < patch_dims[2]; k++)
+                    if (d_project_name == "3D inviscid Taylor-Green vortex")
                     {
-                        for (int j = 0; j < patch_dims[1]; j++)
+                        // Initialize data for a 3D inviscid Taylor-Green problem.
+                        double* rho   = density->getPointer(0);
+                        double* rho_u = momentum->getPointer(0);
+                        double* rho_v = momentum->getPointer(1);
+                        double* rho_w = momentum->getPointer(2);
+                        double* E     = total_energy->getPointer(0);
+                        
+                        double gamma = d_equation_of_state->getSpeciesThermodynamicProperty(
+                            "gamma",
+                            0);
+                        
+                        for (int k = 0; k < patch_dims[2]; k++)
                         {
-                            for (int i = 0; i < patch_dims[0]; i++)
+                            for (int j = 0; j < patch_dims[1]; j++)
                             {
-                                // Compute index into linear data array.
-                                int idx = i +
-                                    j*patch_dims[0] +
-                                    k*patch_dims[0]*patch_dims[1];
-                                
-                                // Compute the coordinates.
-                                double* x = new double[3];
-                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
-                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
-                                x[2] = patch_xlo[2] + (k + 0.5)*dx[2];
-                                
-                                if ((x[0] >= x_a) &&
-                                    (x[0] <= x_b) &&
-                                    (x[1] >= y_a) &&
-                                    (x[1] <= y_b) &&
-                                    (x[2] >= z_a) &&
-                                    (x[2] <= z_b))
+                                for (int i = 0; i < patch_dims[0]; i++)
                                 {
-                                    rho[idx]   = rho_i;
-                                    rho_u[idx] = rho_i*u_i;
-                                    rho_v[idx] = rho_i*v_i;
-                                    rho_w[idx] = rho_i*w_i;
-                                    E[idx]     = p_i/(gamma - 1.0) + 0.5*rho_i*(u_i*u_i +
+                                    // Compute index into linear data array.
+                                    int idx_cell = i +
+                                        j*patch_dims[0] +
+                                        k*patch_dims[0]*patch_dims[1];
+                                    
+                                    // Compute the coordinates.
+                                    double x[3];
+                                    x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                    x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                    x[2] = patch_xlo[2] + (k + 0.5)*dx[2];
+                                    
+                                    // Compute density, velocities and pressure.
+                                    const double rho_i = 1.0;
+                                    const double u_i = sin(x[0])*cos(x[1])*cos(x[2]);
+                                    const double v_i = -cos(x[0])*sin(x[1])*cos(x[2]);
+                                    const double w_i = 0.0;
+                                    const double p_i = 100.0 +
+                                        ((cos(2*x[2]) + 2.0)*(cos(2*x[0]) + cos(2*x[1])) - 2.0)/
+                                            16.0;
+                                    
+                                    rho[idx_cell]   = rho_i;
+                                    rho_u[idx_cell] = rho_i*u_i;
+                                    rho_v[idx_cell] = rho_i*v_i;
+                                    rho_w[idx_cell] = rho_i*w_i;
+                                    E[idx_cell]     = p_i/(gamma - 1.0) + 0.5*rho_i*(u_i*u_i +
                                         v_i*v_i + w_i*w_i);
                                 }
-                                else
-                                {
-                                    rho[idx]   = rho_o;
-                                    rho_u[idx] = rho_o*u_o;
-                                    rho_v[idx] = rho_o*v_o;
-                                    rho_w[idx] = rho_o*w_o;
-                                    E[idx]     = p_o/(gamma - 1.0) + 0.5*rho_o*(u_o*u_o +
-                                        v_o*v_o + w_i*w_i);
-                                }
-                                
-                                // Free the memory.
-                                delete[] x;
                             }
                         }
+                    }
+                    else if (d_project_name == "Advection of 3D density wave")
+                    {
+                        // Initialize data for a 3D density wave advection problem.
+                        double* rho   = density->getPointer(0);
+                        double* rho_u = momentum->getPointer(0);
+                        double* rho_v = momentum->getPointer(1);
+                        double* rho_w = momentum->getPointer(2);
+                        double* E     = total_energy->getPointer(0);
+                        
+                        const double x_a = 1.0/3*(domain_xlo[0] + domain_xhi[0]);
+                        const double x_b = 2.0/3*(domain_xlo[0] + domain_xhi[0]);
+                        
+                        const double y_a = 1.0/3*(domain_xlo[1] + domain_xhi[1]);
+                        const double y_b = 2.0/3*(domain_xlo[1] + domain_xhi[1]);
+                        
+                        const double z_a = 1.0/3*(domain_xlo[2] + domain_xhi[2]);
+                        const double z_b = 2.0/3*(domain_xlo[2] + domain_xhi[2]);
+                        
+                        double gamma = d_equation_of_state->getSpeciesThermodynamicProperty(
+                            "gamma",
+                            0);
+                        
+                        // Initial conditions inside the cube.
+                        double rho_i = 10.0;
+                        double u_i   = 1.0;
+                        double v_i   = 1.0;
+                        double w_i   = 1.0;
+                        double p_i   = 1.0;
+                        
+                        // Initial conditions outside the cube.
+                        double rho_o = 1.0;
+                        double u_o   = 1.0;
+                        double v_o   = 1.0;
+                        double w_o   = 1.0;
+                        double p_o   = 1.0;
+                        
+                        for (int k = 0; k < patch_dims[2]; k++)
+                        {
+                            for (int j = 0; j < patch_dims[1]; j++)
+                            {
+                                for (int i = 0; i < patch_dims[0]; i++)
+                                {
+                                    // Compute index into linear data array.
+                                    int idx_cell = i +
+                                        j*patch_dims[0] +
+                                        k*patch_dims[0]*patch_dims[1];
+                                    
+                                    // Compute the coordinates.
+                                    double x[3];
+                                    x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                    x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                    x[2] = patch_xlo[2] + (k + 0.5)*dx[2];
+                                    
+                                    if ((x[0] >= x_a) &&
+                                        (x[0] <= x_b) &&
+                                        (x[1] >= y_a) &&
+                                        (x[1] <= y_b) &&
+                                        (x[2] >= z_a) &&
+                                        (x[2] <= z_b))
+                                    {
+                                        rho[idx_cell]   = rho_i;
+                                        rho_u[idx_cell] = rho_i*u_i;
+                                        rho_v[idx_cell] = rho_i*v_i;
+                                        rho_w[idx_cell] = rho_i*w_i;
+                                        E[idx_cell]     = p_i/(gamma - 1.0) + 0.5*rho_i*(u_i*u_i +
+                                            v_i*v_i + w_i*w_i);
+                                    }
+                                    else
+                                    {
+                                        rho[idx_cell]   = rho_o;
+                                        rho_u[idx_cell] = rho_o*u_o;
+                                        rho_v[idx_cell] = rho_o*v_o;
+                                        rho_w[idx_cell] = rho_o*w_o;
+                                        E[idx_cell]     = p_o/(gamma - 1.0) + 0.5*rho_o*(u_o*u_o +
+                                            v_o*v_o + w_i*w_i);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        TBOX_ERROR(d_object_name
+                                   << ": "
+                                   << "Cannot initialize data for unknown problem."
+                                   << std::endl);
                     }
                 }
                 
@@ -1273,190 +1350,204 @@ Euler::initializeDataOnPatch(
                 }
                 else if (d_dim == tbox::Dimension(2))
                 {
-                    // Initialize data for a 2D material interface advection problem.
-                    
-                    if (d_num_species != 2)
+                    if (d_project_name == "Advection of 2D material interface")
                     {
-                        TBOX_ERROR(d_object_name
-                                   << ": "
-                                   << "Please provide only two-species for multi-species simulation testing."
-                                   << std::endl);
-                    }
-                    
-                    double* rho       = density->getPointer(0);
-                    double* rho_u     = momentum->getPointer(0);
-                    double* rho_v     = momentum->getPointer(1);
-                    double* E         = total_energy->getPointer(0);
-                    double* Y_1       = mass_fraction->getPointer(0);
-                    double* Y_2       = mass_fraction->getPointer(1);
-                    
-                    const double x_a = 1.0/3*(domain_xlo[0] + domain_xhi[0]);
-                    const double x_b = 2.0/3*(domain_xlo[0] + domain_xhi[0]);
-                    
-                    const double y_a = 1.0/3*(domain_xlo[1] + domain_xhi[1]);
-                    const double y_b = 2.0/3*(domain_xlo[1] + domain_xhi[1]);
-                    
-                    // Material initial conditions.
-                    double gamma_m  = d_equation_of_state->
-                        getSpeciesThermodynamicProperty(
-                            "gamma",
-                            0);
-                    double rho_m    = 10.0;
-                    double u_m      = 0.5;
-                    double v_m      = 0.5;
-                    double p_m      = 1.0/1.4;
-                    
-                    // Ambient initial conditions.
-                    double gamma_a  = d_equation_of_state->
-                        getSpeciesThermodynamicProperty(
-                            "gamma",
-                            1);
-                    double rho_a    = 1.0;
-                    double u_a      = 0.5;
-                    double v_a      = 0.5;
-                    double p_a      = 1.0/1.4;
-                    
-                    for (int j = 0; j < patch_dims[1]; j++)
-                    {
-                        for (int i = 0; i < patch_dims[0]; i++)
+                        // Initialize data for a 2D material interface advection problem.
+                        
+                        if (d_num_species != 2)
                         {
-                            // Compute index into linear data array.
-                            int idx = i + j*patch_dims[0];
-                            
-                            // Compute the coordinates.
-                            double* x = new double[2];
-                            x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
-                            x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
-                            
-                            if ((x[0] >= x_a) &&
-                                (x[0] <= x_b) &&
-                                (x[1] >= y_a) &&
-                                (x[1] <= y_b))
-                            {
-                                rho[idx]     = rho_m;
-                                rho_u[idx]   = rho_m*u_m;
-                                rho_v[idx]   = rho_m*v_m;
-                                E[idx]       = p_m/(gamma_m - 1.0) +
-                                    0.5*rho_m*(u_m*u_m + v_m*v_m);
-                                Y_1[idx]     = 1.0;
-                                Y_2[idx]     = 0.0;
-                            }
-                            else
-                            {
-                                rho[idx]     = rho_a;
-                                rho_u[idx]   = rho_a*u_a;
-                                rho_v[idx]   = rho_a*v_a;
-                                E[idx]       = p_a/(gamma_a - 1.0) +
-                                    0.5*rho_a*(u_a*u_a + v_a*v_a);
-                                Y_1[idx]     = 0.0;
-                                Y_2[idx]     = 1.0;
-                            }
-                            
-                            // Free the memory.
-                            delete[] x;
+                            TBOX_ERROR(d_object_name
+                                       << ": "
+                                       << "Please provide only two-species for multi-species simulation testing."
+                                       << std::endl);
                         }
-                    }
-                }
-                else if (d_dim == tbox::Dimension(3))
-                {
-                    // Initialize data for a 3D material interface advection problem.
-                    
-                    if (d_num_species != 2)
-                    {
-                        TBOX_ERROR(d_object_name
-                                   << ": "
-                                   << "Please provide only two-species for multi-species simulation testing."
-                                   << std::endl);
-                    }
-                    
-                    double* rho       = density->getPointer(0);
-                    double* rho_u     = momentum->getPointer(0);
-                    double* rho_v     = momentum->getPointer(1);
-                    double* rho_w     = momentum->getPointer(2);
-                    double* E         = total_energy->getPointer(0);
-                    double* Y_1       = mass_fraction->getPointer(0);
-                    double* Y_2       = mass_fraction->getPointer(1);
-                    
-                    const double x_a = 1.0/3*(domain_xlo[0] + domain_xhi[0]);
-                    const double x_b = 2.0/3*(domain_xlo[0] + domain_xhi[0]);
-                    
-                    const double y_a = 1.0/3*(domain_xlo[1] + domain_xhi[1]);
-                    const double y_b = 2.0/3*(domain_xlo[1] + domain_xhi[1]);
-                    
-                    const double z_a = 1.0/3*(domain_xlo[2] + domain_xhi[2]);
-                    const double z_b = 2.0/3*(domain_xlo[2] + domain_xhi[2]);
-                    
-                    // Material initial conditions.
-                    double gamma_m  = d_equation_of_state->
-                        getSpeciesThermodynamicProperty(
-                            "gamma",
-                            0);
-                    double rho_m    = 10.0;
-                    double u_m      = 0.5;
-                    double v_m      = 0.5;
-                    double w_m      = 0.5;
-                    double p_m      = 1.0/1.4;
-                    
-                    // Ambient initial conditions.
-                    double gamma_a  = d_equation_of_state->
-                        getSpeciesThermodynamicProperty(
-                            "gamma",
-                            1);
-                    double rho_a    = 1.0;
-                    double u_a      = 0.5;
-                    double v_a      = 0.5;
-                    double w_a      = 0.5;
-                    double p_a      = 1.0/1.4;
-                    
-                    for (int k = 0; k < patch_dims[2]; k++)
-                    {
+                        
+                        double* rho       = density->getPointer(0);
+                        double* rho_u     = momentum->getPointer(0);
+                        double* rho_v     = momentum->getPointer(1);
+                        double* E         = total_energy->getPointer(0);
+                        double* Y_1       = mass_fraction->getPointer(0);
+                        double* Y_2       = mass_fraction->getPointer(1);
+                        
+                        const double x_a = 1.0/3*(domain_xlo[0] + domain_xhi[0]);
+                        const double x_b = 2.0/3*(domain_xlo[0] + domain_xhi[0]);
+                        
+                        const double y_a = 1.0/3*(domain_xlo[1] + domain_xhi[1]);
+                        const double y_b = 2.0/3*(domain_xlo[1] + domain_xhi[1]);
+                        
+                        // Material initial conditions.
+                        double gamma_m  = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                0);
+                        double rho_m    = 10.0;
+                        double u_m      = 0.5;
+                        double v_m      = 0.5;
+                        double p_m      = 1.0/1.4;
+                        
+                        // Ambient initial conditions.
+                        double gamma_a  = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                1);
+                        double rho_a    = 1.0;
+                        double u_a      = 0.5;
+                        double v_a      = 0.5;
+                        double p_a      = 1.0/1.4;
+                        
                         for (int j = 0; j < patch_dims[1]; j++)
                         {
                             for (int i = 0; i < patch_dims[0]; i++)
                             {
                                 // Compute index into linear data array.
-                                int idx = i +
-                                    j*patch_dims[0] +
-                                    k*patch_dims[0]*patch_dims[1];
+                                int idx_cell = i + j*patch_dims[0];
                                 
                                 // Compute the coordinates.
-                                double* x = new double[3];
+                                double x[2];
                                 x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
                                 x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
-                                x[2] = patch_xlo[2] + (k + 0.5)*dx[2];
                                 
                                 if ((x[0] >= x_a) &&
                                     (x[0] <= x_b) &&
                                     (x[1] >= y_a) &&
-                                    (x[1] <= y_b) &&
-                                    (x[2] >= z_a) &&
-                                    (x[2] <= z_b))
+                                    (x[1] <= y_b))
                                 {
-                                    rho[idx]     = rho_m;
-                                    rho_u[idx]   = rho_m*u_m;
-                                    rho_v[idx]   = rho_m*v_m;
-                                    rho_w[idx]   = rho_m*w_m;
-                                    E[idx]       = p_m/(gamma_m - 1.0) +
-                                        0.5*rho_m*(u_m*u_m + v_m*v_m + w_m*w_m);
-                                    Y_1[idx]     = 1.0;
-                                    Y_2[idx]     = 0.0;
+                                    rho[idx_cell]     = rho_m;
+                                    rho_u[idx_cell]   = rho_m*u_m;
+                                    rho_v[idx_cell]   = rho_m*v_m;
+                                    E[idx_cell]       = p_m/(gamma_m - 1.0) +
+                                        0.5*rho_m*(u_m*u_m + v_m*v_m);
+                                    Y_1[idx_cell]     = 1.0;
+                                    Y_2[idx_cell]     = 0.0;
                                 }
                                 else
                                 {
-                                    rho[idx]     = rho_a;
-                                    rho_u[idx]   = rho_a*u_a;
-                                    rho_v[idx]   = rho_a*v_a;
-                                    rho_w[idx]   = rho_a*w_a;
-                                    E[idx]       = p_a/(gamma_a - 1.0) +
-                                        0.5*rho_a*(u_a*u_a + v_a*v_a + w_a*w_a);
-                                    Y_1[idx]     = 0.0;
-                                    Y_2[idx]     = 1.0;
+                                    rho[idx_cell]     = rho_a;
+                                    rho_u[idx_cell]   = rho_a*u_a;
+                                    rho_v[idx_cell]   = rho_a*v_a;
+                                    E[idx_cell]       = p_a/(gamma_a - 1.0) +
+                                        0.5*rho_a*(u_a*u_a + v_a*v_a);
+                                    Y_1[idx_cell]     = 0.0;
+                                    Y_2[idx_cell]     = 1.0;
                                 }
-                                
-                                // Free the memory.
-                                delete[] x;
                             }
                         }
+                    }
+                    else
+                    {
+                        TBOX_ERROR(d_object_name
+                                   << ": "
+                                   << "Cannot initialize data for unknown problem."
+                                   << std::endl);
+                    }
+                }
+                else if (d_dim == tbox::Dimension(3))
+                {
+                    if (d_project_name == "Advection of 3D material interface")
+                    {
+                        // Initialize data for a 3D material interface advection problem.
+                        
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                       << ": "
+                                       << "Please provide only two-species for multi-species simulation testing."
+                                       << std::endl);
+                        }
+                        
+                        double* rho       = density->getPointer(0);
+                        double* rho_u     = momentum->getPointer(0);
+                        double* rho_v     = momentum->getPointer(1);
+                        double* rho_w     = momentum->getPointer(2);
+                        double* E         = total_energy->getPointer(0);
+                        double* Y_1       = mass_fraction->getPointer(0);
+                        double* Y_2       = mass_fraction->getPointer(1);
+                        
+                        const double x_a = 1.0/3*(domain_xlo[0] + domain_xhi[0]);
+                        const double x_b = 2.0/3*(domain_xlo[0] + domain_xhi[0]);
+                        
+                        const double y_a = 1.0/3*(domain_xlo[1] + domain_xhi[1]);
+                        const double y_b = 2.0/3*(domain_xlo[1] + domain_xhi[1]);
+                        
+                        const double z_a = 1.0/3*(domain_xlo[2] + domain_xhi[2]);
+                        const double z_b = 2.0/3*(domain_xlo[2] + domain_xhi[2]);
+                        
+                        // Material initial conditions.
+                        double gamma_m  = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                0);
+                        double rho_m    = 10.0;
+                        double u_m      = 0.5;
+                        double v_m      = 0.5;
+                        double w_m      = 0.5;
+                        double p_m      = 1.0/1.4;
+                        
+                        // Ambient initial conditions.
+                        double gamma_a  = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                1);
+                        double rho_a    = 1.0;
+                        double u_a      = 0.5;
+                        double v_a      = 0.5;
+                        double w_a      = 0.5;
+                        double p_a      = 1.0/1.4;
+                        
+                        for (int k = 0; k < patch_dims[2]; k++)
+                        {
+                            for (int j = 0; j < patch_dims[1]; j++)
+                            {
+                                for (int i = 0; i < patch_dims[0]; i++)
+                                {
+                                    // Compute index into linear data array.
+                                    int idx_cell = i +
+                                        j*patch_dims[0] +
+                                        k*patch_dims[0]*patch_dims[1];
+                                    
+                                    // Compute the coordinates.
+                                    double x[3];
+                                    x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                    x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                    x[2] = patch_xlo[2] + (k + 0.5)*dx[2];
+                                    
+                                    if ((x[0] >= x_a) &&
+                                        (x[0] <= x_b) &&
+                                        (x[1] >= y_a) &&
+                                        (x[1] <= y_b) &&
+                                        (x[2] >= z_a) &&
+                                        (x[2] <= z_b))
+                                    {
+                                        rho[idx_cell]     = rho_m;
+                                        rho_u[idx_cell]   = rho_m*u_m;
+                                        rho_v[idx_cell]   = rho_m*v_m;
+                                        rho_w[idx_cell]   = rho_m*w_m;
+                                        E[idx_cell]       = p_m/(gamma_m - 1.0) +
+                                            0.5*rho_m*(u_m*u_m + v_m*v_m + w_m*w_m);
+                                        Y_1[idx_cell]     = 1.0;
+                                        Y_2[idx_cell]     = 0.0;
+                                    }
+                                    else
+                                    {
+                                        rho[idx_cell]     = rho_a;
+                                        rho_u[idx_cell]   = rho_a*u_a;
+                                        rho_v[idx_cell]   = rho_a*v_a;
+                                        rho_w[idx_cell]   = rho_a*w_a;
+                                        E[idx_cell]       = p_a/(gamma_a - 1.0) +
+                                            0.5*rho_a*(u_a*u_a + v_a*v_a + w_a*w_a);
+                                        Y_1[idx_cell]     = 0.0;
+                                        Y_2[idx_cell]     = 1.0;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        TBOX_ERROR(d_object_name
+                                   << ": "
+                                   << "Cannot initialize data for unknown problem."
+                                   << std::endl);
                     }
                 }
                 
@@ -1525,6 +1616,127 @@ Euler::initializeDataOnPatch(
                                 "gamma",
                                 1);
                         
+                        NULL_USE(gamma_0);
+                        
+                        // He, pre-shock condition.
+                        const double rho_He = 0.1819;
+                        const double u_He   = 0.0;
+                        const double v_He   = 0.0;
+                        const double p_He   = 1.0/1.4;
+                        const double Z_He   = 1.0;
+                        
+                        // air, pre-shock condition.
+                        const double rho_pre = 1.0;
+                        const double u_pre   = 0.0;
+                        const double v_pre   = 0.0;
+                        const double p_pre   = 1.0/1.4;
+                        const double Z_pre   = 0.0;
+                        
+                        // air, post-shock condition.
+                        const double rho_post = 1.3764;
+                        const double u_post   = -0.3336;
+                        const double v_post   = 0.0;
+                        const double p_post   = 1.5698/1.4;
+                        const double Z_post   = 0.0;
+                        
+                        // Compute the characteristic length of the initial interface thickness.
+                        const double epsilon_i = (3.0)*sqrt(dx[0]*dx[1]);
+                        
+                        for (int j = 0; j < patch_dims[1]; j++)
+                        {
+                            for (int i = 0; i < patch_dims[0]; i++)
+                            {
+                                // Compute index into linear data array.
+                                int idx_cell = i + j*patch_dims[0];
+                                
+                                // Compute the coordinates.
+                                double x[2];
+                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                
+                                if (x[0] > 4.5*D)
+                                {
+                                    Z_rho_1[idx_cell] = 0.0;
+                                    Z_rho_2[idx_cell] = rho_post;
+                                    rho_u[idx_cell]   = rho_post*u_post;
+                                    rho_v[idx_cell]   = rho_post*v_post;
+                                    E[idx_cell]       = p_post/(gamma_1 - 1.0) +
+                                        0.5*rho_post*(u_post*u_post + v_post*v_post);
+                                    Z_1[idx_cell]     = Z_post;
+                                    Z_2[idx_cell]     = 1.0 - Z_post;
+                                }
+                                else
+                                {
+                                    // Compute the distance from the initial material interface.
+                                    const double dR = sqrt(pow(x[0] - 3.5, 2) + x[1]*x[1]) - 0.5*D;
+                                    
+                                    const double f_sm = 0.5*(1.0 + erf(dR/epsilon_i));
+                                    
+                                    // Smooth the primitive quantity.
+                                    const double Z_rho_1_i = rho_He*(1.0 - f_sm);
+                                    const double Z_rho_2_i = rho_pre*f_sm;
+                                    const double u_i       = u_He*(1.0 - f_sm) + u_pre*f_sm;
+                                    const double v_i       = v_He*(1.0 - f_sm) + v_pre*f_sm;
+                                    const double p_i       = p_He*(1.0 - f_sm) + p_pre*f_sm;
+                                    const double Z_1_i     = Z_He*(1.0 - f_sm) + Z_pre*f_sm;
+                                    
+                                    const double rho_i = Z_rho_1_i + Z_rho_2_i;
+                                    const double Z_2_i = 1.0 - Z_1_i;
+                                    
+                                    std::vector<const double*> Z_ptr;
+                                    Z_ptr.push_back(&Z_1_i);
+                                    Z_ptr.push_back(&Z_2_i);
+                                    
+                                    const double gamma = d_equation_of_state->
+                                        getMixtureThermodynamicPropertyWithVolumeFraction(
+                                            "gamma",
+                                            Z_ptr);
+                                    
+                                    Z_rho_1[idx_cell] = Z_rho_1_i;
+                                    Z_rho_2[idx_cell] = Z_rho_2_i;
+                                    rho_u[idx_cell]   = rho_i*u_i;
+                                    rho_v[idx_cell]   = rho_i*v_i;
+                                    E[idx_cell]       = p_i/(gamma - 1.0) +
+                                        0.5*rho_i*(u_i*u_i + v_i*v_i);
+                                    Z_1[idx_cell]     = Z_1_i;
+                                    Z_2[idx_cell]     = Z_2_i;
+                                }
+                            }
+                        }
+                    }
+                    /*
+                    if (d_project_name == "2D shock-bubble interaction")
+                    {
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                       << ": "
+                                       << "Please provide only two-species for the 2D shock-bubble interaction simulation."
+                                       << std::endl);
+                        }
+                        
+                        const double D = 1.0;
+                        
+                        double* Z_rho_1   = partial_density->getPointer(0);
+                        double* Z_rho_2   = partial_density->getPointer(1);
+                        double* rho_u     = momentum->getPointer(0);
+                        double* rho_v     = momentum->getPointer(1);
+                        double* E         = total_energy->getPointer(0);
+                        double* Z_1       = volume_fraction->getPointer(0);
+                        double* Z_2       = volume_fraction->getPointer(1);
+                        
+                        // species 0: He
+                        // species 1: air
+                        const double gamma_0 = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                0);
+                        
+                        const double gamma_1 = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                1);
+                        
                         // He, pre-shock condition.
                         const double rho_He = 0.1819;
                         const double u_He   = 0.0;
@@ -1551,53 +1763,383 @@ Euler::initializeDataOnPatch(
                             for (int i = 0; i < patch_dims[0]; i++)
                             {
                                 // Compute index into linear data array.
-                                int idx = i + j*patch_dims[0];
+                                int idx_cell = i + j*patch_dims[0];
                                 
                                 // Compute the coordinates.
-                                double* x = new double[2];
+                                double x[2];
                                 x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
                                 x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
                                 
                                 if (x[0] > 4.5*D)
                                 {
-                                    Z_rho_1[idx] = 0.0;
-                                    Z_rho_2[idx] = rho_post;
-                                    rho_u[idx] = rho_post*u_post;
-                                    rho_v[idx] = rho_post*v_post;
-                                    E[idx] = p_post/(gamma_1 - 1.0) +
+                                    Z_rho_1[idx_cell] = 0.0;
+                                    Z_rho_2[idx_cell] = rho_post;
+                                    rho_u[idx_cell]   = rho_post*u_post;
+                                    rho_v[idx_cell]   = rho_post*v_post;
+                                    E[idx_cell]       = p_post/(gamma_1 - 1.0) +
                                         0.5*rho_post*(u_post*u_post + v_post*v_post);
-                                    Z_1[idx] = Z_post;
-                                    Z_2[idx] = 1.0 - Z_post;
+                                    Z_1[idx_cell]     = Z_post;
+                                    Z_2[idx_cell]     = 1.0 - Z_post;
                                 }
                                 else if (sqrt(pow(x[0] - 3.5, 2) + x[1]*x[1]) < 0.5*D)
                                 {
-                                    Z_rho_1[idx] = rho_He;
-                                    Z_rho_2[idx] = 0.0;
-                                    rho_u[idx] = rho_He*u_He;
-                                    rho_v[idx] = rho_He*v_He;
-                                    E[idx] = p_He/(gamma_0 - 1.0) +
+                                    Z_rho_1[idx_cell] = rho_He;
+                                    Z_rho_2[idx_cell] = 0.0;
+                                    rho_u[idx_cell]   = rho_He*u_He;
+                                    rho_v[idx_cell]   = rho_He*v_He;
+                                    E[idx_cell]       = p_He/(gamma_0 - 1.0) +
                                         0.5*rho_He*(u_He*u_He + v_He*v_He);
-                                    Z_1[idx] = Z_He;
-                                    Z_2[idx] = 1.0 - Z_He;
+                                    Z_1[idx_cell]     = Z_He;
+                                    Z_2[idx_cell]     = 1.0 - Z_He;
                                 }
                                 else
                                 {
-                                    Z_rho_1[idx] = 0.0;
-                                    Z_rho_2[idx] = rho_pre;
-                                    rho_u[idx] = rho_pre*u_pre;
-                                    rho_v[idx] = rho_pre*v_pre;
-                                    E[idx] = p_pre/(gamma_1 - 1.0) +
+                                    Z_rho_1[idx_cell] = 0.0;
+                                    Z_rho_2[idx_cell] = rho_pre;
+                                    rho_u[idx_cell]   = rho_pre*u_pre;
+                                    rho_v[idx_cell]   = rho_pre*v_pre;
+                                    E[idx_cell]       = p_pre/(gamma_1 - 1.0) +
                                         0.5*rho_pre*(u_pre*u_pre + v_pre*v_pre);
-                                    Z_1[idx] = Z_pre;
-                                    Z_2[idx] = 1.0 - Z_pre;
+                                    Z_1[idx_cell]     = Z_pre;
+                                    Z_2[idx_cell]     = 1.0 - Z_pre;
                                 }
-                                
-                                // Free the memory.
-                                delete[] x;
                             }
                         }
                     }
-                    else
+                    */
+                    else if (d_project_name == "2D Richtmyer-Meshkov instability")
+                    {
+                        // Initialize data for a 2D Richtmyer-Meshkov instability.
+                        
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                       << ": "
+                                       << "Please provide only two-species for multi-species simulation testing."
+                                       << std::endl);
+                        }
+                        
+                        const double D = 1.0;
+                        
+                        double* Z_rho_1   = partial_density->getPointer(0);
+                        double* Z_rho_2   = partial_density->getPointer(1);
+                        double* rho_u     = momentum->getPointer(0);
+                        double* rho_v     = momentum->getPointer(1);
+                        double* E         = total_energy->getPointer(0);
+                        double* Z_1       = volume_fraction->getPointer(0);
+                        double* Z_2       = volume_fraction->getPointer(1);
+                        
+                        // species 0: SF6
+                        // species 1: air
+                        const double gamma_0 = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                0);
+                        
+                        const double gamma_1 = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                1);
+                        
+                        NULL_USE(gamma_0);
+                        
+                        // SF6, pre-shock condition.
+                        const double rho_SF6 = 5.04;
+                        const double u_SF6   = 1.24;
+                        const double v_SF6   = 0.0;
+                        const double p_SF6   = 1.0/1.4;
+                        const double Z_SF6   = 1.0;
+                        
+                        // air, pre-shock condition.
+                        const double rho_pre = 1.0;
+                        const double u_pre   = 1.24;
+                        const double v_pre   = 0.0;
+                        const double p_pre   = 1.0/1.4;
+                        const double Z_pre   = 0.0;
+                        
+                        // air, post-shock condition.
+                        const double rho_post = 1.4112;
+                        const double u_post   = 0.8787;
+                        const double v_post   = 0.0;
+                        const double p_post   = 1.6272/1.4;
+                        const double Z_post   = 0.0;
+                        
+                        // Compute the characteristic length of the initial interface thickness.
+                        const double epsilon_i = (6.0)*sqrt(dx[0]*dx[1]);
+                        
+                        for (int j = 0; j < patch_dims[1]; j++)
+                        {
+                            for (int i = 0; i < patch_dims[0]; i++)
+                            {
+                                // Compute index into linear data array.
+                                int idx_cell = i + j*patch_dims[0];
+                                
+                                // Compute the coordinates.
+                                double x[2];
+                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                
+                                if (x[0] > 0.7*D)
+                                {
+                                    Z_rho_1[idx_cell] = 0.0;
+                                    Z_rho_2[idx_cell] = rho_post;
+                                    rho_u[idx_cell]   = rho_post*u_post;
+                                    rho_v[idx_cell]   = rho_post*v_post;
+                                    E[idx_cell]       = p_post/(gamma_1 - 1.0) +
+                                        0.5*rho_post*(u_post*u_post + v_post*v_post);
+                                    Z_1[idx_cell]     = Z_post;
+                                    Z_2[idx_cell]     = 1.0 - Z_post;
+                                }
+                                else
+                                {
+                                    // Compute the distance from the initial material interface.
+                                    const double dR = x[0] - (0.4 - 0.1*sin(2*M_PI*(x[1]/D + 0.25)))*D;
+                                    
+                                    const double f_sm = 0.5*(1.0 + erf(dR/epsilon_i));
+                                    
+                                    // Smooth the primitive quantity.
+                                    const double Z_rho_1_i = rho_SF6*(1.0 - f_sm);
+                                    const double Z_rho_2_i = rho_pre*f_sm;
+                                    const double u_i       = u_SF6*(1.0 - f_sm) + u_pre*f_sm;
+                                    const double v_i       = v_SF6*(1.0 - f_sm) + v_pre*f_sm;
+                                    const double p_i       = p_SF6*(1.0 - f_sm) + p_pre*f_sm;
+                                    const double Z_1_i     = Z_SF6*(1.0 - f_sm) + Z_pre*f_sm;
+                                    
+                                    const double rho_i = Z_rho_1_i + Z_rho_2_i;
+                                    const double Z_2_i = 1.0 - Z_1_i;
+                                    
+                                    std::vector<const double*> Z_ptr;
+                                    Z_ptr.push_back(&Z_1_i);
+                                    Z_ptr.push_back(&Z_2_i);
+                                    
+                                    const double gamma = d_equation_of_state->
+                                        getMixtureThermodynamicPropertyWithVolumeFraction(
+                                            "gamma",
+                                            Z_ptr);
+                                    
+                                    Z_rho_1[idx_cell] = Z_rho_1_i;
+                                    Z_rho_2[idx_cell] = Z_rho_2_i;
+                                    rho_u[idx_cell]   = rho_i*u_i;
+                                    rho_v[idx_cell]   = rho_i*v_i;
+                                    E[idx_cell]       = p_i/(gamma - 1.0) +
+                                        0.5*rho_i*(u_i*u_i + v_i*v_i);
+                                    Z_1[idx_cell]     = Z_1_i;
+                                    Z_2[idx_cell]     = Z_2_i;
+                                }
+                            }
+                        }
+                    }
+                    /*
+                    else if (d_project_name == "2D Richtmyer-Meshkov instability")
+                    {
+                        // Initialize data for a 2D Richtmyer-Meshkov instability.
+                        
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                       << ": "
+                                       << "Please provide only two-species for multi-species simulation testing."
+                                       << std::endl);
+                        }
+                        
+                        const double D = 1.0;
+                        
+                        double* Z_rho_1   = partial_density->getPointer(0);
+                        double* Z_rho_2   = partial_density->getPointer(1);
+                        double* rho_u     = momentum->getPointer(0);
+                        double* rho_v     = momentum->getPointer(1);
+                        double* E         = total_energy->getPointer(0);
+                        double* Z_1       = volume_fraction->getPointer(0);
+                        double* Z_2       = volume_fraction->getPointer(1);
+                        
+                        // species 0: SF6
+                        // species 1: air
+                        const double gamma_0 = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                0);
+                        
+                        const double gamma_1 = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                1);
+                        
+                        // SF6, pre-shock condition.
+                        const double rho_SF6 = 5.04;
+                        const double u_SF6   = 1.24;
+                        const double v_SF6   = 0.0;
+                        const double p_SF6   = 1.0/1.4;
+                        const double Z_SF6   = 1.0;
+                        
+                        // air, pre-shock condition.
+                        const double rho_pre = 1.0;
+                        const double u_pre   = 1.24;
+                        const double v_pre   = 0.0;
+                        const double p_pre   = 1.0/1.4;
+                        const double Z_pre   = 0.0;
+                        
+                        // air, post-shock condition.
+                        const double rho_post = 1.4112;
+                        const double u_post   = 0.8787;
+                        const double v_post   = 0.0;
+                        const double p_post   = 1.6272/1.4;
+                        const double Z_post   = 0.0;
+                        
+                        for (int j = 0; j < patch_dims[1]; j++)
+                        {
+                            for (int i = 0; i < patch_dims[0]; i++)
+                            {
+                                // Compute index into linear data array.
+                                int idx_cell = i + j*patch_dims[0];
+                                
+                                // Compute the coordinates.
+                                double x[2];
+                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                
+                                if (x[0] > 0.7*D)
+                                {
+                                    Z_rho_1[idx_cell] = 0.0;
+                                    Z_rho_2[idx_cell] = rho_post;
+                                    rho_u[idx_cell]   = rho_post*u_post;
+                                    rho_v[idx_cell]   = rho_post*v_post;
+                                    E[idx_cell]       = p_post/(gamma_1 - 1.0) +
+                                        0.5*rho_post*(u_post*u_post + v_post*v_post);
+                                    Z_1[idx_cell]     = Z_post;
+                                    Z_2[idx_cell]     = 1.0 - Z_post;
+                                }
+                                else if (x[0] < (0.4 - 0.1*sin(2*M_PI*(x[1]/D + 0.25)))*D)
+                                {
+                                    Z_rho_1[idx_cell] = rho_SF6;
+                                    Z_rho_2[idx_cell] = 0.0;
+                                    rho_u[idx_cell]   = rho_SF6*u_SF6;
+                                    rho_v[idx_cell]   = rho_SF6*v_SF6;
+                                    E[idx_cell]       = p_SF6/(gamma_0 - 1.0) +
+                                        0.5*rho_SF6*(u_SF6*u_SF6 + v_SF6*v_SF6);
+                                    Z_1[idx_cell]     = Z_SF6;
+                                    Z_2[idx_cell]     = 1.0 - Z_SF6;
+                                }
+                                else
+                                {
+                                    Z_rho_1[idx_cell] = 0.0;
+                                    Z_rho_2[idx_cell] = rho_pre;
+                                    rho_u[idx_cell]   = rho_pre*u_pre;
+                                    rho_v[idx_cell]   = rho_pre*v_pre;
+                                    E[idx_cell]       = p_pre/(gamma_1 - 1.0) +
+                                        0.5*rho_pre*(u_pre*u_pre + v_pre*v_pre);
+                                    Z_1[idx_cell]     = Z_pre;
+                                    Z_2[idx_cell]     = 1.0 - Z_pre;
+                                }
+                            }
+                        }
+                    }
+                    */
+                    /*
+                    else if (d_project_name == "2D Richtmyer-Meshkov instability")
+                    {
+                        // Initialize data for a 2D Richtmyer-Meshkov instability.
+                        
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                       << ": "
+                                       << "Please provide only two-species for multi-species simulation testing."
+                                       << std::endl);
+                        }
+                        
+                        const double D = 1.0;
+                        
+                        double* Z_rho_1   = partial_density->getPointer(0);
+                        double* Z_rho_2   = partial_density->getPointer(1);
+                        double* rho_u     = momentum->getPointer(0);
+                        double* rho_v     = momentum->getPointer(1);
+                        double* E         = total_energy->getPointer(0);
+                        double* Z_1       = volume_fraction->getPointer(0);
+                        double* Z_2       = volume_fraction->getPointer(1);
+                        
+                        // species 0: SF6
+                        // species 1: air
+                        const double gamma_0 = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                0);
+                        
+                        const double gamma_1 = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                1);
+                        
+                        // SF6, pre-shock condition.
+                        const double rho_SF6 = 5.04;
+                        const double u_SF6   = 0.0;
+                        const double v_SF6   = 0.0;
+                        const double p_SF6   = 1.0/1.4;
+                        const double Z_SF6   = 1.0;
+                        
+                        // air, pre-shock condition.
+                        const double rho_pre = 1.0;
+                        const double u_pre   = 0.0;
+                        const double v_pre   = 0.0;
+                        const double p_pre   = 1.0/1.4;
+                        const double Z_pre   = 0.0;
+                        
+                        // air, post-shock condition.
+                        const double rho_post = 1.4112;
+                        const double u_post   = -0.3613;
+                        const double v_post   = 0.0;
+                        const double p_post   = 1.6272/1.4;
+                        const double Z_post   = 0.0;
+                        
+                        for (int j = 0; j < patch_dims[1]; j++)
+                        {
+                            for (int i = 0; i < patch_dims[0]; i++)
+                            {
+                                // Compute index into linear data array.
+                                int idx_cell = i + j*patch_dims[0];
+                                
+                                // Compute the coordinates.
+                                double x[2];
+                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                
+                                if (x[0] > 3.2*D)
+                                {
+                                    Z_rho_1[idx_cell] = 0.0;
+                                    Z_rho_2[idx_cell] = rho_post;
+                                    rho_u[idx_cell]   = rho_post*u_post;
+                                    rho_v[idx_cell]   = rho_post*v_post;
+                                    E[idx_cell]       = p_post/(gamma_1 - 1.0) +
+                                        0.5*rho_post*(u_post*u_post + v_post*v_post);
+                                    Z_1[idx_cell]     = Z_post;
+                                    Z_2[idx_cell]     = 1.0 - Z_post;
+                                }
+                                else if (x[0] < (2.9 - 0.1*sin(2*M_PI*(x[1]/D + 0.25)))*D)
+                                {
+                                    Z_rho_1[idx_cell] = rho_SF6;
+                                    Z_rho_2[idx_cell] = 0.0;
+                                    rho_u[idx_cell]   = rho_SF6*u_SF6;
+                                    rho_v[idx_cell]   = rho_SF6*v_SF6;
+                                    E[idx_cell]       = p_SF6/(gamma_0 - 1.0) +
+                                        0.5*rho_SF6*(u_SF6*u_SF6 + v_SF6*v_SF6);
+                                    Z_1[idx_cell]     = Z_SF6;
+                                    Z_2[idx_cell]     = 1.0 - Z_SF6;
+                                }
+                                else
+                                {
+                                    Z_rho_1[idx_cell] = 0.0;
+                                    Z_rho_2[idx_cell] = rho_pre;
+                                    rho_u[idx_cell]   = rho_pre*u_pre;
+                                    rho_v[idx_cell]   = rho_pre*v_pre;
+                                    E[idx_cell]       = p_pre/(gamma_1 - 1.0) +
+                                        0.5*rho_pre*(u_pre*u_pre + v_pre*v_pre);
+                                    Z_1[idx_cell]     = Z_pre;
+                                    Z_2[idx_cell]     = 1.0 - Z_pre;
+                                }
+                            }
+                        }
+                    }
+                    */
+                    else if (d_project_name == "Advection of 2D material interface")
                     {
                         // Initialize data for a 2D material interface advection problem.
                         
@@ -1648,10 +2190,10 @@ Euler::initializeDataOnPatch(
                             for (int i = 0; i < patch_dims[0]; i++)
                             {
                                 // Compute index into linear data array.
-                                int idx = i + j*patch_dims[0];
+                                int idx_cell = i + j*patch_dims[0];
                                 
                                 // Compute the coordinates.
-                                double* x = new double[2];
+                                double x[2];
                                 x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
                                 x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
                                 
@@ -1660,136 +2202,147 @@ Euler::initializeDataOnPatch(
                                     (x[1] >= y_a) &&
                                     (x[1] <= y_b))
                                 {
-                                    Z_rho_1[idx] = rho_m;
-                                    Z_rho_2[idx] = 0.0;
-                                    rho_u[idx]   = rho_m*u_m;
-                                    rho_v[idx]   = rho_m*v_m;
-                                    E[idx]       = p_m/(gamma_m - 1.0) +
+                                    Z_rho_1[idx_cell] = rho_m;
+                                    Z_rho_2[idx_cell] = 0.0;
+                                    rho_u[idx_cell]   = rho_m*u_m;
+                                    rho_v[idx_cell]   = rho_m*v_m;
+                                    E[idx_cell]       = p_m/(gamma_m - 1.0) +
                                         0.5*rho_m*(u_m*u_m + v_m*v_m);
-                                    Z_1[idx]     = 1.0;
-                                    Z_2[idx]     = 0.0;
+                                    Z_1[idx_cell]     = 1.0;
+                                    Z_2[idx_cell]     = 0.0;
                                 }
                                 else
                                 {
-                                    Z_rho_1[idx] = 0.0;
-                                    Z_rho_2[idx] = rho_a;
-                                    rho_u[idx]   = rho_a*u_a;
-                                    rho_v[idx]   = rho_a*v_a;
-                                    E[idx]       = p_a/(gamma_a - 1.0) +
+                                    Z_rho_1[idx_cell] = 0.0;
+                                    Z_rho_2[idx_cell] = rho_a;
+                                    rho_u[idx_cell]   = rho_a*u_a;
+                                    rho_v[idx_cell]   = rho_a*v_a;
+                                    E[idx_cell]       = p_a/(gamma_a - 1.0) +
                                         0.5*rho_a*(u_a*u_a + v_a*v_a);
-                                    Z_1[idx]     = 0.0;
-                                    Z_2[idx]     = 1.0;
+                                    Z_1[idx_cell]     = 0.0;
+                                    Z_2[idx_cell]     = 1.0;
                                 }
-                                
-                                // Free the memory.
-                                delete[] x;
                             }
                         }
+                    }
+                    else
+                    {
+                        TBOX_ERROR(d_object_name
+                                   << ": "
+                                   << "Cannot initialize data for unknown problem."
+                                   << std::endl);
                     }
                 }
                 else if (d_dim == tbox::Dimension(3))
                 {
-                    // Initialize data for a 3D material interface advection problem.
-                    
-                    if (d_num_species != 2)
+                    if (d_project_name == "Advection of 3D material interface")
+                    {
+                        // Initialize data for a 3D material interface advection problem.
+                        
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                       << ": "
+                                       << "Please provide only two-species for multi-species simulation testing."
+                                       << std::endl);
+                        }
+                        
+                        double* Z_rho_1   = partial_density->getPointer(0);
+                        double* Z_rho_2   = partial_density->getPointer(1);
+                        double* rho_u     = momentum->getPointer(0);
+                        double* rho_v     = momentum->getPointer(1);
+                        double* rho_w     = momentum->getPointer(2);
+                        double* E         = total_energy->getPointer(0);
+                        double* Z_1       = volume_fraction->getPointer(0);
+                        double* Z_2       = volume_fraction->getPointer(1);
+                        
+                        const double x_a = 1.0/3*(domain_xlo[0] + domain_xhi[0]);
+                        const double x_b = 2.0/3*(domain_xlo[0] + domain_xhi[0]);
+                        
+                        const double y_a = 1.0/3*(domain_xlo[1] + domain_xhi[1]);
+                        const double y_b = 2.0/3*(domain_xlo[1] + domain_xhi[1]);
+                        
+                        const double z_a = 1.0/3*(domain_xlo[2] + domain_xhi[2]);
+                        const double z_b = 2.0/3*(domain_xlo[2] + domain_xhi[2]);
+                        
+                        // material initial conditions.
+                        double gamma_m  = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                0);
+                        double rho_m    = 10.0;
+                        double u_m      = 0.5;
+                        double v_m      = 0.5;
+                        double w_m      = 0.5;
+                        double p_m      = 1.0/1.4;
+                        
+                        // ambient initial conditions.
+                        double gamma_a  = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                1);
+                        double rho_a    = 1.0;
+                        double u_a      = 0.5;
+                        double v_a      = 0.5;
+                        double w_a      = 0.5;
+                        double p_a      = 1.0/1.4;
+                        
+                        for (int k = 0; k < patch_dims[2]; k++)
+                        {
+                            for (int j = 0; j < patch_dims[1]; j++)
+                            {
+                                for (int i = 0; i < patch_dims[0]; i++)
+                                {
+                                    // Compute index into linear data array.
+                                    int idx_cell = i +
+                                        j*patch_dims[0] +
+                                        k*patch_dims[0]*patch_dims[1];
+                                    
+                                    // Compute the coordinates.
+                                    double x[3];
+                                    x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                    x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                    x[2] = patch_xlo[2] + (k + 0.5)*dx[2];
+                                    
+                                    if ((x[0] >= x_a) &&
+                                        (x[0] <= x_b) &&
+                                        (x[1] >= y_a) &&
+                                        (x[1] <= y_b) &&
+                                        (x[2] >= z_a) &&
+                                        (x[2] <= z_b))
+                                    {
+                                        Z_rho_1[idx_cell] = rho_m;
+                                        Z_rho_2[idx_cell] = 0.0;
+                                        rho_u[idx_cell]   = rho_m*u_m;
+                                        rho_v[idx_cell]   = rho_m*v_m;
+                                        rho_w[idx_cell]   = rho_m*w_m;
+                                        E[idx_cell]       = p_m/(gamma_m - 1.0) +
+                                            0.5*rho_m*(u_m*u_m + v_m*v_m + w_m*w_m);
+                                        Z_1[idx_cell]     = 1.0;
+                                        Z_2[idx_cell]     = 0.0;
+                                    }
+                                    else
+                                    {
+                                        Z_rho_1[idx_cell] = 0.0;
+                                        Z_rho_2[idx_cell] = rho_a;
+                                        rho_u[idx_cell]   = rho_a*u_a;
+                                        rho_v[idx_cell]   = rho_a*v_a;
+                                        rho_w[idx_cell]   = rho_a*w_a;
+                                        E[idx_cell]       = p_a/(gamma_a - 1.0) +
+                                            0.5*rho_a*(u_a*u_a + v_a*v_a + w_a*w_a);
+                                        Z_1[idx_cell]     = 0.0;
+                                        Z_2[idx_cell]     = 1.0;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
                     {
                         TBOX_ERROR(d_object_name
                                    << ": "
-                                   << "Please provide only two-species for multi-species simulation testing."
+                                   << "Cannot initialize data for unknown problem."
                                    << std::endl);
-                    }
-                    
-                    double* Z_rho_1   = partial_density->getPointer(0);
-                    double* Z_rho_2   = partial_density->getPointer(1);
-                    double* rho_u     = momentum->getPointer(0);
-                    double* rho_v     = momentum->getPointer(1);
-                    double* rho_w     = momentum->getPointer(2);
-                    double* E         = total_energy->getPointer(0);
-                    double* Z_1       = volume_fraction->getPointer(0);
-                    double* Z_2       = volume_fraction->getPointer(1);
-                    
-                    const double x_a = 1.0/3*(domain_xlo[0] + domain_xhi[0]);
-                    const double x_b = 2.0/3*(domain_xlo[0] + domain_xhi[0]);
-                    
-                    const double y_a = 1.0/3*(domain_xlo[1] + domain_xhi[1]);
-                    const double y_b = 2.0/3*(domain_xlo[1] + domain_xhi[1]);
-                    
-                    const double z_a = 1.0/3*(domain_xlo[2] + domain_xhi[2]);
-                    const double z_b = 2.0/3*(domain_xlo[2] + domain_xhi[2]);
-                    
-                    // material initial conditions.
-                    double gamma_m  = d_equation_of_state->
-                        getSpeciesThermodynamicProperty(
-                            "gamma",
-                            0);
-                    double rho_m    = 10.0;
-                    double u_m      = 0.5;
-                    double v_m      = 0.5;
-                    double w_m      = 0.5;
-                    double p_m      = 1.0/1.4;
-                    
-                    // ambient initial conditions.
-                    double gamma_a  = d_equation_of_state->
-                        getSpeciesThermodynamicProperty(
-                            "gamma",
-                            1);
-                    double rho_a    = 1.0;
-                    double u_a      = 0.5;
-                    double v_a      = 0.5;
-                    double w_a      = 0.5;
-                    double p_a      = 1.0/1.4;
-                    
-                    for (int k = 0; k < patch_dims[2]; k++)
-                    {
-                        for (int j = 0; j < patch_dims[1]; j++)
-                        {
-                            for (int i = 0; i < patch_dims[0]; i++)
-                            {
-                                // Compute index into linear data array.
-                                int idx = i +
-                                    j*patch_dims[0] +
-                                    k*patch_dims[0]*patch_dims[1];
-                                
-                                // Compute the coordinates.
-                                double* x = new double[3];
-                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
-                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
-                                x[2] = patch_xlo[2] + (k + 0.5)*dx[2];
-                                
-                                if ((x[0] >= x_a) &&
-                                    (x[0] <= x_b) &&
-                                    (x[1] >= y_a) &&
-                                    (x[1] <= y_b) &&
-                                    (x[2] >= z_a) &&
-                                    (x[2] <= z_b))
-                                {
-                                    Z_rho_1[idx] = rho_m;
-                                    Z_rho_2[idx] = 0.0;
-                                    rho_u[idx]   = rho_m*u_m;
-                                    rho_v[idx]   = rho_m*v_m;
-                                    rho_w[idx]   = rho_m*w_m;
-                                    E[idx]       = p_m/(gamma_m - 1.0) +
-                                        0.5*rho_m*(u_m*u_m + v_m*v_m + w_m*w_m);
-                                    Z_1[idx]     = 1.0;
-                                    Z_2[idx]     = 0.0;
-                                }
-                                else
-                                {
-                                    Z_rho_1[idx] = 0.0;
-                                    Z_rho_2[idx] = rho_a;
-                                    rho_u[idx]   = rho_a*u_a;
-                                    rho_v[idx]   = rho_a*v_a;
-                                    rho_w[idx]   = rho_a*w_a;
-                                    E[idx]       = p_a/(gamma_a - 1.0) +
-                                        0.5*rho_a*(u_a*u_a + v_a*v_a + w_a*w_a);
-                                    Z_1[idx]     = 0.0;
-                                    Z_2[idx]     = 1.0;
-                                }
-                                
-                                // Free the memory.
-                                delete[] x;
-                            }
-                        }
                     }
                 }
                 
@@ -1888,17 +2441,17 @@ Euler::computeStableDtOnPatch(
                 for (int i = 0; i < interior_dims[0]; i++)
                 {
                     // Compute index of cell into linear data array.
-                    const int idx = i + d_num_ghosts[0];
+                    const int idx_cell = i + d_num_ghosts[0];
                     
-                    const double u = rho_u[idx]/rho[idx];
+                    const double u = rho_u[idx_cell]/rho[idx_cell];
                     
-                    std::vector<const double*> momentum_idx;
-                    momentum_idx.push_back(&(rho_u[idx]));
+                    std::vector<const double*> m_ptr;
+                    m_ptr.push_back(&(rho_u[idx_cell]));
                     
                     const double c = d_equation_of_state->getSoundSpeed(
-                        &(rho[idx]),
-                        momentum_idx,
-                        &(E[idx]));
+                        &(rho[idx_cell]),
+                        m_ptr,
+                        &(E[idx_cell]));
                     
                     const double spectral_radius = (fabs(u) + c)/dx[0];
                     stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius);
@@ -1917,20 +2470,20 @@ Euler::computeStableDtOnPatch(
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
                         // Compute index of cell into linear data array.
-                        const int idx = (i + d_num_ghosts[0]) +
+                        const int idx_cell = (i + d_num_ghosts[0]) +
                             (j + d_num_ghosts[1])*ghostcell_dims[0];
                         
-                        const double u = rho_u[idx]/rho[idx];
-                        const double v = rho_v[idx]/rho[idx];
+                        const double u = rho_u[idx_cell]/rho[idx_cell];
+                        const double v = rho_v[idx_cell]/rho[idx_cell];
                         
-                        std::vector<const double*> momentum_idx;
-                        momentum_idx.push_back(&(rho_u[idx]));
-                        momentum_idx.push_back(&(rho_v[idx]));
+                        std::vector<const double*> m_ptr;
+                        m_ptr.push_back(&(rho_u[idx_cell]));
+                        m_ptr.push_back(&(rho_v[idx_cell]));
                         
                         const double c = d_equation_of_state->getSoundSpeed(
-                            &(rho[idx]),
-                            momentum_idx,
-                            &(E[idx]));
+                            &(rho[idx_cell]),
+                            m_ptr,
+                            &(E[idx_cell]));
                         
                         const double spectral_radius = (fabs(u) + c)/dx[0] + (fabs(v) + c)/dx[1];
                         stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius);
@@ -1953,23 +2506,23 @@ Euler::computeStableDtOnPatch(
                         for (int i = 0; i < interior_dims[0]; i++)
                         {
                             // Compute index of cell into linear data array.
-                            const int idx = (i + d_num_ghosts[0]) +
+                            const int idx_cell = (i + d_num_ghosts[0]) +
                                 (j + d_num_ghosts[1])*ghostcell_dims[0] +
                                 (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                             
-                            const double u = rho_u[idx]/rho[idx];
-                            const double v = rho_v[idx]/rho[idx];
-                            const double w = rho_w[idx]/rho[idx];
+                            const double u = rho_u[idx_cell]/rho[idx_cell];
+                            const double v = rho_v[idx_cell]/rho[idx_cell];
+                            const double w = rho_w[idx_cell]/rho[idx_cell];
                             
-                            std::vector<const double*> momentum_idx;
-                            momentum_idx.push_back(&(rho_u[idx]));
-                            momentum_idx.push_back(&(rho_v[idx]));
-                            momentum_idx.push_back(&(rho_w[idx]));
+                            std::vector<const double*> m_ptr;
+                            m_ptr.push_back(&(rho_u[idx_cell]));
+                            m_ptr.push_back(&(rho_v[idx_cell]));
+                            m_ptr.push_back(&(rho_w[idx_cell]));
                             
                             const double c = d_equation_of_state->getSoundSpeed(
-                                &(rho[idx]),
-                                momentum_idx,
-                                &(E[idx]));
+                                &(rho[idx_cell]),
+                                m_ptr,
+                                &(E[idx_cell]));
                             
                             const double spectral_radius = (fabs(u) + c)/dx[0] + (fabs(v) + c)/dx[1] +
                                 (fabs(w) + c)/dx[2];
@@ -2027,24 +2580,24 @@ Euler::computeStableDtOnPatch(
                 for (int i = 0; i < interior_dims[0]; i++)
                 {
                     // Compute index of cell into linear data array.
-                    const int idx = i + d_num_ghosts[0];
+                    const int idx_cell = i + d_num_ghosts[0];
                     
-                    const double u = rho_u[idx]/rho[idx];
+                    const double u = rho_u[idx_cell]/rho[idx_cell];
                     
-                    std::vector<const double*> momentum_idx;
-                    momentum_idx.push_back(&(rho_u[idx]));
+                    std::vector<const double*> m_ptr;
+                    m_ptr.push_back(&(rho_u[idx_cell]));
                     
-                    std::vector<const double*> mass_fraction_idx;
+                    std::vector<const double*> Y_ptr;
                     for (int si = 0; si < d_num_species; si++)
                     {
-                        mass_fraction_idx.push_back(&(Y[si][idx]));
+                        Y_ptr.push_back(&(Y[si][idx_cell]));
                     }
                     
                     const double c = d_equation_of_state->getSoundSpeedWithMassFraction(
-                        &(rho[idx]),
-                        momentum_idx,
-                        &(E[idx]),
-                        mass_fraction_idx);
+                        &(rho[idx_cell]),
+                        m_ptr,
+                        &(E[idx_cell]),
+                        Y_ptr);
                     
                     const double spectral_radius = (fabs(u) + c)/dx[0];
                     
@@ -2069,27 +2622,27 @@ Euler::computeStableDtOnPatch(
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
                         // Compute index of cell into linear data array.
-                        const int idx = (i + d_num_ghosts[0]) +
+                        const int idx_cell = (i + d_num_ghosts[0]) +
                             (j + d_num_ghosts[1])*ghostcell_dims[0];
                         
-                        const double u = rho_u[idx]/rho[idx];
-                        const double v = rho_v[idx]/rho[idx];
+                        const double u = rho_u[idx_cell]/rho[idx_cell];
+                        const double v = rho_v[idx_cell]/rho[idx_cell];
                         
-                        std::vector<const double*> momentum_idx;
-                        momentum_idx.push_back(&(rho_u[idx]));
-                        momentum_idx.push_back(&(rho_v[idx]));
+                        std::vector<const double*> m_ptr;
+                        m_ptr.push_back(&(rho_u[idx_cell]));
+                        m_ptr.push_back(&(rho_v[idx_cell]));
                         
-                        std::vector<const double*> mass_fraction_idx;
+                        std::vector<const double*> Y_ptr;
                         for (int si = 0; si < d_num_species; si++)
                         {
-                            mass_fraction_idx.push_back(&(Y[si][idx]));
+                            Y_ptr.push_back(&(Y[si][idx_cell]));
                         }
                         
                         const double c = d_equation_of_state->getSoundSpeedWithMassFraction(
-                            &(rho[idx]),
-                            momentum_idx,
-                            &(E[idx]),
-                            mass_fraction_idx);
+                            &(rho[idx_cell]),
+                            m_ptr,
+                            &(E[idx_cell]),
+                            Y_ptr);
                         
                         const double spectral_radius = (fabs(u) + c)/dx[0] + (fabs(v) + c)/dx[1];
                         
@@ -2118,30 +2671,30 @@ Euler::computeStableDtOnPatch(
                         for (int i = 0; i < interior_dims[0]; i++)
                         {
                             // Compute index of cell into linear data array.
-                            const int idx = (i + d_num_ghosts[0]) +
+                            const int idx_cell = (i + d_num_ghosts[0]) +
                                 (j + d_num_ghosts[1])*ghostcell_dims[0] +
                                 (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                             
-                            const double u = rho_u[idx]/rho[idx];
-                            const double v = rho_v[idx]/rho[idx];
-                            const double w = rho_w[idx]/rho[idx];
+                            const double u = rho_u[idx_cell]/rho[idx_cell];
+                            const double v = rho_v[idx_cell]/rho[idx_cell];
+                            const double w = rho_w[idx_cell]/rho[idx_cell];
                             
-                            std::vector<const double*> momentum_idx;
-                            momentum_idx.push_back(&(rho_u[idx]));
-                            momentum_idx.push_back(&(rho_v[idx]));
-                            momentum_idx.push_back(&(rho_w[idx]));
+                            std::vector<const double*> m_ptr;
+                            m_ptr.push_back(&(rho_u[idx_cell]));
+                            m_ptr.push_back(&(rho_v[idx_cell]));
+                            m_ptr.push_back(&(rho_w[idx_cell]));
                             
-                            std::vector<const double*> mass_fraction_idx;
+                            std::vector<const double*> Y_ptr;
                             for (int si = 0; si < d_num_species; si++)
                             {
-                                mass_fraction_idx.push_back(&(Y[si][idx]));
+                                Y_ptr.push_back(&(Y[si][idx_cell]));
                             }
                             
                             const double c = d_equation_of_state->getSoundSpeedWithMassFraction(
-                                &(rho[idx]),
-                                momentum_idx,
-                                &(E[idx]),
-                                mass_fraction_idx);
+                                &(rho[idx_cell]),
+                                m_ptr,
+                                &(E[idx_cell]),
+                                Y_ptr);
                             
                             const double spectral_radius = (fabs(u) + c)/dx[0] + (fabs(v) + c)/dx[1] +
                                 (fabs(w) + c)/dx[2];
@@ -2203,33 +2756,33 @@ Euler::computeStableDtOnPatch(
                 for (int i = 0; i < interior_dims[0]; i++)
                 {
                     // Compute index of cell into linear data array.
-                    const int idx = (i + d_num_ghosts[0]);
+                    const int idx_cell = (i + d_num_ghosts[0]);
                     
-                    std::vector<const double*> partial_density_idx;
+                    std::vector<const double*> partial_density_idx_cell;
                     for (int si = 0; si < d_num_species; si++)
                     {
-                        partial_density_idx.push_back(&(Z_rho[si][idx]));
+                        partial_density_idx_cell.push_back(&(Z_rho[si][idx_cell]));
                     }
                     
                     const double rho = d_equation_of_state->getTotalDensity(
-                        partial_density_idx);
+                        partial_density_idx_cell);
                     
-                    const double u = rho_u[idx]/rho;
+                    const double u = rho_u[idx_cell]/rho;
                     
-                    std::vector<const double*> momentum_idx;
-                    momentum_idx.push_back(&(rho_u[idx]));
+                    std::vector<const double*> m_ptr;
+                    m_ptr.push_back(&(rho_u[idx_cell]));
                     
-                    std::vector<const double*> volume_fraction_idx;
+                    std::vector<const double*> Z_ptr;
                     for (int si = 0; si < d_num_species; si++)
                     {
-                        volume_fraction_idx.push_back(&(Z[si][idx]));
+                        Z_ptr.push_back(&(Z[si][idx_cell]));
                     }
                     
                     const double c = d_equation_of_state->getSoundSpeedWithVolumeFraction(
                         &rho,
-                        momentum_idx,
-                        &(E[idx]),
-                        volume_fraction_idx);
+                        m_ptr,
+                        &(E[idx_cell]),
+                        Z_ptr);
                     
                     const double spectral_radius = (fabs(u) + c)/dx[0];
                     
@@ -2258,36 +2811,36 @@ Euler::computeStableDtOnPatch(
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
                         // Compute index of cell into linear data array.
-                        const int idx = (i + d_num_ghosts[0]) +
+                        const int idx_cell = (i + d_num_ghosts[0]) +
                             (j + d_num_ghosts[1])*ghostcell_dims[0];
                         
-                        std::vector<const double*> partial_density_idx;
+                        std::vector<const double*> partial_density_idx_cell;
                         for (int si = 0; si < d_num_species; si++)
                         {
-                            partial_density_idx.push_back(&(Z_rho[si][idx]));
+                            partial_density_idx_cell.push_back(&(Z_rho[si][idx_cell]));
                         }
                         
                         const double rho = d_equation_of_state->getTotalDensity(
-                            partial_density_idx);
+                            partial_density_idx_cell);
                         
-                        const double u = rho_u[idx]/rho;
-                        const double v = rho_v[idx]/rho;
+                        const double u = rho_u[idx_cell]/rho;
+                        const double v = rho_v[idx_cell]/rho;
                         
-                        std::vector<const double*> momentum_idx;
-                        momentum_idx.push_back(&(rho_u[idx]));
-                        momentum_idx.push_back(&(rho_v[idx]));
+                        std::vector<const double*> m_ptr;
+                        m_ptr.push_back(&(rho_u[idx_cell]));
+                        m_ptr.push_back(&(rho_v[idx_cell]));
                         
-                        std::vector<const double*> volume_fraction_idx;
+                        std::vector<const double*> Z_ptr;
                         for (int si = 0; si < d_num_species; si++)
                         {
-                            volume_fraction_idx.push_back(&(Z[si][idx]));
+                            Z_ptr.push_back(&(Z[si][idx_cell]));
                         }
                         
                         const double c = d_equation_of_state->getSoundSpeedWithVolumeFraction(
                             &rho,
-                            momentum_idx,
-                            &(E[idx]),
-                            volume_fraction_idx);
+                            m_ptr,
+                            &(E[idx_cell]),
+                            Z_ptr);
                         
                         const double spectral_radius = (fabs(u) + c)/dx[0] + (fabs(v) + c)/dx[1];
                         
@@ -2320,39 +2873,39 @@ Euler::computeStableDtOnPatch(
                         for (int i = 0; i < interior_dims[0]; i++)
                         {
                             // Compute index of cell into linear data array.
-                            const int idx = (i + d_num_ghosts[0]) +
+                            const int idx_cell = (i + d_num_ghosts[0]) +
                                 (j + d_num_ghosts[1])*ghostcell_dims[0] +
                                 (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                             
-                            std::vector<const double*> partial_density_idx;
+                            std::vector<const double*> partial_density_idx_cell;
                             for (int si = 0; si < d_num_species; si++)
                             {
-                                partial_density_idx.push_back(&(Z_rho[si][idx]));
+                                partial_density_idx_cell.push_back(&(Z_rho[si][idx_cell]));
                             }
                             
                             const double rho = d_equation_of_state->getTotalDensity(
-                                partial_density_idx);
+                                partial_density_idx_cell);
                             
-                            const double u = rho_u[idx]/rho;
-                            const double v = rho_v[idx]/rho;
-                            const double w = rho_w[idx]/rho;
+                            const double u = rho_u[idx_cell]/rho;
+                            const double v = rho_v[idx_cell]/rho;
+                            const double w = rho_w[idx_cell]/rho;
                             
-                            std::vector<const double*> momentum_idx;
-                            momentum_idx.push_back(&(rho_u[idx]));
-                            momentum_idx.push_back(&(rho_v[idx]));
-                            momentum_idx.push_back(&(rho_w[idx]));
+                            std::vector<const double*> m_ptr;
+                            m_ptr.push_back(&(rho_u[idx_cell]));
+                            m_ptr.push_back(&(rho_v[idx_cell]));
+                            m_ptr.push_back(&(rho_w[idx_cell]));
                             
-                            std::vector<const double*> volume_fraction_idx;
+                            std::vector<const double*> Z_ptr;
                             for (int si = 0; si < d_num_species; si++)
                             {
-                                volume_fraction_idx.push_back(&(Z[si][idx]));
+                                Z_ptr.push_back(&(Z[si][idx_cell]));
                             }
                             
                             const double c = d_equation_of_state->getSoundSpeedWithVolumeFraction(
                                 &rho,
-                                momentum_idx,
-                                &(E[idx]),
-                                volume_fraction_idx);
+                                m_ptr,
+                                &(E[idx_cell]),
+                                Z_ptr);
                             
                             const double spectral_radius = (fabs(u) + c)/dx[0] + (fabs(v) + c)/dx[1] +
                                 (fabs(w) + c)/dx[2];
@@ -2386,7 +2939,8 @@ void
 Euler::computeHyperbolicFluxesAndSourcesOnPatch(
     hier::Patch& patch,
     const double time,
-    const double dt)
+    const double dt,
+    const int RK_step_number)
 {
     NULL_USE(time);
     
@@ -2406,9 +2960,10 @@ Euler::computeHyperbolicFluxesAndSourcesOnPatch(
      * Compute the fluxes and sources.
      */
     
-    d_conv_flux_reconstructor->computeConvectiveFluxAndSource(patch,
+    d_conv_flux_reconstructor->computeConvectiveFluxesAndSources(patch,
         time,
         dt,
+        RK_step_number,
         getDataContext());
     
     t_compute_hyperbolicfluxes->stop();
@@ -2608,7 +3163,7 @@ Euler::advanceSingleStep(
     
     /*
      * Use alpah, beta and gamma values to update the time-dependent solution,
-     * fluxes and source
+     * flux and source
      */
     
     boost::shared_ptr<pdat::FaceData<double> > convective_flux(
@@ -2787,31 +3342,49 @@ Euler::advanceSingleStep(
         
         if (d_dim == tbox::Dimension(1))
         {
-            if (!(alpha[n] == 0.0 && beta[n] == 0.0 && gamma[n] == 0.0))
+            if (alpha[n] != 0.0)
             {
                 for (int i = 0; i < interior_dims[0]; i++)
                 {
-                    // Compute indices of time-dependent data, fluxes and source.
+                    // Compute indices of time-dependent data.
+                    int idx_cell   = i + d_num_ghosts[0];
+                    
+                    for (int ei = 0; ei < d_num_eqn; ei++)
+                    {
+                        Q[ei][idx_cell] += alpha[n]*Q_intermediate[ei][idx_cell];
+                    }
+                }
+            }
+            
+            if (d_is_preserving_positivity && (n == num_coeffs - 1))
+            {
+                preservePositivity(Q,
+                    convective_flux_intermediate,
+                    source_intermediate,
+                    interior_dims,
+                    ghostcell_dims,
+                    dx,
+                    dt,
+                    beta[n]);
+            }
+            
+            if (beta[n] != 0.0)
+            {
+                for (int i = 0; i < interior_dims[0]; i++)
+                {
+                    // Compute indices of time-dependent data, flux and source.
                     int idx_cell   = i + d_num_ghosts[0];
                     int idx_source = i;
                     int idx_flux_x = i + 1;
                     
                     for (int ei = 0; ei < d_num_eqn; ei++)
                     {
-                        if (alpha[n] != 0.0)
-                        {
-                            Q[ei][idx_cell] += alpha[n]*Q_intermediate[ei][idx_cell];
-                        }
+                        double* F_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                        double* S_intermediate = source_intermediate->getPointer(ei);
                         
-                        if (beta[n] != 0.0)
-                        {
-                            double* F_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
-                            double* S_intermediate = source_intermediate->getPointer(ei);
-                            
-                            Q[ei][idx_cell] += beta[n]*
-                                (-(F_x_intermediate[idx_flux_x] - F_x_intermediate[idx_flux_x - 1])/dx[0] +
-                                S_intermediate[idx_source]);
-                        }
+                        Q[ei][idx_cell] += beta[n]*
+                            (-(F_x_intermediate[idx_flux_x] - F_x_intermediate[idx_flux_x - 1])/dx[0] +
+                            S_intermediate[idx_source]);
                     }
                     
                     // Update the mass fraction/volume fraction of the last species.
@@ -2820,19 +3393,23 @@ Euler::advanceSingleStep(
                         case SINGLE_SPECIES:
                             break;
                         case FOUR_EQN_SHYUE:
+                        {
                             Q[d_num_eqn][idx_cell] = 1.0;
                             for (int si = 0; si < d_num_species - 1; si++)
                             {
                                 Q[d_num_eqn][idx_cell] -= Q[d_num_eqn - 1 - si][idx_cell];
                             }
                             break;
+                        }
                         case FIVE_EQN_ALLAIRE:
+                        {
                             Q[d_num_eqn][idx_cell] = 1.0;
                             for (int si = 0; si < d_num_species - 1; si++)
                             {
                                 Q[d_num_eqn][idx_cell] -= Q[d_num_eqn - 1 - si][idx_cell];
                             }
                             break;
+                        }
                         default:
                             TBOX_ERROR(d_object_name
                                        << ": "
@@ -2840,13 +3417,137 @@ Euler::advanceSingleStep(
                                        << std::endl);
                     }
                 }
+            }
                 
-                if (gamma[n] != 0.0)
+            if (gamma[n] != 0.0)
+            {
+                // Accumulate the flux in the x direction.
+                for (int i = 0; i < interior_dims[0] + 1; i++)
                 {
-                    // Accumulate the flux in the x direction.
+                    int idx_flux_x = i;
+                    
+                    for (int ei = 0; ei < d_num_eqn; ei++)
+                    {
+                        double* F_x              = convective_flux->getPointer(0, ei);
+                        double* F_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                        
+                        F_x[idx_flux_x] += gamma[n]*F_x_intermediate[idx_flux_x];
+                    }                        
+                }
+                
+                // Accumulate the source.
+                for (int i = 0; i < interior_dims[0]; i++)
+                {
+                    int idx_cell = i;
+                    
+                    for (int ei = 0; ei < d_num_eqn; ei++)
+                    {
+                        double* S              = source->getPointer(ei);
+                        double* S_intermediate = source_intermediate->getPointer(ei);
+                        
+                        S[idx_cell] += gamma[n]*S_intermediate[idx_cell];
+                    }
+                }
+            } // if (gamma[n] != 0.0)
+        } // if (d_dim == tbox::Dimension(1))
+        else if (d_dim == tbox::Dimension(2))
+        {
+            if (alpha[n] != 0.0)
+            {
+                for (int j = 0; j < interior_dims[1]; j++)
+                {
+                    for (int i = 0; i < interior_dims[0]; i++)
+                    {
+                        // Compute indices of time-dependent data.
+                        int idx_cell   = (i + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*ghostcell_dims[0];
+                        
+                        for (int ei = 0; ei < d_num_eqn; ei++)
+                        {
+                            Q[ei][idx_cell] += alpha[n]*Q_intermediate[ei][idx_cell];
+                        }
+                    }
+                }
+            }
+            
+            if (d_is_preserving_positivity && (n == num_coeffs - 1))
+            {
+                preservePositivity(Q,
+                    convective_flux_intermediate,
+                    source_intermediate,
+                    interior_dims,
+                    ghostcell_dims,
+                    dx,
+                    dt,
+                    beta[n]);
+            }
+            
+            if (beta[n] != 0.0)
+            {
+                for (int j = 0; j < interior_dims[1]; j++)
+                {
+                    for (int i = 0; i < interior_dims[0]; i++)
+                    {
+                        // Compute indices of time-dependent data, flux and source.
+                        int idx_cell   = (i + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*ghostcell_dims[0];
+                        int idx_source = i + j*interior_dims[0];
+                        int idx_flux_x = (i + 1) + j*(interior_dims[0] + 1);
+                        int idx_flux_y = (j + 1) + i*(interior_dims[1] + 1);
+                        
+                        for (int ei = 0; ei < d_num_eqn; ei++)
+                        {
+                            double* F_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                            double* F_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
+                            double* S_intermediate = source_intermediate->getPointer(ei);
+                            
+                            Q[ei][idx_cell] += beta[n]*
+                                (-(F_x_intermediate[idx_flux_x] - F_x_intermediate[idx_flux_x - 1])/dx[0] -
+                                (F_y_intermediate[idx_flux_y] - F_y_intermediate[idx_flux_y - 1])/dx[1] +
+                                S_intermediate[idx_source]);
+                        }
+                        
+                        // Update the mass fraction/volume fraction of the last species.
+                        switch (d_flow_model)
+                        {
+                            case SINGLE_SPECIES:
+                                break;
+                            case FOUR_EQN_SHYUE:
+                            {
+                                Q[d_num_eqn][idx_cell] = 1.0;
+                                for (int si = 0; si < d_num_species - 1; si++)
+                                {
+                                    Q[d_num_eqn][idx_cell] -= Q[d_num_eqn - 1 - si][idx_cell];
+                                }
+                                break;
+                            }
+                            case FIVE_EQN_ALLAIRE:
+                            {
+                                Q[d_num_eqn][idx_cell] = 1.0;
+                                for (int si = 0; si < d_num_species - 1; si++)
+                                {
+                                    Q[d_num_eqn][idx_cell] -= Q[d_num_eqn - 1 - si][idx_cell];
+                                }
+                                break;
+                            }
+                            default:
+                                TBOX_ERROR(d_object_name
+                                           << ": "
+                                           << "Unknown d_flow_model."
+                                           << std::endl);
+                        }
+                    }
+                }
+            }
+            
+            if (gamma[n] != 0.0)
+            {
+                // Accumulate the flux in the x direction.
+                for (int j = 0; j < interior_dims[1]; j++)
+                {
                     for (int i = 0; i < interior_dims[0] + 1; i++)
                     {
-                        int idx_flux_x = i;
+                        int idx_flux_x = i + j*(interior_dims[0] + 1);
                         
                         for (int ei = 0; ei < d_num_eqn; ei++)
                         {
@@ -2856,11 +3557,31 @@ Euler::advanceSingleStep(
                             F_x[idx_flux_x] += gamma[n]*F_x_intermediate[idx_flux_x];
                         }                        
                     }
-                    
-                    // Accumulate the source.
+                }
+                
+                // Accumulate the flux in the y direction.
+                for (int i = 0; i < interior_dims[0]; i++)
+                {
+                    for (int j = 0; j < interior_dims[1] + 1; j++)
+                    {
+                        int idx_flux_y = j + i*(interior_dims[1] + 1);
+                        
+                        for (int ei = 0; ei < d_num_eqn; ei++)
+                        {
+                            double* F_y              = convective_flux->getPointer(1, ei);
+                            double* F_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
+                            
+                            F_y[idx_flux_y] += gamma[n]*F_y_intermediate[idx_flux_y];
+                        }
+                    }
+                }
+
+                // Accumulate the source.
+                for (int j = 0; j < interior_dims[1]; j++)
+                {
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
-                        int idx_cell = i;
+                        int idx_cell = i + j*interior_dims[0];
                         
                         for (int ei = 0; ei < d_num_eqn; ei++)
                         {
@@ -2870,129 +3591,12 @@ Euler::advanceSingleStep(
                             S[idx_cell] += gamma[n]*S_intermediate[idx_cell];
                         }
                     }
-                } // if (gamma[n] != 0.0)
-            }
-        } // if (d_dim == tbox::Dimension(1))
-        else if (d_dim == tbox::Dimension(2))
-        {
-            if (!(alpha[n] == 0.0 && beta[n] == 0.0 && gamma[n] == 0.0))
-            {
-                for (int j = 0; j < interior_dims[1]; j++)
-                {
-                    for (int i = 0; i < interior_dims[0]; i++)
-                    {
-                        // Compute indices of time-dependent data, fluxes and source.
-                        int idx_cell   = (i + d_num_ghosts[0]) + (j + d_num_ghosts[1])*ghostcell_dims[0];
-                        int idx_source = i + j*interior_dims[0];
-                        int idx_flux_x = (i + 1) + j*(interior_dims[0] + 1);
-                        int idx_flux_y = (j + 1) + i*(interior_dims[1] + 1);
-                        
-                        for (int ei = 0; ei < d_num_eqn; ei++)
-                        {
-                            if (alpha[n] != 0.0)
-                            {
-                                Q[ei][idx_cell] += alpha[n]*Q_intermediate[ei][idx_cell];
-                            }
-                            
-                            if (beta[n] != 0.0)
-                            {
-                                double* F_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
-                                double* F_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
-                                double* S_intermediate = source_intermediate->getPointer(ei);
-                                
-                                Q[ei][idx_cell] += beta[n]*
-                                    (-(F_x_intermediate[idx_flux_x] - F_x_intermediate[idx_flux_x - 1])/dx[0] -
-                                    (F_y_intermediate[idx_flux_y] - F_y_intermediate[idx_flux_y - 1])/dx[1] +
-                                    S_intermediate[idx_source]);
-                            }
-                        }
-                        
-                        // Update the mass fraction/volume fraction of the last species.
-                        switch (d_flow_model)
-                        {
-                            case SINGLE_SPECIES:
-                                break;
-                            case FOUR_EQN_SHYUE:
-                                Q[d_num_eqn][idx_cell] = 1.0;
-                                for (int si = 0; si < d_num_species - 1; si++)
-                                {
-                                    Q[d_num_eqn][idx_cell] -= Q[d_num_eqn - 1 - si][idx_cell];
-                                }
-                                break;
-                            case FIVE_EQN_ALLAIRE:
-                                Q[d_num_eqn][idx_cell] = 1.0;
-                                for (int si = 0; si < d_num_species - 1; si++)
-                                {
-                                    Q[d_num_eqn][idx_cell] -= Q[d_num_eqn - 1 - si][idx_cell];
-                                }
-                                break;
-                            default:
-                                TBOX_ERROR(d_object_name
-                                           << ": "
-                                           << "Unknown d_flow_model."
-                                           << std::endl);
-                        }
-                    }
                 }
-                
-                if (gamma[n] != 0.0)
-                {
-                    // Accumulate the flux in the x direction.
-                    for (int j = 0; j < interior_dims[1]; j++)
-                    {
-                        for (int i = 0; i < interior_dims[0] + 1; i++)
-                        {
-                            int idx_flux_x = i + j*(interior_dims[0] + 1);
-                            
-                            for (int ei = 0; ei < d_num_eqn; ei++)
-                            {
-                                double* F_x              = convective_flux->getPointer(0, ei);
-                                double* F_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
-                                
-                                F_x[idx_flux_x] += gamma[n]*F_x_intermediate[idx_flux_x];
-                            }                        
-                        }
-                    }
-                    
-                    // Accumulate the flux in the y direction.
-                    for (int i = 0; i < interior_dims[0]; i++)
-                    {
-                        for (int j = 0; j < interior_dims[1] + 1; j++)
-                        {
-                            int idx_flux_y = j + i*(interior_dims[1] + 1);
-                            
-                            for (int ei = 0; ei < d_num_eqn; ei++)
-                            {
-                                double* F_y              = convective_flux->getPointer(1, ei);
-                                double* F_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
-                                
-                                F_y[idx_flux_y] += gamma[n]*F_y_intermediate[idx_flux_y];
-                            }
-                        }
-                    }
-    
-                    // Accumulate the source.
-                    for (int j = 0; j < interior_dims[1]; j++)
-                    {
-                        for (int i = 0; i < interior_dims[0]; i++)
-                        {
-                            int idx_cell = i + j*interior_dims[0];
-                            
-                            for (int ei = 0; ei < d_num_eqn; ei++)
-                            {
-                                double* S              = source->getPointer(ei);
-                                double* S_intermediate = source_intermediate->getPointer(ei);
-                                
-                                S[idx_cell] += gamma[n]*S_intermediate[idx_cell];
-                            }
-                        }
-                    }
-                } // if (gamma[n] != 0.0)
-            }
+            } // if (gamma[n] != 0.0)
         } // if (d_dim == tbox::Dimension(2))
         else if (d_dim == tbox::Dimension(3))
         {
-            if (!(alpha[n] == 0.0 && beta[n] == 0.0 && gamma[n] == 0.0))
+            if (alpha[n] != 0.0)
             {
                 for (int k = 0; k < interior_dims[2]; k++)
                 {
@@ -3000,7 +3604,41 @@ Euler::advanceSingleStep(
                     {
                         for (int i = 0; i < interior_dims[0]; i++)
                         {
-                            // Compute indices of time-dependent data, fluxes and source.
+                            // Compute indices of time-dependent data.
+                            int idx_cell   = (i + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            for (int ei = 0; ei < d_num_eqn; ei++)
+                            {
+                                Q[ei][idx_cell] += alpha[n]*Q_intermediate[ei][idx_cell];
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if (d_is_preserving_positivity && (n == num_coeffs - 1))
+            {
+                preservePositivity(Q,
+                    convective_flux_intermediate,
+                    source_intermediate,
+                    interior_dims,
+                    ghostcell_dims,
+                    dx,
+                    dt,
+                    beta[n]);
+            }
+            
+            if (beta[n] != 0.0)
+            {
+                for (int k = 0; k < interior_dims[2]; k++)
+                {
+                    for (int j = 0; j < interior_dims[1]; j++)
+                    {
+                        for (int i = 0; i < interior_dims[0]; i++)
+                        {
+                            // Compute indices of time-dependent data, flux and source.
                             int idx_cell   = (i + d_num_ghosts[0]) +
                                 (j + d_num_ghosts[1])*ghostcell_dims[0] +
                                 (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
@@ -3023,24 +3661,16 @@ Euler::advanceSingleStep(
                             
                             for (int ei = 0; ei < d_num_eqn; ei++)
                             {
-                                if (alpha[n] != 0.0)
-                                {
-                                    Q[ei][idx_cell] += alpha[n]*Q_intermediate[ei][idx_cell];
-                                }
+                                double* F_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                                double* F_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
+                                double* F_z_intermediate = convective_flux_intermediate->getPointer(2, ei);
+                                double* S_intermediate = source_intermediate->getPointer(ei);
                                 
-                                if (beta[n] != 0.0)
-                                {
-                                    double* F_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
-                                    double* F_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
-                                    double* F_z_intermediate = convective_flux_intermediate->getPointer(2, ei);
-                                    double* S_intermediate = source_intermediate->getPointer(ei);
-                                    
-                                    Q[ei][idx_cell] += beta[n]*
-                                        (-(F_x_intermediate[idx_flux_x] - F_x_intermediate[idx_flux_x - 1])/dx[0] -
-                                        (F_y_intermediate[idx_flux_y] - F_y_intermediate[idx_flux_y - 1])/dx[1] -
-                                        (F_z_intermediate[idx_flux_z] - F_z_intermediate[idx_flux_z - 1])/dx[2] +
-                                        S_intermediate[idx_source]);
-                                }
+                                Q[ei][idx_cell] += beta[n]*
+                                    (-(F_x_intermediate[idx_flux_x] - F_x_intermediate[idx_flux_x - 1])/dx[0] -
+                                    (F_y_intermediate[idx_flux_y] - F_y_intermediate[idx_flux_y - 1])/dx[1] -
+                                    (F_z_intermediate[idx_flux_z] - F_z_intermediate[idx_flux_z - 1])/dx[2] +
+                                    S_intermediate[idx_source]);
                             }
                             
                             // Update the mass fraction/volume fraction of the last species.
@@ -3049,19 +3679,23 @@ Euler::advanceSingleStep(
                                 case SINGLE_SPECIES:
                                     break;
                                 case FOUR_EQN_SHYUE:
+                                {
                                     Q[d_num_eqn][idx_cell] = 1.0;
                                     for (int si = 0; si < d_num_species - 1; si++)
                                     {
                                         Q[d_num_eqn][idx_cell] -= Q[d_num_eqn - 1 - si][idx_cell];
                                     }
                                     break;
+                                }
                                 case FIVE_EQN_ALLAIRE:
+                                {
                                     Q[d_num_eqn][idx_cell] = 1.0;
                                     for (int si = 0; si < d_num_species - 1; si++)
                                     {
                                         Q[d_num_eqn][idx_cell] -= Q[d_num_eqn - 1 - si][idx_cell];
                                     }
                                     break;
+                                }
                                 default:
                                     TBOX_ERROR(d_object_name
                                                << ": "
@@ -3071,98 +3705,98 @@ Euler::advanceSingleStep(
                         }
                     }
                 }
-                
-                if (gamma[n] != 0.0)
+            }
+            
+            if (gamma[n] != 0.0)
+            {
+                // Accumulate the flux in the x direction.
+                for (int k = 0; k < interior_dims[2]; k++)
                 {
-                    // Accumulate the flux in the x direction.
+                    for (int j = 0; j < interior_dims[1]; j++)
+                    {
+                        for (int i = 0; i < interior_dims[0] + 1; i++)
+                        {
+                            int idx_flux_x = i +
+                                j*(interior_dims[0] + 1) +
+                                k*(interior_dims[0] + 1)*interior_dims[1];
+                            
+                            for (int ei = 0; ei < d_num_eqn; ei++)
+                            {
+                                double* F_x              = convective_flux->getPointer(0, ei);
+                                double* F_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                                
+                                F_x[idx_flux_x] += gamma[n]*F_x_intermediate[idx_flux_x];
+                            }                        
+                        }
+                    }
+                }
+                
+                // Accumulate the flux in the y direction.
+                for (int i = 0; i < interior_dims[0]; i++)
+                {
                     for (int k = 0; k < interior_dims[2]; k++)
                     {
-                        for (int j = 0; j < interior_dims[1]; j++)
+                        for (int j = 0; j < interior_dims[1] + 1; j++)
                         {
-                            for (int i = 0; i < interior_dims[0] + 1; i++)
+                            int idx_flux_y = j +
+                                k*(interior_dims[1] + 1) +
+                                i*(interior_dims[1] + 1)*interior_dims[2];
+                            
+                            for (int ei = 0; ei < d_num_eqn; ei++)
                             {
-                                int idx_flux_x = i +
-                                    j*(interior_dims[0] + 1) +
-                                    k*(interior_dims[0] + 1)*interior_dims[1];
+                                double* F_y              = convective_flux->getPointer(1, ei);
+                                double* F_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
                                 
-                                for (int ei = 0; ei < d_num_eqn; ei++)
-                                {
-                                    double* F_x              = convective_flux->getPointer(0, ei);
-                                    double* F_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
-                                    
-                                    F_x[idx_flux_x] += gamma[n]*F_x_intermediate[idx_flux_x];
-                                }                        
+                                F_y[idx_flux_y] += gamma[n]*F_y_intermediate[idx_flux_y];
                             }
                         }
                     }
-                    
-                    // Accumulate the flux in the y direction.
+                }
+                
+                // Accumulate the flux in the z direction.
+                for (int j = 0; j < interior_dims[1]; j++)
+                {
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
                         for (int k = 0; k < interior_dims[2]; k++)
                         {
-                            for (int j = 0; j < interior_dims[1] + 1; j++)
+                            int idx_flux_z = k +
+                                i*(interior_dims[2] + 1) +
+                                j*(interior_dims[2] + 1)*interior_dims[0];
+                            
+                            for (int ei = 0; ei < d_num_eqn; ei++)
                             {
-                                int idx_flux_y = j +
-                                    k*(interior_dims[1] + 1) +
-                                    i*(interior_dims[1] + 1)*interior_dims[2];
+                                double* F_z              = convective_flux->getPointer(2, ei);
+                                double* F_z_intermediate = convective_flux_intermediate->getPointer(2, ei);
                                 
-                                for (int ei = 0; ei < d_num_eqn; ei++)
-                                {
-                                    double* F_y              = convective_flux->getPointer(1, ei);
-                                    double* F_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
-                                    
-                                    F_y[idx_flux_y] += gamma[n]*F_y_intermediate[idx_flux_y];
-                                }
+                                F_z[idx_flux_z] += gamma[n]*F_z_intermediate[idx_flux_z];
                             }
                         }
                     }
-                    
-                    // Accumulate the flux in the z direction.
+                }
+                
+                // Accumulate the source.
+                for (int k = 0; k < interior_dims[2]; k++)
+                {
                     for (int j = 0; j < interior_dims[1]; j++)
                     {
                         for (int i = 0; i < interior_dims[0]; i++)
                         {
-                            for (int k = 0; k < interior_dims[2]; k++)
+                            int idx_cell = i +
+                                j*interior_dims[0] +
+                                k*interior_dims[0]*interior_dims[1];
+                            
+                            for (int ei = 0; ei < d_num_eqn; ei++)
                             {
-                                int idx_flux_z = k +
-                                    i*(interior_dims[2] + 1) +
-                                    j*(interior_dims[2] + 1)*interior_dims[0];
+                                double* S              = source->getPointer(ei);
+                                double* S_intermediate = source_intermediate->getPointer(ei);
                                 
-                                for (int ei = 0; ei < d_num_eqn; ei++)
-                                {
-                                    double* F_z              = convective_flux->getPointer(2, ei);
-                                    double* F_z_intermediate = convective_flux_intermediate->getPointer(2, ei);
-                                    
-                                    F_z[idx_flux_z] += gamma[n]*F_z_intermediate[idx_flux_z];
-                                }
+                                S[idx_cell] += gamma[n]*S_intermediate[idx_cell];
                             }
                         }
                     }
-    
-                    // Accumulate the source.
-                    for (int k = 0; k < interior_dims[2]; k++)
-                    {
-                        for (int j = 0; j < interior_dims[1]; j++)
-                        {
-                            for (int i = 0; i < interior_dims[0]; i++)
-                            {
-                                int idx_cell = i +
-                                    j*interior_dims[0] +
-                                    k*interior_dims[0]*interior_dims[1];
-                                
-                                for (int ei = 0; ei < d_num_eqn; ei++)
-                                {
-                                    double* S              = source->getPointer(ei);
-                                    double* S_intermediate = source_intermediate->getPointer(ei);
-                                    
-                                    S[idx_cell] += gamma[n]*S_intermediate[idx_cell];
-                                }
-                            }
-                        }
-                    }
-                } // if (gamma[n] != 0.0)
-            }
+                }
+            } // if (gamma[n] != 0.0)
         } // if (d_dim == tbox::Dimension(3))        
     }
     
@@ -3171,7 +3805,7 @@ Euler::advanceSingleStep(
 
 
 void
-Euler::synchronizeHyperbolicFlux(
+Euler::synchronizeHyperbolicFluxes(
     hier::Patch& patch,
     const double time,
     const double dt)
@@ -3358,7 +3992,7 @@ Euler::synchronizeHyperbolicFlux(
     {
         for (int i = 0; i < interior_dims[0]; i++)
         {
-            // Compute indices of time-dependent variables, fluxes and sources.
+            // Compute indices of time-dependent variables, flux and source.
             int idx_cell   = i + d_num_ghosts[0];
             int idx_source = i;
             int idx_flux_x = i + 1;
@@ -3406,7 +4040,7 @@ Euler::synchronizeHyperbolicFlux(
         {
             for (int i = 0; i < interior_dims[0]; i++)
             {
-                // Compute indices of time-dependent variables, fluxes and sources.
+                // Compute indices of time-dependent variables, flux and source.
                 int idx_cell   = (i + d_num_ghosts[0]) + (j + d_num_ghosts[1])*ghostcell_dims[0];
                 int idx_source = i + j*interior_dims[0];
                 int idx_flux_x = (i + 1) + j*(interior_dims[0] + 1);
@@ -3460,7 +4094,7 @@ Euler::synchronizeHyperbolicFlux(
             {
                 for (int i = 0; i < interior_dims[0]; i++)
                 {
-                    // Compute indices of time-dependent variables, fluxes and sources.
+                    // Compute indices of time-dependent variables, flux and source.
                     int idx_cell   = (i + d_num_ghosts[0]) +
                         (j + d_num_ghosts[1])*ghostcell_dims[0] +
                         (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
@@ -4423,6 +5057,172 @@ Euler::setPhysicalBoundaryConditions(
         }
     }
     
+    if (d_project_name == "2D double-Mach reflection")
+    {
+        TBOX_ASSERT(d_dim == tbox::Dimension(2));
+        TBOX_ASSERT(d_flow_model == SINGLE_SPECIES);
+        
+        // Get the dimensions of box that covers the interior of patch.
+        hier::Box dummy_box = patch.getBox();
+        const hier::Box interior_box = dummy_box;
+        const hier::IntVector interior_dims = interior_box.numberCells();
+        
+        // Get the dimensions of box that covers interior of patch plus
+        // ghost cells.
+        dummy_box.grow(d_num_ghosts);
+        const hier::Box ghost_box = dummy_box;
+        const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+        
+        const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+            BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                patch.getPatchGeometry()));
+        
+#ifdef DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(patch_geom);
+#endif
+        
+        if (patch_geom->getTouchesRegularBoundary(1, 0) ||
+            patch_geom->getTouchesRegularBoundary(1, 1))
+        {
+            const double* const dx = patch_geom->getDx();
+            const double* const patch_xlo = patch_geom->getXLower();
+            
+            boost::shared_ptr<pdat::CellData<double> > density(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch.getPatchData(d_density, getDataContext())));
+            
+            boost::shared_ptr<pdat::CellData<double> > momentum(
+                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    patch.getPatchData(d_momentum, getDataContext())));
+            
+            boost::shared_ptr<pdat::CellData<double> > total_energy(
+                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    patch.getPatchData(d_total_energy, getDataContext())));
+            
+#ifdef DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(density);
+            TBOX_ASSERT(momentum);
+            TBOX_ASSERT(total_energy);
+            
+            TBOX_ASSERT(density->getGhostCellWidth() == d_num_ghosts);
+            TBOX_ASSERT(momentum->getGhostCellWidth() == d_num_ghosts);
+            TBOX_ASSERT(total_energy->getGhostCellWidth() == d_num_ghosts);
+#endif
+            
+            double* rho   = density->getPointer(0);
+            double* rho_u = momentum->getPointer(0);
+            double* rho_v = momentum->getPointer(1);
+            double* E     = total_energy->getPointer(0);
+            
+            const double x_0 = 1.0/6.0;
+            
+            const double gamma = 1.4;
+            
+            const double rho_post_shock = 8.0;
+            const double u_post_shock = 8.25*cos(M_PI/6.0);
+            const double v_post_shock = -8.25*sin(M_PI/6.0);
+            const double p_post_shock = 116.5;
+            
+            const double rho_pre_shock = 1.4;
+            const double u_pre_shock = 0.0;
+            const double v_pre_shock = 0.0;
+            const double p_pre_shock = 1.0;
+            
+            const double rho_u_post_shock = rho_post_shock*u_post_shock;
+            const double rho_v_post_shock = rho_post_shock*v_post_shock;
+            
+            const double rho_u_pre_shock = rho_pre_shock*u_pre_shock;
+            const double rho_v_pre_shock = rho_pre_shock*v_pre_shock;
+            
+            const double E_pre_shock = p_pre_shock/(gamma - 1.0) +
+                0.5*rho_pre_shock*(u_pre_shock*u_pre_shock + v_pre_shock*v_pre_shock);
+            
+            const double E_post_shock = p_post_shock/(gamma - 1.0) +
+                0.5*rho_post_shock*(u_post_shock*u_post_shock + v_post_shock*v_post_shock);
+            
+            /*
+             * Update the bottom boundary conditions.
+             */
+            
+            if (patch_geom->getTouchesRegularBoundary(1, 0))
+            {
+                for (int i = 0; i < interior_dims[0]; i++)
+                {
+                    for (int j = -ghost_width_to_fill[1];
+                         j < 0;
+                         j++)
+                    {
+                        const int idx_cell = (i + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*ghostcell_dims[0];
+                        
+                        // Compute the coordinates.
+                        double x[2];
+                        x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                        x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                        
+                        if (x[0] < x_0)
+                        {
+                            rho[idx_cell] = rho_post_shock;
+                            rho_u[idx_cell] = rho_u_post_shock;
+                            rho_v[idx_cell] = rho_v_post_shock;
+                            E[idx_cell] = E_post_shock;
+                        }
+                        else
+                        {
+                            const int idx_mirror_cell = (i + d_num_ghosts[0]) +
+                                (-j + d_num_ghosts[1] - 1)*ghostcell_dims[0];
+                            
+                            rho[idx_cell] = rho[idx_mirror_cell];
+                            rho_u[idx_cell] = rho_u[idx_mirror_cell];
+                            rho_v[idx_cell] = -rho_v[idx_mirror_cell];
+                            E[idx_cell] = E[idx_mirror_cell];
+                        }
+                    }
+                }
+            }
+            
+            /*
+             * Update the top boundary conditions.
+             */
+            
+            if (patch_geom->getTouchesRegularBoundary(1, 1))
+            {
+                const double x_s = x_0 + (1.0 + 20.0*fill_time)/sqrt(3.0);
+                
+                for (int i = 0; i < interior_dims[0]; i++)
+                {
+                    for (int j = interior_dims[1];
+                         j < interior_dims[1] + ghost_width_to_fill[1];
+                         j++)
+                    {
+                        const int idx_cell = (i + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*ghostcell_dims[0];
+                        
+                        // Compute the coordinates.
+                        double x[2];
+                        x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                        x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                        
+                        if (x[0] >= x_s)
+                        {
+                            rho[idx_cell] = rho_pre_shock;
+                            rho_u[idx_cell] = rho_u_pre_shock;
+                            rho_v[idx_cell] = rho_v_pre_shock;
+                            E[idx_cell] = E_pre_shock;
+                        }
+                        else
+                        {
+                            rho[idx_cell] = rho_post_shock;
+                            rho_u[idx_cell] = rho_u_post_shock;
+                            rho_v[idx_cell] = rho_v_post_shock;
+                            E[idx_cell] = E_post_shock;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
     t_setphysbcs->stop();
 }
 
@@ -4454,6 +5254,8 @@ Euler::putToRestart(
                        << "Unknown d_flow_model."
                        << std::endl);
     }
+    
+    restart_db->putBool("d_is_preserving_positivity", d_is_preserving_positivity);
     
     boost::shared_ptr<tbox::Database> restart_equation_of_state_db =
         restart_db->putDatabase("Equation_of_state");
@@ -6305,6 +7107,8 @@ void Euler::printClassData(std::ostream& os) const
     os << "d_num_eqn = " << d_num_eqn << std::endl;
     os << "d_num_species = " << d_num_species << std::endl;
     
+    os << "d_is_preserving_positivity = " << d_is_preserving_positivity << std::endl;
+    
     /*
      * Print data of d_grid_geometry.
      */
@@ -7114,6 +7918,16 @@ Euler::getFromInput(
                        << std::endl);            
         }
         
+        if (input_db->keyExists("preserving_positivity"))
+        {
+            d_is_preserving_positivity =
+                input_db-> getBool("preserving_positivity");
+        }
+        else
+        {
+            d_is_preserving_positivity = false;
+        }
+        
         /*
          * Get the database of the equation of state.
          */
@@ -7366,6 +8180,8 @@ void Euler::getFromRestart()
                    << " found in restart file."
                    << std::endl);        
     }
+    
+    d_is_preserving_positivity = db->getBool("d_is_preserving_positivity");
     
     d_equation_of_state_db = db->getDatabase("Equation_of_state");
     
@@ -8045,6 +8861,3094 @@ Euler::setDefaultBoundaryConditions()
                            << ": "
                            << "Unknown d_flow_model."
                            << std::endl);
+            }
+        }
+    }
+}
+
+
+void
+Euler::preservePositivity(
+    std::vector<double*>& Q,
+    boost::shared_ptr<pdat::FaceData<double> >& convective_flux_intermediate,
+    boost::shared_ptr<pdat::CellData<double> >& source_intermediate,
+    const hier::IntVector interior_dims,
+    const hier::IntVector ghostcell_dims,
+    const double* const dx,
+    const double& dt,
+    const double& beta)
+{
+    /*
+     * Set the lower and upper bounds for mass and volume fractions.
+     */
+    const double Y_bnd_lo = -0.1;
+    const double Y_bnd_up = 1.1;
+    
+    const double Z_bnd_lo = -0.1;
+    const double Z_bnd_up = 1.1;
+    
+    NULL_USE(Z_bnd_lo);
+    NULL_USE(Z_bnd_up);
+    
+    TBOX_ASSERT(beta != 0.0);
+    
+    std::vector<double> Q_tmp;
+    Q_tmp.resize(d_num_eqn);
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        for (int i = 0; i < interior_dims[0]; i++)
+        {
+            // Compute indices of time-dependent data, flux and source.
+            const int idx_cell   = i + d_num_ghosts[0];
+            const int idx_source = i;
+            const int idx_face_x = i + 1;
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                double* F_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                double* S_intermediate = source_intermediate->getPointer(ei);
+                
+                Q_tmp[ei] = Q[ei][idx_cell] + beta*
+                    (-(F_x_intermediate[idx_face_x] - F_x_intermediate[idx_face_x - 1])/dx[0] +
+                    S_intermediate[idx_source]);
+            }
+            
+            double rho = 0;
+            double p   = 0;
+            
+            /*
+             * Check if the density or pressure are negative and if the mass or volume fractions
+             * are within the bound. If they are, switch to first order hyperbolic flux.
+             */
+            
+            switch (d_flow_model)
+            {
+                case SINGLE_SPECIES:
+                {
+                    std::vector<const double*> m_ptr;
+                    for (int di = 0; di < d_dim.getValue(); di++)
+                    {
+                        m_ptr.push_back(&Q_tmp[1 + di]);
+                    }
+                    
+                    rho = Q_tmp[0];
+                    const double& E = Q_tmp[1 + d_dim.getValue()];
+                    
+                    p = d_equation_of_state->getPressure(
+                        &rho,
+                        m_ptr,
+                        &E);
+                    
+                    break;
+                }
+                case FOUR_EQN_SHYUE:
+                {
+                    std::vector<const double*> m_ptr;
+                    for (int di = 0; di < d_dim.getValue(); di++)
+                    {
+                        m_ptr.push_back(&Q_tmp[1 + di]);
+                    }
+                    
+                    std::vector<const double*> Y_ptr;
+                    for (int si = 0; si < d_num_species - 1; si++)
+                    {
+                        Y_ptr.push_back(&Q_tmp[2 + d_dim.getValue() + si]);
+                    }
+                    
+                    rho = Q_tmp[0];
+                    const double& E = Q_tmp[1 + d_dim.getValue()];
+                    
+                    p = d_equation_of_state->getPressureWithMassFraction(
+                        &rho,
+                        m_ptr,
+                        &E,
+                        Y_ptr);
+                    
+                    break;
+                }
+                case FIVE_EQN_ALLAIRE:
+                {
+                    std::vector<const double*> Z_rho_ptr;
+                    for (int si = 0; si < d_num_species; si++)
+                    {
+                        Z_rho_ptr.push_back(&Q_tmp[si]);
+                    }
+                    
+                    std::vector<const double*> m_ptr;
+                    for (int di = 0; di < d_dim.getValue(); di++)
+                    {
+                        m_ptr.push_back(&Q_tmp[d_num_species + di]);
+                    }
+                    
+                    std::vector<const double*> Z_ptr;
+                    for (int si = 0; si < d_num_species - 1; si++)
+                    {
+                        Z_ptr.push_back(&Q_tmp[1 + d_num_species + d_dim.getValue() + si]);
+                    }
+                    
+                    rho = d_equation_of_state->getTotalDensity(Z_rho_ptr);
+                    const double& E = Q_tmp[d_num_species + d_dim.getValue()];
+                    
+                    p = d_equation_of_state->getPressureWithVolumeFraction(
+                        &rho,
+                        m_ptr,
+                        &E,
+                        Z_ptr);
+                    
+                    break;
+                }
+                default:
+                    TBOX_ERROR(d_object_name
+                               << ": "
+                               << "Unknown d_flow_model."
+                               << std::endl);
+            }
+            
+            bool is_first_order = false;
+            
+            // Check if the density or pressure are negative.
+            
+            if (rho < 0 || p < 0)
+            {
+                is_first_order = true;
+            }
+            
+            // Check if the mass or volume fractions are within the bound.
+            
+            switch (d_flow_model)
+            {
+                case SINGLE_SPECIES:
+                {
+                    break;
+                }
+                case FOUR_EQN_SHYUE:
+                {
+                    double Y_last = 1.0;
+                    
+                    for (int si = 0; si < d_num_species - 1; si++)
+                    {
+                        double Y = Q_tmp[2 + d_dim.getValue() + si];
+                        
+                        Y_last -= Y;
+                        
+                        if (Y < Y_bnd_lo || Y > Y_bnd_up)
+                        {
+                            is_first_order = true;
+                        }
+                    }
+                    
+                    if (Y_last < Y_bnd_lo || Y_last > Y_bnd_up)
+                    {
+                        is_first_order = true;
+                    }
+                    
+                    break;
+                }
+                case FIVE_EQN_ALLAIRE:
+                {
+                    for (int si = 0; si < d_num_species; si++)
+                    {
+                        double Y = Q_tmp[si]/rho;
+                        
+                        if (Y < Y_bnd_lo || Y > Y_bnd_up)
+                        {
+                            is_first_order = true;
+                            break;
+                        }
+                    }
+                    
+                    /*
+                    double Z_last = 1.0;
+                    
+                    for (int si = 0; si < d_num_species - 1; si++)
+                    {
+                        double Z = Q_tmp[1 + d_num_species + d_dim.getValue() + si];
+                        
+                        Z_last -= Z;
+                        
+                        if (Z < Z_bnd_lo || Z > Z_bnd_up)
+                        {
+                            is_first_order = true;
+                        }
+                    }
+                    
+                    if (Z_last < Z_bnd_lo || Z_last > Z_bnd_up)
+                    {
+                        is_first_order = true;
+                    }
+                    */
+                    
+                    break;
+                }
+                default:
+                        TBOX_ERROR(d_object_name
+                                   << ": "
+                                   << "Unknown d_flow_model."
+                                   << std::endl);
+            }
+            
+            // Change the fluxes to first order fluxes if it is needed.
+            
+            if (is_first_order)
+            {
+                switch (d_flow_model)
+                {
+                    case SINGLE_SPECIES:
+                    {
+                        const double& rho_cell = Q[0][idx_cell];
+                        
+                        const double& E_cell = Q[1 + d_dim.getValue()][idx_cell];
+                        
+                        const double u_cell = Q[1][idx_cell]/rho_cell;
+                        
+                        std::vector<const double*> m_ptr_cell;
+                        for (int di = 0; di < d_dim.getValue(); di++)
+                        {
+                            m_ptr_cell.push_back(&Q[1 + di][idx_cell]);
+                        }
+                        
+                        const double p_cell = d_equation_of_state->getPressure(
+                            &rho_cell,
+                            m_ptr_cell,
+                            &E_cell);
+                        
+                        const double c_cell = d_equation_of_state->getSoundSpeedWithPressure(
+                            &rho_cell,
+                            &p_cell);
+                        
+                        const double sp_x_cell = fabs(u_cell) + c_cell;
+                        
+                        // Correct the fluxes in the x direction.
+                        {
+                            // Compute indices of left and right cells.
+                            const int idx_cell_L   = i - 1 + d_num_ghosts[0];
+                            const int idx_cell_R   = i + 1 + d_num_ghosts[0];
+                            
+                            const double& rho_L = Q[0][idx_cell_L];
+                            const double& rho_R = Q[0][idx_cell_R];
+                            
+                            const double& E_L = Q[1 + d_dim.getValue()][idx_cell_L];
+                            const double& E_R = Q[1 + d_dim.getValue()][idx_cell_R];
+                            
+                            const double u_L = Q[1][idx_cell_L]/rho_L;
+                            const double u_R = Q[1][idx_cell_R]/rho_R;
+                            
+                            std::vector<const double*> m_ptr_L;
+                            for (int di = 0; di < d_dim.getValue(); di++)
+                            {
+                                m_ptr_L.push_back(&Q[1 + di][idx_cell_L]);
+                            }
+                            
+                            std::vector<const double*> m_ptr_R;
+                            for (int di = 0; di < d_dim.getValue(); di++)
+                            {
+                                m_ptr_R.push_back(&Q[1 + di][idx_cell_R]);
+                            }
+                            
+                            const double p_L = d_equation_of_state->getPressure(
+                                &rho_L,
+                                m_ptr_L,
+                                &E_L);
+                            
+                            const double p_R = d_equation_of_state->getPressure(
+                                &rho_R,
+                                m_ptr_R,
+                                &E_R);
+                            
+                            const double c_L = d_equation_of_state->getSoundSpeedWithPressure(
+                                &rho_L,
+                                &p_L);
+                            
+                            const double c_R = d_equation_of_state->getSoundSpeedWithPressure(
+                                &rho_R,
+                                &p_R);
+                            
+                            const double sp_x_L = fabs(u_L) + c_L;
+                            const double sp_x_R = fabs(u_R) + c_R;
+                            
+                            std::vector<double> F_x_cell;
+                            std::vector<double> F_x_L;
+                            std::vector<double> F_x_R;
+                            
+                            F_x_cell.push_back(rho_cell*u_cell);
+                            F_x_cell.push_back(rho_cell*u_cell*u_cell + p_cell);
+                            F_x_cell.push_back(u_cell*(E_cell + p_cell));
+                            
+                            F_x_L.push_back(rho_L*u_L);
+                            F_x_L.push_back(rho_L*u_L*u_L + p_L);
+                            F_x_L.push_back(u_L*(E_L + p_L));
+                            
+                            F_x_R.push_back(rho_R*u_R);
+                            F_x_R.push_back(rho_R*u_R*u_R + p_R);
+                            F_x_R.push_back(u_R*(E_R + p_R));
+                            
+                            const double alpha_x_L = fmax(sp_x_L, sp_x_cell);
+                            const double alpha_x_R = fmax(sp_x_R, sp_x_cell);
+                            
+                            for (int ei = 0; ei < d_num_eqn; ei++)
+                            {
+                                double* F_x = convective_flux_intermediate->getPointer(0, ei);
+                                F_x[idx_face_x - 1] = 0.5*dt*(F_x_L[ei] + F_x_cell[ei] -
+                                    alpha_x_L*(Q[ei][idx_cell] - Q[ei][idx_cell_L]));
+                                
+                                F_x[idx_face_x]     = 0.5*dt*(F_x_cell[ei] + F_x_R[ei] -
+                                    alpha_x_R*(Q[ei][idx_cell_R] - Q[ei][idx_cell]));
+                            }
+                        }
+                        
+                        break;
+                    }
+                    case FOUR_EQN_SHYUE:
+                    {
+                        const double& rho_cell = Q[0][idx_cell];
+                        
+                        const double& E_cell = Q[1 + d_dim.getValue()][idx_cell];
+                        
+                        const double u_cell = Q[1][idx_cell]/rho_cell;
+                        
+                        std::vector<const double*> m_ptr_cell;
+                        for (int di = 0; di < d_dim.getValue(); di++)
+                        {
+                            m_ptr_cell.push_back(&Q[1 + di][idx_cell]);
+                        }
+                        
+                        std::vector<const double*> Y_ptr_cell;
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            Y_ptr_cell.push_back(&Q[2 + d_dim.getValue() + si][idx_cell]);
+                        }
+                        
+                        const double p_cell = d_equation_of_state->getPressureWithMassFraction(
+                            &rho_cell,
+                            m_ptr_cell,
+                            &E_cell,
+                            Y_ptr_cell);
+                        
+                        const double c_cell = d_equation_of_state->getSoundSpeedWithMassFractionAndPressure(
+                            &rho_cell,
+                            Y_ptr_cell,
+                            &p_cell);
+                        
+                        const double sp_x_cell = fabs(u_cell) + c_cell;
+                        
+                        // Correct the fluxes in the x direction.
+                        {
+                            // Compute indices of left and right cells.
+                            const int idx_cell_L   = i - 1 + d_num_ghosts[0];
+                            const int idx_cell_R   = i + 1 + d_num_ghosts[0];
+                            
+                            const double& rho_L = Q[0][idx_cell_L];
+                            const double& rho_R = Q[0][idx_cell_R];
+                            
+                            const double& E_L = Q[1 + d_dim.getValue()][idx_cell_L];
+                            const double& E_R = Q[1 + d_dim.getValue()][idx_cell_R];
+                            
+                            const double u_L = Q[1][idx_cell_L]/rho_L;
+                            const double u_R = Q[1][idx_cell_R]/rho_R;
+                            
+                            std::vector<const double*> m_ptr_L;
+                            for (int di = 0; di < d_dim.getValue(); di++)
+                            {
+                                m_ptr_L.push_back(&Q[1 + di][idx_cell_L]);
+                            }
+                            
+                            std::vector<const double*> m_ptr_R;
+                            for (int di = 0; di < d_dim.getValue(); di++)
+                            {
+                                m_ptr_R.push_back(&Q[1 + di][idx_cell_R]);
+                            }
+                            
+                            std::vector<const double*> Y_ptr_L;
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                Y_ptr_L.push_back(&Q[2 + d_dim.getValue() + si][idx_cell_L]);
+                            }
+                            
+                            std::vector<const double*> Y_ptr_R;
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                Y_ptr_R.push_back(&Q[2 + d_dim.getValue() + si][idx_cell_R]);
+                            }
+                            
+                            const double p_L = d_equation_of_state->getPressureWithMassFraction(
+                                &rho_L,
+                                m_ptr_L,
+                                &E_L,
+                                Y_ptr_L);
+                            
+                            const double p_R = d_equation_of_state->getPressureWithMassFraction(
+                                &rho_R,
+                                m_ptr_R,
+                                &E_R,
+                                Y_ptr_R);
+                            
+                            const double c_L = d_equation_of_state->getSoundSpeedWithMassFractionAndPressure(
+                                &rho_L,
+                                Y_ptr_L,
+                                &p_L);
+                            
+                            const double c_R = d_equation_of_state->getSoundSpeedWithMassFractionAndPressure(
+                                &rho_R,
+                                Y_ptr_R,
+                                &p_R);
+                            
+                            const double sp_x_L = fabs(u_L) + c_L;
+                            const double sp_x_R = fabs(u_R) + c_R;
+                            
+                            std::vector<double> F_x_cell;
+                            std::vector<double> F_x_L;
+                            std::vector<double> F_x_R;
+                            
+                            F_x_cell.push_back(rho_cell*u_cell);
+                            F_x_cell.push_back(rho_cell*u_cell*u_cell + p_cell);
+                            F_x_cell.push_back(u_cell*(E_cell + p_cell));
+                            for (int si = 0; si < d_num_species - 1; si++)
+                            {
+                                F_x_cell.push_back(u_cell*(*Y_ptr_cell[si]));
+                            }
+                            
+                            F_x_L.push_back(rho_L*u_L);
+                            F_x_L.push_back(rho_L*u_L*u_L + p_L);
+                            F_x_L.push_back(u_L*(E_L + p_L));
+                            for (int si = 0; si < d_num_species - 1; si++)
+                            {
+                                F_x_L.push_back(u_L*(*Y_ptr_L[si]));
+                            }
+                            
+                            F_x_R.push_back(rho_R*u_R);
+                            F_x_R.push_back(rho_R*u_R*u_R + p_R);
+                            F_x_R.push_back(u_R*(E_R + p_R));
+                            for (int si = 0; si < d_num_species - 1; si++)
+                            {
+                                F_x_R.push_back(u_R*(*Y_ptr_R[si]));
+                            }
+                            
+                            const double alpha_x_L = fmax(sp_x_L, sp_x_cell);
+                            const double alpha_x_R = fmax(sp_x_R, sp_x_cell);
+                            
+                            for (int ei = 0; ei < d_num_eqn; ei++)
+                            {
+                                double* F_x = convective_flux_intermediate->getPointer(0, ei);
+                                F_x[idx_face_x - 1] = 0.5*dt*(F_x_L[ei] + F_x_cell[ei] -
+                                    alpha_x_L*(Q[ei][idx_cell] - Q[ei][idx_cell_L]));
+                                
+                                F_x[idx_face_x]     = 0.5*dt*(F_x_cell[ei] + F_x_R[ei] -
+                                    alpha_x_R*(Q[ei][idx_cell_R] - Q[ei][idx_cell]));
+                            }
+                        }
+                        
+                        break;
+                    }
+                    case FIVE_EQN_ALLAIRE:
+                    {
+                        std::vector<const double*> Z_rho_ptr_cell;
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            Z_rho_ptr_cell.push_back(&Q[si][idx_cell]);
+                        }
+                        
+                        const double rho_cell = d_equation_of_state->getTotalDensity(Z_rho_ptr_cell);
+                        
+                        const double& E_cell = Q[d_num_species + d_dim.getValue()][idx_cell];
+                        
+                        const double u_cell = Q[d_num_species][idx_cell]/rho_cell;
+                        
+                        std::vector<const double*> m_ptr_cell;
+                        for (int di = 0; di < d_dim.getValue(); di++)
+                        {
+                            m_ptr_cell.push_back(&Q[d_num_species + di][idx_cell]);
+                        }
+                        
+                        std::vector<const double*> Z_ptr_cell;
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            Z_ptr_cell.push_back(&Q[1 + d_num_species + d_dim.getValue() + si][idx_cell]);
+                        }
+                        
+                        const double p_cell = d_equation_of_state->getPressureWithVolumeFraction(
+                            &rho_cell,
+                            m_ptr_cell,
+                            &E_cell,
+                            Z_ptr_cell);
+                        
+                        const double c_cell = d_equation_of_state->getSoundSpeedWithVolumeFractionAndPressure(
+                            &rho_cell,
+                            Z_ptr_cell,
+                            &p_cell);
+                        
+                        const double sp_x_cell = fabs(u_cell) + c_cell;
+                        
+                        // Correct the fluxes in the x direction.
+                        {
+                            // Compute indices of left and right cells.
+                            const int idx_cell_L   = i - 1 + d_num_ghosts[0];
+                            const int idx_cell_R   = i + 1 + d_num_ghosts[0];
+                            
+                            std::vector<const double*> Z_rho_ptr_L;
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                Z_rho_ptr_L.push_back(&Q[si][idx_cell_L]);
+                            }
+                            
+                            std::vector<const double*> Z_rho_ptr_R;
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                Z_rho_ptr_R.push_back(&Q[si][idx_cell_R]);
+                            }
+                            
+                            const double& rho_L = d_equation_of_state->getTotalDensity(Z_rho_ptr_L);
+                            const double& rho_R = d_equation_of_state->getTotalDensity(Z_rho_ptr_R);
+                            
+                            const double& E_L = Q[d_num_species + d_dim.getValue()][idx_cell_L];
+                            const double& E_R = Q[d_num_species + d_dim.getValue()][idx_cell_R];
+                            
+                            const double u_L = Q[d_num_species][idx_cell_L]/rho_L;
+                            const double u_R = Q[d_num_species][idx_cell_R]/rho_R;
+                            
+                            std::vector<const double*> m_ptr_L;
+                            for (int di = 0; di < d_dim.getValue(); di++)
+                            {
+                                m_ptr_L.push_back(&Q[d_num_species + di][idx_cell_L]);
+                            }
+                            
+                            std::vector<const double*> m_ptr_R;
+                            for (int di = 0; di < d_dim.getValue(); di++)
+                            {
+                                m_ptr_R.push_back(&Q[d_num_species + di][idx_cell_R]);
+                            }
+                            
+                            std::vector<const double*> Z_ptr_L;
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                Z_ptr_L.push_back(&Q[1 + d_num_species + d_dim.getValue() + si][idx_cell_L]);
+                            }
+                            
+                            std::vector<const double*> Z_ptr_R;
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                Z_ptr_R.push_back(&Q[1 + d_num_species + d_dim.getValue() + si][idx_cell_R]);
+                            }
+                            
+                            const double p_L = d_equation_of_state->getPressureWithVolumeFraction(
+                                &rho_L,
+                                m_ptr_L,
+                                &E_L,
+                                Z_ptr_L);
+                            
+                            const double p_R = d_equation_of_state->getPressureWithVolumeFraction(
+                                &rho_R,
+                                m_ptr_R,
+                                &E_R,
+                                Z_ptr_R);
+                            
+                            const double c_L = d_equation_of_state->getSoundSpeedWithVolumeFractionAndPressure(
+                                &rho_L,
+                                Z_ptr_L,
+                                &p_L);
+                            
+                            const double c_R = d_equation_of_state->getSoundSpeedWithVolumeFractionAndPressure(
+                                &rho_R,
+                                Z_ptr_R,
+                                &p_R);
+                            
+                            const double sp_x_L = fabs(u_L) + c_L;
+                            const double sp_x_R = fabs(u_R) + c_R;
+                            
+                            std::vector<double> F_x_cell;
+                            std::vector<double> F_x_L;
+                            std::vector<double> F_x_R;
+                            
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                F_x_cell.push_back(u_cell*(*Z_rho_ptr_cell[si]));
+                            }
+                            F_x_cell.push_back(rho_cell*u_cell*u_cell + p_cell);
+                            F_x_cell.push_back(u_cell*(E_cell + p_cell));
+                            for (int si = 0; si < d_num_species - 1; si++)
+                            {
+                                F_x_cell.push_back(u_cell*(*Z_ptr_cell[si]));
+                            }
+                            
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                F_x_L.push_back(u_L*(*Z_rho_ptr_L[si]));
+                            }
+                            F_x_L.push_back(rho_L*u_L*u_L + p_L);
+                            F_x_L.push_back(u_L*(E_L + p_L));
+                            for (int si = 0; si < d_num_species - 1; si++)
+                            {
+                                F_x_L.push_back(u_L*(*Z_ptr_L[si]));
+                            }
+                            
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                F_x_R.push_back(u_R*(*Z_rho_ptr_R[si]));
+                            }
+                            F_x_R.push_back(rho_R*u_R*u_R + p_R);
+                            F_x_R.push_back(u_R*(E_R + p_R));
+                            for (int si = 0; si < d_num_species - 1; si++)
+                            {
+                                F_x_R.push_back(u_R*(*Z_ptr_R[si]));
+                            }
+                            
+                            const double alpha_x_L = fmax(sp_x_L, sp_x_cell);
+                            const double alpha_x_R = fmax(sp_x_R, sp_x_cell);
+                            
+                            for (int ei = 0; ei < d_num_eqn; ei++)
+                            {
+                                double* F_x = convective_flux_intermediate->getPointer(0, ei);
+                                F_x[idx_face_x - 1] = 0.5*dt*(F_x_L[ei] + F_x_cell[ei] -
+                                    alpha_x_L*(Q[ei][idx_cell] - Q[ei][idx_cell_L]));
+                                
+                                F_x[idx_face_x]     = 0.5*dt*(F_x_cell[ei] + F_x_R[ei] -
+                                    alpha_x_R*(Q[ei][idx_cell_R] - Q[ei][idx_cell]));
+                            }
+                        }
+                        
+                        break;
+                    }
+                    default:
+                        TBOX_ERROR(d_object_name
+                                   << ": "
+                                   << "Unknown d_flow_model."
+                                   << std::endl);
+                }
+            }
+        }
+    } // if (d_dim == tbox::Dimension(1))
+    else if (d_dim == tbox::Dimension(2))
+    {
+        for (int j = 0; j < interior_dims[1]; j++)
+        {
+            for (int i = 0; i < interior_dims[0]; i++)
+            {
+                // Compute indices of time-dependent data, flux and source.
+                const int idx_cell   = (i + d_num_ghosts[0]) +
+                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                const int idx_source = i + j*interior_dims[0];
+                const int idx_face_x = (i + 1) + j*(interior_dims[0] + 1);
+                const int idx_face_y = (j + 1) + i*(interior_dims[1] + 1);
+                
+                for (int ei = 0; ei < d_num_eqn; ei++)
+                {
+                    double* F_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                    double* F_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
+                    double* S_intermediate = source_intermediate->getPointer(ei);
+                    
+                    Q_tmp[ei] = Q[ei][idx_cell] + beta*
+                        (-(F_x_intermediate[idx_face_x] - F_x_intermediate[idx_face_x - 1])/dx[0] -
+                        (F_y_intermediate[idx_face_y] - F_y_intermediate[idx_face_y - 1])/dx[1] +
+                        S_intermediate[idx_source]);
+                }
+                
+                double rho = 0;
+                double p   = 0;
+                
+                /*
+                 * Check if the density or pressure are negative and if the mass or volume fractions
+                 * are within the bound. If they are, switch to first order hyperbolic flux.
+                 */
+                
+                switch (d_flow_model)
+                {
+                    case SINGLE_SPECIES:
+                    {
+                        std::vector<const double*> m_ptr;
+                        for (int di = 0; di < d_dim.getValue(); di++)
+                        {
+                            m_ptr.push_back(&Q_tmp[1 + di]);
+                        }
+                        
+                        rho = Q_tmp[0];
+                        const double& E = Q_tmp[1 + d_dim.getValue()];
+                        
+                        p = d_equation_of_state->getPressure(
+                            &rho,
+                            m_ptr,
+                            &E);
+                        
+                        break;
+                    }
+                    case FOUR_EQN_SHYUE:
+                    {
+                        std::vector<const double*> m_ptr;
+                        for (int di = 0; di < d_dim.getValue(); di++)
+                        {
+                            m_ptr.push_back(&Q_tmp[1 + di]);
+                        }
+                        
+                        std::vector<const double*> Y_ptr;
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            Y_ptr.push_back(&Q_tmp[2 + d_dim.getValue() + si]);
+                        }
+                        
+                        rho = Q_tmp[0];
+                        const double& E = Q_tmp[1 + d_dim.getValue()];
+                        
+                        p = d_equation_of_state->getPressureWithMassFraction(
+                            &rho,
+                            m_ptr,
+                            &E,
+                            Y_ptr);
+                        
+                        break;
+                    }
+                    case FIVE_EQN_ALLAIRE:
+                    {
+                        std::vector<const double*> Z_rho_ptr;
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            Z_rho_ptr.push_back(&Q_tmp[si]);
+                        }
+                        
+                        std::vector<const double*> m_ptr;
+                        for (int di = 0; di < d_dim.getValue(); di++)
+                        {
+                            m_ptr.push_back(&Q_tmp[d_num_species + di]);
+                        }
+                        
+                        std::vector<const double*> Z_ptr;
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            Z_ptr.push_back(&Q_tmp[1 + d_num_species + d_dim.getValue() + si]);
+                        }
+                        
+                        rho = d_equation_of_state->getTotalDensity(Z_rho_ptr);
+                        const double& E = Q_tmp[d_num_species + d_dim.getValue()];
+                        
+                        p = d_equation_of_state->getPressureWithVolumeFraction(
+                            &rho,
+                            m_ptr,
+                            &E,
+                            Z_ptr);
+                        
+                        break;
+                    }
+                    default:
+                        TBOX_ERROR(d_object_name
+                                   << ": "
+                                   << "Unknown d_flow_model."
+                                   << std::endl);
+                }
+                
+                bool is_first_order = false;
+                
+                // Check if the density or pressure are negative.
+                
+                if (rho < 0 || p < 0)
+                {
+                    is_first_order = true;
+                }
+                
+                // Check if the mass or volume fractions are within the bound.
+                
+                switch (d_flow_model)
+                {
+                    case SINGLE_SPECIES:
+                    {
+                        break;
+                    }
+                    case FOUR_EQN_SHYUE:
+                    {
+                        double Y_last = 1.0;
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            double Y = Q_tmp[2 + d_dim.getValue() + si];
+                            
+                            Y_last -= Y;
+                            
+                            if (Y < Y_bnd_lo || Y > Y_bnd_up)
+                            {
+                                is_first_order = true;
+                            }
+                        }
+                        
+                        if (Y_last < Y_bnd_lo || Y_last > Y_bnd_up)
+                        {
+                            is_first_order = true;
+                        }
+                        
+                        break;
+                    }
+                    case FIVE_EQN_ALLAIRE:
+                    {
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            double Y = Q_tmp[si]/rho;
+                            
+                            if (Y < Y_bnd_lo || Y > Y_bnd_up)
+                            {
+                                is_first_order = true;
+                                break;
+                            }
+                        }
+                        
+                        /*
+                        double Z_last = 1.0;
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            double Z = Q_tmp[1 + d_num_species + d_dim.getValue() + si];
+                            
+                            Z_last -= Z;
+                            
+                            if (Z < Z_bnd_lo || Z > Z_bnd_up)
+                            {
+                                is_first_order = true;
+                            }
+                        }
+                        
+                        if (Z_last < Z_bnd_lo || Z_last > Z_bnd_up)
+                        {
+                            is_first_order = true;
+                        }
+                        */
+                        
+                        break;
+                    }
+                    default:
+                            TBOX_ERROR(d_object_name
+                                       << ": "
+                                       << "Unknown d_flow_model."
+                                       << std::endl);
+                }
+                
+                // Change the fluxes to first order fluxes if it is needed.
+                
+                if (is_first_order)
+                {
+                    switch (d_flow_model)
+                    {
+                        case SINGLE_SPECIES:
+                        {
+                            const double& rho_cell = Q[0][idx_cell];
+                            
+                            const double& E_cell = Q[1 + d_dim.getValue()][idx_cell];
+                            
+                            const double u_cell = Q[1][idx_cell]/rho_cell;
+                            
+                            const double v_cell = Q[2][idx_cell]/rho_cell;
+                            
+                            std::vector<const double*> m_ptr_cell;
+                            for (int di = 0; di < d_dim.getValue(); di++)
+                            {
+                                m_ptr_cell.push_back(&Q[1 + di][idx_cell]);
+                            }
+                            
+                            const double p_cell = d_equation_of_state->getPressure(
+                                &rho_cell,
+                                m_ptr_cell,
+                                &E_cell);
+                            
+                            const double c_cell = d_equation_of_state->getSoundSpeedWithPressure(
+                                &rho_cell,
+                                &p_cell);
+                            
+                            const double sp_x_cell = fabs(u_cell) + c_cell;
+                            const double sp_y_cell = fabs(v_cell) + c_cell;
+                            
+                            // Correct the fluxes in the x direction.
+                            {
+                                // Compute indices of left and right cells.
+                                int idx_cell_L   = (i - 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                int idx_cell_R   = (i + 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const double& rho_L = Q[0][idx_cell_L];
+                                const double& rho_R = Q[0][idx_cell_R];
+                                
+                                const double& E_L = Q[1 + d_dim.getValue()][idx_cell_L];
+                                const double& E_R = Q[1 + d_dim.getValue()][idx_cell_R];
+                                
+                                const double u_L = Q[1][idx_cell_L]/rho_L;
+                                const double u_R = Q[1][idx_cell_R]/rho_R;
+                                
+                                const double v_L = Q[2][idx_cell_L]/rho_L;
+                                const double v_R = Q[2][idx_cell_R]/rho_R;
+                                
+                                std::vector<const double*> m_ptr_L;
+                                for (int di = 0; di < d_dim.getValue(); di++)
+                                {
+                                    m_ptr_L.push_back(&Q[1 + di][idx_cell_L]);
+                                }
+                                
+                                std::vector<const double*> m_ptr_R;
+                                for (int di = 0; di < d_dim.getValue(); di++)
+                                {
+                                    m_ptr_R.push_back(&Q[1 + di][idx_cell_R]);
+                                }
+                                
+                                const double p_L = d_equation_of_state->getPressure(
+                                    &rho_L,
+                                    m_ptr_L,
+                                    &E_L);
+                                
+                                const double p_R = d_equation_of_state->getPressure(
+                                    &rho_R,
+                                    m_ptr_R,
+                                    &E_R);
+                                
+                                const double c_L = d_equation_of_state->getSoundSpeedWithPressure(
+                                    &rho_L,
+                                    &p_L);
+                                
+                                const double c_R = d_equation_of_state->getSoundSpeedWithPressure(
+                                    &rho_R,
+                                    &p_R);
+                                
+                                const double sp_x_L = fabs(u_L) + c_L;
+                                const double sp_x_R = fabs(u_R) + c_R;
+                                
+                                std::vector<double> F_x_cell;
+                                std::vector<double> F_x_L;
+                                std::vector<double> F_x_R;
+                                
+                                F_x_cell.push_back(rho_cell*u_cell);
+                                F_x_cell.push_back(rho_cell*u_cell*u_cell + p_cell);
+                                F_x_cell.push_back(rho_cell*u_cell*v_cell);
+                                F_x_cell.push_back(u_cell*(E_cell + p_cell));
+                                
+                                F_x_L.push_back(rho_L*u_L);
+                                F_x_L.push_back(rho_L*u_L*u_L + p_L);
+                                F_x_L.push_back(rho_L*u_L*v_L);
+                                F_x_L.push_back(u_L*(E_L + p_L));
+                                
+                                F_x_R.push_back(rho_R*u_R);
+                                F_x_R.push_back(rho_R*u_R*u_R + p_R);
+                                F_x_R.push_back(rho_R*u_R*v_R);
+                                F_x_R.push_back(u_R*(E_R + p_R));
+                                
+                                const double alpha_x_L = fmax(sp_x_L, sp_x_cell);
+                                const double alpha_x_R = fmax(sp_x_R, sp_x_cell);
+                                
+                                for (int ei = 0; ei < d_num_eqn; ei++)
+                                {
+                                    double* F_x = convective_flux_intermediate->getPointer(0, ei);
+                                    F_x[idx_face_x - 1] = 0.5*dt*(F_x_L[ei] + F_x_cell[ei] -
+                                        alpha_x_L*(Q[ei][idx_cell] - Q[ei][idx_cell_L]));
+                                    
+                                    F_x[idx_face_x]     = 0.5*dt*(F_x_cell[ei] + F_x_R[ei] -
+                                        alpha_x_R*(Q[ei][idx_cell_R] - Q[ei][idx_cell]));
+                                }
+                            }
+                            
+                            // Correct the fluxes in the y direction.
+                            {
+                                int idx_cell_B   = (i + d_num_ghosts[0]) +
+                                    (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                int idx_cell_T   = (i + d_num_ghosts[0]) +
+                                    (j + 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const double& rho_B = Q[0][idx_cell_B];
+                                const double& rho_T = Q[0][idx_cell_T];
+                                
+                                const double& E_B = Q[1 + d_dim.getValue()][idx_cell_B];
+                                const double& E_T = Q[1 + d_dim.getValue()][idx_cell_T];
+                                
+                                const double u_B = Q[1][idx_cell_B]/rho_B;
+                                const double u_T = Q[1][idx_cell_T]/rho_T;
+                                
+                                const double v_B = Q[2][idx_cell_B]/rho_B;
+                                const double v_T = Q[2][idx_cell_T]/rho_T;
+                                
+                                std::vector<const double*> m_ptr_B;
+                                for (int di = 0; di < d_dim.getValue(); di++)
+                                {
+                                    m_ptr_B.push_back(&Q[1 + di][idx_cell_B]);
+                                }
+                                
+                                std::vector<const double*> m_ptr_T;
+                                for (int di = 0; di < d_dim.getValue(); di++)
+                                {
+                                    m_ptr_T.push_back(&Q[1 + di][idx_cell_T]);
+                                }
+                                
+                                const double p_B = d_equation_of_state->getPressure(
+                                    &rho_B,
+                                    m_ptr_B,
+                                    &E_B);
+                                
+                                const double p_T = d_equation_of_state->getPressure(
+                                    &rho_T,
+                                    m_ptr_T,
+                                    &E_T);
+                                
+                                const double c_B = d_equation_of_state->getSoundSpeedWithPressure(
+                                    &rho_B,
+                                    &p_B);
+                                
+                                const double c_T = d_equation_of_state->getSoundSpeedWithPressure(
+                                    &rho_T,
+                                    &p_T);
+                                
+                                const double sp_y_B = fabs(v_B) + c_B;
+                                const double sp_y_T = fabs(v_T) + c_T;
+                                
+                                std::vector<double> F_y_cell;
+                                std::vector<double> F_y_B;
+                                std::vector<double> F_y_T;
+                                
+                                F_y_cell.push_back(rho_cell*v_cell);
+                                F_y_cell.push_back(rho_cell*v_cell*u_cell);
+                                F_y_cell.push_back(rho_cell*v_cell*v_cell + p_cell);
+                                F_y_cell.push_back(v_cell*(E_cell + p_cell));
+                                
+                                F_y_B.push_back(rho_B*v_B);
+                                F_y_B.push_back(rho_B*v_B*u_B);
+                                F_y_B.push_back(rho_B*v_B*v_B + p_B);
+                                F_y_B.push_back(v_B*(E_B + p_B));
+                                
+                                F_y_T.push_back(rho_T*v_T);
+                                F_y_T.push_back(rho_T*v_T*u_T);
+                                F_y_T.push_back(rho_T*v_T*v_T + p_T);
+                                F_y_T.push_back(v_T*(E_T + p_T));
+                                
+                                const double alpha_y_B = fmax(sp_y_B, sp_y_cell);
+                                const double alpha_y_T = fmax(sp_y_T, sp_y_cell);
+                                
+                                for (int ei = 0; ei < d_num_eqn; ei++)
+                                {
+                                    double* F_y = convective_flux_intermediate->getPointer(1, ei);
+                                    F_y[idx_face_y - 1] = 0.5*dt*(F_y_B[ei] + F_y_cell[ei] -
+                                        alpha_y_B*(Q[ei][idx_cell] - Q[ei][idx_cell_B]));
+                                    
+                                    F_y[idx_face_y]     = 0.5*dt*(F_y_cell[ei] + F_y_T[ei] -
+                                        alpha_y_T*(Q[ei][idx_cell_T] - Q[ei][idx_cell]));
+                                }
+                            }
+                            
+                            break;
+                        }
+                        case FOUR_EQN_SHYUE:
+                        {
+                            const double& rho_cell = Q[0][idx_cell];
+                            
+                            const double& E_cell = Q[1 + d_dim.getValue()][idx_cell];
+                            
+                            const double u_cell = Q[1][idx_cell]/rho_cell;
+                            
+                            const double v_cell = Q[2][idx_cell]/rho_cell;
+                            
+                            std::vector<const double*> m_ptr_cell;
+                            for (int di = 0; di < d_dim.getValue(); di++)
+                            {
+                                m_ptr_cell.push_back(&Q[1 + di][idx_cell]);
+                            }
+                            
+                            std::vector<const double*> Y_ptr_cell;
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                Y_ptr_cell.push_back(&Q[2 + d_dim.getValue() + si][idx_cell]);
+                            }
+                            
+                            const double p_cell = d_equation_of_state->getPressureWithMassFraction(
+                                &rho_cell,
+                                m_ptr_cell,
+                                &E_cell,
+                                Y_ptr_cell);
+                            
+                            const double c_cell = d_equation_of_state->getSoundSpeedWithMassFractionAndPressure(
+                                &rho_cell,
+                                Y_ptr_cell,
+                                &p_cell);
+                            
+                            const double sp_x_cell = fabs(u_cell) + c_cell;
+                            const double sp_y_cell = fabs(v_cell) + c_cell;
+                            
+                            // Correct the fluxes in the x direction.
+                            {
+                                // Compute indices of left and right cells.
+                                int idx_cell_L   = (i - 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                int idx_cell_R   = (i + 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const double& rho_L = Q[0][idx_cell_L];
+                                const double& rho_R = Q[0][idx_cell_R];
+                                
+                                const double& E_L = Q[1 + d_dim.getValue()][idx_cell_L];
+                                const double& E_R = Q[1 + d_dim.getValue()][idx_cell_R];
+                                
+                                const double u_L = Q[1][idx_cell_L]/rho_L;
+                                const double u_R = Q[1][idx_cell_R]/rho_R;
+                                
+                                const double v_L = Q[2][idx_cell_L]/rho_L;
+                                const double v_R = Q[2][idx_cell_R]/rho_R;
+                                
+                                std::vector<const double*> m_ptr_L;
+                                for (int di = 0; di < d_dim.getValue(); di++)
+                                {
+                                    m_ptr_L.push_back(&Q[1 + di][idx_cell_L]);
+                                }
+                                
+                                std::vector<const double*> m_ptr_R;
+                                for (int di = 0; di < d_dim.getValue(); di++)
+                                {
+                                    m_ptr_R.push_back(&Q[1 + di][idx_cell_R]);
+                                }
+                                
+                                std::vector<const double*> Y_ptr_L;
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_ptr_L.push_back(&Q[2 + d_dim.getValue() + si][idx_cell_L]);
+                                }
+                                
+                                std::vector<const double*> Y_ptr_R;
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_ptr_R.push_back(&Q[2 + d_dim.getValue() + si][idx_cell_R]);
+                                }
+                                
+                                const double p_L = d_equation_of_state->getPressureWithMassFraction(
+                                    &rho_L,
+                                    m_ptr_L,
+                                    &E_L,
+                                    Y_ptr_L);
+                                
+                                const double p_R = d_equation_of_state->getPressureWithMassFraction(
+                                    &rho_R,
+                                    m_ptr_R,
+                                    &E_R,
+                                    Y_ptr_R);
+                                
+                                const double c_L = d_equation_of_state->getSoundSpeedWithMassFractionAndPressure(
+                                    &rho_L,
+                                    Y_ptr_L,
+                                    &p_L);
+                                
+                                const double c_R = d_equation_of_state->getSoundSpeedWithMassFractionAndPressure(
+                                    &rho_R,
+                                    Y_ptr_R,
+                                    &p_R);
+                                
+                                const double sp_x_L = fabs(u_L) + c_L;
+                                const double sp_x_R = fabs(u_R) + c_R;
+                                
+                                std::vector<double> F_x_cell;
+                                std::vector<double> F_x_L;
+                                std::vector<double> F_x_R;
+                                
+                                F_x_cell.push_back(rho_cell*u_cell);
+                                F_x_cell.push_back(rho_cell*u_cell*u_cell + p_cell);
+                                F_x_cell.push_back(rho_cell*u_cell*v_cell);
+                                F_x_cell.push_back(u_cell*(E_cell + p_cell));
+                                for (int si = 0; si < d_num_species - 1; si++)
+                                {
+                                    F_x_cell.push_back(u_cell*(*Y_ptr_cell[si]));
+                                }
+                                
+                                F_x_L.push_back(rho_L*u_L);
+                                F_x_L.push_back(rho_L*u_L*u_L + p_L);
+                                F_x_L.push_back(rho_L*u_L*v_L);
+                                F_x_L.push_back(u_L*(E_L + p_L));
+                                for (int si = 0; si < d_num_species - 1; si++)
+                                {
+                                    F_x_L.push_back(u_L*(*Y_ptr_L[si]));
+                                }
+                                
+                                F_x_R.push_back(rho_R*u_R);
+                                F_x_R.push_back(rho_R*u_R*u_R + p_R);
+                                F_x_R.push_back(rho_R*u_R*v_R);
+                                F_x_R.push_back(u_R*(E_R + p_R));
+                                for (int si = 0; si < d_num_species - 1; si++)
+                                {
+                                    F_x_R.push_back(u_R*(*Y_ptr_R[si]));
+                                }
+                                
+                                const double alpha_x_L = fmax(sp_x_L, sp_x_cell);
+                                const double alpha_x_R = fmax(sp_x_R, sp_x_cell);
+                                
+                                for (int ei = 0; ei < d_num_eqn; ei++)
+                                {
+                                    double* F_x = convective_flux_intermediate->getPointer(0, ei);
+                                    F_x[idx_face_x - 1] = 0.5*dt*(F_x_L[ei] + F_x_cell[ei] -
+                                        alpha_x_L*(Q[ei][idx_cell] - Q[ei][idx_cell_L]));
+                                    
+                                    F_x[idx_face_x]     = 0.5*dt*(F_x_cell[ei] + F_x_R[ei] -
+                                        alpha_x_R*(Q[ei][idx_cell_R] - Q[ei][idx_cell]));
+                                }
+                            }
+                            
+                            // Correct the fluxes in the x direction.
+                            {
+                                int idx_cell_B   = (i + d_num_ghosts[0]) +
+                                    (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                int idx_cell_T   = (i + d_num_ghosts[0]) +
+                                    (j + 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const double& rho_B = Q[0][idx_cell_B];
+                                const double& rho_T = Q[0][idx_cell_T];
+                                
+                                const double& E_B = Q[1 + d_dim.getValue()][idx_cell_B];
+                                const double& E_T = Q[1 + d_dim.getValue()][idx_cell_T];
+                                
+                                const double u_B = Q[1][idx_cell_B]/rho_B;
+                                const double u_T = Q[1][idx_cell_T]/rho_T;
+                                
+                                const double v_B = Q[2][idx_cell_B]/rho_B;
+                                const double v_T = Q[2][idx_cell_T]/rho_T;
+                                
+                                std::vector<const double*> m_ptr_B;
+                                for (int di = 0; di < d_dim.getValue(); di++)
+                                {
+                                    m_ptr_B.push_back(&Q[1 + di][idx_cell_B]);
+                                }
+                                
+                                std::vector<const double*> m_ptr_T;
+                                for (int di = 0; di < d_dim.getValue(); di++)
+                                {
+                                    m_ptr_T.push_back(&Q[1 + di][idx_cell_T]);
+                                }
+                                
+                                std::vector<const double*> Y_ptr_B;
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_ptr_B.push_back(&Q[2 + d_dim.getValue() + si][idx_cell_B]);
+                                }
+                                
+                                std::vector<const double*> Y_ptr_T;
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_ptr_T.push_back(&Q[2 + d_dim.getValue() + si][idx_cell_T]);
+                                }
+                                
+                                const double p_B = d_equation_of_state->getPressureWithMassFraction(
+                                    &rho_B,
+                                    m_ptr_B,
+                                    &E_B,
+                                    Y_ptr_B);
+                                
+                                const double p_T = d_equation_of_state->getPressureWithMassFraction(
+                                    &rho_T,
+                                    m_ptr_T,
+                                    &E_T,
+                                    Y_ptr_T);
+                                
+                                const double c_B = d_equation_of_state->getSoundSpeedWithMassFractionAndPressure(
+                                    &rho_B,
+                                    Y_ptr_B,
+                                    &p_B);
+                                
+                                const double c_T = d_equation_of_state->getSoundSpeedWithMassFractionAndPressure(
+                                    &rho_T,
+                                    Y_ptr_T,
+                                    &p_T);
+                                
+                                const double sp_y_B = fabs(v_B) + c_B;
+                                const double sp_y_T = fabs(v_T) + c_T;
+                                
+                                std::vector<double> F_y_cell;
+                                std::vector<double> F_y_B;
+                                std::vector<double> F_y_T;
+                                
+                                F_y_cell.push_back(rho_cell*v_cell);
+                                F_y_cell.push_back(rho_cell*v_cell*u_cell);
+                                F_y_cell.push_back(rho_cell*v_cell*v_cell + p_cell);
+                                F_y_cell.push_back(v_cell*(E_cell + p_cell));
+                                for (int si = 0; si < d_num_species - 1; si++)
+                                {
+                                    F_y_cell.push_back(v_cell*(*Y_ptr_cell[si]));
+                                }
+                                
+                                F_y_B.push_back(rho_B*v_B);
+                                F_y_B.push_back(rho_B*v_B*u_B);
+                                F_y_B.push_back(rho_B*v_B*v_B + p_B);
+                                F_y_B.push_back(v_B*(E_B + p_B));
+                                for (int si = 0; si < d_num_species - 1; si++)
+                                {
+                                    F_y_B.push_back(v_B*(*Y_ptr_B[si]));
+                                }
+                                
+                                F_y_T.push_back(rho_T*v_T);
+                                F_y_T.push_back(rho_T*v_T*u_T);
+                                F_y_T.push_back(rho_T*v_T*v_T + p_T);
+                                F_y_T.push_back(v_T*(E_T + p_T));
+                                for (int si = 0; si < d_num_species - 1; si++)
+                                {
+                                    F_y_T.push_back(v_T*(*Y_ptr_T[si]));
+                                }
+                                
+                                const double alpha_y_B = fmax(sp_y_B, sp_y_cell);
+                                const double alpha_y_T = fmax(sp_y_T, sp_y_cell);
+                                
+                                for (int ei = 0; ei < d_num_eqn; ei++)
+                                {
+                                    double* F_y = convective_flux_intermediate->getPointer(1, ei);
+                                    F_y[idx_face_y - 1] = 0.5*dt*(F_y_B[ei] + F_y_cell[ei] -
+                                        alpha_y_B*(Q[ei][idx_cell] - Q[ei][idx_cell_B]));
+                                    
+                                    F_y[idx_face_y]     = 0.5*dt*(F_y_cell[ei] + F_y_T[ei] -
+                                        alpha_y_T*(Q[ei][idx_cell_T] - Q[ei][idx_cell]));
+                                }
+                            }
+                            
+                            break;
+                        }
+                        case FIVE_EQN_ALLAIRE:
+                        {
+                            std::vector<const double*> Z_rho_ptr_cell;
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                Z_rho_ptr_cell.push_back(&Q[si][idx_cell]);
+                            }
+                            
+                            const double rho_cell = d_equation_of_state->getTotalDensity(Z_rho_ptr_cell);
+                            
+                            const double& E_cell = Q[d_num_species + d_dim.getValue()][idx_cell];
+                            
+                            const double u_cell = Q[d_num_species][idx_cell]/rho_cell;
+                            
+                            const double v_cell = Q[d_num_species + 1][idx_cell]/rho_cell;
+                            
+                            std::vector<const double*> m_ptr_cell;
+                            for (int di = 0; di < d_dim.getValue(); di++)
+                            {
+                                m_ptr_cell.push_back(&Q[d_num_species + di][idx_cell]);
+                            }
+                            
+                            std::vector<const double*> Z_ptr_cell;
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                Z_ptr_cell.push_back(&Q[1 + d_num_species + d_dim.getValue() + si][idx_cell]);
+                            }
+                            
+                            const double p_cell = d_equation_of_state->getPressureWithVolumeFraction(
+                                &rho_cell,
+                                m_ptr_cell,
+                                &E_cell,
+                                Z_ptr_cell);
+                            
+                            const double c_cell = d_equation_of_state->getSoundSpeedWithVolumeFractionAndPressure(
+                                &rho_cell,
+                                Z_ptr_cell,
+                                &p_cell);
+                            
+                            const double sp_x_cell = fabs(u_cell) + c_cell;
+                            const double sp_y_cell = fabs(v_cell) + c_cell;
+                            
+                            // Correct the fluxes in the x direction.
+                            {
+                                // Compute indices of left and right cells.
+                                int idx_cell_L   = (i - 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                int idx_cell_R   = (i + 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                std::vector<const double*> Z_rho_ptr_L;
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Z_rho_ptr_L.push_back(&Q[si][idx_cell_L]);
+                                }
+                                
+                                std::vector<const double*> Z_rho_ptr_R;
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Z_rho_ptr_R.push_back(&Q[si][idx_cell_R]);
+                                }
+                                
+                                const double& rho_L = d_equation_of_state->getTotalDensity(Z_rho_ptr_L);
+                                const double& rho_R = d_equation_of_state->getTotalDensity(Z_rho_ptr_R);
+                                
+                                const double& E_L = Q[d_num_species + d_dim.getValue()][idx_cell_L];
+                                const double& E_R = Q[d_num_species + d_dim.getValue()][idx_cell_R];
+                                
+                                const double u_L = Q[d_num_species][idx_cell_L]/rho_L;
+                                const double u_R = Q[d_num_species][idx_cell_R]/rho_R;
+                                
+                                const double v_L = Q[d_num_species + 1][idx_cell_L]/rho_L;
+                                const double v_R = Q[d_num_species + 1][idx_cell_R]/rho_R;
+                                
+                                std::vector<const double*> m_ptr_L;
+                                for (int di = 0; di < d_dim.getValue(); di++)
+                                {
+                                    m_ptr_L.push_back(&Q[d_num_species + di][idx_cell_L]);
+                                }
+                                
+                                std::vector<const double*> m_ptr_R;
+                                for (int di = 0; di < d_dim.getValue(); di++)
+                                {
+                                    m_ptr_R.push_back(&Q[d_num_species + di][idx_cell_R]);
+                                }
+                                
+                                std::vector<const double*> Z_ptr_L;
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Z_ptr_L.push_back(&Q[1 + d_num_species + d_dim.getValue() + si][idx_cell_L]);
+                                }
+                                
+                                std::vector<const double*> Z_ptr_R;
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Z_ptr_R.push_back(&Q[1 + d_num_species + d_dim.getValue() + si][idx_cell_R]);
+                                }
+                                
+                                const double p_L = d_equation_of_state->getPressureWithVolumeFraction(
+                                    &rho_L,
+                                    m_ptr_L,
+                                    &E_L,
+                                    Z_ptr_L);
+                                
+                                const double p_R = d_equation_of_state->getPressureWithVolumeFraction(
+                                    &rho_R,
+                                    m_ptr_R,
+                                    &E_R,
+                                    Z_ptr_R);
+                                
+                                const double c_L = d_equation_of_state->getSoundSpeedWithVolumeFractionAndPressure(
+                                    &rho_L,
+                                    Z_ptr_L,
+                                    &p_L);
+                                
+                                const double c_R = d_equation_of_state->getSoundSpeedWithVolumeFractionAndPressure(
+                                    &rho_R,
+                                    Z_ptr_R,
+                                    &p_R);
+                                
+                                const double sp_x_L = fabs(u_L) + c_L;
+                                const double sp_x_R = fabs(u_R) + c_R;
+                                
+                                std::vector<double> F_x_cell;
+                                std::vector<double> F_x_L;
+                                std::vector<double> F_x_R;
+                                
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    F_x_cell.push_back(u_cell*(*Z_rho_ptr_cell[si]));
+                                }
+                                F_x_cell.push_back(rho_cell*u_cell*u_cell + p_cell);
+                                F_x_cell.push_back(rho_cell*u_cell*v_cell);
+                                F_x_cell.push_back(u_cell*(E_cell + p_cell));
+                                for (int si = 0; si < d_num_species - 1; si++)
+                                {
+                                    F_x_cell.push_back(u_cell*(*Z_ptr_cell[si]));
+                                }
+                                
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    F_x_L.push_back(u_L*(*Z_rho_ptr_L[si]));
+                                }
+                                F_x_L.push_back(rho_L*u_L*u_L + p_L);
+                                F_x_L.push_back(rho_L*u_L*v_L);
+                                F_x_L.push_back(u_L*(E_L + p_L));
+                                for (int si = 0; si < d_num_species - 1; si++)
+                                {
+                                    F_x_L.push_back(u_L*(*Z_ptr_L[si]));
+                                }
+                                
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    F_x_R.push_back(u_R*(*Z_rho_ptr_R[si]));
+                                }
+                                F_x_R.push_back(rho_R*u_R*u_R + p_R);
+                                F_x_R.push_back(rho_R*u_R*v_R);
+                                F_x_R.push_back(u_R*(E_R + p_R));
+                                for (int si = 0; si < d_num_species - 1; si++)
+                                {
+                                    F_x_R.push_back(u_R*(*Z_ptr_R[si]));
+                                }
+                                
+                                const double alpha_x_L = fmax(sp_x_L, sp_x_cell);
+                                const double alpha_x_R = fmax(sp_x_R, sp_x_cell);
+                                
+                                for (int ei = 0; ei < d_num_eqn; ei++)
+                                {
+                                    double* F_x = convective_flux_intermediate->getPointer(0, ei);
+                                    F_x[idx_face_x - 1] = 0.5*dt*(F_x_L[ei] + F_x_cell[ei] -
+                                        alpha_x_L*(Q[ei][idx_cell] - Q[ei][idx_cell_L]));
+                                    
+                                    F_x[idx_face_x]     = 0.5*dt*(F_x_cell[ei] + F_x_R[ei] -
+                                        alpha_x_R*(Q[ei][idx_cell_R] - Q[ei][idx_cell]));
+                                }
+                            }
+                            
+                            // Correct the fluxes in the y direction.
+                            {
+                                int idx_cell_B   = (i + d_num_ghosts[0]) +
+                                    (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                int idx_cell_T   = (i + d_num_ghosts[0]) +
+                                    (j + 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                std::vector<const double*> Z_rho_ptr_B;
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Z_rho_ptr_B.push_back(&Q[si][idx_cell_B]);
+                                }
+                                
+                                std::vector<const double*> Z_rho_ptr_T;
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Z_rho_ptr_T.push_back(&Q[si][idx_cell_T]);
+                                }
+                                
+                                const double& rho_B = d_equation_of_state->getTotalDensity(Z_rho_ptr_B);
+                                const double& rho_T = d_equation_of_state->getTotalDensity(Z_rho_ptr_T);
+                                
+                                const double& E_B = Q[d_num_species + d_dim.getValue()][idx_cell_B];
+                                const double& E_T = Q[d_num_species + d_dim.getValue()][idx_cell_T];
+                                
+                                const double u_B = Q[d_num_species][idx_cell_B]/rho_B;
+                                const double u_T = Q[d_num_species][idx_cell_T]/rho_T;
+                                
+                                const double v_B = Q[d_num_species + 1][idx_cell_B]/rho_B;
+                                const double v_T = Q[d_num_species + 1][idx_cell_T]/rho_T;
+                                
+                                std::vector<const double*> m_ptr_B;
+                                for (int di = 0; di < d_dim.getValue(); di++)
+                                {
+                                    m_ptr_B.push_back(&Q[d_num_species + di][idx_cell_B]);
+                                }
+                                
+                                std::vector<const double*> m_ptr_T;
+                                for (int di = 0; di < d_dim.getValue(); di++)
+                                {
+                                    m_ptr_T.push_back(&Q[d_num_species + di][idx_cell_T]);
+                                }
+                                
+                                std::vector<const double*> Z_ptr_B;
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Z_ptr_B.push_back(&Q[1 + d_num_species + d_dim.getValue() + si][idx_cell_B]);
+                                }
+                                
+                                std::vector<const double*> Z_ptr_T;
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Z_ptr_T.push_back(&Q[1 + d_num_species + d_dim.getValue() + si][idx_cell_T]);
+                                }
+                                
+                                const double p_B = d_equation_of_state->getPressureWithVolumeFraction(
+                                    &rho_B,
+                                    m_ptr_B,
+                                    &E_B,
+                                    Z_ptr_B);
+                                
+                                const double p_T = d_equation_of_state->getPressureWithVolumeFraction(
+                                    &rho_T,
+                                    m_ptr_T,
+                                    &E_T,
+                                    Z_ptr_T);
+                                
+                                const double c_B = d_equation_of_state->getSoundSpeedWithVolumeFractionAndPressure(
+                                    &rho_B,
+                                    Z_ptr_B,
+                                    &p_B);
+                                
+                                const double c_T = d_equation_of_state->getSoundSpeedWithVolumeFractionAndPressure(
+                                    &rho_T,
+                                    Z_ptr_T,
+                                    &p_T);
+                                
+                                const double sp_y_B = fabs(v_B) + c_B;
+                                const double sp_y_T = fabs(v_T) + c_T;
+                                
+                                std::vector<double> F_y_cell;
+                                std::vector<double> F_y_B;
+                                std::vector<double> F_y_T;
+                                
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    F_y_cell.push_back(v_cell*(*Z_rho_ptr_cell[si]));
+                                }
+                                F_y_cell.push_back(rho_cell*v_cell*u_cell);
+                                F_y_cell.push_back(rho_cell*v_cell*v_cell + p_cell);
+                                F_y_cell.push_back(v_cell*(E_cell + p_cell));
+                                for (int si = 0; si < d_num_species - 1; si++)
+                                {
+                                    F_y_cell.push_back(v_cell*(*Z_ptr_cell[si]));
+                                }
+                                
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    F_y_B.push_back(v_B*(*Z_rho_ptr_B[si]));
+                                }
+                                F_y_B.push_back(rho_B*v_B*u_B);
+                                F_y_B.push_back(rho_B*v_B*v_B + p_B);
+                                F_y_B.push_back(v_B*(E_B + p_B));
+                                for (int si = 0; si < d_num_species - 1; si++)
+                                {
+                                    F_y_B.push_back(v_B*(*Z_ptr_B[si]));
+                                }
+                                
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    F_y_T.push_back(v_T*(*Z_rho_ptr_T[si]));
+                                }
+                                F_y_T.push_back(rho_T*v_T*u_T);
+                                F_y_T.push_back(rho_T*v_T*v_T + p_T);
+                                F_y_T.push_back(v_T*(E_T + p_T));
+                                for (int si = 0; si < d_num_species - 1; si++)
+                                {
+                                    F_y_T.push_back(v_T*(*Z_ptr_T[si]));
+                                }
+                                
+                                const double alpha_y_B = fmax(sp_y_B, sp_y_cell);
+                                const double alpha_y_T = fmax(sp_y_T, sp_y_cell);
+                                
+                                for (int ei = 0; ei < d_num_eqn; ei++)
+                                {
+                                    double* F_y = convective_flux_intermediate->getPointer(1, ei);
+                                    F_y[idx_face_y - 1] = 0.5*dt*(F_y_B[ei] + F_y_cell[ei] -
+                                        alpha_y_B*(Q[ei][idx_cell] - Q[ei][idx_cell_B]));
+                                    
+                                    F_y[idx_face_y]     = 0.5*dt*(F_y_cell[ei] + F_y_T[ei] -
+                                        alpha_y_T*(Q[ei][idx_cell_T] - Q[ei][idx_cell]));
+                                }
+                            }
+                            
+                            break;
+                        }
+                        default:
+                            TBOX_ERROR(d_object_name
+                                       << ": "
+                                       << "Unknown d_flow_model."
+                                       << std::endl);
+                    }
+                }
+            }
+        }
+    } // if (d_dim == tbox::Dimension(2))
+    else if (d_dim == tbox::Dimension(3))
+    {
+        for (int k = 0; k < interior_dims[2]; k++)
+        {
+            for (int j = 0; j < interior_dims[1]; j++)
+            {
+                for (int i = 0; i < interior_dims[0]; i++)
+                {
+                    // Compute indices of time-dependent data, flux and source.
+                    const int idx_cell = (i + d_num_ghosts[0]) +
+                        (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                    
+                    const int idx_source = i +
+                        j*interior_dims[0] +
+                        k*interior_dims[0]*interior_dims[1];
+                    
+                    const int idx_face_x = (i + 1) +
+                        j*(interior_dims[0] + 1) +
+                        k*(interior_dims[0] + 1)*interior_dims[1];
+                    
+                    const int idx_face_y = (j + 1) +
+                        k*(interior_dims[1] + 1) +
+                        i*(interior_dims[1] + 1)*interior_dims[2];
+                    
+                    const int idx_face_z = (k + 1) +
+                        i*(interior_dims[2] + 1) +
+                        j*(interior_dims[2] + 1)*interior_dims[0];
+                    
+                    for (int ei = 0; ei < d_num_eqn; ei++)
+                    {
+                        double* F_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                        double* F_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
+                        double* F_z_intermediate = convective_flux_intermediate->getPointer(2, ei);
+                        double* S_intermediate = source_intermediate->getPointer(ei);
+                        
+                        Q_tmp[ei] = Q[ei][idx_cell] + beta*
+                            (-(F_x_intermediate[idx_face_x] - F_x_intermediate[idx_face_x - 1])/dx[0] -
+                            (F_y_intermediate[idx_face_y] - F_y_intermediate[idx_face_y - 1])/dx[1] -
+                            (F_z_intermediate[idx_face_z] - F_z_intermediate[idx_face_z - 1])/dx[2] +
+                            S_intermediate[idx_source]);
+                    }
+                    
+                    double rho = 0;
+                    double p   = 0;
+                    
+                    /*
+                     * Check if the density or pressure are negative and if the mass or volume fractions
+                     * are within the bound. If they are, switch to first order hyperbolic flux.
+                     */
+                    
+                    switch (d_flow_model)
+                    {
+                        case SINGLE_SPECIES:
+                        {
+                            std::vector<const double*> m_ptr;
+                            for (int di = 0; di < d_dim.getValue(); di++)
+                            {
+                                m_ptr.push_back(&Q_tmp[1 + di]);
+                            }
+                            
+                            rho = Q_tmp[0];
+                            const double& E = Q_tmp[1 + d_dim.getValue()];
+                            
+                            p = d_equation_of_state->getPressure(
+                                &rho,
+                                m_ptr,
+                                &E);
+                            
+                            break;
+                        }
+                        case FOUR_EQN_SHYUE:
+                        {
+                            std::vector<const double*> m_ptr;
+                            for (int di = 0; di < d_dim.getValue(); di++)
+                            {
+                                m_ptr.push_back(&Q_tmp[1 + di]);
+                            }
+                            
+                            std::vector<const double*> Y_ptr;
+                            for (int si = 0; si < d_num_species - 1; si++)
+                            {
+                                Y_ptr.push_back(&Q_tmp[2 + d_dim.getValue() + si]);
+                            }
+                            
+                            rho = Q_tmp[0];
+                            const double& E = Q_tmp[1 + d_dim.getValue()];
+                            
+                            p = d_equation_of_state->getPressureWithMassFraction(
+                                &rho,
+                                m_ptr,
+                                &E,
+                                Y_ptr);
+                            
+                            break;
+                        }
+                        case FIVE_EQN_ALLAIRE:
+                        {
+                            std::vector<const double*> Z_rho_ptr;
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                Z_rho_ptr.push_back(&Q_tmp[si]);
+                            }
+                            
+                            std::vector<const double*> m_ptr;
+                            for (int di = 0; di < d_dim.getValue(); di++)
+                            {
+                                m_ptr.push_back(&Q_tmp[d_num_species + di]);
+                            }
+                            
+                            std::vector<const double*> Z_ptr;
+                            for (int si = 0; si < d_num_species - 1; si++)
+                            {
+                                Z_ptr.push_back(&Q_tmp[1 + d_num_species + d_dim.getValue() + si]);
+                            }
+                            
+                            rho = d_equation_of_state->getTotalDensity(Z_rho_ptr);
+                            const double& E = Q_tmp[d_num_species + d_dim.getValue()];
+                            
+                            p = d_equation_of_state->getPressureWithVolumeFraction(
+                                &rho,
+                                m_ptr,
+                                &E,
+                                Z_ptr);
+                            
+                            break;
+                        }
+                        default:
+                        TBOX_ERROR(d_object_name
+                                   << ": "
+                                   << "Unknown d_flow_model."
+                                   << std::endl);
+                    }
+                    
+                    bool is_first_order = false;
+                    
+                    // Check if the density or pressure are negative.
+                    
+                    if (rho < 0 || p < 0)
+                    {
+                        is_first_order = true;
+                    }
+                    
+                    // Check if the mass or volume fractions are within the bound.
+                    
+                    switch (d_flow_model)
+                    {
+                        case SINGLE_SPECIES:
+                        {
+                            break;
+                        }
+                        case FOUR_EQN_SHYUE:
+                        {
+                            double Y_last = 1.0;
+                            
+                            for (int si = 0; si < d_num_species - 1; si++)
+                            {
+                                double Y = Q_tmp[2 + d_dim.getValue() + si];
+                                
+                                Y_last -= Y;
+                                
+                                if (Y < Y_bnd_lo || Y > Y_bnd_up)
+                                {
+                                    is_first_order = true;
+                                }
+                            }
+                            
+                            if (Y_last < Y_bnd_lo || Y_last > Y_bnd_up)
+                            {
+                                is_first_order = true;
+                            }
+                            
+                            break;
+                        }
+                        case FIVE_EQN_ALLAIRE:
+                        {
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                double Y = Q_tmp[si]/rho;
+                                
+                                if (Y < Y_bnd_lo || Y > Y_bnd_up)
+                                {
+                                    is_first_order = true;
+                                    break;
+                                }
+                            }
+                            
+                            /*
+                            double Z_last = 1.0;
+                            
+                            for (int si = 0; si < d_num_species - 1; si++)
+                            {
+                                double Z = Q_tmp[1 + d_num_species + d_dim.getValue() + si];
+                                
+                                Z_last -= Z;
+                                
+                                if (Z < Z_bnd_lo || Z > Z_bnd_up)
+                                {
+                                    is_first_order = true;
+                                }
+                            }
+                            
+                            if (Z_last < Z_bnd_lo || Z_last > Z_bnd_up)
+                            {
+                                is_first_order = true;
+                            }
+                            */
+                            
+                            break;
+                        }
+                        default:
+                                TBOX_ERROR(d_object_name
+                                           << ": "
+                                           << "Unknown d_flow_model."
+                                           << std::endl);
+                    }
+                    
+                    // Change the fluxes to first order fluxes if it is needed.
+                    
+                    if (is_first_order)
+                    {
+                        switch (d_flow_model)
+                        {
+                            case SINGLE_SPECIES:
+                            {
+                                const double& rho_cell = Q[0][idx_cell];
+                            
+                                const double& E_cell = Q[1 + d_dim.getValue()][idx_cell];
+                                
+                                const double u_cell = Q[1][idx_cell]/rho_cell;
+                                
+                                const double v_cell = Q[2][idx_cell]/rho_cell;
+                                
+                                const double w_cell = Q[3][idx_cell]/rho_cell;
+                                
+                                std::vector<const double*> m_ptr_cell;
+                                for (int di = 0; di < d_dim.getValue(); di++)
+                                {
+                                    m_ptr_cell.push_back(&Q[1 + di][idx_cell]);
+                                }
+                                
+                                const double p_cell = d_equation_of_state->getPressure(
+                                    &rho_cell,
+                                    m_ptr_cell,
+                                    &E_cell);
+                                
+                                const double c_cell = d_equation_of_state->getSoundSpeedWithPressure(
+                                    &rho_cell,
+                                    &p_cell);
+                                
+                                const double sp_x_cell = fabs(u_cell) + c_cell;
+                                const double sp_y_cell = fabs(v_cell) + c_cell;
+                                const double sp_z_cell = fabs(w_cell) + c_cell;
+                                
+                                // Correct the fluxes in the x direction.
+                                {
+                                    // Compute indices of left and right cells.
+                                    const int idx_cell_L   = (i - 1 + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_cell_R   = (i + 1 + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const double& rho_L = Q[0][idx_cell_L];
+                                    const double& rho_R = Q[0][idx_cell_R];
+                                    
+                                    const double& E_L = Q[1 + d_dim.getValue()][idx_cell_L];
+                                    const double& E_R = Q[1 + d_dim.getValue()][idx_cell_R];
+                                    
+                                    const double u_L = Q[1][idx_cell_L]/rho_L;
+                                    const double u_R = Q[1][idx_cell_R]/rho_R;
+                                    
+                                    const double v_L = Q[2][idx_cell_L]/rho_L;
+                                    const double v_R = Q[2][idx_cell_R]/rho_R;
+                                    
+                                    const double w_L = Q[3][idx_cell_L]/rho_L;
+                                    const double w_R = Q[3][idx_cell_R]/rho_R;
+                                    
+                                    std::vector<const double*> m_ptr_L;
+                                    for (int di = 0; di < d_dim.getValue(); di++)
+                                    {
+                                        m_ptr_L.push_back(&Q[1 + di][idx_cell_L]);
+                                    }
+                                    
+                                    std::vector<const double*> m_ptr_R;
+                                    for (int di = 0; di < d_dim.getValue(); di++)
+                                    {
+                                        m_ptr_R.push_back(&Q[1 + di][idx_cell_R]);
+                                    }
+                                    
+                                    const double p_L = d_equation_of_state->getPressure(
+                                        &rho_L,
+                                        m_ptr_L,
+                                        &E_L);
+                                    
+                                    const double p_R = d_equation_of_state->getPressure(
+                                        &rho_R,
+                                        m_ptr_R,
+                                        &E_R);
+                                    
+                                    const double c_L = d_equation_of_state->getSoundSpeedWithPressure(
+                                        &rho_L,
+                                        &p_L);
+                                    
+                                    const double c_R = d_equation_of_state->getSoundSpeedWithPressure(
+                                        &rho_R,
+                                        &p_R);
+                                    
+                                    const double sp_x_L = fabs(u_L) + c_L;
+                                    const double sp_x_R = fabs(u_R) + c_R;
+                                    
+                                    std::vector<double> F_x_cell;
+                                    std::vector<double> F_x_L;
+                                    std::vector<double> F_x_R;
+                                    
+                                    F_x_cell.push_back(rho_cell*u_cell);
+                                    F_x_cell.push_back(rho_cell*u_cell*u_cell + p_cell);
+                                    F_x_cell.push_back(rho_cell*u_cell*v_cell);
+                                    F_x_cell.push_back(rho_cell*u_cell*w_cell);
+                                    F_x_cell.push_back(u_cell*(E_cell + p_cell));
+                                    
+                                    F_x_L.push_back(rho_L*u_L);
+                                    F_x_L.push_back(rho_L*u_L*u_L + p_L);
+                                    F_x_L.push_back(rho_L*u_L*v_L);
+                                    F_x_L.push_back(rho_L*u_L*w_L);
+                                    F_x_L.push_back(u_L*(E_L + p_L));
+                                    
+                                    F_x_R.push_back(rho_R*u_R);
+                                    F_x_R.push_back(rho_R*u_R*u_R + p_R);
+                                    F_x_R.push_back(rho_R*u_R*v_R);
+                                    F_x_R.push_back(rho_R*u_R*w_R);
+                                    F_x_R.push_back(u_R*(E_R + p_R));
+                                    
+                                    const double alpha_x_L = fmax(sp_x_L, sp_x_cell);
+                                    const double alpha_x_R = fmax(sp_x_R, sp_x_cell);
+                                    
+                                    for (int ei = 0; ei < d_num_eqn; ei++)
+                                    {
+                                        double* F_x = convective_flux_intermediate->getPointer(0, ei);
+                                        F_x[idx_face_x - 1] = 0.5*dt*(F_x_L[ei] + F_x_cell[ei] -
+                                            alpha_x_L*(Q[ei][idx_cell] - Q[ei][idx_cell_L]));
+                                        
+                                        F_x[idx_face_x]     = 0.5*dt*(F_x_cell[ei] + F_x_R[ei] -
+                                            alpha_x_R*(Q[ei][idx_cell_R] - Q[ei][idx_cell]));
+                                    }
+                                }
+                                
+                                // Correct the fluxes in the y direction.
+                                {
+                                    const int idx_cell_B   = (i + d_num_ghosts[0]) +
+                                        (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_cell_T   = (i + d_num_ghosts[0]) +
+                                        (j + 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const double& rho_B = Q[0][idx_cell_B];
+                                    const double& rho_T = Q[0][idx_cell_T];
+                                    
+                                    const double& E_B = Q[1 + d_dim.getValue()][idx_cell_B];
+                                    const double& E_T = Q[1 + d_dim.getValue()][idx_cell_T];
+                                    
+                                    const double u_B = Q[1][idx_cell_B]/rho_B;
+                                    const double u_T = Q[1][idx_cell_T]/rho_T;
+                                    
+                                    const double v_B = Q[2][idx_cell_B]/rho_B;
+                                    const double v_T = Q[2][idx_cell_T]/rho_T;
+                                    
+                                    const double w_B = Q[3][idx_cell_B]/rho_B;
+                                    const double w_T = Q[3][idx_cell_T]/rho_T;
+                                    
+                                    std::vector<const double*> m_ptr_B;
+                                    for (int di = 0; di < d_dim.getValue(); di++)
+                                    {
+                                        m_ptr_B.push_back(&Q[1 + di][idx_cell_B]);
+                                    }
+                                    
+                                    std::vector<const double*> m_ptr_T;
+                                    for (int di = 0; di < d_dim.getValue(); di++)
+                                    {
+                                        m_ptr_T.push_back(&Q[1 + di][idx_cell_T]);
+                                    }
+                                    
+                                    const double p_B = d_equation_of_state->getPressure(
+                                        &rho_B,
+                                        m_ptr_B,
+                                        &E_B);
+                                    
+                                    const double p_T = d_equation_of_state->getPressure(
+                                        &rho_T,
+                                        m_ptr_T,
+                                        &E_T);
+                                    
+                                    const double c_B = d_equation_of_state->getSoundSpeedWithPressure(
+                                        &rho_B,
+                                        &p_B);
+                                    
+                                    const double c_T = d_equation_of_state->getSoundSpeedWithPressure(
+                                        &rho_T,
+                                        &p_T);
+                                    
+                                    const double sp_y_B = fabs(v_B) + c_B;
+                                    const double sp_y_T = fabs(v_T) + c_T;
+                                    
+                                    std::vector<double> F_y_cell;
+                                    std::vector<double> F_y_B;
+                                    std::vector<double> F_y_T;
+                                    
+                                    F_y_cell.push_back(rho_cell*v_cell);
+                                    F_y_cell.push_back(rho_cell*v_cell*u_cell);
+                                    F_y_cell.push_back(rho_cell*v_cell*v_cell + p_cell);
+                                    F_y_cell.push_back(rho_cell*v_cell*w_cell);
+                                    F_y_cell.push_back(v_cell*(E_cell + p_cell));
+                                    
+                                    F_y_B.push_back(rho_B*v_B);
+                                    F_y_B.push_back(rho_B*v_B*u_B);
+                                    F_y_B.push_back(rho_B*v_B*v_B + p_B);
+                                    F_y_B.push_back(rho_B*v_B*w_B);
+                                    F_y_B.push_back(v_B*(E_B + p_B));
+                                    
+                                    F_y_T.push_back(rho_T*v_T);
+                                    F_y_T.push_back(rho_T*v_T*u_T);
+                                    F_y_T.push_back(rho_T*v_T*v_T + p_T);
+                                    F_y_T.push_back(rho_T*v_T*w_T);
+                                    F_y_T.push_back(v_T*(E_T + p_T));
+                                    
+                                    const double alpha_y_B = fmax(sp_y_B, sp_y_cell);
+                                    const double alpha_y_T = fmax(sp_y_T, sp_y_cell);
+                                    
+                                    for (int ei = 0; ei < d_num_eqn; ei++)
+                                    {
+                                        double* F_y = convective_flux_intermediate->getPointer(1, ei);
+                                        F_y[idx_face_y - 1] = 0.5*dt*(F_y_B[ei] + F_y_cell[ei] -
+                                            alpha_y_B*(Q[ei][idx_cell] - Q[ei][idx_cell_B]));
+                                        
+                                        F_y[idx_face_y]     = 0.5*dt*(F_y_cell[ei] + F_y_T[ei] -
+                                            alpha_y_T*(Q[ei][idx_cell_T] - Q[ei][idx_cell]));
+                                    }
+                                }
+                                
+                                // Correct the fluxes in the z direction.
+                                {
+                                    const int idx_cell_B   = (i + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k - 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_cell_F   = (i + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const double& rho_B = Q[0][idx_cell_B];
+                                    const double& rho_F = Q[0][idx_cell_F];
+                                    
+                                    const double& E_B = Q[1 + d_dim.getValue()][idx_cell_B];
+                                    const double& E_F = Q[1 + d_dim.getValue()][idx_cell_F];
+                                    
+                                    const double u_B = Q[1][idx_cell_B]/rho_B;
+                                    const double u_F = Q[1][idx_cell_F]/rho_F;
+                                    
+                                    const double v_B = Q[2][idx_cell_B]/rho_B;
+                                    const double v_F = Q[2][idx_cell_F]/rho_F;
+                                    
+                                    const double w_B = Q[3][idx_cell_B]/rho_B;
+                                    const double w_F = Q[3][idx_cell_F]/rho_F;
+                                    
+                                    std::vector<const double*> m_ptr_B;
+                                    for (int di = 0; di < d_dim.getValue(); di++)
+                                    {
+                                        m_ptr_B.push_back(&Q[1 + di][idx_cell_B]);
+                                    }
+                                    
+                                    std::vector<const double*> m_ptr_F;
+                                    for (int di = 0; di < d_dim.getValue(); di++)
+                                    {
+                                        m_ptr_F.push_back(&Q[1 + di][idx_cell_F]);
+                                    }
+                                    
+                                    const double p_B = d_equation_of_state->getPressure(
+                                        &rho_B,
+                                        m_ptr_B,
+                                        &E_B);
+                                    
+                                    const double p_F = d_equation_of_state->getPressure(
+                                        &rho_F,
+                                        m_ptr_F,
+                                        &E_F);
+                                    
+                                    const double c_B = d_equation_of_state->getSoundSpeedWithPressure(
+                                        &rho_B,
+                                        &p_B);
+                                    
+                                    const double c_F = d_equation_of_state->getSoundSpeedWithPressure(
+                                        &rho_F,
+                                        &p_F);
+                                    
+                                    const double sp_z_B = fabs(w_B) + c_B;
+                                    const double sp_z_F = fabs(w_F) + c_F;
+                                    
+                                    std::vector<double> F_z_cell;
+                                    std::vector<double> F_z_B;
+                                    std::vector<double> F_z_F;
+                                    
+                                    F_z_cell.push_back(rho_cell*w_cell);
+                                    F_z_cell.push_back(rho_cell*w_cell*u_cell);
+                                    F_z_cell.push_back(rho_cell*w_cell*v_cell);
+                                    F_z_cell.push_back(rho_cell*w_cell*w_cell + p_cell);
+                                    F_z_cell.push_back(w_cell*(E_cell + p_cell));
+                                    
+                                    F_z_B.push_back(rho_B*w_B);
+                                    F_z_B.push_back(rho_B*w_B*u_B);
+                                    F_z_B.push_back(rho_B*w_B*v_B);
+                                    F_z_B.push_back(rho_B*w_B*w_B + p_B);
+                                    F_z_B.push_back(w_B*(E_B + p_B));
+                                    
+                                    F_z_F.push_back(rho_F*w_F);
+                                    F_z_F.push_back(rho_F*w_F*u_F);
+                                    F_z_F.push_back(rho_F*w_F*v_F);
+                                    F_z_F.push_back(rho_F*w_F*w_F + p_F);
+                                    F_z_F.push_back(w_F*(E_F + p_F));
+                                    
+                                    const double alpha_z_B = fmax(sp_z_B, sp_z_cell);
+                                    const double alpha_z_F = fmax(sp_z_F, sp_z_cell);
+                                    
+                                    for (int ei = 0; ei < d_num_eqn; ei++)
+                                    {
+                                        double* F_z = convective_flux_intermediate->getPointer(2, ei);
+                                        F_z[idx_face_z - 1] = 0.5*dt*(F_z_B[ei] + F_z_cell[ei] -
+                                            alpha_z_B*(Q[ei][idx_cell] - Q[ei][idx_cell_B]));
+                                        
+                                        F_z[idx_face_z]     = 0.5*dt*(F_z_cell[ei] + F_z_F[ei] -
+                                            alpha_z_F*(Q[ei][idx_cell_F] - Q[ei][idx_cell]));
+                                    }
+                                }
+                                
+                                break;
+                            }
+                            case FOUR_EQN_SHYUE:
+                            {
+                                const double& rho_cell = Q[0][idx_cell];
+                                
+                                const double& E_cell = Q[1 + d_dim.getValue()][idx_cell];
+                                
+                                const double u_cell = Q[1][idx_cell]/rho_cell;
+                                
+                                const double v_cell = Q[2][idx_cell]/rho_cell;
+                                
+                                const double w_cell = Q[3][idx_cell]/rho_cell;
+                                
+                                std::vector<const double*> m_ptr_cell;
+                                for (int di = 0; di < d_dim.getValue(); di++)
+                                {
+                                    m_ptr_cell.push_back(&Q[1 + di][idx_cell]);
+                                }
+                                
+                                std::vector<const double*> Y_ptr_cell;
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_ptr_cell.push_back(&Q[2 + d_dim.getValue() + si][idx_cell]);
+                                }
+                                
+                                const double p_cell = d_equation_of_state->getPressureWithMassFraction(
+                                    &rho_cell,
+                                    m_ptr_cell,
+                                    &E_cell,
+                                    Y_ptr_cell);
+                                
+                                const double c_cell = d_equation_of_state->getSoundSpeedWithMassFractionAndPressure(
+                                    &rho_cell,
+                                    Y_ptr_cell,
+                                    &p_cell);
+                                
+                                const double sp_x_cell = fabs(u_cell) + c_cell;
+                                const double sp_y_cell = fabs(v_cell) + c_cell;
+                                const double sp_z_cell = fabs(w_cell) + c_cell;
+                                
+                                // Correct the fluxes in the x direction.
+                                {
+                                    // Compute indices of left and right cells.
+                                    const int idx_cell_L   = (i - 1 + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_cell_R   = (i + 1 + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const double& rho_L = Q[0][idx_cell_L];
+                                    const double& rho_R = Q[0][idx_cell_R];
+                                    
+                                    const double& E_L = Q[1 + d_dim.getValue()][idx_cell_L];
+                                    const double& E_R = Q[1 + d_dim.getValue()][idx_cell_R];
+                                    
+                                    const double u_L = Q[1][idx_cell_L]/rho_L;
+                                    const double u_R = Q[1][idx_cell_R]/rho_R;
+                                    
+                                    const double v_L = Q[2][idx_cell_L]/rho_L;
+                                    const double v_R = Q[2][idx_cell_R]/rho_R;
+                                    
+                                    const double w_L = Q[3][idx_cell_L]/rho_L;
+                                    const double w_R = Q[3][idx_cell_R]/rho_R;
+                                    
+                                    std::vector<const double*> m_ptr_L;
+                                    for (int di = 0; di < d_dim.getValue(); di++)
+                                    {
+                                        m_ptr_L.push_back(&Q[1 + di][idx_cell_L]);
+                                    }
+                                    
+                                    std::vector<const double*> m_ptr_R;
+                                    for (int di = 0; di < d_dim.getValue(); di++)
+                                    {
+                                        m_ptr_R.push_back(&Q[1 + di][idx_cell_R]);
+                                    }
+                                    
+                                    std::vector<const double*> Y_ptr_L;
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Y_ptr_L.push_back(&Q[2 + d_dim.getValue() + si][idx_cell_L]);
+                                    }
+                                    
+                                    std::vector<const double*> Y_ptr_R;
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Y_ptr_R.push_back(&Q[2 + d_dim.getValue() + si][idx_cell_R]);
+                                    }
+                                    
+                                    const double p_L = d_equation_of_state->getPressureWithMassFraction(
+                                        &rho_L,
+                                        m_ptr_L,
+                                        &E_L,
+                                        Y_ptr_L);
+                                    
+                                    const double p_R = d_equation_of_state->getPressureWithMassFraction(
+                                        &rho_R,
+                                        m_ptr_R,
+                                        &E_R,
+                                        Y_ptr_R);
+                                    
+                                    const double c_L = d_equation_of_state->getSoundSpeedWithMassFractionAndPressure(
+                                        &rho_L,
+                                        Y_ptr_L,
+                                        &p_L);
+                                    
+                                    const double c_R = d_equation_of_state->getSoundSpeedWithMassFractionAndPressure(
+                                        &rho_R,
+                                        Y_ptr_R,
+                                        &p_R);
+                                    
+                                    const double sp_x_L = fabs(u_L) + c_L;
+                                    const double sp_x_R = fabs(u_R) + c_R;
+                                    
+                                    std::vector<double> F_x_cell;
+                                    std::vector<double> F_x_L;
+                                    std::vector<double> F_x_R;
+                                    
+                                    F_x_cell.push_back(rho_cell*u_cell);
+                                    F_x_cell.push_back(rho_cell*u_cell*u_cell + p_cell);
+                                    F_x_cell.push_back(rho_cell*u_cell*v_cell);
+                                    F_x_cell.push_back(rho_cell*u_cell*w_cell);
+                                    F_x_cell.push_back(u_cell*(E_cell + p_cell));
+                                    for (int si = 0; si < d_num_species - 1; si++)
+                                    {
+                                        F_x_cell.push_back(u_cell*(*Y_ptr_cell[si]));
+                                    }
+                                    
+                                    F_x_L.push_back(rho_L*u_L);
+                                    F_x_L.push_back(rho_L*u_L*u_L + p_L);
+                                    F_x_L.push_back(rho_L*u_L*v_L);
+                                    F_x_L.push_back(rho_L*u_L*w_L);
+                                    F_x_L.push_back(u_L*(E_L + p_L));
+                                    for (int si = 0; si < d_num_species - 1; si++)
+                                    {
+                                        F_x_L.push_back(u_L*(*Y_ptr_L[si]));
+                                    }
+                                    
+                                    F_x_R.push_back(rho_R*u_R);
+                                    F_x_R.push_back(rho_R*u_R*u_R + p_R);
+                                    F_x_R.push_back(rho_R*u_R*v_R);
+                                    F_x_R.push_back(rho_R*u_R*w_R);
+                                    F_x_R.push_back(u_R*(E_R + p_R));
+                                    for (int si = 0; si < d_num_species - 1; si++)
+                                    {
+                                        F_x_R.push_back(u_R*(*Y_ptr_R[si]));
+                                    }
+                                    
+                                    const double alpha_x_L = fmax(sp_x_L, sp_x_cell);
+                                    const double alpha_x_R = fmax(sp_x_R, sp_x_cell);
+                                    
+                                    for (int ei = 0; ei < d_num_eqn; ei++)
+                                    {
+                                        double* F_x = convective_flux_intermediate->getPointer(0, ei);
+                                        F_x[idx_face_x - 1] = 0.5*dt*(F_x_L[ei] + F_x_cell[ei] -
+                                            alpha_x_L*(Q[ei][idx_cell] - Q[ei][idx_cell_L]));
+                                        
+                                        F_x[idx_face_x]     = 0.5*dt*(F_x_cell[ei] + F_x_R[ei] -
+                                            alpha_x_R*(Q[ei][idx_cell_R] - Q[ei][idx_cell]));
+                                    }
+                                }
+                                
+                                // Correct the fluxes in the y direction.
+                                {
+                                    const int idx_cell_B   = (i + d_num_ghosts[0]) +
+                                        (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_cell_T   = (i + d_num_ghosts[0]) +
+                                        (j + 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const double& rho_B = Q[0][idx_cell_B];
+                                    const double& rho_T = Q[0][idx_cell_T];
+                                    
+                                    const double& E_B = Q[1 + d_dim.getValue()][idx_cell_B];
+                                    const double& E_T = Q[1 + d_dim.getValue()][idx_cell_T];
+                                    
+                                    const double u_B = Q[1][idx_cell_B]/rho_B;
+                                    const double u_T = Q[1][idx_cell_T]/rho_T;
+                                    
+                                    const double v_B = Q[2][idx_cell_B]/rho_B;
+                                    const double v_T = Q[2][idx_cell_T]/rho_T;
+                                    
+                                    const double w_B = Q[3][idx_cell_B]/rho_B;
+                                    const double w_T = Q[3][idx_cell_T]/rho_T;
+                                    
+                                    std::vector<const double*> m_ptr_B;
+                                    for (int di = 0; di < d_dim.getValue(); di++)
+                                    {
+                                        m_ptr_B.push_back(&Q[1 + di][idx_cell_B]);
+                                    }
+                                    
+                                    std::vector<const double*> m_ptr_T;
+                                    for (int di = 0; di < d_dim.getValue(); di++)
+                                    {
+                                        m_ptr_T.push_back(&Q[1 + di][idx_cell_T]);
+                                    }
+                                    
+                                    std::vector<const double*> Y_ptr_B;
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Y_ptr_B.push_back(&Q[2 + d_dim.getValue() + si][idx_cell_B]);
+                                    }
+                                    
+                                    std::vector<const double*> Y_ptr_T;
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Y_ptr_T.push_back(&Q[2 + d_dim.getValue() + si][idx_cell_T]);
+                                    }
+                                    
+                                    const double p_B = d_equation_of_state->getPressureWithMassFraction(
+                                        &rho_B,
+                                        m_ptr_B,
+                                        &E_B,
+                                        Y_ptr_B);
+                                    
+                                    const double p_T = d_equation_of_state->getPressureWithMassFraction(
+                                        &rho_T,
+                                        m_ptr_T,
+                                        &E_T,
+                                        Y_ptr_T);
+                                    
+                                    const double c_B = d_equation_of_state->getSoundSpeedWithMassFractionAndPressure(
+                                        &rho_B,
+                                        Y_ptr_B,
+                                        &p_B);
+                                    
+                                    const double c_T = d_equation_of_state->getSoundSpeedWithMassFractionAndPressure(
+                                        &rho_T,
+                                        Y_ptr_T,
+                                        &p_T);
+                                    
+                                    const double sp_y_B = fabs(v_B) + c_B;
+                                    const double sp_y_T = fabs(v_T) + c_T;
+                                    
+                                    std::vector<double> F_y_cell;
+                                    std::vector<double> F_y_B;
+                                    std::vector<double> F_y_T;
+                                    
+                                    F_y_cell.push_back(rho_cell*v_cell);
+                                    F_y_cell.push_back(rho_cell*v_cell*u_cell);
+                                    F_y_cell.push_back(rho_cell*v_cell*v_cell + p_cell);
+                                    F_y_cell.push_back(rho_cell*v_cell*w_cell);
+                                    F_y_cell.push_back(v_cell*(E_cell + p_cell));
+                                    for (int si = 0; si < d_num_species - 1; si++)
+                                    {
+                                        F_y_cell.push_back(v_cell*(*Y_ptr_cell[si]));
+                                    }
+                                    
+                                    F_y_B.push_back(rho_B*v_B);
+                                    F_y_B.push_back(rho_B*v_B*u_B);
+                                    F_y_B.push_back(rho_B*v_B*v_B + p_B);
+                                    F_y_B.push_back(rho_B*v_B*w_B);
+                                    F_y_B.push_back(v_B*(E_B + p_B));
+                                    for (int si = 0; si < d_num_species - 1; si++)
+                                    {
+                                        F_y_B.push_back(v_B*(*Y_ptr_B[si]));
+                                    }
+                                    
+                                    F_y_T.push_back(rho_T*v_T);
+                                    F_y_T.push_back(rho_T*v_T*u_T);
+                                    F_y_T.push_back(rho_T*v_T*v_T + p_T);
+                                    F_y_T.push_back(rho_T*v_T*w_T);
+                                    F_y_T.push_back(v_T*(E_T + p_T));
+                                    for (int si = 0; si < d_num_species - 1; si++)
+                                    {
+                                        F_y_T.push_back(v_T*(*Y_ptr_T[si]));
+                                    }
+                                    
+                                    const double alpha_y_B = fmax(sp_y_B, sp_y_cell);
+                                    const double alpha_y_T = fmax(sp_y_T, sp_y_cell);
+                                    
+                                    for (int ei = 0; ei < d_num_eqn; ei++)
+                                    {
+                                        double* F_y = convective_flux_intermediate->getPointer(1, ei);
+                                        F_y[idx_face_y - 1] = 0.5*dt*(F_y_B[ei] + F_y_cell[ei] -
+                                            alpha_y_B*(Q[ei][idx_cell] - Q[ei][idx_cell_B]));
+                                        
+                                        F_y[idx_face_y]     = 0.5*dt*(F_y_cell[ei] + F_y_T[ei] -
+                                            alpha_y_T*(Q[ei][idx_cell_T] - Q[ei][idx_cell]));
+                                    }
+                                }
+                                
+                                // Correct the fluxes in the z direction.
+                                {
+                                    const int idx_cell_B   = (i + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k - 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_cell_F   = (i + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const double& rho_B = Q[0][idx_cell_B];
+                                    const double& rho_F = Q[0][idx_cell_F];
+                                    
+                                    const double& E_B = Q[1 + d_dim.getValue()][idx_cell_B];
+                                    const double& E_F = Q[1 + d_dim.getValue()][idx_cell_F];
+                                    
+                                    const double u_B = Q[1][idx_cell_B]/rho_B;
+                                    const double u_F = Q[1][idx_cell_F]/rho_F;
+                                    
+                                    const double v_B = Q[2][idx_cell_B]/rho_B;
+                                    const double v_F = Q[2][idx_cell_F]/rho_F;
+                                    
+                                    const double w_B = Q[3][idx_cell_B]/rho_B;
+                                    const double w_F = Q[3][idx_cell_F]/rho_F;
+                                    
+                                    std::vector<const double*> m_ptr_B;
+                                    for (int di = 0; di < d_dim.getValue(); di++)
+                                    {
+                                        m_ptr_B.push_back(&Q[1 + di][idx_cell_B]);
+                                    }
+                                    
+                                    std::vector<const double*> m_ptr_F;
+                                    for (int di = 0; di < d_dim.getValue(); di++)
+                                    {
+                                        m_ptr_F.push_back(&Q[1 + di][idx_cell_F]);
+                                    }
+                                    
+                                    std::vector<const double*> Y_ptr_B;
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Y_ptr_B.push_back(&Q[2 + d_dim.getValue() + si][idx_cell_B]);
+                                    }
+                                    
+                                    std::vector<const double*> Y_ptr_F;
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Y_ptr_F.push_back(&Q[2 + d_dim.getValue() + si][idx_cell_F]);
+                                    }
+                                    
+                                    const double p_B = d_equation_of_state->getPressureWithMassFraction(
+                                        &rho_B,
+                                        m_ptr_B,
+                                        &E_B,
+                                        Y_ptr_B);
+                                    
+                                    const double p_F = d_equation_of_state->getPressureWithMassFraction(
+                                        &rho_F,
+                                        m_ptr_F,
+                                        &E_F,
+                                        Y_ptr_F);
+                                    
+                                    const double c_B = d_equation_of_state->getSoundSpeedWithMassFractionAndPressure(
+                                        &rho_B,
+                                        Y_ptr_B,
+                                        &p_B);
+                                    
+                                    const double c_F = d_equation_of_state->getSoundSpeedWithMassFractionAndPressure(
+                                        &rho_F,
+                                        Y_ptr_F,
+                                        &p_F);
+                                    
+                                    const double sp_z_B = fabs(w_B) + c_B;
+                                    const double sp_z_F = fabs(w_F) + c_F;
+                                    
+                                    std::vector<double> F_z_cell;
+                                    std::vector<double> F_z_B;
+                                    std::vector<double> F_z_F;
+                                    
+                                    F_z_cell.push_back(rho_cell*w_cell);
+                                    F_z_cell.push_back(rho_cell*w_cell*u_cell);
+                                    F_z_cell.push_back(rho_cell*w_cell*v_cell);
+                                    F_z_cell.push_back(rho_cell*w_cell*w_cell + p_cell);
+                                    F_z_cell.push_back(w_cell*(E_cell + p_cell));
+                                    for (int si = 0; si < d_num_species - 1; si++)
+                                    {
+                                        F_z_cell.push_back(w_cell*(*Y_ptr_cell[si]));
+                                    }
+                                    
+                                    F_z_B.push_back(rho_B*w_B);
+                                    F_z_B.push_back(rho_B*w_B*u_B);
+                                    F_z_B.push_back(rho_B*w_B*v_B);
+                                    F_z_B.push_back(rho_B*w_B*w_B + p_B);
+                                    F_z_B.push_back(w_B*(E_B + p_B));
+                                    for (int si = 0; si < d_num_species - 1; si++)
+                                    {
+                                        F_z_B.push_back(w_B*(*Y_ptr_B[si]));
+                                    }
+                                    
+                                    F_z_F.push_back(rho_F*w_F);
+                                    F_z_F.push_back(rho_F*w_F*u_F);
+                                    F_z_F.push_back(rho_F*w_F*v_F);
+                                    F_z_F.push_back(rho_F*w_F*w_F + p_F);
+                                    F_z_F.push_back(w_F*(E_F + p_F));
+                                    for (int si = 0; si < d_num_species - 1; si++)
+                                    {
+                                        F_z_F.push_back(w_F*(*Y_ptr_F[si]));
+                                    }
+                                    
+                                    const double alpha_z_B = fmax(sp_z_B, sp_z_cell);
+                                    const double alpha_z_F = fmax(sp_z_F, sp_z_cell);
+                                    
+                                    for (int ei = 0; ei < d_num_eqn; ei++)
+                                    {
+                                        double* F_z = convective_flux_intermediate->getPointer(2, ei);
+                                        F_z[idx_face_z - 1] = 0.5*dt*(F_z_B[ei] + F_z_cell[ei] -
+                                            alpha_z_B*(Q[ei][idx_cell] - Q[ei][idx_cell_B]));
+                                        
+                                        F_z[idx_face_z]     = 0.5*dt*(F_z_cell[ei] + F_z_F[ei] -
+                                            alpha_z_F*(Q[ei][idx_cell_F] - Q[ei][idx_cell]));
+                                    }
+                                }
+                                
+                                break;
+                            }
+                            case FIVE_EQN_ALLAIRE:
+                            {
+                                std::vector<const double*> Z_rho_ptr_cell;
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Z_rho_ptr_cell.push_back(&Q[si][idx_cell]);
+                                }
+                                
+                                const double rho_cell = d_equation_of_state->getTotalDensity(Z_rho_ptr_cell);
+                                
+                                const double& E_cell = Q[d_num_species + d_dim.getValue()][idx_cell];
+                                
+                                const double u_cell = Q[d_num_species][idx_cell]/rho_cell;
+                                
+                                const double v_cell = Q[d_num_species + 1][idx_cell]/rho_cell;
+                                
+                                const double w_cell = Q[d_num_species + 2][idx_cell]/rho_cell;
+                                
+                                std::vector<const double*> m_ptr_cell;
+                                for (int di = 0; di < d_dim.getValue(); di++)
+                                {
+                                    m_ptr_cell.push_back(&Q[d_num_species + di][idx_cell]);
+                                }
+                                
+                                std::vector<const double*> Z_ptr_cell;
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Z_ptr_cell.push_back(&Q[1 + d_num_species + d_dim.getValue() + si][idx_cell]);
+                                }
+                                
+                                const double p_cell = d_equation_of_state->getPressureWithVolumeFraction(
+                                    &rho_cell,
+                                    m_ptr_cell,
+                                    &E_cell,
+                                    Z_ptr_cell);
+                                
+                                const double c_cell = d_equation_of_state->getSoundSpeedWithVolumeFractionAndPressure(
+                                    &rho_cell,
+                                    Z_ptr_cell,
+                                    &p_cell);
+                                
+                                const double sp_x_cell = fabs(u_cell) + c_cell;
+                                const double sp_y_cell = fabs(v_cell) + c_cell;
+                                const double sp_z_cell = fabs(w_cell) + c_cell;
+                                
+                                // Correct the fluxes in the x direction.
+                                {
+                                    // Compute indices of left and right cells.
+                                    const int idx_cell_L   = (i - 1 + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_cell_R   = (i + 1 + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    std::vector<const double*> Z_rho_ptr_L;
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Z_rho_ptr_L.push_back(&Q[si][idx_cell_L]);
+                                    }
+                                    
+                                    std::vector<const double*> Z_rho_ptr_R;
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Z_rho_ptr_R.push_back(&Q[si][idx_cell_R]);
+                                    }
+                                    
+                                    const double& rho_L = d_equation_of_state->getTotalDensity(Z_rho_ptr_L);
+                                    const double& rho_R = d_equation_of_state->getTotalDensity(Z_rho_ptr_R);
+                                    
+                                    const double& E_L = Q[d_num_species + d_dim.getValue()][idx_cell_L];
+                                    const double& E_R = Q[d_num_species + d_dim.getValue()][idx_cell_R];
+                                    
+                                    const double u_L = Q[d_num_species][idx_cell_L]/rho_L;
+                                    const double u_R = Q[d_num_species][idx_cell_R]/rho_R;
+                                    
+                                    const double v_L = Q[d_num_species + 1][idx_cell_L]/rho_L;
+                                    const double v_R = Q[d_num_species + 1][idx_cell_R]/rho_R;
+                                    
+                                    const double w_L = Q[d_num_species + 2][idx_cell_L]/rho_L;
+                                    const double w_R = Q[d_num_species + 2][idx_cell_R]/rho_R;
+                                    
+                                    std::vector<const double*> m_ptr_L;
+                                    for (int di = 0; di < d_dim.getValue(); di++)
+                                    {
+                                        m_ptr_L.push_back(&Q[d_num_species + di][idx_cell_L]);
+                                    }
+                                    
+                                    std::vector<const double*> m_ptr_R;
+                                    for (int di = 0; di < d_dim.getValue(); di++)
+                                    {
+                                        m_ptr_R.push_back(&Q[d_num_species + di][idx_cell_R]);
+                                    }
+                                    
+                                    std::vector<const double*> Z_ptr_L;
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Z_ptr_L.push_back(&Q[1 + d_num_species + d_dim.getValue() + si][idx_cell_L]);
+                                    }
+                                    
+                                    std::vector<const double*> Z_ptr_R;
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Z_ptr_R.push_back(&Q[1 + d_num_species + d_dim.getValue() + si][idx_cell_R]);
+                                    }
+                                    
+                                    const double p_L = d_equation_of_state->getPressureWithVolumeFraction(
+                                        &rho_L,
+                                        m_ptr_L,
+                                        &E_L,
+                                        Z_ptr_L);
+                                    
+                                    const double p_R = d_equation_of_state->getPressureWithVolumeFraction(
+                                        &rho_R,
+                                        m_ptr_R,
+                                        &E_R,
+                                        Z_ptr_R);
+                                    
+                                    const double c_L = d_equation_of_state->getSoundSpeedWithVolumeFractionAndPressure(
+                                        &rho_L,
+                                        Z_ptr_L,
+                                        &p_L);
+                                    
+                                    const double c_R = d_equation_of_state->getSoundSpeedWithVolumeFractionAndPressure(
+                                        &rho_R,
+                                        Z_ptr_R,
+                                        &p_R);
+                                    
+                                    const double sp_x_L = fabs(u_L) + c_L;
+                                    const double sp_x_R = fabs(u_R) + c_R;
+                                    
+                                    std::vector<double> F_x_cell;
+                                    std::vector<double> F_x_L;
+                                    std::vector<double> F_x_R;
+                                    
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        F_x_cell.push_back(u_cell*(*Z_rho_ptr_cell[si]));
+                                    }
+                                    F_x_cell.push_back(rho_cell*u_cell*u_cell + p_cell);
+                                    F_x_cell.push_back(rho_cell*u_cell*v_cell);
+                                    F_x_cell.push_back(rho_cell*u_cell*w_cell);
+                                    F_x_cell.push_back(u_cell*(E_cell + p_cell));
+                                    for (int si = 0; si < d_num_species - 1; si++)
+                                    {
+                                        F_x_cell.push_back(u_cell*(*Z_ptr_cell[si]));
+                                    }
+                                    
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        F_x_L.push_back(u_L*(*Z_rho_ptr_L[si]));
+                                    }
+                                    F_x_L.push_back(rho_L*u_L*u_L + p_L);
+                                    F_x_L.push_back(rho_L*u_L*v_L);
+                                    F_x_L.push_back(rho_L*u_L*w_L);
+                                    F_x_L.push_back(u_L*(E_L + p_L));
+                                    for (int si = 0; si < d_num_species - 1; si++)
+                                    {
+                                        F_x_L.push_back(u_L*(*Z_ptr_L[si]));
+                                    }
+                                    
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        F_x_R.push_back(u_R*(*Z_rho_ptr_R[si]));
+                                    }
+                                    F_x_R.push_back(rho_R*u_R*u_R + p_R);
+                                    F_x_R.push_back(rho_R*u_R*v_R);
+                                    F_x_R.push_back(rho_R*u_R*w_R);
+                                    F_x_R.push_back(u_R*(E_R + p_R));
+                                    for (int si = 0; si < d_num_species - 1; si++)
+                                    {
+                                        F_x_R.push_back(u_R*(*Z_ptr_R[si]));
+                                    }
+                                    
+                                    const double alpha_x_L = fmax(sp_x_L, sp_x_cell);
+                                    const double alpha_x_R = fmax(sp_x_R, sp_x_cell);
+                                    
+                                    for (int ei = 0; ei < d_num_eqn; ei++)
+                                    {
+                                        double* F_x = convective_flux_intermediate->getPointer(0, ei);
+                                        F_x[idx_face_x - 1] = 0.5*dt*(F_x_L[ei] + F_x_cell[ei] -
+                                            alpha_x_L*(Q[ei][idx_cell] - Q[ei][idx_cell_L]));
+                                        
+                                        F_x[idx_face_x]     = 0.5*dt*(F_x_cell[ei] + F_x_R[ei] -
+                                            alpha_x_R*(Q[ei][idx_cell_R] - Q[ei][idx_cell]));
+                                    }
+                                }
+                                
+                                // Correct the fluxes in the y direction.
+                                {
+                                    const int idx_cell_B   = (i + d_num_ghosts[0]) +
+                                        (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_cell_T   = (i + d_num_ghosts[0]) +
+                                        (j + 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    std::vector<const double*> Z_rho_ptr_B;
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Z_rho_ptr_B.push_back(&Q[si][idx_cell_B]);
+                                    }
+                                    
+                                    std::vector<const double*> Z_rho_ptr_T;
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Z_rho_ptr_T.push_back(&Q[si][idx_cell_T]);
+                                    }
+                                    
+                                    const double& rho_B = d_equation_of_state->getTotalDensity(Z_rho_ptr_B);
+                                    const double& rho_T = d_equation_of_state->getTotalDensity(Z_rho_ptr_T);
+                                    
+                                    const double& E_B = Q[d_num_species + d_dim.getValue()][idx_cell_B];
+                                    const double& E_T = Q[d_num_species + d_dim.getValue()][idx_cell_T];
+                                    
+                                    const double u_B = Q[d_num_species][idx_cell_B]/rho_B;
+                                    const double u_T = Q[d_num_species][idx_cell_T]/rho_T;
+                                    
+                                    const double v_B = Q[d_num_species + 1][idx_cell_B]/rho_B;
+                                    const double v_T = Q[d_num_species + 1][idx_cell_T]/rho_T;
+                                    
+                                    const double w_B = Q[d_num_species + 2][idx_cell_B]/rho_B;
+                                    const double w_T = Q[d_num_species + 2][idx_cell_T]/rho_T;
+                                    
+                                    std::vector<const double*> m_ptr_B;
+                                    for (int di = 0; di < d_dim.getValue(); di++)
+                                    {
+                                        m_ptr_B.push_back(&Q[d_num_species + di][idx_cell_B]);
+                                    }
+                                    
+                                    std::vector<const double*> m_ptr_T;
+                                    for (int di = 0; di < d_dim.getValue(); di++)
+                                    {
+                                        m_ptr_T.push_back(&Q[d_num_species + di][idx_cell_T]);
+                                    }
+                                    
+                                    std::vector<const double*> Z_ptr_B;
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Z_ptr_B.push_back(&Q[1 + d_num_species + d_dim.getValue() + si][idx_cell_B]);
+                                    }
+                                    
+                                    std::vector<const double*> Z_ptr_T;
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Z_ptr_T.push_back(&Q[1 + d_num_species + d_dim.getValue() + si][idx_cell_T]);
+                                    }
+                                    
+                                    const double p_B = d_equation_of_state->getPressureWithVolumeFraction(
+                                        &rho_B,
+                                        m_ptr_B,
+                                        &E_B,
+                                        Z_ptr_B);
+                                    
+                                    const double p_T = d_equation_of_state->getPressureWithVolumeFraction(
+                                        &rho_T,
+                                        m_ptr_T,
+                                        &E_T,
+                                        Z_ptr_T);
+                                    
+                                    const double c_B = d_equation_of_state->getSoundSpeedWithVolumeFractionAndPressure(
+                                        &rho_B,
+                                        Z_ptr_B,
+                                        &p_B);
+                                    
+                                    const double c_T = d_equation_of_state->getSoundSpeedWithVolumeFractionAndPressure(
+                                        &rho_T,
+                                        Z_ptr_T,
+                                        &p_T);
+                                    
+                                    const double sp_y_B = fabs(v_B) + c_B;
+                                    const double sp_y_T = fabs(v_T) + c_T;
+                                    
+                                    std::vector<double> F_y_cell;
+                                    std::vector<double> F_y_B;
+                                    std::vector<double> F_y_T;
+                                    
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        F_y_cell.push_back(v_cell*(*Z_rho_ptr_cell[si]));
+                                    }
+                                    F_y_cell.push_back(rho_cell*v_cell*u_cell);
+                                    F_y_cell.push_back(rho_cell*v_cell*v_cell + p_cell);
+                                    F_y_cell.push_back(rho_cell*v_cell*w_cell);
+                                    F_y_cell.push_back(v_cell*(E_cell + p_cell));
+                                    for (int si = 0; si < d_num_species - 1; si++)
+                                    {
+                                        F_y_cell.push_back(v_cell*(*Z_ptr_cell[si]));
+                                    }
+                                    
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        F_y_B.push_back(v_B*(*Z_rho_ptr_B[si]));
+                                    }
+                                    F_y_B.push_back(rho_B*v_B*u_B);
+                                    F_y_B.push_back(rho_B*v_B*v_B + p_B);
+                                    F_y_B.push_back(rho_B*v_B*w_B);
+                                    F_y_B.push_back(v_B*(E_B + p_B));
+                                    for (int si = 0; si < d_num_species - 1; si++)
+                                    {
+                                        F_y_B.push_back(v_B*(*Z_ptr_B[si]));
+                                    }
+                                    
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        F_y_T.push_back(v_T*(*Z_rho_ptr_T[si]));
+                                    }
+                                    F_y_T.push_back(rho_T*v_T*u_T);
+                                    F_y_T.push_back(rho_T*v_T*v_T + p_T);
+                                    F_y_T.push_back(rho_T*v_T*w_T);
+                                    F_y_T.push_back(v_T*(E_T + p_T));
+                                    for (int si = 0; si < d_num_species - 1; si++)
+                                    {
+                                        F_y_T.push_back(v_T*(*Z_ptr_T[si]));
+                                    }
+                                    
+                                    const double alpha_y_B = fmax(sp_y_B, sp_y_cell);
+                                    const double alpha_y_T = fmax(sp_y_T, sp_y_cell);
+                                    
+                                    for (int ei = 0; ei < d_num_eqn; ei++)
+                                    {
+                                        double* F_y = convective_flux_intermediate->getPointer(1, ei);
+                                        F_y[idx_face_y - 1] = 0.5*dt*(F_y_B[ei] + F_y_cell[ei] -
+                                            alpha_y_B*(Q[ei][idx_cell] - Q[ei][idx_cell_B]));
+                                        
+                                        F_y[idx_face_y]     = 0.5*dt*(F_y_cell[ei] + F_y_T[ei] -
+                                            alpha_y_T*(Q[ei][idx_cell_T] - Q[ei][idx_cell]));
+                                    }
+                                }
+                                
+                                // Correct the fluxes in the z direction.
+                                {
+                                    const int idx_cell_B   = (i + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k - 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_cell_F   = (i + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    std::vector<const double*> Z_rho_ptr_B;
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Z_rho_ptr_B.push_back(&Q[si][idx_cell_B]);
+                                    }
+                                    
+                                    std::vector<const double*> Z_rho_ptr_F;
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Z_rho_ptr_F.push_back(&Q[si][idx_cell_F]);
+                                    }
+                                    
+                                    const double& rho_B = d_equation_of_state->getTotalDensity(Z_rho_ptr_B);
+                                    const double& rho_F = d_equation_of_state->getTotalDensity(Z_rho_ptr_F);
+                                    
+                                    const double& E_B = Q[d_num_species + d_dim.getValue()][idx_cell_B];
+                                    const double& E_F = Q[d_num_species + d_dim.getValue()][idx_cell_F];
+                                    
+                                    const double u_B = Q[d_num_species][idx_cell_B]/rho_B;
+                                    const double u_F = Q[d_num_species][idx_cell_F]/rho_F;
+                                    
+                                    const double v_B = Q[d_num_species + 1][idx_cell_B]/rho_B;
+                                    const double v_F = Q[d_num_species + 1][idx_cell_F]/rho_F;
+                                    
+                                    const double w_B = Q[d_num_species + 2][idx_cell_B]/rho_B;
+                                    const double w_F = Q[d_num_species + 2][idx_cell_F]/rho_F;
+                                    
+                                    std::vector<const double*> m_ptr_B;
+                                    for (int di = 0; di < d_dim.getValue(); di++)
+                                    {
+                                        m_ptr_B.push_back(&Q[d_num_species + di][idx_cell_B]);
+                                    }
+                                    
+                                    std::vector<const double*> m_ptr_F;
+                                    for (int di = 0; di < d_dim.getValue(); di++)
+                                    {
+                                        m_ptr_F.push_back(&Q[d_num_species + di][idx_cell_F]);
+                                    }
+                                    
+                                    std::vector<const double*> Z_ptr_B;
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Z_ptr_B.push_back(&Q[1 + d_num_species + d_dim.getValue() + si][idx_cell_B]);
+                                    }
+                                    
+                                    std::vector<const double*> Z_ptr_F;
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Z_ptr_F.push_back(&Q[1 + d_num_species + d_dim.getValue() + si][idx_cell_F]);
+                                    }
+                                    
+                                    const double p_B = d_equation_of_state->getPressureWithVolumeFraction(
+                                        &rho_B,
+                                        m_ptr_B,
+                                        &E_B,
+                                        Z_ptr_B);
+                                    
+                                    const double p_F = d_equation_of_state->getPressureWithVolumeFraction(
+                                        &rho_F,
+                                        m_ptr_F,
+                                        &E_F,
+                                        Z_ptr_F);
+                                    
+                                    const double c_B = d_equation_of_state->getSoundSpeedWithVolumeFractionAndPressure(
+                                        &rho_B,
+                                        Z_ptr_B,
+                                        &p_B);
+                                    
+                                    const double c_F = d_equation_of_state->getSoundSpeedWithVolumeFractionAndPressure(
+                                        &rho_F,
+                                        Z_ptr_F,
+                                        &p_F);
+                                    
+                                    const double sp_z_B = fabs(w_B) + c_B;
+                                    const double sp_z_F = fabs(w_F) + c_F;
+                                    
+                                    std::vector<double> F_z_cell;
+                                    std::vector<double> F_z_B;
+                                    std::vector<double> F_z_F;
+                                    
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        F_z_cell.push_back(w_cell*(*Z_rho_ptr_cell[si]));
+                                    }
+                                    F_z_cell.push_back(rho_cell*w_cell*u_cell);
+                                    F_z_cell.push_back(rho_cell*w_cell*v_cell);
+                                    F_z_cell.push_back(rho_cell*w_cell*w_cell + p_cell);
+                                    F_z_cell.push_back(w_cell*(E_cell + p_cell));
+                                    for (int si = 0; si < d_num_species - 1; si++)
+                                    {
+                                        F_z_cell.push_back(w_cell*(*Z_ptr_cell[si]));
+                                    }
+                                    
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        F_z_B.push_back(w_B*(*Z_rho_ptr_B[si]));
+                                    }
+                                    F_z_B.push_back(rho_B*w_B*u_B);
+                                    F_z_B.push_back(rho_B*w_B*v_B);
+                                    F_z_B.push_back(rho_B*w_B*w_B + p_B);
+                                    F_z_B.push_back(w_B*(E_B + p_B));
+                                    for (int si = 0; si < d_num_species - 1; si++)
+                                    {
+                                        F_z_B.push_back(w_B*(*Z_ptr_B[si]));
+                                    }
+                                    
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        F_z_F.push_back(w_F*(*Z_rho_ptr_F[si]));
+                                    }
+                                    F_z_F.push_back(rho_F*w_F*u_F);
+                                    F_z_F.push_back(rho_F*w_F*v_F);
+                                    F_z_F.push_back(rho_F*w_F*w_F + p_F);
+                                    F_z_F.push_back(w_F*(E_F + p_F));
+                                    for (int si = 0; si < d_num_species - 1; si++)
+                                    {
+                                        F_z_F.push_back(w_F*(*Z_ptr_F[si]));
+                                    }
+                                    
+                                    const double alpha_z_B = fmax(sp_z_B, sp_z_cell);
+                                    const double alpha_z_F = fmax(sp_z_F, sp_z_cell);
+                                    
+                                    for (int ei = 0; ei < d_num_eqn; ei++)
+                                    {
+                                        double* F_z = convective_flux_intermediate->getPointer(2, ei);
+                                        F_z[idx_face_z - 1] = 0.5*dt*(F_z_B[ei] + F_z_cell[ei] -
+                                            alpha_z_B*(Q[ei][idx_cell] - Q[ei][idx_cell_B]));
+                                        
+                                        F_z[idx_face_z]     = 0.5*dt*(F_z_cell[ei] + F_z_F[ei] -
+                                            alpha_z_F*(Q[ei][idx_cell_F] - Q[ei][idx_cell]));
+                                    }
+                                }
+                                
+                                break;
+                            }
+                            default:
+                            TBOX_ERROR(d_object_name
+                                       << ": "
+                                       << "Unknown d_flow_model."
+                                       << std::endl);
+                        }
+                    }
+                }
             }
         }
     }

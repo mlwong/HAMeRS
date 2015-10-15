@@ -1,7 +1,7 @@
 #ifndef CONVECTIVE_FLUX_RECONSTRUCTOR_FIRST_ORDER_HLLC_HPP
 #define CONVECTIVE_FLUX_RECONSTRUCTOR_FIRST_ORDER_HLLC_HPP
 
-#include "ConvectiveFluxReconstructor.hpp"
+#include "flow_model/convective_flux_reconstructor/ConvectiveFluxReconstructor.hpp"
 
 #include "flow_model/Riemann_solver/RiemannSolverHLLC.hpp"
 
@@ -34,12 +34,13 @@ class ConvectiveFluxReconstructorFirstOrderHLLC: public ConvectiveFluxReconstruc
         
         /*
          * Compute the convective fluxes and sources due to hyperbolization
-         * of the equtions.
+         * of the equations.
          */
-        void computeConvectiveFluxAndSource(
+        void computeConvectiveFluxesAndSources(
             hier::Patch& patch,
             const double time,
             const double dt,
+            const int RK_step_number,
             const boost::shared_ptr<hier::VariableContext> data_context);
     
     private:

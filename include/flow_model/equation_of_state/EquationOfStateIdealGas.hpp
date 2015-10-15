@@ -14,6 +14,11 @@ class EquationOfStateIdealGas: public EquationOfState
             const THERMAL_PROCESS_ASSUMPTION& thermal_pro_assum);
         
         /*
+         * Get the label of the equation of state.
+         */
+        EQUATIONS_OF_STATE getLabel() { return IDEAL_GAS; };
+        
+        /*
          * Print all characteristics of the equation of state class.
          */
         void

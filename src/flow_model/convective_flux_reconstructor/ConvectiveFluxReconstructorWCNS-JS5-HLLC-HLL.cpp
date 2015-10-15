@@ -20,7 +20,13 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::ConvectiveFluxReconstructorWCNS_JS
             num_species,
             equation_of_state,
             shock_capturing_scheme_db),
-        d_Riemann_solver(
+        d_Riemann_solver_HLLC(
+            "HLLC Riemann solver",
+            d_dim,
+            d_num_eqn,
+            d_num_species,
+            d_equation_of_state),
+        d_Riemann_solver_HLLC_HLL(
             "HLLC-HLL Riemann solver",
             d_dim,
             d_num_eqn,
@@ -43,6 +49,12 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::ConvectiveFluxReconstructorWCNS_JS
     d_weights_c[2][0] = 3.0/8;
     d_weights_c[2][1] = 3.0/4;
     d_weights_c[2][2] = -1.0/8;
+    
+    d_Y_bnd_lo = -0.001;
+    d_Y_bnd_up = 1.001;
+    
+    d_Z_bnd_lo = -1000.0;
+    d_Z_bnd_up = 1000.0;
 }
 
 
@@ -89,13 +101,14 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::putToRestart(
 
 /*
  * Compute the convective fluxes and sources due to hyperbolization
- * of the equtions.
+ * of the equations.
  */
 void
-ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
+ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxesAndSources(
     hier::Patch& patch,
     const double time,
     const double dt,
+    const int RK_step_number,
     const boost::shared_ptr<hier::VariableContext> data_context)
 {
     if (d_set_variables == true)
@@ -110,6 +123,13 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
         dummy_box.grow(d_num_ghosts);
         const hier::Box ghost_box = dummy_box;
         const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+        
+        // Get the grid spacing.
+        const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+            BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                patch.getPatchGeometry()));
+        
+        const double* const dx = patch_geom->getDx();
         
         switch (d_flow_model)
         {
@@ -152,6 +172,12 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                     new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
                 
                 boost::shared_ptr<pdat::CellData<double> > sound_speed(
+                    new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+                
+                boost::shared_ptr<pdat::CellData<double> > dilatation(
+                    new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+                
+                boost::shared_ptr<pdat::CellData<double> > vorticity_magnitude(
                     new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
                 
                 std::vector<boost::shared_ptr<pdat::CellData<double> > > convective_flux_node;
@@ -199,7 +225,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         F_x_midpoint.push_back(convective_flux_midpoint->getPointer(0, ei));
                     }
                     
-                    // Compute the field of velocities and pressure.
+                    // Compute the field of velocities, pressure, sound speed and fluxes.
                     for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
                     {
                         // Compute index into linear data array.
@@ -290,10 +316,10 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         *R_x_inv_intercell[2][2] = 0.5;
                     }
                     
-                    // Compute the mid-point flux in the x-direction.
+                    // Compute the mid-point fluxes in the x direction.
                     for (int i = -1; i < interior_dims[0] + 2; i++)
                     {
-                        // Compute the index of face of mid-point flux and
+                        // Compute the index of face of mid-point fluxes and
                         // projection matrix.
                         const int idx_face_x = i + 1;
                         
@@ -440,11 +466,19 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                 vel_R_ptr,
                                 &p_R);
                         
+                        bool is_constant_interpolation = false;
+                        
                         /*
-                         * If the WENO interpolated density or energy are negative,
+                         * If the WENO interpolated density, pressure or total energy are negative,
                          * use constant interpolation.
                          */
-                        if ((rho_L < 0) || (rho_R < 0) || (E_L < 0) || (E_R < 0))
+                        
+                        if ((rho_L < 0) || (rho_R < 0) || (p_L < 0) || (p_R < 0) || (E_L < 0) || (E_R < 0))
+                        {
+                            is_constant_interpolation = true;
+                        }
+                        
+                        if (is_constant_interpolation)
                         {
                             // Compute the indices of left cell and right cell.
                             const int idx_cell_L = i - 1 + d_num_ghosts[0];
@@ -458,6 +492,27 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                             
                             E_L = E[idx_cell_L];
                             E_R = E[idx_cell_R];
+                            
+                            /*
+                            const hier::GlobalId global_id = patch.getGlobalId();
+                            const hier::LocalId local_id = patch.getLocalId();
+                            
+                            TBOX_WARNING("Constant interpolation is used at cell edge between cells ("
+                                         << (i - 1)
+                                         << ") and ("
+                                         << i
+                                         << ") of patch with GlobalId # "
+                                         << global_id.getOwnerRank()
+                                         << " and LocalId # "
+                                         << local_id.getValue()
+                                         << " at level # "
+                                         << patch.getPatchLevelNumber()
+                                         << " and Runge-Kutta step # "
+                                         << RK_step_number
+                                         << " of time "
+                                         << time
+                                         << ".");
+                            */
                         }
                         
                         /*
@@ -478,7 +533,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                             F_x_midpoint_ptr.push_back(&F_x_midpoint[ei][idx_face_x]);
                         }
                         
-                        d_Riemann_solver.computeIntercellFluxForSingleSpecies(
+                        d_Riemann_solver_HLLC.computeIntercellFluxForSingleSpecies(
                             F_x_midpoint_ptr,
                             &rho_L,
                             &rho_R,
@@ -489,7 +544,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                             X_DIRECTION);
                     }
                     
-                    // Compute the flux in the x direction.
+                    // Compute the fluxes in the x direction.
                     for (int i = 0; i < interior_dims[0] + 1; i++)
                     {
                         // Compute the indices.
@@ -498,7 +553,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         const int idx_node_L = i - 1 + d_num_ghosts[0];
                         const int idx_node_R = i + d_num_ghosts[0];
                         
-                        // Compute the flux.
+                        // Compute the fluxes.
                         for (int ei = 0; ei < d_num_eqn; ei++)
                         {
                             convective_flux->getPointer(0, ei)[idx_face_x] = dt*(1.0/30*(F_x_midpoint[ei][idx_midpoint_x + 1] +
@@ -522,6 +577,8 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                     double* v     = velocity->getPointer(1);
                     double* p     = pressure->getPointer(0);
                     double* c     = sound_speed->getPointer(0);
+                    double* theta = dilatation->getPointer(0);
+                    double* Omega = vorticity_magnitude->getPointer(0);
                     std::vector<double*> F_x_node;
                     std::vector<double*> F_y_node;
                     for (int ei = 0; ei < d_num_eqn; ei++)
@@ -537,7 +594,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         F_y_midpoint.push_back(convective_flux_midpoint->getPointer(1, ei));
                     }
                     
-                    // Compute the field of velocities and pressure.
+                    // Compute the field of velocities, pressure, sound speed and fluxes.
                     for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
                     {
                         for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
@@ -573,6 +630,38 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                             F_y_node[1][idx] = rho_v[idx]*u[idx];
                             F_y_node[2][idx] = rho_v[idx]*v[idx] + p[idx];
                             F_y_node[3][idx] = v[idx]*(E[idx] + p[idx]);
+                        }
+                    }
+                    
+                    // Compute the dilatation and magnitude of vorticity.
+                    for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                    {
+                        for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                        {
+                            // Compute indices of current and neighboring cells.
+                            const int idx = (i + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_y_B = (i + d_num_ghosts[0]) +
+                                (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_y_T = (i + d_num_ghosts[0]) +
+                                (j + 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            double dudx = (u[idx_x_R] - u[idx_x_L])/(2*dx[0]);
+                            double dudy = (u[idx_y_T] - u[idx_y_B])/(2*dx[1]);
+                            
+                            double dvdx = (v[idx_x_R] - v[idx_x_L])/(2*dx[0]);
+                            double dvdy = (v[idx_y_T] - v[idx_y_B])/(2*dx[1]);
+                            
+                            theta[idx] = dudx + dvdy;
+                            Omega[idx] = fabs(dvdx - dudy);
                         }
                     }
                     
@@ -680,7 +769,6 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                 (i + 1)*(interior_dims[1] + 3);
                             
                             // Get bottom and top quantities.
-                            
                             const double& rho_B = rho[idx_cell_B];
                             const double& rho_T = rho[idx_cell_T];
                             
@@ -745,12 +833,12 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the mid-point flux in the x direction.
+                    // Compute the mid-point fluxes in the x direction.
                     for (int j = 0; j < interior_dims[1]; j++)
                     {
                         for (int i = -1; i < interior_dims[0] + 2; i++)
                         {
-                            // Compute the index of face of mid-point flux and
+                            // Compute the index of face of mid-point fluxes and
                             // projection matrix.
                             const int idx_face_x = (i + 1) +
                                 (j + 1)*(interior_dims[0] + 3);
@@ -900,11 +988,18 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     vel_R_ptr,
                                     &p_R);
                             
+                            bool is_constant_interpolation = false;
+                            
                             /*
-                             * If the WENO interpolated density or energy are negative,
+                             * If the WENO interpolated density, pressure or total energy are negative,
                              * use constant interpolation.
                              */
-                            if ((rho_L < 0) || (rho_R < 0) || (E_L < 0) || (E_R < 0))
+                            if ((rho_L < 0) || (rho_R < 0) || (p_L < 0) || (p_R < 0) || (E_L < 0) || (E_R < 0))
+                            {
+                                is_constant_interpolation = true;
+                            }
+                            
+                            if (is_constant_interpolation)
                             {
                                 // Compute the indices of left cell and right cell.
                                 const int idx_cell_L = (i - 1 + d_num_ghosts[0]) +
@@ -923,6 +1018,31 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                 
                                 E_L = E[idx_cell_L];
                                 E_R = E[idx_cell_R];
+                                
+                                /*
+                                const hier::GlobalId global_id = patch.getGlobalId();
+                                const hier::LocalId local_id = patch.getLocalId();
+                                
+                                TBOX_WARNING("Constant interpolation is used at cell edge between cells ("
+                                             << (i - 1)
+                                             << ", "
+                                             << j
+                                             << ") and ("
+                                             << i
+                                             << ", "
+                                             << j
+                                             << ") of patch with GlobalId # "
+                                             << global_id.getOwnerRank()
+                                             << " and LocalId # "
+                                             << local_id.getValue()
+                                             << " at level # "
+                                             << patch.getPatchLevelNumber()
+                                             << " and Runge-Kutta step # "
+                                             << RK_step_number
+                                             << " of time "
+                                             << time
+                                             << ".");
+                                */
                             }
                             
                             /*
@@ -943,24 +1063,52 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                 F_x_midpoint_ptr.push_back(&F_x_midpoint[ei][idx_face_x]);
                             }
                             
-                            d_Riemann_solver.computeIntercellFluxForSingleSpecies(
-                                F_x_midpoint_ptr,
-                                &rho_L,
-                                &rho_R,
-                                m_L_ptr,
-                                m_R_ptr,
-                                &E_L,
-                                &E_R,
-                                X_DIRECTION);
+                            // Compute the average dilatation and magnitude of vorticity.
+                            const int idx_L = (i - 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_R = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const double theta_avg = 0.5*(theta[idx_L] + theta[idx_R]);
+                            const double Omega_avg = 0.5*(Omega[idx_L] + Omega[idx_R]);
+                            
+                            // Compute the Ducros-like shock sensor.
+                            const double s = -theta_avg/(fabs(theta_avg) + Omega_avg + EPSILON);
+                            
+                            if (s > 0.65)
+                            {
+                                d_Riemann_solver_HLLC_HLL.computeIntercellFluxForSingleSpecies(
+                                    F_x_midpoint_ptr,
+                                    &rho_L,
+                                    &rho_R,
+                                    m_L_ptr,
+                                    m_R_ptr,
+                                    &E_L,
+                                    &E_R,
+                                    X_DIRECTION);
+                            }
+                            else
+                            {
+                                d_Riemann_solver_HLLC.computeIntercellFluxForSingleSpecies(
+                                    F_x_midpoint_ptr,
+                                    &rho_L,
+                                    &rho_R,
+                                    m_L_ptr,
+                                    m_R_ptr,
+                                    &E_L,
+                                    &E_R,
+                                    X_DIRECTION);
+                            }
                         }
                     }
                     
-                    // Compute the mid-point flux in the y direction.
+                    // Compute the mid-point fluxes in the y direction.
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
                         for (int j = -1; j < interior_dims[1] + 2; j++)
                         {
-                            // Compute the index of face of mid-point flux and
+                            // Compute the index of face of mid-point fluxes and
                             // projection matrix.
                             const int idx_face_y = (j + 1) +
                                 (i + 1)*(interior_dims[1] + 3);
@@ -1111,11 +1259,19 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     vel_T_ptr,
                                     &p_T);
                             
+                            bool is_constant_interpolation = false;
+                            
                             /*
-                             * If the WENO interpolated density or energy are negative,
+                             * If the WENO interpolated density, pressure or total energy are negative,
                              * use constant interpolation.
                              */
-                            if ((rho_B < 0) || (rho_T < 0) || (E_B < 0) || (E_T < 0))
+                            
+                            if ((rho_B < 0) || (rho_T < 0) || (p_B < 0) || (p_T < 0) || (E_B < 0) || (E_T < 0))
+                            {
+                                is_constant_interpolation = true;
+                            }
+                            
+                            if (is_constant_interpolation)
                             {
                                 // Compute the indices of bottom cell and top cell.
                                 const int idx_cell_B = (i + d_num_ghosts[0]) +
@@ -1134,6 +1290,31 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                 
                                 E_B = E[idx_cell_B];
                                 E_T = E[idx_cell_T];
+                                
+                                /*
+                                const hier::GlobalId global_id = patch.getGlobalId();
+                                const hier::LocalId local_id = patch.getLocalId();
+                                
+                                TBOX_WARNING("Constant interpolation is used at cell edge between cells ("
+                                             << i
+                                             << ", "
+                                             << (j - 1)
+                                             << ") and ("
+                                             << i
+                                             << ", "
+                                             << j
+                                             << ") of patch with GlobalId # "
+                                             << global_id.getOwnerRank()
+                                             << " and LocalId # "
+                                             << local_id.getValue()
+                                             << " at level # "
+                                             << patch.getPatchLevelNumber()
+                                             << " and Runge-Kutta step # "
+                                             << RK_step_number
+                                             << " of time "
+                                             << time
+                                             << ".");
+                                */
                             }
                             
                             /*
@@ -1154,19 +1335,47 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                 F_y_midpoint_ptr.push_back(&F_y_midpoint[ei][idx_face_y]);
                             }
                             
-                            d_Riemann_solver.computeIntercellFluxForSingleSpecies(
-                                F_y_midpoint_ptr,
-                                &rho_B,
-                                &rho_T,
-                                m_B_ptr,
-                                m_T_ptr,
-                                &E_B,
-                                &E_T,
-                                Y_DIRECTION);
+                            // Compute the average dilatation and magnitude of vorticity.
+                            const int idx_B = (i + d_num_ghosts[0]) +
+                                    (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_T = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const double theta_avg = 0.5*(theta[idx_B] + theta[idx_T]);
+                            const double Omega_avg = 0.5*(Omega[idx_B] + Omega[idx_T]);
+                            
+                            // Compute the Ducros-like shock sensor.
+                            const double s = -theta_avg/(fabs(theta_avg) + Omega_avg + EPSILON);
+                            
+                            if (s > 0.65)
+                            {
+                                d_Riemann_solver_HLLC_HLL.computeIntercellFluxForSingleSpecies(
+                                    F_y_midpoint_ptr,
+                                    &rho_B,
+                                    &rho_T,
+                                    m_B_ptr,
+                                    m_T_ptr,
+                                    &E_B,
+                                    &E_T,
+                                    Y_DIRECTION);
+                            }
+                            else
+                            {
+                                d_Riemann_solver_HLLC.computeIntercellFluxForSingleSpecies(
+                                    F_y_midpoint_ptr,
+                                    &rho_B,
+                                    &rho_T,
+                                    m_B_ptr,
+                                    m_T_ptr,
+                                    &E_B,
+                                    &E_T,
+                                    Y_DIRECTION);
+                            }
                         }
                     }
                     
-                    // Compute the flux in the x direction.
+                    // Compute the fluxes in the x direction.
                     for (int j = 0; j < interior_dims[1]; j++)
                     {
                         for (int i = 0; i < interior_dims[0] + 1; i++)
@@ -1184,7 +1393,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                             const int idx_node_R = (i + d_num_ghosts[0]) +
                                 (j + d_num_ghosts[1])*ghostcell_dims[0];
                             
-                            // Compute the flux.
+                            // Compute the fluxes.
                             for (int ei = 0; ei < d_num_eqn; ei++)
                             {
                                 convective_flux->getPointer(0, ei)[idx_face_x] = dt*(1.0/30*(F_x_midpoint[ei][idx_midpoint_x + 1] +
@@ -1196,7 +1405,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the y direction.
+                    // Compute the fluxes in the y direction.
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
                         for (int j = 0; j < interior_dims[1] + 1; j++)
@@ -1214,7 +1423,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                             const int idx_node_T = (i + d_num_ghosts[0]) +
                                 (j + d_num_ghosts[1])*ghostcell_dims[0];
                             
-                            // Compute the flux.
+                            // Compute the fluxes.
                             for (int ei = 0; ei < d_num_eqn; ei++)
                             {
                                 convective_flux->getPointer(1, ei)[idx_face_y] =
@@ -1242,6 +1451,8 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                     double* w     = velocity->getPointer(2);
                     double* p     = pressure->getPointer(0);
                     double* c     = sound_speed->getPointer(0);
+                    double* theta = dilatation->getPointer(0);
+                    double* Omega = vorticity_magnitude->getPointer(0);
                     std::vector<double*> F_x_node;
                     std::vector<double*> F_y_node;
                     std::vector<double*> F_z_node;
@@ -1261,7 +1472,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         F_z_midpoint.push_back(convective_flux_midpoint->getPointer(2, ei));
                     }
                     
-                    // Compute the field of velocities and pressure.
+                    // Compute the field of velocities, pressure, sound speed and fluxes.
                     for (int k = -d_num_ghosts[2]; k < interior_dims[2] + d_num_ghosts[2]; k++)
                     {
                         for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
@@ -1310,6 +1521,63 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                 F_z_node[2][idx] = rho_w[idx]*v[idx];
                                 F_z_node[3][idx] = rho_w[idx]*w[idx] + p[idx];
                                 F_z_node[4][idx] = w[idx]*(E[idx] + p[idx]);
+                            }
+                        }
+                    }
+                    
+                    // Compute the dilatation and magnitude of vorticity.
+                    for (int k = -d_num_ghosts[2]; k < interior_dims[2] + d_num_ghosts[2]; k++)
+                    {
+                        for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                        {
+                            for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                            {
+                                // Compute indices of current and neighboring cells.
+                                const int idx = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_y_B = (i + d_num_ghosts[0]) +
+                                    (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_y_T = (i + d_num_ghosts[0]) +
+                                    (j + 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_z_B = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k - 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_z_F = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                double dudx = (u[idx_x_R] - u[idx_x_L])/(2*dx[0]);
+                                double dudy = (u[idx_y_T] - u[idx_y_B])/(2*dx[1]);
+                                double dudz = (u[idx_z_F] - u[idx_z_B])/(2*dx[2]);
+                                
+                                double dvdx = (v[idx_x_R] - v[idx_x_L])/(2*dx[0]);
+                                double dvdy = (v[idx_y_T] - v[idx_y_B])/(2*dx[1]);
+                                double dvdz = (v[idx_z_F] - v[idx_z_B])/(2*dx[2]);
+                                
+                                double dwdx = (w[idx_x_R] - w[idx_x_L])/(2*dx[0]);
+                                double dwdy = (w[idx_y_T] - w[idx_y_B])/(2*dx[1]);
+                                double dwdz = (w[idx_z_F] - w[idx_z_B])/(2*dx[2]);
+                                
+                                theta[idx] = dudx + dvdy + dwdz;
+                                
+                                Omega[idx] = sqrt(pow(dwdy - dvdz, 2) +
+                                    pow(dudz - dwdx, 2) +
+                                    pow(dvdx - dudy, 2));
                             }
                         }
                     }
@@ -1640,14 +1908,14 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the mid-point flux in the x direction.
+                    // Compute the mid-point fluxes in the x direction.
                     for (int k = 0; k < interior_dims[2]; k++)
                     {
                         for (int j = 0; j < interior_dims[1]; j++)
                         {
                             for (int i = -1; i < interior_dims[0] + 2; i++)
                             {
-                                // Compute the index of face of mid-point flux and
+                                // Compute the index of face of mid-point fluxes and
                                 // projection matrix.
                                 const int idx_face_x = (i + 1) +
                                     (j + 1)*(interior_dims[0] + 3) +
@@ -1800,11 +2068,19 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                         vel_R_ptr,
                                         &p_R);
                                 
+                                bool is_constant_interpolation = false;
+                                
                                 /*
-                                 * If the WENO interpolated density or energy are negative,
+                                 * If the WENO interpolated density, pressure or total energy are negative,
                                  * use constant interpolation.
                                  */
-                                if ((rho_L < 0) || (rho_R < 0) || (E_L < 0) || (E_R < 0))
+                                
+                                if ((rho_L < 0) || (rho_R < 0) || (p_L < 0) || (p_R < 0) || (E_L < 0) || (E_R < 0))
+                                {
+                                    is_constant_interpolation = true;
+                                }
+                                
+                                if (is_constant_interpolation)
                                 {
                                     // Compute the indices of left cell and right cell.
                                     const int idx_cell_L = (i - 1 + d_num_ghosts[0]) +
@@ -1827,6 +2103,35 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     
                                     E_L = E[idx_cell_L];
                                     E_R = E[idx_cell_R];
+                                    
+                                    /*
+                                    const hier::GlobalId global_id = patch.getGlobalId();
+                                    const hier::LocalId local_id = patch.getLocalId();
+                                    
+                                    TBOX_WARNING("Constant interpolation is used at cell edge between cells ("
+                                                 << (i - 1)
+                                                 << ", "
+                                                 << j
+                                                 << ", "
+                                                 << k
+                                                 << ") and ("
+                                                 << i
+                                                 << ", "
+                                                 << j
+                                                 << ", "
+                                                 << k
+                                                 << ") of patch with GlobalId # "
+                                                 << global_id.getOwnerRank()
+                                                 << " and LocalId # "
+                                                 << local_id.getValue()
+                                                 << " at level # "
+                                                 << patch.getPatchLevelNumber()
+                                                 << " and Runge-Kutta step # "
+                                                 << RK_step_number
+                                                 << " of time "
+                                                 << time
+                                                 << ".");
+                                    */
                                 }
                                 
                                 /*
@@ -1847,27 +2152,57 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     F_x_midpoint_ptr.push_back(&F_x_midpoint[ei][idx_face_x]);
                                 }
                                 
-                                d_Riemann_solver.computeIntercellFluxForSingleSpecies(
-                                    F_x_midpoint_ptr,
-                                    &rho_L,
-                                    &rho_R,
-                                    m_L_ptr,
-                                    m_R_ptr,
-                                    &E_L,
-                                    &E_R,
-                                    X_DIRECTION);
+                                // Compute the average dilatation and magnitude of vorticity.
+                                const int idx_L = (i - 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_R = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const double theta_avg = 0.5*(theta[idx_L] + theta[idx_R]);
+                                const double Omega_avg = 0.5*(Omega[idx_L] + Omega[idx_R]);
+                                
+                                // Compute the Ducros-like shock sensor.
+                                const double s = -theta_avg/(fabs(theta_avg) + Omega_avg + EPSILON);
+                                
+                                if (s > 0.65)
+                                {
+                                    d_Riemann_solver_HLLC_HLL.computeIntercellFluxForSingleSpecies(
+                                        F_x_midpoint_ptr,
+                                        &rho_L,
+                                        &rho_R,
+                                        m_L_ptr,
+                                        m_R_ptr,
+                                        &E_L,
+                                        &E_R,
+                                        X_DIRECTION);
+                                }
+                                else
+                                {
+                                    d_Riemann_solver_HLLC.computeIntercellFluxForSingleSpecies(
+                                        F_x_midpoint_ptr,
+                                        &rho_L,
+                                        &rho_R,
+                                        m_L_ptr,
+                                        m_R_ptr,
+                                        &E_L,
+                                        &E_R,
+                                        X_DIRECTION);
+                                }
                             }
                         }
                     }
                     
-                    // Compute the mid-point flux in the y direction.
+                    // Compute the mid-point fluxes in the y direction.
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
                         for (int k = 0; k < interior_dims[2]; k++)
                         {
                             for (int j = -1; j < interior_dims[1] + 2; j++)
                             {
-                                // Compute the index of face of mid-point flux and
+                                // Compute the index of face of mid-point fluxes and
                                 // projection matrix.
                                 const int idx_face_y = (j + 1) +
                                     (k + 1)*(interior_dims[1] + 3) +
@@ -2021,11 +2356,19 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                         vel_T_ptr,
                                         &p_T);
                                 
+                                bool is_constant_interpolation = false;
+                                
                                 /*
-                                 * If the WENO interpolated density or energy are negative,
+                                 * If the WENO interpolated density, pressure or total energy are negative,
                                  * use constant interpolation.
                                  */
-                                if ((rho_B < 0) || (rho_T < 0) || (E_B < 0) || (E_T < 0))
+                                
+                                if ((rho_B < 0) || (rho_T < 0) || (p_B < 0) || (p_T < 0) || (E_B < 0) || (E_T < 0))
+                                {
+                                    is_constant_interpolation = true;
+                                }
+                                
+                                if (is_constant_interpolation)
                                 {
                                     // Compute the indices of bottom cell and top cell.
                                     const int idx_cell_B = (i + d_num_ghosts[0]) +
@@ -2048,6 +2391,35 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     
                                     E_B = E[idx_cell_B];
                                     E_T = E[idx_cell_T];
+                                    
+                                    /*
+                                    const hier::GlobalId global_id = patch.getGlobalId();
+                                    const hier::LocalId local_id = patch.getLocalId();
+                                    
+                                    TBOX_WARNING("Constant interpolation is used at cell edge between cells ("
+                                                 << i
+                                                 << ", "
+                                                 << (j - 1)
+                                                 << ", "
+                                                 << k
+                                                 << ") and ("
+                                                 << i
+                                                 << ", "
+                                                 << j
+                                                 << ", "
+                                                 << k
+                                                 << ") of patch with GlobalId # "
+                                                 << global_id.getOwnerRank()
+                                                 << " and LocalId # "
+                                                 << local_id.getValue()
+                                                 << " at level # "
+                                                 << patch.getPatchLevelNumber()
+                                                 << " and Runge-Kutta step # "
+                                                 << RK_step_number
+                                                 << " of time "
+                                                 << time
+                                                 << ".");
+                                    */
                                 }
                                 
                                 /*
@@ -2068,27 +2440,57 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     F_y_midpoint_ptr.push_back(&F_y_midpoint[ei][idx_face_y]);
                                 }
                                 
-                                d_Riemann_solver.computeIntercellFluxForSingleSpecies(
-                                    F_y_midpoint_ptr,
-                                    &rho_B,
-                                    &rho_T,
-                                    m_B_ptr,
-                                    m_T_ptr,
-                                    &E_B,
-                                    &E_T,
-                                    Y_DIRECTION);
+                                // Compute the average dilatation and magnitude of vorticity.
+                                const int idx_B = (i + d_num_ghosts[0]) +
+                                    (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_T = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const double theta_avg = 0.5*(theta[idx_B] + theta[idx_T]);
+                                const double Omega_avg = 0.5*(Omega[idx_B] + Omega[idx_T]);
+                                
+                                // Compute the Ducros-like shock sensor.
+                                const double s = -theta_avg/(fabs(theta_avg) + Omega_avg + EPSILON);
+                                
+                                if (s > 0.65)
+                                {
+                                    d_Riemann_solver_HLLC_HLL.computeIntercellFluxForSingleSpecies(
+                                        F_y_midpoint_ptr,
+                                        &rho_B,
+                                        &rho_T,
+                                        m_B_ptr,
+                                        m_T_ptr,
+                                        &E_B,
+                                        &E_T,
+                                        Y_DIRECTION);
+                                }
+                                else
+                                {
+                                    d_Riemann_solver_HLLC.computeIntercellFluxForSingleSpecies(
+                                        F_y_midpoint_ptr,
+                                        &rho_B,
+                                        &rho_T,
+                                        m_B_ptr,
+                                        m_T_ptr,
+                                        &E_B,
+                                        &E_T,
+                                        Y_DIRECTION);
+                                }
                             }
                         }
                     }
                     
-                    // Compute the mid-point flux in the z direction.
+                    // Compute the mid-point fluxes in the z direction.
                     for (int j = 0; j < interior_dims[1]; j++)
                     {
                         for (int i = 0; i < interior_dims[0]; i++)
                         {
                             for (int k = -1; k < interior_dims[2] + 2; k++)
                             {
-                                // Compute the index of face of mid-point flux and
+                                // Compute the index of face of mid-point fluxes and
                                 // projection matrix.
                                 const int idx_face_z = (k + 1) +
                                     (i + 1)*(interior_dims[2] + 3) +
@@ -2242,11 +2644,19 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                         vel_F_ptr,
                                         &p_F);
                                 
+                                bool is_constant_interpolation = false;
+                                
                                 /*
-                                 * If the WENO interpolated density or energy are negative,
+                                 * If the WENO interpolated density, pressure or total energy are negative,
                                  * use constant interpolation.
                                  */
-                                if ((rho_B < 0) || (rho_F < 0) || (E_B < 0) || (E_F < 0))
+                                
+                                if ((rho_B < 0) || (rho_F < 0) || (p_B < 0) || (p_F < 0) || (E_B < 0) || (E_F < 0))
+                                {
+                                    is_constant_interpolation = true;
+                                }
+                                
+                                if (is_constant_interpolation)
                                 {
                                     // Compute the indices of back cell and front cell.
                                     const int idx_cell_B = (i + d_num_ghosts[0]) +
@@ -2269,6 +2679,35 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     
                                     E_B = E[idx_cell_B];
                                     E_F = E[idx_cell_F];
+                                    
+                                    /*
+                                    const hier::GlobalId global_id = patch.getGlobalId();
+                                    const hier::LocalId local_id = patch.getLocalId();
+                                    
+                                    TBOX_WARNING("Constant interpolation is used at cell edge between cells ("
+                                                 << i
+                                                 << ", "
+                                                 << j
+                                                 << ", "
+                                                 << (k - 1)
+                                                 << ") and ("
+                                                 << i
+                                                 << ", "
+                                                 << j
+                                                 << ", "
+                                                 << k
+                                                 << ") of patch with GlobalId # "
+                                                 << global_id.getOwnerRank()
+                                                 << " and LocalId # "
+                                                 << local_id.getValue()
+                                                 << " at level # "
+                                                 << patch.getPatchLevelNumber()
+                                                 << " and Runge-Kutta step # "
+                                                 << RK_step_number
+                                                 << " of time "
+                                                 << time
+                                                 << ".");
+                                    */
                                 }
                                 
                                 /*
@@ -2289,20 +2728,50 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     F_z_midpoint_ptr.push_back(&F_z_midpoint[ei][idx_face_z]);
                                 }
                                 
-                                d_Riemann_solver.computeIntercellFluxForSingleSpecies(
-                                    F_z_midpoint_ptr,
-                                    &rho_B,
-                                    &rho_F,
-                                    m_B_ptr,
-                                    m_F_ptr,
-                                    &E_B,
-                                    &E_F,
-                                    Z_DIRECTION);
+                                // Compute the average dilatation and magnitude of vorticity.
+                                const int idx_B = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k - 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_F = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const double theta_avg = 0.5*(theta[idx_B] + theta[idx_F]);
+                                const double Omega_avg = 0.5*(Omega[idx_B] + Omega[idx_F]);
+                                
+                                // Compute the Ducros-like shock sensor.
+                                const double s = -theta_avg/(fabs(theta_avg) + Omega_avg + EPSILON);
+                                
+                                if (s > 0.65)
+                                {
+                                    d_Riemann_solver_HLLC_HLL.computeIntercellFluxForSingleSpecies(
+                                        F_z_midpoint_ptr,
+                                        &rho_B,
+                                        &rho_F,
+                                        m_B_ptr,
+                                        m_F_ptr,
+                                        &E_B,
+                                        &E_F,
+                                        Z_DIRECTION);
+                                }
+                                else
+                                {
+                                    d_Riemann_solver_HLLC.computeIntercellFluxForSingleSpecies(
+                                        F_z_midpoint_ptr,
+                                        &rho_B,
+                                        &rho_F,
+                                        m_B_ptr,
+                                        m_F_ptr,
+                                        &E_B,
+                                        &E_F,
+                                        Z_DIRECTION);
+                                }
                             }
                         }
                     }
                     
-                    // Compute the flux in the x direction.
+                    // Compute the fluxes in the x direction.
                     for (int k = 0; k < interior_dims[2]; k++)
                     {
                         for (int j = 0; j < interior_dims[1]; j++)
@@ -2326,7 +2795,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     (j + d_num_ghosts[1])*ghostcell_dims[0] +
                                     (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                                 
-                                // Compute the flux.
+                                // Compute the fluxes.
                                 for (int ei = 0; ei < d_num_eqn; ei++)
                                 {
                                     convective_flux->getPointer(0, ei)[idx_face_x] = dt*(1.0/30*(F_x_midpoint[ei][idx_midpoint_x + 1] +
@@ -2339,7 +2808,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the y direction.
+                    // Compute the fluxes in the y direction.
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
                         for (int k = 0; k < interior_dims[2]; k++)
@@ -2363,7 +2832,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     (j + d_num_ghosts[1])*ghostcell_dims[0] +
                                     (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                                 
-                                // Compute the flux.
+                                // Compute the fluxes.
                                 for (int ei = 0; ei < d_num_eqn; ei++)
                                 {
                                     convective_flux->getPointer(1, ei)[idx_face_y] =
@@ -2377,7 +2846,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the z direction.
+                    // Compute the fluxes in the z direction.
                     for (int j = 0; j < interior_dims[1]; j++)
                     {
                         for (int i = 0; i < interior_dims[0]; i++)
@@ -2401,7 +2870,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     (j + d_num_ghosts[1])*ghostcell_dims[0] +
                                     (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                                 
-                                // Compute the flux.
+                                // Compute the fluxes.
                                 for (int ei = 0; ei < d_num_eqn; ei++)
                                 {
                                     convective_flux->getPointer(2, ei)[idx_face_z] =
@@ -2474,6 +2943,12 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                 boost::shared_ptr<pdat::CellData<double> > sound_speed(
                     new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
                 
+                boost::shared_ptr<pdat::CellData<double> > dilatation(
+                    new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+                
+                boost::shared_ptr<pdat::CellData<double> > vorticity_magnitude(
+                    new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+                
                 std::vector<boost::shared_ptr<pdat::CellData<double> > > convective_flux_node;
                 for (int di = 0; di < d_dim.getValue(); di++)
                 {
@@ -2523,7 +2998,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         F_x_midpoint.push_back(convective_flux_midpoint->getPointer(0, ei));
                     }
                     
-                    // Compute the field of velocities, pressure and fluxes.
+                    // Compute the field of velocities, pressure, sound speed and fluxes.
                     for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
                     {
                         // Compute index into linear data array.
@@ -2646,10 +3121,10 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         *R_x_inv_intercell[d_num_species + 1][2] = 0.5;
                     }
                     
-                    // Compute the mid-point flux in the x direction.
+                    // Compute the mid-point fluxes in the x direction.
                     for (int i = -1; i < interior_dims[0] + 2; i++)
                     {
-                        // Compute the index of face of mid-point flux and
+                        // Compute the index of face of mid-point fluxes and
                         // projection matrix.
                         const int idx_face_x = i + 1;
                         
@@ -2823,11 +3298,44 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                 &p_R,
                                 Y_R_ptr);
                         
+                        bool is_constant_interpolation = false;
+                        
                         /*
-                         * If the WENO interpolated density or energy are negative,
+                         * If the WENO interpolated density, pressure or total energy are negative,
                          * use constant interpolation.
                          */
-                        if ((rho_L < 0) || (rho_R < 0) || (E_L < 0) || (E_R < 0))
+                        if ((rho_L < 0) || (rho_R < 0) || (p_L < 0) || (p_R < 0) || (E_L < 0) || (E_R < 0))
+                        {
+                            is_constant_interpolation = true;
+                        }
+                        
+                        /*
+                         * If the WENO interpolated mass fractions are outside the bounds,
+                         * use constant interpolation.
+                         */
+                        
+                        double Y_last_L = 1.0;
+                        double Y_last_R = 1.0;
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            if ((Y_L[si] < d_Y_bnd_lo) || (Y_L[si] > d_Y_bnd_up) ||
+                                (Y_R[si] < d_Y_bnd_lo) || (Y_R[si] > d_Y_bnd_up))
+                            {
+                                is_constant_interpolation = true;
+                            }
+                            
+                            Y_last_L -= Y_L[si];
+                            Y_last_R -= Y_R[si];
+                        }
+                        
+                        if ((Y_last_L < d_Y_bnd_lo) || (Y_last_L > d_Y_bnd_up) ||
+                            (Y_last_R < d_Y_bnd_lo) || (Y_last_R > d_Y_bnd_up))
+                        {
+                            is_constant_interpolation = true;
+                        }
+                        
+                        if (is_constant_interpolation)
                         {
                             // Compute the indices of left cell and right cell.
                             const int idx_cell_L = i - 1 + d_num_ghosts[0];
@@ -2847,6 +3355,27 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                 Y_L[si] = Y[si][idx_cell_L];
                                 Y_R[si] = Y[si][idx_cell_R];
                             }
+                            
+                            /*
+                            const hier::GlobalId global_id = patch.getGlobalId();
+                            const hier::LocalId local_id = patch.getLocalId();
+                            
+                            TBOX_WARNING("Constant interpolation is used at cell edge between cells ("
+                                         << (i - 1)
+                                         << ") and ("
+                                         << i
+                                         << ") of patch with GlobalId # "
+                                         << global_id.getOwnerRank()
+                                         << " and LocalId # "
+                                         << local_id.getValue()
+                                         << " at level # "
+                                         << patch.getPatchLevelNumber()
+                                         << " and Runge-Kutta step # "
+                                         << RK_step_number
+                                         << " of time "
+                                         << time
+                                         << ".");
+                            */
                         }
                         
                         /*
@@ -2873,7 +3402,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                             vel_x_ptr.push_back(&(velocity_intercell->getPointer(0, vi)[idx_face_x]));
                         }
                         
-                        d_Riemann_solver.computeIntercellFluxAndVelocityForFourEqnShyue(
+                        d_Riemann_solver_HLLC.computeIntercellFluxAndVelocityForFourEqnShyue(
                             F_x_midpoint_ptr,
                             vel_x_ptr,
                             &rho_L,
@@ -2887,7 +3416,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                             X_DIRECTION);
                     }
                     
-                    // Compute the flux in the x direction.
+                    // Compute the fluxes in the x direction.
                     for (int i = 0; i < interior_dims[0] + 1; i++)
                     {
                         // Compute the indices.
@@ -2899,7 +3428,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         
                         const int idx_node_R = i + d_num_ghosts[0];
                         
-                        // Compute the flux.
+                        // Compute the fluxes.
                         for (int ei = 0; ei < d_num_eqn; ei++)
                         {
                             convective_flux->getPointer(0, ei)[idx_face_x] = dt*(1.0/30*(F_x_midpoint[ei][idx_midpoint_x + 1] +
@@ -2927,16 +3456,28 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                             // Compute the indices of cell and faces. 
                             const int idx_cell_wghost = i + d_num_ghosts[0];
                             
+                            const int idx_cell_wghost_x_L = i - 1 + d_num_ghosts[0];
+                            
+                            const int idx_cell_wghost_x_R = i + 1 + d_num_ghosts[0];
+                            
                             const int idx_cell_nghost = i;
+                            
+                            const int idx_face_x_LL = i;
                             
                             const int idx_face_x_L = i + 1;
                             
                             const int idx_face_x_R = i + 2;
                             
-                            const int& u_L = velocity_intercell->getPointer(0, 0)[idx_face_x_L];
-                            const int& u_R = velocity_intercell->getPointer(0, 0)[idx_face_x_R];
+                            const int idx_face_x_RR = i + 3;
                             
-                            S[idx_cell_nghost] += dt*Y[si][idx_cell_wghost]*(u_R - u_L)/dx[0];
+                            const double& u_LL = velocity_intercell->getPointer(0, 0)[idx_face_x_LL];
+                            const double& u_L = velocity_intercell->getPointer(0, 0)[idx_face_x_L];
+                            const double& u_R = velocity_intercell->getPointer(0, 0)[idx_face_x_R];
+                            const double& u_RR = velocity_intercell->getPointer(0, 0)[idx_face_x_RR];
+                            
+                            S[idx_cell_nghost] += dt*Y[si][idx_cell_wghost]*(
+                                (3.0/2*(u_R - u_L) - 3.0/10*(u[idx_cell_wghost_x_R] - u[idx_cell_wghost_x_L]) +
+                                 1.0/30*(u_RR - u_LL))/dx[0]);
                         }
                     }
                 } // if (d_dim == tbox::Dimension(1))
@@ -2958,6 +3499,8 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                     double* v     = velocity->getPointer(1);
                     double* p     = pressure->getPointer(0);
                     double* c     = sound_speed->getPointer(0);
+                    double* theta = dilatation->getPointer(0);
+                    double* Omega = vorticity_magnitude->getPointer(0);
                     std::vector<double*> F_x_node;
                     std::vector<double*> F_y_node;
                     for (int ei = 0; ei < d_num_eqn; ei++)
@@ -2973,7 +3516,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         F_y_midpoint.push_back(convective_flux_midpoint->getPointer(1, ei));
                     }
                     
-                    // Compute the field of velocities, pressure and fluxes.
+                    // Compute the field of velocities, pressure, sound speed and fluxes.
                     for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
                     {
                         for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
@@ -3025,6 +3568,38 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                             {
                                 F_y_node[4 + si][idx] = v[idx]*Y[si][idx];
                             }
+                        }
+                    }
+                    
+                    // Compute the dilatation and magnitude of vorticity.
+                    for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                    {
+                        for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                        {
+                            // Compute indices of current and neighboring cells.
+                            const int idx = (i + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_y_B = (i + d_num_ghosts[0]) +
+                                (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_y_T = (i + d_num_ghosts[0]) +
+                                (j + 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            double dudx = (u[idx_x_R] - u[idx_x_L])/(2*dx[0]);
+                            double dudy = (u[idx_y_T] - u[idx_y_B])/(2*dx[1]);
+                            
+                            double dvdx = (v[idx_x_R] - v[idx_x_L])/(2*dx[0]);
+                            double dvdy = (v[idx_y_T] - v[idx_y_B])/(2*dx[1]);
+                            
+                            theta[idx] = dudx + dvdy;
+                            Omega[idx] = fabs(dvdx - dudy);
                         }
                     }
                     
@@ -3217,12 +3792,12 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the mid-point flux in the x direction.
+                    // Compute the mid-point fluxes in the x direction.
                     for (int j = 0; j < interior_dims[1]; j++)
                     {
                         for (int i = -1; i < interior_dims[0] + 2; i++)
                         {
-                            // Compute the index of face of mid-point flux and
+                            // Compute the index of face of mid-point fluxes and
                             // projection matrix.
                             const int idx_face_x = (i + 1) +
                                 (j + 1)*(interior_dims[0] + 3);
@@ -3399,11 +3974,45 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     &p_R,
                                     Y_R_ptr);
                             
+                            bool is_constant_interpolation = false;
+                            
                             /*
-                             * If the WENO interpolated density or energy are negative,
+                             * If the WENO interpolated density, pressure or total energy are negative,
                              * use constant interpolation.
                              */
-                            if ((rho_L < 0) || (rho_R < 0) || (E_L < 0) || (E_R < 0))
+                            
+                            if ((rho_L < 0) || (rho_R < 0) || (p_L < 0) || (p_R < 0) || (E_L < 0) || (E_R < 0))
+                            {
+                                is_constant_interpolation = true;
+                            }
+                            
+                            /*
+                             * If the WENO interpolated mass fractions are outside the bounds,
+                             * use constant interpolation.
+                             */
+                            
+                            double Y_last_L = 1.0;
+                            double Y_last_R = 1.0;
+                            
+                            for (int si = 0; si < d_num_species - 1; si++)
+                            {
+                                if ((Y_L[si] < d_Y_bnd_lo) || (Y_L[si] > d_Y_bnd_up) ||
+                                    (Y_R[si] < d_Y_bnd_lo) || (Y_R[si] > d_Y_bnd_up))
+                                {
+                                    is_constant_interpolation = true;
+                                }
+                               
+                               Y_last_L -= Y_L[si];
+                               Y_last_R -= Y_R[si];
+                            }
+                            
+                            if ((Y_last_L < d_Y_bnd_lo) || (Y_last_L > d_Y_bnd_up) ||
+                                (Y_last_R < d_Y_bnd_lo) || (Y_last_R > d_Y_bnd_up))
+                            {
+                                is_constant_interpolation = true;
+                            }
+                            
+                            if (is_constant_interpolation)
                             {
                                 // Compute the indices of left cell and right cell.
                                 const int idx_cell_L = (i - 1 + d_num_ghosts[0]) +
@@ -3428,6 +4037,31 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     Y_L[si] = Y[si][idx_cell_L];
                                     Y_R[si] = Y[si][idx_cell_R];
                                 }
+                                
+                                /*
+                                const hier::GlobalId global_id = patch.getGlobalId();
+                                const hier::LocalId local_id = patch.getLocalId();
+                                
+                                TBOX_WARNING("Constant interpolation is used at cell edge between cells ("
+                                             << (i - 1)
+                                             << ", "
+                                             << j
+                                             << ") and ("
+                                             << i
+                                             << ", "
+                                             << j
+                                             << ") of patch with GlobalId # "
+                                             << global_id.getOwnerRank()
+                                             << " and LocalId # "
+                                             << local_id.getValue()
+                                             << " at level # "
+                                             << patch.getPatchLevelNumber()
+                                             << " and Runge-Kutta step # "
+                                             << RK_step_number
+                                             << " of time "
+                                             << time
+                                             << ".");
+                                */
                             }
                             
                             /*
@@ -3454,27 +4088,58 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                 vel_x_ptr.push_back(&(velocity_intercell->getPointer(0, vi)[idx_face_x]));
                             }
                             
-                            d_Riemann_solver.computeIntercellFluxAndVelocityForFourEqnShyue(
-                                F_x_midpoint_ptr,
-                                vel_x_ptr,
-                                &rho_L,
-                                &rho_R,
-                                m_L_ptr,
-                                m_R_ptr,
-                                &E_L,
-                                &E_R,
-                                Y_L_ptr,
-                                Y_R_ptr,
-                                X_DIRECTION);
+                            // Compute the average dilatation and magnitude of vorticity.
+                            const int idx_L = (i - 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_R = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const double theta_avg = 0.5*(theta[idx_L] + theta[idx_R]);
+                            const double Omega_avg = 0.5*(Omega[idx_L] + Omega[idx_R]);
+                            
+                            // Compute the Ducros-like shock sensor.
+                            const double s = -theta_avg/(fabs(theta_avg) + Omega_avg + EPSILON);
+                            
+                            if (s > 0.65)
+                            {
+                                d_Riemann_solver_HLLC_HLL.computeIntercellFluxAndVelocityForFourEqnShyue(
+                                    F_x_midpoint_ptr,
+                                    vel_x_ptr,
+                                    &rho_L,
+                                    &rho_R,
+                                    m_L_ptr,
+                                    m_R_ptr,
+                                    &E_L,
+                                    &E_R,
+                                    Y_L_ptr,
+                                    Y_R_ptr,
+                                    X_DIRECTION);
+                            }
+                            else
+                            {
+                                d_Riemann_solver_HLLC.computeIntercellFluxAndVelocityForFourEqnShyue(
+                                    F_x_midpoint_ptr,
+                                    vel_x_ptr,
+                                    &rho_L,
+                                    &rho_R,
+                                    m_L_ptr,
+                                    m_R_ptr,
+                                    &E_L,
+                                    &E_R,
+                                    Y_L_ptr,
+                                    Y_R_ptr,
+                                    X_DIRECTION);
+                            }
                         }
                     }
                     
-                    // Compute the mid-point flux in the y direction.
+                    // Compute the mid-point fluxes in the y direction.
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
                         for (int j = -1; j < interior_dims[1] + 2; j++)
                         {
-                            // Compute the index of face of mid-point flux and
+                            // Compute the index of face of mid-point fluxes and
                             // projection matrix.
                             const int idx_face_y = (j + 1) +
                                 (i + 1)*(interior_dims[1] + 3);
@@ -3652,11 +4317,44 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     &p_T,
                                     Y_T_ptr);
                             
+                            bool is_constant_interpolation = false;
+                            
                             /*
-                             * If the WENO interpolated density or energy are negative,
+                             * If the WENO interpolated density, pressure or total energy are negative,
                              * use constant interpolation.
                              */
-                            if ((rho_B < 0) || (rho_T < 0) || (E_B < 0) || (E_T < 0))
+                            if ((rho_B < 0) || (rho_T < 0) || (p_B < 0) || (p_T < 0) || (E_B < 0) || (E_T < 0))
+                            {
+                                is_constant_interpolation = true;
+                            }
+                            
+                            /*
+                             * If the WENO interpolated mass fractions are outside the bounds,
+                             * use constant interpolation.
+                             */
+                            
+                            double Y_last_B = 1.0;
+                            double Y_last_T = 1.0;
+                            
+                            for (int si = 0; si < d_num_species - 1; si++)
+                            {
+                                if ((Y_B[si] < d_Y_bnd_lo) || (Y_B[si] > d_Y_bnd_up) ||
+                                    (Y_T[si] < d_Y_bnd_lo) || (Y_T[si] > d_Y_bnd_up))
+                                {
+                                    is_constant_interpolation = true;
+                                }
+                                
+                                Y_last_B -= Y_B[si];
+                                Y_last_T -= Y_T[si];
+                            }
+                            
+                            if ((Y_last_B < d_Y_bnd_lo) || (Y_last_B > d_Y_bnd_up) ||
+                                (Y_last_T < d_Y_bnd_lo) || (Y_last_T > d_Y_bnd_up))
+                            {
+                                is_constant_interpolation = true;
+                            }
+                            
+                            if (is_constant_interpolation)
                             {
                                 // Compute the indices of bottom cell and top cell.
                                 const int idx_cell_B = (i + d_num_ghosts[0]) +
@@ -3681,6 +4379,31 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     Y_B[si] = Y[si][idx_cell_B];
                                     Y_T[si] = Y[si][idx_cell_T];
                                 }
+                                
+                                /*
+                                const hier::GlobalId global_id = patch.getGlobalId();
+                                const hier::LocalId local_id = patch.getLocalId();
+                                
+                                TBOX_WARNING("Constant interpolation is used at cell edge between cells ("
+                                             << i
+                                             << ", "
+                                             << (j - 1)
+                                             << ") and ("
+                                             << i
+                                             << ", "
+                                             << j
+                                             << ") of patch with GlobalId # "
+                                             << global_id.getOwnerRank()
+                                             << " and LocalId # "
+                                             << local_id.getValue()
+                                             << " at level # "
+                                             << patch.getPatchLevelNumber()
+                                             << " and Runge-Kutta step # "
+                                             << RK_step_number
+                                             << " of time "
+                                             << time
+                                             << ".");
+                                */
                             }
                             
                             /*
@@ -3707,22 +4430,53 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                 vel_y_ptr.push_back(&(velocity_intercell->getPointer(1, vi)[idx_face_y]));
                             }
                             
-                            d_Riemann_solver.computeIntercellFluxAndVelocityForFourEqnShyue(
-                                F_y_midpoint_ptr,
-                                vel_y_ptr,
-                                &rho_B,
-                                &rho_T,
-                                m_B_ptr,
-                                m_T_ptr,
-                                &E_B,
-                                &E_T,
-                                Y_B_ptr,
-                                Y_T_ptr,
-                                Y_DIRECTION);
+                            // Compute the average dilatation and magnitude of vorticity.
+                            const int idx_B = (i + d_num_ghosts[0]) +
+                                    (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_T = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const double theta_avg = 0.5*(theta[idx_B] + theta[idx_T]);
+                            const double Omega_avg = 0.5*(Omega[idx_B] + Omega[idx_T]);
+                            
+                            // Compute the Ducros-like shock sensor.
+                            const double s = -theta_avg/(fabs(theta_avg) + Omega_avg + EPSILON);
+                            
+                            if (s > 0.65)
+                            {
+                                d_Riemann_solver_HLLC_HLL.computeIntercellFluxAndVelocityForFourEqnShyue(
+                                    F_y_midpoint_ptr,
+                                    vel_y_ptr,
+                                    &rho_B,
+                                    &rho_T,
+                                    m_B_ptr,
+                                    m_T_ptr,
+                                    &E_B,
+                                    &E_T,
+                                    Y_B_ptr,
+                                    Y_T_ptr,
+                                    Y_DIRECTION);
+                            }
+                            else
+                            {
+                                d_Riemann_solver_HLLC.computeIntercellFluxAndVelocityForFourEqnShyue(
+                                    F_y_midpoint_ptr,
+                                    vel_y_ptr,
+                                    &rho_B,
+                                    &rho_T,
+                                    m_B_ptr,
+                                    m_T_ptr,
+                                    &E_B,
+                                    &E_T,
+                                    Y_B_ptr,
+                                    Y_T_ptr,
+                                    Y_DIRECTION);
+                            }
                         }
                     }
                     
-                    // Compute the flux in the x direction.
+                    // Compute the fluxes in the x direction.
                     for (int j = 0; j < interior_dims[1]; j++)
                     {
                         for (int i = 0; i < interior_dims[0] + 1; i++)
@@ -3740,7 +4494,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                             const int idx_node_R = (i + d_num_ghosts[0]) +
                                 (j + d_num_ghosts[1])*ghostcell_dims[0];
                             
-                            // Compute the flux.
+                            // Compute the fluxes.
                             for (int ei = 0; ei < d_num_eqn; ei++)
                             {
                                 convective_flux->getPointer(0, ei)[idx_face_x] = dt*(1.0/30*(F_x_midpoint[ei][idx_midpoint_x + 1] +
@@ -3752,7 +4506,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the y direction.
+                    // Compute the fluxes in the y direction.
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
                         for (int j = 0; j < interior_dims[1] + 1; j++)
@@ -3770,7 +4524,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                             const int idx_node_T = (i + d_num_ghosts[0]) +
                                 (j + d_num_ghosts[1])*ghostcell_dims[0];
                             
-                            // Compute the flux.
+                            // Compute the fluxes.
                             for (int ei = 0; ei < d_num_eqn; ei++)
                             {
                                 convective_flux->getPointer(1, ei)[idx_face_y] =
@@ -3799,11 +4553,26 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         {
                             for (int i = 0; i < interior_dims[0]; i++)
                             {
-                                // Compute the indices of cell and faces. 
+                                // Compute the indices of cells and faces. 
                                 const int idx_cell_wghost = (i + d_num_ghosts[0]) +
                                     (j + d_num_ghosts[1])*ghostcell_dims[0];
                                 
+                                const int idx_cell_wghost_x_L = (i - 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_cell_wghost_x_R = (i + 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_cell_wghost_y_B = (i + d_num_ghosts[0]) +
+                                    (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_cell_wghost_y_T = (i + d_num_ghosts[0]) +
+                                    (j + 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                                
                                 const int idx_cell_nghost = i + j*interior_dims[0];
+                                
+                                const int idx_face_x_LL = i +
+                                    (j + 1)*(interior_dims[0] + 3);
                                 
                                 const int idx_face_x_L = (i + 1) +
                                     (j + 1)*(interior_dims[0] + 3);
@@ -3811,19 +4580,36 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                 const int idx_face_x_R = (i + 2) +
                                     (j + 1)*(interior_dims[0] + 3);
                                 
+                                const int idx_face_x_RR = (i + 3) +
+                                    (j + 1)*(interior_dims[0] + 3);
+                                
+                                const int idx_face_y_BB = j +
+                                    (i + 1)*(interior_dims[1] + 3);
+                                
                                 const int idx_face_y_B = (j + 1) +
                                     (i + 1)*(interior_dims[1] + 3);
                                 
                                 const int idx_face_y_T = (j + 2) +
                                     (i + 1)*(interior_dims[1] + 3);
                                 
-                                const int& u_L = velocity_intercell->getPointer(0, 0)[idx_face_x_L];
-                                const int& u_R = velocity_intercell->getPointer(0, 0)[idx_face_x_R];
+                                const int idx_face_y_TT = (j + 3) +
+                                    (i + 1)*(interior_dims[1] + 3);
                                 
-                                const int& v_B = velocity_intercell->getPointer(1, 1)[idx_face_y_B];
-                                const int& v_T = velocity_intercell->getPointer(1, 1)[idx_face_y_T];
+                                const double& u_LL = velocity_intercell->getPointer(0, 0)[idx_face_x_LL];
+                                const double& u_L = velocity_intercell->getPointer(0, 0)[idx_face_x_L];
+                                const double& u_R = velocity_intercell->getPointer(0, 0)[idx_face_x_R];
+                                const double& u_RR = velocity_intercell->getPointer(0, 0)[idx_face_x_RR];
                                 
-                                S[idx_cell_nghost] += dt*Y[si][idx_cell_wghost]*((u_R - u_L)/dx[0] + (v_T - v_B)/dx[1]);
+                                const double& v_BB = velocity_intercell->getPointer(1, 1)[idx_face_y_BB];
+                                const double& v_B = velocity_intercell->getPointer(1, 1)[idx_face_y_B];
+                                const double& v_T = velocity_intercell->getPointer(1, 1)[idx_face_y_T];
+                                const double& v_TT = velocity_intercell->getPointer(1, 1)[idx_face_y_TT];
+                                
+                                S[idx_cell_nghost] += dt*Y[si][idx_cell_wghost]*(
+                                    (3.0/2*(u_R - u_L) - 3.0/10*(u[idx_cell_wghost_x_R] - u[idx_cell_wghost_x_L]) +
+                                     1.0/30*(u_RR - u_LL))/dx[0] +
+                                    (3.0/2*(v_T - v_B) - 3.0/10*(v[idx_cell_wghost_y_T] - v[idx_cell_wghost_y_B]) +
+                                     1.0/30*(v_TT - v_BB))/dx[1]);
                             }
                         }
                     }
@@ -3848,6 +4634,8 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                     double* w     = velocity->getPointer(2);
                     double* p     = pressure->getPointer(0);
                     double* c     = sound_speed->getPointer(0);
+                    double* theta = dilatation->getPointer(0);
+                    double* Omega = vorticity_magnitude->getPointer(0);
                     std::vector<double*> F_x_node;
                     std::vector<double*> F_y_node;
                     std::vector<double*> F_z_node;
@@ -3867,7 +4655,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         F_z_midpoint.push_back(convective_flux_midpoint->getPointer(2, ei));
                     }
                     
-                    // Compute the field of velocities, pressure and fluxes.
+                    // Compute the field of velocities, pressure, sound speed and fluxes.
                     for (int k = -d_num_ghosts[2]; k < interior_dims[2] + d_num_ghosts[2]; k++)
                     {
                         for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
@@ -3936,6 +4724,63 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                 {
                                     F_z_node[5 + si][idx] = w[idx]*Y[si][idx];
                                 }
+                            }
+                        }
+                    }
+                    
+                    // Compute the dilatation and magnitude of vorticity.
+                    for (int k = -d_num_ghosts[2]; k < interior_dims[2] + d_num_ghosts[2]; k++)
+                    {
+                        for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                        {
+                            for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                            {
+                                // Compute indices of current and neighboring cells.
+                                const int idx = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_y_B = (i + d_num_ghosts[0]) +
+                                    (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_y_T = (i + d_num_ghosts[0]) +
+                                    (j + 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_z_B = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k - 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_z_F = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                double dudx = (u[idx_x_R] - u[idx_x_L])/(2*dx[0]);
+                                double dudy = (u[idx_y_T] - u[idx_y_B])/(2*dx[1]);
+                                double dudz = (u[idx_z_F] - u[idx_z_B])/(2*dx[2]);
+                                
+                                double dvdx = (v[idx_x_R] - v[idx_x_L])/(2*dx[0]);
+                                double dvdy = (v[idx_y_T] - v[idx_y_B])/(2*dx[1]);
+                                double dvdz = (v[idx_z_F] - v[idx_z_B])/(2*dx[2]);
+                                
+                                double dwdx = (w[idx_x_R] - w[idx_x_L])/(2*dx[0]);
+                                double dwdy = (w[idx_y_T] - w[idx_y_B])/(2*dx[1]);
+                                double dwdz = (w[idx_z_F] - w[idx_z_B])/(2*dx[2]);
+                                
+                                theta[idx] = dudx + dvdy + dwdz;
+                                
+                                Omega[idx] = sqrt(pow(dwdy - dvdz, 2) +
+                                    pow(dudz - dwdx, 2) +
+                                    pow(dvdx - dudy, 2));
                             }
                         }
                     }
@@ -4254,14 +5099,14 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the mid-point flux in the x direction.
+                    // Compute the mid-point fluxes in the x direction.
                     for (int k = 0; k < interior_dims[2]; k++)
                     {
                         for (int j = 0; j < interior_dims[1]; j++)
                         {
                             for (int i = -1; i < interior_dims[0] + 2; i++)
                             {
-                                // Compute the index of face of mid-point flux and
+                                // Compute the index of face of mid-point fluxes and
                                 // projection matrix.
                                 const int idx_face_x = (i + 1) +
                                     (j + 1)*(interior_dims[0] + 3) +
@@ -4441,11 +5286,44 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                         &p_R,
                                         Y_R_ptr);
                                 
+                                bool is_constant_interpolation = false;
+                                
                                 /*
-                                 * If the WENO interpolated density or energy are negative,
+                                 * If the WENO interpolated density, pressure or total energy are negative,
                                  * use constant interpolation.
                                  */
-                                if ((rho_L < 0) || (rho_R < 0) || (E_L < 0) || (E_R < 0))
+                                if ((rho_L < 0) || (rho_R < 0) || (p_L < 0) || (p_R < 0) || (E_L < 0) || (E_R < 0))
+                                {
+                                    is_constant_interpolation = true;
+                                }
+                                
+                                /*
+                                 * If the WENO interpolated mass fractions are outside the bounds,
+                                 * use constant interpolation.
+                                 */
+                                
+                                double Y_last_L = 1.0;
+                                double Y_last_R = 1.0;
+                                
+                                for (int si = 0; si < d_num_species - 1; si++)
+                                {
+                                    if ((Y_L[si] < d_Y_bnd_lo) || (Y_L[si] > d_Y_bnd_up) ||
+                                        (Y_R[si] < d_Y_bnd_lo) || (Y_R[si] > d_Y_bnd_up))
+                                    {
+                                        is_constant_interpolation = true;
+                                    }
+                                    
+                                    Y_last_L -= Y_L[si];
+                                    Y_last_R -= Y_R[si];
+                                }
+                                
+                                if ((Y_last_L < d_Y_bnd_lo) || (Y_last_L > d_Y_bnd_up) ||
+                                    (Y_last_R < d_Y_bnd_lo) || (Y_last_R > d_Y_bnd_up))
+                                {
+                                    is_constant_interpolation = true;
+                                }
+                                
+                                if (is_constant_interpolation)
                                 {
                                     // Compute the indices of left cell and right cell.
                                     const int idx_cell_L = (i - 1 + d_num_ghosts[0]) +
@@ -4474,6 +5352,35 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                         Y_L[si] = Y[si][idx_cell_L];
                                         Y_R[si] = Y[si][idx_cell_R];
                                     }
+                                    
+                                    /*
+                                    const hier::GlobalId global_id = patch.getGlobalId();
+                                    const hier::LocalId local_id = patch.getLocalId();
+                                    
+                                    TBOX_WARNING("Constant interpolation is used at cell edge between cells ("
+                                                 << (i - 1)
+                                                 << ", "
+                                                 << j
+                                                 << ", "
+                                                 << k
+                                                 << ") and ("
+                                                 << i
+                                                 << ", "
+                                                 << j
+                                                 << ", "
+                                                 << k
+                                                 << ") of patch with GlobalId # "
+                                                 << global_id.getOwnerRank()
+                                                 << " and LocalId # "
+                                                 << local_id.getValue()
+                                                 << " at level # "
+                                                 << patch.getPatchLevelNumber()
+                                                 << " and Runge-Kutta step # "
+                                                 << RK_step_number
+                                                 << " of time "
+                                                 << time
+                                                 << ".");
+                                    */
                                 }
                                 
                                 /*
@@ -4500,30 +5407,63 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     vel_x_ptr.push_back(&(velocity_intercell->getPointer(0, vi)[idx_face_x]));
                                 }
                                 
-                                d_Riemann_solver.computeIntercellFluxAndVelocityForFourEqnShyue(
-                                    F_x_midpoint_ptr,
-                                    vel_x_ptr,
-                                    &rho_L,
-                                    &rho_R,
-                                    m_L_ptr,
-                                    m_R_ptr,
-                                    &E_L,
-                                    &E_R,
-                                    Y_L_ptr,
-                                    Y_R_ptr,
-                                    X_DIRECTION);
+                                // Compute the average dilatation and magnitude of vorticity.
+                                const int idx_L = (i - 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_R = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const double theta_avg = 0.5*(theta[idx_L] + theta[idx_R]);
+                                const double Omega_avg = 0.5*(Omega[idx_L] + Omega[idx_R]);
+                                
+                                // Compute the Ducros-like shock sensor.
+                                const double s = -theta_avg/(fabs(theta_avg) + Omega_avg + EPSILON);
+                                
+                                if (s > 0.65)
+                                {
+                                    d_Riemann_solver_HLLC_HLL.computeIntercellFluxAndVelocityForFourEqnShyue(
+                                        F_x_midpoint_ptr,
+                                        vel_x_ptr,
+                                        &rho_L,
+                                        &rho_R,
+                                        m_L_ptr,
+                                        m_R_ptr,
+                                        &E_L,
+                                        &E_R,
+                                        Y_L_ptr,
+                                        Y_R_ptr,
+                                        X_DIRECTION);
+                                }
+                                else
+                                {
+                                    d_Riemann_solver_HLLC.computeIntercellFluxAndVelocityForFourEqnShyue(
+                                        F_x_midpoint_ptr,
+                                        vel_x_ptr,
+                                        &rho_L,
+                                        &rho_R,
+                                        m_L_ptr,
+                                        m_R_ptr,
+                                        &E_L,
+                                        &E_R,
+                                        Y_L_ptr,
+                                        Y_R_ptr,
+                                        X_DIRECTION);
+                                }
                             }
                         }
                     }
                     
-                    // Compute the mid-point flux in the y direction.
+                    // Compute the mid-point fluxes in the y direction.
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
                         for (int k = 0; k < interior_dims[2]; k++)
                         {
                             for (int j = -1; j < interior_dims[1] + 2; j++)
                             {
-                                // Compute the index of face of mid-point flux and
+                                // Compute the index of face of mid-point fluxes and
                                 // projection matrix.
                                 const int idx_face_y = (j + 1) +
                                     (k + 1)*(interior_dims[1] + 3) +
@@ -4704,11 +5644,44 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                         &p_T,
                                         Y_T_ptr);
                                 
+                                bool is_constant_interpolation = false;
+                                
                                 /*
-                                 * If the WENO interpolated density or energy are negative,
+                                 * If the WENO interpolated density, pressure or total energy are negative,
                                  * use constant interpolation.
                                  */
-                                if ((rho_B < 0) || (rho_T < 0) || (E_B < 0) || (E_T < 0))
+                                if ((rho_B < 0) || (rho_T < 0) || (p_B < 0) || (p_T < 0) || (E_B < 0) || (E_T < 0))
+                                {
+                                    is_constant_interpolation = true;
+                                }
+                                
+                                /*
+                                 * If the WENO interpolated mass fractions are outside the bounds,
+                                 * use constant interpolation.
+                                 */
+                                
+                                double Y_last_B = 1.0;
+                                double Y_last_T = 1.0;
+                                
+                                for (int si = 0; si < d_num_species - 1; si++)
+                                {
+                                    if ((Y_B[si] < d_Y_bnd_lo) || (Y_B[si] > d_Y_bnd_up) ||
+                                        (Y_T[si] < d_Y_bnd_lo) || (Y_T[si] > d_Y_bnd_up))
+                                    {
+                                        is_constant_interpolation = true;
+                                    }
+                                    
+                                    Y_last_B -= Y_B[si];
+                                    Y_last_T -= Y_T[si];
+                                }
+                                
+                                if ((Y_last_B < d_Y_bnd_lo) || (Y_last_B > d_Y_bnd_up) ||
+                                    (Y_last_T < d_Y_bnd_lo) || (Y_last_T > d_Y_bnd_up))
+                                {
+                                    is_constant_interpolation = true;
+                                }
+                                
+                                if (is_constant_interpolation)
                                 {
                                     // Compute the indices of bottom cell and top cell.
                                     const int idx_cell_B = (i + d_num_ghosts[0]) +
@@ -4737,6 +5710,35 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                         Y_B[si] = Y[si][idx_cell_B];
                                         Y_T[si] = Y[si][idx_cell_T];
                                     }
+                                    
+                                    /*
+                                    const hier::GlobalId global_id = patch.getGlobalId();
+                                    const hier::LocalId local_id = patch.getLocalId();
+                                    
+                                    TBOX_WARNING("Constant interpolation is used at cell edge between cells ("
+                                                 << i
+                                                 << ", "
+                                                 << (j - 1)
+                                                 << ", "
+                                                 << k
+                                                 << ") and ("
+                                                 << i
+                                                 << ", "
+                                                 << j
+                                                 << ", "
+                                                 << k
+                                                 << ") of patch with GlobalId # "
+                                                 << global_id.getOwnerRank()
+                                                 << " and LocalId # "
+                                                 << local_id.getValue()
+                                                 << " at level # "
+                                                 << patch.getPatchLevelNumber()
+                                                 << " and Runge-Kutta step # "
+                                                 << RK_step_number
+                                                 << " of time "
+                                                 << time
+                                                 << ".");
+                                    */
                                 }
                                 
                                 /*
@@ -4763,30 +5765,63 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     vel_y_ptr.push_back(&(velocity_intercell->getPointer(1, vi)[idx_face_y]));
                                 }
                                 
-                                d_Riemann_solver.computeIntercellFluxAndVelocityForFourEqnShyue(
-                                    F_y_midpoint_ptr,
-                                    vel_y_ptr,
-                                    &rho_B,
-                                    &rho_T,
-                                    m_B_ptr,
-                                    m_T_ptr,
-                                    &E_B,
-                                    &E_T,
-                                    Y_B_ptr,
-                                    Y_T_ptr,
-                                    Y_DIRECTION);
+                                // Compute the average dilatation and magnitude of vorticity.
+                                const int idx_B = (i + d_num_ghosts[0]) +
+                                    (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_T = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const double theta_avg = 0.5*(theta[idx_B] + theta[idx_T]);
+                                const double Omega_avg = 0.5*(Omega[idx_B] + Omega[idx_T]);
+                                
+                                // Compute the Ducros-like shock sensor.
+                                const double s = -theta_avg/(fabs(theta_avg) + Omega_avg + EPSILON);
+                                
+                                if (s > 0.65)
+                                {
+                                    d_Riemann_solver_HLLC_HLL.computeIntercellFluxAndVelocityForFourEqnShyue(
+                                        F_y_midpoint_ptr,
+                                        vel_y_ptr,
+                                        &rho_B,
+                                        &rho_T,
+                                        m_B_ptr,
+                                        m_T_ptr,
+                                        &E_B,
+                                        &E_T,
+                                        Y_B_ptr,
+                                        Y_T_ptr,
+                                        Y_DIRECTION);
+                                }
+                                else
+                                {
+                                    d_Riemann_solver_HLLC.computeIntercellFluxAndVelocityForFourEqnShyue(
+                                        F_y_midpoint_ptr,
+                                        vel_y_ptr,
+                                        &rho_B,
+                                        &rho_T,
+                                        m_B_ptr,
+                                        m_T_ptr,
+                                        &E_B,
+                                        &E_T,
+                                        Y_B_ptr,
+                                        Y_T_ptr,
+                                        Y_DIRECTION);
+                                }
                             }
                         }
                     }
                     
-                    // Compute the mid-point flux in the z direction.
+                    // Compute the mid-point fluxes in the z direction.
                     for (int j = 0; j < interior_dims[1]; j++)
                     {
                         for (int i = 0; i < interior_dims[0]; i++)
                         {
                             for (int k = -1; k < interior_dims[2] + 2; k++)
                             {
-                                // Compute the index of face of mid-point flux and
+                                // Compute the index of face of mid-point fluxes and
                                 // projection matrix.
                                 const int idx_face_z = (k + 1) +
                                     (i + 1)*(interior_dims[2] + 3) +
@@ -4968,11 +6003,44 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                         &p_F,
                                         Y_F_ptr);
                                 
+                                bool is_constant_interpolation = false;
+                                
                                 /*
-                                 * If the WENO interpolated density or energy are negative,
+                                 * If the WENO interpolated density, pressure or total energy are negative,
                                  * use constant interpolation.
                                  */
-                                if ((rho_B < 0) || (rho_F < 0) || (E_B < 0) || (E_F < 0))
+                                if ((rho_B < 0) || (rho_F < 0) || (p_B < 0) || (p_F < 0) || (E_B < 0) || (E_F < 0))
+                                {
+                                    is_constant_interpolation = true;
+                                }
+                                
+                                /*
+                                 * If the WENO interpolated mass fractions are outside the bounds,
+                                 * use constant interpolation.
+                                 */
+                                
+                                double Y_last_B = 1.0;
+                                double Y_last_F = 1.0;
+                                
+                                for (int si = 0; si < d_num_species - 1; si++)
+                                {
+                                    if ((Y_B[si] < d_Y_bnd_lo) || (Y_B[si] > d_Y_bnd_up) ||
+                                        (Y_F[si] < d_Y_bnd_lo) || (Y_F[si] > d_Y_bnd_up))
+                                    {
+                                        is_constant_interpolation = true;
+                                    }
+                                    
+                                    Y_last_B -= Y_B[si];
+                                    Y_last_F -= Y_F[si];
+                                }
+                                
+                                if ((Y_last_B < d_Y_bnd_lo) || (Y_last_B > d_Y_bnd_up) ||
+                                    (Y_last_F < d_Y_bnd_lo) || (Y_last_F > d_Y_bnd_up))
+                                {
+                                    is_constant_interpolation = true;
+                                }
+                                
+                                if (is_constant_interpolation)
                                 {
                                     // Compute the indices of back cell and front cell.
                                     const int idx_cell_B = (i + d_num_ghosts[0]) +
@@ -5001,6 +6069,35 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                         Y_B[si] = Y[si][idx_cell_B];
                                         Y_F[si] = Y[si][idx_cell_F];
                                     }
+                                    
+                                    /*
+                                    const hier::GlobalId global_id = patch.getGlobalId();
+                                    const hier::LocalId local_id = patch.getLocalId();
+                                    
+                                    TBOX_WARNING("Constant interpolation is used at cell edge between cells ("
+                                                 << i
+                                                 << ", "
+                                                 << j
+                                                 << ", "
+                                                 << (k - 1)
+                                                 << ") and ("
+                                                 << i
+                                                 << ", "
+                                                 << j
+                                                 << ", "
+                                                 << k
+                                                 << ") of patch with GlobalId # "
+                                                 << global_id.getOwnerRank()
+                                                 << " and LocalId # "
+                                                 << local_id.getValue()
+                                                 << " at level # "
+                                                 << patch.getPatchLevelNumber()
+                                                 << " and Runge-Kutta step # "
+                                                 << RK_step_number
+                                                 << " of time "
+                                                 << time
+                                                 << ".");
+                                    */
                                 }
                                 
                                 /*
@@ -5027,23 +6124,56 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     vel_z_ptr.push_back(&(velocity_intercell->getPointer(2, vi)[idx_face_z]));
                                 }
                                 
-                                d_Riemann_solver.computeIntercellFluxAndVelocityForFourEqnShyue(
-                                    F_z_midpoint_ptr,
-                                    vel_z_ptr,
-                                    &rho_B,
-                                    &rho_F,
-                                    m_B_ptr,
-                                    m_F_ptr,
-                                    &E_B,
-                                    &E_F,
-                                    Y_B_ptr,
-                                    Y_F_ptr,
-                                    Z_DIRECTION);
+                                // Compute the average dilatation and magnitude of vorticity.
+                                const int idx_B = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k - 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_F = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const double theta_avg = 0.5*(theta[idx_B] + theta[idx_F]);
+                                const double Omega_avg = 0.5*(Omega[idx_B] + Omega[idx_F]);
+                                
+                                // Compute the Ducros-like shock sensor.
+                                const double s = -theta_avg/(fabs(theta_avg) + Omega_avg + EPSILON);
+                                
+                                if (s > 0.65)
+                                {
+                                    d_Riemann_solver_HLLC_HLL.computeIntercellFluxAndVelocityForFourEqnShyue(
+                                        F_z_midpoint_ptr,
+                                        vel_z_ptr,
+                                        &rho_B,
+                                        &rho_F,
+                                        m_B_ptr,
+                                        m_F_ptr,
+                                        &E_B,
+                                        &E_F,
+                                        Y_B_ptr,
+                                        Y_F_ptr,
+                                        Z_DIRECTION);
+                                }
+                                else
+                                {
+                                    d_Riemann_solver_HLLC.computeIntercellFluxAndVelocityForFourEqnShyue(
+                                        F_z_midpoint_ptr,
+                                        vel_z_ptr,
+                                        &rho_B,
+                                        &rho_F,
+                                        m_B_ptr,
+                                        m_F_ptr,
+                                        &E_B,
+                                        &E_F,
+                                        Y_B_ptr,
+                                        Y_F_ptr,
+                                        Z_DIRECTION);
+                                }
                             }
                         }
                     }
                     
-                    // Compute the flux in the x direction.
+                    // Compute the fluxes in the x direction.
                     for (int k = 0; k < interior_dims[2]; k++)
                     {
                         for (int j = 0; j < interior_dims[1]; j++)
@@ -5067,7 +6197,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     (j + d_num_ghosts[1])*ghostcell_dims[0] +
                                     (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                                 
-                                // Compute the flux.
+                                // Compute the fluxes.
                                 for (int ei = 0; ei < d_num_eqn; ei++)
                                 {
                                     convective_flux->getPointer(0, ei)[idx_face_x] = dt*(1.0/30*(F_x_midpoint[ei][idx_midpoint_x + 1] +
@@ -5080,7 +6210,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the y direction.
+                    // Compute the fluxes in the y direction.
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
                         for (int k = 0; k < interior_dims[2]; k++)
@@ -5104,7 +6234,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     (j + d_num_ghosts[1])*ghostcell_dims[0] +
                                     (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                                 
-                                // Compute the flux.
+                                // Compute the fluxes.
                                 for (int ei = 0; ei < d_num_eqn; ei++)
                                 {
                                     convective_flux->getPointer(1, ei)[idx_face_y] =
@@ -5118,7 +6248,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the z direction.
+                    // Compute the fluxes in the z direction.
                     for (int j = 0; j < interior_dims[1]; j++)
                     {
                         for (int i = 0; i < interior_dims[0]; i++)
@@ -5142,7 +6272,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     (j + d_num_ghosts[1])*ghostcell_dims[0] +
                                     (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                                 
-                                // Compute the flux.
+                                // Compute the fluxes.
                                 for (int ei = 0; ei < d_num_eqn; ei++)
                                 {
                                     convective_flux->getPointer(2, ei)[idx_face_z] =
@@ -5174,14 +6304,42 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                             {
                                 for (int i = 0; i < interior_dims[0]; i++)
                                 {
-                                    // Compute the indices of cell and faces. 
+                                    // Compute the indices of cells and faces. 
                                     const int idx_cell_wghost = (i + d_num_ghosts[0]) +
                                         (j + d_num_ghosts[1])*ghostcell_dims[0] +
                                         (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                                     
+                                    const int idx_cell_wghost_x_L = (i - 1 + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_cell_wghost_x_R = (i + 1 + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_cell_wghost_y_B = (i + d_num_ghosts[0]) +
+                                        (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_cell_wghost_y_T = (i + d_num_ghosts[0]) +
+                                        (j + 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_cell_wghost_z_B = (i + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k - 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_cell_wghost_z_F = (i + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
                                     const int idx_cell_nghost = i +
                                         j*interior_dims[0] +
                                         k*interior_dims[0]*interior_dims[1];
+                                    
+                                    const int idx_face_x_LL = i +
+                                        (j + 1)*(interior_dims[0] + 3) +
+                                        (k + 1)*(interior_dims[0] + 3)*(interior_dims[1] + 2);
                                     
                                     const int idx_face_x_L = (i + 1) +
                                         (j + 1)*(interior_dims[0] + 3) +
@@ -5191,6 +6349,14 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                         (j + 1)*(interior_dims[0] + 3) +
                                         (k + 1)*(interior_dims[0] + 3)*(interior_dims[1] + 2);
                                     
+                                    const int idx_face_x_RR = (i + 3) +
+                                        (j + 1)*(interior_dims[0] + 3) +
+                                        (k + 1)*(interior_dims[0] + 3)*(interior_dims[1] + 2);
+                                    
+                                    const int idx_face_y_BB = j +
+                                        (k + 1)*(interior_dims[1] + 3) +
+                                        (i + 1)*(interior_dims[1] + 3)*(interior_dims[2] + 2);
+                                    
                                     const int idx_face_y_B = (j + 1) +
                                         (k + 1)*(interior_dims[1] + 3) +
                                         (i + 1)*(interior_dims[1] + 3)*(interior_dims[2] + 2);
@@ -5198,6 +6364,14 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     const int idx_face_y_T = (j + 2) +
                                         (k + 1)*(interior_dims[1] + 3) +
                                         (i + 1)*(interior_dims[1] + 3)*(interior_dims[2] + 2);
+                                    
+                                    const int idx_face_y_TT = (j + 3) +
+                                        (k + 1)*(interior_dims[1] + 3) +
+                                        (i + 1)*(interior_dims[1] + 3)*(interior_dims[2] + 2);
+                                    
+                                    const int idx_face_z_BB = k +
+                                        (i + 1)*(interior_dims[2] + 3) +
+                                        (j + 1)*(interior_dims[2] + 3)*(interior_dims[0] + 2);
                                     
                                     const int idx_face_z_B = (k + 1) +
                                         (i + 1)*(interior_dims[2] + 3) +
@@ -5207,17 +6381,32 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                         (i + 1)*(interior_dims[2] + 3) +
                                         (j + 1)*(interior_dims[2] + 3)*(interior_dims[0] + 2);
                                     
-                                    const int& u_L = velocity_intercell->getPointer(0, 0)[idx_face_x_L];
-                                    const int& u_R = velocity_intercell->getPointer(0, 0)[idx_face_x_R];
+                                    const int idx_face_z_FF = (k + 3) +
+                                        (i + 1)*(interior_dims[2] + 3) +
+                                        (j + 1)*(interior_dims[2] + 3)*(interior_dims[0] + 2);
                                     
-                                    const int& v_B = velocity_intercell->getPointer(1, 1)[idx_face_y_B];
-                                    const int& v_T = velocity_intercell->getPointer(1, 1)[idx_face_y_T];
+                                    const double& u_LL = velocity_intercell->getPointer(0, 0)[idx_face_x_LL];
+                                    const double& u_L = velocity_intercell->getPointer(0, 0)[idx_face_x_L];
+                                    const double& u_R = velocity_intercell->getPointer(0, 0)[idx_face_x_R];
+                                    const double& u_RR = velocity_intercell->getPointer(0, 0)[idx_face_x_RR];
                                     
-                                    const int& w_B = velocity_intercell->getPointer(2, 2)[idx_face_z_B];
-                                    const int& w_F = velocity_intercell->getPointer(2, 2)[idx_face_z_F];
+                                    const double& v_BB = velocity_intercell->getPointer(1, 1)[idx_face_y_BB];
+                                    const double& v_B = velocity_intercell->getPointer(1, 1)[idx_face_y_B];
+                                    const double& v_T = velocity_intercell->getPointer(1, 1)[idx_face_y_T];
+                                    const double& v_TT = velocity_intercell->getPointer(1, 1)[idx_face_y_TT];
                                     
-                                    S[idx_cell_nghost] += dt*Y[si][idx_cell_wghost]*((u_R - u_L)/dx[0] +
-                                        (v_T - v_B)/dx[1] + (w_F - w_B)/dx[2]);
+                                    const double& w_BB = velocity_intercell->getPointer(2, 2)[idx_face_z_BB];
+                                    const double& w_B = velocity_intercell->getPointer(2, 2)[idx_face_z_B];
+                                    const double& w_F = velocity_intercell->getPointer(2, 2)[idx_face_z_F];
+                                    const double& w_FF = velocity_intercell->getPointer(2, 2)[idx_face_z_FF];
+                                    
+                                    S[idx_cell_nghost] += dt*Y[si][idx_cell_wghost]*(
+                                        (3.0/2*(u_R - u_L) - 3.0/10*(u[idx_cell_wghost_x_R] - u[idx_cell_wghost_x_L]) +
+                                         1.0/30*(u_RR - u_LL))/dx[0] +
+                                        (3.0/2*(v_T - v_B) - 3.0/10*(v[idx_cell_wghost_y_T] - v[idx_cell_wghost_y_B]) +
+                                         1.0/30*(v_TT - v_BB))/dx[1] +
+                                        (3.0/2*(w_F - w_B) - 3.0/10*(w[idx_cell_wghost_z_F] - w[idx_cell_wghost_z_B]) +
+                                         1.0/30*(w_FF - w_BB))/dx[2]);
                                 }
                             }
                         }
@@ -5285,6 +6474,12 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                 boost::shared_ptr<pdat::CellData<double> > sound_speed(
                     new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
                 
+                boost::shared_ptr<pdat::CellData<double> > dilatation(
+                    new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+                
+                boost::shared_ptr<pdat::CellData<double> > vorticity_magnitude(
+                    new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+                
                 std::vector<boost::shared_ptr<pdat::CellData<double> > > convective_flux_node;
                 for (int di = 0; di < d_dim.getValue(); di++)
                 {
@@ -5339,7 +6534,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         F_x_midpoint.push_back(convective_flux_midpoint->getPointer(0, ei));
                     }
                     
-                    // Compute the field of total density, velocities, pressure and fluxes.
+                    // Compute the field of total density, velocities, pressure, sound speed and fluxes.
                     for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
                     {
                         // Compute index into linear data array.
@@ -5489,10 +6684,10 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         *R_x_inv_intercell[2*d_num_species][d_num_species + 1] = 1.0/(rho_average*c_average);
                     }
                     
-                    // Compute the mid-point flux in the x direction.
+                    // Compute the mid-point fluxes in the x direction.
                     for (int i = -1; i < interior_dims[0] + 2; i++)
                     {
-                        // Compute the index of face of mid-point flux and
+                        // Compute the index of face of mid-point fluxes and
                         // projection matrix.
                         const int idx_face_x = i + 1;
                         
@@ -5693,11 +6888,62 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                 &p_R,
                                 Z_R_ptr);
                         
+                        bool is_constant_interpolation = false;
+                        
                         /*
-                         * If the WENO interpolated density or energy are negative,
+                         * If the WENO interpolated density, pressure or total energy are negative,
                          * use constant interpolation.
                          */
-                        if ((rho_L < 0) || (rho_R < 0) || (E_L < 0) || (E_R < 0))
+                        
+                        if ((rho_L < 0) || (rho_R < 0) || (p_L < 0) || (p_R < 0) || (E_L < 0) || (E_R < 0))
+                        {
+                            is_constant_interpolation = true;
+                        }
+                        
+                        /*
+                         * If the WENO interpolated mass fractions or volume fractions are outside the bounds,
+                         * use constant interpolation.
+                         */
+                        
+                        // Compute the mass fraction.
+                        
+                        std::vector<double> Y_L;
+                        std::vector<double> Y_R;
+                        
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            Y_L.push_back(Z_rho_L[si]/rho_L);
+                            Y_R.push_back(Z_rho_R[si]/rho_R);
+                            
+                            if ((Y_L[si] < d_Y_bnd_lo) || (Y_L[si] > d_Y_bnd_up) ||
+                                (Y_R[si] < d_Y_bnd_lo) || (Y_R[si] > d_Y_bnd_up))
+                            {
+                                is_constant_interpolation = true;
+                            }
+                        }
+                        
+                        double Z_last_L = 1.0;
+                        double Z_last_R = 1.0;
+                        
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            if ((Z_L[si] < d_Z_bnd_lo) || (Z_L[si] > d_Z_bnd_up) ||
+                                (Z_R[si] < d_Z_bnd_lo) || (Z_R[si] > d_Z_bnd_up))
+                            {
+                                is_constant_interpolation = true;
+                            }
+                            
+                            Z_last_L -= Z_L[si];
+                            Z_last_R -= Z_R[si];
+                        }
+                        
+                        if ((Z_last_L < d_Z_bnd_lo) || (Z_last_L > d_Z_bnd_up) ||
+                            (Z_last_R < d_Z_bnd_lo) || (Z_last_R > d_Z_bnd_up))
+                        {
+                            is_constant_interpolation = true;
+                        }
+                        
+                        if (is_constant_interpolation)
                         {
                             // Compute the indices of left cell and right cell.
                             const int idx_cell_L = i - 1 + d_num_ghosts[0];
@@ -5720,6 +6966,27 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                 Z_L[si] = Z[si][idx_cell_L];
                                 Z_R[si] = Z[si][idx_cell_R];
                             }
+                            
+                            /*
+                            const hier::GlobalId global_id = patch.getGlobalId();
+                            const hier::LocalId local_id = patch.getLocalId();
+                            
+                            TBOX_WARNING("Constant interpolation is used at cell edge between cells ("
+                                         << (i - 1)
+                                         << ") and ("
+                                         << i
+                                         << ") of patch with GlobalId # "
+                                         << global_id.getOwnerRank()
+                                         << " and LocalId # "
+                                         << local_id.getValue()
+                                         << " at level # "
+                                         << patch.getPatchLevelNumber()
+                                         << " and Runge-Kutta step # "
+                                         << RK_step_number
+                                         << " of time "
+                                         << time
+                                         << ".");
+                            */
                         }
                         
                         /*
@@ -5746,7 +7013,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                             vel_x_ptr.push_back(&(velocity_intercell->getPointer(0, vi)[idx_face_x]));
                         }
                         
-                        d_Riemann_solver.computeIntercellFluxAndVelocityForFiveEqnAllaire(
+                        d_Riemann_solver_HLLC.computeIntercellFluxAndVelocityForFiveEqnAllaire(
                             F_x_midpoint_ptr,
                             vel_x_ptr,
                             Z_rho_L_ptr,
@@ -5760,7 +7027,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                             X_DIRECTION);
                     }
                     
-                    // Compute the flux in the x direction.
+                    // Compute the fluxes in the x direction.
                     for (int i = 0; i < interior_dims[0] + 1; i++)
                     {
                         // Compute the indices.
@@ -5772,7 +7039,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         
                         const int idx_node_R = i + d_num_ghosts[0];
                         
-                        // Compute the flux.
+                        // Compute the fluxes.
                         for (int ei = 0; ei < d_num_eqn; ei++)
                         {
                             convective_flux->getPointer(0, ei)[idx_face_x] = dt*(1.0/30*(F_x_midpoint[ei][idx_midpoint_x + 1] +
@@ -5797,19 +7064,31 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         
                         for (int i = 0; i < interior_dims[0]; i++)
                         {
-                            // Compute the indices of cell and faces. 
+                            // Compute the indices of cells and faces. 
                             const int idx_cell_wghost = i + d_num_ghosts[0];
                             
+                            const int idx_cell_wghost_x_L = i - 1 + d_num_ghosts[0];
+                            
+                            const int idx_cell_wghost_x_R = i + 1 + d_num_ghosts[0];
+                            
                             const int idx_cell_nghost = i;
+                            
+                            const int idx_face_x_LL = i;
                             
                             const int idx_face_x_L = i + 1;
                             
                             const int idx_face_x_R = i + 2;
                             
-                            const int& u_L = velocity_intercell->getPointer(0, 0)[idx_face_x_L];
-                            const int& u_R = velocity_intercell->getPointer(0, 0)[idx_face_x_R];
+                            const int idx_face_x_RR = i + 3;
                             
-                            S[idx_cell_nghost] += dt*Z[si][idx_cell_wghost]*(u_R - u_L)/dx[0];
+                            const double& u_LL = velocity_intercell->getPointer(0, 0)[idx_face_x_LL];
+                            const double& u_L = velocity_intercell->getPointer(0, 0)[idx_face_x_L];
+                            const double& u_R = velocity_intercell->getPointer(0, 0)[idx_face_x_R];
+                            const double& u_RR = velocity_intercell->getPointer(0, 0)[idx_face_x_RR];
+                            
+                            S[idx_cell_nghost] += dt*Z[si][idx_cell_wghost]*(
+                                (3.0/2*(u_R - u_L) - 3.0/10*(u[idx_cell_wghost_x_R] - u[idx_cell_wghost_x_L]) +
+                                 1.0/30*(u_RR - u_LL))/dx[0]);
                         }
                     }
                 } // if (d_dim == tbox::Dimension(1))
@@ -5836,6 +7115,8 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                     double* v     = velocity->getPointer(1);
                     double* p     = pressure->getPointer(0);
                     double* c     = sound_speed->getPointer(0);
+                    double* theta = dilatation->getPointer(0);
+                    double* Omega = vorticity_magnitude->getPointer(0);
                     std::vector<double*> F_x_node;
                     std::vector<double*> F_y_node;
                     for (int ei = 0; ei < d_num_eqn; ei++)
@@ -5851,7 +7132,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         F_y_midpoint.push_back(convective_flux_midpoint->getPointer(1, ei));
                     }
                     
-                    // Compute the field of total density, velocities, pressure and fluxes.
+                    // Compute the field of total density, velocities, pressure, sound speed and fluxes.
                     for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
                     {
                         for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
@@ -5919,6 +7200,38 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                             {
                                 F_y_node[d_num_species + 3 + si][idx] = v[idx]*Z[si][idx];
                             }
+                        }
+                    }
+                    
+                    // Compute the dilatation and magnitude of vorticity.
+                    for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                    {
+                        for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                        {
+                            // Compute indices of current and neighboring cells.
+                            const int idx = (i + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_y_B = (i + d_num_ghosts[0]) +
+                                (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_y_T = (i + d_num_ghosts[0]) +
+                                (j + 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            double dudx = (u[idx_x_R] - u[idx_x_L])/(2*dx[0]);
+                            double dudy = (u[idx_y_T] - u[idx_y_B])/(2*dx[1]);
+                            
+                            double dvdx = (v[idx_x_R] - v[idx_x_L])/(2*dx[0]);
+                            double dvdy = (v[idx_y_T] - v[idx_y_B])/(2*dx[1]);
+                            
+                            theta[idx] = dudx + dvdy;
+                            Omega[idx] = fabs(dvdx - dudy);
                         }
                     }
                     
@@ -6139,12 +7452,12 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the mid-point flux in the x direction.
+                    // Compute the mid-point fluxes in the x direction.
                     for (int j = 0; j < interior_dims[1]; j++)
                     {
                         for (int i = -1; i < interior_dims[0] + 2; i++)
                         {
-                            // Compute the index of face of mid-point flux and
+                            // Compute the index of face of mid-point fluxes and
                             // projection matrix.
                             const int idx_face_x = (i + 1) +
                                 (j + 1)*(interior_dims[0] + 3);
@@ -6348,11 +7661,62 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     &p_R,
                                     Z_R_ptr);
                             
+                            bool is_constant_interpolation = false;
+                            
                             /*
-                             * If the WENO interpolated density or energy are negative,
+                             * If the WENO interpolated density, pressure or total energy are negative,
                              * use constant interpolation.
                              */
-                            if ((rho_L < 0) || (rho_R < 0) || (E_L < 0) || (E_R < 0))
+                            
+                            if ((rho_L < 0) || (rho_R < 0) || (p_L < 0) || (p_R < 0) || (E_L < 0) || (E_R < 0))
+                            {
+                                is_constant_interpolation = true;
+                            }
+                            
+                            /*
+                             * If the WENO interpolated mass fractions or volume fractions are outside the bounds,
+                             * use constant interpolation.
+                             */
+                            
+                            // Compute the mass fraction.
+                            
+                            std::vector<double> Y_L;
+                            std::vector<double> Y_R;
+                            
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                Y_L.push_back(Z_rho_L[si]/rho_L);
+                                Y_R.push_back(Z_rho_R[si]/rho_R);
+                                
+                                if ((Y_L[si] < d_Y_bnd_lo) || (Y_L[si] > d_Y_bnd_up) ||
+                                    (Y_R[si] < d_Y_bnd_lo) || (Y_R[si] > d_Y_bnd_up))
+                                {
+                                    is_constant_interpolation = true;
+                                }
+                            }
+                            
+                            double Z_last_L = 1.0;
+                            double Z_last_R = 1.0;
+                            
+                            for (int si = 0; si < d_num_species - 1; si++)
+                            {
+                                if ((Z_L[si] < d_Z_bnd_lo) || (Z_L[si] > d_Z_bnd_up) ||
+                                    (Z_R[si] < d_Z_bnd_lo) || (Z_R[si] > d_Z_bnd_up))
+                                {
+                                    is_constant_interpolation = true;
+                                }
+                                
+                                Z_last_L -= Z_L[si];
+                                Z_last_R -= Z_R[si];
+                            }
+                            
+                            if ((Z_last_L < d_Z_bnd_lo) || (Z_last_L > d_Z_bnd_up) ||
+                                (Z_last_R < d_Z_bnd_lo) || (Z_last_R > d_Z_bnd_up))
+                            {
+                                is_constant_interpolation = true;
+                            }
+                            
+                            if (is_constant_interpolation)
                             {
                                 // Compute the indices of left cell and right cell.
                                 const int idx_cell_L = (i - 1 + d_num_ghosts[0]) +
@@ -6380,6 +7744,31 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     Z_L[si] = Z[si][idx_cell_L];
                                     Z_R[si] = Z[si][idx_cell_R];
                                 }
+                                
+                                /*
+                                const hier::GlobalId global_id = patch.getGlobalId();
+                                const hier::LocalId local_id = patch.getLocalId();
+                                
+                                TBOX_WARNING("Constant interpolation is used at cell edge between cells ("
+                                             << (i - 1)
+                                             << ", "
+                                             << j
+                                             << ") and ("
+                                             << i
+                                             << ", "
+                                             << j
+                                             << ") of patch with GlobalId # "
+                                             << global_id.getOwnerRank()
+                                             << " and LocalId # "
+                                             << local_id.getValue()
+                                             << " at level # "
+                                             << patch.getPatchLevelNumber()
+                                             << " and Runge-Kutta step # "
+                                             << RK_step_number
+                                             << " of time "
+                                             << time
+                                             << ".");
+                                */
                             }
                             
                             /*
@@ -6406,27 +7795,58 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                 vel_x_ptr.push_back(&(velocity_intercell->getPointer(0, vi)[idx_face_x]));
                             }
                             
-                            d_Riemann_solver.computeIntercellFluxAndVelocityForFiveEqnAllaire(
-                                F_x_midpoint_ptr,
-                                vel_x_ptr,
-                                Z_rho_L_ptr,
-                                Z_rho_R_ptr,
-                                m_L_ptr,
-                                m_R_ptr,
-                                &E_L,
-                                &E_R,
-                                Z_L_ptr,
-                                Z_R_ptr,
-                                X_DIRECTION);
+                            // Compute the average dilatation and magnitude of vorticity.
+                            const int idx_L = (i - 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_R = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const double theta_avg = 0.5*(theta[idx_L] + theta[idx_R]);
+                            const double Omega_avg = 0.5*(Omega[idx_L] + Omega[idx_R]);
+                            
+                            // Compute the Ducros-like shock sensor.
+                            const double s = -theta_avg/(fabs(theta_avg) + Omega_avg + EPSILON);
+                            
+                            if (s > 0.65)
+                            {
+                                d_Riemann_solver_HLLC_HLL.computeIntercellFluxAndVelocityForFiveEqnAllaire(
+                                    F_x_midpoint_ptr,
+                                    vel_x_ptr,
+                                    Z_rho_L_ptr,
+                                    Z_rho_R_ptr,
+                                    m_L_ptr,
+                                    m_R_ptr,
+                                    &E_L,
+                                    &E_R,
+                                    Z_L_ptr,
+                                    Z_R_ptr,
+                                    X_DIRECTION);
+                            }
+                            else
+                            {
+                                d_Riemann_solver_HLLC.computeIntercellFluxAndVelocityForFiveEqnAllaire(
+                                    F_x_midpoint_ptr,
+                                    vel_x_ptr,
+                                    Z_rho_L_ptr,
+                                    Z_rho_R_ptr,
+                                    m_L_ptr,
+                                    m_R_ptr,
+                                    &E_L,
+                                    &E_R,
+                                    Z_L_ptr,
+                                    Z_R_ptr,
+                                    X_DIRECTION);
+                            }
                         }
                     }
                     
-                    // Compute the mid-point flux in the y direction.
+                    // Compute the mid-point fluxes in the y direction.
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
                         for (int j = -1; j < interior_dims[1] + 2; j++)
                         {
-                            // Compute the index of face of mid-point flux and
+                            // Compute the index of face of mid-point fluxes and
                             // projection matrix.
                             const int idx_face_y = (j + 1) +
                                 (i + 1)*(interior_dims[1] + 3);
@@ -6631,11 +8051,62 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     &p_T,
                                     Z_T_ptr);
                             
+                            bool is_constant_interpolation = false;
+                            
                             /*
-                             * If the WENO interpolated density or energy are negative,
+                             * If the WENO interpolated density, pressure or total energy are negative,
                              * use constant interpolation.
                              */
-                            if ((rho_B < 0) || (rho_T < 0) || (E_B < 0) || (E_T < 0))
+                            
+                            if ((rho_B < 0) || (rho_T < 0) || (p_B < 0) || (p_T < 0) || (E_B < 0) || (E_T < 0))
+                            {
+                                is_constant_interpolation = true;
+                            }
+                            
+                            /*
+                             * If the WENO interpolated mass fractions or volume fractions are outside the bounds,
+                             * use constant interpolation.
+                             */
+                            
+                            // Compute the mass fraction.
+                            
+                            std::vector<double> Y_B;
+                            std::vector<double> Y_T;
+                            
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                Y_B.push_back(Z_rho_B[si]/rho_B);
+                                Y_T.push_back(Z_rho_T[si]/rho_T);
+                                
+                                if ((Y_B[si] < d_Y_bnd_lo) || (Y_B[si] > d_Y_bnd_up) ||
+                                    (Y_T[si] < d_Y_bnd_lo) || (Y_T[si] > d_Y_bnd_up))
+                                {
+                                    is_constant_interpolation = true;
+                                }
+                            }
+                            
+                            double Z_last_B = 1.0;
+                            double Z_last_T = 1.0;
+                            
+                            for (int si = 0; si < d_num_species - 1; si++)
+                            {
+                                if ((Z_B[si] < d_Z_bnd_lo) || (Z_B[si] > d_Z_bnd_up) ||
+                                    (Z_T[si] < d_Z_bnd_lo) || (Z_T[si] > d_Z_bnd_up))
+                                {
+                                    is_constant_interpolation = true;
+                                }
+                                
+                                Z_last_B -= Z_B[si];
+                                Z_last_T -= Z_T[si];
+                            }
+                            
+                            if ((Z_last_B < d_Z_bnd_lo) || (Z_last_B > d_Z_bnd_up) ||
+                                (Z_last_T < d_Z_bnd_lo) || (Z_last_T > d_Z_bnd_up))
+                            {
+                                is_constant_interpolation = true;
+                            }
+                            
+                            if (is_constant_interpolation)
                             {
                                 // Compute the indices of bottom cell and top cell.
                                 const int idx_cell_B = (i + d_num_ghosts[0]) +
@@ -6663,6 +8134,31 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     Z_B[si] = Z[si][idx_cell_B];
                                     Z_T[si] = Z[si][idx_cell_T];
                                 }
+                                
+                                /*
+                                const hier::GlobalId global_id = patch.getGlobalId();
+                                const hier::LocalId local_id = patch.getLocalId();
+                                
+                                TBOX_WARNING("Constant interpolation is used at cell edge between cells ("
+                                             << i
+                                             << ", "
+                                             << (j - 1)
+                                             << ") and ("
+                                             << i
+                                             << ", "
+                                             << j
+                                             << ") of patch with GlobalId # "
+                                             << global_id.getOwnerRank()
+                                             << " and LocalId # "
+                                             << local_id.getValue()
+                                             << " at level # "
+                                             << patch.getPatchLevelNumber()
+                                             << " and Runge-Kutta step # "
+                                             << RK_step_number
+                                             << " of time "
+                                             << time
+                                             << ".");
+                                */
                             }
                             
                             /*
@@ -6689,22 +8185,53 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                 vel_y_ptr.push_back(&(velocity_intercell->getPointer(1, vi)[idx_face_y]));
                             }
                             
-                            d_Riemann_solver.computeIntercellFluxAndVelocityForFiveEqnAllaire(
-                                F_y_midpoint_ptr,
-                                vel_y_ptr,
-                                Z_rho_B_ptr,
-                                Z_rho_T_ptr,
-                                m_B_ptr,
-                                m_T_ptr,
-                                &E_B,
-                                &E_T,
-                                Z_B_ptr,
-                                Z_T_ptr,
-                                Y_DIRECTION);
+                            // Compute the average dilatation and magnitude of vorticity.
+                            const int idx_B = (i + d_num_ghosts[0]) +
+                                    (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_T = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const double theta_avg = 0.5*(theta[idx_B] + theta[idx_T]);
+                            const double Omega_avg = 0.5*(Omega[idx_B] + Omega[idx_T]);
+                            
+                            // Compute the Ducros-like shock sensor.
+                            const double s = -theta_avg/(fabs(theta_avg) + Omega_avg + EPSILON);
+                            
+                            if (s > 0.65)
+                            {
+                                d_Riemann_solver_HLLC_HLL.computeIntercellFluxAndVelocityForFiveEqnAllaire(
+                                    F_y_midpoint_ptr,
+                                    vel_y_ptr,
+                                    Z_rho_B_ptr,
+                                    Z_rho_T_ptr,
+                                    m_B_ptr,
+                                    m_T_ptr,
+                                    &E_B,
+                                    &E_T,
+                                    Z_B_ptr,
+                                    Z_T_ptr,
+                                    Y_DIRECTION);
+                            }
+                            else
+                            {
+                                d_Riemann_solver_HLLC.computeIntercellFluxAndVelocityForFiveEqnAllaire(
+                                    F_y_midpoint_ptr,
+                                    vel_y_ptr,
+                                    Z_rho_B_ptr,
+                                    Z_rho_T_ptr,
+                                    m_B_ptr,
+                                    m_T_ptr,
+                                    &E_B,
+                                    &E_T,
+                                    Z_B_ptr,
+                                    Z_T_ptr,
+                                    Y_DIRECTION);
+                            }
                         }
                     }
                     
-                    // Compute the flux in the x direction.
+                    // Compute the fluxes in the x direction.
                     for (int j = 0; j < interior_dims[1]; j++)
                     {
                         for (int i = 0; i < interior_dims[0] + 1; i++)
@@ -6722,7 +8249,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                             const int idx_node_R = (i + d_num_ghosts[0]) +
                                 (j + d_num_ghosts[1])*ghostcell_dims[0];
                             
-                            // Compute the flux.
+                            // Compute the fluxes.
                             for (int ei = 0; ei < d_num_eqn; ei++)
                             {
                                 convective_flux->getPointer(0, ei)[idx_face_x] = dt*(1.0/30*(F_x_midpoint[ei][idx_midpoint_x + 1] +
@@ -6734,7 +8261,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the y direction.
+                    // Compute the fluxes in the y direction.
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
                         for (int j = 0; j < interior_dims[1] + 1; j++)
@@ -6752,7 +8279,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                             const int idx_node_T = (i + d_num_ghosts[0]) +
                                 (j + d_num_ghosts[1])*ghostcell_dims[0];
                             
-                            // Compute the flux.
+                            // Compute the fluxes.
                             for (int ei = 0; ei < d_num_eqn; ei++)
                             {
                                 convective_flux->getPointer(1, ei)[idx_face_y] =
@@ -6781,11 +8308,26 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         {
                             for (int i = 0; i < interior_dims[0]; i++)
                             {
-                                // Compute the indices of cell and faces. 
+                                // Compute the indices of cells and faces. 
                                 const int idx_cell_wghost = (i + d_num_ghosts[0]) +
                                     (j + d_num_ghosts[1])*ghostcell_dims[0];
                                 
+                                const int idx_cell_wghost_x_L = (i - 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_cell_wghost_x_R = (i + 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_cell_wghost_y_B = (i + d_num_ghosts[0]) +
+                                    (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_cell_wghost_y_T = (i + d_num_ghosts[0]) +
+                                    (j + 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                                
                                 const int idx_cell_nghost = i + j*interior_dims[0];
+                                
+                                const int idx_face_x_LL = i +
+                                    (j + 1)*(interior_dims[0] + 3);
                                 
                                 const int idx_face_x_L = (i + 1) +
                                     (j + 1)*(interior_dims[0] + 3);
@@ -6793,19 +8335,36 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                 const int idx_face_x_R = (i + 2) +
                                     (j + 1)*(interior_dims[0] + 3);
                                 
+                                const int idx_face_x_RR = (i + 3) +
+                                    (j + 1)*(interior_dims[0] + 3);
+                                
+                                const int idx_face_y_BB = j +
+                                    (i + 1)*(interior_dims[1] + 3);
+                                
                                 const int idx_face_y_B = (j + 1) +
                                     (i + 1)*(interior_dims[1] + 3);
                                 
                                 const int idx_face_y_T = (j + 2) +
                                     (i + 1)*(interior_dims[1] + 3);
                                 
-                                const int& u_L = velocity_intercell->getPointer(0, 0)[idx_face_x_L];
-                                const int& u_R = velocity_intercell->getPointer(0, 0)[idx_face_x_R];
+                                const int idx_face_y_TT = (j + 3) +
+                                    (i + 1)*(interior_dims[1] + 3);
                                 
-                                const int& v_B = velocity_intercell->getPointer(1, 1)[idx_face_y_B];
-                                const int& v_T = velocity_intercell->getPointer(1, 1)[idx_face_y_T];
+                                const double& u_LL = velocity_intercell->getPointer(0, 0)[idx_face_x_LL];
+                                const double& u_L = velocity_intercell->getPointer(0, 0)[idx_face_x_L];
+                                const double& u_R = velocity_intercell->getPointer(0, 0)[idx_face_x_R];
+                                const double& u_RR = velocity_intercell->getPointer(0, 0)[idx_face_x_RR];
                                 
-                                S[idx_cell_nghost] += dt*Z[si][idx_cell_wghost]*((u_R - u_L)/dx[0] + (v_T - v_B)/dx[1]);
+                                const double& v_BB = velocity_intercell->getPointer(1, 1)[idx_face_y_BB];
+                                const double& v_B = velocity_intercell->getPointer(1, 1)[idx_face_y_B];
+                                const double& v_T = velocity_intercell->getPointer(1, 1)[idx_face_y_T];
+                                const double& v_TT = velocity_intercell->getPointer(1, 1)[idx_face_y_TT];
+                                
+                                S[idx_cell_nghost] += dt*Z[si][idx_cell_wghost]*(
+                                    (3.0/2*(u_R - u_L) - 3.0/10*(u[idx_cell_wghost_x_R] - u[idx_cell_wghost_x_L]) +
+                                     1.0/30*(u_RR - u_LL))/dx[0] +
+                                    (3.0/2*(v_T - v_B) - 3.0/10*(v[idx_cell_wghost_y_T] - v[idx_cell_wghost_y_B]) +
+                                     1.0/30*(v_TT - v_BB))/dx[1]);
                             }
                         }
                     }
@@ -6835,6 +8394,8 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                     double* w     = velocity->getPointer(2);
                     double* p     = pressure->getPointer(0);
                     double* c     = sound_speed->getPointer(0);
+                    double* theta = dilatation->getPointer(0);
+                    double* Omega = vorticity_magnitude->getPointer(0);
                     std::vector<double*> F_x_node;
                     std::vector<double*> F_y_node;
                     std::vector<double*> F_z_node;
@@ -6854,7 +8415,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         F_z_midpoint.push_back(convective_flux_midpoint->getPointer(2, ei));
                     }
                     
-                    // Compute the field of total density, velocities, pressure and fluxes.
+                    // Compute the field of total density, velocities, pressure, sound speed and fluxes.
                     for (int k = -d_num_ghosts[2]; k < interior_dims[2] + d_num_ghosts[2]; k++)
                     {
                         for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
@@ -6942,6 +8503,63 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                 {
                                     F_z_node[d_num_species + 4 + si][idx] = w[idx]*Z[si][idx];
                                 }
+                            }
+                        }
+                    }
+                    
+                    // Compute the dilatation and magnitude of vorticity.
+                    for (int k = -d_num_ghosts[2]; k < interior_dims[2] + d_num_ghosts[2]; k++)
+                    {
+                        for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                        {
+                            for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                            {
+                                // Compute indices of current and neighboring cells.
+                                const int idx = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_y_B = (i + d_num_ghosts[0]) +
+                                    (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_y_T = (i + d_num_ghosts[0]) +
+                                    (j + 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_z_B = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k - 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_z_F = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                double dudx = (u[idx_x_R] - u[idx_x_L])/(2*dx[0]);
+                                double dudy = (u[idx_y_T] - u[idx_y_B])/(2*dx[1]);
+                                double dudz = (u[idx_z_F] - u[idx_z_B])/(2*dx[2]);
+                                
+                                double dvdx = (v[idx_x_R] - v[idx_x_L])/(2*dx[0]);
+                                double dvdy = (v[idx_y_T] - v[idx_y_B])/(2*dx[1]);
+                                double dvdz = (v[idx_z_F] - v[idx_z_B])/(2*dx[2]);
+                                
+                                double dwdx = (w[idx_x_R] - w[idx_x_L])/(2*dx[0]);
+                                double dwdy = (w[idx_y_T] - w[idx_y_B])/(2*dx[1]);
+                                double dwdz = (w[idx_z_F] - w[idx_z_B])/(2*dx[2]);
+                                
+                                theta[idx] = dudx + dvdy + dwdz;
+                                
+                                Omega[idx] = sqrt(pow(dwdy - dvdz, 2) +
+                                    pow(dudz - dwdx, 2) +
+                                    pow(dvdx - dudy, 2));
                             }
                         }
                     }
@@ -7302,14 +8920,14 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the mid-point flux in the x direction.
+                    // Compute the mid-point fluxes in the x direction.
                     for (int k = 0; k < interior_dims[2]; k++)
                     {
                         for (int j = 0; j < interior_dims[1]; j++)
                         {
                             for (int i = -1; i < interior_dims[0] + 2; i++)
                             {
-                                // Compute the index of face of mid-point flux and
+                                // Compute the index of face of mid-point fluxes and
                                 // projection matrix.
                                 const int idx_face_x = (i + 1) +
                                     (j + 1)*(interior_dims[0] + 3) +
@@ -7516,11 +9134,62 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                         &p_R,
                                         Z_R_ptr);
                                 
+                                bool is_constant_interpolation = false;
+                                
                                 /*
-                                 * If the WENO interpolated density or energy are negative,
+                                 * If the WENO interpolated density, pressure or total energy are negative,
                                  * use constant interpolation.
                                  */
-                                if ((rho_L < 0) || (rho_R < 0) || (E_L < 0) || (E_R < 0))
+                                
+                                if ((rho_L < 0) || (rho_R < 0) || (p_L < 0) || (p_R < 0) || (E_L < 0) || (E_R < 0))
+                                {
+                                    is_constant_interpolation = true;
+                                }
+                                
+                                /*
+                                 * If the WENO interpolated mass fractions or volume fractions are outside the bounds,
+                                 * use constant interpolation.
+                                 */
+                                
+                                // Compute the mass fraction.
+                                
+                                std::vector<double> Y_L;
+                                std::vector<double> Y_R;
+                                
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_L.push_back(Z_rho_L[si]/rho_L);
+                                    Y_R.push_back(Z_rho_R[si]/rho_R);
+                                    
+                                    if ((Y_L[si] < d_Y_bnd_lo) || (Y_L[si] > d_Y_bnd_up) ||
+                                        (Y_R[si] < d_Y_bnd_lo) || (Y_R[si] > d_Y_bnd_up))
+                                    {
+                                        is_constant_interpolation = true;
+                                    }
+                                }
+                                
+                                double Z_last_L = 1.0;
+                                double Z_last_R = 1.0;
+                                
+                                for (int si = 0; si < d_num_species - 1; si++)
+                                {
+                                    if ((Z_L[si] < d_Z_bnd_lo) || (Z_L[si] > d_Z_bnd_up) ||
+                                        (Z_R[si] < d_Z_bnd_lo) || (Z_R[si] > d_Z_bnd_up))
+                                    {
+                                        is_constant_interpolation = true;
+                                    }
+                                    
+                                    Z_last_L -= Z_L[si];
+                                    Z_last_R -= Z_R[si];
+                                }
+                                
+                                if ((Z_last_L < d_Z_bnd_lo) || (Z_last_L > d_Z_bnd_up) ||
+                                    (Z_last_R < d_Z_bnd_lo) || (Z_last_R > d_Z_bnd_up))
+                                {
+                                    is_constant_interpolation = true;
+                                }
+                                
+                                if (is_constant_interpolation)
                                 {
                                     // Compute the indices of left cell and right cell.
                                     const int idx_cell_L = (i - 1 + d_num_ghosts[0]) +
@@ -7552,6 +9221,35 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                         Z_L[si] = Z[si][idx_cell_L];
                                         Z_R[si] = Z[si][idx_cell_R];
                                     }
+                                    
+                                    /*
+                                    const hier::GlobalId global_id = patch.getGlobalId();
+                                    const hier::LocalId local_id = patch.getLocalId();
+                                    
+                                    TBOX_WARNING("Constant interpolation is used at cell edge between cells ("
+                                                 << (i - 1)
+                                                 << ", "
+                                                 << j
+                                                 << ", "
+                                                 << k
+                                                 << ") and ("
+                                                 << i
+                                                 << ", "
+                                                 << j
+                                                 << ", "
+                                                 << k
+                                                 << ") of patch with GlobalId # "
+                                                 << global_id.getOwnerRank()
+                                                 << " and LocalId # "
+                                                 << local_id.getValue()
+                                                 << " at level # "
+                                                 << patch.getPatchLevelNumber()
+                                                 << " and Runge-Kutta step # "
+                                                 << RK_step_number
+                                                 << " of time "
+                                                 << time
+                                                 << ".");
+                                    */
                                 }
                                 
                                 /*
@@ -7578,30 +9276,63 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     vel_x_ptr.push_back(&(velocity_intercell->getPointer(0, vi)[idx_face_x]));
                                 }
                                 
-                                d_Riemann_solver.computeIntercellFluxAndVelocityForFiveEqnAllaire(
-                                    F_x_midpoint_ptr,
-                                    vel_x_ptr,
-                                    Z_rho_L_ptr,
-                                    Z_rho_R_ptr,
-                                    m_L_ptr,
-                                    m_R_ptr,
-                                    &E_L,
-                                    &E_R,
-                                    Z_L_ptr,
-                                    Z_R_ptr,
-                                    X_DIRECTION);
+                                // Compute the average dilatation and magnitude of vorticity.
+                                const int idx_L = (i - 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_R = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const double theta_avg = 0.5*(theta[idx_L] + theta[idx_R]);
+                                const double Omega_avg = 0.5*(Omega[idx_L] + Omega[idx_R]);
+                                
+                                // Compute the Ducros-like shock sensor.
+                                const double s = -theta_avg/(fabs(theta_avg) + Omega_avg + EPSILON);
+                                
+                                if (s > 0.65)
+                                {
+                                    d_Riemann_solver_HLLC_HLL.computeIntercellFluxAndVelocityForFiveEqnAllaire(
+                                        F_x_midpoint_ptr,
+                                        vel_x_ptr,
+                                        Z_rho_L_ptr,
+                                        Z_rho_R_ptr,
+                                        m_L_ptr,
+                                        m_R_ptr,
+                                        &E_L,
+                                        &E_R,
+                                        Z_L_ptr,
+                                        Z_R_ptr,
+                                        X_DIRECTION);
+                                }
+                                else
+                                {
+                                    d_Riemann_solver_HLLC.computeIntercellFluxAndVelocityForFiveEqnAllaire(
+                                        F_x_midpoint_ptr,
+                                        vel_x_ptr,
+                                        Z_rho_L_ptr,
+                                        Z_rho_R_ptr,
+                                        m_L_ptr,
+                                        m_R_ptr,
+                                        &E_L,
+                                        &E_R,
+                                        Z_L_ptr,
+                                        Z_R_ptr,
+                                        X_DIRECTION);
+                                }
                             }
                         }
                     }
                     
-                    // Compute the mid-point flux in the y direction.
+                    // Compute the mid-point fluxes in the y direction.
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
                         for (int k = 0; k < interior_dims[2]; k++)
                         {
                             for (int j = -1; j < interior_dims[1] + 2; j++)
                             {
-                                // Compute the index of face of mid-point flux and
+                                // Compute the index of face of mid-point fluxes and
                                 // projection matrix.
                                 const int idx_face_y = (j + 1) +
                                     (k + 1)*(interior_dims[1] + 3) +
@@ -7809,11 +9540,62 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                         &p_T,
                                         Z_T_ptr);
                                 
+                                bool is_constant_interpolation = false;
+                                
                                 /*
-                                 * If the WENO interpolated density or energy are negative,
+                                 * If the WENO interpolated density, pressure or total energy are negative,
                                  * use constant interpolation.
                                  */
-                                if ((rho_B < 0) || (rho_T < 0) || (E_B < 0) || (E_T < 0))
+                                
+                                if ((rho_B < 0) || (rho_T < 0) || (p_B < 0) || (p_T < 0) || (E_B < 0) || (E_T < 0))
+                                {
+                                    is_constant_interpolation = true;
+                                }
+                                
+                                /*
+                                 * If the WENO interpolated mass fractions or volume fractions are outside the bounds,
+                                 * use constant interpolation.
+                                 */
+                                
+                                // Compute the mass fraction.
+                                
+                                std::vector<double> Y_B;
+                                std::vector<double> Y_T;
+                                
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_B.push_back(Z_rho_B[si]/rho_B);
+                                    Y_T.push_back(Z_rho_T[si]/rho_T);
+                                    
+                                    if ((Y_B[si] < d_Y_bnd_lo) || (Y_B[si] > d_Y_bnd_up) ||
+                                        (Y_T[si] < d_Y_bnd_lo) || (Y_T[si] > d_Y_bnd_up))
+                                    {
+                                        is_constant_interpolation = true;
+                                    }
+                                }
+                                
+                                double Z_last_B = 1.0;
+                                double Z_last_T = 1.0;
+                                
+                                for (int si = 0; si < d_num_species - 1; si++)
+                                {
+                                    if ((Z_B[si] < d_Z_bnd_lo) || (Z_B[si] > d_Z_bnd_up) ||
+                                        (Z_T[si] < d_Z_bnd_lo) || (Z_T[si] > d_Z_bnd_up))
+                                    {
+                                        is_constant_interpolation = true;
+                                    }
+                                    
+                                    Z_last_B -= Z_B[si];
+                                    Z_last_T -= Z_T[si];
+                                }
+                                
+                                if ((Z_last_B < d_Z_bnd_lo) || (Z_last_B > d_Z_bnd_up) ||
+                                    (Z_last_T < d_Z_bnd_lo) || (Z_last_T > d_Z_bnd_up))
+                                {
+                                    is_constant_interpolation = true;
+                                }
+                                
+                                if (is_constant_interpolation)
                                 {
                                     // Compute the indices of bottom cell and top cell.
                                     const int idx_cell_B = (i + d_num_ghosts[0]) +
@@ -7845,6 +9627,35 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                         Z_B[si] = Z[si][idx_cell_B];
                                         Z_T[si] = Z[si][idx_cell_T];
                                     }
+                                    
+                                    /*
+                                    const hier::GlobalId global_id = patch.getGlobalId();
+                                    const hier::LocalId local_id = patch.getLocalId();
+                                    
+                                    TBOX_WARNING("Constant interpolation is used at cell edge between cells ("
+                                                 << i
+                                                 << ", "
+                                                 << (j - 1)
+                                                 << ", "
+                                                 << k
+                                                 << ") and ("
+                                                 << i
+                                                 << ", "
+                                                 << j
+                                                 << ", "
+                                                 << k
+                                                 << ") of patch with GlobalId # "
+                                                 << global_id.getOwnerRank()
+                                                 << " and LocalId # "
+                                                 << local_id.getValue()
+                                                 << " at level # "
+                                                 << patch.getPatchLevelNumber()
+                                                 << " and Runge-Kutta step # "
+                                                 << RK_step_number
+                                                 << " of time "
+                                                 << time
+                                                 << ".");
+                                    */
                                 }
                                 
                                 /*
@@ -7871,30 +9682,63 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     vel_y_ptr.push_back(&(velocity_intercell->getPointer(1, vi)[idx_face_y]));
                                 }
                                 
-                                d_Riemann_solver.computeIntercellFluxAndVelocityForFiveEqnAllaire(
-                                    F_y_midpoint_ptr,
-                                    vel_y_ptr,
-                                    Z_rho_B_ptr,
-                                    Z_rho_T_ptr,
-                                    m_B_ptr,
-                                    m_T_ptr,
-                                    &E_B,
-                                    &E_T,
-                                    Z_B_ptr,
-                                    Z_T_ptr,
-                                    Y_DIRECTION);
+                                // Compute the average dilatation and magnitude of vorticity.
+                                const int idx_B = (i + d_num_ghosts[0]) +
+                                    (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_T = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const double theta_avg = 0.5*(theta[idx_B] + theta[idx_T]);
+                                const double Omega_avg = 0.5*(Omega[idx_B] + Omega[idx_T]);
+                                
+                                // Compute the Ducros-like shock sensor.
+                                const double s = -theta_avg/(fabs(theta_avg) + Omega_avg + EPSILON);
+                                
+                                if (s > 0.65)
+                                {
+                                    d_Riemann_solver_HLLC_HLL.computeIntercellFluxAndVelocityForFiveEqnAllaire(
+                                        F_y_midpoint_ptr,
+                                        vel_y_ptr,
+                                        Z_rho_B_ptr,
+                                        Z_rho_T_ptr,
+                                        m_B_ptr,
+                                        m_T_ptr,
+                                        &E_B,
+                                        &E_T,
+                                        Z_B_ptr,
+                                        Z_T_ptr,
+                                        Y_DIRECTION);
+                                }
+                                else
+                                {
+                                    d_Riemann_solver_HLLC.computeIntercellFluxAndVelocityForFiveEqnAllaire(
+                                        F_y_midpoint_ptr,
+                                        vel_y_ptr,
+                                        Z_rho_B_ptr,
+                                        Z_rho_T_ptr,
+                                        m_B_ptr,
+                                        m_T_ptr,
+                                        &E_B,
+                                        &E_T,
+                                        Z_B_ptr,
+                                        Z_T_ptr,
+                                        Y_DIRECTION);
+                                }
                             }
                         }
                     }
                     
-                    // Compute the mid-point flux in the z direction.
+                    // Compute the mid-point fluxes in the z direction.
                     for (int j = 0; j < interior_dims[1]; j++)
                     {
                         for (int i = 0; i < interior_dims[0]; i++)
                         {
                             for (int k = -1; k < interior_dims[2] + 2; k++)
                             {
-                                // Compute the index of face of mid-point flux and
+                                // Compute the index of face of mid-point fluxes and
                                 // projection matrix.
                                 const int idx_face_z = (k + 1) +
                                     (i + 1)*(interior_dims[2] + 3) +
@@ -8102,11 +9946,62 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                         &p_F,
                                         Z_F_ptr);
                                 
+                                bool is_constant_interpolation = false;
+                                
                                 /*
-                                 * If the WENO interpolated density or energy are negative,
+                                 * If the WENO interpolated density, pressure or total energy are negative,
                                  * use constant interpolation.
                                  */
-                                if ((rho_B < 0) || (rho_F < 0) || (E_B < 0) || (E_F < 0))
+                                
+                                if ((rho_B < 0) || (rho_F < 0) || (p_B < 0) || (p_F < 0) || (E_B < 0) || (E_F < 0))
+                                {
+                                    is_constant_interpolation = true;
+                                }
+                                
+                                /*
+                                 * If the WENO interpolated mass fractions or volume fractions are outside the bounds,
+                                 * use constant interpolation.
+                                 */
+                                
+                                // Compute the mass fraction.
+                                
+                                std::vector<double> Y_B;
+                                std::vector<double> Y_F;
+                                
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_B.push_back(Z_rho_B[si]/rho_B);
+                                    Y_F.push_back(Z_rho_F[si]/rho_F);
+                                    
+                                    if ((Y_B[si] < d_Y_bnd_lo) || (Y_B[si] > d_Y_bnd_up) ||
+                                        (Y_F[si] < d_Y_bnd_lo) || (Y_F[si] > d_Y_bnd_up))
+                                    {
+                                        is_constant_interpolation = true;
+                                    }
+                                }
+                                
+                                double Z_last_B = 1.0;
+                                double Z_last_F = 1.0;
+                                
+                                for (int si = 0; si < d_num_species - 1; si++)
+                                {
+                                    if ((Z_B[si] < d_Z_bnd_lo) || (Z_B[si] > d_Z_bnd_up) ||
+                                        (Z_F[si] < d_Z_bnd_lo) || (Z_F[si] > d_Z_bnd_up))
+                                    {
+                                        is_constant_interpolation = true;
+                                    }
+                                    
+                                    Z_last_B -= Z_B[si];
+                                    Z_last_F -= Z_F[si];
+                                }
+                                
+                                if ((Z_last_B < d_Z_bnd_lo) || (Z_last_B > d_Z_bnd_up) ||
+                                    (Z_last_F < d_Z_bnd_lo) || (Z_last_F > d_Z_bnd_up))
+                                {
+                                    is_constant_interpolation = true;
+                                }
+                                
+                                if (is_constant_interpolation)
                                 {
                                     // Compute the indices of back cell and front cell.
                                     const int idx_cell_B = (i + d_num_ghosts[0]) +
@@ -8138,6 +10033,35 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                         Z_B[si] = Z[si][idx_cell_B];
                                         Z_F[si] = Z[si][idx_cell_F];
                                     }
+                                    
+                                    /*
+                                    const hier::GlobalId global_id = patch.getGlobalId();
+                                    const hier::LocalId local_id = patch.getLocalId();
+                                    
+                                    TBOX_WARNING("Constant interpolation is used at cell edge between cells ("
+                                                 << i
+                                                 << ", "
+                                                 << j
+                                                 << ", "
+                                                 << (k - 1)
+                                                 << ") and ("
+                                                 << i
+                                                 << ", "
+                                                 << j
+                                                 << ", "
+                                                 << k
+                                                 << ") of patch with GlobalId # "
+                                                 << global_id.getOwnerRank()
+                                                 << " and LocalId # "
+                                                 << local_id.getValue()
+                                                 << " at level # "
+                                                 << patch.getPatchLevelNumber()
+                                                 << " and Runge-Kutta step # "
+                                                 << RK_step_number
+                                                 << " of time "
+                                                 << time
+                                                 << ".");
+                                    */
                                 }
                                 
                                 /*
@@ -8164,23 +10088,56 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     vel_z_ptr.push_back(&(velocity_intercell->getPointer(2, vi)[idx_face_z]));
                                 }
                                 
-                                d_Riemann_solver.computeIntercellFluxAndVelocityForFiveEqnAllaire(
-                                    F_z_midpoint_ptr,
-                                    vel_z_ptr,
-                                    Z_rho_B_ptr,
-                                    Z_rho_F_ptr,
-                                    m_B_ptr,
-                                    m_F_ptr,
-                                    &E_B,
-                                    &E_F,
-                                    Z_B_ptr,
-                                    Z_F_ptr,
-                                    Z_DIRECTION);
+                                // Compute the average dilatation and magnitude of vorticity.
+                                const int idx_B = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k - 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_F = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const double theta_avg = 0.5*(theta[idx_B] + theta[idx_F]);
+                                const double Omega_avg = 0.5*(Omega[idx_B] + Omega[idx_F]);
+                                
+                                // Compute the Ducros-like shock sensor.
+                                const double s = -theta_avg/(fabs(theta_avg) + Omega_avg + EPSILON);
+                                
+                                if (s > 0.65)
+                                {
+                                    d_Riemann_solver_HLLC_HLL.computeIntercellFluxAndVelocityForFiveEqnAllaire(
+                                        F_z_midpoint_ptr,
+                                        vel_z_ptr,
+                                        Z_rho_B_ptr,
+                                        Z_rho_F_ptr,
+                                        m_B_ptr,
+                                        m_F_ptr,
+                                        &E_B,
+                                        &E_F,
+                                        Z_B_ptr,
+                                        Z_F_ptr,
+                                        Z_DIRECTION);
+                                }
+                                else
+                                {
+                                    d_Riemann_solver_HLLC.computeIntercellFluxAndVelocityForFiveEqnAllaire(
+                                        F_z_midpoint_ptr,
+                                        vel_z_ptr,
+                                        Z_rho_B_ptr,
+                                        Z_rho_F_ptr,
+                                        m_B_ptr,
+                                        m_F_ptr,
+                                        &E_B,
+                                        &E_F,
+                                        Z_B_ptr,
+                                        Z_F_ptr,
+                                        Z_DIRECTION);
+                                }
                             }
                         }
                     }
                     
-                    // Compute the flux in the x direction.
+                    // Compute the fluxes in the x direction.
                     for (int k = 0; k < interior_dims[2]; k++)
                     {
                         for (int j = 0; j < interior_dims[1]; j++)
@@ -8204,7 +10161,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     (j + d_num_ghosts[1])*ghostcell_dims[0] +
                                     (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                                 
-                                // Compute the flux.
+                                // Compute the fluxes.
                                 for (int ei = 0; ei < d_num_eqn; ei++)
                                 {
                                     convective_flux->getPointer(0, ei)[idx_face_x] = dt*(1.0/30*(F_x_midpoint[ei][idx_midpoint_x + 1] +
@@ -8217,7 +10174,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the y direction.
+                    // Compute the fluxes in the y direction.
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
                         for (int k = 0; k < interior_dims[2]; k++)
@@ -8241,7 +10198,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     (j + d_num_ghosts[1])*ghostcell_dims[0] +
                                     (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                                 
-                                // Compute the flux.
+                                // Compute the fluxes.
                                 for (int ei = 0; ei < d_num_eqn; ei++)
                                 {
                                     convective_flux->getPointer(1, ei)[idx_face_y] =
@@ -8255,7 +10212,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the z direction.
+                    // Compute the fluxes in the z direction.
                     for (int j = 0; j < interior_dims[1]; j++)
                     {
                         for (int i = 0; i < interior_dims[0]; i++)
@@ -8279,7 +10236,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     (j + d_num_ghosts[1])*ghostcell_dims[0] +
                                     (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                                 
-                                // Compute the flux.
+                                // Compute the fluxes.
                                 for (int ei = 0; ei < d_num_eqn; ei++)
                                 {
                                     convective_flux->getPointer(2, ei)[idx_face_z] =
@@ -8311,14 +10268,42 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                             {
                                 for (int i = 0; i < interior_dims[0]; i++)
                                 {
-                                    // Compute the indices of cell and faces. 
+                                    // Compute the indices of cells and faces. 
                                     const int idx_cell_wghost = (i + d_num_ghosts[0]) +
                                         (j + d_num_ghosts[1])*ghostcell_dims[0] +
                                         (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                                     
+                                    const int idx_cell_wghost_x_L = (i - 1 + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_cell_wghost_x_R = (i + 1 + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_cell_wghost_y_B = (i + d_num_ghosts[0]) +
+                                        (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_cell_wghost_y_T = (i + d_num_ghosts[0]) +
+                                        (j + 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_cell_wghost_z_B = (i + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k - 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_cell_wghost_z_F = (i + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
                                     const int idx_cell_nghost = i +
                                         j*interior_dims[0] +
                                         k*interior_dims[0]*interior_dims[1];
+                                    
+                                    const int idx_face_x_LL = i +
+                                        (j + 1)*(interior_dims[0] + 3) +
+                                        (k + 1)*(interior_dims[0] + 3)*(interior_dims[1] + 2);
                                     
                                     const int idx_face_x_L = (i + 1) +
                                         (j + 1)*(interior_dims[0] + 3) +
@@ -8328,6 +10313,14 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                         (j + 1)*(interior_dims[0] + 3) +
                                         (k + 1)*(interior_dims[0] + 3)*(interior_dims[1] + 2);
                                     
+                                    const int idx_face_x_RR = (i + 3) +
+                                        (j + 1)*(interior_dims[0] + 3) +
+                                        (k + 1)*(interior_dims[0] + 3)*(interior_dims[1] + 2);
+                                    
+                                    const int idx_face_y_BB = j +
+                                        (k + 1)*(interior_dims[1] + 3) +
+                                        (i + 1)*(interior_dims[1] + 3)*(interior_dims[2] + 2);
+                                    
                                     const int idx_face_y_B = (j + 1) +
                                         (k + 1)*(interior_dims[1] + 3) +
                                         (i + 1)*(interior_dims[1] + 3)*(interior_dims[2] + 2);
@@ -8335,6 +10328,14 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                     const int idx_face_y_T = (j + 2) +
                                         (k + 1)*(interior_dims[1] + 3) +
                                         (i + 1)*(interior_dims[1] + 3)*(interior_dims[2] + 2);
+                                    
+                                    const int idx_face_y_TT = (j + 3) +
+                                        (k + 1)*(interior_dims[1] + 3) +
+                                        (i + 1)*(interior_dims[1] + 3)*(interior_dims[2] + 2);
+                                    
+                                    const int idx_face_z_BB = k +
+                                        (i + 1)*(interior_dims[2] + 3) +
+                                        (j + 1)*(interior_dims[2] + 3)*(interior_dims[0] + 2);
                                     
                                     const int idx_face_z_B = (k + 1) +
                                         (i + 1)*(interior_dims[2] + 3) +
@@ -8344,17 +10345,32 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxAndSource(
                                         (i + 1)*(interior_dims[2] + 3) +
                                         (j + 1)*(interior_dims[2] + 3)*(interior_dims[0] + 2);
                                     
-                                    const int& u_L = velocity_intercell->getPointer(0, 0)[idx_face_x_L];
-                                    const int& u_R = velocity_intercell->getPointer(0, 0)[idx_face_x_R];
+                                    const int idx_face_z_FF = (k + 3) +
+                                        (i + 1)*(interior_dims[2] + 3) +
+                                        (j + 1)*(interior_dims[2] + 3)*(interior_dims[0] + 2);
                                     
-                                    const int& v_B = velocity_intercell->getPointer(1, 1)[idx_face_y_B];
-                                    const int& v_T = velocity_intercell->getPointer(1, 1)[idx_face_y_T];
+                                    const double& u_LL = velocity_intercell->getPointer(0, 0)[idx_face_x_LL];
+                                    const double& u_L = velocity_intercell->getPointer(0, 0)[idx_face_x_L];
+                                    const double& u_R = velocity_intercell->getPointer(0, 0)[idx_face_x_R];
+                                    const double& u_RR = velocity_intercell->getPointer(0, 0)[idx_face_x_RR];
                                     
-                                    const int& w_B = velocity_intercell->getPointer(2, 2)[idx_face_z_B];
-                                    const int& w_F = velocity_intercell->getPointer(2, 2)[idx_face_z_F];
+                                    const double& v_BB = velocity_intercell->getPointer(1, 1)[idx_face_y_BB];
+                                    const double& v_B = velocity_intercell->getPointer(1, 1)[idx_face_y_B];
+                                    const double& v_T = velocity_intercell->getPointer(1, 1)[idx_face_y_T];
+                                    const double& v_TT = velocity_intercell->getPointer(1, 1)[idx_face_y_TT];
                                     
-                                    S[idx_cell_nghost] += dt*Z[si][idx_cell_wghost]*((u_R - u_L)/dx[0] +
-                                        (v_T - v_B)/dx[1] + (w_F - w_B)/dx[2]);
+                                    const double& w_BB = velocity_intercell->getPointer(2, 2)[idx_face_z_BB];
+                                    const double& w_B = velocity_intercell->getPointer(2, 2)[idx_face_z_B];
+                                    const double& w_F = velocity_intercell->getPointer(2, 2)[idx_face_z_F];
+                                    const double& w_FF = velocity_intercell->getPointer(2, 2)[idx_face_z_FF];
+                                    
+                                    S[idx_cell_nghost] += dt*Z[si][idx_cell_wghost]*(
+                                        (3.0/2*(u_R - u_L) - 3.0/10*(u[idx_cell_wghost_x_R] - u[idx_cell_wghost_x_L]) +
+                                         1.0/30*(u_RR - u_LL))/dx[0] +
+                                        (3.0/2*(v_T - v_B) - 3.0/10*(v[idx_cell_wghost_y_T] - v[idx_cell_wghost_y_B]) +
+                                         1.0/30*(v_TT - v_BB))/dx[1] +
+                                        (3.0/2*(w_F - w_B) - 3.0/10*(w[idx_cell_wghost_z_F] - w[idx_cell_wghost_z_B]) +
+                                         1.0/30*(w_FF - w_BB))/dx[2]);
                                 }
                             }
                         }

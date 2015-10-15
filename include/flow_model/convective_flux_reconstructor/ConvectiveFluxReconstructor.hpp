@@ -56,7 +56,7 @@ class ConvectiveFluxReconstructor
          * reconstructor.
          */
         hier::IntVector
-        getConvertiveFluxNumberOfGhostCells(void) const
+        getConvectiveFluxNumberOfGhostCells(void) const
         {
             return d_num_conv_ghosts;
         }
@@ -176,13 +176,14 @@ class ConvectiveFluxReconstructor
         
         /*
          * Compute the convective fluxes and sources due to hyperbolization
-         * of the equtions.
+         * of the equations.
          */
         virtual void
-        computeConvectiveFluxAndSource(
+        computeConvectiveFluxesAndSources(
             hier::Patch& patch,
             const double time,
             const double dt,
+            const int RK_step_number,
             const boost::shared_ptr<hier::VariableContext> data_context) = 0;
     
     protected:

@@ -3,9 +3,12 @@
 set(convective_flux_reconstructor_source_files
     ConvectiveFluxReconstructorFirstOrderHLLC.cpp
     ConvectiveFluxReconstructorLLF.cpp
+    ConvectiveFluxReconstructorWENO-JS5-LLF.cpp
+    ConvectiveFluxReconstructorWENO-CU6-M2-LLF.cpp
     ConvectiveFluxReconstructorWCNS-JS5-HLLC-HLL.cpp
-    ConvectiveFluxReconstructorWCNS-HW56-HLLC-HLL.cpp
-    ConvectiveFluxReconstructorTest.cpp
+    ConvectiveFluxReconstructorWCNS-CU6-M2-HLLC-HLL.cpp
+    ConvectiveFluxReconstructorWCNS-HW6-HLLC-HLL.cpp
+    ConvectiveFluxReconstructorWCNS-HW6-LD-HLLC-HLL.cpp
 )
 
 # Create a library called convective_flux_reconstructor which includes the 

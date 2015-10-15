@@ -1327,7 +1327,8 @@ RungeKuttaLevelIntegrator::advanceLevel(
             d_patch_strategy->computeHyperbolicFluxesAndSourcesOnPatch(
                   *patch,
                   current_time,
-                  dt);
+                  dt,
+                  sn);
             
             d_patch_strategy->setDataContext(d_scratch);
             
@@ -1751,7 +1752,7 @@ RungeKuttaLevelIntegrator::synchronizeLevelWithCoarser(
         
         patch->allocatePatchData(d_temp_var_scratch_data, coarse_sim_time);
             
-        d_patch_strategy->synchronizeHyperbolicFlux(*patch,
+        d_patch_strategy->synchronizeHyperbolicFluxes(*patch,
            coarse_sim_time,
            reflux_dt);
         patch->deallocatePatchData(d_temp_var_scratch_data);
@@ -3057,9 +3058,9 @@ RungeKuttaLevelIntegrator::putToRestart(
     {
         std::string alpha_array_name = "alpha_" + tbox::Utilities::intToString(i);
         
-        std::vector<double> alpha_array(d_number_steps);
+        std::vector<double> alpha_array(static_cast<int>(d_alpha[i].size()));
         
-        for (int j = 0; j < d_number_steps; j++)
+        for (int j = 0; j < static_cast<int>(d_alpha[i].size()); j++)
         {
             alpha_array[j] = d_alpha[i][j];
         }
@@ -3071,9 +3072,9 @@ RungeKuttaLevelIntegrator::putToRestart(
     {
         std::string beta_array_name = "beta_" + tbox::Utilities::intToString(i);
         
-        std::vector<double> beta_array(d_number_steps);
+        std::vector<double> beta_array(static_cast<int>(d_beta[i].size()));
         
-        for (int j = 0; j < d_number_steps; j++)
+        for (int j = 0; j < static_cast<int>(d_beta[i].size()); j++)
         {
             beta_array[j] = d_beta[i][j];
         }
@@ -3085,9 +3086,9 @@ RungeKuttaLevelIntegrator::putToRestart(
     {
         std::string gamma_array_name = "gamma_" + tbox::Utilities::intToString(i);
         
-        std::vector<double> gamma_array(d_number_steps);
+        std::vector<double> gamma_array(static_cast<int>(d_gamma[i].size()));
         
-        for (int j = 0; j < d_number_steps; j++)
+        for (int j = 0; j < static_cast<int>(d_gamma[i].size()); j++)
         {
             gamma_array[j] = d_gamma[i][j];
         }

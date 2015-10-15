@@ -1,7 +1,7 @@
 #ifndef CONVECTIVE_FLUX_RECONSTRUCTOR_LLF_HPP
 #define CONVECTIVE_FLUX_RECONSTRUCTOR_LLF_HPP
 
-#include "ConvectiveFluxReconstructor.hpp"
+#include "flow_model/convective_flux_reconstructor/ConvectiveFluxReconstructor.hpp"
 
 class ConvectiveFluxReconstructorLLF: public ConvectiveFluxReconstructor
 {
@@ -32,12 +32,13 @@ class ConvectiveFluxReconstructorLLF: public ConvectiveFluxReconstructor
         
         /*
          * Compute the convective fluxes and sources due to hyperbolization
-         * of the equtions.
+         * of the equations.
          */
-        void computeConvectiveFluxAndSource(
+        void computeConvectiveFluxesAndSources(
             hier::Patch& patch,
             const double time,
             const double dt,
+            const int RK_step_number,
             const boost::shared_ptr<hier::VariableContext> data_context);
     
 };

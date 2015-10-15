@@ -145,7 +145,8 @@ class RungeKuttaPatchStrategy:
         computeHyperbolicFluxesAndSourcesOnPatch(
             hier::Patch& patch,
             const double time,
-            const double dt) = 0;        
+            const double dt,
+            const int RK_step_number) = 0;        
         
         /**
          * Advance a single Runge-Kutta step using previous intermediate solutions
@@ -182,7 +183,7 @@ class RungeKuttaPatchStrategy:
          * be consistent with that.
          */
         virtual void
-        synchronizeHyperbolicFlux(
+        synchronizeHyperbolicFluxes(
             hier::Patch& patch,
             const double time,
             const double dt) = 0;

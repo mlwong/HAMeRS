@@ -21,19 +21,13 @@
 #include "SAMRAI/tbox/Serializable.h"
 
 #include "flow_model/FlowModels.hpp"
+#include "flow_model/convective_flux_reconstructor/ConvectiveFluxReconstructor.hpp"
 #include "integrator/RungeKuttaLevelIntegrator.hpp"
 #include "patch_strategy/RungeKuttaPatchStrategy.hpp"
 
 #include "boost/shared_ptr.hpp"
 #include <string>
 #include <vector>
-
-#include "flow_model/convective_flux_reconstructor/ConvectiveFluxReconstructorLLF.hpp"
-#include "flow_model/convective_flux_reconstructor/ConvectiveFluxReconstructorFirstOrderHLLC.hpp"
-#include "flow_model/convective_flux_reconstructor/ConvectiveFluxReconstructorWCNS-JS5-HLLC-HLL.hpp"
-#include "flow_model/convective_flux_reconstructor/ConvectiveFluxReconstructorWCNS-HW56-HLLC-HLL.hpp"
-#include "flow_model/convective_flux_reconstructor/ConvectiveFluxReconstructorTest.hpp"
-
 
 using namespace SAMRAI;
 
@@ -148,7 +142,8 @@ class Euler:
         computeHyperbolicFluxesAndSourcesOnPatch(
             hier::Patch& patch,
             const double time,
-            const double dt);
+            const double dt,
+            const int RK_step_number);
         
         /**
          * Advance a single Runge-Kutta step. Conservative differencing is
@@ -170,7 +165,7 @@ class Euler:
          * repeating conservative differencing with corrected fluxes.
          */
         void
-        synchronizeHyperbolicFlux(
+        synchronizeHyperbolicFluxes(
             hier::Patch& patch,
             const double time,
             const double dt);
@@ -440,6 +435,17 @@ class Euler:
             std::vector<double>& total_energy,
             std::vector<double>& volume_fraction);
         
+        void
+        preservePositivity(
+            std::vector<double*>& Q,
+            boost::shared_ptr<pdat::FaceData<double> >& convective_flux_intermediate,
+            boost::shared_ptr<pdat::CellData<double> >& source_intermediate,
+            const hier::IntVector interior_dims,
+            const hier::IntVector ghostcell_dims,
+            const double* const dx,
+            const double& dt,
+            const double& beta);
+        
         /*
          * Set defaults for boundary conditions. Set to bogus values
          * for error checking.
@@ -519,7 +525,7 @@ class Euler:
         
         /*
          * Euler solution state is represented by "conservative" variables,
-         * density, momentum, and total_energy per unit volume
+         * density, momentum, and total_energy per unit volume.
          */
         boost::shared_ptr<pdat::CellVariable<double> > d_density;
         boost::shared_ptr<pdat::CellVariable<double> > d_partial_density;
@@ -534,7 +540,7 @@ class Euler:
         boost::shared_ptr<pdat::FaceVariable<double> > d_convective_flux;
         
         /*
-         * boost::shared_ptr to source term
+         * boost::shared_ptr to source term.
          */
         boost::shared_ptr<pdat::CellVariable<double> > d_source;
         
@@ -598,6 +604,11 @@ class Euler:
         std::vector<std::string> d_refinement_criteria;
         std::vector<double> d_density_shock_tol;
         std::vector<double> d_pressure_shock_tol;
+        
+        /*
+         * Boolean to enable positivity-preserving.
+         */
+        bool d_is_preserving_positivity;
         
         /*
          * Timers.

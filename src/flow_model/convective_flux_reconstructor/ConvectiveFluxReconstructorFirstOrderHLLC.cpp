@@ -73,15 +73,18 @@ ConvectiveFluxReconstructorFirstOrderHLLC::putToRestart(
 
 /*
  * Compute the convective fluxes and sources due to hyperbolization
- * of the equtions.
+ * of the equations.
  */
 void
-ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
+ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
     hier::Patch& patch,
     const double time,
     const double dt,
+    const int RK_step_number,
     const boost::shared_ptr<hier::VariableContext> data_context)
 {
+    NULL_USE(RK_step_number);
+    
     if (d_set_variables == true)
     {
         // Get the dimensions of box that covers the interior of patch.
@@ -135,7 +138,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                     double* rho_u = momentum->getPointer(0);
                     double* E     = total_energy->getPointer(0);
                     
-                    // Compute the flux in the x direction.
+                    // Compute the fluxes in the x direction.
                     for (int i = 0; i < interior_dims[0] + 1; i++)
                     {
                         // Compute the indices of left cell, right cell and face.
@@ -167,7 +170,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                             &E[idx_cell_R],
                             X_DIRECTION);
                         
-                        // Mulitply flux by dt.
+                        // Mulitply fluxes by dt.
                         for (int ei = 0; ei < d_num_eqn; ei++)
                         {
                             *F_x_ptr[ei] *= dt;
@@ -182,7 +185,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                     double* rho_v = momentum->getPointer(1);
                     double* E     = total_energy->getPointer(0);
                     
-                    // Compute the flux in the x direction.
+                    // Compute the fluxes in the x direction.
                     for (int j = 0; j < interior_dims[1]; j++)
                     {
                         for (int i = 0; i < interior_dims[0] + 1; i++)
@@ -221,7 +224,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                                 &E[idx_cell_R],
                                 X_DIRECTION);
                             
-                            // Mulitply flux by dt.
+                            // Mulitply fluxes by dt.
                             for (int ei = 0; ei < d_num_eqn; ei++)
                             {
                                 *F_x_ptr[ei] *= dt;
@@ -229,7 +232,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the y direction.
+                    // Compute the fluxes in the y direction.
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
                         for (int j = 0; j < interior_dims[1] + 1; j++)
@@ -268,7 +271,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                                 &E[idx_cell_T],
                                 Y_DIRECTION);
                             
-                            // Mulitply flux by dt.
+                            // Mulitply fluxes by dt.
                             for (int ei = 0; ei < d_num_eqn; ei++)
                             {
                                 *F_y_ptr[ei] *= dt;
@@ -285,7 +288,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                     double* rho_w = momentum->getPointer(2);
                     double* E     = total_energy->getPointer(0);
                     
-                    // Compute the flux in the x direction.
+                    // Compute the fluxes in the x direction.
                     for (int k = 0; k < interior_dims[2]; k++)
                     {
                         for (int j = 0; j < interior_dims[1]; j++)
@@ -331,7 +334,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                                     &E[idx_cell_R],
                                     X_DIRECTION);
                                 
-                                // Mulitply flux by dt.
+                                // Mulitply fluxes by dt.
                                 for (int ei = 0; ei < d_num_eqn; ei++)
                                 {
                                     *F_x_ptr[ei] *= dt;
@@ -340,7 +343,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the y direction.
+                    // Compute the fluxes in the y direction.
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
                         for (int k = 0; k < interior_dims[2]; k++)
@@ -386,7 +389,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                                     &E[idx_cell_T],
                                     Y_DIRECTION);
                                 
-                                // Mulitply flux by dt.
+                                // Mulitply fluxes by dt.
                                 for (int ei = 0; ei < d_num_eqn; ei++)
                                 {
                                     *F_y_ptr[ei] *= dt;
@@ -395,7 +398,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the z direction.
+                    // Compute the fluxes in the z direction.
                     for (int j = 0; j < interior_dims[1]; j++)
                     {
                         for (int i = 0; i < interior_dims[0]; i++)
@@ -441,7 +444,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                                     &E[idx_cell_F],
                                     Z_DIRECTION);
                                 
-                                // Mulitply flux by dt.
+                                // Mulitply fluxes by dt.
                                 for (int ei = 0; ei < d_num_eqn; ei++)
                                 {
                                     *F_z_ptr[ei] *= dt;
@@ -512,7 +515,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                         Y.push_back(mass_fraction->getPointer(si));
                     }
                     
-                    // Compute the flux in the x direction and velocity components at the face
+                    // Compute the fluxes in the x direction and velocity components at the face
                     // normal to the x direction.
                     for (int i = 0; i < interior_dims[0] + 1; i++)
                     {
@@ -565,7 +568,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                             Y_R_ptr,
                             X_DIRECTION);
                         
-                        // Mulitply flux by dt.
+                        // Mulitply fluxes by dt.
                         for (int ei = 0; ei < d_num_eqn; ei++)
                         {
                             *F_x_ptr[ei] *= dt;
@@ -615,7 +618,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                         Y.push_back(mass_fraction->getPointer(si));
                     }
                     
-                    // Compute the flux in the x direction and velocity components at the face
+                    // Compute the fluxes in the x direction and velocity components at the face
                     // normal to the x direction.
                     for (int j = 0; j < interior_dims[1]; j++)
                     {
@@ -678,7 +681,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                                 Y_R_ptr,
                                 X_DIRECTION);
                             
-                            // Mulitply flux by dt.
+                            // Mulitply fluxes by dt.
                             for (int ei = 0; ei < d_num_eqn; ei++)
                             {
                                 *F_x_ptr[ei] *= dt;
@@ -686,8 +689,8 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the y direction and velocity components at the face
-                    // normal to the y directions.
+                    // Compute the fluxes in the y direction and velocity components at the face
+                    // normal to the y direction.
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
                         for (int j = 0; j < interior_dims[1] + 1; j++)
@@ -749,7 +752,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                                 Y_T_ptr,
                                 Y_DIRECTION);
                             
-                            // Mulitply flux by dt.
+                            // Mulitply fluxes by dt.
                             for (int ei = 0; ei < d_num_eqn; ei++)
                             {
                                 *F_y_ptr[ei] *= dt;
@@ -816,7 +819,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                         Y.push_back(mass_fraction->getPointer(si));
                     }
                     
-                    // Compute the flux in the x direction and velocity components at the face
+                    // Compute the fluxes in the x direction and velocity components at the face
                     // normal to the x direction.
                     for (int k = 0; k < interior_dims[2]; k++)
                     {
@@ -886,7 +889,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                                     Y_R_ptr,
                                     X_DIRECTION);
                                 
-                                // Mulitply flux by dt.
+                                // Mulitply fluxes by dt.
                                 for (int ei = 0; ei < d_num_eqn; ei++)
                                 {
                                     *F_x_ptr[ei] *= dt;
@@ -895,8 +898,8 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the y direction and velocity components at the face
-                    // normal to the y directions.
+                    // Compute the fluxes in the y direction and velocity components at the face
+                    // normal to the y direction.
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
                         for (int k = 0; k < interior_dims[2]; k++)
@@ -965,7 +968,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                                     Y_T_ptr,
                                     Y_DIRECTION);
                                 
-                                // Mulitply flux by dt.
+                                // Mulitply fluxes by dt.
                                 for (int ei = 0; ei < d_num_eqn; ei++)
                                 {
                                     *F_y_ptr[ei] *= dt;
@@ -974,8 +977,8 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the z direction and velocity components at the face
-                    // normal to the z directions.
+                    // Compute the fluxes in the z direction and velocity components at the face
+                    // normal to the z direction.
                     for (int j = 0; j < interior_dims[1]; j++)
                     {
                         for (int i = 0; i < interior_dims[0]; i++)
@@ -1044,7 +1047,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                                     Y_F_ptr,
                                     Z_DIRECTION);
                                 
-                                // Mulitply flux by dt.
+                                // Mulitply fluxes by dt.
                                 for (int ei = 0; ei < d_num_eqn; ei++)
                                 {
                                     *F_z_ptr[ei] *= dt;
@@ -1186,7 +1189,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                         Z.push_back(volume_fraction->getPointer(si));
                     }
                     
-                    // Compute the flux in the x direction and velocity components at the face
+                    // Compute the fluxes in the x direction and velocity components at the face
                     // normal to the x direction.
                     for (int i = 0; i < interior_dims[0] + 1; i++)
                     {
@@ -1253,7 +1256,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                             Z_R_ptr,
                             X_DIRECTION);
                         
-                        // Mulitply flux by dt.
+                        // Mulitply fluxes by dt.
                         for (int ei = 0; ei < d_num_eqn; ei++)
                         {
                             *F_x_ptr[ei] *= dt;
@@ -1307,7 +1310,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                         Z.push_back(volume_fraction->getPointer(si));
                     }
                     
-                    // Compute the flux in the x direction and velocity components at the face
+                    // Compute the fluxes in the x direction and velocity components at the face
                     // normal to the x direction.
                     for (int j = 0; j < interior_dims[1]; j++)
                     {
@@ -1384,7 +1387,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                                 Z_R_ptr,
                                 X_DIRECTION);
                             
-                            // Mulitply flux by dt.
+                            // Mulitply fluxes by dt.
                             for (int ei = 0; ei < d_num_eqn; ei++)
                             {
                                 *F_x_ptr[ei] *= dt;
@@ -1392,8 +1395,8 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the y direction and velocity components at the face
-                    // normal to the y directions.
+                    // Compute the fluxes in the y direction and velocity components at the face
+                    // normal to the y direction.
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
                         for (int j = 0; j < interior_dims[1] + 1; j++)
@@ -1469,7 +1472,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                                 Z_T_ptr,
                                 Y_DIRECTION);
                             
-                            // Mulitply flux by dt.
+                            // Mulitply fluxes by dt.
                             for (int ei = 0; ei < d_num_eqn; ei++)
                             {
                                 *F_y_ptr[ei] *= dt;
@@ -1540,7 +1543,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                         Z.push_back(volume_fraction->getPointer(si));
                     }
                     
-                    // Compute the flux in the x direction and velocity components at the face
+                    // Compute the fluxes in the x direction and velocity components at the face
                     // normal to the x direction.
                     for (int k = 0; k < interior_dims[2]; k++)
                     {
@@ -1624,7 +1627,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                                     Z_R_ptr,
                                     X_DIRECTION);
                                 
-                                // Mulitply flux by dt.
+                                // Mulitply fluxes by dt.
                                 for (int ei = 0; ei < d_num_eqn; ei++)
                                 {
                                     *F_x_ptr[ei] *= dt;
@@ -1633,8 +1636,8 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the y direction and velocity components at the face
-                    // normal to the y directions.
+                    // Compute the fluxes in the y direction and velocity components at the face
+                    // normal to the y direction.
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
                         for (int k = 0; k < interior_dims[2]; k++)
@@ -1717,7 +1720,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                                     Z_T_ptr,
                                     Y_DIRECTION);
                                 
-                                // Mulitply flux by dt.
+                                // Mulitply fluxes by dt.
                                 for (int ei = 0; ei < d_num_eqn; ei++)
                                 {
                                     *F_y_ptr[ei] *= dt;
@@ -1726,8 +1729,8 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                         }
                     }
                     
-                    // Compute the flux in the z direction and velocity components at the face
-                    // normal to the z directions.
+                    // Compute the fluxes in the z direction and velocity components at the face
+                    // normal to the z direction.
                     for (int j = 0; j < interior_dims[1]; j++)
                     {
                         for (int i = 0; i < interior_dims[0]; i++)
@@ -1810,7 +1813,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSource(
                                     Z_F_ptr,
                                     Z_DIRECTION);
                                 
-                                // Mulitply flux by dt.
+                                // Mulitply fluxes by dt.
                                 for (int ei = 0; ei < d_num_eqn; ei++)
                                 {
                                     *F_z_ptr[ei] *= dt;

@@ -1,9 +1,11 @@
 #ifndef CONVECTIVE_FLUX_RECONSTRUCTOR_WCNS_JS5_HLLC_HLL_HPP
 #define CONVECTIVE_FLUX_RECONSTRUCTOR_WCNS_JS5_HLLC_HLL_HPP
 
-#include "ConvectiveFluxReconstructor.hpp"
+#include "flow_model/convective_flux_reconstructor/ConvectiveFluxReconstructor.hpp"
 
 #include "Directions.hpp"
+
+#include "flow_model/Riemann_solver/RiemannSolverHLLC.hpp"
 #include "flow_model/Riemann_solver/RiemannSolverHLLC_HLL.hpp"
 
 #include "boost/multi_array.hpp"
@@ -39,16 +41,30 @@ class ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL: public ConvectiveFluxReconst
         
         /*
          * Compute the convective fluxes and sources due to hyperbolization
-         * of the equtions.
+         * of the equations.
          */
         void
-        computeConvectiveFluxAndSource(
+        computeConvectiveFluxesAndSources(
             hier::Patch& patch,
             const double time,
             const double dt,
+            const int RK_step_number,
             const boost::shared_ptr<hier::VariableContext> data_context);
     
     private:
+        
+        /*
+         * Constants used to bound the mass fraction.
+         */
+        double d_Y_bnd_lo;
+        double d_Y_bnd_up;
+        
+        /*
+         * Constants used to bound the volume fraction.
+         */
+        double d_Z_bnd_lo;
+        double d_Z_bnd_up;
+        
         /*
          * Weights used in WENO interpolations.
          */
@@ -57,9 +73,10 @@ class ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL: public ConvectiveFluxReconst
         boost::multi_array<double, 2> d_weights_c;
         
         /*
-         * Riemann solver used for computing mid-point fluxes.
+         * Riemann solvers used for computing mid-point fluxes.
          */
-        RiemannSolverHLLC_HLL d_Riemann_solver;
+        RiemannSolverHLLC d_Riemann_solver_HLLC;
+        RiemannSolverHLLC_HLL d_Riemann_solver_HLLC_HLL;
         
         /*
          * Convert primitive variables into characteristic variables.

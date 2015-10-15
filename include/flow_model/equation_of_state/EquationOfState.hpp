@@ -13,6 +13,8 @@
 
 using namespace SAMRAI;
 
+enum EQUATIONS_OF_STATE { IDEAL_GAS };
+
 class EquationOfState
 {
     public:
@@ -28,6 +30,11 @@ class EquationOfState
                 d_equation_of_state_db(equation_of_state_db),
                 d_thermal_pro_assum(thermal_pro_assum)
         {}
+        
+        /*
+         * Get the label of the equation of state.
+         */
+        virtual EQUATIONS_OF_STATE getLabel() = 0;
         
         /*
          * Helper function to compute the total density of the mixture given
@@ -320,7 +327,7 @@ class EquationOfState
         virtual double&
         getSpeciesThermodynamicProperty(
             const std::string& property_name,
-            const int species_index) = 0;
+            const int species_index = 0) = 0;
         
         /*
          * Determine whether a thermodynamic property is registered.

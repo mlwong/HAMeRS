@@ -406,7 +406,7 @@ RiemannSolverHLLC_HLL::computeIntercellFluxForSingleSpecies(
                 }
                 else
                 {
-                    alpha1 = abs(u_R - u_L)/vel_mag;
+                    alpha1 = fabs(u_R - u_L)/vel_mag;
                     alpha2 = sqrt(1.0 - alpha1*alpha1);
                 }
                 
@@ -633,7 +633,7 @@ RiemannSolverHLLC_HLL::computeIntercellFluxForSingleSpecies(
                 }
                 else
                 {
-                    alpha1 = abs(v_T - v_B)/vel_mag;
+                    alpha1 = fabs(v_T - v_B)/vel_mag;
                     alpha2 = sqrt(1.0 - alpha1*alpha1);
                 }
                 
@@ -920,7 +920,7 @@ RiemannSolverHLLC_HLL::computeIntercellFluxForSingleSpecies(
                 }
                 else
                 {
-                    alpha1 = abs(u_R - u_L)/vel_mag;
+                    alpha1 = fabs(u_R - u_L)/vel_mag;
                     alpha2 = sqrt(1.0 - alpha1*alpha1);
                 }
                 
@@ -1164,7 +1164,7 @@ RiemannSolverHLLC_HLL::computeIntercellFluxForSingleSpecies(
                 }
                 else
                 {
-                    alpha1 = abs(v_T - v_B)/vel_mag;
+                    alpha1 = fabs(v_T - v_B)/vel_mag;
                     alpha2 = sqrt(1.0 - alpha1*alpha1);
                 }
                 
@@ -1408,7 +1408,7 @@ RiemannSolverHLLC_HLL::computeIntercellFluxForSingleSpecies(
                 }
                 else
                 {
-                    alpha1 = abs(w_F - w_B)/vel_mag;
+                    alpha1 = fabs(w_F - w_B)/vel_mag;
                     alpha2 = sqrt(1.0 - alpha1*alpha1);
                 }
                 
@@ -1985,7 +1985,7 @@ RiemannSolverHLLC_HLL::computeIntercellFluxAndVelocityForFourEqnShyue(
                 }
                 else
                 {
-                    alpha1 = abs(u_R - u_L)/vel_mag;
+                    alpha1 = fabs(u_R - u_L)/vel_mag;
                     alpha2 = sqrt(1.0 - alpha1*alpha1);
                 }
                 
@@ -2002,7 +2002,8 @@ RiemannSolverHLLC_HLL::computeIntercellFluxAndVelocityForFourEqnShyue(
                 *(F_x_intercell[3]) = F_x_intercell_HLLC[3];
                 for (int si = 0; si < d_num_species - 1; si++)
                 {
-                    *(F_x_intercell[4 + si]) = F_x_intercell_HLLC[4 + si];
+                    *(F_x_intercell[4 + si]) = beta1*F_x_intercell_HLLC[4 + si] + beta2*F_x_intercell_HLL[4 + si];
+                    // *(F_x_intercell[4 + si]) = F_x_intercell_HLLC[4 + si];
                 }
                 
                 break;
@@ -2284,7 +2285,7 @@ RiemannSolverHLLC_HLL::computeIntercellFluxAndVelocityForFourEqnShyue(
                 }
                 else
                 {
-                    alpha1 = abs(v_T - v_B)/vel_mag;
+                    alpha1 = fabs(v_T - v_B)/vel_mag;
                     alpha2 = sqrt(1.0 - alpha1*alpha1);
                 }
                 
@@ -2301,7 +2302,8 @@ RiemannSolverHLLC_HLL::computeIntercellFluxAndVelocityForFourEqnShyue(
                 *(F_y_intercell[3]) = F_y_intercell_HLLC[3];
                 for (int si = 0; si < d_num_species - 1; si++)
                 {
-                    *(F_y_intercell[4 + si]) = F_y_intercell_HLLC[4 + si];
+                    *(F_y_intercell[4 + si]) = beta1*F_y_intercell_HLLC[4 + si] + beta2*F_y_intercell_HLL[4 + si];
+                    // *(F_y_intercell[4 + si]) = F_y_intercell_HLLC[4 + si];
                 }
                 
                 break;
@@ -2661,7 +2663,7 @@ RiemannSolverHLLC_HLL::computeIntercellFluxAndVelocityForFourEqnShyue(
                 }
                 else
                 {
-                    alpha1 = abs(u_R - u_L)/vel_mag;
+                    alpha1 = fabs(u_R - u_L)/vel_mag;
                     alpha2 = sqrt(1.0 - alpha1*alpha1);
                 }
                 
@@ -2679,7 +2681,8 @@ RiemannSolverHLLC_HLL::computeIntercellFluxAndVelocityForFourEqnShyue(
                 *(F_x_intercell[4]) = F_x_intercell_HLLC[4];
                 for (int si = 0; si < d_num_species - 1; si++)
                 {
-                    *(F_x_intercell[5 + si]) = F_x_intercell_HLLC[5 + si];
+                    *(F_x_intercell[5 + si]) = beta1*F_x_intercell_HLLC[5 + si] + beta2*F_x_intercell_HLL[5 + si];
+                    // *(F_x_intercell[5 + si]) = F_x_intercell_HLLC[5 + si];
                 }
                 
                 break;
@@ -2980,7 +2983,7 @@ RiemannSolverHLLC_HLL::computeIntercellFluxAndVelocityForFourEqnShyue(
                 }
                 else
                 {
-                    alpha1 = abs(v_T - v_B)/vel_mag;
+                    alpha1 = fabs(v_T - v_B)/vel_mag;
                     alpha2 = sqrt(1.0 - alpha1*alpha1);
                 }
                 
@@ -2998,7 +3001,8 @@ RiemannSolverHLLC_HLL::computeIntercellFluxAndVelocityForFourEqnShyue(
                 *(F_y_intercell[4]) = F_y_intercell_HLLC[4];
                 for (int si = 0; si < d_num_species - 1; si++)
                 {
-                    *(F_y_intercell[5 + si]) = F_y_intercell_HLLC[5 + si];
+                    *(F_y_intercell[5 + si]) = beta1*F_y_intercell_HLLC[5 + si] + beta2*F_y_intercell_HLL[5 + si];
+                    // *(F_y_intercell[5 + si]) = F_y_intercell_HLLC[5 + si];
                 }
                 
                 break;
@@ -3298,7 +3302,7 @@ RiemannSolverHLLC_HLL::computeIntercellFluxAndVelocityForFourEqnShyue(
                 }
                 else
                 {
-                    alpha1 = abs(w_F - w_B)/vel_mag;
+                    alpha1 = fabs(w_F - w_B)/vel_mag;
                     alpha2 = sqrt(1.0 - alpha1*alpha1);
                 }
                 
@@ -3316,7 +3320,8 @@ RiemannSolverHLLC_HLL::computeIntercellFluxAndVelocityForFourEqnShyue(
                 *(F_z_intercell[4]) = F_z_intercell_HLLC[4];
                 for (int si = 0; si < d_num_species - 1; si++)
                 {
-                    *(F_z_intercell[5 + si]) = F_z_intercell_HLLC[5 + si];
+                    *(F_z_intercell[5 + si]) = beta1*F_z_intercell_HLLC[5 + si] + beta2*F_z_intercell_HLL[5 + si];
+                    // *(F_z_intercell[5 + si]) = F_z_intercell_HLLC[5 + si];
                 }
                 
                 break;
@@ -3947,7 +3952,7 @@ RiemannSolverHLLC_HLL::computeIntercellFluxAndVelocityForFiveEqnAllaire(
                 }
                 else
                 {
-                    alpha1 = abs(u_R - u_L)/vel_mag;
+                    alpha1 = fabs(u_R - u_L)/vel_mag;
                     alpha2 = sqrt(1.0 - alpha1*alpha1);
                 }
                 
@@ -3968,7 +3973,9 @@ RiemannSolverHLLC_HLL::computeIntercellFluxAndVelocityForFiveEqnAllaire(
                 *(F_x_intercell[d_num_species + 2]) = F_x_intercell_HLLC[d_num_species + 2];
                 for (int si = 0; si < d_num_species - 1; si++)
                 {
-                    *(F_x_intercell[d_num_species + 3 + si]) = F_x_intercell_HLLC[d_num_species + 3 + si];
+                    *(F_x_intercell[d_num_species + 3 + si]) = beta1*F_x_intercell_HLLC[d_num_species + 3 + si] +
+                        beta2*F_x_intercell_HLL[d_num_species + 3 + si];
+                    // *(F_x_intercell[d_num_species + 3 + si]) = F_x_intercell_HLLC[d_num_species + 3 + si];
                 }
                 
                 break;
@@ -4282,7 +4289,7 @@ RiemannSolverHLLC_HLL::computeIntercellFluxAndVelocityForFiveEqnAllaire(
                 }
                 else
                 {
-                    alpha1 = abs(v_T - v_B)/vel_mag;
+                    alpha1 = fabs(v_T - v_B)/vel_mag;
                     alpha2 = sqrt(1.0 - alpha1*alpha1);
                 }
                 
@@ -4303,7 +4310,10 @@ RiemannSolverHLLC_HLL::computeIntercellFluxAndVelocityForFiveEqnAllaire(
                 *(F_y_intercell[d_num_species + 2]) = F_y_intercell_HLLC[d_num_species + 2];
                 for (int si = 0; si < d_num_species - 1; si++)
                 {
-                    *(F_y_intercell[d_num_species + 3 + si]) = F_y_intercell_HLLC[d_num_species + 3 + si];
+                    *(F_y_intercell[d_num_species + 3 + si]) = beta1*F_y_intercell_HLLC[d_num_species + 3 + si] +
+                        beta2*F_y_intercell_HLL[d_num_species + 3 + si];
+                    // *(F_y_intercell[d_num_species + 3 + si]) = F_y_intercell_HLLC[d_num_species + 3 + si];
+                    
                 }
                 
                 break;
@@ -4703,7 +4713,7 @@ RiemannSolverHLLC_HLL::computeIntercellFluxAndVelocityForFiveEqnAllaire(
                 }
                 else
                 {
-                    alpha1 = abs(u_R - u_L)/vel_mag;
+                    alpha1 = fabs(u_R - u_L)/vel_mag;
                     alpha2 = sqrt(1.0 - alpha1*alpha1);
                 }
                 
@@ -4726,7 +4736,9 @@ RiemannSolverHLLC_HLL::computeIntercellFluxAndVelocityForFiveEqnAllaire(
                 *(F_x_intercell[d_num_species + 3]) = F_x_intercell_HLLC[d_num_species + 3];
                 for (int si = 0; si < d_num_species - 1; si++)
                 {
-                    *(F_x_intercell[d_num_species + 4 + si]) = F_x_intercell_HLLC[d_num_species + 4 + si];
+                    *(F_x_intercell[d_num_species + 4 + si]) = beta1*F_x_intercell_HLLC[d_num_species + 4 + si] +
+                        beta2*F_x_intercell_HLL[d_num_species + 4 + si];
+                    // *(F_x_intercell[d_num_species + 4 + si]) = F_x_intercell_HLLC[d_num_species + 4 + si];
                 }
                 
                 break;
@@ -5059,7 +5071,7 @@ RiemannSolverHLLC_HLL::computeIntercellFluxAndVelocityForFiveEqnAllaire(
                 }
                 else
                 {
-                    alpha1 = abs(v_T - v_B)/vel_mag;
+                    alpha1 = fabs(v_T - v_B)/vel_mag;
                     alpha2 = sqrt(1.0 - alpha1*alpha1);
                 }
                 
@@ -5082,7 +5094,9 @@ RiemannSolverHLLC_HLL::computeIntercellFluxAndVelocityForFiveEqnAllaire(
                 *(F_y_intercell[d_num_species + 3]) = F_y_intercell_HLLC[d_num_species + 3];
                 for (int si = 0; si < d_num_species - 1; si++)
                 {
-                    *(F_y_intercell[d_num_species + 4 + si]) = F_y_intercell_HLLC[d_num_species + 4 + si];
+                    *(F_y_intercell[d_num_species + 4 + si]) = beta1*F_y_intercell_HLLC[d_num_species + 4 + si] +
+                        beta2*F_y_intercell_HLL[d_num_species + 4 + si];
+                    // *(F_y_intercell[d_num_species + 4 + si]) = F_y_intercell_HLLC[d_num_species + 4 + si];
                 }
                 
                 break;
@@ -5415,7 +5429,7 @@ RiemannSolverHLLC_HLL::computeIntercellFluxAndVelocityForFiveEqnAllaire(
                 }
                 else
                 {
-                    alpha1 = abs(w_F - w_B)/vel_mag;
+                    alpha1 = fabs(w_F - w_B)/vel_mag;
                     alpha2 = sqrt(1.0 - alpha1*alpha1);
                 }
                 
@@ -5438,7 +5452,9 @@ RiemannSolverHLLC_HLL::computeIntercellFluxAndVelocityForFiveEqnAllaire(
                 *(F_z_intercell[d_num_species + 3]) = F_z_intercell_HLLC[d_num_species + 3];
                 for (int si = 0; si < d_num_species - 1; si++)
                 {
-                    *(F_z_intercell[d_num_species + 4 + si]) = F_z_intercell_HLLC[d_num_species + 4 + si];
+                    *(F_z_intercell[d_num_species + 4 + si]) = beta1*F_z_intercell_HLLC[d_num_species + 4 + si] +
+                        beta2*F_z_intercell_HLL[d_num_species + 4 + si];
+                    // *(F_z_intercell[d_num_species + 4 + si]) = F_z_intercell_HLLC[d_num_species + 4 + si];
                 }
                 
                 break;

@@ -602,41 +602,6 @@ int main(int argc, char *argv[])
         t_write_viz->stop();
     }
     
-    /*
-     * Write out data of the last time step.
-     */
-    int iteration_num = time_integrator->getIntegratorStep();
-    if (is_viz_dumping)
-    {
-        if (viz_dump_setting == "CONSTANT_TIME_INTERVAL")
-        {
-            if (loop_time < last_viz_dump_time + viz_dump_time_interval)
-            {
-                visit_data_writer->writePlotData(
-                    patch_hierarchy,
-                    iteration_num,
-                    loop_time);
-            }
-        }
-        else if (viz_dump_setting == "CONSTANT_TIMESTEP_INTERVAL")
-        {
-            if ((iteration_num % viz_dump_timestep_interval) != 0)
-            {
-                visit_data_writer->writePlotData(
-                    patch_hierarchy,
-                    iteration_num,
-                    loop_time);
-            }
-        }
-        else
-        {
-            TBOX_ERROR("Unknown viz_dump_setting = "
-                << viz_dump_setting
-                << "."
-                << std::endl); 
-        }
-    }
-    
     tbox::plog << "GriddingAlgorithm statistics:\n";
     gridding_algorithm->printStatistics();
     
