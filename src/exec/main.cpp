@@ -552,17 +552,20 @@ int main(int argc, char *argv[])
             if ((iteration_num % restart_interval) == 0)
             {
                 t_write_restart->start();
+                
                 tbox::RestartManager::getManager()->
                     writeRestartFile(restart_write_dirname,
                                      iteration_num);
+                
                 t_write_restart->stop();
             }
         }
         
         /*
          * At specified intervals, write out data files for plotting.
+         * If restart_interval = -1, also write restart files when writing out data
+         * files for plotting
          */
-        t_write_viz->start();
 #ifdef HAVE_HDF5
         if (is_viz_dumping)
         {
@@ -570,24 +573,54 @@ int main(int argc, char *argv[])
             {
                 if (loop_time >= last_viz_dump_time + viz_dump_time_interval)
                 {
+                    t_write_viz->start();
+                    
                     visit_data_writer->writePlotData(
                         patch_hierarchy,
                         iteration_num,
                         loop_time);
                     
+                    t_write_viz->stop();
+                    
                     last_viz_dump_time =
                         floor(loop_time/viz_dump_time_interval)*
                             viz_dump_time_interval;
+                    
+                    if ((restart_interval == -1) && !(restart_write_dirname.empty()))
+                    {
+                        t_write_restart->start();
+                        
+                        tbox::RestartManager::getManager()->
+                            writeRestartFile(restart_write_dirname,
+                                             iteration_num);
+                        
+                        t_write_restart->stop();
+                    }
                 }
             }
             else if (viz_dump_setting == "CONSTANT_TIMESTEP_INTERVAL")
             {
                 if ((iteration_num % viz_dump_timestep_interval) == 0)
                 {
+                    t_write_viz->start();
+                    
                     visit_data_writer->writePlotData(
                         patch_hierarchy,
                         iteration_num,
                         loop_time);
+                    
+                    t_write_viz->stop();
+                }
+                
+                if ((restart_interval == -1) && !(restart_write_dirname.empty()))
+                {
+                    t_write_restart->start();
+                    
+                    tbox::RestartManager::getManager()->
+                        writeRestartFile(restart_write_dirname,
+                                         iteration_num);
+                    
+                    t_write_restart->stop();
                 }
             }
             else
@@ -599,7 +632,29 @@ int main(int argc, char *argv[])
             }
         }
 #endif
-        t_write_viz->stop();
+    }
+    
+    int last_iteration_num = time_integrator->getIntegratorStep();
+    
+    t_write_viz->start();
+    
+    visit_data_writer->writePlotData(
+        patch_hierarchy,
+        last_iteration_num,
+        loop_time);
+    
+    t_write_viz->stop();
+    
+    if ((restart_interval == -1 || restart_interval > 0)
+        && !(restart_write_dirname.empty()))
+    {
+        t_write_restart->start();
+        
+        tbox::RestartManager::getManager()->
+            writeRestartFile(restart_write_dirname,
+                             last_iteration_num);
+        
+        t_write_restart->stop();
     }
     
     tbox::plog << "GriddingAlgorithm statistics:\n";
