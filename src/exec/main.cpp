@@ -610,17 +610,17 @@ int main(int argc, char *argv[])
                         loop_time);
                     
                     t_write_viz->stop();
-                }
-                
-                if ((restart_interval == -1) && !(restart_write_dirname.empty()))
-                {
-                    t_write_restart->start();
                     
-                    tbox::RestartManager::getManager()->
-                        writeRestartFile(restart_write_dirname,
-                                         iteration_num);
-                    
-                    t_write_restart->stop();
+                    if ((restart_interval == -1) && !(restart_write_dirname.empty()))
+                    {
+                        t_write_restart->start();
+                        
+                        tbox::RestartManager::getManager()->
+                            writeRestartFile(restart_write_dirname,
+                                             iteration_num);
+                        
+                        t_write_restart->stop();
+                    }
                 }
             }
             else
