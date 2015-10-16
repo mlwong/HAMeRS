@@ -124,7 +124,7 @@ void
 ConvectiveFluxReconstructorWCNS_HW6_LD_HLLC_HLL::putToRestart(
    const boost::shared_ptr<tbox::Database>& restart_db) const
 {
-    restart_db->putString("d_shock_capturing_scheme", "TEST");
+    restart_db->putString("d_shock_capturing_scheme", "WCNS_HW6_LD_HLLC_HLL");
     
     restart_db->putDouble("d_constant_C", d_constant_C);
     restart_db->putInteger("d_constant_p", d_constant_p);
