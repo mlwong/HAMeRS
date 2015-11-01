@@ -979,6 +979,9 @@ Euler::initializeDataOnPatch(
         hier::Box patch_box = patch.getBox();
         const hier::IntVector patch_dims = patch_box.numberCells();
         
+        // Get the ratio to level zero index space.
+        const hier::IntVector ratio_to_level_zero = patch_geom->getRatio();
+        
         switch (d_flow_model)
         {
             case SINGLE_SPECIES:
@@ -1762,7 +1765,7 @@ Euler::initializeDataOnPatch(
                         const double Z_post   = 0.0;
                         
                         // Compute the characteristic length of the initial interface thickness.
-                        const double epsilon_i = (0.75)*sqrt(dx[0]*dx[1]);
+                        const double epsilon_i = (0.75)*sqrt(ratio_to_level_zero[0]*ratio_to_level_zero[1])*sqrt(dx[0]*dx[1]);
                         
                         for (int j = 0; j < patch_dims[1]; j++)
                         {
