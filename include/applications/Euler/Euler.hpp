@@ -602,8 +602,14 @@ class Euler:
          * Richardson extrapolation.
          */
         std::vector<std::string> d_refinement_criteria;
-        std::vector<double> d_density_shock_tol;
-        std::vector<double> d_pressure_shock_tol;
+        
+        double d_shock_Jameson_tol;
+        double d_shock_Ducros_tol;
+        double d_shock_Larsson_tol;
+        
+        double d_density_Jameson_tol;
+        
+        double d_vorticity_Q_criterion_tol;
         
         /*
          * Boolean to enable positivity-preserving.

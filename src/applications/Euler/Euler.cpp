@@ -61,6 +61,8 @@
 #endif
 #endif
 
+#define EPSILON 1e-40
+
 boost::shared_ptr<tbox::Timer> Euler::t_init = NULL;
 boost::shared_ptr<tbox::Timer> Euler::t_compute_dt = NULL;
 boost::shared_ptr<tbox::Timer> Euler::t_compute_hyperbolicfluxes = NULL;
@@ -4171,6 +4173,8 @@ Euler::tagGradientDetectorCells(
     const int tag_indx,
     const bool uses_richardson_extrapolation_too)
 {
+    NULL_USE(uses_richardson_extrapolation_too);
+    
     t_taggradient->start();
     
     const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
@@ -4183,26 +4187,6 @@ Euler::tagGradientDetectorCells(
     
     const double* dx = patch_geom->getDx();
     
-    NULL_USE(dx);
-    
-    boost::shared_ptr<pdat::CellData<int> > tags(
-        BOOST_CAST<pdat::CellData<int>, hier::PatchData>(
-            patch.getPatchData(tag_indx)));
-
-#ifdef DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(tags);
-    TBOX_ASSERT(tags->getGhostCellWidth() == 0);
-#endif    
-    
-    boost::shared_ptr<pdat::CellData<double> > density(
-        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            patch.getPatchData(d_density, getDataContext())));
-    
-#ifdef DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(density);    
-    TBOX_ASSERT(density->getGhostCellWidth() == d_num_ghosts);
-#endif
-    
     // Get the dimensions of box that covers the interior of Patch.
     hier::Box dummy_box = patch.getBox();
     const hier::Box interior_box = dummy_box;
@@ -4214,75 +4198,951 @@ Euler::tagGradientDetectorCells(
     const hier::Box ghost_box = dummy_box;
     const hier::IntVector ghostcell_dims = ghost_box.numberCells();
     
-    if (d_dim == tbox::Dimension(1))
-    {
-        // NOT YET IMPLEMENTED
-    }
-    else if (d_dim == tbox::Dimension(2))
-    {
-        for (int ncrit = 0;
+    // Get the tags.
+    boost::shared_ptr<pdat::CellData<int> > tags(
+        BOOST_CAST<pdat::CellData<int>, hier::PatchData>(
+            patch.getPatchData(tag_indx)));
+    
+#ifdef DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(tags);
+    TBOX_ASSERT(tags->getGhostCellWidth() == 0);
+#endif
+    
+    // Initialize all tags to zero.
+    tags->fillAll(0.0);
+    
+    for (int ncrit = 0;
              ncrit < static_cast<int>(d_refinement_criteria.size());
              ncrit++)
+    {
+        std::string ref = d_refinement_criteria[ncrit];
+        
+        // Get the pointer of the tags
+        int* tag_ptr  = tags->getPointer();
+        
+        
+        if (ref == "SHOCK_JAMESON")
         {
-            std::string ref = d_refinement_criteria[ncrit];
+            // Get the cell data of the time-dependent variables.
+            boost::shared_ptr<pdat::CellData<double> > density(
+                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    patch.getPatchData(d_density, getDataContext())));
             
-            // Get the pointer of the tags
-            int* tag_ptr  = tags->getPointer();
+            boost::shared_ptr<pdat::CellData<double> > momentum(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch.getPatchData(d_momentum, getDataContext())));
             
-            if (ref == "DENSITY_SHOCK")
+            boost::shared_ptr<pdat::CellData<double> > total_energy(
+                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    patch.getPatchData(d_total_energy, getDataContext())));
+            
+            // Allocate temporary patch data.
+            boost::shared_ptr<pdat::CellData<double> > pressure(
+                new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+            
+            if (d_dim == tbox::Dimension(1))
             {
-                // Get the pointer of conservative variables.
+                // NOT YET IMPLEMENTED
+            }
+            else if (d_dim == tbox::Dimension(2))
+            {
+                // Get the arrays of conservative variables.
                 double* rho   = density->getPointer(0);
+                double* rho_u = momentum->getPointer(0);
+                double* rho_v = momentum->getPointer(1);
+                double* E     = total_energy->getPointer(0);
                 
+                // Get the array of pressure.
+                double* p     = pressure->getPointer(0);
+                
+                // Compute the field of pressure.
+                for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                {
+                    for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                    {
+                        // Compute index into linear data array.
+                        const int idx = (i + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*ghostcell_dims[0];
+                        
+                        std::vector<const double*> m_ptr;
+                        m_ptr.push_back(&rho_u[idx]);
+                        m_ptr.push_back(&rho_v[idx]);
+                        
+                        p[idx] = d_equation_of_state->getPressure(
+                            &rho[idx],
+                            m_ptr,
+                            &E[idx]);
+                    }
+                }
+                
+                // Use the Jameson's switch with threshold to tag cells.
                 for (int j = 0; j < interior_dims[1]; j++)
                 {
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
-                        // Compute index into linear data array.
-                        // Note: the data is stored in Fortran order.
-                        int idx_wghost_x[3];
-                        int idx_wghost_y[3];
+                        // Compute indices.
+                        const int idx = (i + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*ghostcell_dims[0];
                         
-                        idx_wghost_x[0] = ((i - 1) + d_num_ghosts[0]) + (j + d_num_ghosts[1])*ghostcell_dims[0];
-                        idx_wghost_x[1] = ( i      + d_num_ghosts[0]) + (j + d_num_ghosts[1])*ghostcell_dims[0];
-                        idx_wghost_x[2] = ((i + 1) + d_num_ghosts[0]) + (j + d_num_ghosts[1])*ghostcell_dims[0];
+                        const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*ghostcell_dims[0];
                         
-                        idx_wghost_y[0] = (i + d_num_ghosts[0]) + ((j - 1) + d_num_ghosts[1])*ghostcell_dims[0];
-                        idx_wghost_y[1] = (i + d_num_ghosts[0]) + ( j      + d_num_ghosts[1])*ghostcell_dims[0];
-                        idx_wghost_y[2] = (i + d_num_ghosts[0]) + ((j + 1) + d_num_ghosts[1])*ghostcell_dims[0];
+                        const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*ghostcell_dims[0];
                         
-                        int idx_nghost = i + j*interior_dims[0];
+                        const int idx_y_B = (i + d_num_ghosts[0]) +
+                            (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
                         
-                        // Compute the gradient of density
-                        double detector_rho = sqrt(pow(fabs(rho[idx_wghost_x[0]] - 2*rho[idx_wghost_x[1]] + rho[idx_wghost_x[2]])/
-                                                   (fabs(rho[idx_wghost_x[1]] - rho[idx_wghost_x[0]])
-                                                   + fabs(rho[idx_wghost_x[2]] - rho[idx_wghost_x[1]]) + 1.0e-40), 2.0)
-                                                   + pow(fabs(rho[idx_wghost_y[0]] - 2*rho[idx_wghost_y[1]] + rho[idx_wghost_y[2]])/
-                                                   (fabs(rho[idx_wghost_y[1]] - rho[idx_wghost_y[0]])
-                                                   + fabs(rho[idx_wghost_y[2]] - rho[idx_wghost_y[1]]) + 1.0e-40), 2.0))/sqrt(2.0);
+                        const int idx_y_T = (i + d_num_ghosts[0]) +
+                            (j + 1 + d_num_ghosts[1])*ghostcell_dims[0];
                         
-                        NULL_USE(detector_rho);
+                        const int idx_nghost = i + j*interior_dims[0];
                         
-                        if (rho[idx_wghost_x[1]] > 6.5 && rho[idx_wghost_x[1]] < 8.5)
+                        const double psi_x = fabs(p[idx_x_R] - 2*p[idx] + p[idx_x_L])/
+                            (p[idx_x_R] + 2*p[idx] + p[idx_x_L] + EPSILON);
+                        
+                        const double psi_y = fabs(p[idx_y_T] - 2*p[idx] + p[idx_y_B])/
+                            (p[idx_y_T] + 2*p[idx] + p[idx_y_B] + EPSILON);
+                        
+                        const double psi = fmax(psi_x, psi_y);
+                        
+                        if (psi > d_shock_Jameson_tol)
                         {
-                            tag_ptr[idx_nghost] = 1;
-                        }
-                        else
-                        {
-                            tag_ptr[idx_nghost] = 0;
+                            tag_ptr[idx_nghost] |= 1;
                         }
                     }
                 }
             }
-            else if (ref == "PRESSURE_SHOCK")
+            else if (d_dim == tbox::Dimension(3))
+            {
+                // Get the arrays of conservative variables.
+                double* rho   = density->getPointer(0);
+                double* rho_u = momentum->getPointer(0);
+                double* rho_v = momentum->getPointer(1);
+                double* rho_w = momentum->getPointer(2);
+                double* E     = total_energy->getPointer(0);
+                
+                // Get the array of pressure.
+                double* p     = pressure->getPointer(0);
+                
+                for (int k = -d_num_ghosts[2]; k < interior_dims[2] + d_num_ghosts[2]; k++)
+                {
+                    for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                    {
+                        for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                        {
+                            // Compute index into linear data array.
+                            const int idx = (i + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            std::vector<const double*> m_ptr;
+                            m_ptr.push_back(&rho_u[idx]);
+                            m_ptr.push_back(&rho_v[idx]);
+                            m_ptr.push_back(&rho_w[idx]);
+                            
+                            p[idx] = d_equation_of_state->getPressure(
+                                &rho[idx],
+                                m_ptr,
+                                &E[idx]);
+                        }
+                    }
+                }
+                
+                // Use the Jameson's switch with threshold to tag cells.
+                for (int k = 0; k < interior_dims[2]; k++)
+                {
+                    for (int j = 0; j < interior_dims[1]; j++)
+                    {
+                        for (int i = 0; i < interior_dims[0]; i++)
+                        {
+                            // Compute indices.
+                            const int idx = (i + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            const int idx_y_B = (i + d_num_ghosts[0]) +
+                                (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            const int idx_y_T = (i + d_num_ghosts[0]) +
+                                (j + 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            const int idx_z_B = (i + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                (k - 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            const int idx_z_F = (i + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                (k + 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            const int idx_nghost = i + j*interior_dims[0] + k*interior_dims[0]*interior_dims[1];
+                            
+                            const double psi_x = fabs(p[idx_x_R] - 2*p[idx] + p[idx_x_L])/
+                                (p[idx_x_R] + 2*p[idx] + p[idx_x_L] + EPSILON);
+                            
+                            const double psi_y = fabs(p[idx_y_T] - 2*p[idx] + p[idx_y_B])/
+                                (p[idx_y_T] + 2*p[idx] + p[idx_y_B] + EPSILON);
+                            
+                            const double psi_z = fabs(p[idx_z_F] - 2*p[idx] + p[idx_z_B])/
+                                (p[idx_z_F] + 2*p[idx] + p[idx_z_B] + EPSILON);
+                            
+                            const double psi = fmax(fmax(psi_x, psi_y), psi_z);
+                            
+                            if (psi > d_shock_Jameson_tol)
+                            {
+                                tag_ptr[idx_nghost] |= 1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else if (ref == "SHOCK_DUCROS")
+        {
+            // Get the cell data of the time-dependent variables.
+            boost::shared_ptr<pdat::CellData<double> > density(
+                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    patch.getPatchData(d_density, getDataContext())));
+            
+            boost::shared_ptr<pdat::CellData<double> > momentum(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch.getPatchData(d_momentum, getDataContext())));
+            
+            boost::shared_ptr<pdat::CellData<double> > total_energy(
+                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    patch.getPatchData(d_total_energy, getDataContext())));
+            
+            // Allocate temporary patch data.
+            boost::shared_ptr<pdat::CellData<double> > pressure(
+                new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+            
+            boost::shared_ptr<pdat::CellData<double> > velocity(
+                new pdat::CellData<double>(interior_box, d_dim.getValue(), d_num_ghosts));
+            
+            if (d_dim == tbox::Dimension(1))
             {
                 // NOT YET IMPLEMENTED
             }
+            else if (d_dim == tbox::Dimension(2))
+            {
+                // Get the arrays of conservative variables.
+                double* rho   = density->getPointer(0);
+                double* rho_u = momentum->getPointer(0);
+                double* rho_v = momentum->getPointer(1);
+                double* E     = total_energy->getPointer(0);
+                
+                // Get the array of pressure.
+                double* p     = pressure->getPointer(0);
+                double* u     = velocity->getPointer(0);
+                double* v     = velocity->getPointer(1);
+                
+                // Compute the field of pressure.
+                for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                {
+                    for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                    {
+                        // Compute index into linear data array.
+                        const int idx = (i + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*ghostcell_dims[0];
+                        
+                        std::vector<const double*> m_ptr;
+                        m_ptr.push_back(&rho_u[idx]);
+                        m_ptr.push_back(&rho_v[idx]);
+                        
+                        p[idx] = d_equation_of_state->getPressure(
+                            &rho[idx],
+                            m_ptr,
+                            &E[idx]);
+                        
+                        u[idx] = rho_u[idx]/rho[idx];
+                        v[idx] = rho_v[idx]/rho[idx];
+                    }
+                }
+                
+                // Use the Ducros switch with threshold to tag cells.
+                for (int j = 0; j < interior_dims[1]; j++)
+                {
+                    for (int i = 0; i < interior_dims[0]; i++)
+                    {
+                        // Compute indices.
+                        const int idx = (i + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*ghostcell_dims[0];
+                        
+                        const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*ghostcell_dims[0];
+                        
+                        const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*ghostcell_dims[0];
+                        
+                        const int idx_y_B = (i + d_num_ghosts[0]) +
+                            (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                        
+                        const int idx_y_T = (i + d_num_ghosts[0]) +
+                            (j + 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                        
+                        const int idx_nghost = i + j*interior_dims[0];
+                        
+                        // Compute the Jameson's sensor.
+                        const double psi_x = fabs(p[idx_x_R] - 2*p[idx] + p[idx_x_L])/
+                            (p[idx_x_R] + 2*p[idx] + p[idx_x_L] + EPSILON);
+                        
+                        const double psi_y = fabs(p[idx_y_T] - 2*p[idx] + p[idx_y_B])/
+                            (p[idx_y_T] + 2*p[idx] + p[idx_y_B] + EPSILON);
+                        
+                        const double psi = fmax(psi_x, psi_y);
+                        
+                        // Compute another indicator.
+                        
+                        const double dudx = (u[idx_x_R] - u[idx_x_L])/(2*dx[0]);
+                        const double dudy = (u[idx_y_T] - u[idx_y_B])/(2*dx[1]);
+                        
+                        const double dvdx = (v[idx_x_R] - v[idx_x_L])/(2*dx[0]);
+                        const double dvdy = (v[idx_y_T] - v[idx_y_B])/(2*dx[1]);
+                        
+                        const double theta = dudx + dvdy;
+                        const double Omega = fabs(dvdx - dudy);
+                        
+                        const double phi = theta*theta/(theta*theta + Omega*Omega + 1e-40);
+                        
+                        if (psi*phi > d_shock_Ducros_tol)
+                        {
+                            tag_ptr[idx_nghost] |= 1;
+                        }
+                    }
+                }
+            }
+            else if (d_dim == tbox::Dimension(3))
+            {
+                // Get the arrays of conservative variables.
+                double* rho   = density->getPointer(0);
+                double* rho_u = momentum->getPointer(0);
+                double* rho_v = momentum->getPointer(1);
+                double* rho_w = momentum->getPointer(2);
+                double* E     = total_energy->getPointer(0);
+                
+                // Get the array of pressure.
+                double* p     = pressure->getPointer(0);
+                double* u     = velocity->getPointer(0);
+                double* v     = velocity->getPointer(1);
+                double* w     = velocity->getPointer(2);
+                
+                for (int k = -d_num_ghosts[2]; k < interior_dims[2] + d_num_ghosts[2]; k++)
+                {
+                    for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                    {
+                        for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                        {
+                            // Compute index into linear data array.
+                            const int idx = (i + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            std::vector<const double*> m_ptr;
+                            m_ptr.push_back(&rho_u[idx]);
+                            m_ptr.push_back(&rho_v[idx]);
+                            m_ptr.push_back(&rho_w[idx]);
+                            
+                            p[idx] = d_equation_of_state->getPressure(
+                                &rho[idx],
+                                m_ptr,
+                                &E[idx]);
+                            
+                            u[idx] = rho_u[idx]/rho[idx];
+                            v[idx] = rho_v[idx]/rho[idx];
+                            w[idx] = rho_w[idx]/rho[idx];
+                        }
+                    }
+                }
+                
+                // Use the Ducros switch with threshold to tag cells.
+                for (int k = 0; k < interior_dims[2]; k++)
+                {
+                    for (int j = 0; j < interior_dims[1]; j++)
+                    {
+                        for (int i = 0; i < interior_dims[0]; i++)
+                        {
+                            // Compute indices.
+                            const int idx = (i + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            const int idx_y_B = (i + d_num_ghosts[0]) +
+                                (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            const int idx_y_T = (i + d_num_ghosts[0]) +
+                                (j + 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            const int idx_z_B = (i + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                (k - 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            const int idx_z_F = (i + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                (k + 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            const int idx_nghost = i + j*interior_dims[0] + k*interior_dims[0]*interior_dims[1];
+                            
+                            // Compute Jameson's sensor.
+                            
+                            const double psi_x = fabs(p[idx_x_R] - 2*p[idx] + p[idx_x_L])/
+                                (p[idx_x_R] + 2*p[idx] + p[idx_x_L] + EPSILON);
+                            
+                            const double psi_y = fabs(p[idx_y_T] - 2*p[idx] + p[idx_y_B])/
+                                (p[idx_y_T] + 2*p[idx] + p[idx_y_B] + EPSILON);
+                            
+                            const double psi_z = fabs(p[idx_z_F] - 2*p[idx] + p[idx_z_B])/
+                                (p[idx_z_F] + 2*p[idx] + p[idx_z_B] + EPSILON);
+                            
+                            const double psi = fmax(fmax(psi_x, psi_y), psi_z);
+                            
+                            // Compute another indicator.
+                            
+                            const double dudx = (u[idx_x_R] - u[idx_x_L])/(2*dx[0]);
+                            const double dudy = (u[idx_y_T] - u[idx_y_B])/(2*dx[1]);
+                            const double dudz = (u[idx_z_F] - u[idx_z_B])/(2*dx[2]);
+                            
+                            const double dvdx = (v[idx_x_R] - v[idx_x_L])/(2*dx[0]);
+                            const double dvdy = (v[idx_y_T] - v[idx_y_B])/(2*dx[1]);
+                            const double dvdz = (v[idx_z_F] - v[idx_z_B])/(2*dx[2]);
+                            
+                            const double dwdx = (w[idx_x_R] - w[idx_x_L])/(2*dx[0]);
+                            const double dwdy = (w[idx_y_T] - w[idx_y_B])/(2*dx[1]);
+                            const double dwdz = (w[idx_z_F] - w[idx_z_B])/(2*dx[2]);
+                            
+                            const double theta = dudx + dvdy + dwdz;;
+                            
+                            const double Omega = sqrt(pow(dwdy - dvdz, 2) +
+                                pow(dudz - dwdx, 2) +
+                                pow(dvdx - dudy, 2));
+                            
+                            const double phi = theta*theta/(theta*theta + Omega*Omega + 1e-40);
+                            
+                            if (psi*phi > d_shock_Ducros_tol)
+                            {
+                                tag_ptr[idx_nghost] |= 1;
+                            }
+                        }
+                    }
+                }
+            }
         }
-    }
-    else if (d_dim == tbox::Dimension(3))
-    {
-        // NOT YET IMPLEMENTED
+        else if (ref == "SHOCK_LARSSON")
+        {
+            // Get the cell data of the time-dependent variables.
+            boost::shared_ptr<pdat::CellData<double> > density(
+                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    patch.getPatchData(d_density, getDataContext())));
+            
+            boost::shared_ptr<pdat::CellData<double> > momentum(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch.getPatchData(d_momentum, getDataContext())));
+            
+            // Allocate temporary patch data.
+            boost::shared_ptr<pdat::CellData<double> > velocity(
+                new pdat::CellData<double>(interior_box, d_dim.getValue(), d_num_ghosts));
+            
+            if (d_dim == tbox::Dimension(1))
+            {
+                // NOT YET IMPLEMENTED
+            }
+            else if (d_dim == tbox::Dimension(2))
+            {
+                // Get the array of conservative variables.
+                double* rho   = density->getPointer(0);
+                double* rho_u = momentum->getPointer(0);
+                double* rho_v = momentum->getPointer(1);
+                
+                // Get the arrays of temporary patch data.
+                double* u     = velocity->getPointer(0);
+                double* v     = velocity->getPointer(1);
+                
+                // Compute the field of velocities.
+                for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                {
+                    for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                    {
+                        // Compute index into linear data array.
+                        const int idx = (i + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*ghostcell_dims[0];
+                        
+                        u[idx] = rho_u[idx]/rho[idx];
+                        v[idx] = rho_v[idx]/rho[idx];
+                    }
+                }
+                
+                // Use the Larsson's switch with threshold to tag cells.
+                for (int j = 0; j < interior_dims[1]; j++)
+                {
+                    for (int i = 0; i < interior_dims[0]; i++)
+                    {
+                        // Compute indices.
+                        const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*ghostcell_dims[0];
+                        
+                        const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*ghostcell_dims[0];
+                        
+                        const int idx_y_B = (i + d_num_ghosts[0]) +
+                            (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                        
+                        const int idx_y_T = (i + d_num_ghosts[0]) +
+                            (j + 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                        
+                        const int idx_nghost = i + j*interior_dims[0];
+                        
+                        const double dudx = (u[idx_x_R] - u[idx_x_L])/(2*dx[0]);
+                        const double dudy = (u[idx_y_T] - u[idx_y_B])/(2*dx[1]);
+                        
+                        const double dvdx = (v[idx_x_R] - v[idx_x_L])/(2*dx[0]);
+                        const double dvdy = (v[idx_y_T] - v[idx_y_B])/(2*dx[1]);
+                        
+                        const double theta = dudx + dvdy;
+                        const double Omega = fabs(dvdx - dudy);
+                        
+                        const double s = -theta/(fabs(theta) + Omega + EPSILON);
+                        
+                        if (s > d_shock_Larsson_tol)
+                        {
+                            tag_ptr[idx_nghost] |= 1;
+                        }
+                    }
+                }
+            }
+            else if (d_dim == tbox::Dimension(3))
+            {
+                // Get the arrays of conservative variables.
+                double* rho   = density->getPointer(0);
+                double* rho_u = momentum->getPointer(0);
+                double* rho_v = momentum->getPointer(1);
+                double* rho_w = momentum->getPointer(2);
+                
+                // Get the arrays of temporary patch data.
+                double* u     = velocity->getPointer(0);
+                double* v     = velocity->getPointer(1);
+                double* w     = velocity->getPointer(2);
+                
+                // Compute the field of velocities.
+                for (int k = -d_num_ghosts[2]; k < interior_dims[2] + d_num_ghosts[2]; k++)
+                {
+                    for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                    {
+                        for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                        {
+                            // Compute index into linear data array.
+                            const int idx = (i + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            u[idx] = rho_u[idx]/rho[idx];
+                            v[idx] = rho_v[idx]/rho[idx];
+                            w[idx] = rho_w[idx]/rho[idx];
+                        }
+                    }
+                }
+                
+                // Use the Larsson's switch with threshold to tag cells.
+                for (int k = 0; k < interior_dims[2]; k++)
+                {
+                    for (int j = 0; j < interior_dims[1]; j++)
+                    {
+                        for (int i = 0; i < interior_dims[0]; i++)
+                        {
+                            // Compute indices.
+                            const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            const int idx_y_B = (i + d_num_ghosts[0]) +
+                                (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            const int idx_y_T = (i + d_num_ghosts[0]) +
+                                (j + 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            const int idx_z_B = (i + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                (k - 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            const int idx_z_F = (i + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                (k + 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            const int idx_nghost = i + j*interior_dims[0] + k*interior_dims[0]*interior_dims[1];
+                            
+                            const double dudx = (u[idx_x_R] - u[idx_x_L])/(2*dx[0]);
+                            const double dudy = (u[idx_y_T] - u[idx_y_B])/(2*dx[1]);
+                            const double dudz = (u[idx_z_F] - u[idx_z_B])/(2*dx[2]);
+                            
+                            const double dvdx = (v[idx_x_R] - v[idx_x_L])/(2*dx[0]);
+                            const double dvdy = (v[idx_y_T] - v[idx_y_B])/(2*dx[1]);
+                            const double dvdz = (v[idx_z_F] - v[idx_z_B])/(2*dx[2]);
+                            
+                            const double dwdx = (w[idx_x_R] - w[idx_x_L])/(2*dx[0]);
+                            const double dwdy = (w[idx_y_T] - w[idx_y_B])/(2*dx[1]);
+                            const double dwdz = (w[idx_z_F] - w[idx_z_B])/(2*dx[2]);
+                            
+                            const double theta = dudx + dvdy + dwdz;;
+                            
+                            const double Omega = sqrt(pow(dwdy - dvdz, 2) +
+                                pow(dudz - dwdx, 2) +
+                                pow(dvdx - dudy, 2));
+                            
+                            const double s = -theta/(fabs(theta) + Omega + EPSILON);
+                            
+                            if (s > d_shock_Larsson_tol)
+                            {
+                                tag_ptr[idx_nghost] |= 1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else if (ref == "DENSITY_JAMESON")
+        {
+            switch (d_flow_model)
+            {
+                case SINGLE_SPECIES:
+                {
+                    // Get the cell data of the time-dependent variables.
+                    boost::shared_ptr<pdat::CellData<double> > density(
+                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(d_density, getDataContext())));
+                    
+                    if (d_dim == tbox::Dimension(1))
+                    {
+                        // NOT YET IMPLEMENTED
+                    }
+                    else if (d_dim == tbox::Dimension(2))
+                    {
+                        // Get the arrays of density.
+                        double* rho   = density->getPointer(0);
+                        
+                        // Use the Jameson's switch with threshold to tag cells.
+                        for (int j = 0; j < interior_dims[1]; j++)
+                        {
+                            for (int i = 0; i < interior_dims[0]; i++)
+                            {
+                                // Compute indices.
+                                const int idx = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_y_B = (i + d_num_ghosts[0]) +
+                                    (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_y_T = (i + d_num_ghosts[0]) +
+                                    (j + 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_nghost = i + j*interior_dims[0];
+                                
+                                const double psi_x = fabs(rho[idx_x_R] - 2*rho[idx] + rho[idx_x_L])/
+                                    (rho[idx_x_R] + 2*rho[idx] + rho[idx_x_L] + EPSILON);
+                                
+                                const double psi_y = fabs(rho[idx_y_T] - 2*rho[idx] + rho[idx_y_B])/
+                                    (rho[idx_y_T] + 2*rho[idx] + rho[idx_y_B] + EPSILON);
+                                
+                                const double psi = fmax(psi_x, psi_y);
+                                
+                                if (psi > d_density_Jameson_tol)
+                                {
+                                    tag_ptr[idx_nghost] |= 1;
+                                }
+                            }
+                        }
+                    }
+                    else if (d_dim == tbox::Dimension(3))
+                    {
+                        // Get the arrays of density.
+                        double* rho   = density->getPointer(0);
+                        
+                        // Use the Jameson's switch with threshold to tag cells.
+                        for (int k = 0; k < interior_dims[2]; k++)
+                        {
+                            for (int j = 0; j < interior_dims[1]; j++)
+                            {
+                                for (int i = 0; i < interior_dims[0]; i++)
+                                {
+                                    // Compute indices.
+                                    const int idx = (i + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_y_B = (i + d_num_ghosts[0]) +
+                                        (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_y_T = (i + d_num_ghosts[0]) +
+                                        (j + 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_z_B = (i + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k - 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_z_F = (i + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_nghost = i + j*interior_dims[0] + k*interior_dims[0]*interior_dims[1];
+                                    
+                                    const double psi_x = fabs(rho[idx_x_R] - 2*rho[idx] + rho[idx_x_L])/
+                                        (rho[idx_x_R] + 2*rho[idx] + rho[idx_x_L] + EPSILON);
+                                    
+                                    const double psi_y = fabs(rho[idx_y_T] - 2*rho[idx] + rho[idx_y_B])/
+                                        (rho[idx_y_T] + 2*rho[idx] + rho[idx_y_B] + EPSILON);
+                                    
+                                    const double psi_z = fabs(rho[idx_z_F] - 2*rho[idx] + rho[idx_z_B])/
+                                        (rho[idx_z_F] + 2*rho[idx] + rho[idx_z_B] + EPSILON);
+                                    
+                                    const double psi = fmax(fmax(psi_x, psi_y), psi_z);
+                                    
+                                    if (psi > d_density_Jameson_tol)
+                                    {
+                                        tag_ptr[idx_nghost] |= 1;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    break;
+                }
+                case FOUR_EQN_SHYUE:
+                {
+                    
+                    break;
+                }
+                case FIVE_EQN_ALLAIRE:
+                {
+                    // Get the cell data of the time-dependent variables.
+                    boost::shared_ptr<pdat::CellData<double> > partial_density(
+                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(d_partial_density, getDataContext())));
+                    
+                    // Allocate temporary patch data.
+                    boost::shared_ptr<pdat::CellData<double> > density(
+                        new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+                    
+                    if (d_dim == tbox::Dimension(1))
+                    {
+                        // NOT YET IMPLEMENTED
+                    }
+                    else if (d_dim == tbox::Dimension(2))
+                    {
+                        // Get the arrays of conservative variables.
+                        std::vector<double*> Z_rho;
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            Z_rho.push_back(partial_density->getPointer(si));
+                        }
+                        
+                        // Get the array of pressure.
+                        double* rho     = density->getPointer(0);
+                        
+                        // Compute the field of density.
+                        for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                        {
+                            for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                            {
+                                // Compute index into linear data array.
+                                const int idx = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                std::vector<const double*> Z_rho_ptr;
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Z_rho_ptr.push_back(&Z_rho[si][idx]);
+                                }
+                                
+                                rho[idx] = d_equation_of_state->
+                                    getTotalDensity(
+                                        Z_rho_ptr);
+                            }
+                        }
+                        
+                        // Use the Jameson's switch with threshold to tag cells.
+                        for (int j = 0; j < interior_dims[1]; j++)
+                        {
+                            for (int i = 0; i < interior_dims[0]; i++)
+                            {
+                                // Compute indices.
+                                const int idx = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_y_B = (i + d_num_ghosts[0]) +
+                                    (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_y_T = (i + d_num_ghosts[0]) +
+                                    (j + 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_nghost = i + j*interior_dims[0];
+                                
+                                const double psi_x = fabs(rho[idx_x_R] - 2*rho[idx] + rho[idx_x_L])/
+                                    (rho[idx_x_R] + 2*rho[idx] + rho[idx_x_L] + EPSILON);
+                                
+                                const double psi_y = fabs(rho[idx_y_T] - 2*rho[idx] + rho[idx_y_B])/
+                                    (rho[idx_y_T] + 2*rho[idx] + rho[idx_y_B] + EPSILON);
+                                
+                                const double psi = fmax(psi_x, psi_y);
+                                
+                                if (psi > d_density_Jameson_tol)
+                                {
+                                    tag_ptr[idx_nghost] |= 1;
+                                }
+                            }
+                        }
+                    }
+                    else if (d_dim == tbox::Dimension(3))
+                    {
+                        // Get the arrays of conservative variables.
+                        std::vector<double*> Z_rho;
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            Z_rho.push_back(partial_density->getPointer(si));
+                        }
+                        
+                        // Get the array of pressure.
+                        double* rho     = density->getPointer(0);
+                        
+                        // Compute the field of density.
+                        for (int k = -d_num_ghosts[2]; k < interior_dims[2] + d_num_ghosts[2]; k++)
+                        {
+                            for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                            {
+                                for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                                {
+                                    // Compute index into linear data array.
+                                    const int idx = (i + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    std::vector<const double*> Z_rho_ptr;
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Z_rho_ptr.push_back(&Z_rho[si][idx]);
+                                    }
+                                    
+                                    rho[idx] = d_equation_of_state->
+                                        getTotalDensity(
+                                            Z_rho_ptr);
+                                }
+                            }
+                        }
+                        
+                        // Use the Jameson's switch with threshold to tag cells.
+                        for (int k = 0; k < interior_dims[2]; k++)
+                        {
+                            for (int j = 0; j < interior_dims[1]; j++)
+                            {
+                                for (int i = 0; i < interior_dims[0]; i++)
+                                {
+                                    // Compute indices.
+                                    const int idx = (i + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_y_B = (i + d_num_ghosts[0]) +
+                                        (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_y_T = (i + d_num_ghosts[0]) +
+                                        (j + 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_z_B = (i + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k - 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_z_F = (i + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_nghost = i + j*interior_dims[0] + k*interior_dims[0]*interior_dims[1];
+                                    
+                                    const double psi_x = fabs(rho[idx_x_R] - 2*rho[idx] + rho[idx_x_L])/
+                                        (rho[idx_x_R] + 2*rho[idx] + rho[idx_x_L] + EPSILON);
+                                    
+                                    const double psi_y = fabs(rho[idx_y_T] - 2*rho[idx] + rho[idx_y_B])/
+                                        (rho[idx_y_T] + 2*rho[idx] + rho[idx_y_B] + EPSILON);
+                                    
+                                    const double psi_z = fabs(rho[idx_z_F] - 2*rho[idx] + rho[idx_z_B])/
+                                        (rho[idx_z_F] + 2*rho[idx] + rho[idx_z_B] + EPSILON);
+                                    
+                                    const double psi = fmax(fmax(psi_x, psi_y), psi_z);
+                                    
+                                    if (psi > d_density_Jameson_tol)
+                                    {
+                                        tag_ptr[idx_nghost] |= 1;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    break;
+                }
+                default:
+                {
+                    TBOX_ERROR(d_object_name
+                               << ": "
+                               << "Unknown d_flow_model."
+                               << std::endl);
+                }
+            }
+        }
     }
     
     t_taggradient->stop();
@@ -5466,15 +6326,30 @@ Euler::putToRestart(
     }
     for (int i = 0; i < static_cast<int>(d_refinement_criteria.size()); i++)
     {
-        if (d_refinement_criteria[i] == "DENSITY_SHOCK")
+        if (d_refinement_criteria[i] == "SHOCK_JAMESON")
         {
-            restart_db->putDoubleVector("d_density_shock_tol",
-                                        d_density_shock_tol);
+            restart_db->putDouble("d_shock_Jameson_tol",
+                                  d_shock_Jameson_tol);
         }
-        else if(d_refinement_criteria[i] == "PRESSURE_SHOCK")
+        else if (d_refinement_criteria[i] == "SHOCK_DUCROS")
         {
-            restart_db->putDoubleVector("d_pressure_shock_tol",
-                                        d_pressure_shock_tol);
+            restart_db->putDouble("d_shock_Ducros_tol",
+                                  d_shock_Ducros_tol);
+        }
+        else if (d_refinement_criteria[i] == "SHOCK_LARSSON")
+        {
+            restart_db->putDouble("d_shock_Larsson_tol",
+                                  d_shock_Larsson_tol);
+        }
+        else if (d_refinement_criteria[i] == "DENSITY_JAMESON")
+        {
+            restart_db->putDouble("d_density_Jameson_tol",
+                                  d_density_Jameson_tol);
+        }
+        else if (d_refinement_criteria[i] == "VORTICITY_Q_CRITERION")
+        {
+            restart_db->putDouble("d_vorticity_Q_criterion_tol",
+                                  d_vorticity_Q_criterion_tol);
         }
     }
 }
@@ -8055,8 +8930,11 @@ Euler::getFromInput(
             
             if (!(error_key == "refine_criteria"))
             {
-                if (!(error_key == "DENSITY_SHOCK" ||
-                      error_key == "PRESSURE_SHOCK"))
+                if (!((error_key == "SHOCK_JAMESON") ||
+                      (error_key == "SHOCK_DUCROS") ||
+                      (error_key == "SHOCK_LARSSON") ||
+                      (error_key == "DENSITY_JAMESON") ||
+                      (error_key == "VORTICITY_Q_CRITERION")))
                 {
                     TBOX_ERROR(d_object_name
                                << ": "
@@ -8072,34 +8950,81 @@ Euler::getFromInput(
                     ++def_key_cnt;
                 }
                 
-                if (error_db && error_key == "DENSITY_SHOCK")
+                if (error_db && error_key == "SHOCK_JAMESON")
                 {                    
-                    if (error_db->keyExists("shock_tol"))
+                    if (error_db->keyExists("Jameson_tol"))
                     {
-                        d_density_shock_tol = error_db->getDoubleVector("shock_tol");
+                        d_shock_Jameson_tol = error_db->getDouble("Jameson_tol");
                     }
                     else
                     {
                         TBOX_ERROR(d_object_name
                                    << ": "
-                                   << "No key 'shock_tol' found in data for "
+                                   << "No key 'Jameson_tol' found in data for "
                                    << error_key
                                    << "."
                                    << std::endl);
                     }
                 }
-                
-                if (error_db && error_key == "PRESSURE_SHOCK")
-                {        
-                    if (error_db->keyExists("shock_tol"))
+                else if (error_db && error_key == "SHOCK_DUCROS")
+                {                    
+                    if (error_db->keyExists("Ducros_tol"))
                     {
-                        d_pressure_shock_tol = error_db->getDoubleVector("shock_tol");
+                        d_shock_Ducros_tol = error_db->getDouble("Ducros_tol");
                     }
                     else
                     {
                         TBOX_ERROR(d_object_name
                                    << ": "
-                                   << "No key 'shock_tol' found in data for "
+                                   << "No key 'Ducros_tol' found in data for "
+                                   << error_key
+                                   << "."
+                                   << std::endl);
+                    }
+                }
+                else if (error_db && error_key == "SHOCK_LARSSON")
+                {                    
+                    if (error_db->keyExists("Larsson_tol"))
+                    {
+                        d_shock_Larsson_tol = error_db->getDouble("Larsson_tol");
+                    }
+                    else
+                    {
+                        TBOX_ERROR(d_object_name
+                                   << ": "
+                                   << "No key 'Larsson_tol' found in data for "
+                                   << error_key
+                                   << "."
+                                   << std::endl);
+                    }
+                }
+                else if (error_db && error_key == "DENSITY_JAMESON")
+                {                    
+                    if (error_db->keyExists("Jameson_tol"))
+                    {
+                        d_density_Jameson_tol = error_db->getDouble("Jameson_tol");
+                    }
+                    else
+                    {
+                        TBOX_ERROR(d_object_name
+                                   << ": "
+                                   << "No key 'Jameson_tol' found in data for "
+                                   << error_key
+                                   << "."
+                                   << std::endl);
+                    }
+                }
+                else if (error_db && error_key == "VORTICITY_Q_CRITERION")
+                {        
+                    if (error_db->keyExists("Q_criterion_tol"))
+                    {
+                        d_vorticity_Q_criterion_tol = error_db->getDouble("Q_criterion_tol");
+                    }
+                    else
+                    {
+                        TBOX_ERROR(d_object_name
+                                   << ": "
+                                   << "No key 'Q_criterion_tol' found in data for "
                                    << error_key
                                    << "."
                                    << std::endl);
@@ -8327,15 +9252,26 @@ void Euler::getFromRestart()
     
     for (int i = 0; i < static_cast<int>(d_refinement_criteria.size()); i++)
     {
-        if (d_refinement_criteria[i] == "DENSITY_SHOCK")
+        if (d_refinement_criteria[i] == "SHOCK_JAMESON")
         {
-            d_density_shock_tol = db->getDoubleVector("d_density_shock_tol");
-    
+            d_shock_Jameson_tol = db->getDouble("d_shock_Jameson_tol");
         }
-        else if (d_refinement_criteria[i] == "PRESSURE_SHOCK")
+        else if (d_refinement_criteria[i] == "SHOCK_DUCROS")
         {
-            d_pressure_shock_tol = db->getDoubleVector("d_pressure_shock_tol");
-        }    
+            d_shock_Ducros_tol = db->getDouble("d_shock_Ducros_tol");
+        }
+        else if (d_refinement_criteria[i] == "SHOCK_LARSSON")
+        {
+            d_shock_Larsson_tol = db->getDouble("d_shock_Larsson_tol");
+        }
+        else if (d_refinement_criteria[i] == "DENSITY_JAMESON")
+        {
+            d_density_Jameson_tol = db->getDouble("d_density_Jameson_tol");
+        }
+        else if (d_refinement_criteria[i] == "VORTICITY_Q_CRITERION")
+        {
+            d_vorticity_Q_criterion_tol = db->getDouble("d_vorticity_Q_criterion_tol");
+        }
     }
 }
 

@@ -634,29 +634,6 @@ int main(int argc, char *argv[])
 #endif
     }
     
-    int last_iteration_num = time_integrator->getIntegratorStep();
-    
-    t_write_viz->start();
-    
-    visit_data_writer->writePlotData(
-        patch_hierarchy,
-        last_iteration_num,
-        loop_time);
-    
-    t_write_viz->stop();
-    
-    if ((restart_interval == -1 || restart_interval > 0)
-        && !(restart_write_dirname.empty()))
-    {
-        t_write_restart->start();
-        
-        tbox::RestartManager::getManager()->
-            writeRestartFile(restart_write_dirname,
-                             last_iteration_num);
-        
-        t_write_restart->stop();
-    }
-    
     tbox::plog << "GriddingAlgorithm statistics:\n";
     gridding_algorithm->printStatistics();
     
