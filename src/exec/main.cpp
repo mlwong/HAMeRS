@@ -394,7 +394,7 @@ int main(int argc, char *argv[])
     boost::shared_ptr<geom::CartesianGridGeometry> grid_geometry(
         new geom::CartesianGridGeometry(
             dim,
-            "CartesianGeometry",
+            "Cartesian grid geometry",
             input_db->getDatabase("CartesianGeometry")));
     
     boost::shared_ptr<hier::PatchHierarchy> patch_hierarchy(
@@ -403,7 +403,7 @@ int main(int argc, char *argv[])
             grid_geometry,
             input_db->getDatabase("PatchHierarchy")));
         
-    Euler* euler_model = new Euler(
+    Euler* Euler_model = new Euler(
         "Euler",
         dim,
         input_db->getDatabase("Euler"),
@@ -411,9 +411,9 @@ int main(int argc, char *argv[])
     
     boost::shared_ptr<RungeKuttaLevelIntegrator> RK_level_integrator(
         new RungeKuttaLevelIntegrator(
-            "RungeKuttaLevelIntegrator",
+            "Runge-Kutta level integrator",
             input_db->getDatabase("RungeKuttaLevelIntegrator"),
-            euler_model,
+            Euler_model,
             use_refined_timestepping));
     
     boost::shared_ptr<mesh::StandardTagAndInitialize> error_detector(
@@ -469,7 +469,7 @@ int main(int argc, char *argv[])
             visit_dump_dirname,
             visit_number_procs_per_file));
     
-    euler_model->registerVisItDataWriter(visit_data_writer);
+    Euler_model->registerVisItDataWriter(visit_data_writer);
 #endif
     
     /*
@@ -487,12 +487,14 @@ int main(int argc, char *argv[])
      * to the log file.
      */
     
-    tbox::plog << "\nCheck Euler data... " << std::endl;
-    euler_model->printClassData(tbox::plog);
+    tbox::pout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
+    Euler_model->printClassData(tbox::pout);
     
-    tbox::plog << "\nCheck Runge-Kutta integrator data..." << std::endl;
-    RK_level_integrator->printClassData(tbox::plog);
+    tbox::pout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
+    RK_level_integrator->printClassData(tbox::pout);
     
+    tbox::pout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
+    tbox::pout << std::endl;
     /*
      * Create timers for measuring I/O.
      */
@@ -524,26 +526,27 @@ int main(int argc, char *argv[])
     double last_viz_dump_time = floor(time_integrator->getIntegratorTime()/viz_dump_time_interval)*
         viz_dump_time_interval;
     
-    
+    tbox::pout << "Start simulation... " << std::endl;
+    tbox::pout << std::endl;
     while (loop_time < loop_time_end && time_integrator->stepsRemaining())
     {
         int iteration_num = time_integrator->getIntegratorStep() + 1;
-    
-        tbox::pout << "++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
+        
         tbox::pout << "At begining of timestep # " << iteration_num - 1 << std::endl;
         tbox::pout << "Simulation time is " << loop_time << std::endl;
         tbox::pout << "Current dt is " << dt_now << std::endl;
-    
+        
         double dt_new = time_integrator->advanceHierarchy(dt_now);
-    
+        
         loop_time += dt_now;
         dt_now = dt_new;
         
         tbox::pout << "At end of timestep # " << iteration_num - 1 << std::endl;
         tbox::pout << "Simulation time is " << loop_time << std::endl;
-        euler_model->printDataStatistics(tbox::pout, patch_hierarchy);
-        tbox::pout << "++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
-    
+        Euler_model->printDataStatistics(tbox::pout, patch_hierarchy);
+        tbox::pout << "--------------------------------------------------------------------------------";
+        tbox::pout << std::endl;
+        
         /*
          * At specified intervals, write restart files.
          */
@@ -634,6 +637,8 @@ int main(int argc, char *argv[])
 #endif
     }
     
+    tbox::plog << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
+    tbox::plog << std::endl;
     tbox::plog << "GriddingAlgorithm statistics:\n";
     gridding_algorithm->printStatistics();
     
@@ -658,8 +663,8 @@ int main(int argc, char *argv[])
     visit_data_writer.reset();
 #endif
     
-    if (euler_model)
-        delete euler_model;
+    if (Euler_model)
+        delete Euler_model;
     
     tbox::SAMRAIManager::shutdown();
     tbox::SAMRAIManager::finalize();

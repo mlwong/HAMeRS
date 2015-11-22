@@ -3,7 +3,6 @@
 
 #include "SAMRAI/SAMRAI_config.h"
 
-#include "SAMRAI/appu/BoundaryUtilityStrategy.h"
 #include "SAMRAI/appu/VisDerivedDataStrategy.h"
 #include "SAMRAI/appu/VisItDataWriter.h"
 #include "SAMRAI/geom/CartesianGridGeometry.h"
@@ -21,7 +20,10 @@
 #include "SAMRAI/tbox/Serializable.h"
 
 #include "flow_model/FlowModels.hpp"
+#include "flow_model/boundary_conditions/Euler/EulerBoundaryConditions.hpp"
 #include "flow_model/convective_flux_reconstructor/ConvectiveFluxReconstructor.hpp"
+#include "flow_model/feature_driven_tagger/FeatureDrivenTagger.hpp"
+#include "flow_model/initial_conditions/InitialConditions.hpp"
 #include "integrator/RungeKuttaLevelIntegrator.hpp"
 #include "patch_strategy/RungeKuttaPatchStrategy.hpp"
 
@@ -50,7 +52,6 @@ using namespace SAMRAI;
 
 class Euler:
     public RungeKuttaPatchStrategy,
-    public appu::BoundaryUtilityStrategy,
     public appu::VisDerivedDataStrategy,
     public tbox::Serializable
 {
@@ -198,7 +199,7 @@ class Euler:
         
         /**
          * Set the data in ghost cells corresponding to physical boundary
-         * conditions.  Specific boundary conditions are determined by
+         * conditions. Specific boundary conditions are determined by
          * information specified in input file and numerical routines.
          */
         void
@@ -302,30 +303,6 @@ class Euler:
         void
         putToRestart(
             const boost::shared_ptr<tbox::Database>& restart_db) const;
-
-        /**
-         * This routine is a concrete implementation of the virtual function
-         * in the base class BoundaryUtilityStrategy.  It reads DIRICHLET
-         * boundary state values from the given database with the
-         * given name string idenifier.  The integer location index
-         * indicates the face (in 3D) or edge (in 2D) to which the boundary
-         * condition applies.
-         */
-        void
-        readDirichletBoundaryDataEntry(
-            const boost::shared_ptr<tbox::Database>& db,
-            std::string& db_name,
-            int bdry_location_index);
-        
-        /**
-         * This routine is a concrete implementation of the virtual function
-         * in the base class BoundaryUtilityStrategy.  It is a blank implementation
-         * for the purposes of this class.
-         */
-        void readNeumannBoundaryDataEntry(
-            const boost::shared_ptr<tbox::Database>& db,
-            std::string& db_name,
-            int bdry_location_index);
         
         /**
          * Register a VisIt data writer so this class will write
@@ -368,16 +345,6 @@ class Euler:
         ///
         
         /**
-         * Reset physical boundary values in special cases, such as when
-         * using symmetric (i.e., reflective) boundary conditions.
-         */
-        void
-        boundaryReset(
-            hier::Patch& patch,
-            pdat::FaceData<double>& traced_left,
-            pdat::FaceData<double>& traced_right) const;
-        
-        /**
          * Print all data members for Euler class.
          */
         void printClassData(std::ostream& os) const;
@@ -407,35 +374,6 @@ class Euler:
         void getFromRestart();
         
         void
-        readStateDataEntryForSingleSpecies(
-            boost::shared_ptr<tbox::Database> db,
-            const std::string& db_name,
-            int array_indx,
-            std::vector<double>& density,
-            std::vector<double>& momentum,
-            std::vector<double>& total_energy);
-        
-        void
-        readStateDataEntryForFourEqnShyue(
-            boost::shared_ptr<tbox::Database> db,
-            const std::string& db_name,
-            int array_indx,
-            std::vector<double>& density,
-            std::vector<double>& momentum,
-            std::vector<double>& total_energy,
-            std::vector<double>& mass_fraction);
-        
-        void
-        readStateDataEntryForFiveEqnAllaire(
-            boost::shared_ptr<tbox::Database> db,
-            const std::string& db_name,
-            int array_indx,
-            std::vector<double>& partial_density,
-            std::vector<double>& momentum,
-            std::vector<double>& total_energy,
-            std::vector<double>& volume_fraction);
-        
-        void
         preservePositivity(
             std::vector<double*>& Q,
             boost::shared_ptr<pdat::FaceData<double> >& convective_flux_intermediate,
@@ -447,15 +385,7 @@ class Euler:
             const double& beta);
         
         /*
-         * Set defaults for boundary conditions. Set to bogus values
-         * for error checking.
-         */
-        void
-        setDefaultBoundaryConditions();
-        
-        /*
-         * The object name is used for error/warning reporting and also as a
-         * string label for restart database entries.
+         * The object name is used for error/warning reporting.
          */
         const std::string d_object_name;
         
@@ -524,8 +454,26 @@ class Euler:
         boost::shared_ptr<tbox::Database> d_shock_capturing_scheme_db;
         
         /*
+         * boost::shared_ptr to InitialConditions.
+         */
+        boost::shared_ptr<InitialConditions> d_initial_conditions;
+        
+        /*
+         * boost::shared_ptr to EulerBoundaryConditions and its database.
+         */
+        std::shared_ptr<EulerBoundaryConditions> d_Euler_boundary_conditions;
+        boost::shared_ptr<tbox::Database> d_Euler_boundary_conditions_db;
+        bool d_Euler_boundary_conditions_db_is_from_restart;
+        
+        /*
+         * boost::shared_ptr to FeatureDrivenTagger and its database.
+         */
+        std::shared_ptr<FeatureDrivenTagger> d_feature_driven_tagger;
+        boost::shared_ptr<tbox::Database> d_feature_driven_tagger_db;
+        
+        /*
          * Euler solution state is represented by "conservative" variables,
-         * density, momentum, and total_energy per unit volume.
+         * density, momentum, total_energy per unit volume etc.
          */
         boost::shared_ptr<pdat::CellVariable<double> > d_density;
         boost::shared_ptr<pdat::CellVariable<double> > d_partial_density;
@@ -543,73 +491,6 @@ class Euler:
          * boost::shared_ptr to source term.
          */
         boost::shared_ptr<pdat::CellVariable<double> > d_source;
-        
-        /*
-         * Boundary condition cases and boundary values.
-         * Options are: FLOW, REFLECT, DIRICHLET
-         * and variants for nodes and edges.
-         *
-         * Input file values are read into these arrays.
-         */
-        std::vector<int> d_master_bdry_node_conds;
-        std::vector<int> d_master_bdry_edge_conds; // Used in 2D and 3D only.
-        std::vector<int> d_master_bdry_face_conds; // Used in 3D only.
-        
-        /*
-         * Boundary condition cases for scalar and vector (i.e., depth > 1)
-         * variables.  These are post-processed input values and are passed
-         * to the boundary routines.
-         */
-        std::vector<int> d_scalar_bdry_node_conds;
-        std::vector<int> d_vector_bdry_node_conds;
-        
-        std::vector<int> d_scalar_bdry_edge_conds; // Used in 2D and 3D only.
-        std::vector<int> d_vector_bdry_edge_conds; // Used in 2D and 3D only.
-        
-        std::vector<int> d_scalar_bdry_face_conds; // Used in 3D only.
-        std::vector<int> d_vector_bdry_face_conds; // Used in 3D only.
-        
-        std::vector<int> d_node_bdry_edge; // Used in 2D only.
-        std::vector<int> d_edge_bdry_face; // Used in 3D only.
-        std::vector<int> d_node_bdry_face; // Used in 3D only.
-        
-        /*
-         * Vectors of node (1D), edge (2D) or face (3D) boundary values for DIRICHLET case.
-         */
-        std::vector<double> d_bdry_node_density;                // Used in 1D only.
-        std::vector<double> d_bdry_node_partial_density;        // Used in 1D only.
-        std::vector<double> d_bdry_node_momentum;               // Used in 1D only.
-        std::vector<double> d_bdry_node_total_energy;           // Used in 1D only.
-        std::vector<double> d_bdry_node_mass_fraction;          // Used in 1D only.
-        std::vector<double> d_bdry_node_volume_fraction;        // Used in 1D only.
-        
-        std::vector<double> d_bdry_edge_density;                // Used in 2D only.
-        std::vector<double> d_bdry_edge_partial_density;        // Used in 2D only.
-        std::vector<double> d_bdry_edge_momentum;               // Used in 2D only.
-        std::vector<double> d_bdry_edge_total_energy;           // Used in 2D only.
-        std::vector<double> d_bdry_edge_mass_fraction;          // Used in 2D only.
-        std::vector<double> d_bdry_edge_volume_fraction;        // Used in 2D only.
-        
-        std::vector<double> d_bdry_face_density;                // Used in 3D only.
-        std::vector<double> d_bdry_face_partial_density;        // Used in 3D only.
-        std::vector<double> d_bdry_face_momentum;               // Used in 3D only.
-        std::vector<double> d_bdry_face_total_energy;           // Used in 3D only.
-        std::vector<double> d_bdry_face_mass_fraction;          // Used in 3D only.
-        std::vector<double> d_bdry_face_volume_fraction;        // Used in 3D only.
-        
-        /*
-         * Refinement criteria parameters for gradient detector and
-         * Richardson extrapolation.
-         */
-        std::vector<std::string> d_refinement_criteria;
-        
-        double d_shock_Jameson_tol;
-        double d_shock_Ducros_tol;
-        double d_shock_Larsson_tol;
-        
-        double d_density_Jameson_tol;
-        
-        double d_vorticity_Q_criterion_tol;
         
         /*
          * Boolean to enable positivity-preserving.

@@ -37,7 +37,7 @@ void
 ConvectiveFluxReconstructorFirstOrderHLLC::printClassData(
     std::ostream& os) const
 {
-    os << "\nConvectiveFluxReconstructorFirstOrderHLLC::printClassData..."
+    os << "\nPrint ConvectiveFluxReconstructorFirstOrderHLLC object..."
        << std::endl;
     
     os << std::endl;
@@ -50,11 +50,6 @@ ConvectiveFluxReconstructorFirstOrderHLLC::printClassData(
        << std::endl;
     os << "d_set_variables = "
        << d_set_variables
-       << std::endl;
-    
-    os << std::endl;
-    
-    os << "End of ConvectiveFluxReconstructorFirstOrderHLLC::printClassData"
        << std::endl;
 }
 
@@ -1895,9 +1890,11 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
             default:
             {
                 TBOX_ERROR(d_object_name
-                           << ": "
-                           << "Unknown d_flow_model."
-                           << std::endl);
+                    << ": "
+                    << "d_flow_model '"
+                    << d_flow_model
+                    << "' not yet implemented."
+                    << std::endl);
             }
         }
     }

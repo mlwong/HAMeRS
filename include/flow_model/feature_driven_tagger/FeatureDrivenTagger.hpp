@@ -1,15 +1,14 @@
-#ifndef CONVECTIVE_FLUX_RECONSTRUCTOR_HPP
-#define CONVECTIVE_FLUX_RECONSTRUCTOR_HPP
+#ifndef FEATURE_DRIVEN_TAGGER_HPP
+#define FEATURE_DRIVEN_TAGGER_HPP
 
 #include "SAMRAI/SAMRAI_config.h"
 
 #include "SAMRAI/geom/CartesianGridGeometry.h"
+#include "SAMRAI/geom/CartesianPatchGeometry.h"
 #include "SAMRAI/hier/IntVector.h"
 #include "SAMRAI/hier/Patch.h"
 #include "SAMRAI/pdat/CellVariable.h"
-#include "SAMRAI/pdat/FaceVariable.h"
 #include "SAMRAI/tbox/Dimension.h"
-#include "SAMRAI/tbox/Utilities.h"
 
 #include "flow_model/FlowModels.hpp"
 #include "flow_model/equation_of_state/EquationOfStateIdealGas.hpp"
@@ -18,48 +17,18 @@
 #include <string>
 #include <vector>
 
-using namespace SAMRAI;
-
-class ConvectiveFluxReconstructor
+class FeatureDrivenTagger
 {
     public:
-        ConvectiveFluxReconstructor(
+        FeatureDrivenTagger(
             const std::string& object_name,
             const tbox::Dimension& dim,
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geom,
+            const hier::IntVector& num_ghosts,
             const FLOW_MODEL& flow_model,
-            const int& num_eqn,
             const int& num_species,
             const boost::shared_ptr<EquationOfState>& equation_of_state,
-            const boost::shared_ptr<tbox::Database>& shock_capturing_scheme_db):
-                d_object_name(object_name),
-                d_dim(dim),
-                d_grid_geometry(grid_geom),
-                d_num_conv_ghosts(hier::IntVector::getZero(d_dim)),
-                d_num_ghosts(hier::IntVector::getZero(d_dim)),
-                d_flow_model(flow_model),
-                d_num_eqn(num_eqn),
-                d_num_species(num_species),
-                d_equation_of_state(equation_of_state),
-                d_shock_capturing_scheme_db(shock_capturing_scheme_db),
-                d_density(NULL),
-                d_partial_density(NULL),
-                d_momentum(NULL),
-                d_total_energy(NULL),
-                d_mass_fraction(NULL),
-                d_volume_fraction(NULL),
-                d_set_variables(false)
-        {}
-        
-        /*
-         * Get the number of ghost cells needed by the convective flux
-         * reconstructor.
-         */
-        hier::IntVector
-        getConvectiveFluxNumberOfGhostCells(void) const
-        {
-            return d_num_conv_ghosts;
-        }
+            const boost::shared_ptr<tbox::Database>& feature_driven_tagger_db);
         
         /*
          * Set the cell variables if single-species flow model is chosen.
@@ -69,9 +38,7 @@ class ConvectiveFluxReconstructor
             const hier::IntVector& num_ghosts,
             const boost::shared_ptr<pdat::CellVariable<double> > density,
             const boost::shared_ptr<pdat::CellVariable<double> > momentum,
-            const boost::shared_ptr<pdat::CellVariable<double> > total_energy,
-            const boost::shared_ptr<pdat::FaceVariable<double> > convective_flux,
-            const boost::shared_ptr<pdat::CellVariable<double> > source)
+            const boost::shared_ptr<pdat::CellVariable<double> > total_energy)
         {
             if (d_flow_model != SINGLE_SPECIES)
             {            
@@ -86,8 +53,6 @@ class ConvectiveFluxReconstructor
             d_density = density;
             d_momentum = momentum;
             d_total_energy = total_energy;
-            d_convective_flux = convective_flux;
-            d_source = source;
             
             d_set_variables = true;
         }
@@ -102,9 +67,7 @@ class ConvectiveFluxReconstructor
             const boost::shared_ptr<pdat::CellVariable<double> > density,
             const boost::shared_ptr<pdat::CellVariable<double> > momentum,
             const boost::shared_ptr<pdat::CellVariable<double> > total_energy,
-            const boost::shared_ptr<pdat::CellVariable<double> > mass_fraction,
-            const boost::shared_ptr<pdat::FaceVariable<double> > convective_flux,
-            const boost::shared_ptr<pdat::CellVariable<double> > source)
+            const boost::shared_ptr<pdat::CellVariable<double> > mass_fraction)
         {
             if (d_flow_model != FOUR_EQN_SHYUE)
             {            
@@ -120,8 +83,6 @@ class ConvectiveFluxReconstructor
             d_momentum = momentum;
             d_total_energy = total_energy;
             d_mass_fraction = mass_fraction;
-            d_convective_flux = convective_flux;
-            d_source = source;
             
             d_set_variables = true;
         }
@@ -136,9 +97,7 @@ class ConvectiveFluxReconstructor
             const boost::shared_ptr<pdat::CellVariable<double> > partial_density,
             const boost::shared_ptr<pdat::CellVariable<double> > momentum,
             const boost::shared_ptr<pdat::CellVariable<double> > total_energy,
-            const boost::shared_ptr<pdat::CellVariable<double> > volume_fraction,
-            const boost::shared_ptr<pdat::FaceVariable<double> > convective_flux,
-            const boost::shared_ptr<pdat::CellVariable<double> > source)
+            const boost::shared_ptr<pdat::CellVariable<double> > volume_fraction)
         {
             if (d_flow_model != FIVE_EQN_ALLAIRE)
             {            
@@ -154,39 +113,37 @@ class ConvectiveFluxReconstructor
             d_momentum = momentum;
             d_total_energy = total_energy;
             d_volume_fraction = volume_fraction;
-            d_convective_flux = convective_flux;
-            d_source = source;
             
             d_set_variables = true;
         }
         
         /*
-         * Print all characteristics of the convective flux reconstruction class.
+         * Print all characteristics of the feature driven tagger class.
          */
-        virtual void
-        printClassData(std::ostream& os) const = 0;
+        void
+        printClassData(std::ostream& os);
         
         /*
-         * Put the characteristics of the convective flux reconstruction class
-         * into the restart database.
+         * Put the characteristics of the feature driven tagger into the restart
+         * database.
          */
-        virtual void
+        void
         putToRestart(
-            const boost::shared_ptr<tbox::Database>& restart_db) const = 0;
+            const boost::shared_ptr<tbox::Database>& restart_db);
         
         /*
-         * Compute the convective fluxes and sources due to hyperbolization
-         * of the equations.
+         * Tag cells for refinement using different feature-based detectors.
          */
-        virtual void
-        computeConvectiveFluxesAndSources(
+        void
+        tagCells(
             hier::Patch& patch,
-            const double time,
-            const double dt,
-            const int RK_step_number,
-            const boost::shared_ptr<hier::VariableContext> data_context) = 0;
-    
-    protected:
+            const double regrid_time,
+            const bool initial_error,
+            const bool uses_richardson_extrapolation_too,
+            boost::shared_ptr<pdat::CellData<int> > tags,
+            const boost::shared_ptr<hier::VariableContext> data_context);
+        
+    private:
         /*
          * The object name is used for error/warning reporting.
          */
@@ -203,11 +160,6 @@ class ConvectiveFluxReconstructor
         const boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
         
         /*
-         * Number of ghost cells needed by the shock capturing scheme.
-         */
-        hier::IntVector d_num_conv_ghosts;
-        
-        /*
          * Number of ghost cells for time-independent variables.
          */
         hier::IntVector d_num_ghosts;
@@ -216,11 +168,6 @@ class ConvectiveFluxReconstructor
          * Flow model.
          */
         const FLOW_MODEL d_flow_model;
-        
-        /*
-         * Number of equations.
-         */
-        const int d_num_eqn;
         
         /*
          * Number of species.
@@ -233,11 +180,6 @@ class ConvectiveFluxReconstructor
         const boost::shared_ptr<EquationOfState> d_equation_of_state;
         
         /*
-         * boost::shared_ptr to database of the shock capturing scheme.
-         */
-        const boost::shared_ptr<tbox::Database> d_shock_capturing_scheme_db;
-        
-        /*
          * boost::shared_ptr to solution state.
          */
         boost::shared_ptr<pdat::CellVariable<double> > d_density;
@@ -248,19 +190,22 @@ class ConvectiveFluxReconstructor
         boost::shared_ptr<pdat::CellVariable<double> > d_volume_fraction;
         
         /*
-         * boost::shared_ptr to convective flux variable vector.
-         */
-        boost::shared_ptr<pdat::FaceVariable<double> > d_convective_flux;
-        
-        /*
-         * boost::shared_ptr to source variable vector.
-         */
-        boost::shared_ptr<pdat::CellVariable<double> > d_source;
-        
-        /*
          * Boolean to determine where proper variables are initialized.
          */
         bool d_set_variables;
+        
+        /*
+         * Refinement criteria and tolerances for the feature-based detector.
+         */
+        std::vector<std::string> d_refinement_criteria;
+        
+        double d_shock_Jameson_tol;
+        double d_shock_Ducros_tol;
+        double d_shock_Larsson_tol;
+        
+        double d_density_Jameson_tol;
+        
+        double d_vorticity_Q_criterion_tol;
 };
 
-#endif /* CONVECTIVE_FLUX_RECONSTRUCTOR_HPP */
+#endif /* FEATURE_DRIVEN_TAGGER_HPP */

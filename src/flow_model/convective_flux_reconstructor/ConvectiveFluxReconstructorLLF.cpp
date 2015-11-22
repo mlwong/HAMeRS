@@ -31,7 +31,7 @@ void
 ConvectiveFluxReconstructorLLF::printClassData(
     std::ostream& os) const
 {
-    os << "\nConvectiveFluxReconstructorLLF::printClassData..."
+    os << "\nPrint ConvectiveFluxReconstructorLLF object..."
        << std::endl;
     
     os << std::endl;
@@ -44,11 +44,6 @@ ConvectiveFluxReconstructorLLF::printClassData(
        << std::endl;
     os << "d_set_variables = "
        << d_set_variables
-       << std::endl;
-    
-    os << std::endl;
-    
-    os << "End of ConvectiveFluxReconstructorLLF::printClassData"
        << std::endl;
 }
 
@@ -2270,9 +2265,11 @@ ConvectiveFluxReconstructorLLF::computeConvectiveFluxesAndSources(
             default:
             {
                 TBOX_ERROR(d_object_name
-                           << ": "
-                           << "Unknown d_flow_model."
-                           << std::endl);
+                    << ": "
+                    << "d_flow_model '"
+                    << d_flow_model
+                    << "' not yet implemented."
+                    << std::endl);
             }
         }
     } // if (set_variables == true )

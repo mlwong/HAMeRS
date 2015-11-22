@@ -47,7 +47,7 @@ void
 ConvectiveFluxReconstructorWENO_JS5_LLF::printClassData(
     std::ostream& os) const
 {
-    os << "\nConvectiveFluxReconstructorWENO_JS5_LLF::printClassData..."
+    os << "\nPrint ConvectiveFluxReconstructorWENO_JS5_LLF object..."
        << std::endl;
     
     os << std::endl;
@@ -60,11 +60,6 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::printClassData(
        << std::endl;
     os << "d_set_variables = "
        << d_set_variables
-       << std::endl;
-    
-    os << std::endl;
-    
-    os << "End of ConvectiveFluxReconstructorWENO_JS5_LLF::printClassData"
        << std::endl;
 }
 
@@ -2112,9 +2107,11 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::computeConvectiveFluxesAndSources(
             default:
             {
                 TBOX_ERROR(d_object_name
-                           << ": "
-                           << "Unknown d_flow_model."
-                           << std::endl);
+                    << ": "
+                    << "d_flow_model '"
+                    << d_flow_model
+                    << "' not yet implemented."
+                    << std::endl);
             }
         }
         
@@ -2122,9 +2119,9 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::computeConvectiveFluxesAndSources(
     else
     {
         TBOX_ERROR(d_object_name
-                   << ": "
-                   << "Variables are not set."
-                   << std::endl);
+            << ": "
+            << "Variables are not set."
+            << std::endl);
     }
 }
 

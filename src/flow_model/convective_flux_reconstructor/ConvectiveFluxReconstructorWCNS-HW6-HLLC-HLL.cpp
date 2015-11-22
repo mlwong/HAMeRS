@@ -68,7 +68,7 @@ void
 ConvectiveFluxReconstructorWCNS_HW6_HLLC_HLL::printClassData(
     std::ostream& os) const
 {
-    os << "\nConvectiveFluxReconstructorWCNS_HW6_HLLC_HLL::printClassData..."
+    os << "\nPrint ConvectiveFluxReconstructorWCNS_HW6_HLLC_HLL object..."
        << std::endl;
     
     os << std::endl;
@@ -90,11 +90,6 @@ ConvectiveFluxReconstructorWCNS_HW6_HLLC_HLL::printClassData(
        << std::endl;
     os << "d_constant_delta = "
        << d_constant_delta
-       << std::endl;
-    
-    os << std::endl;
-    
-    os << "End of ConvectiveFluxReconstructorWCNS_HW6_HLLC_HLL::printClassData"
        << std::endl;
 }
 
@@ -9810,18 +9805,20 @@ ConvectiveFluxReconstructorWCNS_HW6_HLLC_HLL::computeConvectiveFluxesAndSources(
             default:
             {
                 TBOX_ERROR(d_object_name
-                           << ": "
-                           << "Unknown d_flow_model."
-                           << std::endl);
+                    << ": "
+                    << "d_flow_model '"
+                    << d_flow_model
+                    << "' not yet implemented."
+                    << std::endl);
             }
         }
     }
     else
     {
         TBOX_ERROR(d_object_name
-                   << ": "
-                   << "Variables are not set."
-                   << std::endl);
+            << ": "
+            << "Variables are not set."
+            << std::endl);
     }
 }
 

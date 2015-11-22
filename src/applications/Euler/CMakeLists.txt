@@ -9,7 +9,10 @@ set(Euler_source_files
 add_library(Euler ${Euler_source_files})
 
 TARGET_LINK_LIBRARIES(Euler
+    Euler_boundary_conditions
     convective_flux_reconstructor
+    feature_driven_tagger
+    initial_conditions
     Runge_Kutta_patch_strategy Runge_Kutta_level_integrator
     SAMRAI_appu SAMRAI_geom SAMRAI_solv SAMRAI_algs SAMRAI_mesh
     SAMRAI_math SAMRAI_pdat SAMRAI_xfer SAMRAI_hier SAMRAI_tbox

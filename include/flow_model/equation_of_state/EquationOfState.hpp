@@ -338,8 +338,7 @@ class EquationOfState
         
     protected:
         /*
-         * The object name is used for error/warning reporting and also as a
-         * string label for restart database entries.
+         * The object name is used for error/warning reporting.
          */
         const std::string d_object_name;
         

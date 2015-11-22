@@ -2941,8 +2941,7 @@ void
 RungeKuttaLevelIntegrator::printClassData(
    std::ostream& os) const
 {
-    os << "\nRungeKuttaLevelIntegrator::printClassData..." << std::endl;
-    
+    os << "\nPrint RungeKuttaLevelIntegrator object..." << std::endl;
     os << std::endl;
     
     os << "RungeKuttaLevelIntegrator: this = "
@@ -2959,7 +2958,6 @@ RungeKuttaLevelIntegrator::printClassData(
     os << std::endl;
     
     os << "Runge-Kutta weights:" << std::endl;
-    os << std::endl;
     for (int i = 0; i < static_cast<int>(d_alpha.size()); i++)
     {
         if (i == 0)
@@ -3017,10 +3015,6 @@ RungeKuttaLevelIntegrator::printClassData(
     os << std::endl;
     os << "NOTE: Not printing variable arrays, ComponentSelectors, communication schedules, etc."
        << std::endl;
-    
-    os << std::endl;
-    
-    os << "End of RungeKuttaLevelIntegrator::printClassData" << std::endl;
 }
 
 

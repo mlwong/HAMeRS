@@ -146,9 +146,9 @@ void
 EquationOfStateIdealGas::printClassData(
     std::ostream& os) const
 {
-    os << "\nEquationOfStateIdealGas::printClassData..."
+    os << "\nPrint EquationOfStateIdealGas object..."
        << std::endl;
-    
+       
     os << std::endl;
     
     os << "EquationOfStateIdealGas: this = "
@@ -190,11 +190,6 @@ EquationOfStateIdealGas::printClassData(
         }
         os << std::endl;
     }
-    
-    os << std::endl;
-    
-    os << "End of EquationOfStateIdealGas::printClassData"
-       << std::endl;
 }
 
 
