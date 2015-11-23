@@ -24,9 +24,9 @@ link_directories(${AMR-WCNS_SOURCE_DIR}/hdf5/lib
 		 ${AMR-WCNS_BINARY_DIR}/integrator/fortran
                  ${AMR-WCNS_BINARY_DIR}/integrator
 		 ${AMR-WCNS_BINARY_DIR}/applications/Euler
+		 ${AMR-WCNS_BINARY_DIR}/equation_of_state
                  ${AMR-WCNS_BINARY_DIR}/flow_model/boundary_conditions/Euler
 		 ${AMR-WCNS_BINARY_DIR}/flow_model/convective_flux_reconstructor
-		 ${AMR-WCNS_BINARY_DIR}/flow_model/equation_of_state
 		 ${AMR-WCNS_BINARY_DIR}/flow_model/feature_driven_tagger
                  ${AMR-WCNS_BINARY_DIR}/flow_model/initial_conditions
 		 ${AMR-WCNS_BINARY_DIR}/flow_model/Riemann_solver)
@@ -40,9 +40,9 @@ add_subdirectory(src/patch_strategy)
 add_subdirectory(src/integrator)
 add_subdirectory(src/applications/Euler)
 add_subdirectory(src/exec)
+add_subdirectory(src/equation_of_state)
 add_subdirectory(src/flow_model/boundary_conditions/Euler)
 add_subdirectory(src/flow_model/convective_flux_reconstructor)
-add_subdirectory(src/flow_model/equation_of_state)
 add_subdirectory(src/flow_model/feature_driven_tagger)
 add_subdirectory(src/flow_model/initial_conditions)
 add_subdirectory(src/flow_model/Riemann_solver)

@@ -4,7 +4,7 @@
 #include "SAMRAI/tbox/Dimension.h"
 
 #include "Directions.hpp"
-#include "flow_model/equation_of_state/EquationOfStateIdealGas.hpp"
+#include "equation_of_state/EquationOfStateIdealGas.hpp"
 
 #include "boost/shared_ptr.hpp"
 #include <string>

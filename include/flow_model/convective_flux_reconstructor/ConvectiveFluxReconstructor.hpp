@@ -11,8 +11,8 @@
 #include "SAMRAI/tbox/Dimension.h"
 #include "SAMRAI/tbox/Utilities.h"
 
+#include "equation_of_state/EquationOfStateIdealGas.hpp"
 #include "flow_model/FlowModels.hpp"
-#include "flow_model/equation_of_state/EquationOfStateIdealGas.hpp"
 
 #include "boost/shared_ptr.hpp"
 #include <string>

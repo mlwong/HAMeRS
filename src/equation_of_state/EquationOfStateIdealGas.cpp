@@ -1,4 +1,4 @@
-#include "flow_model/equation_of_state/EquationOfStateIdealGas.hpp"
+#include "equation_of_state/EquationOfStateIdealGas.hpp"
 
 EquationOfStateIdealGas::EquationOfStateIdealGas(
     const std::string& object_name,
