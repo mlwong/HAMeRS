@@ -288,6 +288,13 @@ class EquationOfStateIdealGas: public EquationOfState
         
     private:
         /*
+         * Compute the mixture's gamma for multi-species flow with partial densities.
+         */
+        double
+        getMixtureGammaWithPartialDensity(
+            const std::vector<const double*> partial_density);
+        
+        /*
          * Compute the mixture's gamma for multi-species flow with mass fractions.
          */
         double

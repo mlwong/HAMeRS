@@ -9,7 +9,7 @@ enum FLOW_MODEL { SINGLE_SPECIES,
                   FIVE_EQN_ALLAIRE };
 
 /*
- * Function to print out enum NodeBdyLoc2D::Type value as text.
+ * Function to print out enum FLOW_MODEL value as text.
  */
 inline std::ostream& operator<<(std::ostream& os, const FLOW_MODEL& value)
 {

@@ -65,9 +65,9 @@ InitialConditions::initializeDataOnPatch(
                     TBOX_ERROR(d_object_name
                         << ": "
                         << "Cannot initialize data for unknown 1D problem"
-                        << " for single-species flow with name = \""
+                        << " for single-species flow with name = '"
                         << d_project_name
-                        << "\"."
+                        << "'."
                         << std::endl);
                 }
                 else if (d_dim == tbox::Dimension(2))
@@ -241,9 +241,9 @@ InitialConditions::initializeDataOnPatch(
                         TBOX_ERROR(d_object_name
                             << ": "
                             << "Cannot initialize data for unknown 2D problem"
-                            << " for single-species flow with name = \""
+                            << " for single-species flow with name = '"
                             << d_project_name
-                            << "\"."
+                            << "'."
                             << std::endl);
                     }
                 }
@@ -383,9 +383,9 @@ InitialConditions::initializeDataOnPatch(
                         TBOX_ERROR(d_object_name
                             << ": "
                             << "Cannot initialize data for unknown 3D problem"
-                            << " for single-species flow with name = \""
+                            << " for single-species flow with name = '"
                             << d_project_name
-                            << "\"."
+                            << "'."
                             << std::endl);
                     }
                 }
@@ -424,9 +424,9 @@ InitialConditions::initializeDataOnPatch(
                     TBOX_ERROR(d_object_name
                         << ": "
                         << "Cannot initialize data for unknown 1D problem"
-                        << " for muti-species flow with four-equation model by Shyue with name = \""
+                        << " for muti-species flow with four-equation model by Shyue with name = '"
                         << d_project_name
-                        << "\"."
+                        << "'."
                         << std::endl);
                 }
                 else if (d_dim == tbox::Dimension(2))
@@ -440,7 +440,7 @@ InitialConditions::initializeDataOnPatch(
                             TBOX_ERROR(d_object_name
                                 << ": "
                                 << "Please provide only two-species for the problem"
-                                << " \"2D advection of material interface\"."
+                                << " '2D advection of material interface'."
                                 << std::endl);
                         }
                         
@@ -520,9 +520,9 @@ InitialConditions::initializeDataOnPatch(
                         TBOX_ERROR(d_object_name
                             << ": "
                             << "Cannot initialize data for unknown 2D problem"
-                            << " for muti-species flow with four-equation model by Shyue with name = \""
+                            << " for muti-species flow with four-equation model by Shyue with name = '"
                             << d_project_name
-                            << "\"."
+                            << "'."
                             << std::endl);
                     }
                 }
@@ -537,7 +537,7 @@ InitialConditions::initializeDataOnPatch(
                             TBOX_ERROR(d_object_name
                                 << ": "
                                 << "Please provide only two-species for the problem"
-                                << " \"3D advection of material interface\"."
+                                << " '3D advection of material interface'."
                                 << std::endl);
                         }
                         
@@ -633,9 +633,9 @@ InitialConditions::initializeDataOnPatch(
                         TBOX_ERROR(d_object_name
                             << ": "
                             << "Cannot initialize data for unknown 3D problem"
-                            << " for muti-species flow with four-equation model by Shyue with name = \""
+                            << " for muti-species flow with four-equation model by Shyue with name = '"
                             << d_project_name
-                            << "\"."
+                            << "'."
                             << std::endl);
                     }
                 }
@@ -674,9 +674,9 @@ InitialConditions::initializeDataOnPatch(
                     TBOX_ERROR(d_object_name
                         << ": "
                         << "Cannot initialize data for unknown 1D problem"
-                        << " for muti-species flow with five-equation model by Allaire with name = \""
+                        << " for muti-species flow with five-equation model by Allaire with name = '"
                         << d_project_name
-                        << "\"."
+                        << "'."
                         << std::endl);
                 }
                 else if (d_dim == tbox::Dimension(2))
@@ -688,7 +688,7 @@ InitialConditions::initializeDataOnPatch(
                             TBOX_ERROR(d_object_name
                                 << ": "
                                 << "Please provide only two-species for the problem"
-                                << " \"2D shock-bubble interaction\"."
+                                << " '2D shock-bubble interaction'."
                                 << std::endl);
                         }
                         
@@ -810,7 +810,7 @@ InitialConditions::initializeDataOnPatch(
                             TBOX_ERROR(d_object_name
                                 << ": "
                                 << "Please provide only two-species for the problem"
-                                << " \"2D shock-bubble interaction with AMR\"."
+                                << " '2D shock-bubble interaction with AMR'."
                                 << std::endl);
                         }
                         
@@ -934,7 +934,7 @@ InitialConditions::initializeDataOnPatch(
                             TBOX_ERROR(d_object_name
                                 << ": "
                                 << "Please provide only two-species for the problem"
-                                << " \"2D Richtmyer-Meshkov instability\"."
+                                << " '2D Richtmyer-Meshkov instability'."
                                 << std::endl);
                         }
                         
@@ -1057,7 +1057,7 @@ InitialConditions::initializeDataOnPatch(
                             TBOX_ERROR(d_object_name
                                 << ": "
                                 << "Please provide only two-species for the problem"
-                                << " \"2D advection of material interface\"."
+                                << " '2D advection of material interface'."
                                 << std::endl);
                         }
                         
@@ -1140,9 +1140,9 @@ InitialConditions::initializeDataOnPatch(
                         TBOX_ERROR(d_object_name
                             << ": "
                             << "Cannot initialize data for unknown 2D problem"
-                            << " for muti-species flow with five-equation model by Allaire with name = \""
+                            << " for muti-species flow with five-equation model by Allaire with name = '"
                             << d_project_name
-                            << "\"."
+                            << "'."
                             << std::endl);
                     }
                 }
@@ -1157,7 +1157,7 @@ InitialConditions::initializeDataOnPatch(
                             TBOX_ERROR(d_object_name
                                 << ": "
                                 << "Please provide only two-species for the problem"
-                                << " \"3D advection of material interface\"."
+                                << " '3D advection of material interface'."
                                 << std::endl);
                         }
                         
@@ -1256,9 +1256,9 @@ InitialConditions::initializeDataOnPatch(
                         TBOX_ERROR(d_object_name
                             << ": "
                             << "Cannot initialize data for unknown 3D problem"
-                            << " for muti-species flow with five-equation model by Allaire with name = \""
+                            << " for muti-species flow with five-equation model by Allaire with name = '"
                             << d_project_name
-                            << "\"."
+                            << "'."
                             << std::endl);
                     }
                 }

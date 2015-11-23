@@ -49,7 +49,7 @@ EquationOfStateIdealGas::EquationOfStateIdealGas(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "Key data 'd_species_gamma'/'species_gamma' not found in data for Equation_of_state."
+                   << "Key data 'd_species_gamma' or 'species_gamma' not found in data for Equation_of_state."
                    << std::endl);
     }
     
@@ -121,8 +121,8 @@ EquationOfStateIdealGas::EquationOfStateIdealGas(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "Please provide the correct number of Cp/Cv "
-                   << "while isothermal process is assumed.\n"
+                   << "Please provide the correct number of Cp/Cv"
+                   << " while isothermal process is assumed.\n"
                    << "Number of Cp/Cv provided is not equal to the total number of species."
                    << std::endl);
     }
@@ -156,6 +156,10 @@ EquationOfStateIdealGas::printClassData(
        << std::endl;
     os << "d_object_name = "
        << d_object_name
+       << std::endl;
+    
+    os << "d_thermal_pro_assum = "
+       << d_thermal_pro_assum
        << std::endl;
     
     os << "d_species_gamma = "
@@ -265,8 +269,8 @@ EquationOfStateIdealGas::getPressure(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "Mass fractions/volume fractions are required to "
-                   << "compute pressure for multi-species flow."
+                   << "Mass fractions/volume fractions are required to"
+                   << " compute pressure for multi-species flow."
                    << std::endl);
     }
     
@@ -288,7 +292,7 @@ EquationOfStateIdealGas::getPressureWithMassFraction(
     double p = 0.0;
     
     if (d_num_species > 1)
-    {                
+    {
         if (d_thermal_pro_assum == ISOTHERMAL)
         {
             const double& rho = *density;
@@ -329,8 +333,8 @@ EquationOfStateIdealGas::getPressureWithMassFraction(
         {
             TBOX_ERROR(d_object_name
                        << ": "
-                       << "getPressureWithMassFraction() can only be used "
-                       << "with isothermal assumption."
+                       << "getPressureWithMassFraction() can only be used"
+                       << " with isothermal assumption."
                        << std::endl);
         }
     }
@@ -338,8 +342,8 @@ EquationOfStateIdealGas::getPressureWithMassFraction(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "Mass fractions are not required to compute "
-                   << "pressure for single-species flow"
+                   << "Mass fractions are not required to compute"
+                   << " pressure for single-species flow"
                    << std::endl);
     }
     
@@ -361,7 +365,7 @@ EquationOfStateIdealGas::getPressureWithMassFraction(
     double p = 0.0;
     
     if (d_num_species > 1)
-    {                
+    {
         if (d_thermal_pro_assum == ISOTHERMAL)
         {
             const double& E = *total_energy;
@@ -402,8 +406,8 @@ EquationOfStateIdealGas::getPressureWithMassFraction(
         {
             TBOX_ERROR(d_object_name
                        << ": "
-                       << "getPressureWithMassFraction() can only be used "
-                       << "with isothermal assumption."
+                       << "getPressureWithMassFraction() can only be used"
+                       << " with isothermal assumption."
                        << std::endl);
         }
     }
@@ -411,8 +415,8 @@ EquationOfStateIdealGas::getPressureWithMassFraction(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "Mass fractions are not required to compute "
-                   << "pressure for single-species flow"
+                   << "Mass fractions are not required to compute"
+                   << " pressure for single-species flow"
                    << std::endl);
     }
     
@@ -434,7 +438,7 @@ EquationOfStateIdealGas::getPressureWithVolumeFraction(
     double p = 0.0;
     
     if (d_num_species > 1)
-    {                
+    {
         if (d_thermal_pro_assum == ISOBARIC)
         {
             const double& rho = *density;
@@ -475,8 +479,8 @@ EquationOfStateIdealGas::getPressureWithVolumeFraction(
         {
             TBOX_ERROR(d_object_name
                        << ": "
-                       << "getPressureWithVolumeFraction() can only be used "
-                       << "with isobaric assumption."
+                       << "getPressureWithVolumeFraction() without partial densities"
+                       << " can only be used with isobaric assumption."
                        << std::endl);
         }
     }
@@ -484,8 +488,8 @@ EquationOfStateIdealGas::getPressureWithVolumeFraction(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "Volume fractions are not required to compute "
-                   << "pressure for single-species flow"
+                   << "Volume fractions are not required to compute"
+                   << " pressure for single-species flow"
                    << std::endl);
     }
     
@@ -507,8 +511,44 @@ EquationOfStateIdealGas::getPressureWithVolumeFraction(
     double p = 0.0;
     
     if (d_num_species > 1)
-    {                
-        if (d_thermal_pro_assum == ISOBARIC)
+    {
+        if (d_thermal_pro_assum == ISOTHERMAL)
+        {
+            const double& E = *total_energy;
+            const double rho = getTotalDensity(partial_density);
+            
+            double mixture_gamma = getMixtureGammaWithPartialDensity(
+                partial_density);
+            
+            if (d_dim == tbox::Dimension(1))
+            {
+                // Get the reference to vector time-dependent variables.
+                const double& rho_u = *(momentum[0]);
+                
+                p = (mixture_gamma - 1)*
+                    (E - 0.5*(rho_u*rho_u)/rho);
+            }
+            else if (d_dim == tbox::Dimension(2))
+            {
+                // Get the reference to vector time-dependent variables.
+                const double& rho_u = *(momentum[0]);
+                const double& rho_v = *(momentum[1]);
+                
+                p = (mixture_gamma - 1)*
+                    (E - 0.5*(rho_u*rho_u + rho_v*rho_v)/rho);
+            }
+            else if (d_dim == tbox::Dimension(3))
+            {
+                // Get the pointer of vector time-dependent variables.
+                const double& rho_u = *(momentum[0]);
+                const double& rho_v = *(momentum[1]);
+                const double& rho_w = *(momentum[2]);
+                
+                p = (mixture_gamma- 1)*
+                    (E - 0.5*(rho_u*rho_u + rho_v*rho_v + rho_w*rho_w)/rho);
+            }
+        }
+        else if (d_thermal_pro_assum == ISOBARIC)
         {
             const double& E = *total_energy;
             const double rho = getTotalDensity(partial_density);
@@ -548,8 +588,8 @@ EquationOfStateIdealGas::getPressureWithVolumeFraction(
         {
             TBOX_ERROR(d_object_name
                        << ": "
-                       << "getPressureWithVolumeFraction() can only be used "
-                       << "with isobaric assumption."
+                       << "getPressureWithVolumeFraction() with partial densities"
+                       << " can only be used with isothermal or isobaric assumptions."
                        << std::endl);
         }
     }
@@ -557,8 +597,8 @@ EquationOfStateIdealGas::getPressureWithVolumeFraction(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "Volume fractions are not required to compute "
-                   << "pressure for single-species flow"
+                   << "Volume fractions are not required to compute"
+                   << " pressure for single-species flow"
                    << std::endl);
     }
     
@@ -593,8 +633,8 @@ EquationOfStateIdealGas::getSoundSpeed(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "Mass fractions/volume fractions are required to "
-                   << "compute sound speed for multi-species flow."
+                   << "Mass fractions/volume fractions are required to"
+                   << " compute sound speed for multi-species flow."
                    << std::endl);
     }
     
@@ -626,8 +666,8 @@ EquationOfStateIdealGas::getSoundSpeedWithPressure(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "Mass fractions/volume fractions are required to "
-                   << "compute sound speed for multi-species flow."
+                   << "Mass fractions/volume fractions are required to"
+                   << " compute sound speed for multi-species flow."
                    << std::endl);
     }
     
@@ -649,7 +689,7 @@ EquationOfStateIdealGas::getSoundSpeedWithMassFraction(
     double c = 0.0;
     
     if (d_num_species > 1)
-    {                
+    {
         if (d_thermal_pro_assum == ISOTHERMAL)
         {
             const double& rho = *density;
@@ -670,8 +710,8 @@ EquationOfStateIdealGas::getSoundSpeedWithMassFraction(
         {
             TBOX_ERROR(d_object_name
                        << ": "
-                       << "getSoundSpeedWithMassFraction() can only be used "
-                       << "with isothermal assumption."
+                       << "getSoundSpeedWithMassFraction() can only be used"
+                       << " with isothermal assumption."
                        << std::endl);
         }
     }
@@ -679,8 +719,8 @@ EquationOfStateIdealGas::getSoundSpeedWithMassFraction(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "Mass fractions are not required to "
-                   << "compute sound speed for multi-species flow."
+                   << "Mass fractions are not required to"
+                   << " compute sound speed for multi-species flow."
                    << std::endl);
     }
     
@@ -702,7 +742,7 @@ EquationOfStateIdealGas::getSoundSpeedWithMassFraction(
     double c = 0.0;
     
     if (d_num_species > 1)
-    {                
+    {
         if (d_thermal_pro_assum == ISOTHERMAL)
         {
             const double rho = getTotalDensity(partial_density);
@@ -724,8 +764,8 @@ EquationOfStateIdealGas::getSoundSpeedWithMassFraction(
         {
             TBOX_ERROR(d_object_name
                        << ": "
-                       << "getSoundSpeedWithMassFraction() can only be used "
-                       << "with isothermal assumption."
+                       << "getSoundSpeedWithMassFraction() can only be used"
+                       << " with isothermal assumption."
                        << std::endl);
         }
     }
@@ -733,8 +773,8 @@ EquationOfStateIdealGas::getSoundSpeedWithMassFraction(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "Mass fractions are not required to "
-                   << "compute sound speed for multi-species flow."
+                   << "Mass fractions are not required to"
+                   << " compute sound speed for multi-species flow."
                    << std::endl);
     }
     
@@ -758,7 +798,7 @@ EquationOfStateIdealGas::getSoundSpeedWithMassFractionAndPressure(
     double c = 0.0;
     
     if (d_num_species > 1)
-    {                
+    {
         if (d_thermal_pro_assum == ISOTHERMAL)
         {
             const double& rho = *density;
@@ -773,8 +813,8 @@ EquationOfStateIdealGas::getSoundSpeedWithMassFractionAndPressure(
         {
             TBOX_ERROR(d_object_name
                        << ": "
-                       << "getSoundSpeedWithMassFraction() can only be used "
-                       << "with isothermal assumption."
+                       << "getSoundSpeedWithMassFractionAndPressure() can only be used"
+                       << " with isothermal assumption."
                        << std::endl);
         }
     }
@@ -782,8 +822,8 @@ EquationOfStateIdealGas::getSoundSpeedWithMassFractionAndPressure(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "Mass fractions are not required to "
-                   << "compute sound speed for multi-species flow."
+                   << "Mass fractions are not required to"
+                   << " compute sound speed for multi-species flow."
                    << std::endl);
     }
     
@@ -807,7 +847,7 @@ EquationOfStateIdealGas::getSoundSpeedWithMassFractionAndPressure(
     double c = 0.0;
     
     if (d_num_species > 1)
-    {                
+    {
         if (d_thermal_pro_assum == ISOTHERMAL)
         {
             const double rho = getTotalDensity(partial_density);
@@ -822,8 +862,8 @@ EquationOfStateIdealGas::getSoundSpeedWithMassFractionAndPressure(
         {
             TBOX_ERROR(d_object_name
                        << ": "
-                       << "getSoundSpeedWithMassFraction() can only be used "
-                       << "with isothermal assumption."
+                       << "getSoundSpeedWithMassFractionAndPressure() can only be used"
+                       << " with isothermal assumption."
                        << std::endl);
         }
     }
@@ -831,8 +871,8 @@ EquationOfStateIdealGas::getSoundSpeedWithMassFractionAndPressure(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "Mass fractions are not required to "
-                   << "compute sound speed for multi-species flow."
+                   << "Mass fractions are not required to"
+                   << " compute sound speed for multi-species flow."
                    << std::endl);
     }
     
@@ -854,7 +894,7 @@ EquationOfStateIdealGas::getSoundSpeedWithVolumeFraction(
     double c = 0.0;
     
     if (d_num_species > 1)
-    {                
+    {
         if (d_thermal_pro_assum == ISOBARIC)
         {
             const double& rho = *density;
@@ -875,8 +915,8 @@ EquationOfStateIdealGas::getSoundSpeedWithVolumeFraction(
         {
             TBOX_ERROR(d_object_name
                        << ": "
-                       << "getSoundSpeedWithVolumeFraction() can only be used "
-                       << "with isobaric assumption."
+                       << "getSoundSpeedWithVolumeFraction() without partial densities"
+                       << " can only be used with isobaric assumption."
                        << std::endl);
         }
     }
@@ -884,8 +924,8 @@ EquationOfStateIdealGas::getSoundSpeedWithVolumeFraction(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "Volume fractions are not required to "
-                   << "compute sound speed for multi-species flow."
+                   << "Volume fractions are not required to"
+                   << " compute sound speed for multi-species flow."
                    << std::endl);
     }
     
@@ -908,7 +948,24 @@ EquationOfStateIdealGas::getSoundSpeedWithVolumeFraction(
     
     if (d_num_species > 1)
     {
-        if (d_thermal_pro_assum == ISOBARIC)
+        if (d_thermal_pro_assum == ISOTHERMAL)
+        {
+            const double rho = getTotalDensity(partial_density);
+            const double* const density = &rho;
+            
+            double mixture_gamma = getMixtureGammaWithPartialDensity(
+                partial_density);
+            
+            // Compute the pressure
+            double p = getPressureWithVolumeFraction(
+                density,
+                momentum,
+                total_energy,
+                volume_fraction);
+            
+            c = sqrt(mixture_gamma*p/rho);
+        }
+        else if (d_thermal_pro_assum == ISOBARIC)
         {
             const double rho = getTotalDensity(partial_density);
             const double* const density = &rho;
@@ -929,8 +986,8 @@ EquationOfStateIdealGas::getSoundSpeedWithVolumeFraction(
         {
             TBOX_ERROR(d_object_name
                        << ": "
-                       << "getSoundSpeedWithVolumeFraction() can only be used "
-                       << "with isobaric assumption."
+                       << "getSoundSpeedWithVolumeFraction() with partial densities"
+                       << " can only be used with isothermal or isobaric assumptions."
                        << std::endl);
         }
     }
@@ -938,8 +995,8 @@ EquationOfStateIdealGas::getSoundSpeedWithVolumeFraction(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "Volume fractions are not required to "
-                   << "compute sound speed for multi-species flow."
+                   << "Volume fractions are not required to"
+                   << " compute sound speed for multi-species flow."
                    << std::endl);
     }
     
@@ -963,7 +1020,7 @@ EquationOfStateIdealGas::getSoundSpeedWithVolumeFractionAndPressure(
     double c = 0.0;
     
     if (d_num_species > 1)
-    {                
+    {
         if (d_thermal_pro_assum == ISOBARIC)
         {
             const double& rho = *density;
@@ -978,8 +1035,8 @@ EquationOfStateIdealGas::getSoundSpeedWithVolumeFractionAndPressure(
         {
             TBOX_ERROR(d_object_name
                        << ": "
-                       << "getSoundSpeedWithVolumeFraction() can only be used "
-                       << "with isobaric assumption."
+                       << "getSoundSpeedWithVolumeFractionAndPressure() without partial densities"
+                       << " can only be used with isobaric assumption."
                        << std::endl);
         }
     }
@@ -987,8 +1044,8 @@ EquationOfStateIdealGas::getSoundSpeedWithVolumeFractionAndPressure(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "Volume fractions are not required to "
-                   << "compute sound speed for multi-species flow."
+                   << "Volume fractions are not required to"
+                   << " compute sound speed for multi-species flow."
                    << std::endl);
     }
     
@@ -1012,7 +1069,17 @@ EquationOfStateIdealGas::getSoundSpeedWithVolumeFractionAndPressure(
     
     if (d_num_species > 1)
     {
-        if (d_thermal_pro_assum == ISOBARIC)
+        if (d_thermal_pro_assum == ISOTHERMAL)
+        {
+            const double rho = getTotalDensity(partial_density);
+            const double& p = *pressure;
+            
+            double mixture_gamma = getMixtureGammaWithPartialDensity(
+                partial_density);
+            
+            c = sqrt(mixture_gamma*p/rho);
+        }
+        else if (d_thermal_pro_assum == ISOBARIC)
         {
             const double rho = getTotalDensity(partial_density);
             const double& p = *pressure;
@@ -1026,8 +1093,8 @@ EquationOfStateIdealGas::getSoundSpeedWithVolumeFractionAndPressure(
         {
             TBOX_ERROR(d_object_name
                        << ": "
-                       << "getSoundSpeedWithVolumeFraction() can only be used "
-                       << "with isobaric assumption."
+                       << "getSoundSpeedWithVolumeFractionAndPressure() with partial densities"
+                       << " can only be used with isothermal or isobaric assumptions."
                        << std::endl);
         }
     }
@@ -1035,8 +1102,8 @@ EquationOfStateIdealGas::getSoundSpeedWithVolumeFractionAndPressure(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "Volume fractions are not required to "
-                   << "compute sound speed for multi-species flow."
+                   << "Volume fractions are not required to"
+                   << " compute sound speed for multi-species flow."
                    << std::endl);
     }
     
@@ -1089,8 +1156,8 @@ EquationOfStateIdealGas::getTotalEnergy(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "Mass fractions/volume fractions are required to "
-                   << "compute total energy for multi-species flow."
+                   << "Mass fractions/volume fractions are required to"
+                   << " compute total energy for multi-species flow."
                    << std::endl);
     }
     
@@ -1112,7 +1179,7 @@ EquationOfStateIdealGas::getTotalEnergyWithMassFraction(
     double E = 0.0;
     
     if (d_num_species > 1)
-    {                
+    {
         if (d_thermal_pro_assum == ISOTHERMAL)
         {
             const double& rho = *density;
@@ -1150,8 +1217,8 @@ EquationOfStateIdealGas::getTotalEnergyWithMassFraction(
         {
             TBOX_ERROR(d_object_name
                        << ": "
-                       << "getTotalEnergyWithMassFraction() can only be used "
-                       << "with isothermal assumption."
+                       << "getTotalEnergyWithMassFraction() can only be used"
+                       << " with isothermal assumption."
                        << std::endl);
         }
     }
@@ -1159,8 +1226,8 @@ EquationOfStateIdealGas::getTotalEnergyWithMassFraction(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "Mass fractions are not required to compute "
-                   << "total energy for single-species flow"
+                   << "Mass fractions are not required to compute"
+                   << " total energy for single-species flow"
                    << std::endl);
     }
     
@@ -1182,7 +1249,7 @@ EquationOfStateIdealGas::getTotalEnergyWithMassFraction(
     double E = 0.0;
     
     if (d_num_species > 1)
-    {                
+    {
         if (d_thermal_pro_assum == ISOTHERMAL)
         {
             const double& p = *pressure;
@@ -1220,8 +1287,8 @@ EquationOfStateIdealGas::getTotalEnergyWithMassFraction(
         {
             TBOX_ERROR(d_object_name
                        << ": "
-                       << "getTotalEnergyWithMassFraction() can only be used "
-                       << "with isothermal assumption."
+                       << "getTotalEnergyWithMassFraction() can only be used"
+                       << " with isothermal assumption."
                        << std::endl);
         }
     }
@@ -1229,8 +1296,8 @@ EquationOfStateIdealGas::getTotalEnergyWithMassFraction(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "Mass fractions are not required to compute "
-                   << "total energy for single-species flow"
+                   << "Mass fractions are not required to compute"
+                   << " total energy for single-species flow"
                    << std::endl);
     }
     
@@ -1290,8 +1357,8 @@ EquationOfStateIdealGas::getTotalEnergyWithVolumeFraction(
         {
             TBOX_ERROR(d_object_name
                        << ": "
-                       << "getTotalEnergyWithVolumeFraction() can only be used "
-                       << "with isobaric assumption."
+                       << "getTotalEnergyWithVolumeFraction() without partial densities"
+                       << " can only be used with isobaric assumption."
                        << std::endl);
         }
     }
@@ -1299,8 +1366,8 @@ EquationOfStateIdealGas::getTotalEnergyWithVolumeFraction(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "Volume fractions are not required to compute "
-                   << "total energy for single-species flow"
+                   << "Volume fractions are not required to compute"
+                   << " total energy for single-species flow"
                    << std::endl);
     }
     
@@ -1322,8 +1389,41 @@ EquationOfStateIdealGas::getTotalEnergyWithVolumeFraction(
     double E = 0.0;
     
     if (d_num_species > 1)
-    {                
-        if (d_thermal_pro_assum == ISOBARIC)
+    {
+        if (d_thermal_pro_assum == ISOTHERMAL)
+        {
+            const double& p = *pressure;
+            const double rho = getTotalDensity(partial_density);
+            
+            double mixture_gamma = getMixtureGammaWithPartialDensity(
+                partial_density);
+            
+            if (d_dim == tbox::Dimension(1))
+            {
+                // Get the reference to vector time-dependent variables.
+                const double& u = *(velocity[0]);
+                
+                E = p/(mixture_gamma - 1.0) + 0.5*rho*u*u;
+            }
+            else if (d_dim == tbox::Dimension(2))
+            {
+                // Get the reference to vector time-dependent variables.
+                const double& u = *(velocity[0]);
+                const double& v = *(velocity[1]);
+                
+                E = p/(mixture_gamma - 1.0) + 0.5*rho*(u*u + v*v);
+            }
+            else if (d_dim == tbox::Dimension(3))
+            {
+                // Get the pointer of vector time-dependent variables.
+                const double& u = *(velocity[0]);
+                const double& v = *(velocity[1]);
+                const double& w = *(velocity[2]);
+                
+                E = p/(mixture_gamma - 1.0) + 0.5*rho*(u*u + v*v + w*w);
+            }
+        }
+        else if (d_thermal_pro_assum == ISOBARIC)
         {
             const double& p = *pressure;
             const double rho = getTotalDensity(partial_density);
@@ -1360,8 +1460,8 @@ EquationOfStateIdealGas::getTotalEnergyWithVolumeFraction(
         {
             TBOX_ERROR(d_object_name
                        << ": "
-                       << "getTotalEnergyWithVolumeFraction() can only be used "
-                       << "with isobaric assumption."
+                       << "getTotalEnergyWithVolumeFraction() with partial densities"
+                       << " can only be used with isothermal or isobaric assumptions."
                        << std::endl);
         }
     }
@@ -1369,8 +1469,8 @@ EquationOfStateIdealGas::getTotalEnergyWithVolumeFraction(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "Volume fractions are not required to compute "
-                   << "total energy for single-species flow"
+                   << "Volume fractions are not required to compute"
+                   << " total energy for single-species flow"
                    << std::endl);
     }
     
@@ -1427,9 +1527,9 @@ EquationOfStateIdealGas::getMixtureThermodynamicPropertyWithMassFraction(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "Unknown thermodynamic property name = "
+                   << "Unknown thermodynamic property name = '"
                    << property_name
-                   << " provided."
+                   << "' provided."
                    << std::endl);
     }
     
@@ -1470,9 +1570,9 @@ EquationOfStateIdealGas::getMixtureThermodynamicPropertyWithVolumeFraction(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "Unknown thermodynamic property name = "
+                   << "Unknown thermodynamic property name = '"
                    << property_name
-                   << " provided."
+                   << "' provided."
                    << std::endl);
     }
     
@@ -1525,9 +1625,9 @@ EquationOfStateIdealGas::getSpeciesThermodynamicProperty(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "Unknown thermodynamic property name = "
+                   << "Unknown thermodynamic property name = '"
                    << property_name
-                   << " provided."
+                   << "' provided."
                    << std::endl);
     }
     
@@ -1565,13 +1665,61 @@ EquationOfStateIdealGas::hasThermodynamicProperty(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "Unknown thermodynamic property name = "
+                   << "Unknown thermodynamic property name = '"
                    << property_name
-                   << " provided."
+                   << "' provided."
                    << std::endl);
     }
     
     return has_therm_propty_value;
+}
+
+
+/*
+ * Compute the mixture's gamma for multi-species flow with partial densities.
+ */
+double
+EquationOfStateIdealGas::getMixtureGammaWithPartialDensity(
+    const std::vector<const double*> partial_density)
+{
+    double mixture_gamma = 0.0;
+    
+    if (d_thermal_pro_assum == ISOTHERMAL)
+    {
+        if (static_cast<int>(partial_density.size()) == d_num_species)
+        {
+            const double rho = getTotalDensity(partial_density);
+            double mixture_Cp = 0.0;
+            double mixture_Cv = 0.0;
+            
+            for (int si = 0; si < d_num_species; si++)
+            {
+                const double& Y = (*(partial_density[si]))/rho;
+                mixture_Cp += d_species_Cp[si]*Y;
+                mixture_Cv += d_species_Cv[si]*Y;
+            }
+            
+            mixture_gamma = mixture_Cp/mixture_Cv;
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                       << ": "
+                       << "Number of partial densities provided is not"
+                       << " equal to the total number of species."
+                       << std::endl);
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+                   << ": "
+                   << "getMixtureGammaWithPartialDensity() can only be used"
+                   << " with isothermal assumption."
+                   << std::endl);
+    }
+    
+    return mixture_gamma;
 }
 
 
@@ -1627,7 +1775,7 @@ EquationOfStateIdealGas::getMixtureGammaWithMassFraction(
             TBOX_ERROR(d_object_name
                        << ": "
                        << "Number of mass fractions provided is not"
-                       << "equal to the total number of species."
+                       << " equal to the total number of species."
                        << std::endl);
         }
     }
@@ -1635,8 +1783,8 @@ EquationOfStateIdealGas::getMixtureGammaWithMassFraction(
     {
         TBOX_ERROR(d_object_name
                    << ": "
-                   << "getMixtureGammaWithMassFraction() can only be used "
-                   << "with isothermal assumption."
+                   << "getMixtureGammaWithMassFraction() can only be used"
+                   << " with isothermal assumption."
                    << std::endl);
     }
     
@@ -1691,7 +1839,7 @@ EquationOfStateIdealGas::getMixtureGammaWithVolumeFraction(
             TBOX_ERROR(d_object_name
                        << ": "
                        << "Number of volume fractions provided is not"
-                       << "equal to the total number of species."
+                       << " equal to the total number of species."
                        << std::endl);
         }
     }
@@ -1699,8 +1847,8 @@ EquationOfStateIdealGas::getMixtureGammaWithVolumeFraction(
     {
         TBOX_ERROR(d_object_name
                        << ": "
-                       << "getMixtureGammaWithVolumeFraction() can only be used "
-                       << "with isobaric assumption."
+                       << "getMixtureGammaWithVolumeFraction() can only be used"
+                       << " with isobaric assumption."
                        << std::endl);
     }
     
