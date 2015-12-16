@@ -26,14 +26,14 @@ class InitialConditions
             const std::string& object_name,
             const std::string& project_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geom,
+            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
             const FLOW_MODEL& flow_model,
             const int& num_species,
             const boost::shared_ptr<EquationOfState>& equation_of_state):
                 d_object_name(object_name),
                 d_project_name(project_name),
                 d_dim(dim),
-                d_grid_geometry(grid_geom),
+                d_grid_geometry(grid_geometry),
                 d_flow_model(flow_model),
                 d_num_species(num_species),
                 d_equation_of_state(equation_of_state),
@@ -43,7 +43,7 @@ class InitialConditions
                 d_total_energy(NULL),
                 d_mass_fraction(NULL),
                 d_volume_fraction(NULL),
-                d_set_variables(false)
+                d_variables_set(false)
         {}
         
         /*
@@ -51,9 +51,9 @@ class InitialConditions
          */
         void
         setVariablesForSingleSpecies(
-            const boost::shared_ptr<pdat::CellVariable<double> > density,
-            const boost::shared_ptr<pdat::CellVariable<double> > momentum,
-            const boost::shared_ptr<pdat::CellVariable<double> > total_energy)
+            const boost::shared_ptr<pdat::CellVariable<double> >& density,
+            const boost::shared_ptr<pdat::CellVariable<double> >& momentum,
+            const boost::shared_ptr<pdat::CellVariable<double> >& total_energy)
         {
             if (d_flow_model != SINGLE_SPECIES)
             {            
@@ -67,7 +67,7 @@ class InitialConditions
             d_momentum = momentum;
             d_total_energy = total_energy;
             
-            d_set_variables = true;
+            d_variables_set = true;
         }
         
         /*
@@ -76,10 +76,10 @@ class InitialConditions
          */
         void
         setVariablesForFourEqnShyue(
-            const boost::shared_ptr<pdat::CellVariable<double> > density,
-            const boost::shared_ptr<pdat::CellVariable<double> > momentum,
-            const boost::shared_ptr<pdat::CellVariable<double> > total_energy,
-            const boost::shared_ptr<pdat::CellVariable<double> > mass_fraction)
+            const boost::shared_ptr<pdat::CellVariable<double> >& density,
+            const boost::shared_ptr<pdat::CellVariable<double> >& momentum,
+            const boost::shared_ptr<pdat::CellVariable<double> >& total_energy,
+            const boost::shared_ptr<pdat::CellVariable<double> >& mass_fraction)
         {
             if (d_flow_model != FOUR_EQN_SHYUE)
             {            
@@ -94,7 +94,7 @@ class InitialConditions
             d_total_energy = total_energy;
             d_mass_fraction = mass_fraction;
             
-            d_set_variables = true;
+            d_variables_set = true;
         }
         
         /*
@@ -103,10 +103,10 @@ class InitialConditions
          */
         void
         setVariablesForFiveEqnAllaire(
-            const boost::shared_ptr<pdat::CellVariable<double> > partial_density,
-            const boost::shared_ptr<pdat::CellVariable<double> > momentum,
-            const boost::shared_ptr<pdat::CellVariable<double> > total_energy,
-            const boost::shared_ptr<pdat::CellVariable<double> > volume_fraction)
+            const boost::shared_ptr<pdat::CellVariable<double> >& partial_density,
+            const boost::shared_ptr<pdat::CellVariable<double> >& momentum,
+            const boost::shared_ptr<pdat::CellVariable<double> >& total_energy,
+            const boost::shared_ptr<pdat::CellVariable<double> >& volume_fraction)
         {
             if (d_flow_model != FIVE_EQN_ALLAIRE)
             {            
@@ -121,7 +121,7 @@ class InitialConditions
             d_total_energy = total_energy;
             d_volume_fraction = volume_fraction;
             
-            d_set_variables = true;
+            d_variables_set = true;
         }
         
         /*
@@ -133,7 +133,7 @@ class InitialConditions
             hier::Patch& patch,
             const double data_time,
             const bool initial_time,
-            const boost::shared_ptr<hier::VariableContext> data_context);
+            const boost::shared_ptr<hier::VariableContext>& data_context);
         
     private:
         /*
@@ -182,9 +182,9 @@ class InitialConditions
         boost::shared_ptr<pdat::CellVariable<double> > d_volume_fraction;
         
         /*
-         * Boolean to determine where proper variables are initialized.
+         * Boolean to determine whether proper variables are initialized.
          */
-        bool d_set_variables;
+        bool d_variables_set;
 };
 
 #endif /* INITIAL_CONDITIONS_HPP */

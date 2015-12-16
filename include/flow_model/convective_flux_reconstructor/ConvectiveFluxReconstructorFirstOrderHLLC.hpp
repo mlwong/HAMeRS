@@ -41,7 +41,7 @@ class ConvectiveFluxReconstructorFirstOrderHLLC: public ConvectiveFluxReconstruc
             const double time,
             const double dt,
             const int RK_step_number,
-            const boost::shared_ptr<hier::VariableContext> data_context);
+            const boost::shared_ptr<hier::VariableContext>& data_context);
     
     private:
         RiemannSolverHLLC d_Riemann_solver;

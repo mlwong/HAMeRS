@@ -20,6 +20,7 @@
 #include "SAMRAI/tbox/Serializable.h"
 
 #include "flow_model/FlowModels.hpp"
+#include "flow_model/FlowModelManager.hpp"
 #include "flow_model/boundary_conditions/Euler/EulerBoundaryConditions.hpp"
 #include "flow_model/convective_flux_reconstructor/ConvectiveFluxReconstructor.hpp"
 #include "flow_model/feature_driven_tagger/FeatureDrivenTagger.hpp"
@@ -52,7 +53,6 @@ using namespace SAMRAI;
 
 class Euler:
     public RungeKuttaPatchStrategy,
-    public appu::VisDerivedDataStrategy,
     public tbox::Serializable
 {
     public:
@@ -70,8 +70,8 @@ class Euler:
         Euler(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            boost::shared_ptr<tbox::Database> input_db,
-            boost::shared_ptr<geom::CartesianGridGeometry> grid_geom);
+            const boost::shared_ptr<tbox::Database>& input_db,
+            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry);
         
         /**
          * Destructor of Euler.
@@ -310,7 +310,7 @@ class Euler:
          * visualization tool.
          */
 #ifdef HAVE_HDF5
-        void registerVisItDataWriter(boost::shared_ptr<appu::VisItDataWriter> viz_writer);
+        void registerVisItDataWriter(const boost::shared_ptr<appu::VisItDataWriter>& viz_writer);
 #endif
         
         /**
@@ -353,8 +353,9 @@ class Euler:
          * Print all data statistics for Euler class.
          */
         void
-        printDataStatistics(std::ostream& os,
-                            const boost::shared_ptr<hier::PatchHierarchy> patch_hierarchy) const;
+        printDataStatistics(
+            std::ostream& os,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy) const;
         
     private:
         /*
@@ -368,7 +369,7 @@ class Euler:
          */
         void
         getFromInput(
-            boost::shared_ptr<tbox::Database> input_db,
+            const boost::shared_ptr<tbox::Database>& input_db,
             bool is_from_restart);
         
         void getFromRestart();
@@ -376,8 +377,8 @@ class Euler:
         void
         preservePositivity(
             std::vector<double*>& Q,
-            boost::shared_ptr<pdat::FaceData<double> >& convective_flux_intermediate,
-            boost::shared_ptr<pdat::CellData<double> >& source_intermediate,
+            const boost::shared_ptr<pdat::FaceData<double> >& convective_flux_intermediate,
+            const boost::shared_ptr<pdat::CellData<double> >& source_intermediate,
             const hier::IntVector interior_dims,
             const hier::IntVector ghostcell_dims,
             const double* const dx,
@@ -405,13 +406,11 @@ class Euler:
          * and register plot variables. We also cache a pointer to the
          * plot context passed to the variable registration routine.
          */
-        boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
+        const boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
         
 #ifdef HAVE_HDF5
         boost::shared_ptr<appu::VisItDataWriter> d_visit_writer;
 #endif
-        
-        boost::shared_ptr<hier::VariableContext> d_plot_context;
         
         /*
          * Data iterms used for nonuniform load balance, if used.
@@ -426,14 +425,9 @@ class Euler:
         hier::IntVector d_num_ghosts;
         
         /*
-         * Flow model.
+         * A string variable to describe the flow model used.
          */
-        FLOW_MODEL d_flow_model;
-        
-        /*
-         * Number of equations.
-         */
-        int d_num_eqn;
+        std::string d_flow_model_str;
         
         /*
          * Number of species.
@@ -450,7 +444,7 @@ class Euler:
          * boost::shared_ptr to the convective flux reconstructor and
          * to the database of the corresponding shock capturing scheme.
          */
-        std::shared_ptr<ConvectiveFluxReconstructor> d_conv_flux_reconstructor;
+        boost::shared_ptr<ConvectiveFluxReconstructor> d_conv_flux_reconstructor;
         boost::shared_ptr<tbox::Database> d_shock_capturing_scheme_db;
         
         /*
@@ -461,26 +455,21 @@ class Euler:
         /*
          * boost::shared_ptr to EulerBoundaryConditions and its database.
          */
-        std::shared_ptr<EulerBoundaryConditions> d_Euler_boundary_conditions;
+        boost::shared_ptr<EulerBoundaryConditions> d_Euler_boundary_conditions;
         boost::shared_ptr<tbox::Database> d_Euler_boundary_conditions_db;
         bool d_Euler_boundary_conditions_db_is_from_restart;
         
         /*
          * boost::shared_ptr to FeatureDrivenTagger and its database.
          */
-        std::shared_ptr<FeatureDrivenTagger> d_feature_driven_tagger;
+        boost::shared_ptr<FeatureDrivenTagger> d_feature_driven_tagger;
         boost::shared_ptr<tbox::Database> d_feature_driven_tagger_db;
         
+        
         /*
-         * Euler solution state is represented by "conservative" variables,
-         * density, momentum, total_energy per unit volume etc.
+         * boost::shared_ptr to FlowModelManager.
          */
-        boost::shared_ptr<pdat::CellVariable<double> > d_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_partial_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_momentum;
-        boost::shared_ptr<pdat::CellVariable<double> > d_total_energy;
-        boost::shared_ptr<pdat::CellVariable<double> > d_mass_fraction;
-        boost::shared_ptr<pdat::CellVariable<double> > d_volume_fraction;
+        boost::shared_ptr<FlowModelManager> d_flow_model_manager;
         
         /*
          * boost::shared_ptr to convective flux variable vector.

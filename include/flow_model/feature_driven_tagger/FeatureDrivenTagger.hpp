@@ -23,7 +23,7 @@ class FeatureDrivenTagger
         FeatureDrivenTagger(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geom,
+            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
             const hier::IntVector& num_ghosts,
             const FLOW_MODEL& flow_model,
             const int& num_species,
@@ -35,10 +35,9 @@ class FeatureDrivenTagger
          */
         void
         setVariablesForSingleSpecies(
-            const hier::IntVector& num_ghosts,
-            const boost::shared_ptr<pdat::CellVariable<double> > density,
-            const boost::shared_ptr<pdat::CellVariable<double> > momentum,
-            const boost::shared_ptr<pdat::CellVariable<double> > total_energy)
+            const boost::shared_ptr<pdat::CellVariable<double> >& density,
+            const boost::shared_ptr<pdat::CellVariable<double> >& momentum,
+            const boost::shared_ptr<pdat::CellVariable<double> >& total_energy)
         {
             if (d_flow_model != SINGLE_SPECIES)
             {            
@@ -48,13 +47,11 @@ class FeatureDrivenTagger
                            << std::endl);
             }
             
-            d_num_ghosts = num_ghosts;
-            
             d_density = density;
             d_momentum = momentum;
             d_total_energy = total_energy;
             
-            d_set_variables = true;
+            d_variables_set = true;
         }
         
         /*
@@ -63,11 +60,10 @@ class FeatureDrivenTagger
          */
         void
         setVariablesForFourEqnShyue(
-            const hier::IntVector& num_ghosts,
-            const boost::shared_ptr<pdat::CellVariable<double> > density,
-            const boost::shared_ptr<pdat::CellVariable<double> > momentum,
-            const boost::shared_ptr<pdat::CellVariable<double> > total_energy,
-            const boost::shared_ptr<pdat::CellVariable<double> > mass_fraction)
+            const boost::shared_ptr<pdat::CellVariable<double> >& density,
+            const boost::shared_ptr<pdat::CellVariable<double> >& momentum,
+            const boost::shared_ptr<pdat::CellVariable<double> >& total_energy,
+            const boost::shared_ptr<pdat::CellVariable<double> >& mass_fraction)
         {
             if (d_flow_model != FOUR_EQN_SHYUE)
             {            
@@ -77,14 +73,12 @@ class FeatureDrivenTagger
                            << std::endl);
             }
             
-            d_num_ghosts = num_ghosts;
-            
             d_density = density;
             d_momentum = momentum;
             d_total_energy = total_energy;
             d_mass_fraction = mass_fraction;
             
-            d_set_variables = true;
+            d_variables_set = true;
         }
         
         /*
@@ -93,11 +87,10 @@ class FeatureDrivenTagger
          */
         void
         setVariablesForFiveEqnAllaire(
-            const hier::IntVector& num_ghosts,
-            const boost::shared_ptr<pdat::CellVariable<double> > partial_density,
-            const boost::shared_ptr<pdat::CellVariable<double> > momentum,
-            const boost::shared_ptr<pdat::CellVariable<double> > total_energy,
-            const boost::shared_ptr<pdat::CellVariable<double> > volume_fraction)
+            const boost::shared_ptr<pdat::CellVariable<double> >& partial_density,
+            const boost::shared_ptr<pdat::CellVariable<double> >& momentum,
+            const boost::shared_ptr<pdat::CellVariable<double> >& total_energy,
+            const boost::shared_ptr<pdat::CellVariable<double> >& volume_fraction)
         {
             if (d_flow_model != FIVE_EQN_ALLAIRE)
             {            
@@ -107,21 +100,19 @@ class FeatureDrivenTagger
                            << std::endl);
             }
             
-            d_num_ghosts = num_ghosts;
-            
             d_partial_density = partial_density;
             d_momentum = momentum;
             d_total_energy = total_energy;
             d_volume_fraction = volume_fraction;
             
-            d_set_variables = true;
+            d_variables_set = true;
         }
         
         /*
          * Print all characteristics of the feature driven tagger class.
          */
         void
-        printClassData(std::ostream& os);
+        printClassData(std::ostream& os) const;
         
         /*
          * Put the characteristics of the feature driven tagger into the restart
@@ -129,7 +120,7 @@ class FeatureDrivenTagger
          */
         void
         putToRestart(
-            const boost::shared_ptr<tbox::Database>& restart_db);
+            const boost::shared_ptr<tbox::Database>& restart_db) const;
         
         /*
          * Tag cells for refinement using different feature-based detectors.
@@ -141,7 +132,7 @@ class FeatureDrivenTagger
             const bool initial_error,
             const bool uses_richardson_extrapolation_too,
             boost::shared_ptr<pdat::CellData<int> > tags,
-            const boost::shared_ptr<hier::VariableContext> data_context);
+            const boost::shared_ptr<hier::VariableContext>& data_context);
         
     private:
         /*
@@ -190,9 +181,9 @@ class FeatureDrivenTagger
         boost::shared_ptr<pdat::CellVariable<double> > d_volume_fraction;
         
         /*
-         * Boolean to determine where proper variables are initialized.
+         * Boolean to determine whether proper variables are initialized.
          */
-        bool d_set_variables;
+        bool d_variables_set;
         
         /*
          * Refinement criteria and tolerances for the feature-based detector.

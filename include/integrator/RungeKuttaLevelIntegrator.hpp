@@ -217,7 +217,7 @@ class RungeKuttaLevelIntegrator:
         virtual ~RungeKuttaLevelIntegrator();
         
         /**
-         * Initialize level integrator by by setting the number of time levels
+         * Initialize level integrator by setting the number of time levels
          * of data needed based on specifications of the gridding algorithm.
          *
          * This routine also invokes variable registration in the patch strategy.
@@ -923,7 +923,7 @@ class RungeKuttaLevelIntegrator:
     std::vector<std::vector<double> > d_gamma;
     
     /*
-     * Boolean flags for indicated whether face or side data types are
+     * Boolean flags for indicating whether face or side data types are
      * used for fluxes (choice is determined by numerical routines in
      * Runge-Kutta patch model).
      */
@@ -935,7 +935,7 @@ class RungeKuttaLevelIntegrator:
      * The following communication algorithms and schedules are created and
      * maintained to manage inter-patch communication during AMR integration.
      * The algorithms are created in the class constructor.  They are initialized
-     * when variables are "registered" are registered with the integrator.
+     * when variables are "registered" with the integrator.
      */
     
     /*

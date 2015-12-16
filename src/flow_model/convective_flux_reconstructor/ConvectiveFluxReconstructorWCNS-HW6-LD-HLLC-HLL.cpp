@@ -90,8 +90,8 @@ ConvectiveFluxReconstructorWCNS_HW6_LD_HLLC_HLL::printClassData(
     os << "d_object_name = "
        << d_object_name
        << std::endl;
-    os << "d_set_variables = "
-       << d_set_variables
+    os << "d_variables_set = "
+       << d_variables_set
        << std::endl;
     os << "d_constant_C = "
        << d_constant_C
@@ -139,9 +139,9 @@ ConvectiveFluxReconstructorWCNS_HW6_LD_HLLC_HLL::computeConvectiveFluxesAndSourc
     const double time,
     const double dt,
     const int RK_step_number,
-    const boost::shared_ptr<hier::VariableContext> data_context)
+    const boost::shared_ptr<hier::VariableContext>& data_context)
 {
-    if (d_set_variables == true)
+    if (d_variables_set == true)
     {
         // Get the dimensions of box that covers the interior of patch.
         hier::Box dummy_box = patch.getBox();

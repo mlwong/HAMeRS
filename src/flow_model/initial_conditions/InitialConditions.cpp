@@ -9,7 +9,7 @@ InitialConditions::initializeDataOnPatch(
     hier::Patch& patch,
     const double data_time,
     const bool initial_time,
-    const boost::shared_ptr<hier::VariableContext> data_context)
+    const boost::shared_ptr<hier::VariableContext>& data_context)
 {
     NULL_USE(data_time);
     

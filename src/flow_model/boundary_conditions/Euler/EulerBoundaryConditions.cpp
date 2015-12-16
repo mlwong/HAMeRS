@@ -11,7 +11,7 @@ EulerBoundaryConditions::EulerBoundaryConditions(
     const std::string& object_name,
     const std::string& project_name,
     const tbox::Dimension& dim,
-    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geom,
+    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
     const hier::IntVector& num_ghosts,
     const FLOW_MODEL& flow_model,
     const int& num_species,
@@ -21,7 +21,7 @@ EulerBoundaryConditions::EulerBoundaryConditions(
         d_object_name(object_name),
         d_project_name(project_name),
         d_dim(dim),
-        d_grid_geometry(grid_geom),
+        d_grid_geometry(grid_geometry),
         d_num_ghosts(num_ghosts),
         d_flow_model(flow_model),
         d_num_species(num_species),
@@ -32,7 +32,7 @@ EulerBoundaryConditions::EulerBoundaryConditions(
         d_total_energy(NULL),
         d_mass_fraction(NULL),
         d_volume_fraction(NULL),
-        d_set_variables(false)
+        d_variables_set(false)
 {
     /*
      * Defaults for boundary conditions. Set to bogus values
@@ -335,7 +335,7 @@ EulerBoundaryConditions::EulerBoundaryConditions(
  * Print all characteristics of the boundary conditions class.
  */
 void
-EulerBoundaryConditions::printClassData(std::ostream& os)
+EulerBoundaryConditions::printClassData(std::ostream& os) const
 {
     os << "\nPrint EulerBoundaryConditions object..."
        << std::endl;
@@ -708,7 +708,7 @@ EulerBoundaryConditions::printClassData(std::ostream& os)
  */
 void
 EulerBoundaryConditions::putToRestart(
-    const boost::shared_ptr<tbox::Database>& restart_db)
+    const boost::shared_ptr<tbox::Database>& restart_db) const
 {
     restart_db->putIntegerVector("d_master_bdry_node_conds",
         d_master_bdry_node_conds);
@@ -1062,7 +1062,7 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
     hier::Patch& patch,
     const double fill_time,
     const hier::IntVector& ghost_width_to_fill,
-    const boost::shared_ptr<hier::VariableContext> data_context)
+    const boost::shared_ptr<hier::VariableContext>& data_context)
 {
     NULL_USE(fill_time);
     

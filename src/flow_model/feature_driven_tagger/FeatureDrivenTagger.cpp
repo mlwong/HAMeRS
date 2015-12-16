@@ -5,7 +5,7 @@
 FeatureDrivenTagger::FeatureDrivenTagger(
     const std::string& object_name,
     const tbox::Dimension& dim,
-    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geom,
+    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
     const hier::IntVector& num_ghosts,
     const FLOW_MODEL& flow_model,
     const int& num_species,
@@ -13,7 +13,7 @@ FeatureDrivenTagger::FeatureDrivenTagger(
     const boost::shared_ptr<tbox::Database>& feature_driven_tagger_db):
         d_object_name(object_name),
         d_dim(dim),
-        d_grid_geometry(grid_geom),
+        d_grid_geometry(grid_geometry),
         d_num_ghosts(num_ghosts),
         d_flow_model(flow_model),
         d_num_species(num_species),
@@ -24,7 +24,7 @@ FeatureDrivenTagger::FeatureDrivenTagger(
         d_total_energy(NULL),
         d_mass_fraction(NULL),
         d_volume_fraction(NULL),
-        d_set_variables(false),
+        d_variables_set(false),
         d_shock_Jameson_tol(0.01),
         d_shock_Ducros_tol(0.01),
         d_shock_Larsson_tol(0.7),
@@ -230,7 +230,7 @@ FeatureDrivenTagger::FeatureDrivenTagger(
  * Print all characteristics of the feature driven tagger class.
  */
 void
-FeatureDrivenTagger::printClassData(std::ostream& os)
+FeatureDrivenTagger::printClassData(std::ostream& os) const
 {
     NULL_USE(os);
 }
@@ -242,7 +242,7 @@ FeatureDrivenTagger::printClassData(std::ostream& os)
  */
 void
 FeatureDrivenTagger::putToRestart(
-    const boost::shared_ptr<tbox::Database>& restart_db)
+    const boost::shared_ptr<tbox::Database>& restart_db) const
 {
     if (d_refinement_criteria.size() > 0)
     {
@@ -304,7 +304,7 @@ FeatureDrivenTagger::tagCells(
    const bool initial_error,
    const bool uses_richardson_extrapolation_too,
    boost::shared_ptr<pdat::CellData<int> > tags,
-   const boost::shared_ptr<hier::VariableContext> data_context)
+   const boost::shared_ptr<hier::VariableContext>& data_context)
 {
     NULL_USE(uses_richardson_extrapolation_too);
     

@@ -58,8 +58,8 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::printClassData(
     os << "d_object_name = "
        << d_object_name
        << std::endl;
-    os << "d_set_variables = "
-       << d_set_variables
+    os << "d_variables_set = "
+       << d_variables_set
        << std::endl;
 }
 
@@ -86,11 +86,11 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::computeConvectiveFluxesAndSources(
     const double time,
     const double dt,
     const int RK_step_number,
-    const boost::shared_ptr<hier::VariableContext> data_context)
+    const boost::shared_ptr<hier::VariableContext>& data_context)
 {
     NULL_USE(RK_step_number);
     
-    if (d_set_variables == true)
+    if (d_variables_set == true)
     {
         // Get the dimensions of box that covers the interior of patch.
         hier::Box dummy_box = patch.getBox();

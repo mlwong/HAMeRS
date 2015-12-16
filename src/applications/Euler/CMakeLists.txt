@@ -10,6 +10,7 @@ add_library(Euler ${Euler_source_files})
 
 TARGET_LINK_LIBRARIES(Euler
     Euler_boundary_conditions
+    flow_model_manager
     convective_flux_reconstructor
     feature_driven_tagger
     initial_conditions

@@ -488,13 +488,6 @@ RungeKuttaLevelIntegrator::resetHierarchyConfiguration(
         
         t_advance_bdry_fill_create->start();
         
-        /*
-         * Activating this reveals a bug at step 34 in Euler, room-2d, 2-proc.
-         * Truncated message.  Do the connectors used for schedule
-         * generation agree on transposes?
-         *
-         * Serial run ok.
-         */
         d_bdry_sched_advance[ln] =
             d_bdry_fill_advance->createSchedule(
                 level,
@@ -592,12 +585,12 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
  * of the level on which error estiamtion is performed.  This routine
  * is used to coarsen data from a level in the AMR hierarchy to some
  * coarsened version of it.  Note that this routine will be called twice
- * The init_coarse_level boolean argument indicates whether data is
+ * The before_advance boolean argument indicates whether data is
  * set on the coarse level by coarsening the "old" time level solution
  * or by coarsening the "new" solution on the fine level (i.e., after
  * it has been advanced).
  *
- * The contexts used for coarsening old data depends on the number of
+ * The contexts used for coarsening old data depend on the number of
  * time levels.  We always want to use data at the oldest time on the
  * fine level, coarsened to the CURRENT context on the coarse level.
  * Thus, if the problem uses two time levels, we coarsen data from
@@ -735,7 +728,7 @@ RungeKuttaLevelIntegrator::coarsenDataForRichardsonExtrapolation(
  *************************************************************************
  *
  * Call patch routines to tag cells for refinement using Richardson
- * extrapolation.    Richardson extrapolation requires two copies of
+ * extrapolation. Richardson extrapolation requires two copies of
  * the solution to compare.  The NEW context holds the solution
  * computed on the fine level and coarsened, whereas the CURRENT
  * context holds the solution integrated on the coarse level after
@@ -792,7 +785,7 @@ RungeKuttaLevelIntegrator::applyRichardsonExtrapolation(
  * Initialize level integrator by:
  *
  *   (1) Setting the number of time data levels based on needs of
- *       the gridding algorithm
+ *       the gridding algorithm.
  *   (2) Invoking variable registration in patch strategy.
  *
  *************************************************************************
@@ -870,16 +863,16 @@ RungeKuttaLevelIntegrator::getLevelDt(
              p++)
         {
             const boost::shared_ptr<hier::Patch>& patch = *p;
-      
+            
             patch->allocatePatchData(d_temp_var_scratch_data, dt_time);
-      
+            
             double patch_dt;
             patch_dt = d_patch_strategy->
                 computeStableDtOnPatch(
                     *patch,
                     initial_time,
                     dt_time);
-      
+            
             dt = tbox::MathUtilities<double>::Min(dt, patch_dt);
             //tbox::plog.precision(12);
             //tbox::plog << "Level " << level->getLevelNumber()
@@ -888,7 +881,7 @@ RungeKuttaLevelIntegrator::getLevelDt(
             //           << " has patch_dt " << patch_dt
             //           << " dt " << dt
             //           << std::endl;
-      
+            
             patch->deallocatePatchData(d_temp_var_scratch_data);
         }
      
@@ -932,9 +925,9 @@ RungeKuttaLevelIntegrator::getLevelDt(
             
             patch->deallocatePatchData(d_temp_var_scratch_data);
         }
-     
+        
         d_patch_strategy->clearDataContext();
-     
+        
         /*
          * Copy data from scratch to current and de-allocate scratch storage.
          * This may be excessive here, but seems necessary if the
@@ -1039,7 +1032,7 @@ RungeKuttaLevelIntegrator::getMaxFinerLevelDt(
  *
  *  2c) Advance one single Runge-Kutta step in scratch space and accumulate
  *      hyperbolic fluxs from intermediate fluxes using suitable weights for
- *      hyperbolic flux correction for flux synchronization later.
+ *      hyperbolic flux correction in flux synchronization later.
  *
  *  3) At the end of the loop, interior data is advanced to time = new_time.
  *
@@ -1238,7 +1231,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
      * (6) Initialize all hyperbolic fluxes with zero values
      * (6) Advance solution on all level patches (scratch storage).
      *     In looping over Runge-Kutta steps,
-     *     (6a) Copy data from scatch data to the intermediate data
+     *     (6a) Copy data from scatch data to the intermediate data.
      *          Dirchlet boundary conditions are applied.
      *     (6b) Compute intermediate hyperbolic fluxes of current step.
      *     (6c) Advance one single Runge-Kutta step and accumulate the
@@ -1412,7 +1405,6 @@ RungeKuttaLevelIntegrator::advanceLevel(
                 t_new_advance_bdry_fill_comm->start();
                 d_bdry_sched_advance_new[level_number]->fillData(new_time);
                 t_new_advance_bdry_fill_comm->stop();
-       
             }
             else
             {
@@ -1650,11 +1642,11 @@ RungeKuttaLevelIntegrator::synchronizeNewLevels(
                     fine_level,
                     d_patch_strategy));
             t_sync_initial_create->stop();
-       
+            
             t_sync_initial_comm->start();
             sched->coarsenData();
             t_sync_initial_comm->stop();
-       
+            
             for (hier::PatchLevel::iterator p(coarse_level->begin());
                  p != coarse_level->end();
                  p++)
@@ -2316,7 +2308,8 @@ RungeKuttaLevelIntegrator::registerVariable(
             
             d_hyp_fluxsum_variables.push_back(hyp_fluxsum);
             
-            int fs_id = variable_db->registerVariableAndContext(hyp_fluxsum,
+            int fs_id = variable_db->registerVariableAndContext(
+                hyp_fluxsum,
                 d_scratch,
                 zero_ghosts);
             
@@ -2438,29 +2431,29 @@ RungeKuttaLevelIntegrator::preprocessHyperbolicFluxAndSourceData(
         if (first_step)
         {
             level->allocatePatchData(d_hyp_fluxsum_data, new_time);
-       
+            
             for (hier::PatchLevel::iterator p(level->begin());
                  p != level->end();
                  p++)
             {
                 const boost::shared_ptr<hier::Patch>& patch = *p;
-        
+                
                 std::list<boost::shared_ptr<hier::Variable> >::iterator fs_var =
                     d_hyp_fluxsum_variables.begin();
-        
+                
                 while (fs_var != d_hyp_fluxsum_variables.end())
                 {
                     int fsum_id =
                         variable_db->mapVariableAndContextToIndex(
                             *fs_var,
                             d_scratch);
-         
+                    
                     if (d_hyp_flux_is_face)
                     {
                         boost::shared_ptr<pdat::OuterfaceData<double> > fsum_data(
                             BOOST_CAST<pdat::OuterfaceData<double>, hier::PatchData>(
                                 patch->getPatchData(fsum_id)));
-          
+                        
                         TBOX_ASSERT(fsum_data);
                         fsum_data->fillAll(0.0);
                     }
@@ -2469,11 +2462,11 @@ RungeKuttaLevelIntegrator::preprocessHyperbolicFluxAndSourceData(
                         boost::shared_ptr<pdat::OutersideData<double> > fsum_data(
                             BOOST_CAST<pdat::OutersideData<double>, hier::PatchData>(
                                 patch->getPatchData(fsum_id)));
-          
+                        
                         TBOX_ASSERT(fsum_data);
                         fsum_data->fillAll(0.0);
                     }
-         
+                    
                     fs_var++;
                 }
             }

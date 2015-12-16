@@ -26,7 +26,7 @@ class ConvectiveFluxReconstructor
         ConvectiveFluxReconstructor(
             const std::string& object_name,
             const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geom,
+            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
             const FLOW_MODEL& flow_model,
             const int& num_eqn,
             const int& num_species,
@@ -34,7 +34,7 @@ class ConvectiveFluxReconstructor
             const boost::shared_ptr<tbox::Database>& shock_capturing_scheme_db):
                 d_object_name(object_name),
                 d_dim(dim),
-                d_grid_geometry(grid_geom),
+                d_grid_geometry(grid_geometry),
                 d_num_conv_ghosts(hier::IntVector::getZero(d_dim)),
                 d_num_ghosts(hier::IntVector::getZero(d_dim)),
                 d_flow_model(flow_model),
@@ -48,7 +48,7 @@ class ConvectiveFluxReconstructor
                 d_total_energy(NULL),
                 d_mass_fraction(NULL),
                 d_volume_fraction(NULL),
-                d_set_variables(false)
+                d_variables_set(false)
         {}
         
         /*
@@ -67,11 +67,11 @@ class ConvectiveFluxReconstructor
         void
         setVariablesForSingleSpecies(
             const hier::IntVector& num_ghosts,
-            const boost::shared_ptr<pdat::CellVariable<double> > density,
-            const boost::shared_ptr<pdat::CellVariable<double> > momentum,
-            const boost::shared_ptr<pdat::CellVariable<double> > total_energy,
-            const boost::shared_ptr<pdat::FaceVariable<double> > convective_flux,
-            const boost::shared_ptr<pdat::CellVariable<double> > source)
+            const boost::shared_ptr<pdat::CellVariable<double> >& density,
+            const boost::shared_ptr<pdat::CellVariable<double> >& momentum,
+            const boost::shared_ptr<pdat::CellVariable<double> >& total_energy,
+            const boost::shared_ptr<pdat::FaceVariable<double> >& convective_flux,
+            const boost::shared_ptr<pdat::CellVariable<double> >& source)
         {
             if (d_flow_model != SINGLE_SPECIES)
             {            
@@ -89,7 +89,7 @@ class ConvectiveFluxReconstructor
             d_convective_flux = convective_flux;
             d_source = source;
             
-            d_set_variables = true;
+            d_variables_set = true;
         }
         
         /*
@@ -99,12 +99,12 @@ class ConvectiveFluxReconstructor
         void
         setVariablesForFourEqnShyue(
             const hier::IntVector& num_ghosts,
-            const boost::shared_ptr<pdat::CellVariable<double> > density,
-            const boost::shared_ptr<pdat::CellVariable<double> > momentum,
-            const boost::shared_ptr<pdat::CellVariable<double> > total_energy,
-            const boost::shared_ptr<pdat::CellVariable<double> > mass_fraction,
-            const boost::shared_ptr<pdat::FaceVariable<double> > convective_flux,
-            const boost::shared_ptr<pdat::CellVariable<double> > source)
+            const boost::shared_ptr<pdat::CellVariable<double> >& density,
+            const boost::shared_ptr<pdat::CellVariable<double> >& momentum,
+            const boost::shared_ptr<pdat::CellVariable<double> >& total_energy,
+            const boost::shared_ptr<pdat::CellVariable<double> >& mass_fraction,
+            const boost::shared_ptr<pdat::FaceVariable<double> >& convective_flux,
+            const boost::shared_ptr<pdat::CellVariable<double> >& source)
         {
             if (d_flow_model != FOUR_EQN_SHYUE)
             {            
@@ -123,7 +123,7 @@ class ConvectiveFluxReconstructor
             d_convective_flux = convective_flux;
             d_source = source;
             
-            d_set_variables = true;
+            d_variables_set = true;
         }
         
         /*
@@ -133,12 +133,12 @@ class ConvectiveFluxReconstructor
         void
         setVariablesForFiveEqnAllaire(
             const hier::IntVector& num_ghosts,
-            const boost::shared_ptr<pdat::CellVariable<double> > partial_density,
-            const boost::shared_ptr<pdat::CellVariable<double> > momentum,
-            const boost::shared_ptr<pdat::CellVariable<double> > total_energy,
-            const boost::shared_ptr<pdat::CellVariable<double> > volume_fraction,
-            const boost::shared_ptr<pdat::FaceVariable<double> > convective_flux,
-            const boost::shared_ptr<pdat::CellVariable<double> > source)
+            const boost::shared_ptr<pdat::CellVariable<double> >& partial_density,
+            const boost::shared_ptr<pdat::CellVariable<double> >& momentum,
+            const boost::shared_ptr<pdat::CellVariable<double> >& total_energy,
+            const boost::shared_ptr<pdat::CellVariable<double> >& volume_fraction,
+            const boost::shared_ptr<pdat::FaceVariable<double> >& convective_flux,
+            const boost::shared_ptr<pdat::CellVariable<double> >& source)
         {
             if (d_flow_model != FIVE_EQN_ALLAIRE)
             {            
@@ -157,7 +157,7 @@ class ConvectiveFluxReconstructor
             d_convective_flux = convective_flux;
             d_source = source;
             
-            d_set_variables = true;
+            d_variables_set = true;
         }
         
         /*
@@ -184,7 +184,7 @@ class ConvectiveFluxReconstructor
             const double time,
             const double dt,
             const int RK_step_number,
-            const boost::shared_ptr<hier::VariableContext> data_context) = 0;
+            const boost::shared_ptr<hier::VariableContext>& data_context) = 0;
     
     protected:
         /*
@@ -258,9 +258,9 @@ class ConvectiveFluxReconstructor
         boost::shared_ptr<pdat::CellVariable<double> > d_source;
         
         /*
-         * Boolean to determine where proper variables are initialized.
+         * Boolean to determine whether proper variables are initialized.
          */
-        bool d_set_variables;
+        bool d_variables_set;
 };
 
 #endif /* CONVECTIVE_FLUX_RECONSTRUCTOR_HPP */
