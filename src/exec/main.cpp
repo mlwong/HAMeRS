@@ -533,7 +533,7 @@ int main(int argc, char *argv[])
     {
         iteration_num = time_integrator->getIntegratorStep() + 1;
         
-        // Check whether dt_now is larger than the time interval to next file dumping time.
+        // Check whether dt_now is larger than the time interval to next files dumping time.
         if (viz_dump_setting == "CONSTANT_TIME_INTERVAL")
         {
             if (loop_time + dt_now >= last_viz_dump_time + viz_dump_time_interval - DBL_EPSILON)
