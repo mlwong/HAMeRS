@@ -525,17 +525,28 @@ int main(int argc, char *argv[])
     double loop_time_end = time_integrator->getEndTime();
     double last_viz_dump_time = floor(time_integrator->getIntegratorTime()/viz_dump_time_interval)*
         viz_dump_time_interval;
+    int iteration_num = 0;
     
     tbox::pout << "Start simulation... " << std::endl;
     tbox::pout << std::endl;
     while (loop_time < loop_time_end && time_integrator->stepsRemaining())
     {
-        int iteration_num = time_integrator->getIntegratorStep() + 1;
+        iteration_num = time_integrator->getIntegratorStep() + 1;
+        
+        // Check whether dt_now is larger than the time interval to next file dumping time.
+        if (viz_dump_setting == "CONSTANT_TIME_INTERVAL")
+        {
+            if (loop_time + dt_now >= last_viz_dump_time + viz_dump_time_interval - DBL_EPSILON)
+            {
+                dt_now = last_viz_dump_time + viz_dump_time_interval - loop_time;
+            }
+        }
         
         tbox::pout << "At begining of timestep # " << iteration_num - 1 << std::endl;
         tbox::pout << "Simulation time is " << loop_time << std::endl;
         tbox::pout << "Current dt is " << dt_now << std::endl;
         
+        // Advance the solution.
         double dt_new = time_integrator->advanceHierarchy(dt_now);
         
         loop_time += dt_now;
@@ -544,25 +555,6 @@ int main(int argc, char *argv[])
         tbox::pout << "At end of timestep # " << iteration_num - 1 << std::endl;
         tbox::pout << "Simulation time is " << loop_time << std::endl;
         Euler_model->printDataStatistics(tbox::pout, patch_hierarchy);
-        tbox::pout << "--------------------------------------------------------------------------------";
-        tbox::pout << std::endl;
-        
-        /*
-         * At specified intervals, write restart files.
-         */
-        if (write_restart)
-        {
-            if ((iteration_num % restart_interval) == 0)
-            {
-                t_write_restart->start();
-                
-                tbox::RestartManager::getManager()->
-                    writeRestartFile(restart_write_dirname,
-                                     iteration_num);
-                
-                t_write_restart->stop();
-            }
-        }
         
         /*
          * At specified intervals, write out data files for plotting.
@@ -574,7 +566,7 @@ int main(int argc, char *argv[])
         {
             if (viz_dump_setting == "CONSTANT_TIME_INTERVAL")
             {
-                if (loop_time >= last_viz_dump_time + viz_dump_time_interval)
+                if (fabs(loop_time - (last_viz_dump_time + viz_dump_time_interval)) <= DBL_EPSILON)
                 {
                     t_write_viz->start();
                     
@@ -585,9 +577,9 @@ int main(int argc, char *argv[])
                     
                     t_write_viz->stop();
                     
-                    last_viz_dump_time =
-                        floor(loop_time/viz_dump_time_interval)*
-                            viz_dump_time_interval;
+                    last_viz_dump_time = loop_time;
+                    
+                    tbox::pout << "Files for plotting are written." << std::endl;
                     
                     if ((restart_interval == -1) && !(restart_write_dirname.empty()))
                     {
@@ -598,6 +590,8 @@ int main(int argc, char *argv[])
                                              iteration_num);
                         
                         t_write_restart->stop();
+                        
+                        tbox::pout << "Files for restart are written." << std::endl;
                     }
                 }
             }
@@ -614,6 +608,8 @@ int main(int argc, char *argv[])
                     
                     t_write_viz->stop();
                     
+                    tbox::pout << "Files for plotting are written." << std::endl;
+                    
                     if ((restart_interval == -1) && !(restart_write_dirname.empty()))
                     {
                         t_write_restart->start();
@@ -623,6 +619,8 @@ int main(int argc, char *argv[])
                                              iteration_num);
                         
                         t_write_restart->stop();
+                        
+                        tbox::pout << "Files for restart are written." << std::endl;
                     }
                 }
             }
@@ -634,8 +632,67 @@ int main(int argc, char *argv[])
                     << std::endl); 
             }
         }
+        
+        /*
+         * At specified intervals, write restart files.
+         */
+        if (write_restart)
+        {
+            if ((iteration_num % restart_interval) == 0)
+            {
+                t_write_restart->start();
+                
+                tbox::RestartManager::getManager()->
+                    writeRestartFile(restart_write_dirname,
+                                     iteration_num);
+                
+                t_write_restart->stop();
+            }
+            
+            tbox::pout << "Files for restart are written." << std::endl;
+        }
+        
+        tbox::pout << "--------------------------------------------------------------------------------";
+        tbox::pout << std::endl;
 #endif
     }
+    
+#ifdef HAVE_HDF5
+    if (is_viz_dumping)
+    {
+        if (viz_dump_setting == "CONSTANT_TIME_INTERVAL")
+        {
+            if (fabs(last_viz_dump_time - loop_time_end) > DBL_EPSILON)
+            {
+                t_write_viz->start();
+                
+                visit_data_writer->writePlotData(
+                    patch_hierarchy,
+                    iteration_num,
+                    loop_time);
+                
+                t_write_viz->stop();
+                
+                last_viz_dump_time = loop_time;
+                
+                tbox::pout << "Files for plotting at last time step are written." << std::endl;
+                
+                if ((restart_interval == -1) && !(restart_write_dirname.empty()))
+                {
+                    t_write_restart->start();
+                    
+                    tbox::RestartManager::getManager()->
+                        writeRestartFile(restart_write_dirname,
+                                         iteration_num);
+                    
+                    t_write_restart->stop();
+                    
+                    tbox::pout << "Files for restart at last time step are written." << std::endl;
+                }
+            }
+        }
+    }
+#endif
     
     tbox::plog << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
     tbox::plog << std::endl;
