@@ -266,6 +266,8 @@ InitialConditions::initializeDataOnPatch(
                         const double v_post = 0.0;
                         
                         // Pre-shock condition.
+                        const double rho_pre = 1.0;
+                        const double p_pre = 1.0/gamma;
                         const double u_pre = -1.2;
                         const double v_pre = 0.0;
                         
@@ -292,18 +294,30 @@ InitialConditions::initializeDataOnPatch(
                                 else
                                 {
                                     double r = sqrt(pow(x[0] - x_v[0], 2) + pow(x[1] - x_v[1], 2));
-                                    double p = 1.0/(gamma)*pow((1.0 - 0.5*(gamma - 1.0)*M_v*M_v*exp(1 - pow(r/R, 2))),
-                                                              gamma/(gamma - 1));
-                                    double u = u_pre - M_v*exp(0.5*(1 - pow(r/R, 2)))*(x[1] - x_v[1]);
-                                    double v = v_pre + M_v*exp(0.5*(1 - pow(r/R, 2)))*(x[0] - x_v[0]);
                                     
-                                    
-                                    rho[idx_cell] = pow((1.0 - 0.5*(gamma - 1.0)*M_v*M_v*exp(1 - pow(r/R, 2))),
-                                                         1.0/(gamma - 1));
-                                    rho_u[idx_cell] = rho[idx_cell]*u;
-                                    rho_v[idx_cell] = rho[idx_cell]*v;
-                                    E[idx_cell] = p/(gamma - 1.0) +
-                                        0.5*rho[idx_cell]*(u*u + v*v);
+                                    if (r > 4)
+                                    {
+                                        rho[idx_cell]   = rho_pre;
+                                        rho_u[idx_cell] = rho_pre*u_pre;
+                                        rho_v[idx_cell] = rho_pre*v_pre;
+                                        E[idx_cell]     = p_pre/(gamma - 1.0) +
+                                            0.5*rho_pre*(u_pre*u_pre + v_pre*v_pre);
+                                    }
+                                    else
+                                    {
+                                        double p = 1.0/(gamma)*pow((1.0 - 0.5*(gamma - 1.0)*M_v*M_v*exp(1 - pow(r/R, 2))),
+                                                                  gamma/(gamma - 1));
+                                        double u = u_pre - M_v*exp(0.5*(1 - pow(r/R, 2)))*(x[1] - x_v[1]);
+                                        double v = v_pre + M_v*exp(0.5*(1 - pow(r/R, 2)))*(x[0] - x_v[0]);
+                                        
+                                        
+                                        rho[idx_cell] = pow((1.0 - 0.5*(gamma - 1.0)*M_v*M_v*exp(1 - pow(r/R, 2))),
+                                                             1.0/(gamma - 1));
+                                        rho_u[idx_cell] = rho[idx_cell]*u;
+                                        rho_v[idx_cell] = rho[idx_cell]*v;
+                                        E[idx_cell] = p/(gamma - 1.0) +
+                                            0.5*rho[idx_cell]*(u*u + v*v);
+                                    }
                                 }
                             }
                         }
