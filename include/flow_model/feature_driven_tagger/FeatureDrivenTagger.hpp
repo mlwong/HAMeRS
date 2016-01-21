@@ -190,11 +190,10 @@ class FeatureDrivenTagger
          */
         std::vector<std::string> d_refinement_criteria;
         
-        double d_shock_Jameson_tol;
+        double d_density_Jameson_tol;
+        double d_pressure_Jameson_tol;
         double d_shock_Ducros_tol;
         double d_shock_Larsson_tol;
-        
-        double d_density_Jameson_tol;
         
         double d_vorticity_Q_criterion_tol;
 };

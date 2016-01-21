@@ -236,6 +236,78 @@ InitialConditions::initializeDataOnPatch(
                             }
                         }
                     }
+                    else if (d_project_name == "2D shock-vortex interaction")
+                    {
+                        // Initialize data for a 2D shock-vortex interaction problem.
+                        double* rho   = density->getPointer(0);
+                        double* rho_u = momentum->getPointer(0);
+                        double* rho_v = momentum->getPointer(1);
+                        double* E     = total_energy->getPointer(0);
+                        
+                        double gamma = d_equation_of_state->getSpeciesThermodynamicProperty(
+                            "gamma",
+                            0);
+                        
+                        // Vortex strength.
+                        const double M_v = 0.25;
+                        
+                        // Vortex radius.
+                        const double R = 1.0;
+                        
+                        // Vortex center.
+                        double x_v[2];
+                        x_v[0] = 4.0;
+                        x_v[1] = 0.0;
+                        
+                        // Post-shock condition.
+                        const double rho_post = 1.34161490;
+                        const double p_post = 1.51333333/gamma;
+                        const double u_post = -0.89444445;
+                        const double v_post = 0.0;
+                        
+                        // Pre-shock condition.
+                        const double u_pre = -1.2;
+                        const double v_pre = 0.0;
+                        
+                        for (int j = 0; j < patch_dims[1]; j++)
+                        {
+                            for (int i = 0; i < patch_dims[0]; i++)
+                            {
+                                // Compute index into linear data array.
+                                int idx_cell = i + j*patch_dims[0];
+                                
+                                // Compute the coordinates.
+                                double x[2];
+                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                
+                                if (x[0] < 0)
+                                {
+                                    rho[idx_cell]     = rho_post;
+                                    rho_u[idx_cell]   = rho_post*u_post;
+                                    rho_v[idx_cell]   = rho_post*v_post;
+                                    E[idx_cell]       = p_post/(gamma - 1.0) +
+                                        0.5*rho_post*(u_post*u_post + v_post*v_post);
+                                }
+                                else
+                                {
+                                    double r = sqrt(pow(x[0] - x_v[0], 2) + pow(x[1] - x_v[1], 2));
+                                    double p = 1.0/(gamma)*pow((1.0 - 0.5*(gamma - 1.0)*M_v*M_v*exp(1 - pow(r/R, 2))),
+                                                              gamma/(gamma - 1));
+                                    double u = u_pre - M_v*exp(0.5*(1 - pow(r/R, 2)))*(x[1] - x_v[1]);
+                                    double v = v_pre + M_v*exp(0.5*(1 - pow(r/R, 2)))*(x[0] - x_v[0]);
+                                    
+                                    
+                                    rho[idx_cell] = pow((1.0 - 0.5*(gamma - 1.0)*M_v*M_v*exp(1 - pow(r/R, 2))),
+                                                         1.0/(gamma - 1));
+                                    rho_u[idx_cell] = rho[idx_cell]*u;
+                                    rho_v[idx_cell] = rho[idx_cell]*v;
+                                    E[idx_cell] = p/(gamma - 1.0) +
+                                        0.5*rho[idx_cell]*(u*u + v*v);
+                                }
+                            }
+                        }
+                    }
                     else
                     {
                         TBOX_ERROR(d_object_name
