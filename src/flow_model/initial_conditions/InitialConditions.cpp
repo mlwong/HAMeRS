@@ -249,7 +249,7 @@ InitialConditions::initializeDataOnPatch(
                             0);
                         
                         // Vortex strength.
-                        const double M_v = 0.25;
+                        const double M_v = 1.0;
                         
                         // Vortex radius.
                         const double R = 1.0;
@@ -306,13 +306,13 @@ InitialConditions::initializeDataOnPatch(
                                     else
                                     {
                                         double p = 1.0/(gamma)*pow((1.0 - 0.5*(gamma - 1.0)*M_v*M_v*exp(1 - pow(r/R, 2))),
-                                                                  gamma/(gamma - 1));
+                                                                  gamma/(gamma - 1.0));
                                         double u = u_pre - M_v*exp(0.5*(1 - pow(r/R, 2)))*(x[1] - x_v[1]);
                                         double v = v_pre + M_v*exp(0.5*(1 - pow(r/R, 2)))*(x[0] - x_v[0]);
                                         
                                         
                                         rho[idx_cell] = pow((1.0 - 0.5*(gamma - 1.0)*M_v*M_v*exp(1 - pow(r/R, 2))),
-                                                             1.0/(gamma - 1));
+                                                             1.0/(gamma - 1.0));
                                         rho_u[idx_cell] = rho[idx_cell]*u;
                                         rho_v[idx_cell] = rho[idx_cell]*v;
                                         E[idx_cell] = p/(gamma - 1.0) +
