@@ -30,12 +30,12 @@ $ cmake ..
 $ make
 
 
-To run the code, you need to provide the input file. For instance:
+To run the code, you need to provide the input file:
 
 $ src/exec/main <input filename>
 
 
-To run in parallel, you need OpenMPI/MPI. For example:
+To run the code in parallel, you need OpenMPI/MPI. You can try mpirun:
 
 $ mpirun -np 8 src/exec/main <input filename>
 
