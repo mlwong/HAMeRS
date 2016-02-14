@@ -4,7 +4,7 @@
 
 HOAMR (High-Order Adaptive Mesh Refinement) is a compressible Navier-Stokes/Euler solver with the AMR (Adaptive Mesh Refinement) technique. The parallelization of the code and all the construction, management and storage of cells are facilitated by the SAMRAI (Structured Adaptive Mesh Refinement Application Infrastructure) library from the Lawrence Livermore National Lab (computation.llnl.gov/project/SAMRAI/).
 
-The code consists of a choice of explicit WCNS (Weighted Compact Nonlinear Scheme) and WENO (Weighted Essentially Non-Oscillatory) high-order shock-capturing schemes for simulating shock waves, material interfaces, and turbulent features. The AMR algorithm implemented is based on the algorithm developed by Berger et al. The figure below summarizes the algorithm:
+The code consists of the explicit WCNS (Weighted Compact Nonlinear Scheme) and WENO (Weighted Essentially Non-Oscillatory) high-order shock-capturing schemes for simulating shock waves, material interfaces, and turbulent features. The AMR algorithm implemented is based on the algorithm developed by Berger et al. The figure below summarizes the algorithm:
 ![AMR_flowchart2.png](https://bitbucket.org/repo/zzaMX8/images/1812954715-AMR_flowchart2.png)
 
 ### How do I get set up? ###
