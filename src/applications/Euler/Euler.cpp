@@ -74,8 +74,10 @@ Euler::Euler(
         d_Euler_boundary_conditions(NULL),
         d_Euler_boundary_conditions_db(NULL),
         d_Euler_boundary_conditions_db_is_from_restart(false),
-        d_feature_driven_tagger(NULL),
-        d_feature_driven_tagger_db(NULL),
+        d_gradient_tagger(NULL),
+        d_gradient_tagger_db(NULL),
+        d_multiresolution_tagger(NULL),
+        d_multiresolution_tagger_db(NULL),
         d_flow_model_manager(NULL),
         d_is_preserving_positivity(false)
 {
@@ -214,17 +216,32 @@ Euler::Euler(
         d_Euler_boundary_conditions);
     
     /*
-     * Initialize d_feature_driven_tagger.
+     * Initialize d_gradient_tagger.
      */
-    if (d_feature_driven_tagger_db != nullptr)
+    if (d_gradient_tagger_db != nullptr)
     {
-        d_flow_model_manager->initializeFeatureDrivenTagger(
-            d_feature_driven_tagger_db,
-            d_feature_driven_tagger);
+        d_flow_model_manager->initializeGradientTagger(
+            d_gradient_tagger_db,
+            d_gradient_tagger);
     }
     
     /*
-     * Get the number of ghost cells needed.
+     * Initialize d_multiresolution_tagger.
+     */
+    if (d_multiresolution_tagger_db != nullptr)
+    {
+        d_flow_model_manager->initializeMultiresolutionTagger(
+            d_multiresolution_tagger_db,
+            d_multiresolution_tagger);
+    }
+
+    /*
+     * Set the number of ghost cells needed.
+     */
+    d_flow_model_manager->setNumberOfGhostCells();
+    
+    /*
+     * Get the number of ghost cells needed from the flow manager.
      */
     d_num_ghosts = d_flow_model_manager->
         getNumberOfGhostCells();
@@ -274,6 +291,11 @@ Euler::registerModelVariables(
         "NO_COARSEN",
         "NO_REFINE");
     
+    /*
+     * Register the temporary variables used in refinement taggers.
+     */
+    d_flow_model_manager->registerRefinementTaggerVariables(integrator);
+
     /*
      * Set the plotting context.
      */
@@ -1078,6 +1100,45 @@ Euler::synchronizeHyperbolicFluxes(
 }
 
 
+/*
+ * Compute the gradient using gradient detector.
+ */
+void
+Euler::preprocessTagGradientDetectorCells(
+   const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+   const int level_number,
+   const double regrid_time,
+   const bool initial_error,
+   const bool uses_richardson_extrapolation_too)
+{
+    NULL_USE(regrid_time);
+    NULL_USE(initial_error);
+    NULL_USE(uses_richardson_extrapolation_too);
+    
+    if (d_multiresolution_tagger != nullptr)
+    {
+        boost::shared_ptr<hier::PatchLevel> level(
+            patch_hierarchy->getPatchLevel(level_number));
+        
+        for (hier::PatchLevel::iterator ip(level->begin());
+             ip != level->end();
+             ip++)
+        {
+            const boost::shared_ptr<hier::Patch>& patch = *ip;
+            
+            d_multiresolution_tagger->computeMultiresolutionSensorValues(
+                *patch,
+                getDataContext());
+        }
+        
+        d_multiresolution_tagger->getSensorValueStatistics(
+            patch_hierarchy,
+            level_number,
+            getDataContext());
+    }
+}
+
+
 void
 Euler::tagGradientDetectorCells(
     hier::Patch& patch,
@@ -1101,14 +1162,29 @@ Euler::tagGradientDetectorCells(
     // Initialize values of all tags to zero.
     tags->fillAll(0.0);
     
-    // Tag the cells by using d_feature_driven_tagger.
-    d_feature_driven_tagger->tagCells(
-        patch,
-        regrid_time,
-        initial_error,
-        uses_richardson_extrapolation_too,
-        tags,
-        getDataContext());
+    // Tag the cells by using d_gradient_tagger.
+    if (d_gradient_tagger != nullptr)
+    {
+        d_gradient_tagger->tagCells(
+            patch,
+            regrid_time,
+            initial_error,
+            uses_richardson_extrapolation_too,
+            tags,
+            getDataContext());
+    }
+    
+    // Tag the cells by using d_multiresolution_tagger.
+    if (d_multiresolution_tagger != nullptr)
+    {
+        d_multiresolution_tagger->tagCells(
+            patch,
+            regrid_time,
+            initial_error,
+            uses_richardson_extrapolation_too,
+            tags,
+            getDataContext());
+    }
     
     t_taggradient->stop();
 }
@@ -1164,10 +1240,21 @@ Euler::putToRestart(
     
     d_Euler_boundary_conditions->putToRestart(restart_Euler_boundary_conditions_db);
     
-    boost::shared_ptr<tbox::Database> restart_feature_driven_tagger_db =
-        restart_db->putDatabase("Feature_driven_tagger");
+    if (d_gradient_tagger != nullptr)
+    {
+        boost::shared_ptr<tbox::Database> restart_gradient_tagger_db =
+            restart_db->putDatabase("Gradient_tagger");
+        
+        d_gradient_tagger->putToRestart(restart_gradient_tagger_db);
+    }
     
-    d_feature_driven_tagger->putToRestart(restart_feature_driven_tagger_db);
+    if (d_multiresolution_tagger != nullptr)
+    {
+        boost::shared_ptr<tbox::Database> restart_multiresolution_tagger_db =
+            restart_db->putDatabase("Multiresolution_tagger");
+        
+        d_multiresolution_tagger->putToRestart(restart_multiresolution_tagger_db);
+    }
 }
 
 
@@ -1426,10 +1513,16 @@ Euler::getFromInput(
                        << std::endl);
         }
         
-        if (input_db->keyExists("Feature_driven_tagger"))
+        if (input_db->keyExists("Gradient_tagger"))
         {
-            d_feature_driven_tagger_db =
-                input_db->getDatabase("Feature_driven_tagger");
+            d_gradient_tagger_db =
+                input_db->getDatabase("Gradient_tagger");
+        }
+        
+        if (input_db->keyExists("Multiresolution_tagger"))
+        {
+            d_multiresolution_tagger_db =
+                input_db->getDatabase("Multiresolution_tagger");
         }
     }
     
@@ -1504,9 +1597,14 @@ void Euler::getFromRestart()
     
     d_Euler_boundary_conditions_db_is_from_restart = true;
     
-    if (db->keyExists("Feature_driven_tagger"))
+    if (db->keyExists("Gradient_tagger"))
     {
-        d_feature_driven_tagger_db = db->getDatabase("Feature_driven_tagger");
+        d_gradient_tagger_db = db->getDatabase("Gradient_tagger");
+    }
+    
+    if (db->keyExists("Multiresolution_tagger"))
+    {
+        d_multiresolution_tagger_db = db->getDatabase("Multiresolution_tagger");
     }
 }
 

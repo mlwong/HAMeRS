@@ -280,6 +280,33 @@ class RungeKuttaPatchStrategy:
            const bool uses_richardson_extrapolation_too);
         
         /**
+         * This is an optional routine for user to process any application-specific
+         * patch strategy data BEFORE cells are tagged on the given level using
+         * gradient detector.
+         */
+        virtual void
+        preprocessTagGradientDetectorCells(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const int level_number,
+            const double regrid_time,
+            const bool initial_error,
+            const bool uses_richardson_extrapolation_too);
+        
+        /**
+         * This is an optional routine for user to process any application-specific
+         * patch strategy data AFTER cells are tagged on the given level using
+         * gradient detector.
+         */
+        virtual void
+        postprocessTagGradientDetectorCells(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const int level_number,
+            const double regrid_time,
+            const bool initial_error,
+            const bool uses_richardson_extrapolation_too);
+        
+        
+        /**
          * Tag cells based from differences computed in the Richardson
          * extrapolation.  The Richardson
          * extrapolation algorithm creates a coarsened version of some hierarchy

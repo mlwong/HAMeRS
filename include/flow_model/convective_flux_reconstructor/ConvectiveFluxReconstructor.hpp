@@ -48,7 +48,8 @@ class ConvectiveFluxReconstructor
                 d_total_energy(NULL),
                 d_mass_fraction(NULL),
                 d_volume_fraction(NULL),
-                d_variables_set(false)
+                d_variables_set(false),
+                d_num_ghosts_set(false)
         {}
         
         /*
@@ -62,11 +63,21 @@ class ConvectiveFluxReconstructor
         }
         
         /*
+         * Set the number of ghost cells needed.
+         */
+        void
+        setNumberOfGhostCells(const hier::IntVector& num_ghosts)
+        {
+            d_num_ghosts = num_ghosts;
+            
+            d_num_ghosts_set = true;
+        }
+        
+        /*
          * Set the cell variables if single-species flow model is chosen.
          */
         void
         setVariablesForSingleSpecies(
-            const hier::IntVector& num_ghosts,
             const boost::shared_ptr<pdat::CellVariable<double> >& density,
             const boost::shared_ptr<pdat::CellVariable<double> >& momentum,
             const boost::shared_ptr<pdat::CellVariable<double> >& total_energy,
@@ -80,8 +91,6 @@ class ConvectiveFluxReconstructor
                            << "setVariablesForSingleSpecies() shouldn't be used."
                            << std::endl);
             }
-            
-            d_num_ghosts = num_ghosts;
             
             d_density = density;
             d_momentum = momentum;
@@ -98,7 +107,6 @@ class ConvectiveFluxReconstructor
          */
         void
         setVariablesForFourEqnShyue(
-            const hier::IntVector& num_ghosts,
             const boost::shared_ptr<pdat::CellVariable<double> >& density,
             const boost::shared_ptr<pdat::CellVariable<double> >& momentum,
             const boost::shared_ptr<pdat::CellVariable<double> >& total_energy,
@@ -113,8 +121,6 @@ class ConvectiveFluxReconstructor
                            << "setVariablesForFourEqnShyue() shouldn't be used."
                            << std::endl);
             }
-            
-            d_num_ghosts = num_ghosts;
             
             d_density = density;
             d_momentum = momentum;
@@ -132,7 +138,6 @@ class ConvectiveFluxReconstructor
          */
         void
         setVariablesForFiveEqnAllaire(
-            const hier::IntVector& num_ghosts,
             const boost::shared_ptr<pdat::CellVariable<double> >& partial_density,
             const boost::shared_ptr<pdat::CellVariable<double> >& momentum,
             const boost::shared_ptr<pdat::CellVariable<double> >& total_energy,
@@ -147,8 +152,6 @@ class ConvectiveFluxReconstructor
                            << "setVariablesForFiveEqnAllaire() shouldn't be used."
                            << std::endl);
             }
-            
-            d_num_ghosts = num_ghosts;
             
             d_partial_density = partial_density;
             d_momentum = momentum;
@@ -261,6 +264,11 @@ class ConvectiveFluxReconstructor
          * Boolean to determine whether proper variables are initialized.
          */
         bool d_variables_set;
+        
+        /*
+         * Boolean to determine whether the number of ghost cells is initialized.
+         */
+        bool d_num_ghosts_set;
 };
 
 #endif /* CONVECTIVE_FLUX_RECONSTRUCTOR_HPP */

@@ -2,6 +2,8 @@
 
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 
+#define EPSILON 1e-40
+
 ConvectiveFluxReconstructorWENO_JS5_LLF::ConvectiveFluxReconstructorWENO_JS5_LLF(
     const std::string& object_name,
     const tbox::Dimension& dim,
@@ -61,6 +63,9 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::printClassData(
     os << "d_variables_set = "
        << d_variables_set
        << std::endl;
+    os << "d_num_ghosts_set = "
+       << d_num_ghosts_set
+       << std::endl;
 }
 
 
@@ -92,422 +97,127 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::computeConvectiveFluxesAndSources(
     
     if (d_variables_set == true)
     {
-        // Get the dimensions of box that covers the interior of patch.
-        hier::Box dummy_box = patch.getBox();
-        const hier::Box interior_box = dummy_box;
-        const hier::IntVector interior_dims = interior_box.numberCells();
-        
-        // Get the dimensions of box that covers interior of patch plus
-        // ghost cells.
-        dummy_box.grow(d_num_ghosts);
-        const hier::Box ghost_box = dummy_box;
-        const hier::IntVector ghostcell_dims = ghost_box.numberCells();
-        
-        switch (d_flow_model)
+        if (d_num_ghosts_set == true)
         {
-            case SINGLE_SPECIES:
+            // Get the dimensions of box that covers the interior of patch.
+            hier::Box dummy_box = patch.getBox();
+            const hier::Box interior_box = dummy_box;
+            const hier::IntVector interior_dims = interior_box.numberCells();
+            
+            // Get the dimensions of box that covers interior of patch plus
+            // ghost cells.
+            dummy_box.grow(d_num_ghosts);
+            const hier::Box ghost_box = dummy_box;
+            const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+            
+            switch (d_flow_model)
             {
-                if (d_equation_of_state->getLabel() == IDEAL_GAS)
+                case SINGLE_SPECIES:
                 {
-                    // Get the cell data of the time-dependent variables.
-                    boost::shared_ptr<pdat::CellData<double> > density(
-                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_density, data_context)));
-                    
-                    boost::shared_ptr<pdat::CellData<double> > momentum(
-                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_momentum, data_context)));
-                    
-                    boost::shared_ptr<pdat::CellData<double> > total_energy(
-                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_total_energy, data_context)));
-                    
-                    boost::shared_ptr<pdat::FaceData<double> > convective_flux(
-                        BOOST_CAST<pdat::FaceData<double>, hier::PatchData>(
-                            patch.getPatchData(d_convective_flux, data_context)));
-                    
+                    if (d_equation_of_state->getLabel() == IDEAL_GAS)
+                    {
+                        // Get the cell data of the time-dependent variables.
+                        boost::shared_ptr<pdat::CellData<double> > density(
+                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                patch.getPatchData(d_density, data_context)));
+                        
+                        boost::shared_ptr<pdat::CellData<double> > momentum(
+                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                patch.getPatchData(d_momentum, data_context)));
+                        
+                        boost::shared_ptr<pdat::CellData<double> > total_energy(
+                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                patch.getPatchData(d_total_energy, data_context)));
+                        
+                        boost::shared_ptr<pdat::FaceData<double> > convective_flux(
+                            BOOST_CAST<pdat::FaceData<double>, hier::PatchData>(
+                                patch.getPatchData(d_convective_flux, data_context)));
+                        
 #ifdef DEBUG_CHECK_ASSERTIONS
-                    TBOX_ASSERT(density);
-                    TBOX_ASSERT(momentum);
-                    TBOX_ASSERT(total_energy);
-                    TBOX_ASSERT(convective_flux);
-                    
-                    TBOX_ASSERT(density->getGhostCellWidth() == d_num_ghosts);
-                    TBOX_ASSERT(momentum->getGhostCellWidth() == d_num_ghosts);
-                    TBOX_ASSERT(total_energy->getGhostCellWidth() == d_num_ghosts);
-                    TBOX_ASSERT(convective_flux->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
+                        TBOX_ASSERT(density);
+                        TBOX_ASSERT(momentum);
+                        TBOX_ASSERT(total_energy);
+                        TBOX_ASSERT(convective_flux);
+                        
+                        TBOX_ASSERT(density->getGhostCellWidth() == d_num_ghosts);
+                        TBOX_ASSERT(momentum->getGhostCellWidth() == d_num_ghosts);
+                        TBOX_ASSERT(total_energy->getGhostCellWidth() == d_num_ghosts);
+                        TBOX_ASSERT(convective_flux->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
 #endif
-                    
-                    // Allocate temporary patch data.
-                    boost::shared_ptr<pdat::CellData<double> > velocity(
-                        new pdat::CellData<double>(interior_box, d_dim.getValue(), d_num_ghosts));
-                    
-                    boost::shared_ptr<pdat::CellData<double> > pressure(
-                        new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
-                    
-                    boost::shared_ptr<pdat::CellData<double> > sound_speed(
-                        new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
-                    
-                    boost::shared_ptr<pdat::CellData<double> > total_specific_enthalpy(
-                        new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
-                    
-                    std::vector<boost::shared_ptr<pdat::CellData<double> > > convective_flux_node;
-                    for (int di = 0; di < d_dim.getValue(); di++)
-                    {
-                        convective_flux_node.push_back(boost::make_shared<pdat::CellData<double> >(
-                            interior_box, d_num_eqn, d_num_ghosts));
-                    }
-                    
-                    std::vector<boost::shared_ptr<pdat::CellData<double> > > wave_speed;
-                    for (int di = 0; di < d_dim.getValue(); di++)
-                    {
-                        wave_speed.push_back(boost::make_shared<pdat::CellData<double> >(
-                            interior_box, d_num_eqn, d_num_ghosts));
-                    }
-                    
-                    boost::shared_ptr<pdat::FaceData<double> > projection_matrix(
-                    new pdat::FaceData<double>(
-                        interior_box,
-                        d_num_eqn*d_num_eqn,
-                        hier::IntVector::getZero(d_dim)));
-                    
-                    boost::shared_ptr<pdat::FaceData<double> > projection_matrix_inv(
+                        
+                        // Allocate temporary patch data.
+                        boost::shared_ptr<pdat::CellData<double> > velocity(
+                            new pdat::CellData<double>(interior_box, d_dim.getValue(), d_num_ghosts));
+                        
+                        boost::shared_ptr<pdat::CellData<double> > pressure(
+                            new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+                        
+                        boost::shared_ptr<pdat::CellData<double> > sound_speed(
+                            new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+                        
+                        boost::shared_ptr<pdat::CellData<double> > total_specific_enthalpy(
+                            new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+                        
+                        std::vector<boost::shared_ptr<pdat::CellData<double> > > convective_flux_node;
+                        for (int di = 0; di < d_dim.getValue(); di++)
+                        {
+                            convective_flux_node.push_back(boost::make_shared<pdat::CellData<double> >(
+                                interior_box, d_num_eqn, d_num_ghosts));
+                        }
+                        
+                        std::vector<boost::shared_ptr<pdat::CellData<double> > > wave_speed;
+                        for (int di = 0; di < d_dim.getValue(); di++)
+                        {
+                            wave_speed.push_back(boost::make_shared<pdat::CellData<double> >(
+                                interior_box, d_num_eqn, d_num_ghosts));
+                        }
+                        
+                        boost::shared_ptr<pdat::FaceData<double> > projection_matrix(
                         new pdat::FaceData<double>(
                             interior_box,
                             d_num_eqn*d_num_eqn,
                             hier::IntVector::getZero(d_dim)));
-                    
-                    if (d_dim == tbox::Dimension(1))
-                    {
-                        // Get the arrays of time-dependent variables.
-                        double* rho   = density->getPointer(0);
-                        double* rho_u = momentum->getPointer(0);
-                        double* E     = total_energy->getPointer(0);
                         
-                        // Get the arrays of temporary patch data.
-                        double* u     = velocity->getPointer(0);
-                        double* p     = pressure->getPointer(0);
-                        double* c     = sound_speed->getPointer(0);
-                        double* H     = total_specific_enthalpy->getPointer(0);
-                        std::vector<double*> F_x_node;
-                        for (int ei = 0; ei < d_num_eqn; ei++)
-                        {
-                            F_x_node.push_back(convective_flux_node[0]->getPointer(ei));
-                        }
-                        std::vector<double*> lambda_x;
-                        for (int ei = 0; ei < d_num_eqn; ei++)
-                        {
-                            lambda_x.push_back(wave_speed[0]->getPointer(ei));
-                        }
+                        boost::shared_ptr<pdat::FaceData<double> > projection_matrix_inv(
+                            new pdat::FaceData<double>(
+                                interior_box,
+                                d_num_eqn*d_num_eqn,
+                                hier::IntVector::getZero(d_dim)));
                         
-                        // Compute the field of velocities, pressure, sound speed, total specific enthalpy, wave speeds
-                        // and fluxes.
-                        for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                        if (d_dim == tbox::Dimension(1))
                         {
-                            // Compute index into linear data array.
-                            const int idx = i + d_num_ghosts[0];
+                            // Get the arrays of time-dependent variables.
+                            double* rho   = density->getPointer(0);
+                            double* rho_u = momentum->getPointer(0);
+                            double* E     = total_energy->getPointer(0);
                             
-                            u[idx] = rho_u[idx]/rho[idx];
-                            
-                            std::vector<const double*> m_ptr;
-                            m_ptr.push_back(&rho_u[idx]);
-                            
-                            p[idx] = d_equation_of_state->
-                                getPressure(
-                                    &rho[idx],
-                                    m_ptr,
-                                    &E[idx]);
-                            
-                            c[idx] = d_equation_of_state->
-                                getSoundSpeedWithPressure(
-                                    &rho[idx],
-                                    &p[idx]);
-                            
-                            H[idx] = (E[idx] + p[idx])/rho[idx];
-                            
-                            F_x_node[0][idx] = rho_u[idx];
-                            F_x_node[1][idx] = rho_u[idx]*u[idx] + p[idx];
-                            F_x_node[2][idx] = u[idx]*(E[idx] + p[idx]);
-                            
-                            lambda_x[0][idx] = u[idx] - c[idx];
-                            lambda_x[1][idx] = u[idx];
-                            lambda_x[2][idx] = u[idx] + c[idx];
-                        }
-                        
-                        /*
-                         * Compute the projection matrix and its inverse at the face normal to the
-                         * x direction.
-                         */
-                        for (int i = 0; i < interior_dims[0] + 1; i++)
-                        {
-                            // Compute the indices of left cell, right cell and face of
-                            // projection matrix.
-                            const int idx_cell_L = i - 1 + d_num_ghosts[0];
-                            
-                            const int idx_cell_R = i + d_num_ghosts[0];
-                            
-                            const int idx_face_x = i;
-                            
-                            // Get left and right quantities.
-                            const double& u_L = u[idx_cell_L];
-                            const double& u_R = u[idx_cell_R];
-                            
-                            const double& c_L = c[idx_cell_L];
-                            const double& c_R = c[idx_cell_R];
-                            
-                            const double& H_L = H[idx_cell_L];
-                            const double& H_R = H[idx_cell_R];
-                            
-                            // Compute simply-averaged quantities.
-                            const double u_average = 0.5*(u_L + u_R);
-                            const double c_average = 0.5*(c_L + c_R);
-                            const double H_average = 0.5*(H_L + H_R);
-                            
-                            boost::multi_array<double*, 2> R_x_intercell(
-                                boost::extents[d_num_eqn][d_num_eqn]);
-                            
-                            boost::multi_array<double*, 2> R_x_inv_intercell(
-                                boost::extents[d_num_eqn][d_num_eqn]);
-                            
+                            // Get the arrays of temporary patch data.
+                            double* u     = velocity->getPointer(0);
+                            double* p     = pressure->getPointer(0);
+                            double* c     = sound_speed->getPointer(0);
+                            double* H     = total_specific_enthalpy->getPointer(0);
+                            std::vector<double*> F_x_node;
                             for (int ei = 0; ei < d_num_eqn; ei++)
                             {
-                                for (int ej = 0; ej < d_num_eqn; ej++)
-                                {
-                                    R_x_intercell[ei][ej] =
-                                        &(projection_matrix_inv->getPointer(0, ei + ej*d_num_eqn)[idx_face_x]);
-                                    
-                                    R_x_inv_intercell[ei][ej] =
-                                        &(projection_matrix->getPointer(0, ei + ej*d_num_eqn)[idx_face_x]);
-                                }
+                                F_x_node.push_back(convective_flux_node[0]->getPointer(ei));
                             }
-                            
-                            *R_x_intercell[0][0] = 1.0;
-                            *R_x_intercell[0][1] = 1.0;
-                            *R_x_intercell[0][2] = 1.0;
-                            *R_x_intercell[1][0] = u_average - c_average;
-                            *R_x_intercell[1][1] = u_average;
-                            *R_x_intercell[1][2] = u_average + c_average;
-                            *R_x_intercell[2][0] = H_average - u_average*c_average;
-                            *R_x_intercell[2][1] = 0.5*u_average*u_average;
-                            *R_x_intercell[2][2] = H_average + u_average*c_average;
-                            
-                            const double gamma = d_equation_of_state->
-                                getSpeciesThermodynamicProperty(
-                                    "gamma",
-                                    0);
-                            const double b_1 = (gamma - 1.0)/(c_average*c_average);
-                            const double b_2 = 0.5*u_average*u_average*b_1;
-                            
-                            *R_x_inv_intercell[0][0] = 0.5*(b_2 + u_average/c_average);
-                            *R_x_inv_intercell[0][1] = -0.5*(b_1*u_average + 1.0/c_average);
-                            *R_x_inv_intercell[0][2] = 0.5*b_1;
-                            *R_x_inv_intercell[1][0] = 1.0 - b_2;
-                            *R_x_inv_intercell[1][1] = b_1*u_average;
-                            *R_x_inv_intercell[1][2] = -b_1;
-                            *R_x_inv_intercell[2][0] = 0.5*(b_2 - u_average/c_average);
-                            *R_x_inv_intercell[2][1] = 0.5*(-b_1*u_average + 1.0/c_average);
-                            *R_x_inv_intercell[2][2] = 0.5*b_1;
-                        }
-                        
-                        // Compute the fluxes in the x direction.
-                        for (int i = 0; i < interior_dims[0] + 1; i++)
-                        {
-                            // Compute the indices of left cell, right cell and face.
-                            const int idx_cell_L = i - 1 + d_num_ghosts[0];
-                            
-                            const int idx_cell_R = i + d_num_ghosts[0];
-                        
-                            const int idx_face_x = i;
-                            
-                            /*
-                             * Compute the maximum wave speed of each equation locally.
-                             */
-                            
-                            std::vector<double> alpha_x;
+                            std::vector<double*> lambda_x;
                             for (int ei = 0; ei < d_num_eqn; ei++)
                             {
-                                alpha_x.push_back(fmax(fabs(lambda_x[ei][idx_cell_L]),
-                                    fabs(lambda_x[ei][idx_cell_R])));
+                                lambda_x.push_back(wave_speed[0]->getPointer(ei));
                             }
                             
-                            boost::multi_array<double, 2> G_x_plus_array(
-                                boost::extents[6][d_num_eqn]);
-                            
-                            boost::multi_array<double, 2> G_x_minus_array(
-                                boost::extents[6][d_num_eqn]);
-                            
-                            /*
-                             * Project fluxes onto characteristic fields.
-                             */
-                            
-                            boost::multi_array<const double*, 2> R_x_inv_intercell(
-                                boost::extents[d_num_eqn][d_num_eqn]);
-                            
-                            for (int ei = 0; ei < d_num_eqn; ei++)
-                            {
-                                for (int ej = 0; ej < d_num_eqn; ej++)
-                                {
-                                    R_x_inv_intercell[ei][ej] =
-                                        &(projection_matrix->getPointer(0, ei + ej*d_num_eqn)[idx_face_x]);
-                                }
-                            }
-                            
-                            for (int m = 0; m < 6; m++)
-                            {
-                                const int idx_cell = i - 3 + m + d_num_ghosts[0];
-                                
-                                std::vector<const double*> F_x_ptr;
-                                for (int ei = 0; ei < d_num_eqn; ei++)
-                                {
-                                    F_x_ptr.push_back(&F_x_node[ei][idx_cell]);
-                                }
-                                
-                                std::vector<double> G_x(d_num_eqn, 0.0);
-                                std::vector<double*> G_x_ptr;
-                                for (int ei = 0; ei < d_num_eqn; ei++)
-                                {
-                                    G_x_ptr.push_back(&G_x[ei]);
-                                }
-                                
-                                projectVariablesToCharacteristicFields(
-                                    G_x_ptr,
-                                    F_x_ptr,
-                                    R_x_inv_intercell);
-                                
-                                std::vector<const double*> Q_ptr;
-                                Q_ptr.push_back(&rho[idx_cell]);
-                                Q_ptr.push_back(&rho_u[idx_cell]);
-                                Q_ptr.push_back(&E[idx_cell]);
-                                
-                                std::vector<double> V(d_num_eqn, 0.0);
-                                std::vector<double*> V_ptr;
-                                for (int ei = 0; ei < d_num_eqn; ei++)
-                                {
-                                    V_ptr.push_back(&V[ei]);
-                                }
-                                
-                                projectVariablesToCharacteristicFields(
-                                    V_ptr,
-                                    Q_ptr,
-                                    R_x_inv_intercell);
-                                
-                                for (int ei = 0; ei < d_num_eqn; ei++)
-                                {
-                                    G_x_plus_array[m][ei] = 0.5*(G_x[ei] +
-                                        alpha_x[ei]*V[ei]);
-                                    
-                                    G_x_minus_array[m][ei] = 0.5*(G_x[ei] -
-                                        alpha_x[ei]*V[ei]);
-                                }
-                            }
-                            
-                            /*
-                             * Do WENO reconstruction on characteristic variables to get G_x_plus
-                             * and G_x_minus
-                             */
-                            
-                            std::vector<double> G_x_plus;
-                            std::vector<double> G_x_minus;
-                            
-                            performWENOReconstruction(G_x_plus, G_x_minus, G_x_plus_array, G_x_minus_array);
-                            
-                            /*
-                             * Project characteristic variables back to physical fields.
-                             */
-                            
-                            boost::multi_array<const double*, 2> R_x_intercell(
-                                boost::extents[d_num_eqn][d_num_eqn]);
-                            
-                            for (int ei = 0; ei < d_num_eqn; ei++)
-                            {
-                                for (int ej = 0; ej < d_num_eqn; ej++)
-                                {
-                                    R_x_intercell[ei][ej] =
-                                        &(projection_matrix_inv->getPointer(0, ei + ej*d_num_eqn)[idx_face_x]);
-                                }
-                            }
-                            
-                            std::vector<double> F_x_plus(d_num_eqn, 0.0);
-                            std::vector<double> F_x_minus(d_num_eqn, 0.0);
-                            
-                            std::vector<double*> F_x_plus_ptr;
-                            std::vector<double*> F_x_minus_ptr;
-                            for (int ei = 0; ei < d_num_eqn; ei++)
-                            {
-                                F_x_plus_ptr.push_back(&F_x_plus[ei]);
-                                F_x_minus_ptr.push_back(&F_x_minus[ei]);
-                            }
-                            
-                            std::vector<const double*> G_x_plus_ptr;
-                            std::vector<const double*> G_x_minus_ptr;
-                            for (int ei = 0; ei < d_num_eqn; ei++)
-                            {
-                                G_x_plus_ptr.push_back(&G_x_plus[ei]);
-                                G_x_minus_ptr.push_back(&G_x_minus[ei]);
-                            }
-                            
-                            projectCharacteristicVariablesToPhysicalFields(
-                                F_x_plus_ptr,
-                                G_x_plus_ptr,
-                                R_x_intercell);
-                            
-                            projectCharacteristicVariablesToPhysicalFields(
-                                F_x_minus_ptr,
-                                G_x_minus_ptr,
-                                R_x_intercell);
-                            
-                            for (int ei = 0; ei < d_num_eqn; ei++)
-                            {
-                                double* F_x = convective_flux->getPointer(0, ei);
-                                F_x[idx_face_x] = dt*(F_x_plus[ei] + F_x_minus[ei]);
-                            }
-                        }
-                    }
-                    else if (d_dim == tbox::Dimension(2))
-                    {
-                        // Get the arrays of time-dependent variables.
-                        double* rho   = density->getPointer(0);
-                        double* rho_u = momentum->getPointer(0);
-                        double* rho_v = momentum->getPointer(1);
-                        double* E     = total_energy->getPointer(0);
-                        
-                        // Get the arrays of temporary patch data.
-                        double* u     = velocity->getPointer(0);
-                        double* v     = velocity->getPointer(1);
-                        double* p     = pressure->getPointer(0);
-                        double* c     = sound_speed->getPointer(0);
-                        double* H     = total_specific_enthalpy->getPointer(0);
-                        std::vector<double*> F_x_node;
-                        std::vector<double*> F_y_node;
-                        for (int ei = 0; ei < d_num_eqn; ei++)
-                        {
-                            F_x_node.push_back(convective_flux_node[0]->getPointer(ei));
-                            F_y_node.push_back(convective_flux_node[1]->getPointer(ei));
-                        }
-                        std::vector<double*> lambda_x;
-                        std::vector<double*> lambda_y;
-                        for (int ei = 0; ei < d_num_eqn; ei++)
-                        {
-                            lambda_x.push_back(wave_speed[0]->getPointer(ei));
-                            lambda_y.push_back(wave_speed[1]->getPointer(ei));
-                        }
-                        
-                        // Compute the field of velocities, pressure, sound speed, total specific enthalpy, wave speeds
-                        // and fluxes.
-                        for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
-                        {
+                            // Compute the field of velocities, pressure, sound speed, total specific enthalpy, wave speeds
+                            // and fluxes.
                             for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
                             {
                                 // Compute index into linear data array.
-                                const int idx = (i + d_num_ghosts[0]) +
-                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                const int idx = i + d_num_ghosts[0];
                                 
                                 u[idx] = rho_u[idx]/rho[idx];
-                                v[idx] = rho_v[idx]/rho[idx];
                                 
                                 std::vector<const double*> m_ptr;
                                 m_ptr.push_back(&rho_u[idx]);
-                                m_ptr.push_back(&rho_v[idx]);
                                 
                                 p[idx] = d_equation_of_state->
                                     getPressure(
@@ -524,51 +234,30 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::computeConvectiveFluxesAndSources(
                                 
                                 F_x_node[0][idx] = rho_u[idx];
                                 F_x_node[1][idx] = rho_u[idx]*u[idx] + p[idx];
-                                F_x_node[2][idx] = rho_u[idx]*v[idx];
-                                F_x_node[3][idx] = u[idx]*(E[idx] + p[idx]);
-                                
-                                F_y_node[0][idx] = rho_v[idx];
-                                F_y_node[1][idx] = rho_v[idx]*u[idx];
-                                F_y_node[2][idx] = rho_v[idx]*v[idx] + p[idx];
-                                F_y_node[3][idx] = v[idx]*(E[idx] + p[idx]);
+                                F_x_node[2][idx] = u[idx]*(E[idx] + p[idx]);
                                 
                                 lambda_x[0][idx] = u[idx] - c[idx];
                                 lambda_x[1][idx] = u[idx];
-                                lambda_x[2][idx] = u[idx];
-                                lambda_x[3][idx] = u[idx] + c[idx];
-                                
-                                lambda_y[0][idx] = v[idx] - c[idx];
-                                lambda_y[1][idx] = v[idx];
-                                lambda_y[2][idx] = v[idx];
-                                lambda_y[3][idx] = v[idx] + c[idx];
+                                lambda_x[2][idx] = u[idx] + c[idx];
                             }
-                        }
-                        
-                        /*
-                         * Compute the projection matrix and its inverse at the face normal to the
-                         * x direction.
-                         */
-                        for (int j = 0; j < interior_dims[1]; j++)
-                        {
+                            
+                            /*
+                             * Compute the projection matrix and its inverse at the face normal to the
+                             * x direction.
+                             */
                             for (int i = 0; i < interior_dims[0] + 1; i++)
                             {
                                 // Compute the indices of left cell, right cell and face of
                                 // projection matrix.
-                                const int idx_cell_L = (i - 1 + d_num_ghosts[0]) +
-                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                const int idx_cell_L = i - 1 + d_num_ghosts[0];
                                 
-                                const int idx_cell_R = (i + d_num_ghosts[0]) +
-                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                const int idx_cell_R = i + d_num_ghosts[0];
                                 
-                                const int idx_face_x = i +
-                                    j*(interior_dims[0] + 1);
+                                const int idx_face_x = i;
                                 
                                 // Get left and right quantities.
                                 const double& u_L = u[idx_cell_L];
                                 const double& u_R = u[idx_cell_R];
-                                
-                                const double& v_L = v[idx_cell_L];
-                                const double& v_R = v[idx_cell_R];
                                 
                                 const double& c_L = c[idx_cell_L];
                                 const double& c_R = c[idx_cell_R];
@@ -578,7 +267,6 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::computeConvectiveFluxesAndSources(
                                 
                                 // Compute simply-averaged quantities.
                                 const double u_average = 0.5*(u_L + u_R);
-                                const double v_average = 0.5*(v_L + v_R);
                                 const double c_average = 0.5*(c_L + c_R);
                                 const double H_average = 0.5*(H_L + H_R);
                                 
@@ -601,161 +289,42 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::computeConvectiveFluxesAndSources(
                                 }
                                 
                                 *R_x_intercell[0][0] = 1.0;
-                                *R_x_intercell[0][1] = 0.0;
+                                *R_x_intercell[0][1] = 1.0;
                                 *R_x_intercell[0][2] = 1.0;
-                                *R_x_intercell[0][3] = 1.0;
                                 *R_x_intercell[1][0] = u_average - c_average;
-                                *R_x_intercell[1][1] = 0.0;
-                                *R_x_intercell[1][2] = u_average;
-                                *R_x_intercell[1][3] = u_average + c_average;
-                                *R_x_intercell[2][0] = v_average;
-                                *R_x_intercell[2][1] = 1.0;
-                                *R_x_intercell[2][2] = v_average;
-                                *R_x_intercell[2][3] = v_average;
-                                *R_x_intercell[3][0] = H_average - u_average*c_average;
-                                *R_x_intercell[3][1] = v_average;
-                                *R_x_intercell[3][2] = 0.5*(u_average*u_average + v_average*v_average);
-                                *R_x_intercell[3][3] = H_average + u_average*c_average;
+                                *R_x_intercell[1][1] = u_average;
+                                *R_x_intercell[1][2] = u_average + c_average;
+                                *R_x_intercell[2][0] = H_average - u_average*c_average;
+                                *R_x_intercell[2][1] = 0.5*u_average*u_average;
+                                *R_x_intercell[2][2] = H_average + u_average*c_average;
                                 
                                 const double gamma = d_equation_of_state->
                                     getSpeciesThermodynamicProperty(
                                         "gamma",
                                         0);
                                 const double b_1 = (gamma - 1.0)/(c_average*c_average);
-                                const double b_2 = 0.5*(u_average*u_average + v_average*v_average)*b_1;
+                                const double b_2 = 0.5*u_average*u_average*b_1;
                                 
                                 *R_x_inv_intercell[0][0] = 0.5*(b_2 + u_average/c_average);
                                 *R_x_inv_intercell[0][1] = -0.5*(b_1*u_average + 1.0/c_average);
-                                *R_x_inv_intercell[0][2] = -0.5*b_1*v_average;
-                                *R_x_inv_intercell[0][3] = 0.5*b_1;
-                                *R_x_inv_intercell[1][0] = -v_average;
-                                *R_x_inv_intercell[1][1] = 0.0;
-                                *R_x_inv_intercell[1][2] = 1.0;
-                                *R_x_inv_intercell[1][3] = 0.0;
-                                *R_x_inv_intercell[2][0] = 1.0 - b_2;
-                                *R_x_inv_intercell[2][1] = b_1*u_average;
-                                *R_x_inv_intercell[2][2] = b_1*v_average;
-                                *R_x_inv_intercell[2][3] = -b_1;
-                                *R_x_inv_intercell[3][0] = 0.5*(b_2 - u_average/c_average);
-                                *R_x_inv_intercell[3][1] = 0.5*(-b_1*u_average + 1.0/c_average);
-                                *R_x_inv_intercell[3][2] = -0.5*b_1*v_average;
-                                *R_x_inv_intercell[3][3] = 0.5*b_1;
+                                *R_x_inv_intercell[0][2] = 0.5*b_1;
+                                *R_x_inv_intercell[1][0] = 1.0 - b_2;
+                                *R_x_inv_intercell[1][1] = b_1*u_average;
+                                *R_x_inv_intercell[1][2] = -b_1;
+                                *R_x_inv_intercell[2][0] = 0.5*(b_2 - u_average/c_average);
+                                *R_x_inv_intercell[2][1] = 0.5*(-b_1*u_average + 1.0/c_average);
+                                *R_x_inv_intercell[2][2] = 0.5*b_1;
                             }
-                        }
-                        
-                        /*
-                         * Compute the projection matrix and its inverse at the face normal to the
-                         * y direction.
-                         */
-                        for (int i = 0; i < interior_dims[0]; i++)
-                        {
-                            for (int j = 0; j < interior_dims[1] + 1; j++)
-                            {
-                                // Compute the indices of bottom cell, top cell and face of
-                                // projection matrix.
-                                const int idx_cell_B = (i + d_num_ghosts[0]) +
-                                    (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
-                                
-                                const int idx_cell_T = (i + d_num_ghosts[0]) +
-                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
-                                
-                                const int idx_face_y = j +
-                                    i*(interior_dims[1] + 1);
-                                
-                                // Get bottom and top quantities.
-                                const double& u_B = u[idx_cell_B];
-                                const double& u_T = u[idx_cell_T];
-                                
-                                const double& v_B = v[idx_cell_B];
-                                const double& v_T = v[idx_cell_T];
-                                
-                                const double& c_B = c[idx_cell_B];
-                                const double& c_T = c[idx_cell_T];
-                                
-                                const double& H_B = H[idx_cell_B];
-                                const double& H_T = H[idx_cell_T];
-                                
-                                // Compute simply-averaged quantities.
-                                const double u_average = 0.5*(u_B + u_T);
-                                const double v_average = 0.5*(v_B + v_T);
-                                const double c_average = 0.5*(c_B + c_T);
-                                const double H_average = 0.5*(H_B + H_T);
-                                
-                                boost::multi_array<double*, 2> R_y_intercell(
-                                    boost::extents[d_num_eqn][d_num_eqn]);
-                                
-                                boost::multi_array<double*, 2> R_y_inv_intercell(
-                                    boost::extents[d_num_eqn][d_num_eqn]);
-                                
-                                for (int ei = 0; ei < d_num_eqn; ei++)
-                                {
-                                    for (int ej = 0; ej < d_num_eqn; ej++)
-                                    {
-                                        R_y_intercell[ei][ej] =
-                                            &(projection_matrix_inv->getPointer(1, ei + ej*d_num_eqn)[idx_face_y]);
-                                        
-                                        R_y_inv_intercell[ei][ej] =
-                                            &(projection_matrix->getPointer(1, ei + ej*d_num_eqn)[idx_face_y]);
-                                    }
-                                }
-                                
-                                *R_y_intercell[0][0] = 1.0;
-                                *R_y_intercell[0][1] = 0.0;
-                                *R_y_intercell[0][2] = 1.0;
-                                *R_y_intercell[0][3] = 1.0;
-                                *R_y_intercell[1][0] = u_average;
-                                *R_y_intercell[1][1] = 1.0;
-                                *R_y_intercell[1][2] = u_average;
-                                *R_y_intercell[1][3] = u_average;
-                                *R_y_intercell[2][0] = v_average - c_average;
-                                *R_y_intercell[2][1] = 0.0;
-                                *R_y_intercell[2][2] = v_average;
-                                *R_y_intercell[2][3] = v_average + c_average;
-                                *R_y_intercell[3][0] = H_average - v_average*c_average;
-                                *R_y_intercell[3][1] = u_average;
-                                *R_y_intercell[3][2] = 0.5*(u_average*u_average + v_average*v_average);
-                                *R_y_intercell[3][3] = H_average + v_average*c_average;
-                                
-                                const double gamma = d_equation_of_state->
-                                    getSpeciesThermodynamicProperty(
-                                        "gamma",
-                                        0);
-                                const double b_1 = (gamma - 1.0)/(c_average*c_average);
-                                const double b_2 = 0.5*(u_average*u_average + v_average*v_average)*b_1;
-                                
-                                *R_y_inv_intercell[0][0] = 0.5*(b_2 + v_average/c_average);
-                                *R_y_inv_intercell[0][1] = -0.5*b_1*u_average;
-                                *R_y_inv_intercell[0][2] = -0.5*(b_1*v_average + 1.0/c_average);
-                                *R_y_inv_intercell[0][3] = 0.5*b_1;
-                                *R_y_inv_intercell[1][0] = -u_average;
-                                *R_y_inv_intercell[1][1] = 1.0;
-                                *R_y_inv_intercell[1][2] = 0.0;
-                                *R_y_inv_intercell[1][3] = 0.0;
-                                *R_y_inv_intercell[2][0] = 1.0 - b_2;
-                                *R_y_inv_intercell[2][1] = b_1*u_average;
-                                *R_y_inv_intercell[2][2] = b_1*v_average;
-                                *R_y_inv_intercell[2][3] = -b_1;
-                                *R_y_inv_intercell[3][0] = 0.5*(b_2 - v_average/c_average);
-                                *R_y_inv_intercell[3][1] = -0.5*b_1*u_average;
-                                *R_y_inv_intercell[3][2] = 0.5*(-b_1*v_average + 1.0/c_average);
-                                *R_y_inv_intercell[3][3] = 0.5*b_1;
-                            }
-                        }
-                        
-                        // Compute the fluxes in the x direction.
-                        for (int j = 0; j < interior_dims[1]; j++)
-                        {
+                            
+                            // Compute the fluxes in the x direction.
                             for (int i = 0; i < interior_dims[0] + 1; i++)
                             {
                                 // Compute the indices of left cell, right cell and face.
-                                const int idx_cell_L = (i - 1 + d_num_ghosts[0]) +
-                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                const int idx_cell_L = i - 1 + d_num_ghosts[0];
                                 
-                                const int idx_cell_R = (i + d_num_ghosts[0]) +
-                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                const int idx_cell_R = i + d_num_ghosts[0];
                             
-                                const int idx_face_x = i +
-                                    j*(interior_dims[0] + 1);
+                                const int idx_face_x = i;
                                 
                                 /*
                                  * Compute the maximum wave speed of each equation locally.
@@ -792,8 +361,7 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::computeConvectiveFluxesAndSources(
                                 
                                 for (int m = 0; m < 6; m++)
                                 {
-                                    const int idx_cell = (i - 3 + m + d_num_ghosts[0]) +
-                                        (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                    const int idx_cell = i - 3 + m + d_num_ghosts[0];
                                     
                                     std::vector<const double*> F_x_ptr;
                                     for (int ei = 0; ei < d_num_eqn; ei++)
@@ -816,7 +384,6 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::computeConvectiveFluxesAndSources(
                                     std::vector<const double*> Q_ptr;
                                     Q_ptr.push_back(&rho[idx_cell]);
                                     Q_ptr.push_back(&rho_u[idx_cell]);
-                                    Q_ptr.push_back(&rho_v[idx_cell]);
                                     Q_ptr.push_back(&E[idx_cell]);
                                     
                                     std::vector<double> V(d_num_eqn, 0.0);
@@ -903,225 +470,51 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::computeConvectiveFluxesAndSources(
                                 }
                             }
                         }
-                        
-                        // Compute the fluxes in the y direction.
-                        for (int i = 0; i < interior_dims[0]; i++)
+                        else if (d_dim == tbox::Dimension(2))
                         {
-                            for (int j = 0; j < interior_dims[1] + 1; j++)
+                            // Get the arrays of time-dependent variables.
+                            double* rho   = density->getPointer(0);
+                            double* rho_u = momentum->getPointer(0);
+                            double* rho_v = momentum->getPointer(1);
+                            double* E     = total_energy->getPointer(0);
+                            
+                            // Get the arrays of temporary patch data.
+                            double* u     = velocity->getPointer(0);
+                            double* v     = velocity->getPointer(1);
+                            double* p     = pressure->getPointer(0);
+                            double* c     = sound_speed->getPointer(0);
+                            double* H     = total_specific_enthalpy->getPointer(0);
+                            std::vector<double*> F_x_node;
+                            std::vector<double*> F_y_node;
+                            for (int ei = 0; ei < d_num_eqn; ei++)
                             {
-                                // Compute the indices of bottom cell, top cell and face.
-                                const int idx_cell_B = (i + d_num_ghosts[0]) +
-                                    (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
-                                
-                                const int idx_cell_T = (i + d_num_ghosts[0]) +
-                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
-                                
-                                const int idx_face_y = j +
-                                    i*(interior_dims[1] + 1);
-                                
-                                /*
-                                 * Compute the maximum wave speed of each equation locally.
-                                 */
-                                
-                                std::vector<double> alpha_y;
-                                for (int ei = 0; ei < d_num_eqn; ei++)
-                                {
-                                    alpha_y.push_back(fmax(fabs(lambda_y[ei][idx_cell_B]),
-                                        fabs(lambda_y[ei][idx_cell_T])));
-                                }
-                                
-                                boost::multi_array<double, 2> G_y_plus_array(
-                                    boost::extents[6][d_num_eqn]);
-                                
-                                boost::multi_array<double, 2> G_y_minus_array(
-                                    boost::extents[6][d_num_eqn]);
-                                
-                                /*
-                                 * Project fluxes onto characteristic fields.
-                                 */
-                                
-                                boost::multi_array<const double*, 2> R_y_inv_intercell(
-                                    boost::extents[d_num_eqn][d_num_eqn]);
-                                
-                                for (int ei = 0; ei < d_num_eqn; ei++)
-                                {
-                                    for (int ej = 0; ej < d_num_eqn; ej++)
-                                    {
-                                        R_y_inv_intercell[ei][ej] =
-                                            &(projection_matrix->getPointer(1, ei + ej*d_num_eqn)[idx_face_y]);
-                                    }
-                                }
-                                
-                                for (int m = 0; m < 6; m++)
-                                {
-                                    const int idx_cell = (i + d_num_ghosts[0]) +
-                                        (j - 3 + m + d_num_ghosts[1])*ghostcell_dims[0];
-                                    
-                                    std::vector<const double*> F_y_ptr;
-                                    for (int ei = 0; ei < d_num_eqn; ei++)
-                                    {
-                                        F_y_ptr.push_back(&F_y_node[ei][idx_cell]);
-                                    }
-                                    
-                                    std::vector<double> G_y(d_num_eqn, 0.0);
-                                    std::vector<double*> G_y_ptr;
-                                    for (int ei = 0; ei < d_num_eqn; ei++)
-                                    {
-                                        G_y_ptr.push_back(&G_y[ei]);
-                                    }
-                                    
-                                    projectVariablesToCharacteristicFields(
-                                        G_y_ptr,
-                                        F_y_ptr,
-                                        R_y_inv_intercell);
-                                    
-                                    std::vector<const double*> Q_ptr;
-                                    Q_ptr.push_back(&rho[idx_cell]);
-                                    Q_ptr.push_back(&rho_u[idx_cell]);
-                                    Q_ptr.push_back(&rho_v[idx_cell]);
-                                    Q_ptr.push_back(&E[idx_cell]);
-                                    
-                                    std::vector<double> V(d_num_eqn, 0.0);
-                                    std::vector<double*> V_ptr;
-                                    for (int ei = 0; ei < d_num_eqn; ei++)
-                                    {
-                                        V_ptr.push_back(&V[ei]);
-                                    }
-                                    
-                                    projectVariablesToCharacteristicFields(
-                                        V_ptr,
-                                        Q_ptr,
-                                        R_y_inv_intercell);
-                                    
-                                    for (int ei = 0; ei < d_num_eqn; ei++)
-                                    {
-                                        G_y_plus_array[m][ei] = 0.5*(G_y[ei] +
-                                            alpha_y[ei]*V[ei]);
-                                        
-                                        G_y_minus_array[m][ei] = 0.5*(G_y[ei] -
-                                            alpha_y[ei]*V[ei]);
-                                    }
-                                }
-                                
-                                /*
-                                 * Do WENO reconstruction on characteristic variables to get G_y_plus
-                                 * and G_y_minus
-                                 */
-                                
-                                std::vector<double> G_y_plus;
-                                std::vector<double> G_y_minus;
-                                
-                                performWENOReconstruction(G_y_plus, G_y_minus, G_y_plus_array, G_y_minus_array);
-                                
-                                /*
-                                 * Project characteristic variables back to physical fields.
-                                 */
-                                
-                                boost::multi_array<const double*, 2> R_y_intercell(
-                                    boost::extents[d_num_eqn][d_num_eqn]);
-                                
-                                for (int ei = 0; ei < d_num_eqn; ei++)
-                                {
-                                    for (int ej = 0; ej < d_num_eqn; ej++)
-                                    {
-                                        R_y_intercell[ei][ej] =
-                                            &(projection_matrix_inv->getPointer(1, ei + ej*d_num_eqn)[idx_face_y]);
-                                    }
-                                }
-                                
-                                std::vector<double> F_y_plus(d_num_eqn, 0.0);
-                                std::vector<double> F_y_minus(d_num_eqn, 0.0);
-                                
-                                std::vector<double*> F_y_plus_ptr;
-                                std::vector<double*> F_y_minus_ptr;
-                                for (int ei = 0; ei < d_num_eqn; ei++)
-                                {
-                                    F_y_plus_ptr.push_back(&F_y_plus[ei]);
-                                    F_y_minus_ptr.push_back(&F_y_minus[ei]);
-                                }
-                                
-                                std::vector<const double*> G_y_plus_ptr;
-                                std::vector<const double*> G_y_minus_ptr;
-                                for (int ei = 0; ei < d_num_eqn; ei++)
-                                {
-                                    G_y_plus_ptr.push_back(&G_y_plus[ei]);
-                                    G_y_minus_ptr.push_back(&G_y_minus[ei]);
-                                }
-                                
-                                projectCharacteristicVariablesToPhysicalFields(
-                                    F_y_plus_ptr,
-                                    G_y_plus_ptr,
-                                    R_y_intercell);
-                                
-                                projectCharacteristicVariablesToPhysicalFields(
-                                    F_y_minus_ptr,
-                                    G_y_minus_ptr,
-                                    R_y_intercell);
-                                
-                                for (int ei = 0; ei < d_num_eqn; ei++)
-                                {
-                                    double* F_y = convective_flux->getPointer(1, ei);
-                                    F_y[idx_face_y] = dt*(F_y_plus[ei] + F_y_minus[ei]);
-                                }
+                                F_x_node.push_back(convective_flux_node[0]->getPointer(ei));
+                                F_y_node.push_back(convective_flux_node[1]->getPointer(ei));
                             }
-                        }
-                    }
-                    else if (d_dim == tbox::Dimension(3))
-                    {
-                        // Get the arrays of time-dependent variables.
-                        double* rho   = density->getPointer(0);
-                        double* rho_u = momentum->getPointer(0);
-                        double* rho_v = momentum->getPointer(1);
-                        double* rho_w = momentum->getPointer(2);
-                        double* E     = total_energy->getPointer(0);
-                        
-                        // Get the arrays of temporary patch data.
-                        double* u     = velocity->getPointer(0);
-                        double* v     = velocity->getPointer(1);
-                        double* w     = velocity->getPointer(2);
-                        double* p     = pressure->getPointer(0);
-                        double* c     = sound_speed->getPointer(0);
-                        double* H     = total_specific_enthalpy->getPointer(0);
-                        std::vector<double*> F_x_node;
-                        std::vector<double*> F_y_node;
-                        std::vector<double*> F_z_node;
-                        for (int ei = 0; ei < d_num_eqn; ei++)
-                        {
-                            F_x_node.push_back(convective_flux_node[0]->getPointer(ei));
-                            F_y_node.push_back(convective_flux_node[1]->getPointer(ei));
-                            F_z_node.push_back(convective_flux_node[2]->getPointer(ei));
-                        }
-                        std::vector<double*> lambda_x;
-                        std::vector<double*> lambda_y;
-                        std::vector<double*> lambda_z;
-                        for (int ei = 0; ei < d_num_eqn; ei++)
-                        {
-                            lambda_x.push_back(wave_speed[0]->getPointer(ei));
-                            lambda_y.push_back(wave_speed[1]->getPointer(ei));
-                            lambda_z.push_back(wave_speed[2]->getPointer(ei));
-                        }
-                        
-                        // Compute the field of velocities, pressure, sound speed, total specific enthalpy, wave speeds
-                        // and fluxes.
-                        for (int k = -d_num_ghosts[2]; k < interior_dims[2] + d_num_ghosts[2]; k++)
-                        {
+                            std::vector<double*> lambda_x;
+                            std::vector<double*> lambda_y;
+                            for (int ei = 0; ei < d_num_eqn; ei++)
+                            {
+                                lambda_x.push_back(wave_speed[0]->getPointer(ei));
+                                lambda_y.push_back(wave_speed[1]->getPointer(ei));
+                            }
+                            
+                            // Compute the field of velocities, pressure, sound speed, total specific enthalpy, wave speeds
+                            // and fluxes.
                             for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
                             {
                                 for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
                                 {
                                     // Compute index into linear data array.
                                     const int idx = (i + d_num_ghosts[0]) +
-                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0];
                                     
                                     u[idx] = rho_u[idx]/rho[idx];
                                     v[idx] = rho_v[idx]/rho[idx];
-                                    w[idx] = rho_w[idx]/rho[idx];
                                     
                                     std::vector<const double*> m_ptr;
                                     m_ptr.push_back(&rho_u[idx]);
                                     m_ptr.push_back(&rho_v[idx]);
-                                    m_ptr.push_back(&rho_w[idx]);
                                     
                                     p[idx] = d_equation_of_state->
                                         getPressure(
@@ -1139,48 +532,29 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::computeConvectiveFluxesAndSources(
                                     F_x_node[0][idx] = rho_u[idx];
                                     F_x_node[1][idx] = rho_u[idx]*u[idx] + p[idx];
                                     F_x_node[2][idx] = rho_u[idx]*v[idx];
-                                    F_x_node[3][idx] = rho_u[idx]*w[idx];
-                                    F_x_node[4][idx] = u[idx]*(E[idx] + p[idx]);
+                                    F_x_node[3][idx] = u[idx]*(E[idx] + p[idx]);
                                     
                                     F_y_node[0][idx] = rho_v[idx];
                                     F_y_node[1][idx] = rho_v[idx]*u[idx];
                                     F_y_node[2][idx] = rho_v[idx]*v[idx] + p[idx];
-                                    F_y_node[3][idx] = rho_v[idx]*w[idx];
-                                    F_y_node[4][idx] = v[idx]*(E[idx] + p[idx]);
-                                    
-                                    F_z_node[0][idx] = rho_w[idx];
-                                    F_z_node[1][idx] = rho_w[idx]*u[idx];
-                                    F_z_node[2][idx] = rho_w[idx]*v[idx];
-                                    F_z_node[3][idx] = rho_w[idx]*w[idx] + p[idx];
-                                    F_z_node[4][idx] = w[idx]*(E[idx] + p[idx]);
+                                    F_y_node[3][idx] = v[idx]*(E[idx] + p[idx]);
                                     
                                     lambda_x[0][idx] = u[idx] - c[idx];
                                     lambda_x[1][idx] = u[idx];
                                     lambda_x[2][idx] = u[idx];
-                                    lambda_x[3][idx] = u[idx];
-                                    lambda_x[4][idx] = u[idx] + c[idx];
+                                    lambda_x[3][idx] = u[idx] + c[idx];
                                     
                                     lambda_y[0][idx] = v[idx] - c[idx];
                                     lambda_y[1][idx] = v[idx];
                                     lambda_y[2][idx] = v[idx];
-                                    lambda_y[3][idx] = v[idx];
-                                    lambda_y[4][idx] = v[idx] + c[idx];
-                                    
-                                    lambda_z[0][idx] = w[idx] - c[idx];
-                                    lambda_z[1][idx] = w[idx];
-                                    lambda_z[2][idx] = w[idx];
-                                    lambda_z[3][idx] = w[idx];
-                                    lambda_z[4][idx] = w[idx] + c[idx];
+                                    lambda_y[3][idx] = v[idx] + c[idx];
                                 }
                             }
-                        }
-                        
-                        /*
-                         * Compute the projection matrix and its inverse at the face normal to the
-                         * x direction.
-                         */
-                        for (int k = 0; k < interior_dims[2]; k++)
-                        {
+                            
+                            /*
+                             * Compute the projection matrix and its inverse at the face normal to the
+                             * x direction.
+                             */
                             for (int j = 0; j < interior_dims[1]; j++)
                             {
                                 for (int i = 0; i < interior_dims[0] + 1; i++)
@@ -1188,16 +562,13 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::computeConvectiveFluxesAndSources(
                                     // Compute the indices of left cell, right cell and face of
                                     // projection matrix.
                                     const int idx_cell_L = (i - 1 + d_num_ghosts[0]) +
-                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0];
                                     
                                     const int idx_cell_R = (i + d_num_ghosts[0]) +
-                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0];
                                     
                                     const int idx_face_x = i +
-                                        j*(interior_dims[0] + 1) +
-                                        k*(interior_dims[0] + 1)*interior_dims[1];
+                                        j*(interior_dims[0] + 1);
                                     
                                     // Get left and right quantities.
                                     const double& u_L = u[idx_cell_L];
@@ -1205,9 +576,6 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::computeConvectiveFluxesAndSources(
                                     
                                     const double& v_L = v[idx_cell_L];
                                     const double& v_R = v[idx_cell_R];
-                                    
-                                    const double& w_L = w[idx_cell_L];
-                                    const double& w_R = w[idx_cell_R];
                                     
                                     const double& c_L = c[idx_cell_L];
                                     const double& c_R = c[idx_cell_R];
@@ -1218,7 +586,6 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::computeConvectiveFluxesAndSources(
                                     // Compute simply-averaged quantities.
                                     const double u_average = 0.5*(u_L + u_R);
                                     const double v_average = 0.5*(v_L + v_R);
-                                    const double w_average = 0.5*(w_L + w_R);
                                     const double c_average = 0.5*(c_L + c_R);
                                     const double H_average = 0.5*(H_L + H_R);
                                     
@@ -1242,91 +609,65 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::computeConvectiveFluxesAndSources(
                                     
                                     *R_x_intercell[0][0] = 1.0;
                                     *R_x_intercell[0][1] = 0.0;
-                                    *R_x_intercell[0][2] = 0.0;
+                                    *R_x_intercell[0][2] = 1.0;
                                     *R_x_intercell[0][3] = 1.0;
-                                    *R_x_intercell[0][4] = 1.0;
                                     *R_x_intercell[1][0] = u_average - c_average;
                                     *R_x_intercell[1][1] = 0.0;
-                                    *R_x_intercell[1][2] = 0.0;
-                                    *R_x_intercell[1][3] = u_average;
-                                    *R_x_intercell[1][4] = u_average + c_average;
+                                    *R_x_intercell[1][2] = u_average;
+                                    *R_x_intercell[1][3] = u_average + c_average;
                                     *R_x_intercell[2][0] = v_average;
                                     *R_x_intercell[2][1] = 1.0;
-                                    *R_x_intercell[2][2] = 0.0;
+                                    *R_x_intercell[2][2] = v_average;
                                     *R_x_intercell[2][3] = v_average;
-                                    *R_x_intercell[2][4] = v_average;
-                                    *R_x_intercell[3][0] = w_average;
-                                    *R_x_intercell[3][1] = 0.0;
-                                    *R_x_intercell[3][2] = 1.0;
-                                    *R_x_intercell[3][3] = w_average;
-                                    *R_x_intercell[3][4] = w_average;
-                                    *R_x_intercell[4][0] = H_average - u_average*c_average;
-                                    *R_x_intercell[4][1] = v_average;
-                                    *R_x_intercell[4][2] = w_average;
-                                    *R_x_intercell[4][3] = 0.5*(u_average*u_average + v_average*v_average +
-                                        w_average*w_average);
-                                    *R_x_intercell[4][4] = H_average + u_average*c_average;
+                                    *R_x_intercell[3][0] = H_average - u_average*c_average;
+                                    *R_x_intercell[3][1] = v_average;
+                                    *R_x_intercell[3][2] = 0.5*(u_average*u_average + v_average*v_average);
+                                    *R_x_intercell[3][3] = H_average + u_average*c_average;
                                     
                                     const double gamma = d_equation_of_state->
                                         getSpeciesThermodynamicProperty(
                                             "gamma",
                                             0);
                                     const double b_1 = (gamma - 1.0)/(c_average*c_average);
-                                    const double b_2 = 0.5*(u_average*u_average + v_average*v_average +
-                                        w_average*w_average)*b_1;
+                                    const double b_2 = 0.5*(u_average*u_average + v_average*v_average)*b_1;
                                     
                                     *R_x_inv_intercell[0][0] = 0.5*(b_2 + u_average/c_average);
                                     *R_x_inv_intercell[0][1] = -0.5*(b_1*u_average + 1.0/c_average);
                                     *R_x_inv_intercell[0][2] = -0.5*b_1*v_average;
-                                    *R_x_inv_intercell[0][3] = -0.5*b_1*w_average;
-                                    *R_x_inv_intercell[0][4] = 0.5*b_1;
+                                    *R_x_inv_intercell[0][3] = 0.5*b_1;
                                     *R_x_inv_intercell[1][0] = -v_average;
                                     *R_x_inv_intercell[1][1] = 0.0;
                                     *R_x_inv_intercell[1][2] = 1.0;
                                     *R_x_inv_intercell[1][3] = 0.0;
-                                    *R_x_inv_intercell[1][4] = 0.0;
-                                    *R_x_inv_intercell[2][0] = -w_average;
-                                    *R_x_inv_intercell[2][1] = 0.0;
-                                    *R_x_inv_intercell[2][2] = 0.0;
-                                    *R_x_inv_intercell[2][3] = 1.0;
-                                    *R_x_inv_intercell[2][4] = 0.0;
-                                    *R_x_inv_intercell[3][0] = 1 - b_2;
-                                    *R_x_inv_intercell[3][1] = b_1*u_average;
-                                    *R_x_inv_intercell[3][2] = b_1*v_average;
-                                    *R_x_inv_intercell[3][3] = b_1*w_average;
-                                    *R_x_inv_intercell[3][4] = -b_1;
-                                    *R_x_inv_intercell[4][0] = 0.5*(b_2 - u_average/c_average);
-                                    *R_x_inv_intercell[4][1] = 0.5*(-b_1*u_average + 1.0/c_average);
-                                    *R_x_inv_intercell[4][2] = -0.5*b_1*v_average;
-                                    *R_x_inv_intercell[4][3] = -0.5*b_1*w_average;
-                                    *R_x_inv_intercell[4][4] = 0.5*b_1;
+                                    *R_x_inv_intercell[2][0] = 1.0 - b_2;
+                                    *R_x_inv_intercell[2][1] = b_1*u_average;
+                                    *R_x_inv_intercell[2][2] = b_1*v_average;
+                                    *R_x_inv_intercell[2][3] = -b_1;
+                                    *R_x_inv_intercell[3][0] = 0.5*(b_2 - u_average/c_average);
+                                    *R_x_inv_intercell[3][1] = 0.5*(-b_1*u_average + 1.0/c_average);
+                                    *R_x_inv_intercell[3][2] = -0.5*b_1*v_average;
+                                    *R_x_inv_intercell[3][3] = 0.5*b_1;
                                 }
                             }
-                        }
-                        
-                        /*
-                         * Compute the projection matrix and its inverse at the face normal to the
-                         * y direction.
-                         */
-                        for (int i = 0; i < interior_dims[0]; i++)
-                        {
-                            for (int k = 0; k < interior_dims[2]; k++)
+                            
+                            /*
+                             * Compute the projection matrix and its inverse at the face normal to the
+                             * y direction.
+                             */
+                            for (int i = 0; i < interior_dims[0]; i++)
                             {
                                 for (int j = 0; j < interior_dims[1] + 1; j++)
                                 {
                                     // Compute the indices of bottom cell, top cell and face of
                                     // projection matrix.
                                     const int idx_cell_B = (i + d_num_ghosts[0]) +
-                                    (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
-                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                        (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
                                     
                                     const int idx_cell_T = (i + d_num_ghosts[0]) +
-                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0];
                                     
                                     const int idx_face_y = j +
-                                        k*(interior_dims[1] + 1) +
-                                        i*(interior_dims[1] + 1)*interior_dims[2];
+                                        i*(interior_dims[1] + 1);
                                     
                                     // Get bottom and top quantities.
                                     const double& u_B = u[idx_cell_B];
@@ -1334,9 +675,6 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::computeConvectiveFluxesAndSources(
                                     
                                     const double& v_B = v[idx_cell_B];
                                     const double& v_T = v[idx_cell_T];
-                                    
-                                    const double& w_B = w[idx_cell_B];
-                                    const double& w_T = w[idx_cell_T];
                                     
                                     const double& c_B = c[idx_cell_B];
                                     const double& c_T = c[idx_cell_T];
@@ -1347,7 +685,6 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::computeConvectiveFluxesAndSources(
                                     // Compute simply-averaged quantities.
                                     const double u_average = 0.5*(u_B + u_T);
                                     const double v_average = 0.5*(v_B + v_T);
-                                    const double w_average = 0.5*(w_B + w_T);
                                     const double c_average = 0.5*(c_B + c_T);
                                     const double H_average = 0.5*(H_B + H_T);
                                     
@@ -1371,217 +708,61 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::computeConvectiveFluxesAndSources(
                                     
                                     *R_y_intercell[0][0] = 1.0;
                                     *R_y_intercell[0][1] = 0.0;
-                                    *R_y_intercell[0][2] = 0.0;
+                                    *R_y_intercell[0][2] = 1.0;
                                     *R_y_intercell[0][3] = 1.0;
-                                    *R_y_intercell[0][4] = 1.0;
                                     *R_y_intercell[1][0] = u_average;
                                     *R_y_intercell[1][1] = 1.0;
-                                    *R_y_intercell[1][2] = 0.0;
+                                    *R_y_intercell[1][2] = u_average;
                                     *R_y_intercell[1][3] = u_average;
-                                    *R_y_intercell[1][4] = u_average;
                                     *R_y_intercell[2][0] = v_average - c_average;
                                     *R_y_intercell[2][1] = 0.0;
-                                    *R_y_intercell[2][2] = 0.0;
-                                    *R_y_intercell[2][3] = v_average;
-                                    *R_y_intercell[2][4] = v_average + c_average;
-                                    *R_y_intercell[3][0] = w_average;
-                                    *R_y_intercell[3][1] = 0.0;
-                                    *R_y_intercell[3][2] = 1.0;
-                                    *R_y_intercell[3][3] = w_average;
-                                    *R_y_intercell[3][4] = w_average;
-                                    *R_y_intercell[4][0] = H_average - v_average*c_average;
-                                    *R_y_intercell[4][1] = u_average;
-                                    *R_y_intercell[4][2] = w_average;
-                                    *R_y_intercell[4][3] = 0.5*(u_average*u_average + v_average*v_average +
-                                        w_average*w_average);
-                                    *R_y_intercell[4][4] = H_average + v_average*c_average;
+                                    *R_y_intercell[2][2] = v_average;
+                                    *R_y_intercell[2][3] = v_average + c_average;
+                                    *R_y_intercell[3][0] = H_average - v_average*c_average;
+                                    *R_y_intercell[3][1] = u_average;
+                                    *R_y_intercell[3][2] = 0.5*(u_average*u_average + v_average*v_average);
+                                    *R_y_intercell[3][3] = H_average + v_average*c_average;
                                     
                                     const double gamma = d_equation_of_state->
                                         getSpeciesThermodynamicProperty(
                                             "gamma",
                                             0);
-                                    const double b_1 = (gamma - 1)/(c_average*c_average);
-                                    const double b_2 = 0.5*(u_average*u_average + v_average*v_average +
-                                        w_average*w_average)*b_1;
+                                    const double b_1 = (gamma - 1.0)/(c_average*c_average);
+                                    const double b_2 = 0.5*(u_average*u_average + v_average*v_average)*b_1;
                                     
                                     *R_y_inv_intercell[0][0] = 0.5*(b_2 + v_average/c_average);
                                     *R_y_inv_intercell[0][1] = -0.5*b_1*u_average;
                                     *R_y_inv_intercell[0][2] = -0.5*(b_1*v_average + 1.0/c_average);
-                                    *R_y_inv_intercell[0][3] = -0.5*b_1*w_average;
-                                    *R_y_inv_intercell[0][4] = 0.5*b_1;
+                                    *R_y_inv_intercell[0][3] = 0.5*b_1;
                                     *R_y_inv_intercell[1][0] = -u_average;
                                     *R_y_inv_intercell[1][1] = 1.0;
                                     *R_y_inv_intercell[1][2] = 0.0;
                                     *R_y_inv_intercell[1][3] = 0.0;
-                                    *R_y_inv_intercell[1][4] = 0.0;
-                                    *R_y_inv_intercell[2][0] = -w_average;
-                                    *R_y_inv_intercell[2][1] = 0.0;
-                                    *R_y_inv_intercell[2][2] = 0.0;
-                                    *R_y_inv_intercell[2][3] = 1.0;
-                                    *R_y_inv_intercell[2][4] = 0.0;
-                                    *R_y_inv_intercell[3][0] = 1 - b_2;
-                                    *R_y_inv_intercell[3][1] = b_1*u_average;
-                                    *R_y_inv_intercell[3][2] = b_1*v_average;
-                                    *R_y_inv_intercell[3][3] = b_1*w_average;
-                                    *R_y_inv_intercell[3][4] = -b_1;
-                                    *R_y_inv_intercell[4][0] = 0.5*(b_2 - v_average/c_average);
-                                    *R_y_inv_intercell[4][1] = -0.5*b_1*u_average;
-                                    *R_y_inv_intercell[4][2] = 0.5*(-b_1*v_average + 1.0/c_average);
-                                    *R_y_inv_intercell[4][3] = -0.5*b_1*w_average;
-                                    *R_y_inv_intercell[4][4] = 0.5*b_1;
+                                    *R_y_inv_intercell[2][0] = 1.0 - b_2;
+                                    *R_y_inv_intercell[2][1] = b_1*u_average;
+                                    *R_y_inv_intercell[2][2] = b_1*v_average;
+                                    *R_y_inv_intercell[2][3] = -b_1;
+                                    *R_y_inv_intercell[3][0] = 0.5*(b_2 - v_average/c_average);
+                                    *R_y_inv_intercell[3][1] = -0.5*b_1*u_average;
+                                    *R_y_inv_intercell[3][2] = 0.5*(-b_1*v_average + 1.0/c_average);
+                                    *R_y_inv_intercell[3][3] = 0.5*b_1;
                                 }
                             }
-                        }
-                        
-                        /*
-                         * Compute the projection matrix and its inverse at the face normal to the
-                         * z direction.
-                         */
-                        // Compute the fluxes in the z direction.
-                        for (int j = 0; j < interior_dims[1]; j++)
-                        {
-                            for (int i = 0; i < interior_dims[0]; i++)
-                            {
-                                for (int k = 0; k < interior_dims[2] + 1; k++)
-                                {
-                                    // Compute the indices of bottom cell, top cell and face of
-                                    // projection matrix.
-                                    const int idx_cell_B = (i + d_num_ghosts[0]) +
-                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                        (k - 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                                    
-                                    const int idx_cell_F = (i + d_num_ghosts[0]) +
-                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                                    
-                                    const int idx_face_z = k +
-                                        i*(interior_dims[2] + 1) +
-                                        j*(interior_dims[2] + 1)*interior_dims[0];
-                                    
-                                    // Get back and front quantities.
-                                    const double& u_B = u[idx_cell_B];
-                                    const double& u_F = u[idx_cell_F];
-                                    
-                                    const double& v_B = v[idx_cell_B];
-                                    const double& v_F = v[idx_cell_F];
-                                    
-                                    const double& w_B = w[idx_cell_B];
-                                    const double& w_F = w[idx_cell_F];
-                                    
-                                    const double& c_B = c[idx_cell_B];
-                                    const double& c_F = c[idx_cell_F];
-                                    
-                                    const double& H_B = H[idx_cell_B];
-                                    const double& H_F = H[idx_cell_F];
-                                    
-                                    // Compute simply-averaged quantities.
-                                    const double u_average = 0.5*(u_B + u_F);
-                                    const double v_average = 0.5*(v_B + v_F);
-                                    const double w_average = 0.5*(w_B + w_F);
-                                    const double c_average = 0.5*(c_B + c_F);
-                                    const double H_average = 0.5*(H_B + H_F);
-                                    
-                                    boost::multi_array<double*, 2> R_z_intercell(
-                                        boost::extents[d_num_eqn][d_num_eqn]);
-                                    
-                                    boost::multi_array<double*, 2> R_z_inv_intercell(
-                                        boost::extents[d_num_eqn][d_num_eqn]);
-                                    
-                                    for (int ei = 0; ei < d_num_eqn; ei++)
-                                    {
-                                        for (int ej = 0; ej < d_num_eqn; ej++)
-                                        {
-                                            R_z_intercell[ei][ej] =
-                                                &(projection_matrix_inv->getPointer(2, ei + ej*d_num_eqn)[idx_face_z]);
-                                            
-                                            R_z_inv_intercell[ei][ej] =
-                                                &(projection_matrix->getPointer(2, ei + ej*d_num_eqn)[idx_face_z]);
-                                        }
-                                    }
-                                    
-                                    *R_z_intercell[0][0] = 1.0;
-                                    *R_z_intercell[0][1] = 0.0;
-                                    *R_z_intercell[0][2] = 0.0;
-                                    *R_z_intercell[0][3] = 1.0;
-                                    *R_z_intercell[0][4] = 1.0;
-                                    *R_z_intercell[1][0] = u_average;
-                                    *R_z_intercell[1][1] = 1.0;
-                                    *R_z_intercell[1][2] = 0.0;
-                                    *R_z_intercell[1][3] = u_average;
-                                    *R_z_intercell[1][4] = u_average;
-                                    *R_z_intercell[2][0] = v_average;
-                                    *R_z_intercell[2][1] = 0.0;
-                                    *R_z_intercell[2][2] = 1.0;
-                                    *R_z_intercell[2][3] = v_average;
-                                    *R_z_intercell[2][4] = v_average;
-                                    *R_z_intercell[3][0] = w_average - c_average;
-                                    *R_z_intercell[3][1] = 0.0;
-                                    *R_z_intercell[3][2] = 0.0;
-                                    *R_z_intercell[3][3] = w_average;
-                                    *R_z_intercell[3][4] = w_average + c_average;
-                                    *R_z_intercell[4][0] = H_average - w_average*c_average;
-                                    *R_z_intercell[4][1] = u_average;
-                                    *R_z_intercell[4][2] = v_average;
-                                    *R_z_intercell[4][3] = 0.5*(u_average*u_average + v_average*v_average +
-                                        w_average*w_average);
-                                    *R_z_intercell[4][4] = H_average + w_average*c_average;
-                                    
-                                    const double gamma = d_equation_of_state->
-                                        getSpeciesThermodynamicProperty(
-                                            "gamma",
-                                            0);
-                                    const double b_1 = (gamma - 1)/(c_average*c_average);
-                                    const double b_2 = 0.5*(u_average*u_average + v_average*v_average +
-                                        w_average*w_average)*b_1;
-                                    
-                                    *R_z_inv_intercell[0][0] = 0.5*(b_2 + w_average/c_average);
-                                    *R_z_inv_intercell[0][1] = -0.5*b_1*u_average;
-                                    *R_z_inv_intercell[0][2] = -0.5*b_1*v_average;
-                                    *R_z_inv_intercell[0][3] = -0.5*(b_1*w_average + 1.0/c_average);
-                                    *R_z_inv_intercell[0][4] = 0.5*b_1;
-                                    *R_z_inv_intercell[1][0] = -u_average;
-                                    *R_z_inv_intercell[1][1] = 1.0;
-                                    *R_z_inv_intercell[1][2] = 0.0;
-                                    *R_z_inv_intercell[1][3] = 0.0;
-                                    *R_z_inv_intercell[1][4] = 0.0;
-                                    *R_z_inv_intercell[2][0] = -v_average;
-                                    *R_z_inv_intercell[2][1] = 0.0;
-                                    *R_z_inv_intercell[2][2] = 1.0;
-                                    *R_z_inv_intercell[2][3] = 0.0;
-                                    *R_z_inv_intercell[2][4] = 0.0;
-                                    *R_z_inv_intercell[3][0] = 1 - b_2;
-                                    *R_z_inv_intercell[3][1] = b_1*u_average;
-                                    *R_z_inv_intercell[3][2] = b_1*v_average;
-                                    *R_z_inv_intercell[3][3] = b_1*w_average;
-                                    *R_z_inv_intercell[3][4] = -b_1;
-                                    *R_z_inv_intercell[4][0] = 0.5*(b_2 - w_average/c_average);
-                                    *R_z_inv_intercell[4][1] = -0.5*b_1*u_average;
-                                    *R_z_inv_intercell[4][2] = -0.5*b_1*v_average;
-                                    *R_z_inv_intercell[4][3] = -0.5*(b_1*w_average - 1.0/c_average);
-                                    *R_z_inv_intercell[4][4] = 0.5*b_1;
-                                }
-                            }
-                        }
-                        
-                        // Compute the fluxes in the x direction.
-                        for (int k = 0; k < interior_dims[2]; k++)
-                        {
+                            
+                            // Compute the fluxes in the x direction.
                             for (int j = 0; j < interior_dims[1]; j++)
                             {
                                 for (int i = 0; i < interior_dims[0] + 1; i++)
                                 {
                                     // Compute the indices of left cell, right cell and face.
                                     const int idx_cell_L = (i - 1 + d_num_ghosts[0]) +
-                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0];
                                     
                                     const int idx_cell_R = (i + d_num_ghosts[0]) +
-                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                                    
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
                                     const int idx_face_x = i +
-                                        j*(interior_dims[0] + 1) +
-                                        k*(interior_dims[0] + 1)*interior_dims[1];
+                                        j*(interior_dims[0] + 1);
                                     
                                     /*
                                      * Compute the maximum wave speed of each equation locally.
@@ -1619,8 +800,7 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::computeConvectiveFluxesAndSources(
                                     for (int m = 0; m < 6; m++)
                                     {
                                         const int idx_cell = (i - 3 + m + d_num_ghosts[0]) +
-                                            (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                            (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                            (j + d_num_ghosts[1])*ghostcell_dims[0];
                                         
                                         std::vector<const double*> F_x_ptr;
                                         for (int ei = 0; ei < d_num_eqn; ei++)
@@ -1644,7 +824,6 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::computeConvectiveFluxesAndSources(
                                         Q_ptr.push_back(&rho[idx_cell]);
                                         Q_ptr.push_back(&rho_u[idx_cell]);
                                         Q_ptr.push_back(&rho_v[idx_cell]);
-                                        Q_ptr.push_back(&rho_w[idx_cell]);
                                         Q_ptr.push_back(&E[idx_cell]);
                                         
                                         std::vector<double> V(d_num_eqn, 0.0);
@@ -1731,27 +910,21 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::computeConvectiveFluxesAndSources(
                                     }
                                 }
                             }
-                        }
-                        
-                        // Compute the fluxes in the y direction.
-                        for (int i = 0; i < interior_dims[0]; i++)
-                        {
-                            for (int k = 0; k < interior_dims[2]; k++)
+                            
+                            // Compute the fluxes in the y direction.
+                            for (int i = 0; i < interior_dims[0]; i++)
                             {
                                 for (int j = 0; j < interior_dims[1] + 1; j++)
                                 {
                                     // Compute the indices of bottom cell, top cell and face.
                                     const int idx_cell_B = (i + d_num_ghosts[0]) +
-                                    (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
-                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                        (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
                                     
                                     const int idx_cell_T = (i + d_num_ghosts[0]) +
-                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0];
                                     
                                     const int idx_face_y = j +
-                                        k*(interior_dims[1] + 1) +
-                                        i*(interior_dims[1] + 1)*interior_dims[2];
+                                        i*(interior_dims[1] + 1);
                                     
                                     /*
                                      * Compute the maximum wave speed of each equation locally.
@@ -1789,8 +962,7 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::computeConvectiveFluxesAndSources(
                                     for (int m = 0; m < 6; m++)
                                     {
                                         const int idx_cell = (i + d_num_ghosts[0]) +
-                                            (j - 3 + m + d_num_ghosts[1])*ghostcell_dims[0] +
-                                            (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                            (j - 3 + m + d_num_ghosts[1])*ghostcell_dims[0];
                                         
                                         std::vector<const double*> F_y_ptr;
                                         for (int ei = 0; ei < d_num_eqn; ei++)
@@ -1814,7 +986,6 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::computeConvectiveFluxesAndSources(
                                         Q_ptr.push_back(&rho[idx_cell]);
                                         Q_ptr.push_back(&rho_u[idx_cell]);
                                         Q_ptr.push_back(&rho_v[idx_cell]);
-                                        Q_ptr.push_back(&rho_w[idx_cell]);
                                         Q_ptr.push_back(&E[idx_cell]);
                                         
                                         std::vector<double> V(d_num_eqn, 0.0);
@@ -1902,225 +1073,1068 @@ ConvectiveFluxReconstructorWENO_JS5_LLF::computeConvectiveFluxesAndSources(
                                 }
                             }
                         }
-                        
-                        // Compute the fluxes in the z direction.
-                        for (int j = 0; j < interior_dims[1]; j++)
+                        else if (d_dim == tbox::Dimension(3))
                         {
+                            // Get the arrays of time-dependent variables.
+                            double* rho   = density->getPointer(0);
+                            double* rho_u = momentum->getPointer(0);
+                            double* rho_v = momentum->getPointer(1);
+                            double* rho_w = momentum->getPointer(2);
+                            double* E     = total_energy->getPointer(0);
+                            
+                            // Get the arrays of temporary patch data.
+                            double* u     = velocity->getPointer(0);
+                            double* v     = velocity->getPointer(1);
+                            double* w     = velocity->getPointer(2);
+                            double* p     = pressure->getPointer(0);
+                            double* c     = sound_speed->getPointer(0);
+                            double* H     = total_specific_enthalpy->getPointer(0);
+                            std::vector<double*> F_x_node;
+                            std::vector<double*> F_y_node;
+                            std::vector<double*> F_z_node;
+                            for (int ei = 0; ei < d_num_eqn; ei++)
+                            {
+                                F_x_node.push_back(convective_flux_node[0]->getPointer(ei));
+                                F_y_node.push_back(convective_flux_node[1]->getPointer(ei));
+                                F_z_node.push_back(convective_flux_node[2]->getPointer(ei));
+                            }
+                            std::vector<double*> lambda_x;
+                            std::vector<double*> lambda_y;
+                            std::vector<double*> lambda_z;
+                            for (int ei = 0; ei < d_num_eqn; ei++)
+                            {
+                                lambda_x.push_back(wave_speed[0]->getPointer(ei));
+                                lambda_y.push_back(wave_speed[1]->getPointer(ei));
+                                lambda_z.push_back(wave_speed[2]->getPointer(ei));
+                            }
+                            
+                            // Compute the field of velocities, pressure, sound speed, total specific enthalpy, wave speeds
+                            // and fluxes.
+                            for (int k = -d_num_ghosts[2]; k < interior_dims[2] + d_num_ghosts[2]; k++)
+                            {
+                                for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                                {
+                                    for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                                    {
+                                        // Compute index into linear data array.
+                                        const int idx = (i + d_num_ghosts[0]) +
+                                            (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                            (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                        
+                                        u[idx] = rho_u[idx]/rho[idx];
+                                        v[idx] = rho_v[idx]/rho[idx];
+                                        w[idx] = rho_w[idx]/rho[idx];
+                                        
+                                        std::vector<const double*> m_ptr;
+                                        m_ptr.push_back(&rho_u[idx]);
+                                        m_ptr.push_back(&rho_v[idx]);
+                                        m_ptr.push_back(&rho_w[idx]);
+                                        
+                                        p[idx] = d_equation_of_state->
+                                            getPressure(
+                                                &rho[idx],
+                                                m_ptr,
+                                                &E[idx]);
+                                        
+                                        c[idx] = d_equation_of_state->
+                                            getSoundSpeedWithPressure(
+                                                &rho[idx],
+                                                &p[idx]);
+                                        
+                                        H[idx] = (E[idx] + p[idx])/rho[idx];
+                                        
+                                        F_x_node[0][idx] = rho_u[idx];
+                                        F_x_node[1][idx] = rho_u[idx]*u[idx] + p[idx];
+                                        F_x_node[2][idx] = rho_u[idx]*v[idx];
+                                        F_x_node[3][idx] = rho_u[idx]*w[idx];
+                                        F_x_node[4][idx] = u[idx]*(E[idx] + p[idx]);
+                                        
+                                        F_y_node[0][idx] = rho_v[idx];
+                                        F_y_node[1][idx] = rho_v[idx]*u[idx];
+                                        F_y_node[2][idx] = rho_v[idx]*v[idx] + p[idx];
+                                        F_y_node[3][idx] = rho_v[idx]*w[idx];
+                                        F_y_node[4][idx] = v[idx]*(E[idx] + p[idx]);
+                                        
+                                        F_z_node[0][idx] = rho_w[idx];
+                                        F_z_node[1][idx] = rho_w[idx]*u[idx];
+                                        F_z_node[2][idx] = rho_w[idx]*v[idx];
+                                        F_z_node[3][idx] = rho_w[idx]*w[idx] + p[idx];
+                                        F_z_node[4][idx] = w[idx]*(E[idx] + p[idx]);
+                                        
+                                        lambda_x[0][idx] = u[idx] - c[idx];
+                                        lambda_x[1][idx] = u[idx];
+                                        lambda_x[2][idx] = u[idx];
+                                        lambda_x[3][idx] = u[idx];
+                                        lambda_x[4][idx] = u[idx] + c[idx];
+                                        
+                                        lambda_y[0][idx] = v[idx] - c[idx];
+                                        lambda_y[1][idx] = v[idx];
+                                        lambda_y[2][idx] = v[idx];
+                                        lambda_y[3][idx] = v[idx];
+                                        lambda_y[4][idx] = v[idx] + c[idx];
+                                        
+                                        lambda_z[0][idx] = w[idx] - c[idx];
+                                        lambda_z[1][idx] = w[idx];
+                                        lambda_z[2][idx] = w[idx];
+                                        lambda_z[3][idx] = w[idx];
+                                        lambda_z[4][idx] = w[idx] + c[idx];
+                                    }
+                                }
+                            }
+                            
+                            /*
+                             * Compute the projection matrix and its inverse at the face normal to the
+                             * x direction.
+                             */
+                            for (int k = 0; k < interior_dims[2]; k++)
+                            {
+                                for (int j = 0; j < interior_dims[1]; j++)
+                                {
+                                    for (int i = 0; i < interior_dims[0] + 1; i++)
+                                    {
+                                        // Compute the indices of left cell, right cell and face of
+                                        // projection matrix.
+                                        const int idx_cell_L = (i - 1 + d_num_ghosts[0]) +
+                                            (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                            (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                        
+                                        const int idx_cell_R = (i + d_num_ghosts[0]) +
+                                            (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                            (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                        
+                                        const int idx_face_x = i +
+                                            j*(interior_dims[0] + 1) +
+                                            k*(interior_dims[0] + 1)*interior_dims[1];
+                                        
+                                        // Get left and right quantities.
+                                        const double& u_L = u[idx_cell_L];
+                                        const double& u_R = u[idx_cell_R];
+                                        
+                                        const double& v_L = v[idx_cell_L];
+                                        const double& v_R = v[idx_cell_R];
+                                        
+                                        const double& w_L = w[idx_cell_L];
+                                        const double& w_R = w[idx_cell_R];
+                                        
+                                        const double& c_L = c[idx_cell_L];
+                                        const double& c_R = c[idx_cell_R];
+                                        
+                                        const double& H_L = H[idx_cell_L];
+                                        const double& H_R = H[idx_cell_R];
+                                        
+                                        // Compute simply-averaged quantities.
+                                        const double u_average = 0.5*(u_L + u_R);
+                                        const double v_average = 0.5*(v_L + v_R);
+                                        const double w_average = 0.5*(w_L + w_R);
+                                        const double c_average = 0.5*(c_L + c_R);
+                                        const double H_average = 0.5*(H_L + H_R);
+                                        
+                                        boost::multi_array<double*, 2> R_x_intercell(
+                                            boost::extents[d_num_eqn][d_num_eqn]);
+                                        
+                                        boost::multi_array<double*, 2> R_x_inv_intercell(
+                                            boost::extents[d_num_eqn][d_num_eqn]);
+                                        
+                                        for (int ei = 0; ei < d_num_eqn; ei++)
+                                        {
+                                            for (int ej = 0; ej < d_num_eqn; ej++)
+                                            {
+                                                R_x_intercell[ei][ej] =
+                                                    &(projection_matrix_inv->getPointer(0, ei + ej*d_num_eqn)[idx_face_x]);
+                                                
+                                                R_x_inv_intercell[ei][ej] =
+                                                    &(projection_matrix->getPointer(0, ei + ej*d_num_eqn)[idx_face_x]);
+                                            }
+                                        }
+                                        
+                                        *R_x_intercell[0][0] = 1.0;
+                                        *R_x_intercell[0][1] = 0.0;
+                                        *R_x_intercell[0][2] = 0.0;
+                                        *R_x_intercell[0][3] = 1.0;
+                                        *R_x_intercell[0][4] = 1.0;
+                                        *R_x_intercell[1][0] = u_average - c_average;
+                                        *R_x_intercell[1][1] = 0.0;
+                                        *R_x_intercell[1][2] = 0.0;
+                                        *R_x_intercell[1][3] = u_average;
+                                        *R_x_intercell[1][4] = u_average + c_average;
+                                        *R_x_intercell[2][0] = v_average;
+                                        *R_x_intercell[2][1] = 1.0;
+                                        *R_x_intercell[2][2] = 0.0;
+                                        *R_x_intercell[2][3] = v_average;
+                                        *R_x_intercell[2][4] = v_average;
+                                        *R_x_intercell[3][0] = w_average;
+                                        *R_x_intercell[3][1] = 0.0;
+                                        *R_x_intercell[3][2] = 1.0;
+                                        *R_x_intercell[3][3] = w_average;
+                                        *R_x_intercell[3][4] = w_average;
+                                        *R_x_intercell[4][0] = H_average - u_average*c_average;
+                                        *R_x_intercell[4][1] = v_average;
+                                        *R_x_intercell[4][2] = w_average;
+                                        *R_x_intercell[4][3] = 0.5*(u_average*u_average + v_average*v_average +
+                                            w_average*w_average);
+                                        *R_x_intercell[4][4] = H_average + u_average*c_average;
+                                        
+                                        const double gamma = d_equation_of_state->
+                                            getSpeciesThermodynamicProperty(
+                                                "gamma",
+                                                0);
+                                        const double b_1 = (gamma - 1.0)/(c_average*c_average);
+                                        const double b_2 = 0.5*(u_average*u_average + v_average*v_average +
+                                            w_average*w_average)*b_1;
+                                        
+                                        *R_x_inv_intercell[0][0] = 0.5*(b_2 + u_average/c_average);
+                                        *R_x_inv_intercell[0][1] = -0.5*(b_1*u_average + 1.0/c_average);
+                                        *R_x_inv_intercell[0][2] = -0.5*b_1*v_average;
+                                        *R_x_inv_intercell[0][3] = -0.5*b_1*w_average;
+                                        *R_x_inv_intercell[0][4] = 0.5*b_1;
+                                        *R_x_inv_intercell[1][0] = -v_average;
+                                        *R_x_inv_intercell[1][1] = 0.0;
+                                        *R_x_inv_intercell[1][2] = 1.0;
+                                        *R_x_inv_intercell[1][3] = 0.0;
+                                        *R_x_inv_intercell[1][4] = 0.0;
+                                        *R_x_inv_intercell[2][0] = -w_average;
+                                        *R_x_inv_intercell[2][1] = 0.0;
+                                        *R_x_inv_intercell[2][2] = 0.0;
+                                        *R_x_inv_intercell[2][3] = 1.0;
+                                        *R_x_inv_intercell[2][4] = 0.0;
+                                        *R_x_inv_intercell[3][0] = 1 - b_2;
+                                        *R_x_inv_intercell[3][1] = b_1*u_average;
+                                        *R_x_inv_intercell[3][2] = b_1*v_average;
+                                        *R_x_inv_intercell[3][3] = b_1*w_average;
+                                        *R_x_inv_intercell[3][4] = -b_1;
+                                        *R_x_inv_intercell[4][0] = 0.5*(b_2 - u_average/c_average);
+                                        *R_x_inv_intercell[4][1] = 0.5*(-b_1*u_average + 1.0/c_average);
+                                        *R_x_inv_intercell[4][2] = -0.5*b_1*v_average;
+                                        *R_x_inv_intercell[4][3] = -0.5*b_1*w_average;
+                                        *R_x_inv_intercell[4][4] = 0.5*b_1;
+                                    }
+                                }
+                            }
+                            
+                            /*
+                             * Compute the projection matrix and its inverse at the face normal to the
+                             * y direction.
+                             */
                             for (int i = 0; i < interior_dims[0]; i++)
                             {
-                                for (int k = 0; k < interior_dims[2] + 1; k++)
+                                for (int k = 0; k < interior_dims[2]; k++)
                                 {
-                                    // Compute the indices of back cell, front cell and face.
-                                    const int idx_cell_B = (i + d_num_ghosts[0]) +
-                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                        (k - 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                                    
-                                    const int idx_cell_F = (i + d_num_ghosts[0]) +
-                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    for (int j = 0; j < interior_dims[1] + 1; j++)
+                                    {
+                                        // Compute the indices of bottom cell, top cell and face of
+                                        // projection matrix.
+                                        const int idx_cell_B = (i + d_num_ghosts[0]) +
+                                        (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
                                         (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                                    
-                                    const int idx_face_z = k +
-                                        i*(interior_dims[2] + 1) +
-                                        j*(interior_dims[2] + 1)*interior_dims[0];
-                                    
-                                    /*
-                                     * Compute the maximum wave speed of each equation locally.
-                                     */
-                                    
-                                    std::vector<double> alpha_z;
-                                    for (int ei = 0; ei < d_num_eqn; ei++)
-                                    {
-                                        alpha_z.push_back(fmax(fabs(lambda_z[ei][idx_cell_B]),
-                                            fabs(lambda_z[ei][idx_cell_F])));
-                                    }
-                                    
-                                    boost::multi_array<double, 2> G_z_plus_array(
-                                        boost::extents[6][d_num_eqn]);
-                                    
-                                    boost::multi_array<double, 2> G_z_minus_array(
-                                        boost::extents[6][d_num_eqn]);
-                                    
-                                    /*
-                                     * Project fluxes onto characteristic fields.
-                                     */
-                                    
-                                    boost::multi_array<const double*, 2> R_z_inv_intercell(
-                                        boost::extents[d_num_eqn][d_num_eqn]);
-                                    
-                                    for (int ei = 0; ei < d_num_eqn; ei++)
-                                    {
-                                        for (int ej = 0; ej < d_num_eqn; ej++)
-                                        {
-                                            R_z_inv_intercell[ei][ej] =
-                                                &(projection_matrix->getPointer(2, ei + ej*d_num_eqn)[idx_face_z]);
-                                        }
-                                    }
-                                    
-                                    for (int m = 0; m < 6; m++)
-                                    {
-                                        const int idx_cell = (i + d_num_ghosts[0]) +
+                                        
+                                        const int idx_cell_T = (i + d_num_ghosts[0]) +
                                             (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                            (k - 3 + m + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                            (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                                         
-                                        std::vector<const double*> F_z_ptr;
+                                        const int idx_face_y = j +
+                                            k*(interior_dims[1] + 1) +
+                                            i*(interior_dims[1] + 1)*interior_dims[2];
+                                        
+                                        // Get bottom and top quantities.
+                                        const double& u_B = u[idx_cell_B];
+                                        const double& u_T = u[idx_cell_T];
+                                        
+                                        const double& v_B = v[idx_cell_B];
+                                        const double& v_T = v[idx_cell_T];
+                                        
+                                        const double& w_B = w[idx_cell_B];
+                                        const double& w_T = w[idx_cell_T];
+                                        
+                                        const double& c_B = c[idx_cell_B];
+                                        const double& c_T = c[idx_cell_T];
+                                        
+                                        const double& H_B = H[idx_cell_B];
+                                        const double& H_T = H[idx_cell_T];
+                                        
+                                        // Compute simply-averaged quantities.
+                                        const double u_average = 0.5*(u_B + u_T);
+                                        const double v_average = 0.5*(v_B + v_T);
+                                        const double w_average = 0.5*(w_B + w_T);
+                                        const double c_average = 0.5*(c_B + c_T);
+                                        const double H_average = 0.5*(H_B + H_T);
+                                        
+                                        boost::multi_array<double*, 2> R_y_intercell(
+                                            boost::extents[d_num_eqn][d_num_eqn]);
+                                        
+                                        boost::multi_array<double*, 2> R_y_inv_intercell(
+                                            boost::extents[d_num_eqn][d_num_eqn]);
+                                        
                                         for (int ei = 0; ei < d_num_eqn; ei++)
                                         {
-                                            F_z_ptr.push_back(&F_z_node[ei][idx_cell]);
+                                            for (int ej = 0; ej < d_num_eqn; ej++)
+                                            {
+                                                R_y_intercell[ei][ej] =
+                                                    &(projection_matrix_inv->getPointer(1, ei + ej*d_num_eqn)[idx_face_y]);
+                                                
+                                                R_y_inv_intercell[ei][ej] =
+                                                    &(projection_matrix->getPointer(1, ei + ej*d_num_eqn)[idx_face_y]);
+                                            }
                                         }
                                         
-                                        std::vector<double> G_z(d_num_eqn, 0.0);
-                                        std::vector<double*> G_z_ptr;
+                                        *R_y_intercell[0][0] = 1.0;
+                                        *R_y_intercell[0][1] = 0.0;
+                                        *R_y_intercell[0][2] = 0.0;
+                                        *R_y_intercell[0][3] = 1.0;
+                                        *R_y_intercell[0][4] = 1.0;
+                                        *R_y_intercell[1][0] = u_average;
+                                        *R_y_intercell[1][1] = 1.0;
+                                        *R_y_intercell[1][2] = 0.0;
+                                        *R_y_intercell[1][3] = u_average;
+                                        *R_y_intercell[1][4] = u_average;
+                                        *R_y_intercell[2][0] = v_average - c_average;
+                                        *R_y_intercell[2][1] = 0.0;
+                                        *R_y_intercell[2][2] = 0.0;
+                                        *R_y_intercell[2][3] = v_average;
+                                        *R_y_intercell[2][4] = v_average + c_average;
+                                        *R_y_intercell[3][0] = w_average;
+                                        *R_y_intercell[3][1] = 0.0;
+                                        *R_y_intercell[3][2] = 1.0;
+                                        *R_y_intercell[3][3] = w_average;
+                                        *R_y_intercell[3][4] = w_average;
+                                        *R_y_intercell[4][0] = H_average - v_average*c_average;
+                                        *R_y_intercell[4][1] = u_average;
+                                        *R_y_intercell[4][2] = w_average;
+                                        *R_y_intercell[4][3] = 0.5*(u_average*u_average + v_average*v_average +
+                                            w_average*w_average);
+                                        *R_y_intercell[4][4] = H_average + v_average*c_average;
+                                        
+                                        const double gamma = d_equation_of_state->
+                                            getSpeciesThermodynamicProperty(
+                                                "gamma",
+                                                0);
+                                        const double b_1 = (gamma - 1)/(c_average*c_average);
+                                        const double b_2 = 0.5*(u_average*u_average + v_average*v_average +
+                                            w_average*w_average)*b_1;
+                                        
+                                        *R_y_inv_intercell[0][0] = 0.5*(b_2 + v_average/c_average);
+                                        *R_y_inv_intercell[0][1] = -0.5*b_1*u_average;
+                                        *R_y_inv_intercell[0][2] = -0.5*(b_1*v_average + 1.0/c_average);
+                                        *R_y_inv_intercell[0][3] = -0.5*b_1*w_average;
+                                        *R_y_inv_intercell[0][4] = 0.5*b_1;
+                                        *R_y_inv_intercell[1][0] = -u_average;
+                                        *R_y_inv_intercell[1][1] = 1.0;
+                                        *R_y_inv_intercell[1][2] = 0.0;
+                                        *R_y_inv_intercell[1][3] = 0.0;
+                                        *R_y_inv_intercell[1][4] = 0.0;
+                                        *R_y_inv_intercell[2][0] = -w_average;
+                                        *R_y_inv_intercell[2][1] = 0.0;
+                                        *R_y_inv_intercell[2][2] = 0.0;
+                                        *R_y_inv_intercell[2][3] = 1.0;
+                                        *R_y_inv_intercell[2][4] = 0.0;
+                                        *R_y_inv_intercell[3][0] = 1 - b_2;
+                                        *R_y_inv_intercell[3][1] = b_1*u_average;
+                                        *R_y_inv_intercell[3][2] = b_1*v_average;
+                                        *R_y_inv_intercell[3][3] = b_1*w_average;
+                                        *R_y_inv_intercell[3][4] = -b_1;
+                                        *R_y_inv_intercell[4][0] = 0.5*(b_2 - v_average/c_average);
+                                        *R_y_inv_intercell[4][1] = -0.5*b_1*u_average;
+                                        *R_y_inv_intercell[4][2] = 0.5*(-b_1*v_average + 1.0/c_average);
+                                        *R_y_inv_intercell[4][3] = -0.5*b_1*w_average;
+                                        *R_y_inv_intercell[4][4] = 0.5*b_1;
+                                    }
+                                }
+                            }
+                            
+                            /*
+                             * Compute the projection matrix and its inverse at the face normal to the
+                             * z direction.
+                             */
+                            // Compute the fluxes in the z direction.
+                            for (int j = 0; j < interior_dims[1]; j++)
+                            {
+                                for (int i = 0; i < interior_dims[0]; i++)
+                                {
+                                    for (int k = 0; k < interior_dims[2] + 1; k++)
+                                    {
+                                        // Compute the indices of bottom cell, top cell and face of
+                                        // projection matrix.
+                                        const int idx_cell_B = (i + d_num_ghosts[0]) +
+                                            (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                            (k - 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                        
+                                        const int idx_cell_F = (i + d_num_ghosts[0]) +
+                                            (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                            (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                        
+                                        const int idx_face_z = k +
+                                            i*(interior_dims[2] + 1) +
+                                            j*(interior_dims[2] + 1)*interior_dims[0];
+                                        
+                                        // Get back and front quantities.
+                                        const double& u_B = u[idx_cell_B];
+                                        const double& u_F = u[idx_cell_F];
+                                        
+                                        const double& v_B = v[idx_cell_B];
+                                        const double& v_F = v[idx_cell_F];
+                                        
+                                        const double& w_B = w[idx_cell_B];
+                                        const double& w_F = w[idx_cell_F];
+                                        
+                                        const double& c_B = c[idx_cell_B];
+                                        const double& c_F = c[idx_cell_F];
+                                        
+                                        const double& H_B = H[idx_cell_B];
+                                        const double& H_F = H[idx_cell_F];
+                                        
+                                        // Compute simply-averaged quantities.
+                                        const double u_average = 0.5*(u_B + u_F);
+                                        const double v_average = 0.5*(v_B + v_F);
+                                        const double w_average = 0.5*(w_B + w_F);
+                                        const double c_average = 0.5*(c_B + c_F);
+                                        const double H_average = 0.5*(H_B + H_F);
+                                        
+                                        boost::multi_array<double*, 2> R_z_intercell(
+                                            boost::extents[d_num_eqn][d_num_eqn]);
+                                        
+                                        boost::multi_array<double*, 2> R_z_inv_intercell(
+                                            boost::extents[d_num_eqn][d_num_eqn]);
+                                        
                                         for (int ei = 0; ei < d_num_eqn; ei++)
                                         {
-                                            G_z_ptr.push_back(&G_z[ei]);
+                                            for (int ej = 0; ej < d_num_eqn; ej++)
+                                            {
+                                                R_z_intercell[ei][ej] =
+                                                    &(projection_matrix_inv->getPointer(2, ei + ej*d_num_eqn)[idx_face_z]);
+                                                
+                                                R_z_inv_intercell[ei][ej] =
+                                                    &(projection_matrix->getPointer(2, ei + ej*d_num_eqn)[idx_face_z]);
+                                            }
                                         }
                                         
-                                        projectVariablesToCharacteristicFields(
-                                            G_z_ptr,
-                                            F_z_ptr,
-                                            R_z_inv_intercell);
+                                        *R_z_intercell[0][0] = 1.0;
+                                        *R_z_intercell[0][1] = 0.0;
+                                        *R_z_intercell[0][2] = 0.0;
+                                        *R_z_intercell[0][3] = 1.0;
+                                        *R_z_intercell[0][4] = 1.0;
+                                        *R_z_intercell[1][0] = u_average;
+                                        *R_z_intercell[1][1] = 1.0;
+                                        *R_z_intercell[1][2] = 0.0;
+                                        *R_z_intercell[1][3] = u_average;
+                                        *R_z_intercell[1][4] = u_average;
+                                        *R_z_intercell[2][0] = v_average;
+                                        *R_z_intercell[2][1] = 0.0;
+                                        *R_z_intercell[2][2] = 1.0;
+                                        *R_z_intercell[2][3] = v_average;
+                                        *R_z_intercell[2][4] = v_average;
+                                        *R_z_intercell[3][0] = w_average - c_average;
+                                        *R_z_intercell[3][1] = 0.0;
+                                        *R_z_intercell[3][2] = 0.0;
+                                        *R_z_intercell[3][3] = w_average;
+                                        *R_z_intercell[3][4] = w_average + c_average;
+                                        *R_z_intercell[4][0] = H_average - w_average*c_average;
+                                        *R_z_intercell[4][1] = u_average;
+                                        *R_z_intercell[4][2] = v_average;
+                                        *R_z_intercell[4][3] = 0.5*(u_average*u_average + v_average*v_average +
+                                            w_average*w_average);
+                                        *R_z_intercell[4][4] = H_average + w_average*c_average;
                                         
-                                        std::vector<const double*> Q_ptr;
-                                        Q_ptr.push_back(&rho[idx_cell]);
-                                        Q_ptr.push_back(&rho_u[idx_cell]);
-                                        Q_ptr.push_back(&rho_v[idx_cell]);
-                                        Q_ptr.push_back(&rho_w[idx_cell]);
-                                        Q_ptr.push_back(&E[idx_cell]);
+                                        const double gamma = d_equation_of_state->
+                                            getSpeciesThermodynamicProperty(
+                                                "gamma",
+                                                0);
+                                        const double b_1 = (gamma - 1)/(c_average*c_average);
+                                        const double b_2 = 0.5*(u_average*u_average + v_average*v_average +
+                                            w_average*w_average)*b_1;
                                         
-                                        std::vector<double> V(d_num_eqn, 0.0);
-                                        std::vector<double*> V_ptr;
+                                        *R_z_inv_intercell[0][0] = 0.5*(b_2 + w_average/c_average);
+                                        *R_z_inv_intercell[0][1] = -0.5*b_1*u_average;
+                                        *R_z_inv_intercell[0][2] = -0.5*b_1*v_average;
+                                        *R_z_inv_intercell[0][3] = -0.5*(b_1*w_average + 1.0/c_average);
+                                        *R_z_inv_intercell[0][4] = 0.5*b_1;
+                                        *R_z_inv_intercell[1][0] = -u_average;
+                                        *R_z_inv_intercell[1][1] = 1.0;
+                                        *R_z_inv_intercell[1][2] = 0.0;
+                                        *R_z_inv_intercell[1][3] = 0.0;
+                                        *R_z_inv_intercell[1][4] = 0.0;
+                                        *R_z_inv_intercell[2][0] = -v_average;
+                                        *R_z_inv_intercell[2][1] = 0.0;
+                                        *R_z_inv_intercell[2][2] = 1.0;
+                                        *R_z_inv_intercell[2][3] = 0.0;
+                                        *R_z_inv_intercell[2][4] = 0.0;
+                                        *R_z_inv_intercell[3][0] = 1 - b_2;
+                                        *R_z_inv_intercell[3][1] = b_1*u_average;
+                                        *R_z_inv_intercell[3][2] = b_1*v_average;
+                                        *R_z_inv_intercell[3][3] = b_1*w_average;
+                                        *R_z_inv_intercell[3][4] = -b_1;
+                                        *R_z_inv_intercell[4][0] = 0.5*(b_2 - w_average/c_average);
+                                        *R_z_inv_intercell[4][1] = -0.5*b_1*u_average;
+                                        *R_z_inv_intercell[4][2] = -0.5*b_1*v_average;
+                                        *R_z_inv_intercell[4][3] = -0.5*(b_1*w_average - 1.0/c_average);
+                                        *R_z_inv_intercell[4][4] = 0.5*b_1;
+                                    }
+                                }
+                            }
+                            
+                            // Compute the fluxes in the x direction.
+                            for (int k = 0; k < interior_dims[2]; k++)
+                            {
+                                for (int j = 0; j < interior_dims[1]; j++)
+                                {
+                                    for (int i = 0; i < interior_dims[0] + 1; i++)
+                                    {
+                                        // Compute the indices of left cell, right cell and face.
+                                        const int idx_cell_L = (i - 1 + d_num_ghosts[0]) +
+                                            (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                            (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                        
+                                        const int idx_cell_R = (i + d_num_ghosts[0]) +
+                                            (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                            (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                        
+                                        const int idx_face_x = i +
+                                            j*(interior_dims[0] + 1) +
+                                            k*(interior_dims[0] + 1)*interior_dims[1];
+                                        
+                                        /*
+                                         * Compute the maximum wave speed of each equation locally.
+                                         */
+                                        
+                                        std::vector<double> alpha_x;
                                         for (int ei = 0; ei < d_num_eqn; ei++)
                                         {
-                                            V_ptr.push_back(&V[ei]);
+                                            alpha_x.push_back(fmax(fabs(lambda_x[ei][idx_cell_L]),
+                                                fabs(lambda_x[ei][idx_cell_R])));
                                         }
                                         
-                                        projectVariablesToCharacteristicFields(
-                                            V_ptr,
-                                            Q_ptr,
-                                            R_z_inv_intercell);
+                                        boost::multi_array<double, 2> G_x_plus_array(
+                                            boost::extents[6][d_num_eqn]);
+                                        
+                                        boost::multi_array<double, 2> G_x_minus_array(
+                                            boost::extents[6][d_num_eqn]);
+                                        
+                                        /*
+                                         * Project fluxes onto characteristic fields.
+                                         */
+                                        
+                                        boost::multi_array<const double*, 2> R_x_inv_intercell(
+                                            boost::extents[d_num_eqn][d_num_eqn]);
                                         
                                         for (int ei = 0; ei < d_num_eqn; ei++)
                                         {
-                                            G_z_plus_array[m][ei] = 0.5*(G_z[ei] +
-                                                alpha_z[ei]*V[ei]);
+                                            for (int ej = 0; ej < d_num_eqn; ej++)
+                                            {
+                                                R_x_inv_intercell[ei][ej] =
+                                                    &(projection_matrix->getPointer(0, ei + ej*d_num_eqn)[idx_face_x]);
+                                            }
+                                        }
+                                        
+                                        for (int m = 0; m < 6; m++)
+                                        {
+                                            const int idx_cell = (i - 3 + m + d_num_ghosts[0]) +
+                                                (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                                (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                                             
-                                            G_z_minus_array[m][ei] = 0.5*(G_z[ei] -
-                                                alpha_z[ei]*V[ei]);
+                                            std::vector<const double*> F_x_ptr;
+                                            for (int ei = 0; ei < d_num_eqn; ei++)
+                                            {
+                                                F_x_ptr.push_back(&F_x_node[ei][idx_cell]);
+                                            }
+                                            
+                                            std::vector<double> G_x(d_num_eqn, 0.0);
+                                            std::vector<double*> G_x_ptr;
+                                            for (int ei = 0; ei < d_num_eqn; ei++)
+                                            {
+                                                G_x_ptr.push_back(&G_x[ei]);
+                                            }
+                                            
+                                            projectVariablesToCharacteristicFields(
+                                                G_x_ptr,
+                                                F_x_ptr,
+                                                R_x_inv_intercell);
+                                            
+                                            std::vector<const double*> Q_ptr;
+                                            Q_ptr.push_back(&rho[idx_cell]);
+                                            Q_ptr.push_back(&rho_u[idx_cell]);
+                                            Q_ptr.push_back(&rho_v[idx_cell]);
+                                            Q_ptr.push_back(&rho_w[idx_cell]);
+                                            Q_ptr.push_back(&E[idx_cell]);
+                                            
+                                            std::vector<double> V(d_num_eqn, 0.0);
+                                            std::vector<double*> V_ptr;
+                                            for (int ei = 0; ei < d_num_eqn; ei++)
+                                            {
+                                                V_ptr.push_back(&V[ei]);
+                                            }
+                                            
+                                            projectVariablesToCharacteristicFields(
+                                                V_ptr,
+                                                Q_ptr,
+                                                R_x_inv_intercell);
+                                            
+                                            for (int ei = 0; ei < d_num_eqn; ei++)
+                                            {
+                                                G_x_plus_array[m][ei] = 0.5*(G_x[ei] +
+                                                    alpha_x[ei]*V[ei]);
+                                                
+                                                G_x_minus_array[m][ei] = 0.5*(G_x[ei] -
+                                                    alpha_x[ei]*V[ei]);
+                                            }
                                         }
-                                    }
-                                    
-                                    /*
-                                     * Do WENO reconstruction on characteristic variables to get G_z_plus
-                                     * and G_z_minus
-                                     */
-                                    
-                                    std::vector<double> G_z_plus;
-                                    std::vector<double> G_z_minus;
-                                    
-                                    performWENOReconstruction(G_z_plus, G_z_minus, G_z_plus_array, G_z_minus_array);
-                                    
-                                    /*
-                                     * Project characteristic variables back to physical fields.
-                                     */
-                                    
-                                    boost::multi_array<const double*, 2> R_z_intercell(
-                                        boost::extents[d_num_eqn][d_num_eqn]);
-                                    
-                                    for (int ei = 0; ei < d_num_eqn; ei++)
-                                    {
-                                        for (int ej = 0; ej < d_num_eqn; ej++)
+                                        
+                                        /*
+                                         * Do WENO reconstruction on characteristic variables to get G_x_plus
+                                         * and G_x_minus
+                                         */
+                                        
+                                        std::vector<double> G_x_plus;
+                                        std::vector<double> G_x_minus;
+                                        
+                                        performWENOReconstruction(G_x_plus, G_x_minus, G_x_plus_array, G_x_minus_array);
+                                        
+                                        /*
+                                         * Project characteristic variables back to physical fields.
+                                         */
+                                        
+                                        boost::multi_array<const double*, 2> R_x_intercell(
+                                            boost::extents[d_num_eqn][d_num_eqn]);
+                                        
+                                        for (int ei = 0; ei < d_num_eqn; ei++)
                                         {
-                                            R_z_intercell[ei][ej] =
-                                                &(projection_matrix_inv->getPointer(2, ei + ej*d_num_eqn)[idx_face_z]);
+                                            for (int ej = 0; ej < d_num_eqn; ej++)
+                                            {
+                                                R_x_intercell[ei][ej] =
+                                                    &(projection_matrix_inv->getPointer(0, ei + ej*d_num_eqn)[idx_face_x]);
+                                            }
+                                        }
+                                        
+                                        std::vector<double> F_x_plus(d_num_eqn, 0.0);
+                                        std::vector<double> F_x_minus(d_num_eqn, 0.0);
+                                        
+                                        std::vector<double*> F_x_plus_ptr;
+                                        std::vector<double*> F_x_minus_ptr;
+                                        for (int ei = 0; ei < d_num_eqn; ei++)
+                                        {
+                                            F_x_plus_ptr.push_back(&F_x_plus[ei]);
+                                            F_x_minus_ptr.push_back(&F_x_minus[ei]);
+                                        }
+                                        
+                                        std::vector<const double*> G_x_plus_ptr;
+                                        std::vector<const double*> G_x_minus_ptr;
+                                        for (int ei = 0; ei < d_num_eqn; ei++)
+                                        {
+                                            G_x_plus_ptr.push_back(&G_x_plus[ei]);
+                                            G_x_minus_ptr.push_back(&G_x_minus[ei]);
+                                        }
+                                        
+                                        projectCharacteristicVariablesToPhysicalFields(
+                                            F_x_plus_ptr,
+                                            G_x_plus_ptr,
+                                            R_x_intercell);
+                                        
+                                        projectCharacteristicVariablesToPhysicalFields(
+                                            F_x_minus_ptr,
+                                            G_x_minus_ptr,
+                                            R_x_intercell);
+                                        
+                                        for (int ei = 0; ei < d_num_eqn; ei++)
+                                        {
+                                            double* F_x = convective_flux->getPointer(0, ei);
+                                            F_x[idx_face_x] = dt*(F_x_plus[ei] + F_x_minus[ei]);
                                         }
                                     }
-                                    
-                                    std::vector<double> F_z_plus(d_num_eqn, 0.0);
-                                    std::vector<double> F_z_minus(d_num_eqn, 0.0);
-                                    
-                                    std::vector<double*> F_z_plus_ptr;
-                                    std::vector<double*> F_z_minus_ptr;
-                                    for (int ei = 0; ei < d_num_eqn; ei++)
+                                }
+                            }
+                            
+                            // Compute the fluxes in the y direction.
+                            for (int i = 0; i < interior_dims[0]; i++)
+                            {
+                                for (int k = 0; k < interior_dims[2]; k++)
+                                {
+                                    for (int j = 0; j < interior_dims[1] + 1; j++)
                                     {
-                                        F_z_plus_ptr.push_back(&F_z_plus[ei]);
-                                        F_z_minus_ptr.push_back(&F_z_minus[ei]);
+                                        // Compute the indices of bottom cell, top cell and face.
+                                        const int idx_cell_B = (i + d_num_ghosts[0]) +
+                                        (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                        
+                                        const int idx_cell_T = (i + d_num_ghosts[0]) +
+                                            (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                            (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                        
+                                        const int idx_face_y = j +
+                                            k*(interior_dims[1] + 1) +
+                                            i*(interior_dims[1] + 1)*interior_dims[2];
+                                        
+                                        /*
+                                         * Compute the maximum wave speed of each equation locally.
+                                         */
+                                        
+                                        std::vector<double> alpha_y;
+                                        for (int ei = 0; ei < d_num_eqn; ei++)
+                                        {
+                                            alpha_y.push_back(fmax(fabs(lambda_y[ei][idx_cell_B]),
+                                                fabs(lambda_y[ei][idx_cell_T])));
+                                        }
+                                        
+                                        boost::multi_array<double, 2> G_y_plus_array(
+                                            boost::extents[6][d_num_eqn]);
+                                        
+                                        boost::multi_array<double, 2> G_y_minus_array(
+                                            boost::extents[6][d_num_eqn]);
+                                        
+                                        /*
+                                         * Project fluxes onto characteristic fields.
+                                         */
+                                        
+                                        boost::multi_array<const double*, 2> R_y_inv_intercell(
+                                            boost::extents[d_num_eqn][d_num_eqn]);
+                                        
+                                        for (int ei = 0; ei < d_num_eqn; ei++)
+                                        {
+                                            for (int ej = 0; ej < d_num_eqn; ej++)
+                                            {
+                                                R_y_inv_intercell[ei][ej] =
+                                                    &(projection_matrix->getPointer(1, ei + ej*d_num_eqn)[idx_face_y]);
+                                            }
+                                        }
+                                        
+                                        for (int m = 0; m < 6; m++)
+                                        {
+                                            const int idx_cell = (i + d_num_ghosts[0]) +
+                                                (j - 3 + m + d_num_ghosts[1])*ghostcell_dims[0] +
+                                                (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                            
+                                            std::vector<const double*> F_y_ptr;
+                                            for (int ei = 0; ei < d_num_eqn; ei++)
+                                            {
+                                                F_y_ptr.push_back(&F_y_node[ei][idx_cell]);
+                                            }
+                                            
+                                            std::vector<double> G_y(d_num_eqn, 0.0);
+                                            std::vector<double*> G_y_ptr;
+                                            for (int ei = 0; ei < d_num_eqn; ei++)
+                                            {
+                                                G_y_ptr.push_back(&G_y[ei]);
+                                            }
+                                            
+                                            projectVariablesToCharacteristicFields(
+                                                G_y_ptr,
+                                                F_y_ptr,
+                                                R_y_inv_intercell);
+                                            
+                                            std::vector<const double*> Q_ptr;
+                                            Q_ptr.push_back(&rho[idx_cell]);
+                                            Q_ptr.push_back(&rho_u[idx_cell]);
+                                            Q_ptr.push_back(&rho_v[idx_cell]);
+                                            Q_ptr.push_back(&rho_w[idx_cell]);
+                                            Q_ptr.push_back(&E[idx_cell]);
+                                            
+                                            std::vector<double> V(d_num_eqn, 0.0);
+                                            std::vector<double*> V_ptr;
+                                            for (int ei = 0; ei < d_num_eqn; ei++)
+                                            {
+                                                V_ptr.push_back(&V[ei]);
+                                            }
+                                            
+                                            projectVariablesToCharacteristicFields(
+                                                V_ptr,
+                                                Q_ptr,
+                                                R_y_inv_intercell);
+                                            
+                                            for (int ei = 0; ei < d_num_eqn; ei++)
+                                            {
+                                                G_y_plus_array[m][ei] = 0.5*(G_y[ei] +
+                                                    alpha_y[ei]*V[ei]);
+                                                
+                                                G_y_minus_array[m][ei] = 0.5*(G_y[ei] -
+                                                    alpha_y[ei]*V[ei]);
+                                            }
+                                        }
+                                        
+                                        /*
+                                         * Do WENO reconstruction on characteristic variables to get G_y_plus
+                                         * and G_y_minus
+                                         */
+                                        
+                                        std::vector<double> G_y_plus;
+                                        std::vector<double> G_y_minus;
+                                        
+                                        performWENOReconstruction(G_y_plus, G_y_minus, G_y_plus_array, G_y_minus_array);
+                                        
+                                        /*
+                                         * Project characteristic variables back to physical fields.
+                                         */
+                                        
+                                        boost::multi_array<const double*, 2> R_y_intercell(
+                                            boost::extents[d_num_eqn][d_num_eqn]);
+                                        
+                                        for (int ei = 0; ei < d_num_eqn; ei++)
+                                        {
+                                            for (int ej = 0; ej < d_num_eqn; ej++)
+                                            {
+                                                R_y_intercell[ei][ej] =
+                                                    &(projection_matrix_inv->getPointer(1, ei + ej*d_num_eqn)[idx_face_y]);
+                                            }
+                                        }
+                                        
+                                        std::vector<double> F_y_plus(d_num_eqn, 0.0);
+                                        std::vector<double> F_y_minus(d_num_eqn, 0.0);
+                                        
+                                        std::vector<double*> F_y_plus_ptr;
+                                        std::vector<double*> F_y_minus_ptr;
+                                        for (int ei = 0; ei < d_num_eqn; ei++)
+                                        {
+                                            F_y_plus_ptr.push_back(&F_y_plus[ei]);
+                                            F_y_minus_ptr.push_back(&F_y_minus[ei]);
+                                        }
+                                        
+                                        std::vector<const double*> G_y_plus_ptr;
+                                        std::vector<const double*> G_y_minus_ptr;
+                                        for (int ei = 0; ei < d_num_eqn; ei++)
+                                        {
+                                            G_y_plus_ptr.push_back(&G_y_plus[ei]);
+                                            G_y_minus_ptr.push_back(&G_y_minus[ei]);
+                                        }
+                                        
+                                        projectCharacteristicVariablesToPhysicalFields(
+                                            F_y_plus_ptr,
+                                            G_y_plus_ptr,
+                                            R_y_intercell);
+                                        
+                                        projectCharacteristicVariablesToPhysicalFields(
+                                            F_y_minus_ptr,
+                                            G_y_minus_ptr,
+                                            R_y_intercell);
+                                        
+                                        for (int ei = 0; ei < d_num_eqn; ei++)
+                                        {
+                                            double* F_y = convective_flux->getPointer(1, ei);
+                                            F_y[idx_face_y] = dt*(F_y_plus[ei] + F_y_minus[ei]);
+                                        }
                                     }
-                                    
-                                    std::vector<const double*> G_z_plus_ptr;
-                                    std::vector<const double*> G_z_minus_ptr;
-                                    for (int ei = 0; ei < d_num_eqn; ei++)
+                                }
+                            }
+                            
+                            // Compute the fluxes in the z direction.
+                            for (int j = 0; j < interior_dims[1]; j++)
+                            {
+                                for (int i = 0; i < interior_dims[0]; i++)
+                                {
+                                    for (int k = 0; k < interior_dims[2] + 1; k++)
                                     {
-                                        G_z_plus_ptr.push_back(&G_z_plus[ei]);
-                                        G_z_minus_ptr.push_back(&G_z_minus[ei]);
-                                    }
-                                    
-                                    projectCharacteristicVariablesToPhysicalFields(
-                                        F_z_plus_ptr,
-                                        G_z_plus_ptr,
-                                        R_z_intercell);
-                                    
-                                    projectCharacteristicVariablesToPhysicalFields(
-                                        F_z_minus_ptr,
-                                        G_z_minus_ptr,
-                                        R_z_intercell);
-                                    
-                                    for (int ei = 0; ei < d_num_eqn; ei++)
-                                    {
-                                        double* F_z = convective_flux->getPointer(2, ei);
-                                        F_z[idx_face_z] = dt*(F_z_plus[ei] + F_z_minus[ei]);
+                                        // Compute the indices of back cell, front cell and face.
+                                        const int idx_cell_B = (i + d_num_ghosts[0]) +
+                                            (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                            (k - 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                        
+                                        const int idx_cell_F = (i + d_num_ghosts[0]) +
+                                            (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                            (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                        
+                                        const int idx_face_z = k +
+                                            i*(interior_dims[2] + 1) +
+                                            j*(interior_dims[2] + 1)*interior_dims[0];
+                                        
+                                        /*
+                                         * Compute the maximum wave speed of each equation locally.
+                                         */
+                                        
+                                        std::vector<double> alpha_z;
+                                        for (int ei = 0; ei < d_num_eqn; ei++)
+                                        {
+                                            alpha_z.push_back(fmax(fabs(lambda_z[ei][idx_cell_B]),
+                                                fabs(lambda_z[ei][idx_cell_F])));
+                                        }
+                                        
+                                        boost::multi_array<double, 2> G_z_plus_array(
+                                            boost::extents[6][d_num_eqn]);
+                                        
+                                        boost::multi_array<double, 2> G_z_minus_array(
+                                            boost::extents[6][d_num_eqn]);
+                                        
+                                        /*
+                                         * Project fluxes onto characteristic fields.
+                                         */
+                                        
+                                        boost::multi_array<const double*, 2> R_z_inv_intercell(
+                                            boost::extents[d_num_eqn][d_num_eqn]);
+                                        
+                                        for (int ei = 0; ei < d_num_eqn; ei++)
+                                        {
+                                            for (int ej = 0; ej < d_num_eqn; ej++)
+                                            {
+                                                R_z_inv_intercell[ei][ej] =
+                                                    &(projection_matrix->getPointer(2, ei + ej*d_num_eqn)[idx_face_z]);
+                                            }
+                                        }
+                                        
+                                        for (int m = 0; m < 6; m++)
+                                        {
+                                            const int idx_cell = (i + d_num_ghosts[0]) +
+                                                (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                                (k - 3 + m + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                            
+                                            std::vector<const double*> F_z_ptr;
+                                            for (int ei = 0; ei < d_num_eqn; ei++)
+                                            {
+                                                F_z_ptr.push_back(&F_z_node[ei][idx_cell]);
+                                            }
+                                            
+                                            std::vector<double> G_z(d_num_eqn, 0.0);
+                                            std::vector<double*> G_z_ptr;
+                                            for (int ei = 0; ei < d_num_eqn; ei++)
+                                            {
+                                                G_z_ptr.push_back(&G_z[ei]);
+                                            }
+                                            
+                                            projectVariablesToCharacteristicFields(
+                                                G_z_ptr,
+                                                F_z_ptr,
+                                                R_z_inv_intercell);
+                                            
+                                            std::vector<const double*> Q_ptr;
+                                            Q_ptr.push_back(&rho[idx_cell]);
+                                            Q_ptr.push_back(&rho_u[idx_cell]);
+                                            Q_ptr.push_back(&rho_v[idx_cell]);
+                                            Q_ptr.push_back(&rho_w[idx_cell]);
+                                            Q_ptr.push_back(&E[idx_cell]);
+                                            
+                                            std::vector<double> V(d_num_eqn, 0.0);
+                                            std::vector<double*> V_ptr;
+                                            for (int ei = 0; ei < d_num_eqn; ei++)
+                                            {
+                                                V_ptr.push_back(&V[ei]);
+                                            }
+                                            
+                                            projectVariablesToCharacteristicFields(
+                                                V_ptr,
+                                                Q_ptr,
+                                                R_z_inv_intercell);
+                                            
+                                            for (int ei = 0; ei < d_num_eqn; ei++)
+                                            {
+                                                G_z_plus_array[m][ei] = 0.5*(G_z[ei] +
+                                                    alpha_z[ei]*V[ei]);
+                                                
+                                                G_z_minus_array[m][ei] = 0.5*(G_z[ei] -
+                                                    alpha_z[ei]*V[ei]);
+                                            }
+                                        }
+                                        
+                                        /*
+                                         * Do WENO reconstruction on characteristic variables to get G_z_plus
+                                         * and G_z_minus
+                                         */
+                                        
+                                        std::vector<double> G_z_plus;
+                                        std::vector<double> G_z_minus;
+                                        
+                                        performWENOReconstruction(G_z_plus, G_z_minus, G_z_plus_array, G_z_minus_array);
+                                        
+                                        /*
+                                         * Project characteristic variables back to physical fields.
+                                         */
+                                        
+                                        boost::multi_array<const double*, 2> R_z_intercell(
+                                            boost::extents[d_num_eqn][d_num_eqn]);
+                                        
+                                        for (int ei = 0; ei < d_num_eqn; ei++)
+                                        {
+                                            for (int ej = 0; ej < d_num_eqn; ej++)
+                                            {
+                                                R_z_intercell[ei][ej] =
+                                                    &(projection_matrix_inv->getPointer(2, ei + ej*d_num_eqn)[idx_face_z]);
+                                            }
+                                        }
+                                        
+                                        std::vector<double> F_z_plus(d_num_eqn, 0.0);
+                                        std::vector<double> F_z_minus(d_num_eqn, 0.0);
+                                        
+                                        std::vector<double*> F_z_plus_ptr;
+                                        std::vector<double*> F_z_minus_ptr;
+                                        for (int ei = 0; ei < d_num_eqn; ei++)
+                                        {
+                                            F_z_plus_ptr.push_back(&F_z_plus[ei]);
+                                            F_z_minus_ptr.push_back(&F_z_minus[ei]);
+                                        }
+                                        
+                                        std::vector<const double*> G_z_plus_ptr;
+                                        std::vector<const double*> G_z_minus_ptr;
+                                        for (int ei = 0; ei < d_num_eqn; ei++)
+                                        {
+                                            G_z_plus_ptr.push_back(&G_z_plus[ei]);
+                                            G_z_minus_ptr.push_back(&G_z_minus[ei]);
+                                        }
+                                        
+                                        projectCharacteristicVariablesToPhysicalFields(
+                                            F_z_plus_ptr,
+                                            G_z_plus_ptr,
+                                            R_z_intercell);
+                                        
+                                        projectCharacteristicVariablesToPhysicalFields(
+                                            F_z_minus_ptr,
+                                            G_z_minus_ptr,
+                                            R_z_intercell);
+                                        
+                                        for (int ei = 0; ei < d_num_eqn; ei++)
+                                        {
+                                            double* F_z = convective_flux->getPointer(2, ei);
+                                            F_z[idx_face_z] = dt*(F_z_plus[ei] + F_z_minus[ei]);
+                                        }
                                     }
                                 }
                             }
                         }
                     }
+                    else
+                    {
+                        TBOX_ERROR(d_object_name
+                               << ": "
+                               << "The supplied equation of state cannot be used."
+                               << " Only ideal gas assumption can be used with"
+                               << " the convective flux reconstructor."
+                               << std::endl);
+                    }
+                    
+                    break;
                 }
-                else
+                case FOUR_EQN_SHYUE:
                 {
                     TBOX_ERROR(d_object_name
-                           << ": "
-                           << "The supplied equation of state cannot be used."
-                           << " Only ideal gas assumption can be used with"
-                           << " the convective flux reconstructor."
-                           << std::endl);
+                               << ": "
+                               << "FOUR_EQN_SHYUE flow model is not implemented."
+                               << std::endl);
+                    
+                    break;
                 }
-                
-                break;
-            }
-            case FOUR_EQN_SHYUE:
-            {
-                TBOX_ERROR(d_object_name
-                           << ": "
-                           << "FOUR_EQN_SHYUE flow model is not implemented."
-                           << std::endl);
-                
-                break;
-            }
-            case FIVE_EQN_ALLAIRE:
-            {
-                TBOX_ERROR(d_object_name
-                           << ": "
-                           << "FIVE_EQN_ALLAIRE flow model is not implemented."
-                           << std::endl);
-                
-                break;
-            }
-            default:
-            {
-                TBOX_ERROR(d_object_name
-                    << ": "
-                    << "d_flow_model '"
-                    << d_flow_model
-                    << "' not yet implemented."
-                    << std::endl);
+                case FIVE_EQN_ALLAIRE:
+                {
+                    TBOX_ERROR(d_object_name
+                               << ": "
+                               << "FIVE_EQN_ALLAIRE flow model is not implemented."
+                               << std::endl);
+                    
+                    break;
+                }
+                default:
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": "
+                        << "d_flow_model '"
+                        << d_flow_model
+                        << "' not yet implemented."
+                        << std::endl);
+                }
             }
         }
-        
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Number of ghost cells is not set yet."
+                << std::endl);
+        }
     }
     else
     {
         TBOX_ERROR(d_object_name
             << ": "
-            << "Variables are not set."
+            << "Variables are not set yet."
             << std::endl);
     }
 }

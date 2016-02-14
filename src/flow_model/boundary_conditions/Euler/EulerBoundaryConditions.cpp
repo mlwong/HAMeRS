@@ -12,7 +12,6 @@ EulerBoundaryConditions::EulerBoundaryConditions(
     const std::string& project_name,
     const tbox::Dimension& dim,
     const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
-    const hier::IntVector& num_ghosts,
     const FLOW_MODEL& flow_model,
     const int& num_species,
     const boost::shared_ptr<EquationOfState>& equation_of_state,
@@ -22,7 +21,7 @@ EulerBoundaryConditions::EulerBoundaryConditions(
         d_project_name(project_name),
         d_dim(dim),
         d_grid_geometry(grid_geometry),
-        d_num_ghosts(num_ghosts),
+        d_num_ghosts(hier::IntVector::getZero(d_dim)),
         d_flow_model(flow_model),
         d_num_species(num_species),
         d_equation_of_state(equation_of_state),
@@ -32,7 +31,8 @@ EulerBoundaryConditions::EulerBoundaryConditions(
         d_total_energy(NULL),
         d_mass_fraction(NULL),
         d_volume_fraction(NULL),
-        d_variables_set(false)
+        d_variables_set(false),
+        d_num_ghosts_set(false)
 {
     /*
      * Defaults for boundary conditions. Set to bogus values
@@ -338,6 +338,15 @@ void
 EulerBoundaryConditions::printClassData(std::ostream& os) const
 {
     os << "\nPrint EulerBoundaryConditions object..."
+       << std::endl;
+    
+    os << std::endl;
+    
+    os << "d_variables_set = "
+       << d_variables_set
+       << std::endl;
+    os << "d_num_ghosts_set = "
+       << d_num_ghosts_set
        << std::endl;
     
     os << std::endl;
@@ -1066,800 +1075,820 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
 {
     NULL_USE(fill_time);
     
-    switch (d_flow_model)
+    if (d_variables_set == true)
     {
-        case SINGLE_SPECIES:
+        if (d_num_ghosts_set == true)
         {
-            boost::shared_ptr<pdat::CellData<double> > density(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch.getPatchData(d_density, data_context)));
-            
-            boost::shared_ptr<pdat::CellData<double> > momentum(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch.getPatchData(d_momentum, data_context)));
-            
-            boost::shared_ptr<pdat::CellData<double> > total_energy(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch.getPatchData(d_total_energy, data_context)));
-            
+            switch (d_flow_model)
+            {
+                case SINGLE_SPECIES:
+                {
+                    boost::shared_ptr<pdat::CellData<double> > density(
+                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(d_density, data_context)));
+                    
+                    boost::shared_ptr<pdat::CellData<double> > momentum(
+                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(d_momentum, data_context)));
+                    
+                    boost::shared_ptr<pdat::CellData<double> > total_energy(
+                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(d_total_energy, data_context)));
+                    
 #ifdef DEBUG_CHECK_ASSERTIONS
-            TBOX_ASSERT(density);
-            TBOX_ASSERT(momentum);
-            TBOX_ASSERT(total_energy);
-            
-            TBOX_ASSERT(density->getGhostCellWidth() == d_num_ghosts);
-            TBOX_ASSERT(momentum->getGhostCellWidth() == d_num_ghosts);
-            TBOX_ASSERT(total_energy->getGhostCellWidth() == d_num_ghosts);
+                    TBOX_ASSERT(density);
+                    TBOX_ASSERT(momentum);
+                    TBOX_ASSERT(total_energy);
+                    
+                    TBOX_ASSERT(density->getGhostCellWidth() == d_num_ghosts);
+                    TBOX_ASSERT(momentum->getGhostCellWidth() == d_num_ghosts);
+                    TBOX_ASSERT(total_energy->getGhostCellWidth() == d_num_ghosts);
 #endif
-            
-            if (d_dim == tbox::Dimension(1))
-            {
-                // NOT YET IMPLEMENTED
-            }
-            else if (d_dim == tbox::Dimension(2))
-            {
-                /*
-                 * Set boundary conditions for cells corresponding to patch edges.
-                 */
-                
-                appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
-                    "density",
-                    density,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_edge_conds,
-                    d_bdry_edge_density);
-                
-                appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
-                    "momentum",
-                    momentum,
-                    patch,
-                    ghost_width_to_fill,
-                    d_vector_bdry_edge_conds,
-                    d_bdry_edge_momentum);
-                
-                appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
-                    "total energy",
-                    total_energy,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_edge_conds,
-                    d_bdry_edge_total_energy);
-                
-                /*
-                 *  Set boundary conditions for cells corresponding to patch nodes.
-                 */
-                
-                appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
-                    "density",
-                    density,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_node_conds,
-                    d_bdry_edge_density);
-                
-                appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
-                    "momentum",
-                    momentum,
-                    patch,
-                    ghost_width_to_fill,
-                    d_vector_bdry_node_conds,
-                    d_bdry_edge_momentum);
-                
-                appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
-                    "total energy",
-                    total_energy,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_node_conds,
-                    d_bdry_edge_total_energy);
-            }
-            else if (d_dim == tbox::Dimension(3))
-            {
-                /*
-                 *  Set boundary conditions for cells corresponding to patch faces.
-                 */
-                
-                appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
-                    "density",
-                    density,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_face_conds,
-                    d_bdry_face_density);
-                
-                appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
-                    "momentum",
-                    momentum,
-                    patch,
-                    ghost_width_to_fill,
-                    d_vector_bdry_face_conds,
-                    d_bdry_face_momentum);
-                
-                appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
-                    "total energy",
-                    total_energy,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_face_conds,
-                    d_bdry_face_total_energy);
-                
-                /*
-                 *  Set boundary conditions for cells corresponding to patch edges.
-                 */
-                
-                appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
-                    "density",
-                    density,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_edge_conds,
-                    d_bdry_face_density);
-                
-                appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
-                    "momentum",
-                    momentum,
-                    patch,
-                    ghost_width_to_fill,
-                    d_vector_bdry_edge_conds,
-                    d_bdry_face_momentum);
-                
-                appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
-                    "total energy",
-                    total_energy,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_edge_conds,
-                    d_bdry_face_total_energy);
-                
-                /*
-                 *  Set boundary conditions for cells corresponding to patch nodes.
-                 */
-                
-                appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
-                    "density",
-                    density,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_node_conds,
-                    d_bdry_face_density);
-                
-                appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
-                    "momentum",
-                    momentum,
-                    patch,
-                    ghost_width_to_fill,
-                    d_vector_bdry_node_conds,
-                    d_bdry_face_momentum);
-                
-                appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
-                    "total energy",
-                    total_energy,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_node_conds,
-                    d_bdry_face_total_energy);
-            }
-            
-            break;
-        }
-        case FOUR_EQN_SHYUE:
-        {
-            boost::shared_ptr<pdat::CellData<double> > density(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch.getPatchData(d_density, data_context)));
-            
-            boost::shared_ptr<pdat::CellData<double> > momentum(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch.getPatchData(d_momentum, data_context)));
-            
-            boost::shared_ptr<pdat::CellData<double> > total_energy(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch.getPatchData(d_total_energy, data_context)));
-            
-            boost::shared_ptr<pdat::CellData<double> > mass_fraction(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch.getPatchData(d_mass_fraction, data_context)));
-            
+                    
+                    if (d_dim == tbox::Dimension(1))
+                    {
+                        // NOT YET IMPLEMENTED
+                    }
+                    else if (d_dim == tbox::Dimension(2))
+                    {
+                        /*
+                         * Set boundary conditions for cells corresponding to patch edges.
+                         */
+                        
+                        appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
+                            "density",
+                            density,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_edge_conds,
+                            d_bdry_edge_density);
+                        
+                        appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
+                            "momentum",
+                            momentum,
+                            patch,
+                            ghost_width_to_fill,
+                            d_vector_bdry_edge_conds,
+                            d_bdry_edge_momentum);
+                        
+                        appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
+                            "total energy",
+                            total_energy,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_edge_conds,
+                            d_bdry_edge_total_energy);
+                        
+                        /*
+                         *  Set boundary conditions for cells corresponding to patch nodes.
+                         */
+                        
+                        appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
+                            "density",
+                            density,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_node_conds,
+                            d_bdry_edge_density);
+                        
+                        appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
+                            "momentum",
+                            momentum,
+                            patch,
+                            ghost_width_to_fill,
+                            d_vector_bdry_node_conds,
+                            d_bdry_edge_momentum);
+                        
+                        appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
+                            "total energy",
+                            total_energy,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_node_conds,
+                            d_bdry_edge_total_energy);
+                    }
+                    else if (d_dim == tbox::Dimension(3))
+                    {
+                        /*
+                         *  Set boundary conditions for cells corresponding to patch faces.
+                         */
+                        
+                        appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
+                            "density",
+                            density,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_face_conds,
+                            d_bdry_face_density);
+                        
+                        appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
+                            "momentum",
+                            momentum,
+                            patch,
+                            ghost_width_to_fill,
+                            d_vector_bdry_face_conds,
+                            d_bdry_face_momentum);
+                        
+                        appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
+                            "total energy",
+                            total_energy,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_face_conds,
+                            d_bdry_face_total_energy);
+                        
+                        /*
+                         *  Set boundary conditions for cells corresponding to patch edges.
+                         */
+                        
+                        appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
+                            "density",
+                            density,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_edge_conds,
+                            d_bdry_face_density);
+                        
+                        appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
+                            "momentum",
+                            momentum,
+                            patch,
+                            ghost_width_to_fill,
+                            d_vector_bdry_edge_conds,
+                            d_bdry_face_momentum);
+                        
+                        appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
+                            "total energy",
+                            total_energy,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_edge_conds,
+                            d_bdry_face_total_energy);
+                        
+                        /*
+                         *  Set boundary conditions for cells corresponding to patch nodes.
+                         */
+                        
+                        appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
+                            "density",
+                            density,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_node_conds,
+                            d_bdry_face_density);
+                        
+                        appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
+                            "momentum",
+                            momentum,
+                            patch,
+                            ghost_width_to_fill,
+                            d_vector_bdry_node_conds,
+                            d_bdry_face_momentum);
+                        
+                        appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
+                            "total energy",
+                            total_energy,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_node_conds,
+                            d_bdry_face_total_energy);
+                    }
+                    
+                    break;
+                }
+                case FOUR_EQN_SHYUE:
+                {
+                    boost::shared_ptr<pdat::CellData<double> > density(
+                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(d_density, data_context)));
+                    
+                    boost::shared_ptr<pdat::CellData<double> > momentum(
+                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(d_momentum, data_context)));
+                    
+                    boost::shared_ptr<pdat::CellData<double> > total_energy(
+                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(d_total_energy, data_context)));
+                    
+                    boost::shared_ptr<pdat::CellData<double> > mass_fraction(
+                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(d_mass_fraction, data_context)));
+                    
 #ifdef DEBUG_CHECK_ASSERTIONS
-            TBOX_ASSERT(density);
-            TBOX_ASSERT(momentum);
-            TBOX_ASSERT(total_energy);
-            TBOX_ASSERT(mass_fraction);
-            
-            TBOX_ASSERT(density->getGhostCellWidth() == d_num_ghosts);
-            TBOX_ASSERT(momentum->getGhostCellWidth() == d_num_ghosts);
-            TBOX_ASSERT(total_energy->getGhostCellWidth() == d_num_ghosts);
-            TBOX_ASSERT(mass_fraction->getGhostCellWidth() == d_num_ghosts);
+                    TBOX_ASSERT(density);
+                    TBOX_ASSERT(momentum);
+                    TBOX_ASSERT(total_energy);
+                    TBOX_ASSERT(mass_fraction);
+                    
+                    TBOX_ASSERT(density->getGhostCellWidth() == d_num_ghosts);
+                    TBOX_ASSERT(momentum->getGhostCellWidth() == d_num_ghosts);
+                    TBOX_ASSERT(total_energy->getGhostCellWidth() == d_num_ghosts);
+                    TBOX_ASSERT(mass_fraction->getGhostCellWidth() == d_num_ghosts);
 #endif
-            
-            if (d_dim == tbox::Dimension(1))
-            {
-                // NOT YET IMPLEMENTED
-            }
-            else if (d_dim == tbox::Dimension(2))
-            {
-                /*
-                 * Set boundary conditions for cells corresponding to patch edges.
-                 */
-                
-                appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
-                    "density",
-                    density,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_edge_conds,
-                    d_bdry_edge_density);
-                
-                appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
-                    "momentum",
-                    momentum,
-                    patch,
-                    ghost_width_to_fill,
-                    d_vector_bdry_edge_conds,
-                    d_bdry_edge_momentum);
-                
-                appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
-                    "total energy",
-                    total_energy,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_edge_conds,
-                    d_bdry_edge_total_energy);
-                
-                appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
-                    "mass fraction",
-                    mass_fraction,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_edge_conds,
-                    d_bdry_edge_mass_fraction);
-                
-                /*
-                 *  Set boundary conditions for cells corresponding to patch nodes.
-                 */
-                
-                appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
-                    "density",
-                    density,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_node_conds,
-                    d_bdry_edge_density);
-                
-                appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
-                    "momentum",
-                    momentum,
-                    patch,
-                    ghost_width_to_fill,
-                    d_vector_bdry_node_conds,
-                    d_bdry_edge_momentum);
-                
-                appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
-                    "total energy",
-                    total_energy,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_node_conds,
-                    d_bdry_edge_total_energy);
-                
-                appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
-                    "mass fraction",
-                    mass_fraction,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_node_conds,
-                    d_bdry_edge_mass_fraction);
-            }
-            else if (d_dim == tbox::Dimension(3))
-            {
-                /*
-                 *  Set boundary conditions for cells corresponding to patch faces.
-                 */
-                
-                appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
-                    "density",
-                    density,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_face_conds,
-                    d_bdry_face_density);
-                
-                appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
-                    "momentum",
-                    momentum,
-                    patch,
-                    ghost_width_to_fill,
-                    d_vector_bdry_face_conds,
-                    d_bdry_face_momentum);
-                
-                appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
-                    "total energy",
-                    total_energy,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_face_conds,
-                    d_bdry_face_total_energy);
-                
-                appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
-                    "mass fraction",
-                    mass_fraction,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_face_conds,
-                    d_bdry_face_mass_fraction);
-                
-                /*
-                 *  Set boundary conditions for cells corresponding to patch edges.
-                 */
-                
-                appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
-                    "density",
-                    density,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_edge_conds,
-                    d_bdry_face_density);
-                
-                appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
-                    "momentum",
-                    momentum,
-                    patch,
-                    ghost_width_to_fill,
-                    d_vector_bdry_edge_conds,
-                    d_bdry_face_momentum);
-                
-                appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
-                    "total energy",
-                    total_energy,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_edge_conds,
-                    d_bdry_face_total_energy);
-                
-                appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
-                    "mass fraction",
-                    mass_fraction,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_edge_conds,
-                    d_bdry_face_mass_fraction);
-                
-                /*
-                 *  Set boundary conditions for cells corresponding to patch nodes.
-                 */
-                
-                appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
-                    "density",
-                    density,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_node_conds,
-                    d_bdry_face_density);
-                
-                appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
-                    "momentum",
-                    momentum,
-                    patch,
-                    ghost_width_to_fill,
-                    d_vector_bdry_node_conds,
-                    d_bdry_face_momentum);
-                
-                appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
-                    "total energy",
-                    total_energy,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_node_conds,
-                    d_bdry_face_total_energy);
-                
-                appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
-                    "mass fraction",
-                    mass_fraction,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_node_conds,
-                    d_bdry_face_mass_fraction);
-            }
-            
-            break;
-        }
-        case FIVE_EQN_ALLAIRE:
-        {
-            boost::shared_ptr<pdat::CellData<double> > partial_density(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch.getPatchData(d_partial_density, data_context)));
-            
-            boost::shared_ptr<pdat::CellData<double> > momentum(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch.getPatchData(d_momentum, data_context)));
-            
-            boost::shared_ptr<pdat::CellData<double> > total_energy(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch.getPatchData(d_total_energy, data_context)));
-            
-            boost::shared_ptr<pdat::CellData<double> > volume_fraction(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch.getPatchData(d_volume_fraction, data_context)));
-            
+                    
+                    if (d_dim == tbox::Dimension(1))
+                    {
+                        // NOT YET IMPLEMENTED
+                    }
+                    else if (d_dim == tbox::Dimension(2))
+                    {
+                        /*
+                         * Set boundary conditions for cells corresponding to patch edges.
+                         */
+                        
+                        appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
+                            "density",
+                            density,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_edge_conds,
+                            d_bdry_edge_density);
+                        
+                        appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
+                            "momentum",
+                            momentum,
+                            patch,
+                            ghost_width_to_fill,
+                            d_vector_bdry_edge_conds,
+                            d_bdry_edge_momentum);
+                        
+                        appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
+                            "total energy",
+                            total_energy,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_edge_conds,
+                            d_bdry_edge_total_energy);
+                        
+                        appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
+                            "mass fraction",
+                            mass_fraction,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_edge_conds,
+                            d_bdry_edge_mass_fraction);
+                        
+                        /*
+                         *  Set boundary conditions for cells corresponding to patch nodes.
+                         */
+                        
+                        appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
+                            "density",
+                            density,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_node_conds,
+                            d_bdry_edge_density);
+                        
+                        appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
+                            "momentum",
+                            momentum,
+                            patch,
+                            ghost_width_to_fill,
+                            d_vector_bdry_node_conds,
+                            d_bdry_edge_momentum);
+                        
+                        appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
+                            "total energy",
+                            total_energy,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_node_conds,
+                            d_bdry_edge_total_energy);
+                        
+                        appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
+                            "mass fraction",
+                            mass_fraction,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_node_conds,
+                            d_bdry_edge_mass_fraction);
+                    }
+                    else if (d_dim == tbox::Dimension(3))
+                    {
+                        /*
+                         *  Set boundary conditions for cells corresponding to patch faces.
+                         */
+                        
+                        appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
+                            "density",
+                            density,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_face_conds,
+                            d_bdry_face_density);
+                        
+                        appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
+                            "momentum",
+                            momentum,
+                            patch,
+                            ghost_width_to_fill,
+                            d_vector_bdry_face_conds,
+                            d_bdry_face_momentum);
+                        
+                        appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
+                            "total energy",
+                            total_energy,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_face_conds,
+                            d_bdry_face_total_energy);
+                        
+                        appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
+                            "mass fraction",
+                            mass_fraction,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_face_conds,
+                            d_bdry_face_mass_fraction);
+                        
+                        /*
+                         *  Set boundary conditions for cells corresponding to patch edges.
+                         */
+                        
+                        appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
+                            "density",
+                            density,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_edge_conds,
+                            d_bdry_face_density);
+                        
+                        appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
+                            "momentum",
+                            momentum,
+                            patch,
+                            ghost_width_to_fill,
+                            d_vector_bdry_edge_conds,
+                            d_bdry_face_momentum);
+                        
+                        appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
+                            "total energy",
+                            total_energy,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_edge_conds,
+                            d_bdry_face_total_energy);
+                        
+                        appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
+                            "mass fraction",
+                            mass_fraction,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_edge_conds,
+                            d_bdry_face_mass_fraction);
+                        
+                        /*
+                         *  Set boundary conditions for cells corresponding to patch nodes.
+                         */
+                        
+                        appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
+                            "density",
+                            density,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_node_conds,
+                            d_bdry_face_density);
+                        
+                        appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
+                            "momentum",
+                            momentum,
+                            patch,
+                            ghost_width_to_fill,
+                            d_vector_bdry_node_conds,
+                            d_bdry_face_momentum);
+                        
+                        appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
+                            "total energy",
+                            total_energy,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_node_conds,
+                            d_bdry_face_total_energy);
+                        
+                        appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
+                            "mass fraction",
+                            mass_fraction,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_node_conds,
+                            d_bdry_face_mass_fraction);
+                    }
+                    
+                    break;
+                }
+                case FIVE_EQN_ALLAIRE:
+                {
+                    boost::shared_ptr<pdat::CellData<double> > partial_density(
+                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(d_partial_density, data_context)));
+                    
+                    boost::shared_ptr<pdat::CellData<double> > momentum(
+                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(d_momentum, data_context)));
+                    
+                    boost::shared_ptr<pdat::CellData<double> > total_energy(
+                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(d_total_energy, data_context)));
+                    
+                    boost::shared_ptr<pdat::CellData<double> > volume_fraction(
+                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(d_volume_fraction, data_context)));
+                    
 #ifdef DEBUG_CHECK_ASSERTIONS
-            TBOX_ASSERT(partial_density);
-            TBOX_ASSERT(momentum);
-            TBOX_ASSERT(total_energy);
-            TBOX_ASSERT(volume_fraction);
-            
-            TBOX_ASSERT(partial_density->getGhostCellWidth() == d_num_ghosts);
-            TBOX_ASSERT(momentum->getGhostCellWidth() == d_num_ghosts);
-            TBOX_ASSERT(total_energy->getGhostCellWidth() == d_num_ghosts);
-            TBOX_ASSERT(volume_fraction->getGhostCellWidth() == d_num_ghosts);
+                    TBOX_ASSERT(partial_density);
+                    TBOX_ASSERT(momentum);
+                    TBOX_ASSERT(total_energy);
+                    TBOX_ASSERT(volume_fraction);
+                    
+                    TBOX_ASSERT(partial_density->getGhostCellWidth() == d_num_ghosts);
+                    TBOX_ASSERT(momentum->getGhostCellWidth() == d_num_ghosts);
+                    TBOX_ASSERT(total_energy->getGhostCellWidth() == d_num_ghosts);
+                    TBOX_ASSERT(volume_fraction->getGhostCellWidth() == d_num_ghosts);
 #endif
+                    
+                    if (d_dim == tbox::Dimension(1))
+                    {
+                        // NOT YET IMPLEMENTED
+                    }
+                    else if (d_dim == tbox::Dimension(2))
+                    {
+                        /*
+                         * Set boundary conditions for cells corresponding to patch edges.
+                         */
+                        
+                        appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
+                            "partial density",
+                            partial_density,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_edge_conds,
+                            d_bdry_edge_partial_density);
+                        
+                        appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
+                            "momentum",
+                            momentum,
+                            patch,
+                            ghost_width_to_fill,
+                            d_vector_bdry_edge_conds,
+                            d_bdry_edge_momentum);
+                        
+                        appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
+                            "total energy",
+                            total_energy,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_edge_conds,
+                            d_bdry_edge_total_energy);
+                        
+                        appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
+                            "volume fraction",
+                            volume_fraction,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_edge_conds,
+                            d_bdry_edge_volume_fraction);
+                        
+                        /*
+                         *  Set boundary conditions for cells corresponding to patch nodes.
+                         */
+                        
+                        appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
+                            "partial density",
+                            partial_density,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_node_conds,
+                            d_bdry_edge_partial_density);
+                        
+                        appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
+                            "momentum",
+                            momentum,
+                            patch,
+                            ghost_width_to_fill,
+                            d_vector_bdry_node_conds,
+                            d_bdry_edge_momentum);
+                        
+                        appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
+                            "total energy",
+                            total_energy,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_node_conds,
+                            d_bdry_edge_total_energy);
+                        
+                        appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
+                            "volume fraction",
+                            volume_fraction,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_node_conds,
+                            d_bdry_edge_volume_fraction);
+                    }
+                    else if (d_dim == tbox::Dimension(3))
+                    {
+                        /*
+                         *  Set boundary conditions for cells corresponding to patch faces.
+                         */
+                        
+                        appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
+                            "partial density",
+                            partial_density,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_face_conds,
+                            d_bdry_face_partial_density);
+                        
+                        appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
+                            "momentum",
+                            momentum,
+                            patch,
+                            ghost_width_to_fill,
+                            d_vector_bdry_face_conds,
+                            d_bdry_face_momentum);
+                        
+                        appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
+                            "total energy",
+                            total_energy,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_face_conds,
+                            d_bdry_face_total_energy);
+                        
+                        appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
+                            "volume fraction",
+                            volume_fraction,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_face_conds,
+                            d_bdry_face_volume_fraction);
+                        
+                        /*
+                         *  Set boundary conditions for cells corresponding to patch edges.
+                         */
+                        
+                        appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
+                            "partial density",
+                            partial_density,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_edge_conds,
+                            d_bdry_face_partial_density);
+                        
+                        appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
+                            "momentum",
+                            momentum,
+                            patch,
+                            ghost_width_to_fill,
+                            d_vector_bdry_edge_conds,
+                            d_bdry_face_momentum);
+                        
+                        appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
+                            "total energy",
+                            total_energy,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_edge_conds,
+                            d_bdry_face_total_energy);
+                        
+                        appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
+                            "volume fraction",
+                            volume_fraction,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_edge_conds,
+                            d_bdry_face_volume_fraction);
+                        
+                        /*
+                         *  Set boundary conditions for cells corresponding to patch nodes.
+                         */
+                        
+                        appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
+                            "partial density",
+                            partial_density,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_node_conds,
+                            d_bdry_face_partial_density);
+                        
+                        appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
+                            "momentum",
+                            momentum,
+                            patch,
+                            ghost_width_to_fill,
+                            d_vector_bdry_node_conds,
+                            d_bdry_face_momentum);
+                        
+                        appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
+                            "total energy",
+                            total_energy,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_node_conds,
+                            d_bdry_face_total_energy);
+                        
+                        appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
+                            "volume fraction",
+                            volume_fraction,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_node_conds,
+                            d_bdry_face_volume_fraction);
+                    }
+                    
+                    break;
+                }
+                default:
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": "
+                        << "d_flow_model '"
+                        << d_flow_model
+                        << "' not yet implemented."
+                        << std::endl);
+                }
+            }
             
-            if (d_dim == tbox::Dimension(1))
+            if (d_project_name == "2D double-Mach reflection")
             {
-                // NOT YET IMPLEMENTED
+                TBOX_ASSERT(d_dim == tbox::Dimension(2));
+                TBOX_ASSERT(d_flow_model == SINGLE_SPECIES);
+                
+                // Get the dimensions of box that covers the interior of patch.
+                hier::Box dummy_box = patch.getBox();
+                const hier::Box interior_box = dummy_box;
+                const hier::IntVector interior_dims = interior_box.numberCells();
+                
+                // Get the dimensions of box that covers interior of patch plus
+                // ghost cells.
+                dummy_box.grow(d_num_ghosts);
+                const hier::Box ghost_box = dummy_box;
+                const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+                
+                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch.getPatchGeometry()));
+                
+#ifdef DEBUG_CHECK_ASSERTIONS
+                    TBOX_ASSERT(patch_geom);
+#endif
+                
+                if (patch_geom->getTouchesRegularBoundary(1, 0) ||
+                    patch_geom->getTouchesRegularBoundary(1, 1))
+                {
+                    const double* const dx = patch_geom->getDx();
+                    const double* const patch_xlo = patch_geom->getXLower();
+                    
+                    boost::shared_ptr<pdat::CellData<double> > density(
+                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                patch.getPatchData(d_density, data_context)));
+                    
+                    boost::shared_ptr<pdat::CellData<double> > momentum(
+                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(d_momentum, data_context)));
+                    
+                    boost::shared_ptr<pdat::CellData<double> > total_energy(
+                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(d_total_energy, data_context)));
+                    
+#ifdef DEBUG_CHECK_ASSERTIONS
+                    TBOX_ASSERT(density);
+                    TBOX_ASSERT(momentum);
+                    TBOX_ASSERT(total_energy);
+                    
+                    TBOX_ASSERT(density->getGhostCellWidth() == d_num_ghosts);
+                    TBOX_ASSERT(momentum->getGhostCellWidth() == d_num_ghosts);
+                    TBOX_ASSERT(total_energy->getGhostCellWidth() == d_num_ghosts);
+#endif
+                    
+                    double* rho   = density->getPointer(0);
+                    double* rho_u = momentum->getPointer(0);
+                    double* rho_v = momentum->getPointer(1);
+                    double* E     = total_energy->getPointer(0);
+                    
+                    const double x_0 = 1.0/6.0;
+                    
+                    const double gamma = 1.4;
+                    
+                    const double rho_post_shock = 8.0;
+                    const double u_post_shock = 8.25*cos(M_PI/6.0);
+                    const double v_post_shock = -8.25*sin(M_PI/6.0);
+                    const double p_post_shock = 116.5;
+                    
+                    const double rho_pre_shock = 1.4;
+                    const double u_pre_shock = 0.0;
+                    const double v_pre_shock = 0.0;
+                    const double p_pre_shock = 1.0;
+                    
+                    const double rho_u_post_shock = rho_post_shock*u_post_shock;
+                    const double rho_v_post_shock = rho_post_shock*v_post_shock;
+                    
+                    const double rho_u_pre_shock = rho_pre_shock*u_pre_shock;
+                    const double rho_v_pre_shock = rho_pre_shock*v_pre_shock;
+                    
+                    const double E_pre_shock = p_pre_shock/(gamma - 1.0) +
+                        0.5*rho_pre_shock*(u_pre_shock*u_pre_shock + v_pre_shock*v_pre_shock);
+                    
+                    const double E_post_shock = p_post_shock/(gamma - 1.0) +
+                        0.5*rho_post_shock*(u_post_shock*u_post_shock + v_post_shock*v_post_shock);
+                    
+                    /*
+                     * Update the bottom boundary conditions.
+                     */
+                    
+                    if (patch_geom->getTouchesRegularBoundary(1, 0))
+                    {
+                        for (int i = 0; i < interior_dims[0]; i++)
+                        {
+                            for (int j = -ghost_width_to_fill[1];
+                                 j < 0;
+                                 j++)
+                            {
+                                const int idx_cell = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                // Compute the coordinates.
+                                double x[2];
+                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                
+                                if (x[0] < x_0)
+                                {
+                                    rho[idx_cell] = rho_post_shock;
+                                    rho_u[idx_cell] = rho_u_post_shock;
+                                    rho_v[idx_cell] = rho_v_post_shock;
+                                    E[idx_cell] = E_post_shock;
+                                }
+                                else
+                                {
+                                    const int idx_mirror_cell = (i + d_num_ghosts[0]) +
+                                        (-j + d_num_ghosts[1] - 1)*ghostcell_dims[0];
+                                    
+                                    rho[idx_cell] = rho[idx_mirror_cell];
+                                    rho_u[idx_cell] = rho_u[idx_mirror_cell];
+                                    rho_v[idx_cell] = -rho_v[idx_mirror_cell];
+                                    E[idx_cell] = E[idx_mirror_cell];
+                                }
+                            }
+                        }
+                    }
+                    
+                    /*
+                     * Update the top boundary conditions.
+                     */
+                    
+                    if (patch_geom->getTouchesRegularBoundary(1, 1))
+                    {
+                        const double x_s = x_0 + (1.0 + 20.0*fill_time)/sqrt(3.0);
+                        
+                        for (int i = 0; i < interior_dims[0]; i++)
+                        {
+                            for (int j = interior_dims[1];
+                                 j < interior_dims[1] + ghost_width_to_fill[1];
+                                 j++)
+                            {
+                                const int idx_cell = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                // Compute the coordinates.
+                                double x[2];
+                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                
+                                if (x[0] >= x_s)
+                                {
+                                    rho[idx_cell] = rho_pre_shock;
+                                    rho_u[idx_cell] = rho_u_pre_shock;
+                                    rho_v[idx_cell] = rho_v_pre_shock;
+                                    E[idx_cell] = E_pre_shock;
+                                }
+                                else
+                                {
+                                    rho[idx_cell] = rho_post_shock;
+                                    rho_u[idx_cell] = rho_u_post_shock;
+                                    rho_v[idx_cell] = rho_v_post_shock;
+                                    E[idx_cell] = E_post_shock;
+                                }
+                            }
+                        }
+                    }
+                }
             }
-            else if (d_dim == tbox::Dimension(2))
-            {
-                /*
-                 * Set boundary conditions for cells corresponding to patch edges.
-                 */
-                
-                appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
-                    "partial density",
-                    partial_density,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_edge_conds,
-                    d_bdry_edge_partial_density);
-                
-                appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
-                    "momentum",
-                    momentum,
-                    patch,
-                    ghost_width_to_fill,
-                    d_vector_bdry_edge_conds,
-                    d_bdry_edge_momentum);
-                
-                appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
-                    "total energy",
-                    total_energy,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_edge_conds,
-                    d_bdry_edge_total_energy);
-                
-                appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
-                    "volume fraction",
-                    volume_fraction,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_edge_conds,
-                    d_bdry_edge_volume_fraction);
-                
-                /*
-                 *  Set boundary conditions for cells corresponding to patch nodes.
-                 */
-                
-                appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
-                    "partial density",
-                    partial_density,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_node_conds,
-                    d_bdry_edge_partial_density);
-                
-                appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
-                    "momentum",
-                    momentum,
-                    patch,
-                    ghost_width_to_fill,
-                    d_vector_bdry_node_conds,
-                    d_bdry_edge_momentum);
-                
-                appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
-                    "total energy",
-                    total_energy,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_node_conds,
-                    d_bdry_edge_total_energy);
-                
-                appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
-                    "volume fraction",
-                    volume_fraction,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_node_conds,
-                    d_bdry_edge_volume_fraction);
-            }
-            else if (d_dim == tbox::Dimension(3))
-            {
-                /*
-                 *  Set boundary conditions for cells corresponding to patch faces.
-                 */
-                
-                appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
-                    "partial density",
-                    partial_density,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_face_conds,
-                    d_bdry_face_partial_density);
-                
-                appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
-                    "momentum",
-                    momentum,
-                    patch,
-                    ghost_width_to_fill,
-                    d_vector_bdry_face_conds,
-                    d_bdry_face_momentum);
-                
-                appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
-                    "total energy",
-                    total_energy,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_face_conds,
-                    d_bdry_face_total_energy);
-                
-                appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
-                    "volume fraction",
-                    volume_fraction,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_face_conds,
-                    d_bdry_face_volume_fraction);
-                
-                /*
-                 *  Set boundary conditions for cells corresponding to patch edges.
-                 */
-                
-                appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
-                    "partial density",
-                    partial_density,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_edge_conds,
-                    d_bdry_face_partial_density);
-                
-                appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
-                    "momentum",
-                    momentum,
-                    patch,
-                    ghost_width_to_fill,
-                    d_vector_bdry_edge_conds,
-                    d_bdry_face_momentum);
-                
-                appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
-                    "total energy",
-                    total_energy,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_edge_conds,
-                    d_bdry_face_total_energy);
-                
-                appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
-                    "volume fraction",
-                    volume_fraction,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_edge_conds,
-                    d_bdry_face_volume_fraction);
-                
-                /*
-                 *  Set boundary conditions for cells corresponding to patch nodes.
-                 */
-                
-                appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
-                    "partial density",
-                    partial_density,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_node_conds,
-                    d_bdry_face_partial_density);
-                
-                appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
-                    "momentum",
-                    momentum,
-                    patch,
-                    ghost_width_to_fill,
-                    d_vector_bdry_node_conds,
-                    d_bdry_face_momentum);
-                
-                appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
-                    "total energy",
-                    total_energy,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_node_conds,
-                    d_bdry_face_total_energy);
-                
-                appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
-                    "volume fraction",
-                    volume_fraction,
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_node_conds,
-                    d_bdry_face_volume_fraction);
-            }
-            
-            break;
         }
-        default:
+        else
         {
             TBOX_ERROR(d_object_name
                 << ": "
-                << "d_flow_model '"
-                << d_flow_model
-                << "' not yet implemented."
+                << "Number of ghost cells is not set yet."
                 << std::endl);
         }
     }
-    
-    if (d_project_name == "2D double-Mach reflection")
+    else
     {
-        TBOX_ASSERT(d_dim == tbox::Dimension(2));
-        TBOX_ASSERT(d_flow_model == SINGLE_SPECIES);
-        
-        // Get the dimensions of box that covers the interior of patch.
-        hier::Box dummy_box = patch.getBox();
-        const hier::Box interior_box = dummy_box;
-        const hier::IntVector interior_dims = interior_box.numberCells();
-        
-        // Get the dimensions of box that covers interior of patch plus
-        // ghost cells.
-        dummy_box.grow(d_num_ghosts);
-        const hier::Box ghost_box = dummy_box;
-        const hier::IntVector ghostcell_dims = ghost_box.numberCells();
-        
-        const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-            BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-                patch.getPatchGeometry()));
-        
-#ifdef DEBUG_CHECK_ASSERTIONS
-            TBOX_ASSERT(patch_geom);
-#endif
-        
-        if (patch_geom->getTouchesRegularBoundary(1, 0) ||
-            patch_geom->getTouchesRegularBoundary(1, 1))
-        {
-            const double* const dx = patch_geom->getDx();
-            const double* const patch_xlo = patch_geom->getXLower();
-            
-            boost::shared_ptr<pdat::CellData<double> > density(
-                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                        patch.getPatchData(d_density, data_context)));
-            
-            boost::shared_ptr<pdat::CellData<double> > momentum(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch.getPatchData(d_momentum, data_context)));
-            
-            boost::shared_ptr<pdat::CellData<double> > total_energy(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch.getPatchData(d_total_energy, data_context)));
-            
-#ifdef DEBUG_CHECK_ASSERTIONS
-            TBOX_ASSERT(density);
-            TBOX_ASSERT(momentum);
-            TBOX_ASSERT(total_energy);
-            
-            TBOX_ASSERT(density->getGhostCellWidth() == d_num_ghosts);
-            TBOX_ASSERT(momentum->getGhostCellWidth() == d_num_ghosts);
-            TBOX_ASSERT(total_energy->getGhostCellWidth() == d_num_ghosts);
-#endif
-            
-            double* rho   = density->getPointer(0);
-            double* rho_u = momentum->getPointer(0);
-            double* rho_v = momentum->getPointer(1);
-            double* E     = total_energy->getPointer(0);
-            
-            const double x_0 = 1.0/6.0;
-            
-            const double gamma = 1.4;
-            
-            const double rho_post_shock = 8.0;
-            const double u_post_shock = 8.25*cos(M_PI/6.0);
-            const double v_post_shock = -8.25*sin(M_PI/6.0);
-            const double p_post_shock = 116.5;
-            
-            const double rho_pre_shock = 1.4;
-            const double u_pre_shock = 0.0;
-            const double v_pre_shock = 0.0;
-            const double p_pre_shock = 1.0;
-            
-            const double rho_u_post_shock = rho_post_shock*u_post_shock;
-            const double rho_v_post_shock = rho_post_shock*v_post_shock;
-            
-            const double rho_u_pre_shock = rho_pre_shock*u_pre_shock;
-            const double rho_v_pre_shock = rho_pre_shock*v_pre_shock;
-            
-            const double E_pre_shock = p_pre_shock/(gamma - 1.0) +
-                0.5*rho_pre_shock*(u_pre_shock*u_pre_shock + v_pre_shock*v_pre_shock);
-            
-            const double E_post_shock = p_post_shock/(gamma - 1.0) +
-                0.5*rho_post_shock*(u_post_shock*u_post_shock + v_post_shock*v_post_shock);
-            
-            /*
-             * Update the bottom boundary conditions.
-             */
-            
-            if (patch_geom->getTouchesRegularBoundary(1, 0))
-            {
-                for (int i = 0; i < interior_dims[0]; i++)
-                {
-                    for (int j = -ghost_width_to_fill[1];
-                         j < 0;
-                         j++)
-                    {
-                        const int idx_cell = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*ghostcell_dims[0];
-                        
-                        // Compute the coordinates.
-                        double x[2];
-                        x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
-                        x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
-                        
-                        if (x[0] < x_0)
-                        {
-                            rho[idx_cell] = rho_post_shock;
-                            rho_u[idx_cell] = rho_u_post_shock;
-                            rho_v[idx_cell] = rho_v_post_shock;
-                            E[idx_cell] = E_post_shock;
-                        }
-                        else
-                        {
-                            const int idx_mirror_cell = (i + d_num_ghosts[0]) +
-                                (-j + d_num_ghosts[1] - 1)*ghostcell_dims[0];
-                            
-                            rho[idx_cell] = rho[idx_mirror_cell];
-                            rho_u[idx_cell] = rho_u[idx_mirror_cell];
-                            rho_v[idx_cell] = -rho_v[idx_mirror_cell];
-                            E[idx_cell] = E[idx_mirror_cell];
-                        }
-                    }
-                }
-            }
-            
-            /*
-             * Update the top boundary conditions.
-             */
-            
-            if (patch_geom->getTouchesRegularBoundary(1, 1))
-            {
-                const double x_s = x_0 + (1.0 + 20.0*fill_time)/sqrt(3.0);
-                
-                for (int i = 0; i < interior_dims[0]; i++)
-                {
-                    for (int j = interior_dims[1];
-                         j < interior_dims[1] + ghost_width_to_fill[1];
-                         j++)
-                    {
-                        const int idx_cell = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*ghostcell_dims[0];
-                        
-                        // Compute the coordinates.
-                        double x[2];
-                        x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
-                        x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
-                        
-                        if (x[0] >= x_s)
-                        {
-                            rho[idx_cell] = rho_pre_shock;
-                            rho_u[idx_cell] = rho_u_pre_shock;
-                            rho_v[idx_cell] = rho_v_pre_shock;
-                            E[idx_cell] = E_pre_shock;
-                        }
-                        else
-                        {
-                            rho[idx_cell] = rho_post_shock;
-                            rho_u[idx_cell] = rho_u_post_shock;
-                            rho_v[idx_cell] = rho_v_post_shock;
-                            E[idx_cell] = E_post_shock;
-                        }
-                    }
-                }
-            }
-        }
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "Variables are not set yet."
+            << std::endl);
     }
 }
 

@@ -189,7 +189,7 @@ class RungeKuttaLevelIntegrator:
                            NO_FILL     = 2,
                            HYP_FLUX    = 3,
                            SOURCE      = 4,
-                           TEMPORARY   = 5 };
+                           TEMPORARY   = 5};
         
         /**
          * Constructor for RungeKuttaLevelIntegrator initializes

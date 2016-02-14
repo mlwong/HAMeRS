@@ -18,7 +18,8 @@
 #include "equation_of_state/EquationOfStateIdealGas.hpp"
 #include "flow_model/boundary_conditions/Euler/EulerBoundaryConditions.hpp"
 #include "flow_model/convective_flux_reconstructor/ConvectiveFluxReconstructor.hpp"
-#include "flow_model/feature_driven_tagger/FeatureDrivenTagger.hpp"
+#include "flow_model/refinement_taggers/gradient_tagger/GradientTagger.hpp"
+#include "flow_model/refinement_taggers/multiresolution_tagger/MultiresolutionTagger.hpp"
 #include "flow_model/initial_conditions/InitialConditions.hpp"
 #include "integrator/RungeKuttaLevelIntegrator.hpp"
 
@@ -124,18 +125,39 @@ class FlowModelManager:
             boost::shared_ptr<EulerBoundaryConditions>& Euler_boundary_conditions);
         
         /*
-         * Initialize d_feature_driven_tagger.
+         * Initialize d_gradient_tagger.
          */
         void
-        initializeFeatureDrivenTagger(
-            const boost::shared_ptr<tbox::Database>& feature_driven_tagger_db,
-            boost::shared_ptr<FeatureDrivenTagger>& feature_driven_tagger);
+        initializeGradientTagger(
+            const boost::shared_ptr<tbox::Database>& gradient_tagger_db,
+            boost::shared_ptr<GradientTagger>& gradient_tagger);
+        
+        /*
+         * Initialize d_multiresolution_tagger.
+         */
+        void
+        initializeMultiresolutionTagger(
+            const boost::shared_ptr<tbox::Database>& multiresolution_tagger_db,
+            boost::shared_ptr<MultiresolutionTagger>& multiresolution_tagger);
+        
+        /*
+         * Compute and set the number of ghost cells needed.
+         */
+        void
+        setNumberOfGhostCells();
         
         /*
          * Register the conservative variables.
          */
         void
         registerConservativeVariables(
+            RungeKuttaLevelIntegrator* integrator);
+        
+        /*
+         * Register the temporary variables used in refinement taggers.
+         */
+        void
+        registerRefinementTaggerVariables(
             RungeKuttaLevelIntegrator* integrator);
         
         /*
@@ -246,10 +268,17 @@ class FlowModelManager:
         
         /*
          * Initialize the number of ghost cells and boost::shared_ptr of the variables
-         * in d_feature_driven_tagger.
+         * in d_gradient_tagger.
          */
         void
-        setVariablesForFeatureDrivenTagger();
+        setVariablesForGradientTagger();
+        
+        /*
+         * Initialize the number of ghost cells and boost::shared_ptr of the variables
+         * in d_multiresolution_tagger.
+         */
+        void
+        setVariablesForMultiresolutionTagger();
         
         /*
          * The object name is used for error/warning reporting.
@@ -307,9 +336,14 @@ class FlowModelManager:
         boost::shared_ptr<EulerBoundaryConditions> d_Euler_boundary_conditions;
         
         /*
-         * boost::shared_ptr to FeatureDrivenTagger.
+         * boost::shared_ptr to GradientTagger.
          */
-        boost::shared_ptr<FeatureDrivenTagger> d_feature_driven_tagger;
+        boost::shared_ptr<GradientTagger> d_gradient_tagger;
+        
+        /*
+         * boost::shared_ptr to MultiresolutionTagger.
+         */
+        boost::shared_ptr<MultiresolutionTagger> d_multiresolution_tagger;
         
         /*
          * boost::shared_ptr to the plotting context.
@@ -332,6 +366,7 @@ class FlowModelManager:
          * Boolean to determine whether d_equation_of_state is initialized.
          */
         bool d_equation_of_state_initialized;
+        
 };
 
 #endif /* FLOW_MODEL_MANAGER_HPP */

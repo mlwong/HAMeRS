@@ -15,7 +15,8 @@ FlowModelManager::FlowModelManager(
                 d_conv_flux_reconstructor(NULL),
                 d_initial_conditions(NULL),
                 d_Euler_boundary_conditions(NULL),
-                d_feature_driven_tagger(NULL),
+                d_gradient_tagger(NULL),
+                d_multiresolution_tagger(NULL),
                 d_plot_context(NULL),
                 d_density(NULL),
                 d_partial_density(NULL),
@@ -328,10 +329,6 @@ FlowModelManager::initializeConvectiveFluxReconstructor(
     
     d_conv_flux_reconstructor = conv_flux_reconstructor;
     
-    // Compute the number of ghost cells required.
-    d_num_ghosts = d_conv_flux_reconstructor->
-        getConvectiveFluxNumberOfGhostCells();
-    
     /*
      * Initialize the number of ghost cells and boost::shared_ptr of the variables
      * in d_conv_flux_reconstructor.
@@ -387,15 +384,6 @@ FlowModelManager::initializeEulerBoundaryConditions(
     const bool& Euler_boundary_conditions_db_is_from_restart,
     boost::shared_ptr<EulerBoundaryConditions>& Euler_boundary_conditions)
 {
-    if (d_num_ghosts == hier::IntVector::getZero(d_dim))
-    {
-        TBOX_ERROR(d_object_name
-            << ": initializeEulerBoundaryConditions()\n"
-            << "The number of ghost cells is not computed yet.\n"
-            << "The flux reconstructors may have not initialized yet."
-            << std::endl);
-    }
-    
     if (!d_equation_of_state_initialized)
     {
         TBOX_ERROR(d_object_name
@@ -409,7 +397,6 @@ FlowModelManager::initializeEulerBoundaryConditions(
         project_name,
         d_dim,
         d_grid_geometry,
-        d_num_ghosts,
         d_flow_model,
         d_num_species,
         d_equation_of_state,
@@ -427,47 +414,120 @@ FlowModelManager::initializeEulerBoundaryConditions(
 
 
 /*
- * Initialize d_feature_driven_tagger.
+ * Initialize d_gradient_tagger.
  */
 void
-FlowModelManager::initializeFeatureDrivenTagger(
-    const boost::shared_ptr<tbox::Database>& feature_driven_tagger_db,
-    boost::shared_ptr<FeatureDrivenTagger>& feature_driven_tagger)
+FlowModelManager::initializeGradientTagger(
+    const boost::shared_ptr<tbox::Database>& gradient_tagger_db,
+    boost::shared_ptr<GradientTagger>& gradient_tagger)
 {
-    if (d_num_ghosts == hier::IntVector::getZero(d_dim))
-    {
-        TBOX_ERROR(d_object_name
-            << ": initializeFeatureDrivenTagger()\n"
-            << "The number of ghost cells is not computed yet.\n"
-            << "The flux reconstructors may have not initialized yet."
-            << std::endl);
-    }
-    
     if (!d_equation_of_state_initialized)
     {
         TBOX_ERROR(d_object_name
-            << ": initializeFeatureDrivenTagger()\n"
+            << ": initializeGradientTagger()\n"
             << "d_equation_of_state is not initialized yet."
             << std::endl);
     }
     
-    feature_driven_tagger.reset(new FeatureDrivenTagger(
-        "feature driven tagger",
+    gradient_tagger.reset(new GradientTagger(
+        "gradient tagger",
         d_dim,
         d_grid_geometry,
-        d_num_ghosts,
         d_flow_model,
         d_num_species,
         d_equation_of_state,
-        feature_driven_tagger_db));
+        gradient_tagger_db));
     
-    d_feature_driven_tagger = feature_driven_tagger;
+    d_gradient_tagger = gradient_tagger;
     
     /*
      * Initialize the number of ghost cells and boost::shared_ptr of the variables
-     * in d_feature_driven_tagger.
+     * in d_gradient_tagger.
      */
-    setVariablesForFeatureDrivenTagger();
+    setVariablesForGradientTagger();
+}
+
+
+/*
+ * Initialize d_multiresolution_tagger.
+ */
+void
+FlowModelManager::initializeMultiresolutionTagger(
+   const boost::shared_ptr<tbox::Database>& multiresolution_tagger_db,
+   boost::shared_ptr<MultiresolutionTagger>& multiresolution_tagger)
+{
+    if (!d_equation_of_state_initialized)
+    {
+        TBOX_ERROR(d_object_name
+            << ": initializeMultiresolutionTagger()\n"
+            << "d_equation_of_state is not initialized yet."
+            << std::endl);
+    }
+    
+    if (multiresolution_tagger_db != nullptr)
+    {
+        multiresolution_tagger.reset(new MultiresolutionTagger(
+            "multiresolution tagger",
+            d_dim,
+            d_grid_geometry,
+            d_flow_model,
+            d_num_species,
+            d_equation_of_state,
+            multiresolution_tagger_db));
+        
+        d_multiresolution_tagger = multiresolution_tagger;
+        
+        /*
+         * Initialize the number of ghost cells and boost::shared_ptr of the variables
+         * in d_multiresolution_tagger.
+         */
+        setVariablesForMultiresolutionTagger();
+    }
+}
+
+
+/*
+ * Compute and set the number of ghost cells needed.
+ */
+void
+FlowModelManager::setNumberOfGhostCells()
+{
+    /*
+     * Compute the number of ghost cells required.
+     */
+    d_num_ghosts = d_conv_flux_reconstructor->
+        getConvectiveFluxNumberOfGhostCells();
+    
+    if (d_gradient_tagger != nullptr)
+    {
+        d_num_ghosts = hier::IntVector::max(
+            d_num_ghosts,
+            d_gradient_tagger->getGradientTaggerNumberOfGhostCells());
+    }
+    
+    if (d_multiresolution_tagger != nullptr)
+    {
+        d_num_ghosts = hier::IntVector::max(
+            d_num_ghosts,
+            d_multiresolution_tagger->getMultiresolutionTaggerNumberOfGhostCells());
+    }
+    
+    /*
+     * Set the number of ghost cells required.
+     */
+    d_conv_flux_reconstructor->setNumberOfGhostCells(d_num_ghosts);
+    
+    d_Euler_boundary_conditions->setNumberOfGhostCells(d_num_ghosts);
+    
+    if (d_gradient_tagger != nullptr)
+    {
+        d_gradient_tagger->setNumberOfGhostCells(d_num_ghosts);
+    }
+    
+    if (d_multiresolution_tagger != nullptr)
+    {
+        d_multiresolution_tagger->setNumberOfGhostCells(d_num_ghosts);
+    }
 }
 
 
@@ -594,6 +654,20 @@ FlowModelManager::registerConservativeVariables(
 
 
 /*
+ * Register the temporary variables used in refinement taggers.
+ */
+void
+FlowModelManager::registerRefinementTaggerVariables(
+   RungeKuttaLevelIntegrator* integrator)
+{
+    if (d_multiresolution_tagger != nullptr)
+    {
+        d_multiresolution_tagger->registerMultiresolutionTaggerVariables(integrator);
+    }
+}
+
+
+/*
  * Set the plotting context.
  */
 void
@@ -614,6 +688,14 @@ FlowModelManager::registerPlotQuantities(
     const boost::shared_ptr<appu::VisItDataWriter>& visit_writer)
 {
     hier::VariableDatabase* vardb = hier::VariableDatabase::getDatabase();
+    
+if (d_multiresolution_tagger != nullptr)
+{
+    d_multiresolution_tagger->registerPlotQuantities(
+        integrator,
+        visit_writer,
+        d_plot_context);
+}
     
     switch (d_flow_model)
     {
@@ -3605,21 +3687,11 @@ FlowModelManager::setVariablesForConvectiveFluxReconstructor(
     boost::shared_ptr<pdat::FaceVariable<double> >& convective_flux,
     boost::shared_ptr<pdat::CellVariable<double> >& source)
 {
-    if (d_num_ghosts == hier::IntVector::getZero(d_dim))
-    {
-        TBOX_ERROR(d_object_name
-            << ": setVariablesForConvectiveFluxReconstructor()\n"
-            << "The number of ghost cells is not computed yet.\n"
-            << "The flux reconstructors may have not initialized yet."
-            << std::endl);
-    }
-    
     switch (d_flow_model)
     {
         case SINGLE_SPECIES:
         {
             d_conv_flux_reconstructor->setVariablesForSingleSpecies(
-                d_num_ghosts,
                 d_density,
                 d_momentum,
                 d_total_energy,
@@ -3631,7 +3703,6 @@ FlowModelManager::setVariablesForConvectiveFluxReconstructor(
         case FOUR_EQN_SHYUE:
         {
             d_conv_flux_reconstructor->setVariablesForFourEqnShyue(
-                d_num_ghosts,
                 d_density,
                 d_momentum,
                 d_total_energy,
@@ -3644,7 +3715,6 @@ FlowModelManager::setVariablesForConvectiveFluxReconstructor(
         case FIVE_EQN_ALLAIRE:
         {
             d_conv_flux_reconstructor->setVariablesForFiveEqnAllaire(
-                d_num_ghosts,
                 d_partial_density,
                 d_momentum,
                 d_total_energy,
@@ -3771,50 +3841,107 @@ FlowModelManager::setVariablesForEulerBoundaryConditions()
 
 /*
  * Initialize the number of ghost cells and boost::shared_ptr of the variables
- * in d_feature_driven_tagger.
+ * in d_gradient_tagger.
  */
 void
-FlowModelManager::setVariablesForFeatureDrivenTagger()
+FlowModelManager::setVariablesForGradientTagger()
 {
-    switch (d_flow_model)
+    if (d_gradient_tagger != nullptr)
     {
-        case SINGLE_SPECIES:
+        switch (d_flow_model)
         {
-            d_feature_driven_tagger->setVariablesForSingleSpecies(
-                d_density,
-                d_momentum,
-                d_total_energy);
-            
-            break;
+            case SINGLE_SPECIES:
+            {
+                d_gradient_tagger->setVariablesForSingleSpecies(
+                    d_density,
+                    d_momentum,
+                    d_total_energy);
+                
+                break;
+            }
+            case FOUR_EQN_SHYUE:
+            {
+                d_gradient_tagger->setVariablesForFourEqnShyue(
+                    d_density,
+                    d_momentum,
+                    d_total_energy,
+                    d_mass_fraction);
+                
+                break;
+            }
+            case FIVE_EQN_ALLAIRE:
+            {
+                d_gradient_tagger->setVariablesForFiveEqnAllaire(
+                    d_partial_density,
+                    d_momentum,
+                    d_total_energy,
+                    d_volume_fraction);
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "d_flow_model '"
+                    << d_flow_model
+                    << "' not yet implemented."
+                    << std::endl);
+            }
         }
-        case FOUR_EQN_SHYUE:
+    }
+}
+
+
+/*
+ * Initialize the number of ghost cells and boost::shared_ptr of the variables
+ * in d_multiresolution_tagger.
+ */
+void
+FlowModelManager::setVariablesForMultiresolutionTagger()
+{
+    if (d_multiresolution_tagger != nullptr)
+    {
+        switch (d_flow_model)
         {
-            d_feature_driven_tagger->setVariablesForFourEqnShyue(
-                d_density,
-                d_momentum,
-                d_total_energy,
-                d_mass_fraction);
-            
-            break;
-        }
-        case FIVE_EQN_ALLAIRE:
-        {
-            d_feature_driven_tagger->setVariablesForFiveEqnAllaire(
-                d_partial_density,
-                d_momentum,
-                d_total_energy,
-                d_volume_fraction);
-            
-            break;
-        }
-        default:
-        {
-            TBOX_ERROR(d_object_name
-                << ": "
-                << "d_flow_model '"
-                << d_flow_model
-                << "' not yet implemented."
-                << std::endl);
+            case SINGLE_SPECIES:
+            {
+                d_multiresolution_tagger->setVariablesForSingleSpecies(
+                    d_density,
+                    d_momentum,
+                    d_total_energy);
+                
+                break;
+            }
+            case FOUR_EQN_SHYUE:
+            {
+                d_multiresolution_tagger->setVariablesForFourEqnShyue(
+                    d_density,
+                    d_momentum,
+                    d_total_energy,
+                    d_mass_fraction);
+                
+                break;
+            }
+            case FIVE_EQN_ALLAIRE:
+            {
+                d_multiresolution_tagger->setVariablesForFiveEqnAllaire(
+                    d_partial_density,
+                    d_momentum,
+                    d_total_energy,
+                    d_volume_fraction);
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "d_flow_model '"
+                    << d_flow_model
+                    << "' not yet implemented."
+                    << std::endl);
+            }
         }
     }
 }

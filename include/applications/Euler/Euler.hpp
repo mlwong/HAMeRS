@@ -23,7 +23,7 @@
 #include "flow_model/FlowModelManager.hpp"
 #include "flow_model/boundary_conditions/Euler/EulerBoundaryConditions.hpp"
 #include "flow_model/convective_flux_reconstructor/ConvectiveFluxReconstructor.hpp"
-#include "flow_model/feature_driven_tagger/FeatureDrivenTagger.hpp"
+#include "flow_model/refinement_taggers/gradient_tagger/GradientTagger.hpp"
 #include "flow_model/initial_conditions/InitialConditions.hpp"
 #include "integrator/RungeKuttaLevelIntegrator.hpp"
 #include "patch_strategy/RungeKuttaPatchStrategy.hpp"
@@ -171,8 +171,9 @@ class Euler:
             const double time,
             const double dt);
         
+        
         /**
-         * Tag cells for refinement using gradient detector.
+         * Tag cells for refinement using values from gradient detector.
          */
         void
         tagGradientDetectorCells(
@@ -180,6 +181,17 @@ class Euler:
             const double regrid_time,
             const bool initial_error,
             const int tag_indx,
+            const bool uses_richardson_extrapolation_too);
+        
+        /**
+         * Compute the gradient using gradient detector.
+         */
+        void
+        preprocessTagGradientDetectorCells(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const int level_number,
+            const double regrid_time,
+            const bool initial_error,
             const bool uses_richardson_extrapolation_too);
         
         //@{
@@ -190,7 +202,7 @@ class Euler:
         ///
         ///      setPhysicalBoundaryConditions(),
         ///      getRefineOpStencilWidth(),
-        ///      preprocessRefine()
+        ///      preprocessRefine(),
         ///      postprocessRefine()
         ///
         ///  are concrete implementations of functions declared in the
@@ -460,11 +472,16 @@ class Euler:
         bool d_Euler_boundary_conditions_db_is_from_restart;
         
         /*
-         * boost::shared_ptr to FeatureDrivenTagger and its database.
+         * boost::shared_ptr to GradientTagger and its database.
          */
-        boost::shared_ptr<FeatureDrivenTagger> d_feature_driven_tagger;
-        boost::shared_ptr<tbox::Database> d_feature_driven_tagger_db;
+        boost::shared_ptr<GradientTagger> d_gradient_tagger;
+        boost::shared_ptr<tbox::Database> d_gradient_tagger_db;
         
+        /*
+         * boost::shared_ptr to MultiresolutionTagger and its database.
+         */
+        boost::shared_ptr<MultiresolutionTagger> d_multiresolution_tagger;
+        boost::shared_ptr<tbox::Database> d_multiresolution_tagger_db;
         
         /*
          * boost::shared_ptr to FlowModelManager.

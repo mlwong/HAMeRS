@@ -139,12 +139,22 @@ class EulerBoundaryConditions:
             const std::string& project_name,
             const tbox::Dimension& dim,
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
-            const hier::IntVector& num_ghosts,
             const FLOW_MODEL& flow_model,
             const int& num_species,
             const boost::shared_ptr<EquationOfState>& equation_of_state,
             const boost::shared_ptr<tbox::Database>& boundary_conditions_db,
             const bool& is_from_restart);
+        
+        /*
+         * Set the number of ghost cells needed.
+         */
+        void
+        setNumberOfGhostCells(const hier::IntVector& num_ghosts)
+        {
+            d_num_ghosts = num_ghosts;
+            
+            d_num_ghosts_set = true;
+        }
         
         /*
          * Set the cell variables if single-species flow model is chosen.
@@ -365,6 +375,11 @@ class EulerBoundaryConditions:
          * Boolean to determine whether proper variables are initialized.
          */
         bool d_variables_set;
+        
+        /*
+         * Boolean to determine whether the number of ghost cells is initialized.
+         */
+        bool d_num_ghosts_set;
         
         /*
          * Boundary condition cases and boundary values.

@@ -539,6 +539,7 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
         hierarchy->getPatchLevel(level_number));
     
     level->allocatePatchData(d_saved_var_scratch_data, error_data_time);
+    level->allocatePatchData(d_temp_var_scratch_data, error_data_time);
     
     d_patch_strategy->setDataContext(d_scratch);
     
@@ -555,6 +556,13 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
     }
     t_error_bdry_fill_comm->stop();
     
+    d_patch_strategy->preprocessTagGradientDetectorCells(
+        hierarchy,
+        level_number,
+        error_data_time,
+        initial_time,
+        uses_richardson_extrapolation_too);
+    
     t_tag_cells->start();
     for (hier::PatchLevel::iterator ip(level->begin());
          ip != level->end();
@@ -570,8 +578,18 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
     }
     t_tag_cells->stop();
     
+    d_patch_strategy->postprocessTagGradientDetectorCells(
+        hierarchy,
+        level_number,
+        error_data_time,
+        initial_time,
+        uses_richardson_extrapolation_too);
+    
     d_patch_strategy->clearDataContext();
     
+    copyTimeDependentData(level, d_scratch, d_current);
+    
+    level->deallocatePatchData(d_temp_var_scratch_data);
     level->deallocatePatchData(d_saved_var_scratch_data);
     
     t_apply_gradient_detector->stop();
@@ -1889,69 +1907,69 @@ RungeKuttaLevelIntegrator::resetDataToPreadvanceState(
  * algorithms takes place here.  The different cases are:
  *
  * TIME_DEP:
- *            The number of factories depends on the number of time
- *            levels of data that must be stored on patches to satisfy
- *            regridding reqs.  Currently, there are two possibilities:
+ *             The number of factories depends on the number of time
+ *             levels of data that must be stored on patches to satisfy
+ *             regridding reqs.  Currently, there are two possibilities:
  *
- *            (1) If the coarsen ratios between levels are even, the
- *                error coarsening ratio will be two and so only two
- *                time levels of data must be maintained on every level
- *                but the finest as usual.
+ *             (1) If the coarsen ratios between levels are even, the
+ *                 error coarsening ratio will be two and so only two
+ *                 time levels of data must be maintained on every level
+ *                 but the finest as usual.
  *
- *            (2) If the coarsen ratios between levels are three, and
- *                time integration is used during regridding (e.g., Rich-
- *                ardson extrapolation), then three time levels of data
- *                must be maintained on every level but the finest so
- *                that error estimation can be executed properly.
+ *             (2) If the coarsen ratios between levels are three, and
+ *                 time integration is used during regridding (e.g., Rich-
+ *                 ardson extrapolation), then three time levels of data
+ *                 must be maintained on every level but the finest so
+ *                 that error estimation can be executed properly.
  *
- *            In case (1), three factories are needed:
- *                         SCRATCH, CURRENT, NEW.
- *            In case (2), four factories are needed:
- *                         SCRATCH, OLD, CURRENT, NEW.
+ *             In case (1), three factories are needed:
+ *                          SCRATCH, CURRENT, NEW.
+ *             In case (2), four factories are needed:
+ *                          SCRATCH, OLD, CURRENT, NEW.
  *
- *            SCRATCH index is added to d_saved_var_scratch_data.
- *            CURRENT index is added to d_new_patch_init_data.
- *            NEW index is added to d_new_time_dep_data.
+ *             SCRATCH index is added to d_saved_var_scratch_data.
+ *             CURRENT index is added to d_new_patch_init_data.
+ *             NEW index is added to d_new_time_dep_data.
  *
  * INPUT:
- *            Only one time level of data is maintained and once values
- *            are set on patches, they do not change in time.
+ *             Only one time level of data is maintained and once values
+ *             are set on patches, they do not change in time.
  *
- *            Two factories are needed: SCRATCH, CURRENT.
+ *             Two factories are needed: SCRATCH, CURRENT.
  *
- *            SCRATCH index is added to d_saved_var_scratch_data.
- *            CURRENT index is added to d_new_patch_init_data.
+ *             SCRATCH index is added to d_saved_var_scratch_data.
+ *             CURRENT index is added to d_new_patch_init_data.
  *
  * NO_FILL:
- *            Only one time level of data is stored and no scratch space
- *            is used.  Data may be set and manipulated at will in user
- *            routines.  Data (including ghost values) is never touched
- *            outside of user routines.
+ *             Only one time level of data is stored and no scratch space
+ *             is used.  Data may be set and manipulated at will in user
+ *             routines.  Data (including ghost values) is never touched
+ *             outside of user routines.
  *
- *            Two factories are needed: CURRENT, SCRATCH.
+ *             Two factories are needed: CURRENT, SCRATCH.
  *
- *            CURRENT index is added to d_new_patch_init_data.
- *            SCRATCH index is needed only for temporary work space to
- *            fill new patch levels.
+ *             CURRENT index is added to d_new_patch_init_data.
+ *             SCRATCH index is needed only for temporary work space to
+ *             fill new patch levels.
  *
  * HYP_FLUX:
- *            One factory is needed: SCRATCH.
+ *             One factory is needed: SCRATCH.
  *
- *            SCRATCH index is added to d_hyp_flux_var_data.
+ *             SCRATCH index is added to d_hyp_flux_var_data.
  *
- *            Additionally, a variable for hyperbolic flux integral data
- *            is created for each HYP_FLUX variable. It has a single
- *            factory, SCRATCH, which is added to d_hyp_fluxsum_data.
+ *             Additionally, a variable for hyperbolic flux integral data
+ *             is created for each HYP_FLUX variable. It has a single
+ *             factory, SCRATCH, which is added to d_hyp_fluxsum_data.
  *
  * SOURCE:
- *            One factory is needed: SCRATCH.
+ *             One factory is needed: SCRATCH.
  *
- *            SCRATCH index is added to d_source_var_data.
+ *             SCRATCH index is added to d_source_var_data.
  *
  * TEMPORARY:
- *            One factory is needed: SCRATCH.
- *            SCRATCH index is added to d_temp_var_scratch_data.
- *
+ *             One factory is needed: SCRATCH.
+ *             SCRATCH index is added to d_temp_var_scratch_data.
+ *             
  *************************************************************************
  */
 void

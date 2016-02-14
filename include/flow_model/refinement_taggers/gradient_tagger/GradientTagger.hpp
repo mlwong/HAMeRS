@@ -1,5 +1,5 @@
-#ifndef FEATURE_DRIVEN_TAGGER_HPP
-#define FEATURE_DRIVEN_TAGGER_HPP
+#ifndef GRADIENT_TAGGER_HPP
+#define GRADIENT_TAGGER_HPP
 
 #include "SAMRAI/SAMRAI_config.h"
 
@@ -12,23 +12,57 @@
 
 #include "equation_of_state/EquationOfStateIdealGas.hpp"
 #include "flow_model/FlowModels.hpp"
+#include "utils/gradient_sensors/GradientSensorJameson.hpp"
 
 #include "boost/shared_ptr.hpp"
 #include <string>
 #include <vector>
 
-class FeatureDrivenTagger
+class GradientTagger
 {
     public:
-        FeatureDrivenTagger(
+        GradientTagger(
             const std::string& object_name,
             const tbox::Dimension& dim,
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
-            const hier::IntVector& num_ghosts,
             const FLOW_MODEL& flow_model,
             const int& num_species,
             const boost::shared_ptr<EquationOfState>& equation_of_state,
-            const boost::shared_ptr<tbox::Database>& feature_driven_tagger_db);
+            const boost::shared_ptr<tbox::Database>& gradient_tagger_db);
+        
+        /*
+         * Get the number of ghost cells needed by the gradient tagger.
+         */
+        hier::IntVector
+        getGradientTaggerNumberOfGhostCells() const
+        {
+            hier::IntVector d_num_gradient_ghosts = hier::IntVector::getZero(d_dim);
+            
+            if (d_gradient_sensor_Jameson != nullptr)
+            {
+                d_num_gradient_ghosts = hier::IntVector::max(
+                    d_num_gradient_ghosts,
+                    d_gradient_sensor_Jameson->getGradientSensorNumberOfGhostCells());
+            }
+            
+            return d_num_gradient_ghosts;
+        }
+        
+        /*
+         * Set the number of ghost cells needed.
+         */
+        void
+        setNumberOfGhostCells(const hier::IntVector& num_ghosts)
+        {
+            d_num_ghosts = num_ghosts;
+            
+            if (d_gradient_sensor_Jameson != nullptr)
+            {
+                d_gradient_sensor_Jameson->setNumberOfGhostCells(num_ghosts);
+            }
+            
+            d_num_ghosts_set = true;
+        }
         
         /*
          * Set the cell variables if single-species flow model is chosen.
@@ -109,13 +143,13 @@ class FeatureDrivenTagger
         }
         
         /*
-         * Print all characteristics of the feature driven tagger class.
+         * Print all characteristics of the gradient tagger class.
          */
         void
         printClassData(std::ostream& os) const;
         
         /*
-         * Put the characteristics of the feature driven tagger into the restart
+         * Put the characteristics of the gradient tagger class into the restart
          * database.
          */
         void
@@ -123,7 +157,7 @@ class FeatureDrivenTagger
             const boost::shared_ptr<tbox::Database>& restart_db) const;
         
         /*
-         * Tag cells for refinement using different feature-based detectors.
+         * Tag cells for refinement using gradient sensors.
          */
         void
         tagCells(
@@ -186,16 +220,27 @@ class FeatureDrivenTagger
         bool d_variables_set;
         
         /*
-         * Refinement criteria and tolerances for the feature-based detector.
+         * Boolean to determine whether the number of ghost cells is initialized.
          */
-        std::vector<std::string> d_refinement_criteria;
+        bool d_num_ghosts_set;
         
-        double d_density_Jameson_tol;
-        double d_pressure_Jameson_tol;
-        double d_shock_Ducros_tol;
-        double d_shock_Larsson_tol;
+        /*
+         * Chosen gradient sensors.
+         */
+        std::vector<std::string> d_gradient_sensors;
         
-        double d_vorticity_Q_criterion_tol;
+        
+        /*
+         * boost::shared_ptr to GradientSensorJameson.
+         */
+        boost::shared_ptr<GradientSensorJameson> d_gradient_sensor_Jameson;
+        
+        /*
+         * Variables and tolerances for the gradient sensor.
+         */
+        std::vector<std::string> d_Jameson_gradient_variables;
+        std::vector<double> d_Jameson_gradient_tol;
+        
 };
 
-#endif /* FEATURE_DRIVEN_TAGGER_HPP */
+#endif /* GRADIENT_TAGGER_HPP */

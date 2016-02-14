@@ -7,8 +7,6 @@
 
 #include "boost/multi_array.hpp"
 
-#define EPSILON 1e-40
-
 class ConvectiveFluxReconstructorWENO_CU6_M2_LLF: public ConvectiveFluxReconstructor
 {
     public:
