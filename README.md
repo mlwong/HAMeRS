@@ -20,8 +20,11 @@ $ git clone https://yournameg@bitbucket.org/yourname/hoamr.git
 To compile the code, in general all you need is to use cmake and then make. For example:
 
 $ mkdir build
+
 $ cd build
+
 $ cmake ..
+
 $ make
 
 To run the code, you need to provide the input file. For instance:
