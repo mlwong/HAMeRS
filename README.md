@@ -13,9 +13,11 @@ Git is used for the version control of the code. To install Git on Debian-based 
 
 $ sudo apt-get install git-all
 
+
 To code can be downloaded from the repository by:
 
 $ git clone https://yournameg@bitbucket.org/yourname/hoamr.git
+
 
 To compile the code, in general all you need is to use cmake and then make. For example:
 
@@ -27,17 +29,21 @@ $ cmake ..
 
 $ make
 
+
 To run the code, you need to provide the input file. For instance:
 
 $ src/exec/main <input filename>
+
 
 To run in parallel, you need OpenMPI/MPI. For example:
 
 $ mpirun -np 8 src/exec/main <input filename>
 
+
 To restart a simulation, you need to provide restart directory and restore number in addition to the input file:
 
 $ src/exec/main <input filename> <restart dir> <restore number>
+
 
 
 ### Who do I talk to? ###
