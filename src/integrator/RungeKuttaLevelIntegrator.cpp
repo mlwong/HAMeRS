@@ -37,140 +37,140 @@
  *
  *************************************************************************
  */
-
-extern "C" {
-
+extern "C"
+{
+    
 #ifdef __INTEL_COMPILER
 #pragma warning (disable:1419)
 #endif
-
-// in upfluxsum1d.m4:
-void SAMRAI_F77_FUNC(upfluxsum1d, UPFLUXSUM1D) (
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const double *,
-    double *);
-// in upfluxsum2d.m4:
-void SAMRAI_F77_FUNC(upfluxsumface2d0, UPFLUXSUMFACE2D0) (
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const double *, double *);
-void SAMRAI_F77_FUNC(upfluxsumface2d1, UPFLUXSUMFACE2D1) (
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const double *,
-    double *);
-void SAMRAI_F77_FUNC(upfluxsumside2d0, UPFLUXSUMSIDE2D0) (
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const double *,
-    double *);
-void SAMRAI_F77_FUNC(upfluxsumside2d1, UPFLUXSUMSIDE2D1) (
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const double *,
-    double *);
-// in upfluxsum3d.m4:
-void SAMRAI_F77_FUNC(upfluxsumface3d0, UPFLUXSUMFACE3D0) (
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const double *,
-    double *);
-void SAMRAI_F77_FUNC(upfluxsumface3d1, UPFLUXSUMFACE3D1) (
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const double *,
-    double *);
-void SAMRAI_F77_FUNC(upfluxsumface3d2, UPFLUXSUMFACE3D2) (
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const double *,
-    double *);
-void SAMRAI_F77_FUNC(upfluxsumside3d0, UPFLUXSUMSIDE3D0) (
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const double *,
-    double *);
-void SAMRAI_F77_FUNC(upfluxsumside3d1, UPFLUXSUMSIDE3D1) (
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const double *,
-    double *);
-void SAMRAI_F77_FUNC(upfluxsumside3d2, UPFLUXSUMSIDE3D2) (
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const int&,
-    const double *,
-    double *);
+    
+    // in upfluxsum1d.m4:
+    void SAMRAI_F77_FUNC(upfluxsum1d, UPFLUXSUM1D) (
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const double *,
+        double *);
+    // in upfluxsum2d.m4:
+    void SAMRAI_F77_FUNC(upfluxsumface2d0, UPFLUXSUMFACE2D0) (
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const double *, double *);
+    void SAMRAI_F77_FUNC(upfluxsumface2d1, UPFLUXSUMFACE2D1) (
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const double *,
+        double *);
+    void SAMRAI_F77_FUNC(upfluxsumside2d0, UPFLUXSUMSIDE2D0) (
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const double *,
+        double *);
+    void SAMRAI_F77_FUNC(upfluxsumside2d1, UPFLUXSUMSIDE2D1) (
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const double *,
+        double *);
+    // in upfluxsum3d.m4:
+    void SAMRAI_F77_FUNC(upfluxsumface3d0, UPFLUXSUMFACE3D0) (
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const double *,
+        double *);
+    void SAMRAI_F77_FUNC(upfluxsumface3d1, UPFLUXSUMFACE3D1) (
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const double *,
+        double *);
+    void SAMRAI_F77_FUNC(upfluxsumface3d2, UPFLUXSUMFACE3D2) (
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const double *,
+        double *);
+    void SAMRAI_F77_FUNC(upfluxsumside3d0, UPFLUXSUMSIDE3D0) (
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const double *,
+        double *);
+    void SAMRAI_F77_FUNC(upfluxsumside3d1, UPFLUXSUMSIDE3D1) (
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const double *,
+        double *);
+    void SAMRAI_F77_FUNC(upfluxsumside3d2, UPFLUXSUMSIDE3D2) (
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const int&,
+        const double *,
+        double *);
 }
 
 

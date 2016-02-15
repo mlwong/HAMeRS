@@ -203,20 +203,7 @@ class MultiresolutionTagger
         registerPlotQuantities(
             RungeKuttaLevelIntegrator* integrator,
             const boost::shared_ptr<appu::VisItDataWriter>& visit_writer,
-            const boost::shared_ptr<hier::VariableContext>& plot_context)
-        {
-            hier::VariableDatabase* vardb = hier::VariableDatabase::getDatabase();
-            
-            for (int li = 0; li < d_Harten_wavelet_num_level; li++)
-            {
-                visit_writer->registerPlotQuantity(
-                    "wavelet coefficients at level " + std::to_string(li),
-                    "SCALAR",
-                    vardb->mapVariableAndContextToIndex(
-                       d_density_Harten_wavelet_coeffs[li],
-                       plot_context));
-            }
-        }
+            const boost::shared_ptr<hier::VariableContext>& plot_context);
         
     private:
         /*

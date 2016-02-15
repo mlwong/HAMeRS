@@ -1,6 +1,7 @@
 #ifndef RUNGE_KUTTA_LEVEL_INTEGRATOR_HPP
 #define RUNGE_KUTTA_LEVEL_INTEGRATOR_HPP
 
+#include "integrator/ExtendedTagAndInitialize.hpp"
 #include "patch_strategy/RungeKuttaPatchStrategy.hpp"
 
 #include "SAMRAI/SAMRAI_config.h"
@@ -11,7 +12,6 @@
 #include "SAMRAI/hier/Variable.h"
 #include "SAMRAI/hier/VariableContext.h"
 #include "SAMRAI/mesh/GriddingAlgorithm.h"
-#include "SAMRAI/mesh/StandardTagAndInitStrategy.h"
 #include "SAMRAI/tbox/Database.h"
 #include "SAMRAI/tbox/Serializable.h"
 #include "SAMRAI/tbox/Timer.h"
@@ -65,9 +65,9 @@ using namespace SAMRAI;
  * getLevelDt(), getMaxFinerLevelDt(), advanceLevel(),
  * standardLevelSynchronization(), synchronizeNewLevels(),
  * resetTimeDependentData(), and resetDataToPreadvanceState().
- * This class is also derived from mesh::StandardTagAndInitStrategy,
+ * This class is also derived from ExtendedTagAndInitStrategy,
  * which defines routines needed by the gridding algorithm classes.  The
- * routines overloaded in mesh::StandardTagAndInitStrategy are:
+ * routines overloaded in ExtendedTagAndInitStrategy are:
  * initializeLevelData(), resetHierarchyConfiguration(),
  * applyGradientDetector(), applyRichardsonExtrapolation(), and
  * coarsenDataForRichardsonExtrapolation().
@@ -147,13 +147,13 @@ using namespace SAMRAI;
  * @endcode
  *
  * @see algs::TimeRefinementIntegrator
- * @see mesh::StandardTagAndInitStrategy
+ * @see ExtendedTagAndInitStrategy
  * @see RungeKuttaPatchStrategy
  */
 
 class RungeKuttaLevelIntegrator:
     public algs::TimeRefinementLevelStrategy,
-    public mesh::StandardTagAndInitStrategy,
+    public ExtendedTagAndInitStrategy,
     public tbox::Serializable
 {
     public:
@@ -508,7 +508,7 @@ class RungeKuttaLevelIntegrator:
             const bool allocate_data = true);
 
 #if !defined(__xlC__)
-        using mesh::StandardTagAndInitStrategy::initializeLevelData;
+        using ExtendedTagAndInitStrategy::initializeLevelData;
 #endif
         
         /**

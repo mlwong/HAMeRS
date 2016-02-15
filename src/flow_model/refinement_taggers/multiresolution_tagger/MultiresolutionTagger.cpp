@@ -516,19 +516,19 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                         // Get the key of the current variable.
                         std::string variable_key = d_Harten_wavelet_variables[vi];
                         
-if (variable_key == "DENSITY")
-{
-    for (int li = 0; li < d_Harten_wavelet_num_level; li++)
-    {
-        integrator->registerVariable(
-            d_density_Harten_wavelet_coeffs[li],
-            d_num_ghosts,
-            RungeKuttaLevelIntegrator::TIME_DEP,
-                d_grid_geometry,
-                "NO_COARSEN",
-                "NO_REFINE");
-    }
-}
+                        if (variable_key == "DENSITY")
+                        {
+                            for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                            {
+                                integrator->registerVariable(
+                                    d_density_Harten_wavelet_coeffs[li],
+                                    d_num_ghosts,
+                                    RungeKuttaLevelIntegrator::TIME_DEP,
+                                        d_grid_geometry,
+                                        "CONSERVATIVE_COARSEN",
+                                        "CONSERVATIVE_LINEAR_REFINE");
+                            }
+                        }
                         else if (variable_key == "TOTAL_ENERGY")
                         {
                             for (int li = 0; li < d_Harten_wavelet_num_level; li++)
@@ -536,10 +536,10 @@ if (variable_key == "DENSITY")
                                 integrator->registerVariable(
                                     d_total_energy_Harten_wavelet_coeffs[li],
                                     d_num_ghosts,
-                                    RungeKuttaLevelIntegrator::TEMPORARY,
+                                    RungeKuttaLevelIntegrator::TIME_DEP,
                                     d_grid_geometry,
-                                    "NO_COARSEN",
-                                    "NO_REFINE");
+                                    "CONSERVATIVE_COARSEN",
+                                    "CONSERVATIVE_LINEAR_REFINE");
                             }
                         }
                         else if (variable_key == "PRESSURE")
@@ -549,10 +549,10 @@ if (variable_key == "DENSITY")
                                 integrator->registerVariable(
                                     d_pressure_Harten_wavelet_coeffs[li],
                                     d_num_ghosts,
-                                    RungeKuttaLevelIntegrator::TEMPORARY,
+                                    RungeKuttaLevelIntegrator::TIME_DEP,
                                     d_grid_geometry,
-                                    "NO_COARSEN",
-                                    "NO_REFINE");
+                                    "CONSERVATIVE_COARSEN",
+                                    "CONSERVATIVE_LINEAR_REFINE");
                             }
                         }
                         else if (variable_key == "ENSTROPHY")
@@ -562,10 +562,10 @@ if (variable_key == "DENSITY")
                                 integrator->registerVariable(
                                     d_enstrophy_Harten_wavelet_coeffs[li],
                                     d_num_ghosts,
-                                    RungeKuttaLevelIntegrator::TEMPORARY,
+                                    RungeKuttaLevelIntegrator::TIME_DEP,
                                     d_grid_geometry,
-                                    "NO_COARSEN",
-                                    "NO_REFINE");
+                                    "CONSERVATIVE_COARSEN",
+                                    "CONSERVATIVE_LINEAR_REFINE");
                             }
                         }
                         else if (variable_key == "MASS_FRACTION")
@@ -593,10 +593,10 @@ if (variable_key == "DENSITY")
                                             integrator->registerVariable(
                                                 d_mass_fraction_Harten_wavelet_coeffs[di*d_Harten_wavelet_num_level + li],
                                                 d_num_ghosts,
-                                                RungeKuttaLevelIntegrator::TEMPORARY,
+                                                RungeKuttaLevelIntegrator::TIME_DEP,
                                                 d_grid_geometry,
-                                                "NO_COARSEN",
-                                                "NO_REFINE");
+                                                "CONSERVATIVE_COARSEN",
+                                                "CONSERVATIVE_LINEAR_REFINE");
                                         }
                                     }
                                     
@@ -611,10 +611,10 @@ if (variable_key == "DENSITY")
                                             integrator->registerVariable(
                                                 d_mass_fraction_Harten_wavelet_coeffs[di*d_Harten_wavelet_num_level + li],
                                                 d_num_ghosts,
-                                                RungeKuttaLevelIntegrator::TEMPORARY,
+                                                RungeKuttaLevelIntegrator::TIME_DEP,
                                                 d_grid_geometry,
-                                                "NO_COARSEN",
-                                                "NO_REFINE");
+                                                "CONSERVATIVE_COARSEN",
+                                                "CONSERVATIVE_LINEAR_REFINE");
                                         }
                                     }
                                     
@@ -656,10 +656,10 @@ if (variable_key == "DENSITY")
                                             integrator->registerVariable(
                                                 d_volume_fraction_Harten_wavelet_coeffs[di*d_Harten_wavelet_num_level + li],
                                                 d_num_ghosts,
-                                                RungeKuttaLevelIntegrator::TEMPORARY,
+                                                RungeKuttaLevelIntegrator::TIME_DEP,
                                                 d_grid_geometry,
-                                                "NO_COARSEN",
-                                                "NO_REFINE");
+                                                "CONSERVATIVE_COARSEN",
+                                                "CONSERVATIVE_LINEAR_REFINE");
                                         }
                                     }
                                     
@@ -2559,5 +2559,209 @@ MultiresolutionTagger::tagCellsUsingLipschitzExponent(
                 << " not yet implemented."
                 << std::endl);
         }
+    }
+}
+
+
+/*
+ * Register the plotting quantities.
+ */
+void
+MultiresolutionTagger::registerPlotQuantities(
+    RungeKuttaLevelIntegrator* integrator,
+    const boost::shared_ptr<appu::VisItDataWriter>& visit_writer,
+    const boost::shared_ptr<hier::VariableContext>& plot_context)
+{
+    if (d_variables_set == true)
+    {
+        if (d_num_ghosts_set == true)
+        {
+            hier::VariableDatabase* vardb = hier::VariableDatabase::getDatabase();
+            
+            for (int si = 0;
+                     si < static_cast<int>(d_multiresolution_sensors.size());
+                     si++)
+            {
+                std::string sensor_key = d_multiresolution_sensors[si];
+                
+                if (sensor_key == "HARTEN_WAVELET")
+                {
+                    for (int vi = 0; vi < static_cast<int>(d_Harten_wavelet_variables.size()); vi++)
+                    {
+                        // Get the key of the current variable.
+                        std::string variable_key = d_Harten_wavelet_variables[vi];
+                        
+                        if (variable_key == "DENSITY")
+                        {
+                            for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                            {
+                                visit_writer->registerPlotQuantity(
+                                    "density wavelet coefficients at level " + std::to_string(li),
+                                    "SCALAR",
+                                    vardb->mapVariableAndContextToIndex(
+                                       d_density_Harten_wavelet_coeffs[li],
+                                       plot_context));
+                            }
+                        }
+                        else if (variable_key == "TOTAL_ENERGY")
+                        {
+                            for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                            {
+                                visit_writer->registerPlotQuantity(
+                                    "total energy wavelet coefficients at level " + std::to_string(li),
+                                    "SCALAR",
+                                    vardb->mapVariableAndContextToIndex(
+                                       d_total_energy_Harten_wavelet_coeffs[li],
+                                       plot_context));
+                            }
+                        }
+                        else if (variable_key == "PRESSURE")
+                        {
+                            for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                            {
+                                visit_writer->registerPlotQuantity(
+                                    "pressure wavelet coefficients at level " + std::to_string(li),
+                                    "SCALAR",
+                                    vardb->mapVariableAndContextToIndex(
+                                       d_pressure_Harten_wavelet_coeffs[li],
+                                       plot_context));
+                            }
+                        }
+                        else if (variable_key == "ENSTROPHY")
+                        {
+                            for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                            {
+                                visit_writer->registerPlotQuantity(
+                                    "enstrophy wavelet coefficients at level " + std::to_string(li),
+                                    "SCALAR",
+                                    vardb->mapVariableAndContextToIndex(
+                                       d_enstrophy_Harten_wavelet_coeffs[li],
+                                       plot_context));
+                            }
+                        }
+                        else if (variable_key == "MASS_FRACTION")
+                        {
+                            switch (d_flow_model)
+                            {
+                                case SINGLE_SPECIES:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": '"
+                                        << variable_key
+                                        << "' not supported for '"
+                                        << d_flow_model
+                                        << "' flow model."
+                                        << std::endl);
+                                    
+                                    break;
+                                }
+                                case FOUR_EQN_SHYUE:
+                                {
+                                    for (int di = 0; di < d_volume_fraction->getDepth(); di++)
+                                    {
+                                        for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                                        {
+                                            visit_writer->registerPlotQuantity(
+                                                "mass fraction " + std::to_string(di) +
+                                                    " wavelet coefficients at level " + std::to_string(li),
+                                                "SCALAR",
+                                                vardb->mapVariableAndContextToIndex(
+                                                   d_mass_fraction_Harten_wavelet_coeffs[di*d_Harten_wavelet_num_level + li],
+                                                   plot_context));
+                                        }
+                                    }
+                                    
+                                    break;
+                                }
+                                case FIVE_EQN_ALLAIRE:
+                                {
+                                    for (int di = 0; di < d_num_species; di++)
+                                    {
+                                        for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                                        {
+                                            visit_writer->registerPlotQuantity(
+                                                "mass fraction " + std::to_string(di) +
+                                                    " wavelet coefficients at level " + std::to_string(li),
+                                                "SCALAR",
+                                                vardb->mapVariableAndContextToIndex(
+                                                   d_mass_fraction_Harten_wavelet_coeffs[di*d_Harten_wavelet_num_level + li],
+                                                   plot_context));
+                                        }
+                                    }
+                                    
+                                    break;
+                                }
+                                default:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": "
+                                        << "d_flow_model '"
+                                        << d_flow_model
+                                        << "' not yet implemented."
+                                        << std::endl);
+                                }
+                            }
+                        }
+                        else if (variable_key == "VOLUME_FRACTION")
+                        {
+                            switch (d_flow_model)
+                            {
+                                case SINGLE_SPECIES: case FOUR_EQN_SHYUE:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": '"
+                                        << variable_key
+                                        << "' not supported for '"
+                                        << d_flow_model
+                                        << "' flow model."
+                                        << std::endl);
+                                    
+                                    break;
+                                }
+                                case FIVE_EQN_ALLAIRE:
+                                {
+                                    for (int di = 0; di < d_volume_fraction->getDepth(); di++)
+                                    {
+                                        for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                                        {
+                                            visit_writer->registerPlotQuantity(
+                                                    "volume fraction " + std::to_string(di) +
+                                                        " wavelet coefficients at level " + std::to_string(li),
+                                                    "SCALAR",
+                                                    vardb->mapVariableAndContextToIndex(
+                                                       d_volume_fraction_Harten_wavelet_coeffs[di*d_Harten_wavelet_num_level + li],
+                                                       plot_context));
+                                        }
+                                    }
+                                }
+                                default:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": "
+                                        << "d_flow_model '"
+                                        << d_flow_model
+                                        << "' not yet implemented."
+                                        << std::endl);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Number of ghost cells is not set yet."
+                << std::endl);
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "Variables are not set yet."
+            << std::endl);
     }
 }

@@ -1,6 +1,9 @@
 # Define a variable Runge_Kutta_level_integrator_source_files containing
 # a list of the source files for the Runge_Kutta_level_integrator library
 set(Runge_Kutta_level_integrator_source_files
+    ExtendedTagAndInitialize.cpp
+    ExtendedTagAndInitializeConnectorWidthRequestor
+    ExtendedTagAndInitStrategy.cpp
     RungeKuttaLevelIntegrator.cpp
 )
 

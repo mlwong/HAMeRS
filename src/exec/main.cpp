@@ -21,6 +21,8 @@
 
 // Headers for major algorithm/data structure objects
 
+#include "integrator/ExtendedTagAndInitialize.hpp"
+
 #include "SAMRAI/algs/TimeRefinementIntegrator.h"
 #include "SAMRAI/algs/TimeRefinementLevelStrategy.h"
 #include "SAMRAI/appu/VisItDataWriter.h"
@@ -28,7 +30,6 @@
 #include "SAMRAI/hier/PatchHierarchy.h"
 #include "SAMRAI/mesh/BergerRigoutsos.h"
 #include "SAMRAI/mesh/GriddingAlgorithm.h"
-#include "SAMRAI/mesh/StandardTagAndInitialize.h"
 #include "SAMRAI/mesh/TreeLoadBalancer.h"
 
 // Headers for application-specific algorithm/data structure object
@@ -121,7 +122,7 @@ using namespace SAMRAI;
  *          each of which contains the same number of cells.  The
  *          load balancer also assigns patches to processors.
  *
- *       mesh::StandardTagAndInitialize - Couples the gridding algorithm
+ *       ExtendedTagAndInitialize - Couples the gridding algorithm
  *          to the RungeKuttaIntegrator. Selects cells for
  *          refinement based on either Gradient detection, Richardson
  *          extrapolation, or pre-defined Refine box region.  The
@@ -416,11 +417,11 @@ int main(int argc, char *argv[])
             Euler_model,
             use_refined_timestepping));
     
-    boost::shared_ptr<mesh::StandardTagAndInitialize> error_detector(
-        new mesh::StandardTagAndInitialize(
-            "StandardTagAndInitialize",
+    boost::shared_ptr<ExtendedTagAndInitialize> error_detector(
+        new ExtendedTagAndInitialize(
+            "ExtendedTagAndInitialize",
             RK_level_integrator.get(),
-            input_db->getDatabase("StandardTagAndInitialize")));
+            input_db->getDatabase("ExtendedTagAndInitialize")));
     
     boost::shared_ptr<mesh::BergerRigoutsos> box_generator(
         new mesh::BergerRigoutsos(
