@@ -171,9 +171,8 @@ class Euler:
             const double time,
             const double dt);
         
-        
         /**
-         * Tag cells for refinement using values from gradient detector.
+         * Tag cells for refinement using gradient detector.
          */
         void
         tagGradientDetectorCells(
@@ -181,17 +180,31 @@ class Euler:
             const double regrid_time,
             const bool initial_error,
             const int tag_indx,
+            const bool uses_multiresolution_detector_too,
             const bool uses_richardson_extrapolation_too);
         
         /**
-         * Compute the gradient using gradient detector.
+         * Preprocess before tagging cells using multiresolution detector.
          */
         void
-        preprocessTagGradientDetectorCells(
+        preprocessTagMultiresolutionDetectorCells(
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const int level_number,
             const double regrid_time,
             const bool initial_error,
+            const bool uses_gradient_detector_too,
+            const bool uses_richardson_extrapolation_too);
+        
+        /**
+         * Tag cells for refinement using multiresolution detector.
+         */
+        void
+        tagMultiresolutionDetectorCells(
+            hier::Patch& patch,
+            const double regrid_time,
+            const bool initial_error,
+            const int tag_indx,
+            const bool uses_gradient_detector_too,
             const bool uses_richardson_extrapolation_too);
         
         //@{
@@ -513,6 +526,7 @@ class Euler:
         static boost::shared_ptr<tbox::Timer> t_synchronize_hyperbloicfluxes;
         static boost::shared_ptr<tbox::Timer> t_setphysbcs;
         static boost::shared_ptr<tbox::Timer> t_taggradient;
+        static boost::shared_ptr<tbox::Timer> t_tagmultiresolution;
 };
 
 #endif /* EULER_HPP */

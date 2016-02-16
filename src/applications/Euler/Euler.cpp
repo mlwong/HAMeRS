@@ -50,6 +50,7 @@ boost::shared_ptr<tbox::Timer> Euler::t_advance_steps = NULL;
 boost::shared_ptr<tbox::Timer> Euler::t_synchronize_hyperbloicfluxes = NULL;
 boost::shared_ptr<tbox::Timer> Euler::t_setphysbcs = NULL;
 boost::shared_ptr<tbox::Timer> Euler::t_taggradient = NULL;
+boost::shared_ptr<tbox::Timer> Euler::t_tagmultiresolution = NULL;
 
 Euler::Euler(
     const std::string& object_name,
@@ -103,6 +104,8 @@ Euler::Euler(
             getTimer("Euler::setPhysicalBoundaryConditions()");
         t_taggradient = tbox::TimerManager::getManager()->
             getTimer("Euler::tagGradientDetectorCells()");
+        t_tagmultiresolution = tbox::TimerManager::getManager()->
+            getTimer("Euler::tagMultiresolutionDetectorCells()");
     }
     
     /*
@@ -257,6 +260,7 @@ Euler::~Euler()
     t_synchronize_hyperbloicfluxes.reset();
     t_setphysbcs.reset();
     t_taggradient.reset();
+    t_tagmultiresolution.reset();
 }
 
 
@@ -1101,18 +1105,69 @@ Euler::synchronizeHyperbolicFluxes(
 
 
 /*
- * Compute the gradient using gradient detector.
+ * Tag cells for refinement using gradient detector.
  */
 void
-Euler::preprocessTagGradientDetectorCells(
+Euler::tagGradientDetectorCells(
+    hier::Patch& patch,
+    const double regrid_time,
+    const bool initial_error,
+    const int tag_indx,
+    const bool uses_multiresolution_detector_too,
+    const bool uses_richardson_extrapolation_too)
+{
+    NULL_USE(regrid_time);
+    NULL_USE(initial_error);
+    NULL_USE(uses_multiresolution_detector_too);
+    NULL_USE(uses_richardson_extrapolation_too);
+    
+    t_taggradient->start();
+    
+    // Get the tags.
+    boost::shared_ptr<pdat::CellData<int> > tags(
+        BOOST_CAST<pdat::CellData<int>, hier::PatchData>(
+            patch.getPatchData(tag_indx)));
+    
+#ifdef DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(tags);
+    TBOX_ASSERT(tags->getGhostCellWidth() == 0);
+#endif
+    
+    // Initialize values of all tags to zero.
+    if ((!uses_richardson_extrapolation_too) &&
+        (!uses_multiresolution_detector_too))
+    {
+        tags->fillAll(0.0);
+    }
+    
+    // Tag the cells by using d_gradient_tagger.
+    if (d_gradient_tagger != nullptr)
+    {
+        d_gradient_tagger->tagCells(
+            patch,
+            tags,
+            getDataContext());
+    }
+    
+    t_taggradient->stop();
+}
+
+
+/*
+ * Preprocess before tagging cells using multiresolution detector.
+ */
+void
+Euler::preprocessTagMultiresolutionDetectorCells(
    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
    const int level_number,
    const double regrid_time,
    const bool initial_error,
+   const bool uses_gradient_detector_too,
    const bool uses_richardson_extrapolation_too)
 {
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
+    NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_richardson_extrapolation_too);
     
     if (d_multiresolution_tagger != nullptr)
@@ -1139,15 +1194,24 @@ Euler::preprocessTagGradientDetectorCells(
 }
 
 
+/*
+ * Tag cells for refinement using multiresolution detector.
+ */
 void
-Euler::tagGradientDetectorCells(
+Euler::tagMultiresolutionDetectorCells(
     hier::Patch& patch,
     const double regrid_time,
     const bool initial_error,
     const int tag_indx,
+    const bool uses_gradient_detector_too,
     const bool uses_richardson_extrapolation_too)
 {
-    t_taggradient->start();
+    NULL_USE(regrid_time);
+    NULL_USE(initial_error);
+    NULL_USE(uses_gradient_detector_too);
+    NULL_USE(uses_richardson_extrapolation_too);
+    
+    t_tagmultiresolution->start();
     
     // Get the tags.
     boost::shared_ptr<pdat::CellData<int> > tags(
@@ -1160,18 +1224,9 @@ Euler::tagGradientDetectorCells(
 #endif
     
     // Initialize values of all tags to zero.
-    tags->fillAll(0.0);
-    
-    // Tag the cells by using d_gradient_tagger.
-    if (d_gradient_tagger != nullptr)
+    if (!uses_richardson_extrapolation_too)
     {
-        d_gradient_tagger->tagCells(
-            patch,
-            regrid_time,
-            initial_error,
-            uses_richardson_extrapolation_too,
-            tags,
-            getDataContext());
+        tags->fillAll(0.0);
     }
     
     // Tag the cells by using d_multiresolution_tagger.
@@ -1179,14 +1234,11 @@ Euler::tagGradientDetectorCells(
     {
         d_multiresolution_tagger->tagCells(
             patch,
-            regrid_time,
-            initial_error,
-            uses_richardson_extrapolation_too,
             tags,
             getDataContext());
     }
     
-    t_taggradient->stop();
+    t_tagmultiresolution->stop();
 }
 
 

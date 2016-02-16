@@ -9,9 +9,11 @@ RungeKuttaPatchStrategy::RungeKuttaPatchStrategy():
 {
 }
 
+
 RungeKuttaPatchStrategy::~RungeKuttaPatchStrategy()
 {
 }
+
 
 /*
  *************************************************************************
@@ -27,12 +29,14 @@ RungeKuttaPatchStrategy::tagGradientDetectorCells(
    const double regrid_time,
    const bool initial_error,
    const int tag_index,
+   const bool uses_multiresolution_detector_too,
    const bool uses_richardson_extrapolation_too)
 {
    NULL_USE(patch);
    NULL_USE(regrid_time);
    NULL_USE(initial_error);
    NULL_USE(tag_index);
+   NULL_USE(uses_multiresolution_detector_too);
    NULL_USE(uses_richardson_extrapolation_too);
    TBOX_ERROR("RungeKuttaPatchStrategy::tagGradientDetectorCells()"
       << "\nNo derived class supplies a concrete implementation for "
@@ -40,35 +44,100 @@ RungeKuttaPatchStrategy::tagGradientDetectorCells(
       << std::endl);
 }
 
+
 void
 RungeKuttaPatchStrategy::preprocessTagGradientDetectorCells(
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const int level_number,
-    const double regrid_time,
-    const bool initial_error,
-    const bool uses_richardson_extrapolation_too)
+   const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+   const int level_number,
+   const double regrid_time,
+   const bool initial_error,
+   const bool uses_multiresolution_detector_too,
+   const bool uses_richardson_extrapolation_too)
 {
    NULL_USE(patch_hierarchy);
    NULL_USE(level_number);
    NULL_USE(regrid_time);
    NULL_USE(initial_error);
+   NULL_USE(uses_multiresolution_detector_too);
    NULL_USE(uses_richardson_extrapolation_too);
 }
 
+
 void
 RungeKuttaPatchStrategy::postprocessTagGradientDetectorCells(
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const int level_number,
-    const double regrid_time,
-    const bool initial_error,
-    const bool uses_richardson_extrapolation_too)
+   const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+   const int level_number,
+   const double regrid_time,
+   const bool initial_error,
+   const bool uses_multiresolution_detector_too,
+   const bool uses_richardson_extrapolation_too)
 {
    NULL_USE(patch_hierarchy);
    NULL_USE(level_number);
    NULL_USE(regrid_time);
    NULL_USE(initial_error);
+   NULL_USE(uses_multiresolution_detector_too);
    NULL_USE(uses_richardson_extrapolation_too);
 }
+
+
+void
+RungeKuttaPatchStrategy::tagMultiresolutionDetectorCells(
+   hier::Patch& patch,
+   const double regrid_time,
+   const bool initial_error,
+   const int tag_index,
+   const bool uses_gradient_detector_too,
+   const bool uses_richardson_extrapolation_too)
+{
+   NULL_USE(patch);
+   NULL_USE(regrid_time);
+   NULL_USE(initial_error);
+   NULL_USE(tag_index);
+   NULL_USE(uses_gradient_detector_too);
+   NULL_USE(uses_richardson_extrapolation_too);
+   TBOX_ERROR("RungeKuttaPatchStrategy::tagMultiresolutionDetectorCells()"
+      << "\nNo derived class supplies a concrete implementation for "
+      << "\nthis method."
+      << std::endl);
+}
+
+
+void
+RungeKuttaPatchStrategy::preprocessTagMultiresolutionDetectorCells(
+   const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+   const int level_number,
+   const double regrid_time,
+   const bool initial_error,
+   const bool uses_gradient_detector_too,
+   const bool uses_richardson_extrapolation_too)
+{
+   NULL_USE(patch_hierarchy);
+   NULL_USE(level_number);
+   NULL_USE(regrid_time);
+   NULL_USE(initial_error);
+   NULL_USE(uses_gradient_detector_too);
+   NULL_USE(uses_richardson_extrapolation_too);
+}
+
+
+void
+RungeKuttaPatchStrategy::postprocessTagMultiresolutionDetectorCells(
+   const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+   const int level_number,
+   const double regrid_time,
+   const bool initial_error,
+   const bool uses_gradient_detector_too,
+   const bool uses_richardson_extrapolation_too)
+{
+   NULL_USE(patch_hierarchy);
+   NULL_USE(level_number);
+   NULL_USE(regrid_time);
+   NULL_USE(initial_error);
+   NULL_USE(uses_gradient_detector_too);
+   NULL_USE(uses_richardson_extrapolation_too);
+}
+
 
 void
 RungeKuttaPatchStrategy::tagRichardsonExtrapolationCells(
@@ -81,7 +150,8 @@ RungeKuttaPatchStrategy::tagRichardsonExtrapolationCells(
    const int error_coarsen_ratio,
    const bool initial_error,
    const int tag_index,
-   const bool uses_gradient_detector_too)
+   const bool uses_gradient_detector_too,
+   const bool uses_multiresolution_detector_too)
 {
    NULL_USE(patch);
    NULL_USE(error_level_number);
@@ -93,10 +163,12 @@ RungeKuttaPatchStrategy::tagRichardsonExtrapolationCells(
    NULL_USE(initial_error);
    NULL_USE(tag_index);
    NULL_USE(uses_gradient_detector_too);
+   NULL_USE(uses_multiresolution_detector_too);
    TBOX_ERROR("RungeKuttaPatchStrategy::tagRichardsonExtrapolationCells()"
       << "\nNo derived class supplies a concrete implementation for "
       << "\nthis method." << std::endl);
 }
+
 
 void
 RungeKuttaPatchStrategy::setupLoadBalancer(
@@ -106,6 +178,7 @@ RungeKuttaPatchStrategy::setupLoadBalancer(
    NULL_USE(integrator);
    NULL_USE(gridding_algorithm);
 }
+
 
 void
 RungeKuttaPatchStrategy::preprocessAdvanceLevelState(
@@ -123,6 +196,7 @@ RungeKuttaPatchStrategy::preprocessAdvanceLevelState(
    NULL_USE(last_step);
    NULL_USE(regrid_advance);
 }
+
 
 void
 RungeKuttaPatchStrategy::postprocessAdvanceLevelState(

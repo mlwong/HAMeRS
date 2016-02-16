@@ -190,9 +190,6 @@ class MultiresolutionTagger
         void
         tagCells(
             hier::Patch& patch,
-            const double regrid_time,
-            const bool initial_error,
-            const bool uses_richardson_extrapolation_too,
             boost::shared_ptr<pdat::CellData<int> > tags,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         

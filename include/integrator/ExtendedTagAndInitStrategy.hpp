@@ -30,10 +30,12 @@ using namespace SAMRAI;
  * patch hierarchy.  Other routines are virtual here and given default
  * implementations as they are specific to only one type of error estimation
  * method.  Gradient detector functionality requires an implementation of
- * the applyGradientDetector() routine.  The Richardson extrapolation method
- * requires implementations of the methods: applyRichardsonExtrapolation(),
- * coarsenDataForRichardsonExtrapolation(), getLevelDt(), advanceLevel(),
- * resetTimeDependentData(), and resetDataToPreadvanceState().
+ * the applyGradientDetector() routine. Multiresolution detector functionality
+ * requires an implementation of the applyMultiresolutionDetector() routine.
+ * The Richardson extrapolation method requires implementations of the methods:
+ * applyRichardsonExtrapolation(), coarsenDataForRichardsonExtrapolation(),
+ * getLevelDt(), advanceLevel(), resetTimeDependentData(), and
+ * resetDataToPreadvanceState().
  *
  * @see ExtendedTagAndInitialize.
  */
@@ -223,28 +225,33 @@ class ExtendedTagAndInitStrategy
             const int finest_level) = 0;
         
         /**
-        * Set integer tags to "one" in cells where refinement of the given
-        * level should occur according to some user-supplied gradient criteria.
-        * The double time argument is the regrid time.  The integer "tag_index"
-        * argument is the patch descriptor index of the cell-centered integer tag
-        * array on each patch in the hierarchy.  The boolean argument
-        * initial_time indicates whether the level is being subject to refinement
-        * at the initial simulation time.  If it is false, then the error
-        * estimation process is being invoked at some later time after the AMR
-        * hierarchy was initially constructed.  Typically, this information is
-        * passed to the user's patch tagging routines since the error
-        * estimator or gradient detector may be different in each case.
-        *
-        * The boolean uses_richardson_extrapolation_too is true when Richardson
-        * extrapolation error estimation is used in addition to the gradient
-        * detector, and false otherwise.  This argument helps the user to
-        * manage multiple regridding criteria.
-        *
-        * This routine is only when gradient detector is being used.
-        * It is virtual with an empty implementation here (rather than pure
-        * virtual) so that users are not required to provide an implementation
-        * when the function is not needed.
-        */
+         * Set integer tags to "one" in cells where refinement of the given
+         * level should occur according to some user-supplied gradient criteria.
+         * The double time argument is the regrid time.  The integer "tag_index"
+         * argument is the patch descriptor index of the cell-centered integer tag
+         * array on each patch in the hierarchy.  The boolean argument
+         * initial_time indicates whether the level is being subject to refinement
+         * at the initial simulation time.  If it is false, then the error
+         * estimation process is being invoked at some later time after the AMR
+         * hierarchy was initially constructed.  Typically, this information is
+         * passed to the user's patch tagging routines since the error
+         * estimator or gradient detector may be different in each case.
+         *
+         * The boolean uses_multiresolution_detector_too is true when
+         * multiresolution detector is used in addition to the gradient
+         * detector, and false otherwise.  This argument helps the user to
+         * manage multiple regridding criteria.
+         * 
+         * The boolean uses_richardson_extrapolation_too is true when Richardson
+         * extrapolation error estimation is used in addition to the gradient
+         * detector, and false otherwise.  This argument helps the user to
+         * manage multiple regridding criteria.
+         *
+         * This routine is only when gradient detector is being used.
+         * It is virtual with an empty implementation here (rather than pure
+         * virtual) so that users are not required to provide an implementation
+         * when the function is not needed.
+         */
         virtual void
         applyGradientDetector(
             const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
@@ -252,39 +259,83 @@ class ExtendedTagAndInitStrategy
             const double error_data_time,
             const int tag_index,
             const bool initial_time,
+            const bool uses_multiresolution_detector_too,
             const bool uses_richardson_extrapolation_too);
         
         /**
-        * Set integer tags to "one" in cells where refinement of the given
-        * level should occur according to some user-supplied Richardson
-        * extrapolation criteria.  The "error_data_time" argument is the
-        * regrid time.  The "deltat" argument is the time increment to advance
-        * the solution on the level to be refined.  Note that that level is
-        * finer than the level in the argument list, in general.  The
-        * ratio between the argument level and the actual hierarchy level
-        * is given by the integer "coarsen ratio".
-        *
-        * The integer "tag_index" argument is the patch descriptor index of
-        * the cell-centered integer tag array on each patch in the hierarchy.
-        *
-        * The boolean argument initial_time indicates whether the level is being
-        * subject to refinement at the initial simulation time.  If it is false,
-        * then the error estimation process is being invoked at some later time
-        * after the AMR hierarchy was initially constructed.  Typically, this
-        * information is passed to the user's patch tagging routines since the
-        * application of the Richardson extrapolation process may be different
-        * in each case.
-        *
-        * The boolean uses_gradient_detector_too is true when a gradient
-        * detector procedure is used in addition to Richardson extrapolation,
-        * and false otherwise.  This argument helps the user to manage multiple
-        * regridding criteria.
-        *
-        * This routine is only when Richardson extrapolation is being used.
-        * It is virtual with an empty implementation here (rather than pure
-        * virtual) so that users are not required to provide an implementation
-        * when the function is not needed.
-        */
+         * Set integer tags to "one" in cells where refinement of the given
+         * level should occur according to some user-supplied multiresolution criteria.
+         * The double time argument is the regrid time.  The integer "tag_index"
+         * argument is the patch descriptor index of the cell-centered integer tag
+         * array on each patch in the hierarchy.  The boolean argument
+         * initial_time indicates whether the level is being subject to refinement
+         * at the initial simulation time.  If it is false, then the error
+         * estimation process is being invoked at some later time after the AMR
+         * hierarchy was initially constructed.  Typically, this information is
+         * passed to the user's patch tagging routines since the error
+         * estimator or multiresolution detector may be different in each case.
+         *
+         * The boolean uses_gradient_detector_too is true when
+         * gradient detector is used in addition to the multiresolution
+         * detector, and false otherwise.  This argument helps the user to
+         * manage multiple regridding criteria.
+         * 
+         * The boolean uses_richardson_extrapolation_too is true when Richardson
+         * extrapolation error estimation is used in addition to the multiresolution
+         * detector, and false otherwise.  This argument helps the user to
+         * manage multiple regridding criteria.
+         *
+         * This routine is only when multiresolution detector is being used.
+         * It is virtual with an empty implementation here (rather than pure
+         * virtual) so that users are not required to provide an implementation
+         * when the function is not needed.
+         */
+        virtual void
+        applyMultiresolutionDetector(
+            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const int level_number,
+            const double error_data_time,
+            const int tag_index,
+            const bool initial_time,
+            const bool uses_gradient_detector_too,
+            const bool uses_richardson_extrapolation_too);
+        
+        /**
+         * Set integer tags to "one" in cells where refinement of the given
+         * level should occur according to some user-supplied Richardson
+         * extrapolation criteria.  The "error_data_time" argument is the
+         * regrid time.  The "deltat" argument is the time increment to advance
+         * the solution on the level to be refined.  Note that that level is
+         * finer than the level in the argument list, in general.  The
+         * ratio between the argument level and the actual hierarchy level
+         * is given by the integer "coarsen ratio".
+         *
+         * The integer "tag_index" argument is the patch descriptor index of
+         * the cell-centered integer tag array on each patch in the hierarchy.
+         *
+         * The boolean argument initial_time indicates whether the level is being
+         * subject to refinement at the initial simulation time.  If it is false,
+         * then the error estimation process is being invoked at some later time
+         * after the AMR hierarchy was initially constructed.  Typically, this
+         * information is passed to the user's patch tagging routines since the
+         * application of the Richardson extrapolation process may be different
+         * in each case.
+         *
+         * The boolean uses_gradient_detector_too is true when a gradient
+         * detector procedure is used in addition to Richardson extrapolation,
+         * and false otherwise.  This argument helps the user to manage multiple
+         * regridding criteria.
+         *
+         * The boolean uses_multiresolution_detector_too is true when
+         * multiresolution detector is used in addition to the Richardson
+         * extrapolation, and false otherwise.  This argument helps the user to
+         * manage multiple regridding criteria.
+         * 
+         * This routine is only when Richardson extrapolation is being used.
+         * It is virtual with an empty implementation here (rather than pure
+         * virtual) so that users are not required to provide an implementation
+         * when the function is not needed.
+         */
         virtual void
         applyRichardsonExtrapolation(
             const boost::shared_ptr<hier::PatchLevel>& level,
@@ -293,7 +344,8 @@ class ExtendedTagAndInitStrategy
             const double deltat,
             const int error_coarsen_ratio,
             const bool initial_time,
-            const bool uses_gradient_detector_too);
+            const bool uses_gradient_detector_too,
+            const bool uses_multiresolution_detector_too);
         
         /**
          * Coarsen solution data from level to coarse_level for Richardson

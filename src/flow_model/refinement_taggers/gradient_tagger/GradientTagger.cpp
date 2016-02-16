@@ -338,16 +338,9 @@ GradientTagger::putToRestart(
 void
 GradientTagger::tagCells(
    hier::Patch& patch,
-   const double regrid_time,
-   const bool initial_error,
-   const bool uses_richardson_extrapolation_too,
    boost::shared_ptr<pdat::CellData<int> > tags,
    const boost::shared_ptr<hier::VariableContext>& data_context)
 {
-    NULL_USE(regrid_time);
-    NULL_USE(initial_error);
-    NULL_USE(uses_richardson_extrapolation_too);
-    
     if (d_variables_set == true)
     {
         if (d_num_ghosts_set == true)

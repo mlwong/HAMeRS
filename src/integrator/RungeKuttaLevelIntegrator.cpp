@@ -200,6 +200,7 @@ boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_init_level_fill_inte
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_advance_bdry_fill_create;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_new_advance_bdry_fill_create;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_apply_gradient_detector;
+boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_apply_multiresolution_detector;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_tag_cells;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_coarsen_rich_extrap;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_get_level_dt;
@@ -526,11 +527,12 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
     const double error_data_time,
     const int tag_index,
     const bool initial_time,
+    const bool uses_multiresolution_detector_too,
     const bool uses_richardson_extrapolation_too)
 {
     TBOX_ASSERT(hierarchy);
-    TBOX_ASSERT((level_number >= 0)
-                && (level_number <= hierarchy->getFinestLevelNumber()));
+    TBOX_ASSERT((level_number >= 0) &&
+                (level_number <= hierarchy->getFinestLevelNumber()));
     TBOX_ASSERT(hierarchy->getPatchLevel(level_number));
     
     t_apply_gradient_detector->start();
@@ -561,6 +563,7 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
         level_number,
         error_data_time,
         initial_time,
+        uses_multiresolution_detector_too,
         uses_richardson_extrapolation_too);
     
     t_tag_cells->start();
@@ -574,6 +577,7 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
             error_data_time,
             initial_time,
             tag_index,
+            uses_multiresolution_detector_too,
             uses_richardson_extrapolation_too);
     }
     t_tag_cells->stop();
@@ -583,6 +587,7 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
         level_number,
         error_data_time,
         initial_time,
+        uses_multiresolution_detector_too,
         uses_richardson_extrapolation_too);
     
     d_patch_strategy->clearDataContext();
@@ -593,6 +598,95 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
     level->deallocatePatchData(d_saved_var_scratch_data);
     
     t_apply_gradient_detector->stop();
+}
+
+
+/*
+ *************************************************************************
+ *
+ * Call patch routines to tag cells with multiresolution detector.
+ * These cells will be refined.
+ *
+ *************************************************************************
+ */
+void
+RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
+    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const int level_number,
+    const double error_data_time,
+    const int tag_index,
+    const bool initial_time,
+    const bool uses_gradient_detector_too,
+    const bool uses_richardson_extrapolation_too)
+{
+    TBOX_ASSERT(hierarchy);
+    TBOX_ASSERT((level_number >= 0) &&
+                (level_number <= hierarchy->getFinestLevelNumber()));
+    TBOX_ASSERT(hierarchy->getPatchLevel(level_number));
+    
+    t_apply_multiresolution_detector->start();
+    
+    boost::shared_ptr<hier::PatchLevel> level(
+        hierarchy->getPatchLevel(level_number));
+    
+    level->allocatePatchData(d_saved_var_scratch_data, error_data_time);
+    level->allocatePatchData(d_temp_var_scratch_data, error_data_time);
+    
+    d_patch_strategy->setDataContext(d_scratch);
+    
+    const tbox::SAMRAI_MPI& mpi(level->getBoxLevel()->getMPI());
+    
+    t_error_bdry_fill_comm->start();
+    d_bdry_sched_advance[level_number]->fillData(error_data_time);
+    
+    if (s_barrier_after_error_bdry_fill_comm)
+    {
+        t_barrier_after_error_bdry_fill_comm->start();
+        mpi.Barrier();
+        t_barrier_after_error_bdry_fill_comm->stop();
+    }
+    t_error_bdry_fill_comm->stop();
+    
+    d_patch_strategy->preprocessTagMultiresolutionDetectorCells(
+        hierarchy,
+        level_number,
+        error_data_time,
+        initial_time,
+        uses_gradient_detector_too,
+        uses_richardson_extrapolation_too);
+    
+    t_tag_cells->start();
+    for (hier::PatchLevel::iterator ip(level->begin());
+         ip != level->end();
+         ip++)
+    {
+        const boost::shared_ptr<hier::Patch>& patch = *ip;
+        d_patch_strategy->tagMultiresolutionDetectorCells(
+            *patch,
+            error_data_time,
+            initial_time,
+            tag_index,
+            uses_gradient_detector_too,
+            uses_richardson_extrapolation_too);
+    }
+    t_tag_cells->stop();
+    
+    d_patch_strategy->postprocessTagMultiresolutionDetectorCells(
+        hierarchy,
+        level_number,
+        error_data_time,
+        initial_time,
+        uses_gradient_detector_too,
+        uses_richardson_extrapolation_too);
+    
+    d_patch_strategy->clearDataContext();
+    
+    copyTimeDependentData(level, d_scratch, d_current);
+    
+    level->deallocatePatchData(d_temp_var_scratch_data);
+    level->deallocatePatchData(d_saved_var_scratch_data);
+    
+    t_apply_multiresolution_detector->stop();
 }
 
 
@@ -762,7 +856,8 @@ RungeKuttaLevelIntegrator::applyRichardsonExtrapolation(
     const double deltat,
     const int error_coarsen_ratio,
     const bool initial_time,
-    const bool uses_gradient_detector_too)
+    const bool uses_gradient_detector_too,
+    const bool uses_multiresolution_detector_too)
 {
     TBOX_ASSERT(level);
     
@@ -792,7 +887,8 @@ RungeKuttaLevelIntegrator::applyRichardsonExtrapolation(
             error_coarsen_ratio,
             initial_time,
             tag_index,
-            uses_gradient_detector_too);
+            uses_gradient_detector_too,
+            uses_multiresolution_detector_too);
     }
 }
 
@@ -3397,6 +3493,8 @@ RungeKuttaLevelIntegrator::initializeCallback()
         getTimer("RungeKuttaLevelIntegrator::new_advance_bdry_fill_create");
     t_apply_gradient_detector = tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::applyGradientDetector()");
+    t_apply_multiresolution_detector = tbox::TimerManager::getManager()->
+        getTimer("RungeKuttaLevelIntegrator::applyMultiresolutionDetector()");
     t_tag_cells = tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::tag_cells");
     t_coarsen_rich_extrap = tbox::TimerManager::getManager()->
@@ -3451,6 +3549,7 @@ RungeKuttaLevelIntegrator::finalizeCallback()
     t_advance_bdry_fill_create.reset();
     t_new_advance_bdry_fill_create.reset();
     t_apply_gradient_detector.reset();
+    t_apply_multiresolution_detector.reset();
     t_tag_cells.reset();
     t_coarsen_rich_extrap.reset();
     t_get_level_dt.reset();

@@ -32,8 +32,8 @@ using namespace SAMRAI;
  * It is possible to use combinations of the tagging methods (e.g., use
  * gradient detection, multiresolution, Richardson extrapolation, and static
  * refine boxes at the same cycle/time).  The order in which they are executed
- * is fixed (Richardson extrapolation first, gradient detection second,
- * multiresolution third and refine boxes fourth). An input entry for this
+ * is fixed (Richardson extrapolation first, multiresolution detection second,
+ * gradient detection third and refine boxes fourth). An input entry for this
  * class is optional.
  * If none is provided, the class will, by default, not use any criteria
  * to tag cells for refinement and issue a warning.
@@ -160,7 +160,7 @@ using namespace SAMRAI;
  *
  * @see mesh::TagAndInitializeStrategy
  * @see mesh::GriddingAlgorithm
- * @see mesh::ExtendedTagAndInitStrategy
+ * @see ExtendedTagAndInitStrategy
  */
 
 class ExtendedTagAndInitialize:
@@ -219,6 +219,22 @@ class ExtendedTagAndInitialize:
          */
         bool
         usesRichardsonExtrapolation(
+            int cycle,
+            double time);
+        
+        /*!
+         * Returns true if multiresolution detector is used at any cycle or time.
+         */
+        bool
+        everUsesMultiresolutionDetector() const;
+        
+        /*!
+         * Returns true if multiresolution detector is used at the supplied cycle and time.
+         *
+         * @pre !d_use_cycle_criteria || !d_use_time_criteria
+         */
+        bool
+        usesMultiresolutionDetector(
             int cycle,
             double time);
         
@@ -462,6 +478,28 @@ class ExtendedTagAndInitialize:
             double time);
         
         /*!
+         * Turn on multiresolution detector criteria at the specified time
+         * programmatically.
+         *
+         * @param time Time to turn multiresolution detector criteria on.
+         *
+         * @pre d_tag_strategy
+         */
+        void
+        turnOnMultiresolutionDetector(
+            double time);
+        
+        /*!
+         * Turn off multiresolution detector criteria at the specified time
+         * programmatically.
+         *
+         * @param time Time to turn multiresolution detector criteria off.
+         */
+        void
+        turnOffMultiresolutionDetector(
+            double time);
+        
+        /*!
          * Turn on Richardson extrapolation criteria at the specified time
          * programmatically.
          *
@@ -685,6 +723,11 @@ class ExtendedTagAndInitialize:
          * Flag indicating if any tagging criteria is RICHARDSON_EXTRAPOLATION.
          */
         bool d_ever_uses_richardson_extrapolation;
+        
+        /*
+         * Flag indicating if any tagging criteria is MULTIRESOLUTION_DETECTOR.
+         */
+        bool d_ever_uses_multiresolution_detector;
         
         /*
          * Flag indicating if any tagging criteria is GRADIENT_DETECTOR.
