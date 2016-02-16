@@ -2,6 +2,8 @@
 
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 
+#include <cfloat>
+
 WaveletTransformHarten::WaveletTransformHarten(
     const std::string& object_name,
     const tbox::Dimension& dim,
@@ -517,6 +519,9 @@ WaveletTransformHarten::computeWaveletCoefficients(
                 {
                     const int idx = (i + d_num_ghosts[0]) +
                         (j + d_num_ghosts[1])*ghostcell_dims[0];
+                    
+                    w_x[li][idx] = w_x[li][idx] < -DBL_EPSILON ? (double)d_k : w_x[li][idx];
+                    w_y[li][idx] = w_y[li][idx] < -DBL_EPSILON ? (double)d_k : w_y[li][idx];
                     
                     w[li][idx] = sqrt(w_x[li][idx]*w_x[li][idx] + w_y[li][idx]*w_y[li][idx]);
                 }
@@ -1193,6 +1198,10 @@ WaveletTransformHarten::computeWaveletCoefficients(
                         const int idx = (i + d_num_ghosts[0]) +
                             (j + d_num_ghosts[1])*ghostcell_dims[0] +
                             (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                        
+                        w_x[li][idx] = w_x[li][idx] < -DBL_EPSILON ? (double)d_k : w_x[li][idx];
+                        w_y[li][idx] = w_y[li][idx] < -DBL_EPSILON ? (double)d_k : w_y[li][idx];
+                        w_z[li][idx] = w_z[li][idx] < -DBL_EPSILON ? (double)d_k : w_z[li][idx];
                         
                         w[li][idx] = sqrt(w_x[li][idx]*w_x[li][idx] + w_y[li][idx]*w_y[li][idx] + w_z[li][idx]*w_z[li][idx]);
                     }
