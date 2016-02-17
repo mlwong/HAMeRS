@@ -35,15 +35,14 @@ To run the code, you need to provide the input file:
 $ src/exec/main <input filename>
 
 
-To run the code in parallel, you need OpenMPI/MPI. You can try mpirun:
-
-$ mpirun -np 8 src/exec/main <input filename>
-
-
 To restart a simulation, you need to provide restart directory and restore number in addition to the input file:
 
 $ src/exec/main <input filename> <restart dir> <restore number>
 
+
+To run the code in parallel, you need OpenMPI/MPI. You can try mpirun:
+
+$ mpirun -np 8 src/exec/main <input filename>
 
 
 ### Who do I talk to? ###
