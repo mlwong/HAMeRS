@@ -16,7 +16,7 @@ $ sudo apt-get install git-all
 
 To code can be downloaded from the repository by:
 
-$ git clone https://yournameg@bitbucket.org/yourname/hoamr.git
+$ git clone https://yourname@bitbucket.org/yourname/hoamr.git
 
 
 To compile the code, in general all you need is to use cmake and then make. For example:
