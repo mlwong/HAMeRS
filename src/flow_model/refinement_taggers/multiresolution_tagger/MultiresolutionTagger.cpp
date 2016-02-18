@@ -797,6 +797,12 @@ MultiresolutionTagger::putToRestart(
             boost::shared_ptr<tbox::Database> sensor_db =
                 restart_db->putDatabase("HARTEN_WAVELET");
             
+            sensor_db->putInteger("d_Harten_wavelet_num_level",
+                d_Harten_wavelet_num_level);
+            
+            sensor_db->putInteger("d_Harten_wavelet_num_vanishing_moments",
+                d_Harten_wavelet_num_vanishing_moments);
+            
             sensor_db->putStringVector("d_Harten_wavelet_variables",
                 d_Harten_wavelet_variables);
             

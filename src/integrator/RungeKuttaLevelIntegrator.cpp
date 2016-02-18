@@ -201,6 +201,7 @@ boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_advance_bdry_fill_cr
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_new_advance_bdry_fill_create;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_apply_gradient_detector;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_apply_multiresolution_detector;
+boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_apply_integral_detector;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_tag_cells;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_coarsen_rich_extrap;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_get_level_dt;
@@ -528,6 +529,7 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
     const int tag_index,
     const bool initial_time,
     const bool uses_multiresolution_detector_too,
+    const bool uses_integral_detector_too,
     const bool uses_richardson_extrapolation_too)
 {
     TBOX_ASSERT(hierarchy);
@@ -564,6 +566,7 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
         error_data_time,
         initial_time,
         uses_multiresolution_detector_too,
+        uses_integral_detector_too,
         uses_richardson_extrapolation_too);
     
     t_tag_cells->start();
@@ -578,6 +581,7 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
             initial_time,
             tag_index,
             uses_multiresolution_detector_too,
+            uses_integral_detector_too,
             uses_richardson_extrapolation_too);
     }
     t_tag_cells->stop();
@@ -588,6 +592,7 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
         error_data_time,
         initial_time,
         uses_multiresolution_detector_too,
+        uses_integral_detector_too,
         uses_richardson_extrapolation_too);
     
     d_patch_strategy->clearDataContext();
@@ -617,6 +622,7 @@ RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
     const int tag_index,
     const bool initial_time,
     const bool uses_gradient_detector_too,
+    const bool uses_integral_detector_too,
     const bool uses_richardson_extrapolation_too)
 {
     TBOX_ASSERT(hierarchy);
@@ -653,6 +659,7 @@ RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
         error_data_time,
         initial_time,
         uses_gradient_detector_too,
+        uses_integral_detector_too,
         uses_richardson_extrapolation_too);
     
     t_tag_cells->start();
@@ -667,6 +674,7 @@ RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
             initial_time,
             tag_index,
             uses_gradient_detector_too,
+            uses_integral_detector_too,
             uses_richardson_extrapolation_too);
     }
     t_tag_cells->stop();
@@ -677,6 +685,7 @@ RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
         error_data_time,
         initial_time,
         uses_gradient_detector_too,
+        uses_integral_detector_too,
         uses_richardson_extrapolation_too);
     
     d_patch_strategy->clearDataContext();
@@ -687,6 +696,158 @@ RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
     level->deallocatePatchData(d_saved_var_scratch_data);
     
     t_apply_multiresolution_detector->stop();
+}
+
+
+/*
+ *************************************************************************
+ *
+ * Call patch routines to tag cells with integral detector.
+ * These cells will be refined.
+ *
+ *************************************************************************
+ */
+void
+RungeKuttaLevelIntegrator::applyIntegralDetector(
+    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const int level_number,
+    const double error_data_time,
+    const int tag_index,
+    const bool initial_time,
+    const bool uses_gradient_detector_too,
+    const bool uses_multiresolution_detector_too,
+    const bool uses_richardson_extrapolation_too)
+{
+    TBOX_ASSERT(hierarchy);
+    TBOX_ASSERT((level_number >= 0) &&
+                (level_number <= hierarchy->getFinestLevelNumber()));
+    TBOX_ASSERT(hierarchy->getPatchLevel(level_number));
+    
+    t_apply_integral_detector->start();
+    
+    boost::shared_ptr<hier::PatchLevel> level(
+        hierarchy->getPatchLevel(level_number));
+    
+    level->allocatePatchData(d_saved_var_scratch_data, error_data_time);
+    level->allocatePatchData(d_temp_var_scratch_data, error_data_time);
+    
+    d_patch_strategy->setDataContext(d_scratch);
+    
+    const tbox::SAMRAI_MPI& mpi(level->getBoxLevel()->getMPI());
+    
+    t_error_bdry_fill_comm->start();
+    d_bdry_sched_advance[level_number]->fillData(error_data_time);
+    
+    if (s_barrier_after_error_bdry_fill_comm)
+    {
+        t_barrier_after_error_bdry_fill_comm->start();
+        mpi.Barrier();
+        t_barrier_after_error_bdry_fill_comm->stop();
+    }
+    t_error_bdry_fill_comm->stop();
+    
+    d_patch_strategy->preprocessTagIntegralDetectorCells(
+        hierarchy,
+        level_number,
+        error_data_time,
+        initial_time,
+        uses_gradient_detector_too,
+        uses_multiresolution_detector_too,
+        uses_richardson_extrapolation_too);
+    
+    t_tag_cells->start();
+    for (hier::PatchLevel::iterator ip(level->begin());
+         ip != level->end();
+         ip++)
+    {
+        const boost::shared_ptr<hier::Patch>& patch = *ip;
+        d_patch_strategy->tagIntegralDetectorCells(
+            *patch,
+            error_data_time,
+            initial_time,
+            tag_index,
+            uses_gradient_detector_too,
+            uses_multiresolution_detector_too,
+            uses_richardson_extrapolation_too);
+    }
+    t_tag_cells->stop();
+    
+    d_patch_strategy->postprocessTagIntegralDetectorCells(
+        hierarchy,
+        level_number,
+        error_data_time,
+        initial_time,
+        uses_gradient_detector_too,
+        uses_multiresolution_detector_too,
+        uses_richardson_extrapolation_too);
+    
+    d_patch_strategy->clearDataContext();
+    
+    copyTimeDependentData(level, d_scratch, d_current);
+    
+    level->deallocatePatchData(d_temp_var_scratch_data);
+    level->deallocatePatchData(d_saved_var_scratch_data);
+    
+    t_apply_integral_detector->stop();
+}
+
+
+/*
+ *************************************************************************
+ *
+ * Call patch routines to tag cells for refinement using Richardson
+ * extrapolation. Richardson extrapolation requires two copies of
+ * the solution to compare.  The NEW context holds the solution
+ * computed on the fine level and coarsened, whereas the CURRENT
+ * context holds the solution integrated on the coarse level after
+ * coarsening the initial data from the fine level.
+ *
+ *************************************************************************
+ */
+void
+RungeKuttaLevelIntegrator::applyRichardsonExtrapolation(
+    const boost::shared_ptr<hier::PatchLevel>& level,
+    const double error_data_time,
+    const int tag_index,
+    const double deltat,
+    const int error_coarsen_ratio,
+    const bool initial_time,
+    const bool uses_gradient_detector_too,
+    const bool uses_multiresolution_detector_too,
+    const bool uses_integral_detector_too)
+{
+    TBOX_ASSERT(level);
+    
+    /*
+     * Compare solutions computed on level (stored in NEW context) and on
+     * the coarser level (stored in CURR context) on the patches of the
+     * coarser level.  The patch strategy implements the compare operations
+     * performed on each patch.
+     */
+    
+    const int error_level_number =
+        level->getNextCoarserHierarchyLevelNumber() + 1;
+    
+    for (hier::PatchLevel::iterator ip(level->begin());
+         ip != level->end();
+         ip++)
+    {
+        const boost::shared_ptr<hier::Patch>& patch = *ip;
+        
+        d_patch_strategy->tagRichardsonExtrapolationCells(
+            *patch,
+            error_level_number,
+            d_new,                                     //  finer context
+            d_current,                                 //  coarser context
+            error_data_time,
+            deltat,
+            error_coarsen_ratio,
+            initial_time,
+            tag_index,
+            uses_gradient_detector_too,
+            uses_multiresolution_detector_too,
+            uses_integral_detector_too);
+    }
 }
 
 
@@ -833,63 +994,6 @@ RungeKuttaLevelIntegrator::coarsenDataForRichardsonExtrapolation(
     }
     
     t_coarsen_rich_extrap->stop();
-}
-
-
-/*
- *************************************************************************
- *
- * Call patch routines to tag cells for refinement using Richardson
- * extrapolation. Richardson extrapolation requires two copies of
- * the solution to compare.  The NEW context holds the solution
- * computed on the fine level and coarsened, whereas the CURRENT
- * context holds the solution integrated on the coarse level after
- * coarsening the initial data from the fine level.
- *
- *************************************************************************
- */
-void
-RungeKuttaLevelIntegrator::applyRichardsonExtrapolation(
-    const boost::shared_ptr<hier::PatchLevel>& level,
-    const double error_data_time,
-    const int tag_index,
-    const double deltat,
-    const int error_coarsen_ratio,
-    const bool initial_time,
-    const bool uses_gradient_detector_too,
-    const bool uses_multiresolution_detector_too)
-{
-    TBOX_ASSERT(level);
-    
-    /*
-     * Compare solutions computed on level (stored in NEW context) and on
-     * the coarser level (stored in CURR context) on the patches of the
-     * coarser level.  The patch strategy implements the compare operations
-     * performed on each patch.
-     */
-    
-    const int error_level_number =
-        level->getNextCoarserHierarchyLevelNumber() + 1;
-    
-    for (hier::PatchLevel::iterator ip(level->begin());
-         ip != level->end();
-         ip++)
-    {
-        const boost::shared_ptr<hier::Patch>& patch = *ip;
-        
-        d_patch_strategy->tagRichardsonExtrapolationCells(
-            *patch,
-            error_level_number,
-            d_new,                                     //  finer context
-            d_current,                                 //  coarser context
-            error_data_time,
-            deltat,
-            error_coarsen_ratio,
-            initial_time,
-            tag_index,
-            uses_gradient_detector_too,
-            uses_multiresolution_detector_too);
-    }
 }
 
 
@@ -3495,6 +3599,8 @@ RungeKuttaLevelIntegrator::initializeCallback()
         getTimer("RungeKuttaLevelIntegrator::applyGradientDetector()");
     t_apply_multiresolution_detector = tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::applyMultiresolutionDetector()");
+    t_apply_integral_detector = tbox::TimerManager::getManager()->
+        getTimer("RungeKuttaLevelIntegrator::applyIntegralDetector()");
     t_tag_cells = tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::tag_cells");
     t_coarsen_rich_extrap = tbox::TimerManager::getManager()->
@@ -3550,6 +3656,7 @@ RungeKuttaLevelIntegrator::finalizeCallback()
     t_new_advance_bdry_fill_create.reset();
     t_apply_gradient_detector.reset();
     t_apply_multiresolution_detector.reset();
+    t_apply_integral_detector.reset();
     t_tag_cells.reset();
     t_coarsen_rich_extrap.reset();
     t_get_level_dt.reset();

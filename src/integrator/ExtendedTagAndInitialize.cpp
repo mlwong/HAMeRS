@@ -90,6 +90,7 @@ ExtendedTagAndInitialize::ExtendedTagAndInitialize(
     d_use_cycle_criteria(false),
     d_use_time_criteria(false),
     d_ever_uses_richardson_extrapolation(false),
+    d_ever_uses_integral_detector(false),
     d_ever_uses_multiresolution_detector(false),
     d_ever_uses_gradient_detector(false),
     d_ever_uses_refine_boxes(false),
@@ -106,11 +107,12 @@ ExtendedTagAndInitialize::ExtendedTagAndInitialize(
     /*
      * If the user wishes to only use the REFINE_BOXES tagging option,
      * the registered strategy class may be null.  In order to use
-     * the GRADIENT_DETECTOR, MULTIRESOLUTION_DETECTOR, or RICHARDSON_EXTRAPOLATION
-     * options, the registered ExtendedTagAndInitStrategy must be non-NULL.
+     * the GRADIENT_DETECTOR, MULTIRESOLUTION_DETECTOR, INTEGRAL_DETECTOR or
+     * RICHARDSON_EXTRAPOLATION options, the registered ExtendedTagAndInitStrategy
+     * must be non-NULL.
      */
-    if ((d_ever_uses_richardson_extrapolation || d_ever_uses_gradient_detector ||
-         d_ever_uses_multiresolution_detector) &&
+    if ((d_ever_uses_richardson_extrapolation || d_ever_uses_integral_detector ||
+         d_ever_uses_multiresolution_detector || d_ever_uses_gradient_detector) &&
         tag_strategy == 0)
     {
         TBOX_ERROR(getObjectName()
@@ -118,7 +120,8 @@ ExtendedTagAndInitialize::ExtendedTagAndInitialize(
             << "\nThe supplied implementation of the "
             << "\nExtendedTagAndInitStrategy is NULL.  It must be"
             << "\nnon-NULL to use the GRADIENT_DETECTOR, "
-            << "\nMULTIRESOLUTION_DETECTOR, or "
+            << "\nMULTIRESOLUTION_DETECTOR, "
+            << "\nINTEGRAL_DETECTOR, or"
             << "\nRICHARDSON_EXTRAPOLATION tagging options."
             << std::endl);
     }
@@ -208,18 +211,20 @@ ExtendedTagAndInitialize::resetHierarchyConfiguration(
  *************************************************************************
  *
  * Tag cells on level where refinement should occur.   The method can
- * tag cells using either of three options:
+ * tag cells using either of five options:
  *
  *    1) Richardson extrapolation
- *    2) gradient detection
- *    3) user supplied refine boxes.
+ *    2) integral detection
+ *    3) multiresolution detection
+ *    4) gradient detection
+ *    5) user supplied refine boxes.
  *
  * These options may be used individually or in combination.  If used in
  * combination,  it is IMPORTANT TO PRESERVE THE ORDER of the calls
- * (Richardson extrapolation 1st, gradient detection 2nd, user-supplied
- * refine boxes 3rd) in this method because users may have logic in
- * their code to compare how cells are tagged and changing the order
- * could destroy this logic.
+ * (Richardson extrapolation 1st, integral detection 2nd, multiresolution
+ * detection 3rd, gradient detection 4th, user-supplied refine boxes 5th)
+ * in this method because users may have logic in their code to compare how
+ * cells are tagged and changing the order could destroy this logic.
  *
  *************************************************************************
  */
@@ -247,6 +252,9 @@ ExtendedTagAndInitialize::tagCellsForRefinement(
     bool usesMultiresolution =
         usesMultiresolutionDetector(regrid_cycle, regrid_time);
     
+    bool usesIntegral =
+        usesIntegralDetector(regrid_cycle, regrid_time);
+    
     bool usesRichExtrap =
         usesRichardsonExtrapolation(regrid_cycle, regrid_time);
     
@@ -264,6 +272,21 @@ ExtendedTagAndInitialize::tagCellsForRefinement(
             can_be_refined);
     }
     
+    if (usesIntegral)
+    {
+        TBOX_ASSERT(d_tag_strategy != 0);
+        
+        d_tag_strategy->applyIntegralDetector(
+            hierarchy,
+            level_number,
+            regrid_time,
+            tag_index,
+            initial_time,
+            usesGradient,
+            usesMultiresolution,
+            usesRichExtrap);
+    }
+    
     if (usesMultiresolution)
     {
         TBOX_ASSERT(d_tag_strategy != 0);
@@ -275,6 +298,7 @@ ExtendedTagAndInitialize::tagCellsForRefinement(
             tag_index,
             initial_time,
             usesGradient,
+            usesIntegral,
             usesRichExtrap);
     }
     
@@ -289,6 +313,7 @@ ExtendedTagAndInitialize::tagCellsForRefinement(
             tag_index,
             initial_time,
             usesMultiresolution,
+            usesIntegral,
             usesRichExtrap);
     }
     
@@ -603,7 +628,8 @@ ExtendedTagAndInitialize::tagCellsUsingRichardsonExtrapolation(
         d_error_coarsen_ratio,
         initial_time,
         usesGradientDetector(regrid_cycle, regrid_time),
-        usesMultiresolutionDetector(regrid_cycle, regrid_time));
+        usesMultiresolutionDetector(regrid_cycle, regrid_time),
+        usesIntegralDetector(regrid_cycle, regrid_time));
     
     /*
      * Refine tags from coarser level to level.
@@ -1151,6 +1177,68 @@ ExtendedTagAndInitialize::usesRichardsonExtrapolation(
 
 /*
  *************************************************************************
+ * Returns true if there is ever an integral detector tagging
+ * crtieria.
+ *************************************************************************
+ */
+bool
+ExtendedTagAndInitialize::everUsesIntegralDetector() const
+{
+    return d_ever_uses_integral_detector;
+}
+
+
+/*
+ *************************************************************************
+ * Returns true if there is an integral detector tagging crtieria
+ * for the supplied cycle/time.
+ *************************************************************************
+ */
+bool
+ExtendedTagAndInitialize::usesIntegralDetector(
+    int cycle,
+    double time)
+{
+    TBOX_ASSERT(!d_use_cycle_criteria || !d_use_time_criteria);
+    
+    bool result = false;
+    
+    setCurrentTaggingCriteria(cycle, time);
+    if (d_use_cycle_criteria)
+    {
+        for (std::vector<TagCriteria>::const_iterator i =
+                d_cur_cycle_criteria->d_tag_criteria.begin();
+             i != d_cur_cycle_criteria->d_tag_criteria.end();
+             i++)
+        {
+            if (i->d_tagging_method == "INTEGRAL_DETECTOR")
+            {
+                result = true;
+                break;
+            }
+        }
+    }
+    else if (d_use_time_criteria)
+    {
+        for (std::vector<TagCriteria>::const_iterator i =
+                d_cur_time_criteria->d_tag_criteria.begin();
+             i != d_cur_time_criteria->d_tag_criteria.end();
+             i++)
+        {
+            if (i->d_tagging_method == "INTEGRAL_DETECTOR")
+            {
+                result = true;
+                break;
+            }
+        }
+    }
+    
+    return result;
+}
+
+
+/*
+ *************************************************************************
  * Returns true if there is ever a multiresolution detector tagging
  * crtieria.
  *************************************************************************
@@ -1390,6 +1478,7 @@ ExtendedTagAndInitialize::getFromInput(
             this_cycle_crit.d_cycle = 0;
             std::string tagging_method = input_db->getString("tagging_method");
             if (!(tagging_method == "RICHARDSON_EXTRAPOLATION" ||
+                  tagging_method == "INTEGRAL_DETECTOR" ||
                   tagging_method == "MULTIRESOLUTION_DETECTOR" ||
                   tagging_method == "GRADIENT_DETECTOR" ||
                   tagging_method == "REFINE_BOXES" ||
@@ -1484,6 +1573,10 @@ ExtendedTagAndInitialize::getFromInput(
             else if (tagging_method == "RICHARDSON_EXTRAPOLATION")
             {
                 d_ever_uses_richardson_extrapolation = true;
+            }
+            else if (tagging_method == "INTEGRAL_DETECTOR")
+            {
+                d_ever_uses_integral_detector = true;
             }
             else if (tagging_method == "MULTIRESOLUTION_DETECTOR")
             {
@@ -1590,6 +1683,7 @@ ExtendedTagAndInitialize::getFromInput(
                     std::string tagging_method =
                         this_tag_db->getString("tagging_method");
                     if (tagging_method != "RICHARDSON_EXTRAPOLATION" &&
+                        tagging_method != "INTEGRAL_DETECTOR" &&
                         tagging_method != "MULTIRESOLUTION_DETECTOR" &&
                         tagging_method != "GRADIENT_DETECTOR" &&
                         tagging_method != "REFINE_BOXES" &&
@@ -1693,6 +1787,10 @@ ExtendedTagAndInitialize::getFromInput(
                     else if (tagging_method == "RICHARDSON_EXTRAPOLATION")
                     {
                         d_ever_uses_richardson_extrapolation = true;
+                    }
+                    else if (tagging_method == "INTEGRAL_DETECTOR")
+                    {
+                        d_ever_uses_integral_detector = true;
                     }
                     else if (tagging_method == "MULTIRESOLUTION_DETECTOR")
                     {
@@ -2096,7 +2194,7 @@ ExtendedTagAndInitialize::turnOnMultiresolutionDetector(
         if (!multiresolution_detect_already_on)
         {
             TagCriteria this_tag_crit;
-            this_tag_crit.d_tagging_method = "MULTIRESOLUION_DETECTOR";
+            this_tag_crit.d_tagging_method = "MULTIRESOLUTION_DETECTOR";
             std::vector<TagCriteria>& this_tag_criteria =
                 const_cast<std::vector<TagCriteria>&>(existing->d_tag_criteria);
             this_tag_criteria.push_back(this_tag_crit);
@@ -2122,6 +2220,86 @@ ExtendedTagAndInitialize::turnOffMultiresolutionDetector(
             while (j != tag_crits.end())
             {
                 if (j->d_tagging_method == "MULTIRESOLUTION_DETECTOR")
+                {
+                    tag_crits.erase(j);
+                }
+                else
+                {
+                    j++;
+                }
+            }
+            break;
+        }
+    }
+}
+
+
+void
+ExtendedTagAndInitialize::turnOnIntegralDetector(
+    double time)
+{
+    if (!d_tag_strategy)
+    {
+        TBOX_ERROR("ExtendedTagAndInitialize::turnOnIntegralDetector\n"
+            << "A tagging strategy must be defined if integral detector is used.\n");
+    }
+    
+    TimeTagCriteria search_for;
+    search_for.d_time = time;
+    std::set<TimeTagCriteria, time_tag_criteria_less>::iterator existing =
+        d_time_criteria.find(search_for);
+    if (existing == d_time_criteria.end())
+    {
+        TimeTagCriteria this_time_crit;
+        TagCriteria this_tag_crit;
+        this_tag_crit.d_tagging_method = "INTEGRAL_DETECTOR";
+        this_time_crit.d_time = time;
+        this_time_crit.d_tag_criteria.push_back(this_tag_crit);
+        d_cur_time_criteria = d_time_criteria.insert(this_time_crit).first;
+    }
+    else
+    {
+        bool integral_detect_already_on = false;
+        for (std::vector<TagCriteria>::const_iterator i =
+                existing->d_tag_criteria.begin();
+             i != existing->d_tag_criteria.end();
+             i++)
+        {
+            if (i->d_tagging_method == "INTEGRAL_DETECTOR")
+            {
+                integral_detect_already_on = true;
+                break;
+            }
+        }
+        if (!integral_detect_already_on)
+        {
+            TagCriteria this_tag_crit;
+            this_tag_crit.d_tagging_method = "INTEGRAL_DETECTOR";
+            std::vector<TagCriteria>& this_tag_criteria =
+                const_cast<std::vector<TagCriteria>&>(existing->d_tag_criteria);
+            this_tag_criteria.push_back(this_tag_crit);
+        }
+    }
+}
+
+
+void
+ExtendedTagAndInitialize::turnOffIntegralDetector(
+    double time)
+{
+    for (std::set<TimeTagCriteria, time_tag_criteria_less>::iterator i =
+            d_time_criteria.begin();
+         i != d_time_criteria.end();
+         i++)
+    {
+        if (i->d_time <= time)
+        {
+            std::vector<TagCriteria>& tag_crits =
+                const_cast<std::vector<TagCriteria>&>(i->d_tag_criteria);
+            std::vector<TagCriteria>::iterator j = tag_crits.begin();
+            while (j != tag_crits.end())
+            {
+                if (j->d_tagging_method == "INTEGRAL_DETECTOR")
                 {
                     tag_crits.erase(j);
                 }
@@ -2248,6 +2426,7 @@ ExtendedTagAndInitialize::setCurrentTaggingCriteria(
         std::set<TimeTagCriteria, time_tag_criteria_less>::iterator old_cur_time_criteria =
             d_cur_time_criteria;
         bool old_use_re = false;
+        bool old_use_in = false;
         bool old_use_mr = false;
         bool old_use_gd = false;
         bool old_use_rb = false;
@@ -2261,6 +2440,10 @@ ExtendedTagAndInitialize::setCurrentTaggingCriteria(
                 if (i->d_tagging_method == "RICHARDSON_EXTRAPOLATION")
                 {
                     old_use_re = true;
+                }
+                else if (i->d_tagging_method == "INTEGRAL_DETECTOR")
+                {
+                    old_use_in = true;
                 }
                 else if (i->d_tagging_method == "MULTIRESOLUTION_DETECTOR")
                 {
@@ -2286,6 +2469,10 @@ ExtendedTagAndInitialize::setCurrentTaggingCriteria(
                 if (i->d_tagging_method == "RICHARDSON_EXTRAPOLATION")
                 {
                     old_use_re = true;
+                }
+                else if (i->d_tagging_method == "INTEGRAL_DETECTOR")
+                {
+                    old_use_in = true;
                 }
                 else if (i->d_tagging_method == "MULTIRESOLUTION_DETECTOR")
                 {
@@ -2387,6 +2574,7 @@ ExtendedTagAndInitialize::setCurrentTaggingCriteria(
         // comparison with the information cached at the beginning of this
         // method about the old tagging criteria.
         bool new_use_re = false;
+        bool new_use_in = false;
         bool new_use_mr = false;
         bool new_use_gd = false;
         bool new_use_rb = false;
@@ -2400,6 +2588,10 @@ ExtendedTagAndInitialize::setCurrentTaggingCriteria(
                 if (i->d_tagging_method == "RICHARDSON_EXTRAPOLATION")
                 {
                     new_use_re = true;
+                }
+                else if (i->d_tagging_method == "INTEGRAL_DETECTOR")
+                {
+                    new_use_in = true;
                 }
                 else if (i->d_tagging_method == "MULTIRESOLUTION_DETECTOR")
                 {
@@ -2426,6 +2618,10 @@ ExtendedTagAndInitialize::setCurrentTaggingCriteria(
                 {
                     new_use_re = true;
                 }
+                else if (i->d_tagging_method == "INTEGRAL_DETECTOR")
+                {
+                    new_use_in = true;
+                }
                 else if (i->d_tagging_method == "MULTIRESOLUTION_DETECTOR")
                 {
                     new_use_mr = true;
@@ -2443,8 +2639,9 @@ ExtendedTagAndInitialize::setCurrentTaggingCriteria(
         
         // Compare the old and new tagging criteria to determine if the tagged
         // boxes changed.
-        if ((old_use_re != new_use_re) || (old_use_mr != new_use_mr) ||
-            (old_use_gd != new_use_gd) ||(old_use_rb != new_use_rb))
+        if ((old_use_re != new_use_re) || (old_use_in != new_use_in) ||
+            (old_use_mr != new_use_mr) || (old_use_gd != new_use_gd) ||
+            (old_use_rb != new_use_rb))
         {
             // If one of the tagging methods which was used is now not used or
             // vice-versa, then the tagged boxes have changed.
@@ -2453,7 +2650,7 @@ ExtendedTagAndInitialize::setCurrentTaggingCriteria(
         else
         {
             // The tagging methods are the same as they were last cycle.
-            if (new_use_re || new_use_mr || new_use_gd)
+            if (new_use_re || new_use_in || new_use_mr || new_use_gd)
             {
                 // If we're using either Richardson extrapolation or gradient
                 // detector we must assume that the boxes have changed.

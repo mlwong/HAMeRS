@@ -27,6 +27,7 @@ ExtendedTagAndInitStrategy::applyGradientDetector(
     const int tag_index,
     const bool initial_time,
     const bool uses_multiresolution_detector_too,
+    const bool uses_integral_detector_too,
     const bool uses_richardson_extrapolation_too)
 {
     NULL_USE(hierarchy);
@@ -35,6 +36,7 @@ ExtendedTagAndInitStrategy::applyGradientDetector(
     NULL_USE(tag_index);
     NULL_USE(initial_time);
     NULL_USE(uses_multiresolution_detector_too);
+    NULL_USE(uses_integral_detector_too);
     NULL_USE(uses_richardson_extrapolation_too);
     TBOX_ERROR("ExtendedTagAndInitStrategy::applyGradientDetector()"
         << "\nNo derived class supplies a concrete implementation for "
@@ -50,6 +52,7 @@ ExtendedTagAndInitStrategy::applyMultiresolutionDetector(
     const int tag_index,
     const bool initial_time,
     const bool uses_gradient_detector_too,
+    const bool uses_integral_detector_too,
     const bool uses_richardson_extrapolation_too)
 {
     NULL_USE(hierarchy);
@@ -58,8 +61,61 @@ ExtendedTagAndInitStrategy::applyMultiresolutionDetector(
     NULL_USE(tag_index);
     NULL_USE(initial_time);
     NULL_USE(uses_gradient_detector_too);
+    NULL_USE(uses_integral_detector_too);
     NULL_USE(uses_richardson_extrapolation_too);
     TBOX_ERROR("ExtendedTagAndInitStrategy::applyMultiresolutionDetector()"
+        << "\nNo derived class supplies a concrete implementation for "
+        << "\nthis method." << std::endl);
+}
+
+
+void
+ExtendedTagAndInitStrategy::applyIntegralDetector(
+    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const int level_number,
+    const double error_data_time,
+    const int tag_index,
+    const bool initial_time,
+    const bool uses_gradient_detector_too,
+    const bool uses_multiresolution_detector_too,
+    const bool uses_richardson_extrapolation_too)
+{
+    NULL_USE(hierarchy);
+    NULL_USE(level_number);
+    NULL_USE(error_data_time);
+    NULL_USE(tag_index);
+    NULL_USE(initial_time);
+    NULL_USE(uses_gradient_detector_too);
+    NULL_USE(uses_multiresolution_detector_too);
+    NULL_USE(uses_richardson_extrapolation_too);
+    TBOX_ERROR("ExtendedTagAndInitStrategy::applyIntegralDetector()"
+        << "\nNo derived class supplies a concrete implementation for "
+        << "\nthis method." << std::endl);
+}
+
+
+void
+ExtendedTagAndInitStrategy::applyRichardsonExtrapolation(
+    const boost::shared_ptr<hier::PatchLevel>& level,
+    const double error_data_time,
+    const int tag_index,
+    const double deltat,
+    const int error_coarsen_ratio,
+    const bool initial_time,
+    const bool uses_gradient_detector_too,
+    const bool uses_multiresolution_detector_too,
+    const bool uses_integral_detector_too)
+{
+    NULL_USE(level);
+    NULL_USE(error_data_time);
+    NULL_USE(tag_index);
+    NULL_USE(deltat);
+    NULL_USE(error_coarsen_ratio);
+    NULL_USE(initial_time);
+    NULL_USE(uses_gradient_detector_too);
+    NULL_USE(uses_multiresolution_detector_too);
+    NULL_USE(uses_integral_detector_too);
+    TBOX_ERROR("ExtendedTagAndInitStrategy::applyRichardsonExtrapolation()"
         << "\nNo derived class supplies a concrete implementation for "
         << "\nthis method." << std::endl);
 }
@@ -79,31 +135,6 @@ ExtendedTagAndInitStrategy::coarsenDataForRichardsonExtrapolation(
     NULL_USE(coarsen_data_time);
     NULL_USE(before_advance);
     TBOX_ERROR("ExtendedTagAndInitStrategy::coarsenDataForRichardsonExtrapolation()"
-        << "\nNo derived class supplies a concrete implementation for "
-        << "\nthis method." << std::endl);
-}
-
-
-void
-ExtendedTagAndInitStrategy::applyRichardsonExtrapolation(
-    const boost::shared_ptr<hier::PatchLevel>& level,
-    const double error_data_time,
-    const int tag_index,
-    const double deltat,
-    const int error_coarsen_ratio,
-    const bool initial_time,
-    const bool uses_gradient_detector_too,
-    const bool uses_multiresolution_detector_too)
-{
-    NULL_USE(level);
-    NULL_USE(error_data_time);
-    NULL_USE(tag_index);
-    NULL_USE(deltat);
-    NULL_USE(error_coarsen_ratio);
-    NULL_USE(initial_time);
-    NULL_USE(uses_gradient_detector_too);
-    NULL_USE(uses_multiresolution_detector_too);
-    TBOX_ERROR("ExtendedTagAndInitStrategy::applyRichardsonExtrapolation()"
         << "\nNo derived class supplies a concrete implementation for "
         << "\nthis method." << std::endl);
 }

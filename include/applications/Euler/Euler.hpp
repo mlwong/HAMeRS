@@ -181,6 +181,7 @@ class Euler:
             const bool initial_error,
             const int tag_indx,
             const bool uses_multiresolution_detector_too,
+            const bool uses_integral_detector_too,
             const bool uses_richardson_extrapolation_too);
         
         /**
@@ -193,6 +194,7 @@ class Euler:
             const double regrid_time,
             const bool initial_error,
             const bool uses_gradient_detector_too,
+            const bool uses_integral_detector_too,
             const bool uses_richardson_extrapolation_too);
         
         /**
@@ -205,6 +207,7 @@ class Euler:
             const bool initial_error,
             const int tag_indx,
             const bool uses_gradient_detector_too,
+            const bool uses_integral_detector_too,
             const bool uses_richardson_extrapolation_too);
         
         //@{

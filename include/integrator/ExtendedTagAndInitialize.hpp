@@ -25,6 +25,7 @@ using namespace SAMRAI;
  *
  *   - Gradient Detection
  *   - Multiresolution Detection
+ *   - Integral Detection
  *   - Richardson Extrapolation
  *   - Explicitly defined refine boxes
  *
@@ -219,6 +220,22 @@ class ExtendedTagAndInitialize:
          */
         bool
         usesRichardsonExtrapolation(
+            int cycle,
+            double time);
+        
+        /*!
+         * Returns true if integral detector is used at any cycle or time.
+         */
+        bool
+        everUsesIntegralDetector() const;
+        
+        /*!
+         * Returns true if integral detector is used at the supplied cycle and time.
+         *
+         * @pre !d_use_cycle_criteria || !d_use_time_criteria
+         */
+        bool
+        usesIntegralDetector(
             int cycle,
             double time);
         
@@ -500,6 +517,28 @@ class ExtendedTagAndInitialize:
             double time);
         
         /*!
+         * Turn on integral detector criteria at the specified time
+         * programmatically.
+         *
+         * @param time Time to turn integral detector criteria on.
+         *
+         * @pre d_tag_strategy
+         */
+        void
+        turnOnIntegralDetector(
+            double time);
+        
+        /*!
+         * Turn off integral detector criteria at the specified time
+         * programmatically.
+         *
+         * @param time Time to turn integral detector criteria off.
+         */
+        void
+        turnOffIntegralDetector(
+            double time);
+        
+        /*!
          * Turn on Richardson extrapolation criteria at the specified time
          * programmatically.
          *
@@ -723,6 +762,11 @@ class ExtendedTagAndInitialize:
          * Flag indicating if any tagging criteria is RICHARDSON_EXTRAPOLATION.
          */
         bool d_ever_uses_richardson_extrapolation;
+        
+        /*
+         * Flag indicating if any tagging criteria is INTEGRAL_DETECTOR.
+         */
+        bool d_ever_uses_integral_detector;
         
         /*
          * Flag indicating if any tagging criteria is MULTIRESOLUTION_DETECTOR.

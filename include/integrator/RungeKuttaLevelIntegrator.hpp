@@ -549,6 +549,10 @@ class RungeKuttaLevelIntegrator:
          * multiresolution detector is used in addition to the gradient
          * detector, and false otherwise.  This argument helps the user to
          * manage multiple regridding criteria.
+         *
+         * The boolean uses_integral_detector_too is true when integral detector
+         * is used in addition to the gradient detector, and false otherwise.
+         * This argument helps the user to manage multiple regridding criteria.
          * 
          * The boolean uses_richardson_extrapolation_too is true when Richardson
          * extrapolation error estimation is used in addition to the gradient
@@ -573,6 +577,7 @@ class RungeKuttaLevelIntegrator:
             const int tag_index,
             const bool initial_time,
             const bool uses_multiresolution_detector_too,
+            const bool uses_integral_detector_too,
             const bool uses_richardson_extrapolation_too);
         
         /**
@@ -592,6 +597,10 @@ class RungeKuttaLevelIntegrator:
          * gradient detector is used in addition to the multiresolution
          * detector, and false otherwise.  This argument helps the user to
          * manage multiple regridding criteria.
+         * 
+         * The boolean uses_integral_detector_too is true when integral detector
+         * is used in addition to the multiresolution detector, and false otherwise.
+         * This argument helps the user to manage multiple regridding criteria.
          * 
          * The boolean uses_richardson_extrapolation_too is true when Richardson
          * extrapolation error estimation is used in addition to the multiresolution
@@ -616,6 +625,54 @@ class RungeKuttaLevelIntegrator:
             const int tag_index,
             const bool initial_time,
             const bool uses_gradient_detector_too,
+            const bool uses_integral_detector_too,
+            const bool uses_richardson_extrapolation_too);
+        
+        /**
+         * Set integer tags to "one" in cells where refinement of the given
+         * level should occur according to some user-supplied integral criteria.
+         * The double time argument is the regrid time.  The integer "tag_index"
+         * argument is the patch descriptor index of the cell-centered integer tag
+         * array on each patch in the hierarchy.  The boolean argument
+         * initial_time indicates whether the level is being subject to refinement
+         * at the initial simulation time.  If it is false, then the error
+         * estimation process is being invoked at some later time after the AMR
+         * hierarchy was initially constructed.  Typically, this information is
+         * passed to the user's patch tagging routines since the error
+         * estimator or integral detector may be different in each case.
+         *
+         * The boolean uses_gradient_detector_too is true when gradient detector
+         * is used in addition to the integral detector, and false otherwise.
+         * This argument helps the user to manage multiple regridding criteria.
+         * 
+         * The boolean uses_multiresolution_detector_too is true when multiresolution
+         * detector is used in addition to the integral detector, and false otherwise.
+         * This argument helps the user to manage multiple regridding criteria.
+         * 
+         * The boolean uses_richardson_extrapolation_too is true when Richardson
+         * extrapolation error estimation is used in addition to the integral
+         * detector, and false otherwise.  This argument helps the user to
+         * manage multiple regridding criteria.
+         *
+         * This routine is only when integral detector is being used.
+         * It is virtual with an empty implementation here (rather than pure
+         * virtual) so that users are not required to provide an implementation
+         * when the function is not needed.
+         *
+         * @pre hierarchy
+         * @pre (level_number >= 0) &&
+         *      (level_number <= hierarchy->getFinestLevelNumber())
+         * @pre hierarchy->getPatchLevel(level_number)
+         */
+        virtual void
+        applyIntegralDetector(
+            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const int level_number,
+            const double error_data_time,
+            const int tag_index,
+            const bool initial_time,
+            const bool uses_gradient_detector_too,
+            const bool uses_multiresolution_detector_too,
             const bool uses_richardson_extrapolation_too);
         
         /**
@@ -648,6 +705,10 @@ class RungeKuttaLevelIntegrator:
          * multiresolution detector is used in addition to the Richardson
          * extrapolation, and false otherwise.  This argument helps the user to
          * manage multiple regridding criteria.
+         *
+         * The boolean uses_integral_detector_too is true when integral detector
+         * is used in addition to the Richardson extrapolation, and false otherwise.
+         * This argument helps the user to manage multiple regridding criteria.
          * 
          * This routine is only when Richardson extrapolation is being used.
          * It is virtual with an empty implementation here (rather than pure
@@ -665,7 +726,8 @@ class RungeKuttaLevelIntegrator:
             const int error_coarsen_ratio,
             const bool initial_time,
             const bool uses_gradient_detector_too,
-            const bool uses_multiresolution_detector_too);
+            const bool uses_multiresolution_detector_too,
+            const bool uses_integral_detector_too);
         
         /**
          * Coarsen solution data from level to coarse_level for Richardson
@@ -1183,6 +1245,7 @@ class RungeKuttaLevelIntegrator:
     static boost::shared_ptr<tbox::Timer> t_new_advance_bdry_fill_create;
     static boost::shared_ptr<tbox::Timer> t_apply_gradient_detector;
     static boost::shared_ptr<tbox::Timer> t_apply_multiresolution_detector;
+    static boost::shared_ptr<tbox::Timer> t_apply_integral_detector;
     static boost::shared_ptr<tbox::Timer> t_tag_cells;
     static boost::shared_ptr<tbox::Timer> t_coarsen_rich_extrap;
     static boost::shared_ptr<tbox::Timer> t_get_level_dt;

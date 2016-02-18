@@ -1114,11 +1114,13 @@ Euler::tagGradientDetectorCells(
     const bool initial_error,
     const int tag_indx,
     const bool uses_multiresolution_detector_too,
+    const bool uses_integral_detector_too,
     const bool uses_richardson_extrapolation_too)
 {
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
     NULL_USE(uses_multiresolution_detector_too);
+    NULL_USE(uses_integral_detector_too);
     NULL_USE(uses_richardson_extrapolation_too);
     
     t_taggradient->start();
@@ -1163,11 +1165,13 @@ Euler::preprocessTagMultiresolutionDetectorCells(
    const double regrid_time,
    const bool initial_error,
    const bool uses_gradient_detector_too,
+   const bool uses_integral_detector_too,
    const bool uses_richardson_extrapolation_too)
 {
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
     NULL_USE(uses_gradient_detector_too);
+    NULL_USE(uses_integral_detector_too);
     NULL_USE(uses_richardson_extrapolation_too);
     
     if (d_multiresolution_tagger != nullptr)
@@ -1204,11 +1208,13 @@ Euler::tagMultiresolutionDetectorCells(
     const bool initial_error,
     const int tag_indx,
     const bool uses_gradient_detector_too,
+    const bool uses_integral_detector_too,
     const bool uses_richardson_extrapolation_too)
 {
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
     NULL_USE(uses_gradient_detector_too);
+    NULL_USE(uses_integral_detector_too);
     NULL_USE(uses_richardson_extrapolation_too);
     
     t_tagmultiresolution->start();
@@ -1672,6 +1678,7 @@ Euler::preservePositivity(
     const double& dt,
     const double& beta)
 {
+    // NOT YET IMPLEMENTED
     NULL_USE(Q);
     NULL_USE(convective_flux_intermediate);
     NULL_USE(source_intermediate);

@@ -266,9 +266,11 @@ class RungeKuttaPatchStrategy:
          *
          * The boolean uses_multiresolution_detector_too is true when
          * multiresolution detector is used in addition to the gradient detector.
-         * The boolean uses_richardson_extrapolation_too is true when Richardson
-         * extrapolation is used in addition to the gradient detector.  These flags
-         * help users manage multiple regridding criteria.
+         * The boolean uses_integral_detector_too is true when integral detector
+         * is used in addition to the gradient detector.  The boolean
+         * uses_richardson_extrapolation_too is true when Richardson extrapolation
+         * is used in addition to the gradient detector.  These flags help users
+         * manage multiple regridding criteria.
          *
          * Note that this function is not pure virtual. It is given a
          * dummy implementation here so that users may ignore it when
@@ -281,6 +283,7 @@ class RungeKuttaPatchStrategy:
            const bool initial_error,
            const int tag_index,
            const bool uses_multiresolution_detector_too,
+           const bool uses_integral_detector_too,
            const bool uses_richardson_extrapolation_too);
         
         /**
@@ -295,6 +298,7 @@ class RungeKuttaPatchStrategy:
             const double regrid_time,
             const bool initial_error,
             const bool uses_multiresolution_detector_too,
+            const bool uses_integral_detector_too,
             const bool uses_richardson_extrapolation_too);
         
         /**
@@ -309,6 +313,7 @@ class RungeKuttaPatchStrategy:
             const double regrid_time,
             const bool initial_error,
             const bool uses_multiresolution_detector_too,
+            const bool uses_integral_detector_too,
             const bool uses_richardson_extrapolation_too);
         
         /**
@@ -318,11 +323,13 @@ class RungeKuttaPatchStrategy:
          * boolean argument initial_error is true if tagging is being done at the
          * initial simulation time; otherwise, it is false.
          *
-         * The boolean uses_gradient_detector_too is true when gradient
-         * detector is used in addition to the multiresolution detector.
-         * The boolean uses_richardson_extrapolation_too is true when Richardson
-         * extrapolation is used in addition to the gradient detector.  These flags
-         * help users manage multiple regridding criteria.
+         * The boolean uses_gradient_detector_too is true when gradient detector
+         * is used in addition to the multiresolution detector.  The boolean
+         * uses_integral_detector_too is true when integral detector is used
+         * in addition to the multiresolution detector.  The boolean
+         * uses_richardson_extrapolation_too is true when Richardson extrapolation
+         * is used in addition to the gradient detector.  These flags help users
+         * manage multiple regridding criteria.
          *
          * Note that this function is not pure virtual. It is given a
          * dummy implementation here so that users may ignore it when
@@ -335,6 +342,7 @@ class RungeKuttaPatchStrategy:
            const bool initial_error,
            const int tag_index,
            const bool uses_gradient_detector_too,
+           const bool uses_integral_detector_too,
            const bool uses_richardson_extrapolation_too);
         
         /**
@@ -349,6 +357,7 @@ class RungeKuttaPatchStrategy:
             const double regrid_time,
             const bool initial_error,
             const bool uses_gradient_detector_too,
+            const bool uses_integral_detector_too,
             const bool uses_richardson_extrapolation_too);
         
         /**
@@ -363,6 +372,66 @@ class RungeKuttaPatchStrategy:
             const double regrid_time,
             const bool initial_error,
             const bool uses_gradient_detector_too,
+            const bool uses_integral_detector_too,
+            const bool uses_richardson_extrapolation_too);
+        
+        /**
+         * Tag cells on the given patch that require refinement based on
+         * application-specific numerical quantities.  The tag index argument
+         * indicates the index of the tag data on the patch data array.  The
+         * boolean argument initial_error is true if tagging is being done at the
+         * initial simulation time; otherwise, it is false.
+         *
+         * The boolean uses_gradient_detector_too is true when gradient detector
+         * is used in addition to the integral detector.  The boolean
+         * uses_multiresolution_detector_too is true when multiresolution detector
+         * is used in addition to the integral detector.  The boolean
+         * uses_richardson_extrapolation_too is true when Richardson extrapolation
+         * is used in addition to the integral detector.  These flags help users
+         * manage multiple regridding criteria.
+         *
+         * Note that this function is not pure virtual. It is given a
+         * dummy implementation here so that users may ignore it when
+         * inheriting from this class.
+         */
+        virtual void
+        tagIntegralDetectorCells(
+           hier::Patch& patch,
+           const double regrid_time,
+           const bool initial_error,
+           const int tag_index,
+           const bool uses_gradient_detector_too,
+           const bool uses_multiresolution_detector_too,
+           const bool uses_richardson_extrapolation_too);
+        
+        /**
+         * This is an optional routine for user to process any application-specific
+         * patch strategy data BEFORE cells are tagged on the given level using
+         * integral detector.
+         */
+        virtual void
+        preprocessTagIntegralDetectorCells(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const int level_number,
+            const double regrid_time,
+            const bool initial_error,
+            const bool uses_gradient_detector_too,
+            const bool uses_multiresolution_detector_too,
+            const bool uses_richardson_extrapolation_too);
+        
+        /**
+         * This is an optional routine for user to process any application-specific
+         * patch strategy data AFTER cells are tagged on the given level using
+         * integral detector.
+         */
+        virtual void
+        postprocessTagIntegralDetectorCells(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const int level_number,
+            const double regrid_time,
+            const bool initial_error,
+            const bool uses_gradient_detector_too,
+            const bool uses_multiresolution_detector_too,
             const bool uses_richardson_extrapolation_too);
         
         /**
@@ -405,8 +474,10 @@ class RungeKuttaPatchStrategy:
          * The boolean uses_gradient_detector_too is true when gradient detector is
          * used in addition to the Richardson extrapolation.  The boolean
          * uses_multiresolution_detector_too is true when multiresolution detector
-         * is used in addition to the Richardson extrapolation. These flags
-         * help users manage multiple regridding criteria.
+         * is used in addition to the Richardson extrapolation.  The boolean
+         * uses_integral_detector_too is true when integral detector is used
+         * in addition to the Richardson extrapolation. These flags help users manage
+         * multiple regridding criteria.
          * 
          * Note that this function is not pure virtual. It is given a
          * dummy implementation here so that users may ignore it when
@@ -424,7 +495,8 @@ class RungeKuttaPatchStrategy:
             const bool initial_error,
             const int tag_index,
             const bool uses_gradient_detector_too,
-            const bool uses_multiresolution_detector_too);
+            const bool uses_multiresolution_detector_too,
+            const bool uses_integral_detector_too);
         
         /**
          * Set user-defined boundary conditions at the physical domain boundary.
@@ -465,7 +537,7 @@ class RungeKuttaPatchStrategy:
         {
            d_data_context.reset();
         }
-    
+        
     private:
         boost::shared_ptr<hier::VariableContext> d_data_context;
 };
