@@ -390,7 +390,10 @@ GradientTagger::tagCells(
                                 // Get the key of the current variable.
                                 std::string variable_key = d_Jameson_gradient_variables[vi];
                                 
+/*
                                 boost::shared_ptr<pdat::CellData<double> > gradient = NULL;
+*/
+                                boost::shared_ptr<pdat::CellData<double> > gradient;
                                 
                                 if (variable_key == "DENSITY")
                                 {
@@ -816,7 +819,10 @@ GradientTagger::tagCells(
                                 // Get the key of the current variable.
                                 std::string variable_key = d_Jameson_gradient_variables[vi];
                                 
+/*
                                 boost::shared_ptr<pdat::CellData<double> > gradient = NULL;
+*/
+                                boost::shared_ptr<pdat::CellData<double> > gradient;
                                 
                                 if (variable_key == "DENSITY")
                                 {
@@ -1252,7 +1258,10 @@ GradientTagger::tagCells(
                                 // Get the key of the current variable.
                                 std::string variable_key = d_Jameson_gradient_variables[vi];
                                 
+/*
                                 boost::shared_ptr<pdat::CellData<double> > gradient = NULL;
+*/
+                                boost::shared_ptr<pdat::CellData<double> > gradient;
                                 
                                 if (variable_key == "DENSITY")
                                 {
