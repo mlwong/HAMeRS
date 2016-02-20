@@ -43,14 +43,14 @@
 
 #define EPSILON 1e-40
 
-boost::shared_ptr<tbox::Timer> Euler::t_init = NULL;
-boost::shared_ptr<tbox::Timer> Euler::t_compute_dt = NULL;
-boost::shared_ptr<tbox::Timer> Euler::t_compute_hyperbolicfluxes = NULL;
-boost::shared_ptr<tbox::Timer> Euler::t_advance_steps = NULL;
-boost::shared_ptr<tbox::Timer> Euler::t_synchronize_hyperbloicfluxes = NULL;
-boost::shared_ptr<tbox::Timer> Euler::t_setphysbcs = NULL;
-boost::shared_ptr<tbox::Timer> Euler::t_taggradient = NULL;
-boost::shared_ptr<tbox::Timer> Euler::t_tagmultiresolution = NULL;
+boost::shared_ptr<tbox::Timer> Euler::t_init;
+boost::shared_ptr<tbox::Timer> Euler::t_compute_dt;
+boost::shared_ptr<tbox::Timer> Euler::t_compute_hyperbolicfluxes;
+boost::shared_ptr<tbox::Timer> Euler::t_advance_steps;
+boost::shared_ptr<tbox::Timer> Euler::t_synchronize_hyperbloicfluxes;
+boost::shared_ptr<tbox::Timer> Euler::t_setphysbcs;
+boost::shared_ptr<tbox::Timer> Euler::t_taggradient;
+boost::shared_ptr<tbox::Timer> Euler::t_tagmultiresolution;
 
 Euler::Euler(
     const std::string& object_name,
@@ -61,12 +61,15 @@ Euler::Euler(
         d_object_name(object_name),
         d_dim(dim),
         d_grid_geometry(grid_geometry),
+/*
 #ifdef HAVE_HDF5
         d_visit_writer(NULL),
 #endif
         d_workload_variable(NULL),
+*/
         d_use_nonuniform_workload(false),
         d_num_ghosts(hier::IntVector::getZero(d_dim)),
+/*
         d_equation_of_state(NULL),
         d_equation_of_state_db(NULL),
         d_conv_flux_reconstructor(NULL),
@@ -74,12 +77,15 @@ Euler::Euler(
         d_initial_conditions(NULL),
         d_Euler_boundary_conditions(NULL),
         d_Euler_boundary_conditions_db(NULL),
+*/
         d_Euler_boundary_conditions_db_is_from_restart(false),
+/*
         d_gradient_tagger(NULL),
         d_gradient_tagger_db(NULL),
         d_multiresolution_tagger(NULL),
         d_multiresolution_tagger_db(NULL),
         d_flow_model_manager(NULL),
+*/
         d_is_preserving_positivity(false)
 {
     TBOX_ASSERT(!object_name.empty());
