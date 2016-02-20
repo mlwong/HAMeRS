@@ -486,7 +486,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                                     d_dim,
                                                     "volume fraction " + boost::lexical_cast<std::string>(di) +
                                                         " wavelet coefficients at level " +
-                                                        boost::lexical_cast<std::string>g(li),
+                                                        boost::lexical_cast<std::string>(li),
                                                     1));
                                             
                                             d_volume_fraction_Harten_wavelet_coeffs_max.push_back(0.0);
