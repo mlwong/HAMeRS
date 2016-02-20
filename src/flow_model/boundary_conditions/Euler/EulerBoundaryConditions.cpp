@@ -28,13 +28,6 @@ EulerBoundaryConditions::EulerBoundaryConditions(
         d_variables_set(false),
         d_num_ghosts_set(false)
 {
-    d_density = NULL;
-    d_partial_density = NULL;
-    d_momentum = NULL;
-    d_total_energy = NULL;
-    d_mass_fraction = NULL;
-    d_volume_fraction = NULL;
-    
     /*
      * Defaults for boundary conditions. Set to bogus values
      * for error checking.
