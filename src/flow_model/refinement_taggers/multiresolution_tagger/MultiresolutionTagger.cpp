@@ -345,7 +345,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                 d_density_Harten_wavelet_coeffs.push_back(
                                     boost::make_shared<pdat::CellVariable<double> >(
                                         d_dim,
-                                        "density wavelet coefficients at level " + std::to_string(li),
+                                        "density wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
                                         1));
                                 
                                 d_density_Harten_wavelet_coeffs_max.push_back(0.0);
@@ -358,7 +358,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                 d_total_energy_Harten_wavelet_coeffs.push_back(
                                     boost::make_shared<pdat::CellVariable<double> >(
                                         d_dim,
-                                        "total energy_wavelet_coefficients at level " + std::to_string(li),
+                                        "total energy_wavelet_coefficients at level " + boost::lexical_cast<std::string>(li),
                                         1));
                                 
                                 d_total_energy_Harten_wavelet_coeffs_max.push_back(0.0);
@@ -371,7 +371,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                 d_pressure_Harten_wavelet_coeffs.push_back(
                                     boost::make_shared<pdat::CellVariable<double> >(
                                         d_dim,
-                                        "pressure wavelet coefficients at level " + std::to_string(li),
+                                        "pressure wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
                                         1));
                                 
                                 d_pressure_Harten_wavelet_coeffs_max.push_back(0.0);
@@ -384,7 +384,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                 d_enstrophy_Harten_wavelet_coeffs.push_back(
                                     boost::make_shared<pdat::CellVariable<double> >(
                                         d_dim,
-                                        "enstrophy wavelet coefficients at level " + std::to_string(li),
+                                        "enstrophy wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
                                         1));
                                 
                                 d_enstrophy_Harten_wavelet_coeffs_max.push_back(0.0);
@@ -415,9 +415,9 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                             d_mass_fraction_Harten_wavelet_coeffs.push_back(
                                                 boost::make_shared<pdat::CellVariable<double> >(
                                                     d_dim,
-                                                    "mass fraction " + std::to_string(di) +
+                                                    "mass fraction " + boost::lexical_cast<std::string>(di) +
                                                         " wavelet coefficients at level " +
-                                                        std::to_string(li),
+                                                        boost::lexical_cast<std::string>(li),
                                                     1));
                                             
                                             d_mass_fraction_Harten_wavelet_coeffs_max.push_back(0.0);
@@ -435,9 +435,9 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                             d_mass_fraction_Harten_wavelet_coeffs.push_back(
                                                 boost::make_shared<pdat::CellVariable<double> >(
                                                     d_dim,
-                                                    "mass fraction " + std::to_string(di) +
+                                                    "mass fraction " + boost::lexical_cast<std::string>(di) +
                                                         " wavelet coefficients at level " +
-                                                        std::to_string(li),
+                                                        boost::lexical_cast<std::string>(li),
                                                     1));
                                             
                                             d_mass_fraction_Harten_wavelet_coeffs_max.push_back(0.0);
@@ -482,9 +482,9 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                             d_volume_fraction_Harten_wavelet_coeffs.push_back(
                                                 boost::make_shared<pdat::CellVariable<double> >(
                                                     d_dim,
-                                                    "volume fraction " + std::to_string(di) +
+                                                    "volume fraction " + boost::lexical_cast<std::string>(di) +
                                                         " wavelet coefficients at level " +
-                                                        std::to_string(li),
+                                                        boost::lexical_cast<std::string>g(li),
                                                     1));
                                             
                                             d_volume_fraction_Harten_wavelet_coeffs_max.push_back(0.0);
@@ -2599,7 +2599,7 @@ MultiresolutionTagger::registerPlotQuantities(
                             for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                             {
                                 visit_writer->registerPlotQuantity(
-                                    "density wavelet coefficients at level " + std::to_string(li),
+                                    "density wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
                                     "SCALAR",
                                     vardb->mapVariableAndContextToIndex(
                                        d_density_Harten_wavelet_coeffs[li],
@@ -2611,7 +2611,7 @@ MultiresolutionTagger::registerPlotQuantities(
                             for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                             {
                                 visit_writer->registerPlotQuantity(
-                                    "total energy wavelet coefficients at level " + std::to_string(li),
+                                    "total energy wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
                                     "SCALAR",
                                     vardb->mapVariableAndContextToIndex(
                                        d_total_energy_Harten_wavelet_coeffs[li],
@@ -2623,7 +2623,7 @@ MultiresolutionTagger::registerPlotQuantities(
                             for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                             {
                                 visit_writer->registerPlotQuantity(
-                                    "pressure wavelet coefficients at level " + std::to_string(li),
+                                    "pressure wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
                                     "SCALAR",
                                     vardb->mapVariableAndContextToIndex(
                                        d_pressure_Harten_wavelet_coeffs[li],
@@ -2635,7 +2635,7 @@ MultiresolutionTagger::registerPlotQuantities(
                             for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                             {
                                 visit_writer->registerPlotQuantity(
-                                    "enstrophy wavelet coefficients at level " + std::to_string(li),
+                                    "enstrophy wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
                                     "SCALAR",
                                     vardb->mapVariableAndContextToIndex(
                                        d_enstrophy_Harten_wavelet_coeffs[li],
@@ -2665,8 +2665,8 @@ MultiresolutionTagger::registerPlotQuantities(
                                         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                                         {
                                             visit_writer->registerPlotQuantity(
-                                                "mass fraction " + std::to_string(di) +
-                                                    " wavelet coefficients at level " + std::to_string(li),
+                                                "mass fraction " + boost::lexical_cast<std::string>(di) +
+                                                    " wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
                                                 "SCALAR",
                                                 vardb->mapVariableAndContextToIndex(
                                                    d_mass_fraction_Harten_wavelet_coeffs[di*d_Harten_wavelet_num_level + li],
@@ -2683,8 +2683,8 @@ MultiresolutionTagger::registerPlotQuantities(
                                         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                                         {
                                             visit_writer->registerPlotQuantity(
-                                                "mass fraction " + std::to_string(di) +
-                                                    " wavelet coefficients at level " + std::to_string(li),
+                                                "mass fraction " + boost::lexical_cast<std::string>(di) +
+                                                    " wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
                                                 "SCALAR",
                                                 vardb->mapVariableAndContextToIndex(
                                                    d_mass_fraction_Harten_wavelet_coeffs[di*d_Harten_wavelet_num_level + li],
@@ -2728,8 +2728,8 @@ MultiresolutionTagger::registerPlotQuantities(
                                         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                                         {
                                             visit_writer->registerPlotQuantity(
-                                                    "volume fraction " + std::to_string(di) +
-                                                        " wavelet coefficients at level " + std::to_string(li),
+                                                    "volume fraction " + boost::lexical_cast<std::string>(di) +
+                                                        " wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
                                                     "SCALAR",
                                                     vardb->mapVariableAndContextToIndex(
                                                        d_volume_fraction_Harten_wavelet_coeffs[di*d_Harten_wavelet_num_level + li],
