@@ -17,15 +17,19 @@ GradientTagger::GradientTagger(
         d_flow_model(flow_model),
         d_num_species(num_species),
         d_equation_of_state(equation_of_state),
+/*
         d_density(NULL),
         d_partial_density(NULL),
         d_momentum(NULL),
         d_total_energy(NULL),
         d_mass_fraction(NULL),
         d_volume_fraction(NULL),
+*/
         d_variables_set(false),
-        d_num_ghosts_set(false),
+        d_num_ghosts_set(false)
+/*
         d_gradient_sensor_Jameson(NULL)
+*/
 {
     if (gradient_tagger_db != nullptr)
     {

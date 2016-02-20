@@ -11,6 +11,7 @@ FlowModelManager::FlowModelManager(
                 d_grid_geometry(grid_geometry),
                 d_num_ghosts(hier::IntVector::getZero(d_dim)),
                 d_num_species(num_species),
+/*
                 d_equation_of_state(NULL),
                 d_conv_flux_reconstructor(NULL),
                 d_initial_conditions(NULL),
@@ -24,6 +25,7 @@ FlowModelManager::FlowModelManager(
                 d_total_energy(NULL),
                 d_mass_fraction(NULL),
                 d_volume_fraction(NULL),
+*/
                 d_equation_of_state_initialized(false)
 {
     if (flow_model_str == "SINGLE_SPECIES")
