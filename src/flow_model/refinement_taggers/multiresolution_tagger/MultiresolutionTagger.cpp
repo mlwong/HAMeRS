@@ -1,5 +1,7 @@
 #include "flow_model/refinement_taggers/multiresolution_tagger/MultiresolutionTagger.hpp"
 
+#include "boost\lexical_cast.hpp"
+
 MultiresolutionTagger::MultiresolutionTagger(
     const std::string& object_name,
     const tbox::Dimension& dim,
