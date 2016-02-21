@@ -11,21 +11,6 @@ FlowModelManager::FlowModelManager(
                 d_grid_geometry(grid_geometry),
                 d_num_ghosts(hier::IntVector::getZero(d_dim)),
                 d_num_species(num_species),
-/*
-                d_equation_of_state(NULL),
-                d_conv_flux_reconstructor(NULL),
-                d_initial_conditions(NULL),
-                d_Euler_boundary_conditions(NULL),
-                d_gradient_tagger(NULL),
-                d_multiresolution_tagger(NULL),
-                d_plot_context(NULL),
-                d_density(NULL),
-                d_partial_density(NULL),
-                d_momentum(NULL),
-                d_total_energy(NULL),
-                d_mass_fraction(NULL),
-                d_volume_fraction(NULL),
-*/
                 d_equation_of_state_initialized(false)
 {
     if (flow_model_str == "SINGLE_SPECIES")

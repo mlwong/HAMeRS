@@ -17,19 +17,8 @@ GradientTagger::GradientTagger(
         d_flow_model(flow_model),
         d_num_species(num_species),
         d_equation_of_state(equation_of_state),
-/*
-        d_density(NULL),
-        d_partial_density(NULL),
-        d_momentum(NULL),
-        d_total_energy(NULL),
-        d_mass_fraction(NULL),
-        d_volume_fraction(NULL),
-*/
         d_variables_set(false),
         d_num_ghosts_set(false)
-/*
-        d_gradient_sensor_Jameson(NULL)
-*/
 {
     if (gradient_tagger_db != nullptr)
     {
@@ -390,9 +379,6 @@ GradientTagger::tagCells(
                                 // Get the key of the current variable.
                                 std::string variable_key = d_Jameson_gradient_variables[vi];
                                 
-/*
-                                boost::shared_ptr<pdat::CellData<double> > gradient = NULL;
-*/
                                 boost::shared_ptr<pdat::CellData<double> > gradient;
                                 
                                 if (variable_key == "DENSITY")
@@ -819,9 +805,6 @@ GradientTagger::tagCells(
                                 // Get the key of the current variable.
                                 std::string variable_key = d_Jameson_gradient_variables[vi];
                                 
-/*
-                                boost::shared_ptr<pdat::CellData<double> > gradient = NULL;
-*/
                                 boost::shared_ptr<pdat::CellData<double> > gradient;
                                 
                                 if (variable_key == "DENSITY")
@@ -1258,9 +1241,6 @@ GradientTagger::tagCells(
                                 // Get the key of the current variable.
                                 std::string variable_key = d_Jameson_gradient_variables[vi];
                                 
-/*
-                                boost::shared_ptr<pdat::CellData<double> > gradient = NULL;
-*/
                                 boost::shared_ptr<pdat::CellData<double> > gradient;
                                 
                                 if (variable_key == "DENSITY")

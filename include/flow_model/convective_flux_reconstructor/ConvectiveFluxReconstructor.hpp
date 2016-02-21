@@ -42,14 +42,6 @@ class ConvectiveFluxReconstructor
                 d_num_species(num_species),
                 d_equation_of_state(equation_of_state),
                 d_shock_capturing_scheme_db(shock_capturing_scheme_db),
-/*
-                d_density(NULL),
-                d_partial_density(NULL),
-                d_momentum(NULL),
-                d_total_energy(NULL),
-                d_mass_fraction(NULL),
-                d_volume_fraction(NULL),
-*/
                 d_variables_set(false),
                 d_num_ghosts_set(false)
         {}
