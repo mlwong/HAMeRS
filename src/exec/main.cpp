@@ -570,32 +570,35 @@ int main(int argc, char *argv[])
 #ifdef HAVE_HDF5
         if (is_viz_dumping)
         {
-            if (viz_dump_setting == "CONSTANT_TIME_INTERVAL" && dump_viz)
+            if (viz_dump_setting == "CONSTANT_TIME_INTERVAL")
             {
-                t_write_viz->start();
-                
-                visit_data_writer->writePlotData(
-                    patch_hierarchy,
-                    iteration_num,
-                    loop_time);
-                
-                t_write_viz->stop();
-                
-                last_viz_dump_time = loop_time;
-                
-                tbox::pout << "Files for plotting are written." << std::endl;
-                
-                if ((restart_interval == -1) && !(restart_write_dirname.empty()))
+                if (dump_viz)
                 {
-                    t_write_restart->start();
+                    t_write_viz->start();
                     
-                    tbox::RestartManager::getManager()->
-                        writeRestartFile(restart_write_dirname,
-                                         iteration_num);
+                    visit_data_writer->writePlotData(
+                        patch_hierarchy,
+                        iteration_num,
+                        loop_time);
                     
-                    t_write_restart->stop();
+                    t_write_viz->stop();
                     
-                    tbox::pout << "Files for restart are written." << std::endl;
+                    last_viz_dump_time = loop_time;
+                    
+                    tbox::pout << "Files for plotting are written." << std::endl;
+                    
+                    if ((restart_interval == -1) && !(restart_write_dirname.empty()))
+                    {
+                        t_write_restart->start();
+                        
+                        tbox::RestartManager::getManager()->
+                            writeRestartFile(restart_write_dirname,
+                                             iteration_num);
+                        
+                        t_write_restart->stop();
+                        
+                        tbox::pout << "Files for restart are written." << std::endl;
+                    }
                 }
             }
             else if (viz_dump_setting == "CONSTANT_TIMESTEP_INTERVAL")
