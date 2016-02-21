@@ -150,7 +150,6 @@ ConvectiveFluxReconstructorWCNS_HW6_LD_HLLC_HLL::computeConvectiveFluxesAndSourc
     {
         if (d_num_ghosts_set == true)
         {
-std::cout << "1" << std::endl;
             // Get the dimensions of box that covers the interior of patch.
             hier::Box dummy_box = patch.getBox();
             const hier::Box interior_box = dummy_box;
@@ -168,12 +167,11 @@ std::cout << "1" << std::endl;
                     patch.getPatchGeometry()));
             
             const double* const dx = patch_geom->getDx();
-std::cout << "2" << std::endl;
+            
             switch (d_flow_model)
             {
                 case SINGLE_SPECIES:
                 {
-std::cout << "3" << std::endl;
                     // Get the cell data of the time-dependent variables.
                     boost::shared_ptr<pdat::CellData<double> > density(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -190,7 +188,7 @@ std::cout << "3" << std::endl;
                     boost::shared_ptr<pdat::FaceData<double> > convective_flux(
                         BOOST_CAST<pdat::FaceData<double>, hier::PatchData>(
                             patch.getPatchData(d_convective_flux, data_context)));
-std::cout << "4" << std::endl;
+                    
 #ifdef DEBUG_CHECK_ASSERTIONS
                     TBOX_ASSERT(density);
                     TBOX_ASSERT(momentum);
@@ -202,7 +200,7 @@ std::cout << "4" << std::endl;
                     TBOX_ASSERT(total_energy->getGhostCellWidth() == d_num_ghosts);
                     TBOX_ASSERT(convective_flux->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
 #endif
-std::cout << "5" << std::endl;
+                    
                     // Allocate temporary patch data.
                     boost::shared_ptr<pdat::CellData<double> > velocity(
                         new pdat::CellData<double>(interior_box, d_dim.getValue(), d_num_ghosts));
@@ -225,7 +223,7 @@ std::cout << "5" << std::endl;
                         convective_flux_node.push_back(boost::make_shared<pdat::CellData<double> >(
                             interior_box, d_num_eqn, d_num_ghosts));
                     }
-std::cout << "6" << std::endl;
+                    
                     boost::shared_ptr<pdat::FaceData<double> > convective_flux_midpoint(
                         new pdat::FaceData<double>(interior_box, d_num_eqn, hier::IntVector::getOne(d_dim)));
                     
@@ -240,7 +238,7 @@ std::cout << "6" << std::endl;
                             interior_box,
                             d_num_eqn*d_num_eqn,
                             hier::IntVector::getOne(d_dim)));
-std::cout << "7" << std::endl;
+                    
                     if (d_dim == tbox::Dimension(1))
                     {
                         // Get the arrays of time-dependent variables.
@@ -604,7 +602,6 @@ std::cout << "7" << std::endl;
                     } // if (d_dim == tbox::Dimension(1))
                     else if (d_dim == tbox::Dimension(2))
                     {
-std::cout << "8" << std::endl;
                         // Get the arrays of time-dependent variables.
                         double* rho   = density->getPointer(0);
                         double* rho_u = momentum->getPointer(0);
@@ -632,7 +629,7 @@ std::cout << "8" << std::endl;
                             F_x_midpoint.push_back(convective_flux_midpoint->getPointer(0, ei));
                             F_y_midpoint.push_back(convective_flux_midpoint->getPointer(1, ei));
                         }
-std::cout << "9" << std::endl;
+                        
                         // Compute the field of velocities, pressure, sound speed and fluxes.
                         for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
                         {
@@ -671,11 +668,11 @@ std::cout << "9" << std::endl;
                                 F_y_node[3][idx] = v[idx]*(E[idx] + p[idx]);
                             }
                         }
-std::cout << "10" << std::endl;
+                        
                         // Compute the dilatation and magnitude of vorticity.
-                        for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                        for (int j = -d_num_ghosts[1] + 1; j < interior_dims[1] + d_num_ghosts[1] - 1; j++)
                         {
-                            for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                            for (int i = -d_num_ghosts[0] + 1; i < interior_dims[0] + d_num_ghosts[0] - 1; i++)
                             {
                                 // Compute indices of current and neighboring cells.
                                 const int idx = (i + d_num_ghosts[0]) +
@@ -703,7 +700,7 @@ std::cout << "10" << std::endl;
                                 Omega[idx] = fabs(dvdx - dudy);
                             }
                         }
-std::cout << "11" << std::endl;
+                        
                         /*
                          * Compute the projection matrix and its inverse at the face normal to the
                          * x direction.
@@ -787,7 +784,7 @@ std::cout << "11" << std::endl;
                                 *R_x_inv_intercell[3][3] = 0.5;
                             }
                         }
-std::cout << "12" << std::endl;
+                        
                         /*
                          * Compute the projection matrix and its inverse at the face normal to the
                          * y direction.
@@ -872,7 +869,7 @@ std::cout << "12" << std::endl;
                                 *R_y_inv_intercell[3][3] = 0.5;
                             }
                         }
-std::cout << "13" << std::endl;
+                        
                         // Compute the mid-point fluxes in the x direction.
                         for (int j = 0; j < interior_dims[1]; j++)
                         {
@@ -1142,7 +1139,7 @@ std::cout << "13" << std::endl;
                                 }
                             }
                         }
-std::cout << "14" << std::endl;
+                        
                         // Compute the mid-point fluxes in the y direction.
                         for (int i = 0; i < interior_dims[0]; i++)
                         {
@@ -1414,7 +1411,7 @@ std::cout << "14" << std::endl;
                                 }
                             }
                         }
-std::cout << "15" << std::endl;
+                        
                         // Compute the fluxes in the x direction.
                         for (int j = 0; j < interior_dims[1]; j++)
                         {
@@ -1444,7 +1441,7 @@ std::cout << "15" << std::endl;
                                 }
                             }
                         }
-std::cout << "16" << std::endl;
+                        
                         // Compute the fluxes in the y direction.
                         for (int i = 0; i < interior_dims[0]; i++)
                         {
@@ -1566,11 +1563,11 @@ std::cout << "16" << std::endl;
                         }
                         
                         // Compute the dilatation and magnitude of vorticity.
-                        for (int k = -d_num_ghosts[2]; k < interior_dims[2] + d_num_ghosts[2]; k++)
+                        for (int k = -d_num_ghosts[2] + 1; k < interior_dims[2] + d_num_ghosts[2] - 1; k++)
                         {
-                            for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                            for (int j = -d_num_ghosts[1] + 1; j < interior_dims[1] + d_num_ghosts[1] - 1; j++)
                             {
-                                for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                                for (int i = -d_num_ghosts[0] + 1; i < interior_dims[0] + d_num_ghosts[0] - 1; i++)
                                 {
                                     // Compute indices of current and neighboring cells.
                                     const int idx = (i + d_num_ghosts[0]) +
@@ -3612,9 +3609,9 @@ std::cout << "16" << std::endl;
                         }
                         
                         // Compute the dilatation and magnitude of vorticity.
-                        for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                        for (int j = -d_num_ghosts[1] + 1; j < interior_dims[1] + d_num_ghosts[1] - 1; j++)
                         {
-                            for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                            for (int i = -d_num_ghosts[0] + 1; i < interior_dims[0] + d_num_ghosts[0] - 1; i++)
                             {
                                 // Compute indices of current and neighboring cells.
                                 const int idx = (i + d_num_ghosts[0]) +
@@ -4769,11 +4766,11 @@ std::cout << "16" << std::endl;
                         }
                         
                         // Compute the dilatation and magnitude of vorticity.
-                        for (int k = -d_num_ghosts[2]; k < interior_dims[2] + d_num_ghosts[2]; k++)
+                        for (int k = -d_num_ghosts[2] + 1; k < interior_dims[2] + d_num_ghosts[2] - 1; k++)
                         {
-                            for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                            for (int j = -d_num_ghosts[1] + 1; j < interior_dims[1] + d_num_ghosts[1] - 1; j++)
                             {
-                                for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                                for (int i = -d_num_ghosts[0] + 1; i < interior_dims[0] + d_num_ghosts[0] - 1; i++)
                                 {
                                     // Compute indices of current and neighboring cells.
                                     const int idx = (i + d_num_ghosts[0]) +
@@ -7244,9 +7241,9 @@ std::cout << "16" << std::endl;
                         }
                         
                         // Compute the dilatation and magnitude of vorticity.
-                        for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                        for (int j = -d_num_ghosts[1] + 1; j < interior_dims[1] + d_num_ghosts[1] - 1; j++)
                         {
-                            for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                            for (int i = -d_num_ghosts[0] + 1; i < interior_dims[0] + d_num_ghosts[0] - 1; i++)
                             {
                                 // Compute indices of current and neighboring cells.
                                 const int idx = (i + d_num_ghosts[0]) +
@@ -8548,11 +8545,11 @@ std::cout << "16" << std::endl;
                         }
                         
                         // Compute the dilatation and magnitude of vorticity.
-                        for (int k = -d_num_ghosts[2]; k < interior_dims[2] + d_num_ghosts[2]; k++)
+                        for (int k = -d_num_ghosts[2] + 1; k < interior_dims[2] + d_num_ghosts[2] - 1; k++)
                         {
-                            for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                            for (int j = -d_num_ghosts[1] + 1; j < interior_dims[1] + d_num_ghosts[1] - 1; j++)
                             {
-                                for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                                for (int i = -d_num_ghosts[0] + 1; i < interior_dims[0] + d_num_ghosts[0] - 1; i++)
                                 {
                                     // Compute indices of current and neighboring cells.
                                     const int idx = (i + d_num_ghosts[0]) +

@@ -641,9 +641,9 @@ ConvectiveFluxReconstructorWCNS_HW6_HLLC_HLL::computeConvectiveFluxesAndSources(
                         }
                         
                         // Compute the dilatation and magnitude of vorticity.
-                        for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                        for (int j = -d_num_ghosts[1] + 1; j < interior_dims[1] + d_num_ghosts[1] - 1; j++)
                         {
-                            for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                            for (int i = -d_num_ghosts[0] + 1; i < interior_dims[0] + d_num_ghosts[0] - 1; i++)
                             {
                                 // Compute indices of current and neighboring cells.
                                 const int idx = (i + d_num_ghosts[0]) +
@@ -1515,11 +1515,11 @@ ConvectiveFluxReconstructorWCNS_HW6_HLLC_HLL::computeConvectiveFluxesAndSources(
                         }
                         
                         // Compute the dilatation and magnitude of vorticity.
-                        for (int k = -d_num_ghosts[2]; k < interior_dims[2] + d_num_ghosts[2]; k++)
+                        for (int k = -d_num_ghosts[2] + 1; k < interior_dims[2] + d_num_ghosts[2] - 1; k++)
                         {
-                            for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                            for (int j = -d_num_ghosts[1] + 1; j < interior_dims[1] + d_num_ghosts[1] - 1; j++)
                             {
-                                for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                                for (int i = -d_num_ghosts[0] + 1; i < interior_dims[0] + d_num_ghosts[0] - 1; i++)
                                 {
                                     // Compute indices of current and neighboring cells.
                                     const int idx = (i + d_num_ghosts[0]) +
@@ -3496,9 +3496,9 @@ ConvectiveFluxReconstructorWCNS_HW6_HLLC_HLL::computeConvectiveFluxesAndSources(
                         }
                         
                         // Compute the dilatation and magnitude of vorticity.
-                        for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                        for (int j = -d_num_ghosts[1] + 1; j < interior_dims[1] + d_num_ghosts[1] - 1; j++)
                         {
-                            for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                            for (int i = -d_num_ghosts[0] + 1; i < interior_dims[0] + d_num_ghosts[0] - 1; i++)
                             {
                                 // Compute indices of current and neighboring cells.
                                 const int idx = (i + d_num_ghosts[0]) +
@@ -4582,11 +4582,11 @@ ConvectiveFluxReconstructorWCNS_HW6_HLLC_HLL::computeConvectiveFluxesAndSources(
                         }
                         
                         // Compute the dilatation and magnitude of vorticity.
-                        for (int k = -d_num_ghosts[2]; k < interior_dims[2] + d_num_ghosts[2]; k++)
+                        for (int k = -d_num_ghosts[2] + 1; k < interior_dims[2] + d_num_ghosts[2] - 1; k++)
                         {
-                            for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                            for (int j = -d_num_ghosts[1] + 1; j < interior_dims[1] + d_num_ghosts[1] - 1; j++)
                             {
-                                for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                                for (int i = -d_num_ghosts[0] + 1; i < interior_dims[0] + d_num_ghosts[0] - 1; i++)
                                 {
                                     // Compute indices of current and neighboring cells.
                                     const int idx = (i + d_num_ghosts[0]) +
@@ -6899,9 +6899,9 @@ ConvectiveFluxReconstructorWCNS_HW6_HLLC_HLL::computeConvectiveFluxesAndSources(
                         }
                         
                         // Compute the dilatation and magnitude of vorticity.
-                        for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                        for (int j = -d_num_ghosts[1] + 1; j < interior_dims[1] + d_num_ghosts[1] - 1; j++)
                         {
-                            for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                            for (int i = -d_num_ghosts[0] + 1; i < interior_dims[0] + d_num_ghosts[0] - 1; i++)
                             {
                                 // Compute indices of current and neighboring cells.
                                 const int idx = (i + d_num_ghosts[0]) +
@@ -8097,11 +8097,11 @@ ConvectiveFluxReconstructorWCNS_HW6_HLLC_HLL::computeConvectiveFluxesAndSources(
                         }
                         
                         // Compute the dilatation and magnitude of vorticity.
-                        for (int k = -d_num_ghosts[2]; k < interior_dims[2] + d_num_ghosts[2]; k++)
+                        for (int k = -d_num_ghosts[2] + 1; k < interior_dims[2] + d_num_ghosts[2] - 1; k++)
                         {
-                            for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                            for (int j = -d_num_ghosts[1] + 1; j < interior_dims[1] + d_num_ghosts[1] - 1; j++)
                             {
-                                for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                                for (int i = -d_num_ghosts[0] + 1; i < interior_dims[0] + d_num_ghosts[0] - 1; i++)
                                 {
                                     // Compute indices of current and neighboring cells.
                                     const int idx = (i + d_num_ghosts[0]) +
