@@ -147,7 +147,7 @@ class MultiresolutionTagger
         }
         
         /*
-         * Register the temporary variables used in multiresolution tagger class.
+         * Register the variables used in multiresolution tagger class.
          */
         void
         registerMultiresolutionTaggerVariables(
@@ -176,7 +176,8 @@ class MultiresolutionTagger
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
-         * Get the statistics of the sensor values at given patch level.
+         * Get the statistics of the sensor values that are required by the
+         * multiresolution sensors at a given patch level.
          */
         void
         getSensorValueStatistics(
@@ -275,44 +276,75 @@ class MultiresolutionTagger
         int d_Harten_wavelet_num_vanishing_moments;
         
         /*
-         * Variables and tolerances for the multiresolution sensor.
+         * Variables, tolerances and settings for the multiresolution sensor.
          */
         std::vector<std::string> d_Harten_wavelet_variables;
-        std::vector<double> d_Harten_wavelet_tol_1;
-        std::vector<double> d_Harten_wavelet_tol_2;
+        std::vector<double> d_Harten_wavelet_global_tol;
+        std::vector<double> d_Harten_wavelet_local_tol;
+        std::vector<double> d_Harten_wavelet_alpha_tol;
+        bool d_Harten_wavelet_uses_global_tol;
+        bool d_Harten_wavelet_uses_local_tol;
+        bool d_Harten_wavelet_uses_alpha_tol;
         
         /*
          * boost::shared_ptr to wavelet coefficients at different levels.
          */
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_density_Harten_wavelet_coeffs;
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_total_energy_Harten_wavelet_coeffs;
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_pressure_Harten_wavelet_coeffs;
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_enstrophy_Harten_wavelet_coeffs;
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_mass_fraction_Harten_wavelet_coeffs;
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_volume_fraction_Harten_wavelet_coeffs;
+        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_density_wavelet_coeffs;
+        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_total_energy_wavelet_coeffs;
+        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_pressure_wavelet_coeffs;
+        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_enstrophy_wavelet_coeffs;
+        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_mass_fraction_wavelet_coeffs;
+        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_volume_fraction_wavelet_coeffs;
         
         /*
          * Statistics of sensor values.
          */
-        std::vector<double> d_density_Harten_wavelet_coeffs_max;
-        std::vector<double> d_total_energy_Harten_wavelet_coeffs_max;
-        std::vector<double> d_pressure_Harten_wavelet_coeffs_max;
-        std::vector<double> d_enstrophy_Harten_wavelet_coeffs_max;
-        std::vector<double> d_mass_fraction_Harten_wavelet_coeffs_max;
-        std::vector<double> d_volume_fraction_Harten_wavelet_coeffs_max;
+        std::vector<double> d_Harten_density_wavelet_coeffs_maxs;
+        std::vector<double> d_Harten_total_energy_wavelet_coeffs_maxs;
+        std::vector<double> d_Harten_pressure_wavelet_coeffs_maxs;
+        std::vector<double> d_Harten_enstrophy_wavelet_coeffs_maxs;
+        std::vector<double> d_Harten_mass_fraction_wavelet_coeffs_maxs;
+        std::vector<double> d_Harten_volume_fraction_wavelet_coeffs_maxs;
+        
+        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_density_local_means;
+        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_total_energy_local_means;
+        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_pressure_local_means;
+        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_enstrophy_local_means;
+        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_mass_fraction_local_means;
+        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_volume_fraction_local_means;
+        
+        boost::shared_ptr<pdat::CellVariable<double> > d_Harten_Lipschitz_exponent;
         
         /*
-         * Compute the Lipschitz's exponent and tag cells. There are two steps:
-         * 1. Find the maximum wavelet coefficients in domain of dependence.
-         * 2. Compute Lipschitz's exponent and tag cells with the provided tolerances.
+         * Tag cells using wavelet sensor with the combination of three possible criteria:
+         * 1. When ratio between wavelet coefficient and global maximum at any level is greater than the tolerance.
+         * 2. When ratio between wavelet coefficient and local mean at any level is greater than the tolerance.
+         * 3. When the Lipschitz's exponent is smaller than the tolerance.
          */
         void
-        tagCellsUsingLipschitzExponent(
+        tagCellsWithWaveletSensor(
             hier::Patch& patch,
             boost::shared_ptr<pdat::CellData<int> > tags,
             std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
-            std::vector<double>& tol_wavelet_coeffs,
-            double& tol_alpha);
+            std::vector<double>& wavelet_coeffs_maxs,
+            std::vector<boost::shared_ptr<pdat::CellData<double> > >& variable_local_means,
+            boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent,
+            double& global_tol,
+            double& local_tol,
+            double& alpha_tol,
+            std::string& sensor_key);
+        
+        /*
+         * Compute the Lipschitz's exponent. There are two steps:
+         * 1. Find the maximum wavelet coefficients in the domain of dependence.
+         * 2. Compute Lipschitz's exponent.
+         */
+        void
+        computeLipschitzExponent(
+            hier::Patch& patch,
+            std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
+            boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent,
+            std::string& sensor_key);
         
 };
 

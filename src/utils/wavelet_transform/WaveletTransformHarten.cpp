@@ -61,7 +61,7 @@ WaveletTransformHarten::WaveletTransformHarten(
         num_wavelet_ghosts += fmax(d_p, d_q)*pow(2, li);
     }
     
-    num_wavelet_ghosts += fmax(d_p, d_q)*pow(2, num_level - 1);
+    num_wavelet_ghosts += fmax(d_p, d_q)*pow(2, num_level);
     
     d_num_wavelet_ghosts = hier::IntVector::getOne(d_dim)*num_wavelet_ghosts;
 }
@@ -74,9 +74,41 @@ void
 WaveletTransformHarten::computeWaveletCoefficients(
     hier::Patch& patch,
     boost::shared_ptr<pdat::CellData<double> > cell_data,
-    std::vector<boost::shared_ptr<pdat::CellData<double> > > wavelet_coeffs,
-    int depth)
+    std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
+    int depth,
+    bool smooth_cell_data)
 {
+    // Declare an empty vector.
+    std::vector<boost::shared_ptr<pdat::CellData<double> > > variable_local_means;
+    
+    computeWaveletCoefficientsWithVariableLocalMeans(
+        patch,
+        cell_data,
+        wavelet_coeffs,
+        variable_local_means,
+        depth,
+        smooth_cell_data);
+}
+
+
+/*
+ * Perform the wavelet transformation and compute the local mean of the given cell data.
+ */
+void
+WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
+    hier::Patch& patch,
+    boost::shared_ptr<pdat::CellData<double> > cell_data,
+    std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
+    std::vector<boost::shared_ptr<pdat::CellData<double> > >& variable_local_means,
+    int depth,
+    bool smooth_cell_data)
+{
+    bool compute_variable_local_means = false;
+    if (!variable_local_means.empty())
+    {
+        compute_variable_local_means = true;
+    }
+    
     const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
         BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
@@ -104,16 +136,30 @@ WaveletTransformHarten::computeWaveletCoefficients(
     for (int li = 0; li < d_num_level; li++)
     {
         w.push_back(wavelet_coeffs[li]->getPointer(0));
+        wavelet_coeffs[li]->fillAll(0.0);
+    }
+    
+    std::vector<double*> f_mean;
+    if (compute_variable_local_means)
+    {
+        for (int li = 0; li < d_num_level; li++)
+        {
+            f_mean.push_back(variable_local_means[li]->getPointer(0));
+        }
     }
     
     /*
      * Smooth the depth component of the given cell data.
      */
-    boost::shared_ptr<pdat::CellData<double> > smoothed_cell_data =
-        smoothCellData(
+    boost::shared_ptr<pdat::CellData<double> > smoothed_cell_data;
+    
+    if (smooth_cell_data)
+    {
+        smoothed_cell_data = smoothCellData(
             patch,
             cell_data,
             depth);
+    }
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -172,13 +218,20 @@ WaveletTransformHarten::computeWaveletCoefficients(
                  */
                 
                 // Get the pointer to the smoothed cell data in the x-direction.
-                f = smoothed_cell_data->getPointer(0);
+                if (smooth_cell_data)
+                {
+                    f = smoothed_cell_data->getPointer(0);
+                }
+                else
+                {
+                    f = cell_data->getPointer(depth);
+                }
                 
                 // Compute the starting and ending indices.
-                start_index_i = -d_num_ghosts[0] + 1 ;
+                start_index_i = -d_num_ghosts[0] + 1;
                 end_index_i   = interior_dims[0] + d_num_ghosts[0] - 1;
-                start_index_j = 0;
-                end_index_j   = interior_dims[1];
+                start_index_j = -d_num_ghosts[1];
+                end_index_j   = interior_dims[1] + d_num_ghosts[1];
                 
                 for (int j = start_index_j; j < end_index_j; j++)
                 {
@@ -204,12 +257,19 @@ WaveletTransformHarten::computeWaveletCoefficients(
                  */
                 
                 // Get the pointer to the smoothed cell data in the y-direction.
-                f = smoothed_cell_data->getPointer(1);
+                if (smooth_cell_data)
+                {
+                    f = smoothed_cell_data->getPointer(1);
+                }
+                else
+                {
+                    f = cell_data->getPointer(depth);
+                }
                 
                 // Compute the starting and ending indices.
-                start_index_i = 0;
-                end_index_i   = interior_dims[0];
-                start_index_j = -d_num_ghosts[1] + 1 ;
+                start_index_i = -d_num_ghosts[0];
+                end_index_i   = interior_dims[0] + d_num_ghosts[0];
+                start_index_j = -d_num_ghosts[1] + 1;
                 end_index_j   = interior_dims[1] + d_num_ghosts[1] - 1;
                 
                 for (int i = start_index_i; i < end_index_i; i++)
@@ -231,6 +291,34 @@ WaveletTransformHarten::computeWaveletCoefficients(
                     }
                 }
                 
+                if (compute_variable_local_means)
+                {
+                    for (int j = 0; j < interior_dims[1]; j++)
+                    {
+                        for (int i = 0; i < interior_dims[0]; i++)
+                        {
+                            // Compute indices.
+                            const int idx = (i + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_y_B = (i + d_num_ghosts[0]) +
+                                (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_y_T = (i + d_num_ghosts[0]) +
+                                (j + 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            f_mean[0][idx] = 1.0/8.0*(4*f[idx] + f[idx_x_L] + f[idx_x_R] +
+                                f[idx_y_B] + f[idx_y_T]);
+                        }
+                    }
+                }
+                
                 break;
             }
             case 4:
@@ -243,13 +331,20 @@ WaveletTransformHarten::computeWaveletCoefficients(
                  */
                 
                 // Get the pointer to the smoothed cell data in the x-direction.
-                f = smoothed_cell_data->getPointer(0);
+                if (smooth_cell_data)
+                {
+                    f = smoothed_cell_data->getPointer(0);
+                }
+                else
+                {
+                    f = cell_data->getPointer(depth);
+                }
                 
                 // Compute the starting and ending indices.
-                start_index_i = -d_num_ghosts[0] + 2 ;
+                start_index_i = -d_num_ghosts[0] + 2;
                 end_index_i   = interior_dims[0] + d_num_ghosts[0] - 2;
-                start_index_j = 0;
-                end_index_j   = interior_dims[1];
+                start_index_j = -d_num_ghosts[1];
+                end_index_j   = interior_dims[1] + d_num_ghosts[1];
                 
                 for (int j = start_index_j; j < end_index_j; j++)
                 {
@@ -281,12 +376,19 @@ WaveletTransformHarten::computeWaveletCoefficients(
                  */
                 
                 // Get the pointer to the smoothed cell data in the y-direction.
-                f = smoothed_cell_data->getPointer(1);
+                if (smooth_cell_data)
+                {
+                    f = smoothed_cell_data->getPointer(1);
+                }
+                else
+                {
+                    f = cell_data->getPointer(depth);
+                }
                 
                 // Compute the starting and ending indices.
-                start_index_i = 0;
-                end_index_i   = interior_dims[0];
-                start_index_j = -d_num_ghosts[1] + 2 ;
+                start_index_i = -d_num_ghosts[0];
+                end_index_i   = interior_dims[0] + d_num_ghosts[0];
+                start_index_j = -d_num_ghosts[1] + 2;
                 end_index_j   = interior_dims[1] + d_num_ghosts[1] - 2;
                 
                 for (int i = start_index_i; i < end_index_i; i++)
@@ -311,6 +413,46 @@ WaveletTransformHarten::computeWaveletCoefficients(
                         
                         f_y[0][idx] = 1.0/6.0*(-f[idx_y_BB] + 4*f[idx_y_B] + 4*f[idx_y_T] - f[idx_y_TT]);
                         w_y[0][idx] = 1.0/6.0*(f[idx_y_BB] - 4*f[idx_y_B] + 6*f[idx] - 4*f[idx_y_T] + f[idx_y_TT]);
+                    }
+                }
+                
+                if (compute_variable_local_means)
+                {
+                    for (int j = 0; j < interior_dims[1]; j++)
+                    {
+                        for (int i = 0; i < interior_dims[0]; i++)
+                        {
+                            // Compute indices.
+                            const int idx = (i + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_x_LL = (i - 2 + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_x_RR = (i + 2 + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_y_BB = (i + d_num_ghosts[0]) +
+                                (j - 2 + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_y_B = (i + d_num_ghosts[0]) +
+                                (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_y_T = (i + d_num_ghosts[0]) +
+                                (j + 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            const int idx_y_TT = (i + d_num_ghosts[0]) +
+                                (j + 2 + d_num_ghosts[1])*ghostcell_dims[0];
+                            
+                            f_mean[0][idx] = 1.0/32.0*(12*f[idx] + f[idx_x_LL] + 4*f[idx_x_L] + 4*f[idx_x_R] +
+                                f[idx_x_RR] + f[idx_y_BB] + 4*f[idx_y_B] + 4*f[idx_y_T] + f[idx_y_TT]);
+                        }
                     }
                 }
                 
@@ -344,14 +486,11 @@ WaveletTransformHarten::computeWaveletCoefficients(
                      * Compute scaling and wavelet coefficients in the x-direction.
                      */
                     
-                    // Get the pointer to the smoothed cell data in the x-direction.
-                    f = smoothed_cell_data->getPointer(0);
-                    
                     // Compute the starting and ending indices.
-                    start_index_i = -d_num_ghosts[0] + pow(2, li) ;
+                    start_index_i = -d_num_ghosts[0] + pow(2, li);
                     end_index_i   = interior_dims[0] + d_num_ghosts[0] - pow(2, li);
-                    start_index_j = 0;
-                    end_index_j   = interior_dims[1];
+                    start_index_j = -d_num_ghosts[1];
+                    end_index_j   = interior_dims[1] + d_num_ghosts[1];
                     
                     for (int j = start_index_j; j < end_index_j; j++)
                     {
@@ -376,13 +515,10 @@ WaveletTransformHarten::computeWaveletCoefficients(
                      * Compute scaling and wavelet coefficients in the y-direction.
                      */
                     
-                    // Get the pointer to the smoothed cell data in the y-direction.
-                    f = smoothed_cell_data->getPointer(1);
-                    
                     // Compute the starting and ending indices.
-                    start_index_i = 0;
-                    end_index_i   = interior_dims[0];
-                    start_index_j = -d_num_ghosts[1] + pow(2, li) ;
+                    start_index_i = -d_num_ghosts[0];
+                    end_index_i   = interior_dims[0] + d_num_ghosts[0];
+                    start_index_j = -d_num_ghosts[1] + pow(2, li);
                     end_index_j   = interior_dims[1] + d_num_ghosts[1] - pow(2, li);
                     
                     for (int i = start_index_i; i < end_index_i; i++)
@@ -404,6 +540,34 @@ WaveletTransformHarten::computeWaveletCoefficients(
                         }
                     }
                     
+                    if (compute_variable_local_means)
+                    {
+                        for (int j = 0; j < interior_dims[1]; j++)
+                        {
+                            for (int i = 0; i < interior_dims[0]; i++)
+                            {
+                                // Compute indices.
+                                const int idx = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_x_L = (i - pow(2, li) + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_x_R = (i + pow(2, li) + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_y_B = (i + d_num_ghosts[0]) +
+                                    (j - pow(2, li) + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_y_T = (i + d_num_ghosts[0]) +
+                                    (j + pow(2, li) + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                f_mean[li][idx] = 1.0/8.0*(2*f_x[li-1][idx] + 2*f_y[li-1][idx] + f_x[li-1][idx_x_L] +
+                                    f_x[li-1][idx_x_R] + f_y[li-1][idx_y_B] + f_y[li-1][idx_y_T]);
+                            }
+                        }
+                    }
+                    
                     break;
                 }
                 case 4:
@@ -415,14 +579,11 @@ WaveletTransformHarten::computeWaveletCoefficients(
                      * Compute scaling and wavelet coefficients in the x-direction.
                      */
                     
-                    // Get the pointer to the smoothed cell data in the x-direction.
-                    f = smoothed_cell_data->getPointer(0);
-                    
                     // Compute the starting and ending indices.
-                    start_index_i = -d_num_ghosts[0] + 2*pow(2, li) ;
+                    start_index_i = -d_num_ghosts[0] + 2*pow(2, li);
                     end_index_i   = interior_dims[0] + d_num_ghosts[0] - 2*pow(2, li);
-                    start_index_j = 0;
-                    end_index_j   = interior_dims[1];
+                    start_index_j = -d_num_ghosts[1];
+                    end_index_j   = interior_dims[1] + d_num_ghosts[1];
                     
                     for (int j = start_index_j; j < end_index_j; j++)
                     {
@@ -456,13 +617,10 @@ WaveletTransformHarten::computeWaveletCoefficients(
                      * Compute scaling and wavelet coefficients in the y-direction.
                      */
                     
-                    // Get the pointer to the smoothed cell data in the y-direction.
-                    f = smoothed_cell_data->getPointer(1);
-                    
                     // Compute the starting and ending indices.
-                    start_index_i = 0;
-                    end_index_i   = interior_dims[0];
-                    start_index_j = -d_num_ghosts[1] + 2*pow(2, li) ;
+                    start_index_i = -d_num_ghosts[0];
+                    end_index_i   = interior_dims[0] + d_num_ghosts[0];
+                    start_index_j = -d_num_ghosts[1] + 2*pow(2, li);
                     end_index_j   = interior_dims[1] + d_num_ghosts[1] - 2*pow(2, li);
                     
                     for (int i = start_index_i; i < end_index_i; i++)
@@ -493,6 +651,48 @@ WaveletTransformHarten::computeWaveletCoefficients(
                         }
                     }
                     
+                    if (compute_variable_local_means)
+                    {
+                        for (int j = 0; j < interior_dims[1]; j++)
+                        {
+                            for (int i = 0; i < interior_dims[0]; i++)
+                            {
+                                // Compute indices.
+                                const int idx = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_x_LL = (i - 2*pow(2, li) + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_x_L = (i - pow(2, li) + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_x_R = (i + pow(2, li) + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_x_RR = (i + 2*pow(2, li) + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_y_BB = (i + d_num_ghosts[0]) +
+                                    (j - 2*pow(2, li) + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_y_B = (i + d_num_ghosts[0]) +
+                                    (j - pow(2, li) + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_y_T = (i + d_num_ghosts[0]) +
+                                    (j + pow(2, li) + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const int idx_y_TT = (i + d_num_ghosts[0]) +
+                                    (j + 2*pow(2, li) + d_num_ghosts[1])*ghostcell_dims[0];
+                                
+                                f_mean[li][idx] = 1.0/32.0*(6*f_x[li-1][idx] + 6*f_y[li-1][idx] +
+                                    f_x[li-1][idx_x_LL] + 4*f_x[li-1][idx_x_L] + 4*f_x[li-1][idx_x_R] +
+                                    f_x[li-1][idx_x_RR] + f_y[li-1][idx_y_BB] + 4*f_y[li-1][idx_y_B] +
+                                    4*f_y[li-1][idx_y_T] + f_y[li-1][idx_y_TT]);
+                            }
+                        }
+                    }
+                    
                     break;
                 }
                 default:
@@ -513,9 +713,13 @@ WaveletTransformHarten::computeWaveletCoefficients(
         
         for (int li = 0; li < d_num_level; li++)
         {
-            for (int j = 0; j < interior_dims[1]; j++)
+            for (int j = -d_p*pow(2, li+1);
+                 j < interior_dims[1] + d_q*pow(2, li+1);
+                 j++)
             {
-                for (int i = 0; i < interior_dims[0]; i++)
+                for (int i = -d_p*pow(2, li+1);
+                     i < interior_dims[0] + d_q*pow(2, li+1);
+                     i++)
                 {
                     const int idx = (i + d_num_ghosts[0]) +
                         (j + d_num_ghosts[1])*ghostcell_dims[0];
@@ -590,15 +794,22 @@ WaveletTransformHarten::computeWaveletCoefficients(
                  */
                 
                 // Get the pointer to the smoothed cell data in the x-direction.
-                f = smoothed_cell_data->getPointer(0);
+                if (smooth_cell_data)
+                {
+                    f = smoothed_cell_data->getPointer(0);
+                }
+                else
+                {
+                    f = cell_data->getPointer(depth);
+                }
                 
                 // Compute the starting and ending indices.
                 start_index_i = -d_num_ghosts[0] + 1;
                 end_index_i   = interior_dims[0] + d_num_ghosts[0] - 1;
-                start_index_j = 0;
-                end_index_j   = interior_dims[1];
-                start_index_k = 0;
-                end_index_k   = interior_dims[2];
+                start_index_j = -d_num_ghosts[1];
+                end_index_j   = interior_dims[1] + d_num_ghosts[1];
+                start_index_k = -d_num_ghosts[2];
+                end_index_k   = interior_dims[2] + d_num_ghosts[2];
                 
                 for (int k = start_index_k; k < end_index_k; k++)
                 {
@@ -630,15 +841,22 @@ WaveletTransformHarten::computeWaveletCoefficients(
                  */
                 
                 // Get the pointer to the smoothed cell data in the y-direction.
-                f = smoothed_cell_data->getPointer(1);
+                if (smooth_cell_data)
+                {
+                    f = smoothed_cell_data->getPointer(1);
+                }
+                else
+                {
+                    f = cell_data->getPointer(depth);
+                }
                 
                 // Compute the starting and ending indices.
-                start_index_i = 0;
-                end_index_i   = interior_dims[0];
+                start_index_i = -d_num_ghosts[0];
+                end_index_i   = interior_dims[0] + d_num_ghosts[0];
                 start_index_j = -d_num_ghosts[1] + 1;
                 end_index_j   = interior_dims[1] + d_num_ghosts[1] - 1;
-                start_index_k = 0;
-                end_index_k   = interior_dims[2];
+                start_index_k = -d_num_ghosts[2];
+                end_index_k   = interior_dims[2] + d_num_ghosts[2];
                 
                 for (int k = start_index_k; k < end_index_k; k++)
                 {
@@ -670,13 +888,20 @@ WaveletTransformHarten::computeWaveletCoefficients(
                  */
                 
                 // Get the pointer to the smoothed cell data in the z-direction.
-                f = smoothed_cell_data->getPointer(2);
+                if (smooth_cell_data)
+                {
+                    f = smoothed_cell_data->getPointer(2);
+                }
+                else
+                {
+                    f = cell_data->getPointer(depth);
+                }
                 
                 // Compute the starting and ending indices.
-                start_index_i = 0;
-                end_index_i   = interior_dims[0];
-                start_index_j = 0;
-                end_index_j   = interior_dims[1];
+                start_index_i = -d_num_ghosts[0];
+                end_index_i   = interior_dims[0] + d_num_ghosts[0];
+                start_index_j = -d_num_ghosts[1];
+                end_index_j   = interior_dims[1] + d_num_ghosts[1];
                 start_index_k = -d_num_ghosts[2] + 1;
                 end_index_k   = interior_dims[2] + d_num_ghosts[1] - 1;
                 
@@ -705,6 +930,50 @@ WaveletTransformHarten::computeWaveletCoefficients(
                     }
                 }
                 
+                if (compute_variable_local_means)
+                {
+                    for (int k = 0; k < interior_dims[2]; k++)
+                    {
+                        for (int j = 0; j < interior_dims[1]; j++)
+                        {
+                            for (int i = 0; i < interior_dims[0]; i++)
+                            {
+                                // Compute indices.
+                                const int idx = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_y_B = (i + d_num_ghosts[0]) +
+                                    (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_y_T = (i + d_num_ghosts[0]) +
+                                    (j + 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_z_B = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k - 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_z_F = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                f_mean[0][idx] = 1.0/12.0*(6*f[idx] + f[idx_x_L] + f[idx_x_R] +
+                                    f[idx_y_B] + f[idx_y_T] + f[idx_z_B] + f[idx_z_F]);
+                            }
+                        }
+                    }
+                }
+                
                 break;
             }
             case 4:
@@ -718,15 +987,22 @@ WaveletTransformHarten::computeWaveletCoefficients(
                  */
                 
                 // Get the pointer to the smoothed cell data in the x-direction.
-                f = smoothed_cell_data->getPointer(0);
+                if (smooth_cell_data)
+                {
+                    f = smoothed_cell_data->getPointer(0);
+                }
+                else
+                {
+                    f = cell_data->getPointer(depth);
+                }
                 
                 // Compute the starting and ending indices.
                 start_index_i = -d_num_ghosts[0] + 2;
                 end_index_i   = interior_dims[0] + d_num_ghosts[0] - 2;
-                start_index_j = 0;
-                end_index_j   = interior_dims[1];
-                start_index_k = 0;
-                end_index_k   = interior_dims[2];
+                start_index_j = -d_num_ghosts[1];
+                end_index_j   = interior_dims[1] + d_num_ghosts[1];
+                start_index_k = -d_num_ghosts[2];
+                end_index_k   = interior_dims[2] + d_num_ghosts[2];
                 
                 for (int k = start_index_k; k < end_index_k; k++)
                 {
@@ -766,15 +1042,22 @@ WaveletTransformHarten::computeWaveletCoefficients(
                  */
                 
                 // Get the pointer to the smoothed cell data in the y-direction.
-                f = smoothed_cell_data->getPointer(1);
+                if (smooth_cell_data)
+                {
+                    f = smoothed_cell_data->getPointer(1);
+                }
+                else
+                {
+                    f = cell_data->getPointer(depth);
+                }
                 
                 // Compute the starting and ending indices.
-                start_index_i = 0;
-                end_index_i   = interior_dims[0];
+                start_index_i = -d_num_ghosts[0];
+                end_index_i   = interior_dims[0] + d_num_ghosts[0];
                 start_index_j = -d_num_ghosts[1] + 2;
                 end_index_j   = interior_dims[1] + d_num_ghosts[1] - 2;
-                start_index_k = 0;
-                end_index_k   = interior_dims[2];
+                start_index_k = -d_num_ghosts[2];
+                end_index_k   = interior_dims[2] + d_num_ghosts[2];
                 
                 for (int k = start_index_k; k < end_index_k; k++)
                 {
@@ -814,13 +1097,20 @@ WaveletTransformHarten::computeWaveletCoefficients(
                  */
                 
                 // Get the pointer to the smoothed cell data in the z-direction.
-                f = smoothed_cell_data->getPointer(2);
+                if (smooth_cell_data)
+                {
+                    f = smoothed_cell_data->getPointer(2);
+                }
+                else
+                {
+                    f = cell_data->getPointer(depth);
+                }
                 
                 // Compute the starting and ending indices.
-                start_index_i = 0;
-                end_index_i   = interior_dims[0];
-                start_index_j = 0;
-                end_index_j   = interior_dims[1];
+                start_index_i = -d_num_ghosts[0];
+                end_index_i   = interior_dims[0] + d_num_ghosts[0];
+                start_index_j = -d_num_ghosts[1];
+                end_index_j   = interior_dims[1] + d_num_ghosts[1];
                 start_index_k = -d_num_ghosts[2] + 2;
                 end_index_k   = interior_dims[2] + d_num_ghosts[1] - 2;
                 
@@ -857,6 +1147,75 @@ WaveletTransformHarten::computeWaveletCoefficients(
                     }
                 }
                 
+                if (compute_variable_local_means)
+                {
+                    for (int k = 0; k < interior_dims[2]; k++)
+                    {
+                        for (int j = 0; j < interior_dims[1]; j++)
+                        {
+                            for (int i = 0; i < interior_dims[0]; i++)
+                            {
+                                // Compute indices.
+                                const int idx = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_x_LL = (i - 2 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_x_RR = (i + 2 + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_y_BB = (i + d_num_ghosts[0]) +
+                                    (j - 2 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_y_B = (i + d_num_ghosts[0]) +
+                                    (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_y_T = (i + d_num_ghosts[0]) +
+                                    (j + 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_y_TT = (i + d_num_ghosts[0]) +
+                                    (j + 2 + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_z_BB = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k - 2 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_z_B = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k - 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_z_F = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                const int idx_z_FF = (i + d_num_ghosts[0]) +
+                                    (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + 2 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                                f_mean[0][idx] = 1.0/48.0*(18*f[idx] + f[idx_x_LL] + 4*f[idx_x_L] + 4*f[idx_x_R] +
+                                    f[idx_x_RR] + f[idx_y_BB] + 4*f[idx_y_B] + 4*f[idx_y_T] + f[idx_y_TT] +
+                                    f[idx_z_BB] + 4*f[idx_z_B] + 4*f[idx_z_F] + f[idx_z_FF]);
+                            }
+                        }
+                    }
+                }
+                
                 break;
             }
             default:
@@ -888,16 +1247,13 @@ WaveletTransformHarten::computeWaveletCoefficients(
                      * Compute scaling and wavelet coefficients in the x-direction.
                      */
                     
-                    // Get the pointer to the smoothed cell data in the x-direction.
-                    f = smoothed_cell_data->getPointer(0);
-                    
                     // Compute the starting and ending indices.
                     start_index_i = -d_num_ghosts[0] + pow(2, li) ;
                     end_index_i   = interior_dims[0] + d_num_ghosts[0] - pow(2, li);
-                    start_index_j = 0;
-                    end_index_j   = interior_dims[1];
-                    start_index_k = 0;
-                    end_index_k   = interior_dims[2];
+                    start_index_j = -d_num_ghosts[1];
+                    end_index_j   = interior_dims[1] + d_num_ghosts[1];
+                    start_index_k = -d_num_ghosts[2];
+                    end_index_k   = interior_dims[2] + d_num_ghosts[2];
                     
                     for (int k = start_index_k; k < end_index_k; k++)
                     {
@@ -928,16 +1284,13 @@ WaveletTransformHarten::computeWaveletCoefficients(
                      * Compute scaling and wavelet coefficients in the y-direction.
                      */
                     
-                    // Get the pointer to the smoothed cell data in the y-direction.
-                    f = smoothed_cell_data->getPointer(1);
-                    
                     // Compute the starting and ending indices.
-                    start_index_i = 0;
-                    end_index_i   = interior_dims[0];
+                    start_index_i = -d_num_ghosts[0];
+                    end_index_i   = interior_dims[0] + d_num_ghosts[0];
                     start_index_j = -d_num_ghosts[1] + pow(2, li) ;
                     end_index_j   = interior_dims[1] + d_num_ghosts[1] - pow(2, li);
-                    start_index_k = 0;
-                    end_index_k   = interior_dims[2];
+                    start_index_k = -d_num_ghosts[2];
+                    end_index_k   = interior_dims[2] + d_num_ghosts[2];
                     
                     for (int k = start_index_k; k < end_index_k; k++)
                     {
@@ -968,14 +1321,11 @@ WaveletTransformHarten::computeWaveletCoefficients(
                      * Compute scaling and wavelet coefficients in the z-direction.
                      */
                     
-                    // Get the pointer to the smoothed cell data in the z-direction.
-                    f = smoothed_cell_data->getPointer(2);
-                    
                     // Compute the starting and ending indices.
-                    start_index_i = 0;
-                    end_index_i   = interior_dims[0];
-                    start_index_j = 0;
-                    end_index_j   = interior_dims[1];
+                    start_index_i = -d_num_ghosts[0];
+                    end_index_i   = interior_dims[0] + d_num_ghosts[0];
+                    start_index_j = -d_num_ghosts[1];
+                    end_index_j   = interior_dims[1] + d_num_ghosts[1];
                     start_index_k = -d_num_ghosts[2] + pow(2, li) ;
                     end_index_k   = interior_dims[2] + d_num_ghosts[2] - pow(2, li);
                     
@@ -994,12 +1344,58 @@ WaveletTransformHarten::computeWaveletCoefficients(
                                     (j + d_num_ghosts[1])*ghostcell_dims[0] +
                                     (k - pow(2, li) + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                                 
-                                const int idx_z_T = (i + d_num_ghosts[0]) +
+                                const int idx_z_F = (i + d_num_ghosts[0]) +
                                     (j + d_num_ghosts[1])*ghostcell_dims[0] +
                                     (k + pow(2, li) + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                                 
-                                f_z[li][idx] = 0.5*(f_z[li-1][idx_z_B] + f_z[li-1][idx_z_T]);
-                                w_z[li][idx] = -0.5*(f_z[li-1][idx_z_B] - 2*f_z[li-1][idx] + f_z[li-1][idx_z_T]);
+                                f_z[li][idx] = 0.5*(f_z[li-1][idx_z_B] + f_z[li-1][idx_z_F]);
+                                w_z[li][idx] = -0.5*(f_z[li-1][idx_z_B] - 2*f_z[li-1][idx] + f_z[li-1][idx_z_F]);
+                            }
+                        }
+                    }
+                    
+                    if (compute_variable_local_means)
+                    {
+                        for (int k = 0; k < interior_dims[2]; k++)
+                        {
+                            for (int j = 0; j < interior_dims[1]; j++)
+                            {
+                                for (int i = 0; i < interior_dims[0]; i++)
+                                {
+                                    // Compute indices.
+                                    const int idx = (i + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_x_L = (i - pow(2, li) + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_x_R = (i + pow(2, li) + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_y_B = (i + d_num_ghosts[0]) +
+                                        (j - pow(2, li) + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_y_T = (i + d_num_ghosts[0]) +
+                                        (j + pow(2, li) + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_z_B = (i + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k - pow(2, li) + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_z_F = (i + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + pow(2, li) + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    f_mean[li][idx] = 1.0/12.0*(2*f_x[li-1][idx] + 2*f_y[li-1][idx] +
+                                        2*f_z[li-1][idx] + f_x[li-1][idx_x_L] + f_x[li-1][idx_x_R] +
+                                        f_y[li-1][idx_y_B] + f_y[li-1][idx_y_T] + f_z[li-1][idx_z_B] +
+                                        f_z[li-1][idx_z_F]);
+                                }
                             }
                         }
                     }
@@ -1016,16 +1412,13 @@ WaveletTransformHarten::computeWaveletCoefficients(
                      * Compute scaling and wavelet coefficients in the x-direction.
                      */
                     
-                    // Get the pointer to the smoothed cell data in the x-direction.
-                    f = smoothed_cell_data->getPointer(0);
-                    
                     // Compute the starting and ending indices.
                     start_index_i = -d_num_ghosts[0] + 2*pow(2, li) ;
                     end_index_i   = interior_dims[0] + d_num_ghosts[0] - 2*pow(2, li);
-                    start_index_j = 0;
-                    end_index_j   = interior_dims[1];
-                    start_index_k = 0;
-                    end_index_k   = interior_dims[2];
+                    start_index_j = -d_num_ghosts[1];
+                    end_index_j   = interior_dims[1] + d_num_ghosts[1];
+                    start_index_k = -d_num_ghosts[2];
+                    end_index_k   = interior_dims[2] + d_num_ghosts[2];
                     
                     for (int k = start_index_k; k < end_index_k; k++)
                     {
@@ -1067,16 +1460,13 @@ WaveletTransformHarten::computeWaveletCoefficients(
                      * Compute scaling and wavelet coefficients in the y-direction.
                      */
                     
-                    // Get the pointer to the smoothed cell data in the y-direction.
-                    f = smoothed_cell_data->getPointer(1);
-                    
                     // Compute the starting and ending indices.
-                    start_index_i = 0;
-                    end_index_i   = interior_dims[0];
+                    start_index_i = -d_num_ghosts[0];
+                    end_index_i   = interior_dims[0] + d_num_ghosts[0];
                     start_index_j = -d_num_ghosts[1] + 2*pow(2, li) ;
                     end_index_j   = interior_dims[1] + d_num_ghosts[1] - 2*pow(2, li);
-                    start_index_k = 0;
-                    end_index_k   = interior_dims[2];
+                    start_index_k = -d_num_ghosts[2];
+                    end_index_k   = interior_dims[2] + d_num_ghosts[2];
                     
                     for (int k = start_index_k; k < end_index_k; k++)
                     {
@@ -1118,14 +1508,11 @@ WaveletTransformHarten::computeWaveletCoefficients(
                      * Compute scaling and wavelet coefficients in the z-direction.
                      */
                     
-                    // Get the pointer to the smoothed cell data in the z-direction.
-                    f = smoothed_cell_data->getPointer(2);
-                    
                     // Compute the starting and ending indices.
-                    start_index_i = 0;
-                    end_index_i   = interior_dims[0];
-                    start_index_j = 0;
-                    end_index_j   = interior_dims[1];
+                    start_index_i = -d_num_ghosts[0];
+                    end_index_i   = interior_dims[0] + d_num_ghosts[0];
+                    start_index_j = -d_num_ghosts[1];
+                    end_index_j   = interior_dims[1] + d_num_ghosts[1];
                     start_index_k = -d_num_ghosts[2] + 2*pow(2, li) ;
                     end_index_k   = interior_dims[2] + d_num_ghosts[2] - 2*pow(2, li);
                     
@@ -1165,6 +1552,78 @@ WaveletTransformHarten::computeWaveletCoefficients(
                         }
                     }
                     
+                    if (compute_variable_local_means)
+                    {
+                        for (int k = 0; k < interior_dims[2]; k++)
+                        {
+                            for (int j = 0; j < interior_dims[1]; j++)
+                            {
+                                for (int i = 0; i < interior_dims[0]; i++)
+                                {
+                                    // Compute indices.
+                                    const int idx = (i + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_x_LL = (i - 2*pow(2, li) + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_x_L = (i - pow(2, li) + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_x_R = (i + pow(2, li) + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_x_RR = (i + 2*pow(2, li) + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_y_BB = (i + d_num_ghosts[0]) +
+                                        (j - 2*pow(2, li) + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_y_B = (i + d_num_ghosts[0]) +
+                                        (j - pow(2, li) + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_y_T = (i + d_num_ghosts[0]) +
+                                        (j + pow(2, li) + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_y_TT = (i + d_num_ghosts[0]) +
+                                        (j + 2*pow(2, li) + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_z_BB = (i + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k - 2*pow(2, li) + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_z_B = (i + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k - pow(2, li) + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_z_F = (i + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + pow(2, li) + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    const int idx_z_FF = (i + d_num_ghosts[0]) +
+                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                        (k + 2*pow(2, li) + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                    
+                                    f_mean[li][idx] = 1.0/48.0*(6*f_x[li-1][idx] + 6*f_y[li-1][idx] +
+                                        6*f_z[li-1][idx] + f_x[li-1][idx_x_LL] + 4*f_x[li-1][idx_x_L] +
+                                        4*f_x[li-1][idx_x_R] + f_x[li-1][idx_x_RR] + f_y[li-1][idx_y_BB] +
+                                        4*f_y[li-1][idx_y_B] + 4*f_y[li-1][idx_y_T] + f_y[li-1][idx_y_TT] +
+                                        f_z[li-1][idx_z_BB] + 4*f_z[li-1][idx_z_B] + 4*f_z[li-1][idx_z_F] +
+                                        f_z[li-1][idx_z_FF]);
+                                }
+                            }
+                        }
+                    }
+                    
                     break;
                 }
                 default:
@@ -1186,11 +1645,17 @@ WaveletTransformHarten::computeWaveletCoefficients(
         
         for (int li = 0; li < d_num_level; li++)
         {
-            for (int k = 0; k < interior_dims[2]; k++)
+            for (int k = -d_p*pow(2, li+1);
+                 k < interior_dims[2] + d_q*pow(2, li+1);
+                 k++)
             {
-                for (int j = 0; j < interior_dims[1]; j++)
+                for (int j = -d_p*pow(2, li+1);
+                     j < interior_dims[1] + d_q*pow(2, li+1);
+                     j++)
                 {
-                    for (int i = 0; i < interior_dims[0]; i++)
+                    for (int i = -d_p*pow(2, li+1);
+                         i < interior_dims[0] + d_q*pow(2, li+1);
+                         i++)
                     {
                         const int idx = (i + d_num_ghosts[0]) +
                             (j + d_num_ghosts[1])*ghostcell_dims[0] +
@@ -1255,8 +1720,8 @@ WaveletTransformHarten::smoothCellData(
         // Compute the starting and ending indices.
         start_index_i = -d_num_ghosts[0];
         end_index_i   = interior_dims[0] + d_num_ghosts[0];
-        start_index_j = 0;
-        end_index_j   = interior_dims[1];
+        start_index_j = -d_num_ghosts[1];
+        end_index_j   = interior_dims[1] + d_num_ghosts[1];
         
         for (int j = start_index_j; j < end_index_j; j++)
         {
@@ -1292,8 +1757,8 @@ WaveletTransformHarten::smoothCellData(
         f_smoothed = smoothed_cell_data->getPointer(1);
         
         // Compute the starting and ending indices.
-        start_index_i = 0;
-        end_index_i   = interior_dims[0];
+        start_index_i = -d_num_ghosts[0];
+        end_index_i   = interior_dims[0] + d_num_ghosts[0];
         start_index_j = -d_num_ghosts[1];
         end_index_j   = interior_dims[1] + d_num_ghosts[1];
         
@@ -1339,10 +1804,10 @@ WaveletTransformHarten::smoothCellData(
         // Compute the starting and ending indices.
         start_index_i = -d_num_ghosts[0];
         end_index_i   = interior_dims[0] + d_num_ghosts[0];
-        start_index_j = 0;
-        end_index_j   = interior_dims[1];
-        start_index_k = 0;
-        end_index_k   = interior_dims[2];
+        start_index_j = -d_num_ghosts[1];
+        end_index_j   = interior_dims[1] + d_num_ghosts[1];
+        start_index_k = -d_num_ghosts[2];
+        end_index_k   = interior_dims[2] + d_num_ghosts[2];
         
         for (int k = start_index_k; k < end_index_k; k++)
         {
@@ -1383,12 +1848,12 @@ WaveletTransformHarten::smoothCellData(
         f_smoothed = smoothed_cell_data->getPointer(1);
         
         // Compute the starting and ending indices.
-        start_index_i = 0;
-        end_index_i   = interior_dims[0];
+        start_index_i = -d_num_ghosts[0];
+        end_index_i   = interior_dims[0] + d_num_ghosts[0];
         start_index_j = -d_num_ghosts[1];
         end_index_j   = interior_dims[1] + d_num_ghosts[1];
-        start_index_k = 0;
-        end_index_k   = interior_dims[2];
+        start_index_k = -d_num_ghosts[2];
+        end_index_k   = interior_dims[2] + d_num_ghosts[2];
         
         for (int i = start_index_i; i < end_index_i; i++)
         {
@@ -1428,12 +1893,12 @@ WaveletTransformHarten::smoothCellData(
         f_smoothed = smoothed_cell_data->getPointer(2);
         
         // Compute the starting and ending indices.
-        start_index_i = 0;
-        end_index_i   = interior_dims[0];
-        start_index_k = 0;
-        end_index_k   = interior_dims[1];
-        start_index_j = -d_num_ghosts[2];
-        end_index_j   = interior_dims[2] + d_num_ghosts[2];
+        start_index_i = -d_num_ghosts[0];
+        end_index_i   = interior_dims[0] + d_num_ghosts[0];
+        start_index_j = -d_num_ghosts[1];
+        end_index_j   = interior_dims[1] + d_num_ghosts[1];
+        start_index_k = -d_num_ghosts[2];
+        end_index_k   = interior_dims[2] + d_num_ghosts[2];
         
         for (int j = start_index_j; j < end_index_j; j++)
         {
