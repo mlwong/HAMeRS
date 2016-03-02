@@ -3286,6 +3286,8 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                             if (w[li][idx] >= global_tol*wavelet_coeffs_maxs[li])
                             {
                                 tag_cell = 1;
+                                
+                                break;
                             }
                         }
                     }
@@ -3297,6 +3299,8 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                             if (w[li][idx] >= local_tol*u_mean[li][idx])
                             {
                                 tag_cell = 1;
+                                
+                                break;
                             }
                         }
                     }
@@ -3337,6 +3341,8 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                                 if (w[li][idx] >= global_tol*wavelet_coeffs_maxs[li])
                                 {
                                     tag_cell = 1;
+                                    
+                                    break;
                                 }
                             }
                         }
@@ -3348,14 +3354,14 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                                 if (w[li][idx] >= local_tol*u_mean[li][idx])
                                 {
                                     tag_cell = 1;
+                                    
+                                    break;
                                 }
                             }
                         }
                         
                         if (d_Harten_wavelet_uses_alpha_tol)
                         {
-                            alpha = Lipschitz_exponent->getPointer(0);
-                            
                             if (alpha[idx] > alpha_tol)
                             {
                                 tag_cell = 0;
