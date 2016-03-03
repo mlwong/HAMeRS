@@ -63,14 +63,21 @@ GradientSensorJameson::ComputeGradient(
         }
         else if (d_dim == tbox::Dimension(2))
         {
-            // Allocate sensor values in different dimensions.
+            // Allocate memory in different dimensions.
             boost::shared_ptr<pdat::CellData<double> > sensor_value_x(
                         new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
             boost::shared_ptr<pdat::CellData<double> > sensor_value_y(
                         new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+            boost::shared_ptr<pdat::CellData<double> > local_mean_value_x(
+                        new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+            boost::shared_ptr<pdat::CellData<double> > local_mean_value_y(
+                        new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
             
             double* psi_x = sensor_value_x->getPointer(0);
             double* psi_y = sensor_value_y->getPointer(0);
+            double* mean_x = local_mean_value_x->getPointer(0);
+            double* mean_y = local_mean_value_y->getPointer(0);
+            
             
             for (int j = 0; j < interior_dims[1]; j++)
             {
@@ -86,8 +93,8 @@ GradientSensorJameson::ComputeGradient(
                     const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
                         (j + d_num_ghosts[1])*ghostcell_dims[0];
                     
-                    psi_x[idx] = fabs(f[idx_x_R] - 2*f[idx] + f[idx_x_L])/
-                        (f[idx_x_R] + 2*f[idx] + f[idx_x_L] + EPSILON);
+                    psi_x[idx] = f[idx_x_R] - 2*f[idx] + f[idx_x_L];
+                    mean_x[idx] = f[idx_x_R] + 2*f[idx] + f[idx_x_L];
                 }
             }
             
@@ -105,8 +112,8 @@ GradientSensorJameson::ComputeGradient(
                     const int idx_y_T = (i + d_num_ghosts[0]) +
                         (j + 1 + d_num_ghosts[1])*ghostcell_dims[0];
                     
-                    psi_y[idx] = fabs(f[idx_y_T] - 2*f[idx] + f[idx_y_B])/
-                        (f[idx_y_T] + 2*f[idx] + f[idx_y_B] + EPSILON);
+                    psi_y[idx] = f[idx_y_T] - 2*f[idx] + f[idx_y_B];
+                    mean_y[idx] = f[idx_y_T] + 2*f[idx] + f[idx_y_B];
                 }
             }
             
@@ -118,23 +125,33 @@ GradientSensorJameson::ComputeGradient(
                     const int idx = (i + d_num_ghosts[0]) +
                         (j + d_num_ghosts[1])*ghostcell_dims[0];
                     
-                    psi[idx] = fmax(psi_x[idx], psi_y[idx]);
+                    psi[idx] = sqrt(psi_x[idx]*psi_x[idx] + psi_y[idx]*psi_y[idx])/
+                        (sqrt(mean_x[idx]*mean_x[idx] + mean_y[idx]*mean_y[idx]) + EPSILON);
                 }
             }
         }
         else if (d_dim == tbox::Dimension(3))
         {
-            // Allocate sensor values in different dimensions.
+            // Allocate memory in different dimensions.
             boost::shared_ptr<pdat::CellData<double> > sensor_value_x(
                         new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
             boost::shared_ptr<pdat::CellData<double> > sensor_value_y(
                         new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
             boost::shared_ptr<pdat::CellData<double> > sensor_value_z(
                         new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+            boost::shared_ptr<pdat::CellData<double> > local_mean_value_x(
+                        new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+            boost::shared_ptr<pdat::CellData<double> > local_mean_value_y(
+                        new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+            boost::shared_ptr<pdat::CellData<double> > local_mean_value_z(
+                        new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
             
             double* psi_x = sensor_value_x->getPointer(0);
             double* psi_y = sensor_value_y->getPointer(0);
             double* psi_z = sensor_value_z->getPointer(0);
+            double* mean_x = local_mean_value_x->getPointer(0);
+            double* mean_y = local_mean_value_y->getPointer(0);
+            double* mean_z = local_mean_value_z->getPointer(0);
             
             for (int k = 0; k < interior_dims[2]; k++)
             {
@@ -155,8 +172,8 @@ GradientSensorJameson::ComputeGradient(
                             (j + d_num_ghosts[1])*ghostcell_dims[0] +
                             (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                         
-                        psi_x[idx] = fabs(f[idx_x_R] - 2*f[idx] + f[idx_x_L])/
-                            (f[idx_x_R] + 2*f[idx] + f[idx_x_L] + EPSILON);
+                        psi_x[idx] = f[idx_x_R] - 2*f[idx] + f[idx_x_L];
+                        mean_x[idx] = f[idx_x_R] + 2*f[idx] + f[idx_x_L];
                     }
                 }
             }
@@ -180,8 +197,8 @@ GradientSensorJameson::ComputeGradient(
                             (j + 1 + d_num_ghosts[1])*ghostcell_dims[0] +
                             (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                         
-                        psi_y[idx] = fabs(f[idx_y_T] - 2*f[idx] + f[idx_y_B])/
-                            (f[idx_y_T] + 2*f[idx] + f[idx_y_B] + EPSILON);
+                        psi_y[idx] = f[idx_y_T] - 2*f[idx] + f[idx_y_B];
+                        mean_y[idx] = f[idx_y_T] + 2*f[idx] + f[idx_y_B];
                     }
                 }
             }
@@ -205,8 +222,8 @@ GradientSensorJameson::ComputeGradient(
                             (j + d_num_ghosts[1])*ghostcell_dims[0] +
                             (k + 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                         
-                        psi_z[idx] = fabs(f[idx_z_F] - 2*f[idx] + f[idx_z_B])/
-                            (f[idx_z_F] + 2*f[idx] + f[idx_z_B] + EPSILON);
+                        psi_z[idx] = f[idx_z_F] - 2*f[idx] + f[idx_z_B];
+                        mean_z[idx] = f[idx_z_F] + 2*f[idx] + f[idx_z_B];
                     }
                 }
             }
@@ -222,7 +239,9 @@ GradientSensorJameson::ComputeGradient(
                             (j + d_num_ghosts[1])*ghostcell_dims[0] +
                             (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                         
-                        psi[idx] = fmax(fmax(psi_x[idx], psi_y[idx]), psi_z[idx]);
+                        psi[idx] = sqrt(psi_x[idx]*psi_x[idx] + psi_y[idx]*psi_y[idx] + psi_z[idx]*psi_z[idx])/
+                            (sqrt(mean_x[idx]*mean_x[idx] + mean_y[idx]*mean_y[idx] + mean_z[idx]*mean_z[idx]) +
+                             EPSILON);
                     }
                 }
             }

@@ -4,6 +4,8 @@
 
 #define PLOTTING_MULTIRESOLUTION_TAGGER
 
+#define EPSILON 1e-40
+
 MultiresolutionTagger::MultiresolutionTagger(
     const std::string& object_name,
     const tbox::Dimension& dim,
@@ -3283,7 +3285,7 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                     {
                         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                         {
-                            if (w[li][idx] >= global_tol*wavelet_coeffs_maxs[li])
+                            if (w[li][idx]/(wavelet_coeffs_maxs[li] + EPSILON) >= global_tol)
                             {
                                 tag_cell = 1;
                                 
@@ -3296,7 +3298,7 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                     {
                         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                         {
-                            if (w[li][idx] >= local_tol*u_mean[li][idx])
+                            if (w[li][idx]/(u_mean[li][idx] + EPSILON) >= local_tol)
                             {
                                 tag_cell = 1;
                                 
@@ -3338,7 +3340,7 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                         {
                             for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                             {
-                                if (w[li][idx] >= global_tol*wavelet_coeffs_maxs[li])
+                                if (w[li][idx]/(wavelet_coeffs_maxs[li] + EPSILON) >= global_tol)
                                 {
                                     tag_cell = 1;
                                     
@@ -3351,7 +3353,7 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                         {
                             for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                             {
-                                if (w[li][idx] >= local_tol*u_mean[li][idx])
+                                if (w[li][idx]/(u_mean[li][idx] + EPSILON) >= local_tol)
                                 {
                                     tag_cell = 1;
                                     
