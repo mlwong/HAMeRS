@@ -3279,7 +3279,10 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                     
                     const int idx_nghost = i + j*interior_dims[0];
                     
-                    int tag_cell = 0;
+                    int tag_cell            = 1;
+                    int tag_cell_global_tol = 0;
+                    int tag_cell_local_tol  = 0;
+                    int tag_cell_alpha_tol  = 0;
                     
                     if (d_Harten_wavelet_uses_global_tol)
                     {
@@ -3287,11 +3290,13 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                         {
                             if (w[li][idx]/(wavelet_coeffs_maxs[li] + EPSILON) >= global_tol)
                             {
-                                tag_cell = 1;
+                                tag_cell_global_tol = 1;
                                 
                                 break;
                             }
                         }
+                        
+                        tag_cell &= tag_cell_global_tol;
                     }
                     
                     if (d_Harten_wavelet_uses_local_tol)
@@ -3300,19 +3305,23 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                         {
                             if (w[li][idx]/(u_mean[li][idx] + EPSILON) >= local_tol)
                             {
-                                tag_cell = 1;
+                                tag_cell_local_tol = 1;
                                 
                                 break;
                             }
                         }
+                        
+                        tag_cell &= tag_cell_local_tol;
                     }
                     
                     if (d_Harten_wavelet_uses_alpha_tol)
                     {
-                        if (alpha[idx] > alpha_tol)
+                        if (alpha[idx] <= alpha_tol)
                         {
-                            tag_cell = 0;
+                            tag_cell_alpha_tol = 1;
                         }
+                        
+                        tag_cell &= tag_cell_alpha_tol;
                     }
                     
                     tag_ptr[idx_nghost] |= tag_cell;
@@ -3334,7 +3343,10 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                         
                         const int idx_nghost = i + j*interior_dims[0] + k*interior_dims[0]*interior_dims[1];
                         
-                        int tag_cell = 0;
+                        int tag_cell            = 1;
+                        int tag_cell_global_tol = 0;
+                        int tag_cell_local_tol  = 0;
+                        int tag_cell_alpha_tol  = 0;
                         
                         if (d_Harten_wavelet_uses_global_tol)
                         {
@@ -3342,11 +3354,13 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                             {
                                 if (w[li][idx]/(wavelet_coeffs_maxs[li] + EPSILON) >= global_tol)
                                 {
-                                    tag_cell = 1;
+                                    tag_cell_global_tol = 1;
                                     
                                     break;
                                 }
                             }
+                            
+                            tag_cell &= tag_cell_global_tol;
                         }
                         
                         if (d_Harten_wavelet_uses_local_tol)
@@ -3355,19 +3369,23 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                             {
                                 if (w[li][idx]/(u_mean[li][idx] + EPSILON) >= local_tol)
                                 {
-                                    tag_cell = 1;
+                                    tag_cell_local_tol = 1;
                                     
                                     break;
                                 }
                             }
+                            
+                            tag_cell &= tag_cell_local_tol;
                         }
                         
                         if (d_Harten_wavelet_uses_alpha_tol)
                         {
-                            if (alpha[idx] > alpha_tol)
+                            if (alpha[idx] <= alpha_tol)
                             {
-                                tag_cell = 0;
+                                tag_cell_alpha_tol = 1;
                             }
+                            
+                            tag_cell &= tag_cell_alpha_tol;
                         }
                         
                         tag_ptr[idx_nghost] |= tag_cell;
