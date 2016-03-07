@@ -3286,6 +3286,7 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                     
                     if (d_Harten_wavelet_uses_global_tol)
                     {
+                        /*
                         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                         {
                             if (w[li][idx]/(wavelet_coeffs_maxs[li] + EPSILON) >= global_tol)
@@ -3295,12 +3296,19 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                                 break;
                             }
                         }
+                        */
+                        
+                        if (w[0][idx]/(wavelet_coeffs_maxs[0] + EPSILON) >= global_tol)
+                        {
+                            tag_cell_global_tol = 1;
+                        }
                         
                         tag_cell &= tag_cell_global_tol;
                     }
                     
                     if (d_Harten_wavelet_uses_local_tol)
                     {
+                        /*
                         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                         {
                             if (w[li][idx]/(u_mean[li][idx] + EPSILON) >= local_tol)
@@ -3309,6 +3317,12 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                                 
                                 break;
                             }
+                        }
+                        */
+                        
+                        if (w[0][idx]/(u_mean[0][idx] + EPSILON) >= local_tol)
+                        {
+                            tag_cell_local_tol = 1;
                         }
                         
                         tag_cell &= tag_cell_local_tol;
@@ -3350,6 +3364,7 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                         
                         if (d_Harten_wavelet_uses_global_tol)
                         {
+                            /*
                             for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                             {
                                 if (w[li][idx]/(wavelet_coeffs_maxs[li] + EPSILON) >= global_tol)
@@ -3359,12 +3374,19 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                                     break;
                                 }
                             }
+                            */
+                            
+                            if (w[0][idx]/(wavelet_coeffs_maxs[0] + EPSILON) >= global_tol)
+                            {
+                                tag_cell_global_tol = 1;
+                            }
                             
                             tag_cell &= tag_cell_global_tol;
                         }
                         
                         if (d_Harten_wavelet_uses_local_tol)
                         {
+                            /*
                             for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                             {
                                 if (w[li][idx]/(u_mean[li][idx] + EPSILON) >= local_tol)
@@ -3373,6 +3395,12 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                                     
                                     break;
                                 }
+                            }
+                            */
+                            
+                            if (w[0][idx]/(u_mean[0][idx] + EPSILON) >= local_tol)
+                            {
+                                tag_cell_local_tol = 1;
                             }
                             
                             tag_cell &= tag_cell_local_tol;
