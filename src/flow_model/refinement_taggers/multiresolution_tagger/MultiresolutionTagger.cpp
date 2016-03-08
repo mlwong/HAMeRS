@@ -3553,7 +3553,15 @@ alpha[idx] = w[0][idx]/(u_mean[0][idx] + EPSILON);
                         
                         tag_cell &= tag_cell_alpha_tol;
                     }
-alpha[idx] = (double) tag_cell;
+                    
+if (w[0][idx]/(u_mean[0][idx] + EPSILON) > 0.004)
+{
+    alpha[idx] = 1;   
+}
+else
+{
+    alpha[idx] = 0;
+}
                     tag_ptr[idx_nghost] |= tag_cell;
                 }
             }

@@ -1123,7 +1123,7 @@ Euler::tagGradientDetectorCells(
     if ((!uses_richardson_extrapolation_too) &&
         (!uses_multiresolution_detector_too))
     {
-        tags->fillAll(0.0);
+        tags->fillAll(0);
     }
     
     // Tag the cells by using d_gradient_tagger.
@@ -1216,7 +1216,7 @@ Euler::tagMultiresolutionDetectorCells(
     // Initialize values of all tags to zero.
     if (!uses_richardson_extrapolation_too)
     {
-        tags->fillAll(0.0);
+        tags->fillAll(0);
     }
     
     // Tag the cells by using d_multiresolution_tagger.
