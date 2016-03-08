@@ -3514,7 +3514,7 @@ alpha = Lipschitz_exponent->getPointer(0);
                         }
                         */
                         
-                        if (w[0][idx]/(wavelet_coeffs_maxs[0] + EPSILON) >= global_tol)
+                        if (w[0][idx]/(wavelet_coeffs_maxs[0] + EPSILON) > global_tol)
                         {
                             tag_cell_global_tol = 1;
                         }
@@ -3536,7 +3536,7 @@ alpha = Lipschitz_exponent->getPointer(0);
                         }
                         */
                         
-                        if (w[0][idx]/(u_mean[0][idx] + EPSILON) >= local_tol)
+                        if (w[0][idx]/(u_mean[0][idx] + EPSILON) > local_tol)
                         {
                             tag_cell_local_tol = 1;
                         }
@@ -3546,7 +3546,7 @@ alpha = Lipschitz_exponent->getPointer(0);
                     
                     if (d_Harten_wavelet_uses_alpha_tol)
                     {
-                        if (alpha[idx] <= alpha_tol)
+                        if (alpha[idx] < alpha_tol)
                         {
                             tag_cell_alpha_tol = 1;
                         }
