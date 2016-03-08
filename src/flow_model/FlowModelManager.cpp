@@ -647,6 +647,11 @@ void
 FlowModelManager::registerRefinementTaggerVariables(
    RungeKuttaLevelIntegrator* integrator)
 {
+    if (d_gradient_tagger != nullptr)
+    {
+        d_gradient_tagger->registerGradientTaggerVariables(integrator);
+    }
+    
     if (d_multiresolution_tagger != nullptr)
     {
         d_multiresolution_tagger->registerMultiresolutionTaggerVariables(integrator);
@@ -675,14 +680,6 @@ FlowModelManager::registerPlotQuantities(
     const boost::shared_ptr<appu::VisItDataWriter>& visit_writer)
 {
     hier::VariableDatabase* vardb = hier::VariableDatabase::getDatabase();
-    
-if (d_multiresolution_tagger != nullptr)
-{
-    d_multiresolution_tagger->registerPlotQuantities(
-        integrator,
-        visit_writer,
-        d_plot_context);
-}
     
     switch (d_flow_model)
     {
@@ -855,6 +852,22 @@ if (d_multiresolution_tagger != nullptr)
                 << "' not yet implemented."
                 << std::endl);
         }
+    }
+    
+    if (d_multiresolution_tagger != nullptr)
+    {
+        d_multiresolution_tagger->registerPlotQuantities(
+            integrator,
+            visit_writer,
+            d_plot_context);
+    }
+    
+    if (d_gradient_tagger != nullptr)
+    {
+        d_gradient_tagger->registerPlotQuantities(
+            integrator,
+            visit_writer,
+            d_plot_context);
     }
 }
 #endif

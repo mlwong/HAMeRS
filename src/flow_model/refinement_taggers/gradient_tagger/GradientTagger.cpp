@@ -1,5 +1,7 @@
 #include "flow_model/refinement_taggers/gradient_tagger/GradientTagger.hpp"
 
+#define PLOTTING_GRADIENT_TAGGER
+
 #define EPSILON 1e-40
 
 GradientTagger::GradientTagger(
@@ -237,6 +239,453 @@ GradientTagger::GradientTagger(
 
 
 /*
+ * Register the temporary variables used in gradient tagger class.
+ */
+void
+GradientTagger::registerGradientTaggerVariables(
+    RungeKuttaLevelIntegrator* integrator)
+{
+    if (d_variables_set == true)
+    {
+        if (d_num_ghosts_set == true)
+        {
+            for (int si = 0;
+                     si < static_cast<int>(d_gradient_sensors.size());
+                     si++)
+            {
+                std::string sensor_key = d_gradient_sensors[si];
+                
+                if (sensor_key == "JAMESON_GRADIENT")
+                {
+                    for (int vi = 0; vi < static_cast<int>(d_Jameson_gradient_variables.size()); vi++)
+                    {
+                        // Get the key of the current variable.
+                        std::string variable_key = d_Jameson_gradient_variables[vi];
+                        
+                        if (variable_key == "DENSITY")
+                        {
+                            d_Jameson_density_gradient =
+                                boost::shared_ptr<pdat::CellVariable<double> > (
+                                    new pdat::CellVariable<double>(d_dim, "Jameson density gradient", 1));
+                        }
+                        else if (variable_key == "TOTAL_ENERGY")
+                        {
+                            d_Jameson_total_energy_gradient =
+                                boost::shared_ptr<pdat::CellVariable<double> > (
+                                    new pdat::CellVariable<double>(d_dim, "Jameson total_energy gradient", 1));
+                        }
+                        else if (variable_key == "PRESSURE")
+                        {
+                            d_Jameson_density_gradient =
+                                boost::shared_ptr<pdat::CellVariable<double> > (
+                                    new pdat::CellVariable<double>(d_dim, "Jameson pressure gradient", 1));
+                        }
+                        else if (variable_key == "ENSTROPHY")
+                        {
+                            d_Jameson_density_gradient =
+                                boost::shared_ptr<pdat::CellVariable<double> > (
+                                    new pdat::CellVariable<double>(d_dim, "Jameson enstrophy gradient", 1));
+                        }
+                        else if (variable_key == "MASS_FRACTION")
+                        {
+                            switch (d_flow_model)
+                            {
+                                case SINGLE_SPECIES:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                    << ": '"
+                                    << variable_key
+                                    << "' not supported for '"
+                                    << d_flow_model
+                                    << "' flow model."
+                                    << std::endl);
+                                
+                                    break;
+                                }
+                                case FOUR_EQN_SHYUE: case FIVE_EQN_ALLAIRE:
+                                {
+                                    d_Jameson_mass_fraction_gradient =
+                                        boost::shared_ptr<pdat::CellVariable<double> > (
+                                            new pdat::CellVariable<double>(
+                                                d_dim, "Jameson mass fraction gradient", 1));
+                                    
+                                    break;
+                                }
+                                default:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": "
+                                        << "d_flow_model '"
+                                        << d_flow_model
+                                        << "' not yet implemented."
+                                        << std::endl);
+                                }
+                            }
+                        }
+                        else if (variable_key == "VOLUME_FRACTION")
+                        {
+                            switch (d_flow_model)
+                            {
+                                case SINGLE_SPECIES: case FOUR_EQN_SHYUE:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": '"
+                                        << variable_key
+                                        << "' not supported for '"
+                                        << d_flow_model
+                                        << "' flow model."
+                                        << std::endl);
+                                    
+                                    break;
+                                }
+                                case FIVE_EQN_ALLAIRE:
+                                {
+                                    d_Jameson_volume_fraction_gradient =
+                                        boost::shared_ptr<pdat::CellVariable<double> > (
+                                            new pdat::CellVariable<double>(
+                                                d_dim, "Jameson volume fraction gradient", 1));
+                                    
+                                    break;
+                                }
+                                default:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": "
+                                        << "d_flow_model '"
+                                        << d_flow_model
+                                        << "' not yet implemented."
+                                        << std::endl);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Unknown/unsupported variable: "
+                                << variable_key
+                                << "\nin input."
+                                << std::endl);
+                        }
+                    }
+                    
+                    for (int vi = 0; vi < static_cast<int>(d_Jameson_gradient_variables.size()); vi++)
+                    {
+                        // Get the key of the current variable.
+                        std::string variable_key = d_Jameson_gradient_variables[vi];
+                        
+                        if (variable_key == "DENSITY")
+                        {
+                            integrator->registerVariable(
+                                d_Jameson_density_gradient,
+                                d_num_ghosts,
+                                RungeKuttaLevelIntegrator::TIME_DEP,
+                                    d_grid_geometry,
+                                    "CONSERVATIVE_COARSEN",
+                                    "CONSERVATIVE_LINEAR_REFINE");
+                        }
+                        else if (variable_key == "TOTAL_ENERGY")
+                        {
+                            integrator->registerVariable(
+                                d_Jameson_total_energy_gradient,
+                                d_num_ghosts,
+                                RungeKuttaLevelIntegrator::TIME_DEP,
+                                    d_grid_geometry,
+                                    "CONSERVATIVE_COARSEN",
+                                    "CONSERVATIVE_LINEAR_REFINE");
+                        }
+                        else if (variable_key == "PRESSURE")
+                        {
+                            integrator->registerVariable(
+                                d_Jameson_pressure_gradient,
+                                d_num_ghosts,
+                                RungeKuttaLevelIntegrator::TIME_DEP,
+                                    d_grid_geometry,
+                                    "CONSERVATIVE_COARSEN",
+                                    "CONSERVATIVE_LINEAR_REFINE");
+                        }
+                        else if (variable_key == "ENSTROPHY")
+                        {
+                            integrator->registerVariable(
+                                d_Jameson_enstrophy_gradient,
+                                d_num_ghosts,
+                                RungeKuttaLevelIntegrator::TIME_DEP,
+                                    d_grid_geometry,
+                                    "CONSERVATIVE_COARSEN",
+                                    "CONSERVATIVE_LINEAR_REFINE");
+                        }
+                        else if (variable_key == "MASS_FRACTION")
+                        {
+                            switch (d_flow_model)
+                            {
+                                case SINGLE_SPECIES:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": '"
+                                        << variable_key
+                                        << "' not supported for '"
+                                        << d_flow_model
+                                        << "' flow model."
+                                        << std::endl);
+                                    
+                                    break;
+                                }
+                                case FOUR_EQN_SHYUE: case FIVE_EQN_ALLAIRE:
+                                {
+                                    integrator->registerVariable(
+                                        d_Jameson_mass_fraction_gradient,
+                                        d_num_ghosts,
+                                        RungeKuttaLevelIntegrator::TIME_DEP,
+                                        d_grid_geometry,
+                                        "CONSERVATIVE_COARSEN",
+                                        "CONSERVATIVE_LINEAR_REFINE");
+                                    
+                                    break;
+                                }
+                                default:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": "
+                                        << "d_flow_model '"
+                                        << d_flow_model
+                                        << "' not yet implemented."
+                                        << std::endl);
+                                }
+                            }
+                        }
+                        else if (variable_key == "VOLUME_FRACTION")
+                        {
+                            switch (d_flow_model)
+                            {
+                                case SINGLE_SPECIES: case FOUR_EQN_SHYUE:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": '"
+                                        << variable_key
+                                        << "' not supported for '"
+                                        << d_flow_model
+                                        << "' flow model."
+                                        << std::endl);
+                                    
+                                    break;
+                                }
+                                case FIVE_EQN_ALLAIRE:
+                                {
+                                    integrator->registerVariable(
+                                        d_Jameson_volume_fraction_gradient,
+                                        d_num_ghosts,
+                                        RungeKuttaLevelIntegrator::TIME_DEP,
+                                        d_grid_geometry,
+                                        "CONSERVATIVE_COARSEN",
+                                        "CONSERVATIVE_LINEAR_REFINE");
+                                    
+                                    break;
+                                }
+                                default:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": "
+                                        << "d_flow_model '"
+                                        << d_flow_model
+                                        << "' not yet implemented."
+                                        << std::endl);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Unknown/unsupported variable: "
+                                << variable_key
+                                << "\nin input."
+                                << std::endl);
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Number of ghost cells is not set yet."
+                << std::endl);
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "Variables are not set yet."
+            << std::endl);
+    }
+}
+
+
+/*
+ * Register the plotting quantities.
+ */
+void
+GradientTagger::registerPlotQuantities(
+    RungeKuttaLevelIntegrator* integrator,
+    const boost::shared_ptr<appu::VisItDataWriter>& visit_writer,
+    const boost::shared_ptr<hier::VariableContext>& plot_context)
+{
+#ifdef PLOTTING_GRADIENT_TAGGER
+    if (d_variables_set == true)
+    {
+        if (d_num_ghosts_set == true)
+        {
+            hier::VariableDatabase* vardb = hier::VariableDatabase::getDatabase();
+            
+            for (int si = 0;
+                     si < static_cast<int>(d_gradient_sensors.size());
+                     si++)
+            {
+                std::string sensor_key = d_gradient_sensors[si];
+                
+                if (sensor_key == "JAMESON_GRADIENT")
+                {
+                    for (int vi = 0; vi < static_cast<int>(d_Jameson_gradient_variables.size()); vi++)
+                    {
+                        // Get the key of the current variable.
+                        std::string variable_key = d_Jameson_gradient_variables[vi];
+                        
+                        if (variable_key == "DENSITY")
+                        {
+                            visit_writer->registerPlotQuantity(
+                                "Jameson density gradient",
+                                "SCALAR",
+                                vardb->mapVariableAndContextToIndex(
+                                   d_Jameson_density_gradient,
+                                   plot_context));
+                        }
+                        else if (variable_key == "TOTAL_ENERGY")
+                        {
+                            visit_writer->registerPlotQuantity(
+                                "Jameson total energy gradient",
+                                "SCALAR",
+                                vardb->mapVariableAndContextToIndex(
+                                   d_Jameson_total_energy_gradient,
+                                   plot_context));
+                        }
+                        else if (variable_key == "PRESSURE")
+                        {
+                            visit_writer->registerPlotQuantity(
+                                "Jameson pressure gradient",
+                                "SCALAR",
+                                vardb->mapVariableAndContextToIndex(
+                                   d_Jameson_pressure_gradient,
+                                   plot_context));
+                        }
+                        else if (variable_key == "ENSTROPHY")
+                        {
+                            visit_writer->registerPlotQuantity(
+                                "Jameson enstrophy gradient",
+                                "SCALAR",
+                                vardb->mapVariableAndContextToIndex(
+                                   d_Jameson_enstrophy_gradient,
+                                   plot_context));
+                        }
+                        else if (variable_key == "MASS_FRACTION")
+                        {
+                            switch (d_flow_model)
+                            {
+                                case SINGLE_SPECIES:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": '"
+                                        << variable_key
+                                        << "' not supported for '"
+                                        << d_flow_model
+                                        << "' flow model."
+                                        << std::endl);
+                                    
+                                    break;
+                                }
+                                case FOUR_EQN_SHYUE: case FIVE_EQN_ALLAIRE:
+                                {
+                                    visit_writer->registerPlotQuantity(
+                                        "Jameson mass fraction gradient",
+                                        "SCALAR",
+                                        vardb->mapVariableAndContextToIndex(
+                                           d_Jameson_mass_fraction_gradient,
+                                           plot_context));
+                                    
+                                    break;
+                                }
+                                default:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": "
+                                        << "d_flow_model '"
+                                        << d_flow_model
+                                        << "' not yet implemented."
+                                        << std::endl);
+                                }
+                            }
+                        }
+                        else if (variable_key == "VOLUME_FRACTION")
+                        {
+                            switch (d_flow_model)
+                            {
+                                case SINGLE_SPECIES: case FOUR_EQN_SHYUE:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": '"
+                                        << variable_key
+                                        << "' not supported for '"
+                                        << d_flow_model
+                                        << "' flow model."
+                                        << std::endl);
+                                    
+                                    break;
+                                }
+                                case FIVE_EQN_ALLAIRE:
+                                {
+                                    visit_writer->registerPlotQuantity(
+                                        "Jameson volume fraction gradient",
+                                        "SCALAR",
+                                        vardb->mapVariableAndContextToIndex(
+                                           d_Jameson_volume_fraction_gradient,
+                                           plot_context));
+                                }
+                                default:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": "
+                                        << "d_flow_model '"
+                                        << d_flow_model
+                                        << "' not yet implemented."
+                                        << std::endl);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Number of ghost cells is not set yet."
+                << std::endl);
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "Variables are not set yet."
+            << std::endl);
+    }
+#endif
+}
+
+
+/*
  * Print all characteristics of the gradient tagger class.
  */
 void
@@ -383,6 +832,10 @@ GradientTagger::tagCells(
                                 
                                 if (variable_key == "DENSITY")
                                 {
+                                    // Get the cell data of the density gradient.
+                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                        patch.getPatchData(d_Jameson_density_gradient, data_context));
+                                    
                                     // Get the cell data of density.
                                     boost::shared_ptr<pdat::CellData<double> > density(
                                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -394,6 +847,10 @@ GradientTagger::tagCells(
                                 }
                                 else if (variable_key == "TOTAL_ENERGY")
                                 {
+                                    // Get the cell data of the total energy gradient.
+                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                            patch.getPatchData(d_Jameson_total_energy_gradient, data_context));
+                                    
                                     // Get the cell data of total energy.
                                     boost::shared_ptr<pdat::CellData<double> > total_energy(
                                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -404,6 +861,10 @@ GradientTagger::tagCells(
                                 }
                                 else if (variable_key == "PRESSURE")
                                 {
+                                    // Get the cell data of the pressure gradient.
+                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                            patch.getPatchData(d_Jameson_pressure_gradient,data_context));
+                                    
                                     // Get the cell data of density, momentum and total energy.
                                     boost::shared_ptr<pdat::CellData<double> > density(
                                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -493,6 +954,10 @@ GradientTagger::tagCells(
                                 }
                                 else if (variable_key == "ENSTROPHY")
                                 {
+                                    // Get the cell data of the enstrophy gradient.
+                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                            patch.getPatchData(d_Jameson_enstrophy_gradient, data_context));
+                                    
                                     // Get the cell data of density, momentum and total energy.
                                     boost::shared_ptr<pdat::CellData<double> > density(
                                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -809,6 +1274,10 @@ GradientTagger::tagCells(
                                 
                                 if (variable_key == "DENSITY")
                                 {
+                                    // Get the cell data of the density gradient.
+                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                        patch.getPatchData(d_Jameson_density_gradient, data_context));
+                                    
                                     // Get the cell data of density.
                                     boost::shared_ptr<pdat::CellData<double> > density(
                                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -820,6 +1289,10 @@ GradientTagger::tagCells(
                                 }
                                 else if (variable_key == "TOTAL_ENERGY")
                                 {
+                                    // Get the cell data of the total energy gradient.
+                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                        patch.getPatchData(d_Jameson_total_energy_gradient, data_context));
+                                    
                                     // Get the cell data of total energy.
                                     boost::shared_ptr<pdat::CellData<double> > total_energy(
                                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -830,6 +1303,10 @@ GradientTagger::tagCells(
                                 }
                                 else if (variable_key == "PRESSURE")
                                 {
+                                    // Get the cell data of the pressure gradient.
+                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                        patch.getPatchData(d_Jameson_pressure_gradient, data_context));
+                                    
                                     // Get the cell data of density, momentum and total energy.
                                     boost::shared_ptr<pdat::CellData<double> > density(
                                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -919,6 +1396,10 @@ GradientTagger::tagCells(
                                 }
                                 else if (variable_key == "ENSTROPHY")
                                 {
+                                    // Get the cell data of the enstrophy gradient.
+                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                        patch.getPatchData(d_Jameson_enstrophy_gradient, data_context));
+                                    
                                     // Get the cell data of density, momentum and total energy.
                                     boost::shared_ptr<pdat::CellData<double> > density(
                                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -1155,6 +1636,10 @@ GradientTagger::tagCells(
                                 }
                                 else if (variable_key == "MASS_FRACTION")
                                 {
+                                    // Get the cell data of the mass fraction gradient.
+                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                        patch.getPatchData(d_Jameson_mass_fraction_gradient, data_context));
+                                    
                                     // Get the cell data of mass fraction.
                                     boost::shared_ptr<pdat::CellData<double> > mass_fraction(
                                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -1245,6 +1730,10 @@ GradientTagger::tagCells(
                                 
                                 if (variable_key == "DENSITY")
                                 {
+                                    // Get the cell data of the density gradient.
+                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                        patch.getPatchData(d_Jameson_density_gradient, data_context));
+                                    
                                     // Get the cell data of partial density.
                                     boost::shared_ptr<pdat::CellData<double> > partial_density(
                                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -1321,6 +1810,10 @@ GradientTagger::tagCells(
                                 }
                                 else if (variable_key == "TOTAL_ENERGY")
                                 {
+                                    // Get the cell data of the total energy gradient.
+                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                        patch.getPatchData(d_Jameson_total_energy_gradient, data_context));
+                                    
                                     // Get the cell data of total energy.
                                     boost::shared_ptr<pdat::CellData<double> > total_energy(
                                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -1331,6 +1824,10 @@ GradientTagger::tagCells(
                                 }
                                 else if (variable_key == "PRESSURE")
                                 {
+                                    // Get the cell data of the pressure gradient.
+                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                        patch.getPatchData(d_Jameson_pressure_gradient, data_context));
+                                    
                                     // Get the cell data of density, momentum and total energy.
                                     boost::shared_ptr<pdat::CellData<double> > density(
                                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -1420,6 +1917,10 @@ GradientTagger::tagCells(
                                 }
                                 else if (variable_key == "ENSTROPHY")
                                 {
+                                    // Get the cell data of the enstrophy gradient.
+                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                        patch.getPatchData(d_Jameson_enstrophy_gradient, data_context));
+                                    
                                     // Get the cell data of density, momentum and total energy.
                                     boost::shared_ptr<pdat::CellData<double> > density(
                                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -1656,6 +2157,10 @@ GradientTagger::tagCells(
                                 }
                                 else if (variable_key == "MASS_FRACTION")
                                 {
+                                    // Get the cell data of the mass fraction gradient.
+                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                        patch.getPatchData(d_Jameson_mass_fraction_gradient, data_context));
+                                    
                                     // Get the cell data of partial density.
                                     boost::shared_ptr<pdat::CellData<double> > partial_density(
                                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -1746,6 +2251,10 @@ GradientTagger::tagCells(
                                 }
                                 else if (variable_key == "VOLUME_FRACTION")
                                 {
+                                    // Get the cell data of the volume fraction gradient.
+                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                        patch.getPatchData(d_Jameson_volume_fraction_gradient, data_context));
+                                    
                                     // Get the cell data of volume fraction.
                                     boost::shared_ptr<pdat::CellData<double> > volume_fraction(
                                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(

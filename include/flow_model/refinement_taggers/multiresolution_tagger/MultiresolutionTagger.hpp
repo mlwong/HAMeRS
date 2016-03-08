@@ -154,6 +154,15 @@ class MultiresolutionTagger
             RungeKuttaLevelIntegrator* integrator);
         
         /*
+         * Register the plotting quantities.
+         */
+        void
+        registerPlotQuantities(
+            RungeKuttaLevelIntegrator* integrator,
+            const boost::shared_ptr<appu::VisItDataWriter>& visit_writer,
+            const boost::shared_ptr<hier::VariableContext>& plot_context);
+        
+        /*
          * Print all characteristics of the multiresolution tagger class.
          */
         void
@@ -193,15 +202,6 @@ class MultiresolutionTagger
             hier::Patch& patch,
             boost::shared_ptr<pdat::CellData<int> > tags,
             const boost::shared_ptr<hier::VariableContext>& data_context);
-        
-        /*
-         * Register the plotting quantities.
-         */
-        void
-        registerPlotQuantities(
-            RungeKuttaLevelIntegrator* integrator,
-            const boost::shared_ptr<appu::VisItDataWriter>& visit_writer,
-            const boost::shared_ptr<hier::VariableContext>& plot_context);
         
     private:
         /*

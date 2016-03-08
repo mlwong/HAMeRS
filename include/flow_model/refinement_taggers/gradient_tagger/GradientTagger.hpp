@@ -3,6 +3,8 @@
 
 #include "SAMRAI/SAMRAI_config.h"
 
+#include "SAMRAI/appu/VisItDataWriter.h"
+
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 #include "SAMRAI/hier/IntVector.h"
@@ -12,6 +14,7 @@
 
 #include "equation_of_state/EquationOfStateIdealGas.hpp"
 #include "flow_model/FlowModels.hpp"
+#include "integrator/RungeKuttaLevelIntegrator.hpp"
 #include "utils/gradient_sensors/GradientSensorJameson.hpp"
 
 #include "boost/shared_ptr.hpp"
@@ -143,6 +146,22 @@ class GradientTagger
         }
         
         /*
+         * Register the variables used in gradient tagger class.
+         */
+        void
+        registerGradientTaggerVariables(
+            RungeKuttaLevelIntegrator* integrator);
+        
+        /*
+         * Register the plotting quantities.
+         */
+        void
+        registerPlotQuantities(
+            RungeKuttaLevelIntegrator* integrator,
+            const boost::shared_ptr<appu::VisItDataWriter>& visit_writer,
+            const boost::shared_ptr<hier::VariableContext>& plot_context);
+        
+        /*
          * Print all characteristics of the gradient tagger class.
          */
         void
@@ -237,6 +256,16 @@ class GradientTagger
          */
         std::vector<std::string> d_Jameson_gradient_variables;
         std::vector<double> d_Jameson_gradient_tol;
+        
+        /*
+         * boost::shared_ptr to Jameson's gradient.
+         */
+        boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_density_gradient;
+        boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_total_energy_gradient;
+        boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_pressure_gradient;
+        boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_enstrophy_gradient;
+        boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_mass_fraction_gradient;
+        boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_volume_fraction_gradient;
         
 };
 

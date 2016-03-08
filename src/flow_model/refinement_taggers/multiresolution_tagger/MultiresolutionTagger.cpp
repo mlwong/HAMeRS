@@ -847,7 +847,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                 }
                                 case FOUR_EQN_SHYUE:
                                 {
-                                    for (int di = 0; di < d_volume_fraction->getDepth(); di++)
+                                    for (int di = 0; di < d_mass_fraction->getDepth(); di++)
                                     {
                                         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                                         {
@@ -998,6 +998,219 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
             << "Variables are not set yet."
             << std::endl);
     }
+}
+
+
+/*
+ * Register the plotting quantities.
+ */
+void
+MultiresolutionTagger::registerPlotQuantities(
+    RungeKuttaLevelIntegrator* integrator,
+    const boost::shared_ptr<appu::VisItDataWriter>& visit_writer,
+    const boost::shared_ptr<hier::VariableContext>& plot_context)
+{
+#ifdef PLOTTING_MULTIRESOLUTION_TAGGER
+    if (d_variables_set == true)
+    {
+        if (d_num_ghosts_set == true)
+        {
+            hier::VariableDatabase* vardb = hier::VariableDatabase::getDatabase();
+            
+            for (int si = 0;
+                     si < static_cast<int>(d_multiresolution_sensors.size());
+                     si++)
+            {
+                std::string sensor_key = d_multiresolution_sensors[si];
+                
+                if (sensor_key == "HARTEN_WAVELET")
+                {
+                    visit_writer->registerPlotQuantity(
+                        "Harten Lipschitz's exponent",
+                        "SCALAR",
+                        vardb->mapVariableAndContextToIndex(
+                           d_Harten_Lipschitz_exponent,
+                           plot_context));
+                    
+                    for (int vi = 0; vi < static_cast<int>(d_Harten_wavelet_variables.size()); vi++)
+                    {
+                        // Get the key of the current variable.
+                        std::string variable_key = d_Harten_wavelet_variables[vi];
+                        
+                        if (variable_key == "DENSITY")
+                        {
+                            for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                            {
+                                visit_writer->registerPlotQuantity(
+                                    "Harten density wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
+                                    "SCALAR",
+                                    vardb->mapVariableAndContextToIndex(
+                                       d_Harten_density_wavelet_coeffs[li],
+                                       plot_context));
+                            }
+                        }
+                        else if (variable_key == "TOTAL_ENERGY")
+                        {
+                            for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                            {
+                                visit_writer->registerPlotQuantity(
+                                    "Harten total energy wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
+                                    "SCALAR",
+                                    vardb->mapVariableAndContextToIndex(
+                                       d_Harten_total_energy_wavelet_coeffs[li],
+                                       plot_context));
+                            }
+                        }
+                        else if (variable_key == "PRESSURE")
+                        {
+                            for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                            {
+                                visit_writer->registerPlotQuantity(
+                                    "Harten pressure wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
+                                    "SCALAR",
+                                    vardb->mapVariableAndContextToIndex(
+                                       d_Harten_pressure_wavelet_coeffs[li],
+                                       plot_context));
+                            }
+                        }
+                        else if (variable_key == "ENSTROPHY")
+                        {
+                            for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                            {
+                                visit_writer->registerPlotQuantity(
+                                    "Harten enstrophy wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
+                                    "SCALAR",
+                                    vardb->mapVariableAndContextToIndex(
+                                       d_Harten_enstrophy_wavelet_coeffs[li],
+                                       plot_context));
+                            }
+                        }
+                        else if (variable_key == "MASS_FRACTION")
+                        {
+                            switch (d_flow_model)
+                            {
+                                case SINGLE_SPECIES:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": '"
+                                        << variable_key
+                                        << "' not supported for '"
+                                        << d_flow_model
+                                        << "' flow model."
+                                        << std::endl);
+                                    
+                                    break;
+                                }
+                                case FOUR_EQN_SHYUE:
+                                {
+                                    for (int di = 0; di < d_mass_fraction->getDepth(); di++)
+                                    {
+                                        for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                                        {
+                                            visit_writer->registerPlotQuantity(
+                                                "Harten mass fraction " + boost::lexical_cast<std::string>(di) +
+                                                    " wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
+                                                "SCALAR",
+                                                vardb->mapVariableAndContextToIndex(
+                                                   d_Harten_mass_fraction_wavelet_coeffs[di*d_Harten_wavelet_num_level + li],
+                                                   plot_context));
+                                        }
+                                    }
+                                    
+                                    break;
+                                }
+                                case FIVE_EQN_ALLAIRE:
+                                {
+                                    for (int di = 0; di < d_num_species; di++)
+                                    {
+                                        for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                                        {
+                                            visit_writer->registerPlotQuantity(
+                                                "Harten mass fraction " + boost::lexical_cast<std::string>(di) +
+                                                    " wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
+                                                "SCALAR",
+                                                vardb->mapVariableAndContextToIndex(
+                                                   d_Harten_mass_fraction_wavelet_coeffs[di*d_Harten_wavelet_num_level + li],
+                                                   plot_context));
+                                        }
+                                    }
+                                    
+                                    break;
+                                }
+                                default:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": "
+                                        << "d_flow_model '"
+                                        << d_flow_model
+                                        << "' not yet implemented."
+                                        << std::endl);
+                                }
+                            }
+                        }
+                        else if (variable_key == "VOLUME_FRACTION")
+                        {
+                            switch (d_flow_model)
+                            {
+                                case SINGLE_SPECIES: case FOUR_EQN_SHYUE:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": '"
+                                        << variable_key
+                                        << "' not supported for '"
+                                        << d_flow_model
+                                        << "' flow model."
+                                        << std::endl);
+                                    
+                                    break;
+                                }
+                                case FIVE_EQN_ALLAIRE:
+                                {
+                                    for (int di = 0; di < d_volume_fraction->getDepth(); di++)
+                                    {
+                                        for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                                        {
+                                            visit_writer->registerPlotQuantity(
+                                                    "Harten volume fraction " + boost::lexical_cast<std::string>(di) +
+                                                        " wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
+                                                    "SCALAR",
+                                                    vardb->mapVariableAndContextToIndex(
+                                                       d_Harten_volume_fraction_wavelet_coeffs[di*d_Harten_wavelet_num_level + li],
+                                                       plot_context));
+                                        }
+                                    }
+                                }
+                                default:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": "
+                                        << "d_flow_model '"
+                                        << d_flow_model
+                                        << "' not yet implemented."
+                                        << std::endl);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Number of ghost cells is not set yet."
+                << std::endl);
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "Variables are not set yet."
+            << std::endl);
+    }
+#endif
 }
 
 
@@ -3324,7 +3537,7 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                         {
                             tag_cell_local_tol = 1;
                         }
-                        
+alpha[idx] = w[0][idx]/(u_mean[0][idx] + EPSILON);
                         tag_cell &= tag_cell_local_tol;
                     }
                     
@@ -3422,217 +3635,4 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
             }
         }
     }
-}
-
-
-/*
- * Register the plotting quantities.
- */
-void
-MultiresolutionTagger::registerPlotQuantities(
-    RungeKuttaLevelIntegrator* integrator,
-    const boost::shared_ptr<appu::VisItDataWriter>& visit_writer,
-    const boost::shared_ptr<hier::VariableContext>& plot_context)
-{
-#ifdef PLOTTING_MULTIRESOLUTION_TAGGER
-    if (d_variables_set == true)
-    {
-        if (d_num_ghosts_set == true)
-        {
-            hier::VariableDatabase* vardb = hier::VariableDatabase::getDatabase();
-            
-            for (int si = 0;
-                     si < static_cast<int>(d_multiresolution_sensors.size());
-                     si++)
-            {
-                std::string sensor_key = d_multiresolution_sensors[si];
-                
-                if (sensor_key == "HARTEN_WAVELET")
-                {
-                    visit_writer->registerPlotQuantity(
-                        "Harten Lipschitz's exponent",
-                        "SCALAR",
-                        vardb->mapVariableAndContextToIndex(
-                           d_Harten_Lipschitz_exponent,
-                           plot_context));
-                    
-                    for (int vi = 0; vi < static_cast<int>(d_Harten_wavelet_variables.size()); vi++)
-                    {
-                        // Get the key of the current variable.
-                        std::string variable_key = d_Harten_wavelet_variables[vi];
-                        
-                        if (variable_key == "DENSITY")
-                        {
-                            for (int li = 0; li < d_Harten_wavelet_num_level; li++)
-                            {
-                                visit_writer->registerPlotQuantity(
-                                    "Harten density wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
-                                    "SCALAR",
-                                    vardb->mapVariableAndContextToIndex(
-                                       d_Harten_density_wavelet_coeffs[li],
-                                       plot_context));
-                            }
-                        }
-                        else if (variable_key == "TOTAL_ENERGY")
-                        {
-                            for (int li = 0; li < d_Harten_wavelet_num_level; li++)
-                            {
-                                visit_writer->registerPlotQuantity(
-                                    "Harten total energy wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
-                                    "SCALAR",
-                                    vardb->mapVariableAndContextToIndex(
-                                       d_Harten_total_energy_wavelet_coeffs[li],
-                                       plot_context));
-                            }
-                        }
-                        else if (variable_key == "PRESSURE")
-                        {
-                            for (int li = 0; li < d_Harten_wavelet_num_level; li++)
-                            {
-                                visit_writer->registerPlotQuantity(
-                                    "Harten pressure wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
-                                    "SCALAR",
-                                    vardb->mapVariableAndContextToIndex(
-                                       d_Harten_pressure_wavelet_coeffs[li],
-                                       plot_context));
-                            }
-                        }
-                        else if (variable_key == "ENSTROPHY")
-                        {
-                            for (int li = 0; li < d_Harten_wavelet_num_level; li++)
-                            {
-                                visit_writer->registerPlotQuantity(
-                                    "Harten enstrophy wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
-                                    "SCALAR",
-                                    vardb->mapVariableAndContextToIndex(
-                                       d_Harten_enstrophy_wavelet_coeffs[li],
-                                       plot_context));
-                            }
-                        }
-                        else if (variable_key == "MASS_FRACTION")
-                        {
-                            switch (d_flow_model)
-                            {
-                                case SINGLE_SPECIES:
-                                {
-                                    TBOX_ERROR(d_object_name
-                                        << ": '"
-                                        << variable_key
-                                        << "' not supported for '"
-                                        << d_flow_model
-                                        << "' flow model."
-                                        << std::endl);
-                                    
-                                    break;
-                                }
-                                case FOUR_EQN_SHYUE:
-                                {
-                                    for (int di = 0; di < d_volume_fraction->getDepth(); di++)
-                                    {
-                                        for (int li = 0; li < d_Harten_wavelet_num_level; li++)
-                                        {
-                                            visit_writer->registerPlotQuantity(
-                                                "Harten mass fraction " + boost::lexical_cast<std::string>(di) +
-                                                    " wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
-                                                "SCALAR",
-                                                vardb->mapVariableAndContextToIndex(
-                                                   d_Harten_mass_fraction_wavelet_coeffs[di*d_Harten_wavelet_num_level + li],
-                                                   plot_context));
-                                        }
-                                    }
-                                    
-                                    break;
-                                }
-                                case FIVE_EQN_ALLAIRE:
-                                {
-                                    for (int di = 0; di < d_num_species; di++)
-                                    {
-                                        for (int li = 0; li < d_Harten_wavelet_num_level; li++)
-                                        {
-                                            visit_writer->registerPlotQuantity(
-                                                "Harten mass fraction " + boost::lexical_cast<std::string>(di) +
-                                                    " wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
-                                                "SCALAR",
-                                                vardb->mapVariableAndContextToIndex(
-                                                   d_Harten_mass_fraction_wavelet_coeffs[di*d_Harten_wavelet_num_level + li],
-                                                   plot_context));
-                                        }
-                                    }
-                                    
-                                    break;
-                                }
-                                default:
-                                {
-                                    TBOX_ERROR(d_object_name
-                                        << ": "
-                                        << "d_flow_model '"
-                                        << d_flow_model
-                                        << "' not yet implemented."
-                                        << std::endl);
-                                }
-                            }
-                        }
-                        else if (variable_key == "VOLUME_FRACTION")
-                        {
-                            switch (d_flow_model)
-                            {
-                                case SINGLE_SPECIES: case FOUR_EQN_SHYUE:
-                                {
-                                    TBOX_ERROR(d_object_name
-                                        << ": '"
-                                        << variable_key
-                                        << "' not supported for '"
-                                        << d_flow_model
-                                        << "' flow model."
-                                        << std::endl);
-                                    
-                                    break;
-                                }
-                                case FIVE_EQN_ALLAIRE:
-                                {
-                                    for (int di = 0; di < d_volume_fraction->getDepth(); di++)
-                                    {
-                                        for (int li = 0; li < d_Harten_wavelet_num_level; li++)
-                                        {
-                                            visit_writer->registerPlotQuantity(
-                                                    "Harten volume fraction " + boost::lexical_cast<std::string>(di) +
-                                                        " wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
-                                                    "SCALAR",
-                                                    vardb->mapVariableAndContextToIndex(
-                                                       d_Harten_volume_fraction_wavelet_coeffs[di*d_Harten_wavelet_num_level + li],
-                                                       plot_context));
-                                        }
-                                    }
-                                }
-                                default:
-                                {
-                                    TBOX_ERROR(d_object_name
-                                        << ": "
-                                        << "d_flow_model '"
-                                        << d_flow_model
-                                        << "' not yet implemented."
-                                        << std::endl);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        else
-        {
-            TBOX_ERROR(d_object_name
-                << ": "
-                << "Number of ghost cells is not set yet."
-                << std::endl);
-        }
-    }
-    else
-    {
-        TBOX_ERROR(d_object_name
-            << ": "
-            << "Variables are not set yet."
-            << std::endl);
-    }
-#endif
 }
