@@ -3540,7 +3540,7 @@ alpha = Lipschitz_exponent->getPointer(0);
                         {
                             tag_cell_local_tol = 1;
                         }
- alpha[idx] = w[0][idx]/(u_mean[0][idx] + EPSILON);
+alpha[idx] = w[0][idx]/(u_mean[0][idx] + EPSILON);
                         tag_cell &= tag_cell_local_tol;
                     }
                     
@@ -3553,7 +3553,7 @@ alpha = Lipschitz_exponent->getPointer(0);
                         
                         tag_cell &= tag_cell_alpha_tol;
                     }
-                    
+alpha[idx] = (double) tag_cell;
                     tag_ptr[idx_nghost] |= tag_cell;
                 }
             }
