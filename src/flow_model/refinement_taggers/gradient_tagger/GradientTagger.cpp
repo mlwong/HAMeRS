@@ -842,7 +842,7 @@ GradientTagger::tagCells(
                                             patch.getPatchData(d_density, data_context)));
                                     
                                     // Compute the gradient.
-                                    gradient = d_gradient_sensor_Jameson->ComputeGradient(patch, density);
+                                    d_gradient_sensor_Jameson->computeGradient(patch, density, gradient);
                                     
                                 }
                                 else if (variable_key == "TOTAL_ENERGY")
@@ -857,13 +857,13 @@ GradientTagger::tagCells(
                                             patch.getPatchData(d_total_energy, data_context)));
                                     
                                     // Compute the gradient.
-                                    gradient = d_gradient_sensor_Jameson->ComputeGradient(patch, total_energy);
+                                    d_gradient_sensor_Jameson->computeGradient(patch, total_energy, gradient);
                                 }
                                 else if (variable_key == "PRESSURE")
                                 {
                                     // Get the cell data of the pressure gradient.
                                     gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                            patch.getPatchData(d_Jameson_pressure_gradient,data_context));
+                                            patch.getPatchData(d_Jameson_pressure_gradient, data_context));
                                     
                                     // Get the cell data of density, momentum and total energy.
                                     boost::shared_ptr<pdat::CellData<double> > density(
@@ -950,7 +950,7 @@ GradientTagger::tagCells(
                                     }
                                     
                                     // Compute the gradient.
-                                    gradient = d_gradient_sensor_Jameson->ComputeGradient(patch, pressure);
+                                    d_gradient_sensor_Jameson->computeGradient(patch, pressure, gradient);
                                 }
                                 else if (variable_key == "ENSTROPHY")
                                 {
@@ -1190,7 +1190,7 @@ GradientTagger::tagCells(
                                     }
                                     
                                     // Compute the gradient.
-                                    gradient = d_gradient_sensor_Jameson->ComputeGradient(patch, enstrophy);
+                                    d_gradient_sensor_Jameson->computeGradient(patch, enstrophy, gradient);
                                 }
                                 else
                                 {
@@ -1284,7 +1284,7 @@ GradientTagger::tagCells(
                                             patch.getPatchData(d_density, data_context)));
                                     
                                     // Compute the gradient.
-                                    gradient = d_gradient_sensor_Jameson->ComputeGradient(patch, density);
+                                    d_gradient_sensor_Jameson->computeGradient(patch, density, gradient);
                                     
                                 }
                                 else if (variable_key == "TOTAL_ENERGY")
@@ -1299,7 +1299,7 @@ GradientTagger::tagCells(
                                             patch.getPatchData(d_total_energy, data_context)));
                                     
                                     // Compute the gradient.
-                                    gradient = d_gradient_sensor_Jameson->ComputeGradient(patch, total_energy);
+                                    d_gradient_sensor_Jameson->computeGradient(patch, total_energy, gradient);
                                 }
                                 else if (variable_key == "PRESSURE")
                                 {
@@ -1392,7 +1392,7 @@ GradientTagger::tagCells(
                                     }
                                     
                                     // Compute the gradient.
-                                    gradient = d_gradient_sensor_Jameson->ComputeGradient(patch, pressure);
+                                    d_gradient_sensor_Jameson->computeGradient(patch, pressure, gradient);
                                 }
                                 else if (variable_key == "ENSTROPHY")
                                 {
@@ -1632,7 +1632,7 @@ GradientTagger::tagCells(
                                     }
                                     
                                     // Compute the gradient.
-                                    gradient = d_gradient_sensor_Jameson->ComputeGradient(patch, enstrophy);
+                                    d_gradient_sensor_Jameson->computeGradient(patch, enstrophy, gradient);
                                 }
                                 else if (variable_key == "MASS_FRACTION")
                                 {
@@ -1646,7 +1646,7 @@ GradientTagger::tagCells(
                                             patch.getPatchData(d_mass_fraction, data_context)));
                                     
                                     // Compute the gradient.
-                                    gradient = d_gradient_sensor_Jameson->ComputeGradient(patch, mass_fraction);
+                                    d_gradient_sensor_Jameson->computeGradient(patch, mass_fraction, gradient);
                                 }
                                 else
                                 {
@@ -1806,7 +1806,7 @@ GradientTagger::tagCells(
                                     }
                                     
                                     // Compute the gradient.
-                                    gradient = d_gradient_sensor_Jameson->ComputeGradient(patch, density);
+                                    d_gradient_sensor_Jameson->computeGradient(patch, density, gradient);
                                 }
                                 else if (variable_key == "TOTAL_ENERGY")
                                 {
@@ -1820,7 +1820,7 @@ GradientTagger::tagCells(
                                             patch.getPatchData(d_total_energy, data_context)));
                                     
                                     // Compute the gradient.
-                                    gradient = d_gradient_sensor_Jameson->ComputeGradient(patch, total_energy);
+                                    d_gradient_sensor_Jameson->computeGradient(patch, total_energy, gradient);
                                 }
                                 else if (variable_key == "PRESSURE")
                                 {
@@ -1913,7 +1913,7 @@ GradientTagger::tagCells(
                                     }
                                     
                                     // Compute the gradient.
-                                    gradient = d_gradient_sensor_Jameson->ComputeGradient(patch, pressure);
+                                    d_gradient_sensor_Jameson->computeGradient(patch, pressure, gradient);
                                 }
                                 else if (variable_key == "ENSTROPHY")
                                 {
@@ -2153,7 +2153,7 @@ GradientTagger::tagCells(
                                     }
                                     
                                     // Compute the gradient.
-                                    gradient = d_gradient_sensor_Jameson->ComputeGradient(patch, enstrophy);
+                                    d_gradient_sensor_Jameson->computeGradient(patch, enstrophy, gradient);
                                 }
                                 else if (variable_key == "MASS_FRACTION")
                                 {
@@ -2247,7 +2247,7 @@ GradientTagger::tagCells(
                                     }
                                     
                                     // Compute the gradient.
-                                    gradient = d_gradient_sensor_Jameson->ComputeGradient(patch, mass_fraction);
+                                    d_gradient_sensor_Jameson->computeGradient(patch, mass_fraction, gradient);
                                 }
                                 else if (variable_key == "VOLUME_FRACTION")
                                 {
@@ -2261,7 +2261,7 @@ GradientTagger::tagCells(
                                             patch.getPatchData(d_mass_fraction, data_context)));
                                     
                                     // Compute the gradient.
-                                    gradient = d_gradient_sensor_Jameson->ComputeGradient(patch, volume_fraction);
+                                    d_gradient_sensor_Jameson->computeGradient(patch, volume_fraction, gradient);
                                 }
                                 else
                                 {

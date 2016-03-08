@@ -47,10 +47,12 @@ class GradientSensor
         /*
          * Compute the gradient.
          */
-        virtual boost::shared_ptr<pdat::CellData<double> >
-        ComputeGradient(
+        virtual void
+        computeGradient(
             hier::Patch& patch,
-            boost::shared_ptr<pdat::CellData<double> > cell_data) = 0;
+            boost::shared_ptr<pdat::CellData<double> > cell_data,
+            boost::shared_ptr<pdat::CellData<double> > gradient,
+            int depth = 0) = 0;
         
     protected:
         /*

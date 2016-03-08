@@ -18,14 +18,13 @@ GradientSensorJameson::GradientSensorJameson(
 /*
  * Compute the gradient with the given cell data.
  */
-boost::shared_ptr<pdat::CellData<double> >
-GradientSensorJameson::ComputeGradient(
+void
+GradientSensorJameson::computeGradient(
     hier::Patch& patch,
-    boost::shared_ptr<pdat::CellData<double> > cell_data)
+    boost::shared_ptr<pdat::CellData<double> > cell_data,
+    boost::shared_ptr<pdat::CellData<double> > gradient,
+    int depth)
 {
-    // Get the depth of the given cell data.
-    int data_depth = cell_data->getDepth();
-    
     const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
         BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
@@ -45,208 +44,199 @@ GradientSensorJameson::ComputeGradient(
     const hier::Box ghost_box = dummy_box;
     const hier::IntVector ghostcell_dims = ghost_box.numberCells();
     
-    // Allocate sensor values.
-    boost::shared_ptr<pdat::CellData<double> > sensor_value(
-        new pdat::CellData<double>(interior_box, data_depth, d_num_ghosts));
+    // Get the pointer to the current depth component of the given cell data.
+    double* f = cell_data->getPointer(depth);
     
-    for (int di = 0; di < data_depth; di++)
+    // Get the pointer to the gradient.
+    double* psi = gradient->getPointer(0);
+    
+    if (d_dim == tbox::Dimension(1))
     {
-        // Get the pointer to the current depth component of the given cell data.
-        double* f = cell_data->getPointer(di);
+        // NOT YET IMPLEMENTED
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        // Allocate memory in different dimensions.
+        boost::shared_ptr<pdat::CellData<double> > gradient_x(
+                    new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+        boost::shared_ptr<pdat::CellData<double> > gradient_y(
+                    new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+        boost::shared_ptr<pdat::CellData<double> > local_mean_value_x(
+                    new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+        boost::shared_ptr<pdat::CellData<double> > local_mean_value_y(
+                    new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
         
-        // Get the pointer to the current depth component of the sensor cell data.
-        double* psi = sensor_value->getPointer(di);
+        double* psi_x = gradient_x->getPointer(0);
+        double* psi_y = gradient_y->getPointer(0);
+        double* mean_x = local_mean_value_x->getPointer(0);
+        double* mean_y = local_mean_value_y->getPointer(0);
         
-        if (d_dim == tbox::Dimension(1))
+        
+        for (int j = 0; j < interior_dims[1]; j++)
         {
-            // NOT YET IMPLEMENTED
+            for (int i = 0; i < interior_dims[0]; i++)
+            {
+                // Compute indices.
+                const int idx = (i + d_num_ghosts[0]) +
+                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                
+                const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
+                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                
+                const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
+                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                
+                psi_x[idx] = f[idx_x_R] - 2*f[idx] + f[idx_x_L];
+                mean_x[idx] = f[idx_x_R] + 2*f[idx] + f[idx_x_L];
+            }
         }
-        else if (d_dim == tbox::Dimension(2))
+        
+        for (int i = 0; i < interior_dims[0]; i++)
         {
-            // Allocate memory in different dimensions.
-            boost::shared_ptr<pdat::CellData<double> > sensor_value_x(
-                        new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
-            boost::shared_ptr<pdat::CellData<double> > sensor_value_y(
-                        new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
-            boost::shared_ptr<pdat::CellData<double> > local_mean_value_x(
-                        new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
-            boost::shared_ptr<pdat::CellData<double> > local_mean_value_y(
-                        new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
-            
-            double* psi_x = sensor_value_x->getPointer(0);
-            double* psi_y = sensor_value_y->getPointer(0);
-            double* mean_x = local_mean_value_x->getPointer(0);
-            double* mean_y = local_mean_value_y->getPointer(0);
-            
-            
+            for (int j = 0; j < interior_dims[1]; j++)
+            {
+                // Compute indices.
+                const int idx = (i + d_num_ghosts[0]) +
+                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                
+                const int idx_y_B = (i + d_num_ghosts[0]) +
+                    (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                
+                const int idx_y_T = (i + d_num_ghosts[0]) +
+                    (j + 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                
+                psi_y[idx] = f[idx_y_T] - 2*f[idx] + f[idx_y_B];
+                mean_y[idx] = f[idx_y_T] + 2*f[idx] + f[idx_y_B];
+            }
+        }
+        
+        for (int j = 0; j < interior_dims[1]; j++)
+        {
+            for (int i = 0; i < interior_dims[0]; i++)
+            {
+                // Compute indices.
+                const int idx = (i + d_num_ghosts[0]) +
+                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                
+                psi[idx] = sqrt(psi_x[idx]*psi_x[idx] + psi_y[idx]*psi_y[idx])/
+                    (sqrt(mean_x[idx]*mean_x[idx] + mean_y[idx]*mean_y[idx]) + EPSILON);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        // Allocate memory in different dimensions.
+        boost::shared_ptr<pdat::CellData<double> > gradient_x(
+                    new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+        boost::shared_ptr<pdat::CellData<double> > gradient_y(
+                    new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+        boost::shared_ptr<pdat::CellData<double> > sensor_value_z(
+                    new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+        boost::shared_ptr<pdat::CellData<double> > local_mean_value_x(
+                    new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+        boost::shared_ptr<pdat::CellData<double> > local_mean_value_y(
+                    new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+        boost::shared_ptr<pdat::CellData<double> > local_mean_value_z(
+                    new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+        
+        double* psi_x = gradient_x->getPointer(0);
+        double* psi_y = gradient_y->getPointer(0);
+        double* psi_z = sensor_value_z->getPointer(0);
+        double* mean_x = local_mean_value_x->getPointer(0);
+        double* mean_y = local_mean_value_y->getPointer(0);
+        double* mean_z = local_mean_value_z->getPointer(0);
+        
+        for (int k = 0; k < interior_dims[2]; k++)
+        {
             for (int j = 0; j < interior_dims[1]; j++)
             {
                 for (int i = 0; i < interior_dims[0]; i++)
                 {
                     // Compute indices.
                     const int idx = (i + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*ghostcell_dims[0];
+                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                     
                     const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*ghostcell_dims[0];
+                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                     
                     const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*ghostcell_dims[0];
+                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                     
                     psi_x[idx] = f[idx_x_R] - 2*f[idx] + f[idx_x_L];
                     mean_x[idx] = f[idx_x_R] + 2*f[idx] + f[idx_x_L];
                 }
             }
-            
-            for (int i = 0; i < interior_dims[0]; i++)
+        }
+        
+        for (int k = 0; k < interior_dims[2]; k++)
+        {
+            for (int i = 0; i < interior_dims[1]; i++)
             {
-                for (int j = 0; j < interior_dims[1]; j++)
+                for (int j = 0; j < interior_dims[0]; j++)
                 {
                     // Compute indices.
                     const int idx = (i + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*ghostcell_dims[0];
+                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                     
                     const int idx_y_B = (i + d_num_ghosts[0]) +
-                        (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                        (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                     
                     const int idx_y_T = (i + d_num_ghosts[0]) +
-                        (j + 1 + d_num_ghosts[1])*ghostcell_dims[0];
+                        (j + 1 + d_num_ghosts[1])*ghostcell_dims[0] +
+                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                     
                     psi_y[idx] = f[idx_y_T] - 2*f[idx] + f[idx_y_B];
                     mean_y[idx] = f[idx_y_T] + 2*f[idx] + f[idx_y_B];
                 }
             }
-            
+        }
+        
+        for (int j = 0; j < interior_dims[1]; j++)
+        {
+            for (int i = 0; i < interior_dims[0]; i++)
+            {
+                for (int k = 0; k < interior_dims[2]; k++)
+                {
+                    // Compute indices.
+                    const int idx = (i + d_num_ghosts[0]) +
+                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                    
+                    const int idx_z_B = (i + d_num_ghosts[0]) +
+                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                        (k - 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                    
+                    const int idx_z_F = (i + d_num_ghosts[0]) +
+                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                        (k + 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                    
+                    psi_z[idx] = f[idx_z_F] - 2*f[idx] + f[idx_z_B];
+                    mean_z[idx] = f[idx_z_F] + 2*f[idx] + f[idx_z_B];
+                }
+            }
+        }
+        
+        for (int k = 0; k < interior_dims[2]; k++)
+        {
             for (int j = 0; j < interior_dims[1]; j++)
             {
                 for (int i = 0; i < interior_dims[0]; i++)
                 {
                     // Compute indices.
                     const int idx = (i + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*ghostcell_dims[0];
+                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                     
-                    psi[idx] = sqrt(psi_x[idx]*psi_x[idx] + psi_y[idx]*psi_y[idx])/
-                        (sqrt(mean_x[idx]*mean_x[idx] + mean_y[idx]*mean_y[idx]) + EPSILON);
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            // Allocate memory in different dimensions.
-            boost::shared_ptr<pdat::CellData<double> > sensor_value_x(
-                        new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
-            boost::shared_ptr<pdat::CellData<double> > sensor_value_y(
-                        new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
-            boost::shared_ptr<pdat::CellData<double> > sensor_value_z(
-                        new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
-            boost::shared_ptr<pdat::CellData<double> > local_mean_value_x(
-                        new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
-            boost::shared_ptr<pdat::CellData<double> > local_mean_value_y(
-                        new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
-            boost::shared_ptr<pdat::CellData<double> > local_mean_value_z(
-                        new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
-            
-            double* psi_x = sensor_value_x->getPointer(0);
-            double* psi_y = sensor_value_y->getPointer(0);
-            double* psi_z = sensor_value_z->getPointer(0);
-            double* mean_x = local_mean_value_x->getPointer(0);
-            double* mean_y = local_mean_value_y->getPointer(0);
-            double* mean_z = local_mean_value_z->getPointer(0);
-            
-            for (int k = 0; k < interior_dims[2]; k++)
-            {
-                for (int j = 0; j < interior_dims[1]; j++)
-                {
-                    for (int i = 0; i < interior_dims[0]; i++)
-                    {
-                        // Compute indices.
-                        const int idx = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        psi_x[idx] = f[idx_x_R] - 2*f[idx] + f[idx_x_L];
-                        mean_x[idx] = f[idx_x_R] + 2*f[idx] + f[idx_x_L];
-                    }
-                }
-            }
-            
-            for (int k = 0; k < interior_dims[2]; k++)
-            {
-                for (int i = 0; i < interior_dims[1]; i++)
-                {
-                    for (int j = 0; j < interior_dims[0]; j++)
-                    {
-                        // Compute indices.
-                        const int idx = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        const int idx_y_B = (i + d_num_ghosts[0]) +
-                            (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        const int idx_y_T = (i + d_num_ghosts[0]) +
-                            (j + 1 + d_num_ghosts[1])*ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        psi_y[idx] = f[idx_y_T] - 2*f[idx] + f[idx_y_B];
-                        mean_y[idx] = f[idx_y_T] + 2*f[idx] + f[idx_y_B];
-                    }
-                }
-            }
-            
-            for (int j = 0; j < interior_dims[1]; j++)
-            {
-                for (int i = 0; i < interior_dims[0]; i++)
-                {
-                    for (int k = 0; k < interior_dims[2]; k++)
-                    {
-                        // Compute indices.
-                        const int idx = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        const int idx_z_B = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                            (k - 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        const int idx_z_F = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                            (k + 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        psi_z[idx] = f[idx_z_F] - 2*f[idx] + f[idx_z_B];
-                        mean_z[idx] = f[idx_z_F] + 2*f[idx] + f[idx_z_B];
-                    }
-                }
-            }
-            
-            for (int k = 0; k < interior_dims[2]; k++)
-            {
-                for (int j = 0; j < interior_dims[1]; j++)
-                {
-                    for (int i = 0; i < interior_dims[0]; i++)
-                    {
-                        // Compute indices.
-                        const int idx = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        psi[idx] = sqrt(psi_x[idx]*psi_x[idx] + psi_y[idx]*psi_y[idx] + psi_z[idx]*psi_z[idx])/
-                            (sqrt(mean_x[idx]*mean_x[idx] + mean_y[idx]*mean_y[idx] + mean_z[idx]*mean_z[idx]) +
-                             EPSILON);
-                    }
+                    psi[idx] = sqrt(psi_x[idx]*psi_x[idx] + psi_y[idx]*psi_y[idx] + psi_z[idx]*psi_z[idx])/
+                        (sqrt(mean_x[idx]*mean_x[idx] + mean_y[idx]*mean_y[idx] + mean_z[idx]*mean_z[idx]) +
+                         EPSILON);
                 }
             }
         }
     }
-    
-    return sensor_value;
 }

@@ -131,7 +131,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
     // Get the pointer to the desired depth component of the given cell data.
     double* f = cell_data->getPointer(depth);
     
-    // Get the pointer to the desired depth component of the wavelet cell data.
+    // Get the pointer to the wavelet coefficients at different levels.
     std::vector<double*> w;
     for (int li = 0; li < d_num_level; li++)
     {

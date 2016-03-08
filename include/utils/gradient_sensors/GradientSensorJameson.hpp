@@ -13,10 +13,12 @@ class GradientSensorJameson: public GradientSensor
         /*
          * Compute the gradient with the given cell data.
          */
-        boost::shared_ptr<pdat::CellData<double> >
-        ComputeGradient(
+        void
+        computeGradient(
             hier::Patch& patch,
-            boost::shared_ptr<pdat::CellData<double> > cell_data);
+            boost::shared_ptr<pdat::CellData<double> > cell_data,
+            boost::shared_ptr<pdat::CellData<double> > gradient,
+            int depth = 0);
         
 };
 
