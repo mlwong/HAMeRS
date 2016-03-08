@@ -276,13 +276,13 @@ GradientTagger::registerGradientTaggerVariables(
                         }
                         else if (variable_key == "PRESSURE")
                         {
-                            d_Jameson_density_gradient =
+                            d_Jameson_pressure_gradient =
                                 boost::shared_ptr<pdat::CellVariable<double> > (
                                     new pdat::CellVariable<double>(d_dim, "Jameson pressure gradient", 1));
                         }
                         else if (variable_key == "ENSTROPHY")
                         {
-                            d_Jameson_density_gradient =
+                            d_Jameson_enstrophy_gradient =
                                 boost::shared_ptr<pdat::CellVariable<double> > (
                                     new pdat::CellVariable<double>(d_dim, "Jameson enstrophy gradient", 1));
                         }
