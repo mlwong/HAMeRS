@@ -322,6 +322,75 @@ InitialConditions::initializeDataOnPatch(
                             }
                         }
                     }
+                    else if (d_project_name == "2D Kelvin-Helmholtz")
+                    {
+                        // Initialize data for a 2D Kelvin-Helmohltz problem.
+                        // (McNally, Colin P., Wladimir Lyra, and Jean-Claude Passy.
+                        // "A well-posed Kelvin-Helmholtz instability test and comparison."
+                        // The Astrophysical Journal Supplement Series 201.2 (2012): 18.)
+                        double* rho   = density->getPointer(0);
+                        double* rho_u = momentum->getPointer(0);
+                        double* rho_v = momentum->getPointer(1);
+                        double* E     = total_energy->getPointer(0);
+                        
+                        double gamma = d_equation_of_state->getSpeciesThermodynamicProperty(
+                            "gamma",
+                            0);
+                        
+                        // Some parameters for the problem.
+                        const double rho_1 = 1.0;
+                        const double rho_2 = 2.0;
+                        const double rho_m = 0.5*(rho_1 - rho_2);
+                        const double u_1   = 0.5;
+                        const double u_2   = -0.5;
+                        const double u_m   = 0.5*(u_1 - u_2);
+                        const double L     = 0.025;
+                        
+                        for (int j = 0; j < patch_dims[1]; j++)
+                        {
+                            for (int i = 0; i < patch_dims[0]; i++)
+                            {
+                                // Compute index into linear data array.
+                                int idx_cell = i + j*patch_dims[0];
+                                
+                                // Compute the coordinates.
+                                double x[2];
+                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                
+                                double u   = 0.0;
+                                double v   = 0.01*sin(4*M_PI*x[0]);
+                                double p   = 2.5;
+                                
+                                if (x[1] < 0.25)
+                                {
+                                    rho[idx_cell] = rho_1 - rho_m*exp((x[1] - 0.25)/L);
+                                    u = u_1 - u_m*exp((x[1] - 0.25)/L);
+                                    
+                                }
+                                else if (x[1] < 0.5)
+                                {
+                                    rho[idx_cell] = rho_2 + rho_m*exp((-x[1] + 0.25)/L);
+                                    u   = u_2 + u_m*exp((-x[1] + 0.25)/L);
+                                }
+                                else if (x[1] < 0.75)
+                                {
+                                    rho[idx_cell] = rho_2 + rho_m*exp(-(0.75 - x[1])/L);
+                                    u   = u_2 + u_m*exp(-(0.75 - x[1])/L);
+                                }
+                                else
+                                {
+                                    rho[idx_cell] = rho_1 - rho_m*exp(-(x[1] - 0.75)/L);
+                                    u   = u_1 - u_m*exp(-(x[1] - 0.75)/L);
+                                }
+                                
+                                rho_u[idx_cell] = rho[idx_cell]*u;
+                                rho_v[idx_cell] = rho[idx_cell]*v;
+                                E[idx_cell]     = p/(gamma - 1.0) +
+                                    0.5*rho[idx_cell]*(u*u + v*v);
+                            }
+                        }
+                    }
                     else
                     {
                         TBOX_ERROR(d_object_name
