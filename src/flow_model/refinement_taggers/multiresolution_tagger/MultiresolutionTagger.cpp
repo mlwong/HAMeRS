@@ -3465,7 +3465,6 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
     
     if (sensor_key == "HARTEN_WAVELET")
     {
-        /*
         if (d_Harten_wavelet_uses_alpha_tol)
         {
             alpha = Lipschitz_exponent->getPointer(0);
@@ -3476,8 +3475,6 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                 Lipschitz_exponent,
                 sensor_key);
         }
-        */
-alpha = Lipschitz_exponent->getPointer(0);
         
         if (d_dim == tbox::Dimension(1))
         {
@@ -3540,7 +3537,7 @@ alpha = Lipschitz_exponent->getPointer(0);
                         {
                             tag_cell_local_tol = 1;
                         }
-alpha[idx] = w[0][idx]/(u_mean[0][idx] + EPSILON);
+                        
                         tag_cell &= tag_cell_local_tol;
                     }
                     
@@ -3554,14 +3551,6 @@ alpha[idx] = w[0][idx]/(u_mean[0][idx] + EPSILON);
                         tag_cell &= tag_cell_alpha_tol;
                     }
                     
-if (w[0][idx]/(u_mean[0][idx] + EPSILON) > 0.004)
-{
-    alpha[idx] = 1;   
-}
-else
-{
-    alpha[idx] = 0;
-}
                     tag_ptr[idx_nghost] |= tag_cell;
                 }
             }

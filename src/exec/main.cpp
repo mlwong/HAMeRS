@@ -29,7 +29,8 @@
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/hier/PatchHierarchy.h"
 #include "SAMRAI/mesh/BergerRigoutsos.h"
-#include "SAMRAI/mesh/GriddingAlgorithm.h"
+// #include "SAMRAI/mesh/GriddingAlgorithm.h"
+#include "integrator/GriddingAlgorithm.hpp"
 #include "SAMRAI/mesh/TreeLoadBalancer.h"
 
 // Headers for application-specific algorithm/data structure object
@@ -403,7 +404,7 @@ int main(int argc, char *argv[])
             "PatchHierarchy",
             grid_geometry,
             input_db->getDatabase("PatchHierarchy")));
-        
+    
     Euler* Euler_model = new Euler(
         "Euler",
         dim,
