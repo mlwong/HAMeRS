@@ -2355,231 +2355,234 @@ MultiresolutionTagger::getSensorValueStatistics(
     const int level_number,
     const boost::shared_ptr<hier::VariableContext>& data_context)
 {
-    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
-    
-    math::HierarchyCellDataOpsReal<double> cell_double_operator(patch_hierarchy, level_number, level_number);
-    
-    hier::VariableDatabase* variable_db = hier::VariableDatabase::getDatabase();
-    
-    if (d_variables_set == true)
+    if (d_Harten_wavelet_uses_global_tol)
     {
-        if (d_num_ghosts_set == true)
+        const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+        
+        math::HierarchyCellDataOpsReal<double> cell_double_operator(patch_hierarchy, level_number, level_number);
+        
+        hier::VariableDatabase* variable_db = hier::VariableDatabase::getDatabase();
+        
+        if (d_variables_set == true)
         {
-            for (int si = 0;
-                     si < static_cast<int>(d_multiresolution_sensors.size());
-                     si++)
+            if (d_num_ghosts_set == true)
             {
-                std::string sensor_key = d_multiresolution_sensors[si];
-                
-                if (sensor_key == "HARTEN_WAVELET")
+                for (int si = 0;
+                         si < static_cast<int>(d_multiresolution_sensors.size());
+                         si++)
                 {
-                    // Only get the statistics if global filter is used.
-                    if (d_Harten_wavelet_uses_global_tol)
+                    std::string sensor_key = d_multiresolution_sensors[si];
+                    
+                    if (sensor_key == "HARTEN_WAVELET")
                     {
-                        for (int vi = 0; vi < static_cast<int>(d_Harten_wavelet_variables.size()); vi++)
+                        // Only get the statistics if global filter is used.
+                        if (d_Harten_wavelet_uses_global_tol)
                         {
-                            // Get the key of the current variable.
-                            std::string variable_key = d_Harten_wavelet_variables[vi];
-                            
-                            if (variable_key == "DENSITY")
+                            for (int vi = 0; vi < static_cast<int>(d_Harten_wavelet_variables.size()); vi++)
                             {
-                                for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                                // Get the key of the current variable.
+                                std::string variable_key = d_Harten_wavelet_variables[vi];
+                                
+                                if (variable_key == "DENSITY")
                                 {
-                                    const int rho_w_id = variable_db->mapVariableAndContextToIndex(
-                                        d_Harten_density_wavelet_coeffs[li],
-                                        data_context);
-                                    
-                                    double rho_w_max_local = cell_double_operator.max(rho_w_id);
-                                    d_Harten_density_wavelet_coeffs_maxs[li] = 0.0;
-                                    
-                                    mpi.Allreduce(
-                                        &rho_w_max_local,
-                                        &d_Harten_density_wavelet_coeffs_maxs[li],
-                                        1,
-                                        MPI_DOUBLE,
-                                        MPI_MAX);
-                                }
-                            }
-                            else if (variable_key == "TOTAL_ENERGY")
-                            {
-                                for (int li = 0; li < d_Harten_wavelet_num_level; li++)
-                                {
-                                    const int E_w_id = variable_db->mapVariableAndContextToIndex(
-                                        d_Harten_total_energy_wavelet_coeffs[li],
-                                        data_context);
-                                    
-                                    double E_w_max_local = cell_double_operator.max(E_w_id);
-                                    d_Harten_total_energy_wavelet_coeffs_maxs[li] = 0.0;
-                                    
-                                    mpi.Allreduce(
-                                        &E_w_max_local,
-                                        &d_Harten_total_energy_wavelet_coeffs_maxs[li],
-                                        1,
-                                        MPI_DOUBLE,
-                                        MPI_MAX);
-                                }
-                            }
-                            else if (variable_key == "PRESSURE")
-                            {
-                                for (int li = 0; li < d_Harten_wavelet_num_level; li++)
-                                {
-                                    const int p_w_id = variable_db->mapVariableAndContextToIndex(
-                                        d_Harten_pressure_wavelet_coeffs[li],
-                                        data_context);
-                                    
-                                    double p_w_max_local = cell_double_operator.max(p_w_id);
-                                    d_Harten_pressure_wavelet_coeffs_maxs[li] = 0.0;
-                                    
-                                    mpi.Allreduce(
-                                        &p_w_max_local,
-                                        &d_Harten_pressure_wavelet_coeffs_maxs[li],
-                                        1,
-                                        MPI_DOUBLE,
-                                        MPI_MAX);
-                                }
-                            }
-                            else if (variable_key == "ENSTROPHY")
-                            {
-                                for (int li = 0; li < d_Harten_wavelet_num_level; li++)
-                                {
-                                    const int Omega_w_id = variable_db->mapVariableAndContextToIndex(
-                                        d_Harten_enstrophy_wavelet_coeffs[li],
-                                        data_context);
-                                    
-                                    double Omega_w_max_local = cell_double_operator.max(Omega_w_id);
-                                    d_Harten_enstrophy_wavelet_coeffs_maxs[li] = 0.0;
-                                    
-                                    mpi.Allreduce(
-                                        &Omega_w_max_local,
-                                        &d_Harten_enstrophy_wavelet_coeffs_maxs[li],
-                                        1,
-                                        MPI_DOUBLE,
-                                        MPI_MAX);
-                                }
-                            }
-                            else if (variable_key == "MASS_FRACTION")
-                            {
-                                switch (d_flow_model)
-                                {
-                                    case SINGLE_SPECIES:
+                                    for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                                     {
-                                        TBOX_ERROR(d_object_name
-                                            << ": '"
-                                            << variable_key
-                                            << "' not supported for '"
-                                            << d_flow_model
-                                            << "' flow model."
-                                            << std::endl);
+                                        const int rho_w_id = variable_db->mapVariableAndContextToIndex(
+                                            d_Harten_density_wavelet_coeffs[li],
+                                            data_context);
                                         
-                                        break;
+                                        double rho_w_max_local = cell_double_operator.max(rho_w_id);
+                                        d_Harten_density_wavelet_coeffs_maxs[li] = 0.0;
+                                        
+                                        mpi.Allreduce(
+                                            &rho_w_max_local,
+                                            &d_Harten_density_wavelet_coeffs_maxs[li],
+                                            1,
+                                            MPI_DOUBLE,
+                                            MPI_MAX);
                                     }
-                                    case FOUR_EQN_SHYUE:
+                                }
+                                else if (variable_key == "TOTAL_ENERGY")
+                                {
+                                    for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                                     {
-                                        for (int di = 0; di < d_mass_fraction->getDepth(); di++)
+                                        const int E_w_id = variable_db->mapVariableAndContextToIndex(
+                                            d_Harten_total_energy_wavelet_coeffs[li],
+                                            data_context);
+                                        
+                                        double E_w_max_local = cell_double_operator.max(E_w_id);
+                                        d_Harten_total_energy_wavelet_coeffs_maxs[li] = 0.0;
+                                        
+                                        mpi.Allreduce(
+                                            &E_w_max_local,
+                                            &d_Harten_total_energy_wavelet_coeffs_maxs[li],
+                                            1,
+                                            MPI_DOUBLE,
+                                            MPI_MAX);
+                                    }
+                                }
+                                else if (variable_key == "PRESSURE")
+                                {
+                                    for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                                    {
+                                        const int p_w_id = variable_db->mapVariableAndContextToIndex(
+                                            d_Harten_pressure_wavelet_coeffs[li],
+                                            data_context);
+                                        
+                                        double p_w_max_local = cell_double_operator.max(p_w_id);
+                                        d_Harten_pressure_wavelet_coeffs_maxs[li] = 0.0;
+                                        
+                                        mpi.Allreduce(
+                                            &p_w_max_local,
+                                            &d_Harten_pressure_wavelet_coeffs_maxs[li],
+                                            1,
+                                            MPI_DOUBLE,
+                                            MPI_MAX);
+                                    }
+                                }
+                                else if (variable_key == "ENSTROPHY")
+                                {
+                                    for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                                    {
+                                        const int Omega_w_id = variable_db->mapVariableAndContextToIndex(
+                                            d_Harten_enstrophy_wavelet_coeffs[li],
+                                            data_context);
+                                        
+                                        double Omega_w_max_local = cell_double_operator.max(Omega_w_id);
+                                        d_Harten_enstrophy_wavelet_coeffs_maxs[li] = 0.0;
+                                        
+                                        mpi.Allreduce(
+                                            &Omega_w_max_local,
+                                            &d_Harten_enstrophy_wavelet_coeffs_maxs[li],
+                                            1,
+                                            MPI_DOUBLE,
+                                            MPI_MAX);
+                                    }
+                                }
+                                else if (variable_key == "MASS_FRACTION")
+                                {
+                                    switch (d_flow_model)
+                                    {
+                                        case SINGLE_SPECIES:
                                         {
-                                            for (int li = 0; li < d_Harten_wavelet_num_level; li++)
-                                            {
-                                                const int Y_w_id = variable_db->mapVariableAndContextToIndex(
-                                                    d_Harten_mass_fraction_wavelet_coeffs[di*d_Harten_wavelet_num_level + li],
-                                                    data_context);
-                                                
-                                                double Y_w_max_local = cell_double_operator.max(Y_w_id);
-                                                d_Harten_mass_fraction_wavelet_coeffs_maxs[di*d_Harten_wavelet_num_level + li] = 0.0;
-                                                
-                                                mpi.Allreduce(
-                                                    &Y_w_max_local,
-                                                    &d_Harten_mass_fraction_wavelet_coeffs_maxs[di*d_Harten_wavelet_num_level + li],
-                                                    1,
-                                                    MPI_DOUBLE,
-                                                    MPI_MAX);
-                                            }
+                                            TBOX_ERROR(d_object_name
+                                                << ": '"
+                                                << variable_key
+                                                << "' not supported for '"
+                                                << d_flow_model
+                                                << "' flow model."
+                                                << std::endl);
+                                            
+                                            break;
                                         }
-                                        
-                                        break;
-                                    }
-                                    case FIVE_EQN_ALLAIRE:
-                                    {
-                                        for (int di = 0; di < d_num_species; di++)
+                                        case FOUR_EQN_SHYUE:
                                         {
-                                            for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                                            for (int di = 0; di < d_mass_fraction->getDepth(); di++)
                                             {
-                                                const int Y_w_id = variable_db->mapVariableAndContextToIndex(
-                                                    d_Harten_mass_fraction_wavelet_coeffs[di*d_Harten_wavelet_num_level + li],
-                                                    data_context);
-                                                
-                                                double Y_w_max_local = cell_double_operator.max(Y_w_id);
-                                                d_Harten_mass_fraction_wavelet_coeffs_maxs[di*d_Harten_wavelet_num_level + li] = 0.0;
-                                                
-                                                mpi.Allreduce(
-                                                    &Y_w_max_local,
-                                                    &d_Harten_mass_fraction_wavelet_coeffs_maxs[di*d_Harten_wavelet_num_level + li],
-                                                    1,
-                                                    MPI_DOUBLE,
-                                                    MPI_MAX);
+                                                for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                                                {
+                                                    const int Y_w_id = variable_db->mapVariableAndContextToIndex(
+                                                        d_Harten_mass_fraction_wavelet_coeffs[di*d_Harten_wavelet_num_level + li],
+                                                        data_context);
+                                                    
+                                                    double Y_w_max_local = cell_double_operator.max(Y_w_id);
+                                                    d_Harten_mass_fraction_wavelet_coeffs_maxs[di*d_Harten_wavelet_num_level + li] = 0.0;
+                                                    
+                                                    mpi.Allreduce(
+                                                        &Y_w_max_local,
+                                                        &d_Harten_mass_fraction_wavelet_coeffs_maxs[di*d_Harten_wavelet_num_level + li],
+                                                        1,
+                                                        MPI_DOUBLE,
+                                                        MPI_MAX);
+                                                }
                                             }
+                                            
+                                            break;
                                         }
-                                        
-                                        break;
-                                    }
-                                    default:
-                                    {
-                                        TBOX_ERROR(d_object_name
-                                            << ": "
-                                            << "d_flow_model '"
-                                            << d_flow_model
-                                            << "' not yet implemented."
-                                            << std::endl);
+                                        case FIVE_EQN_ALLAIRE:
+                                        {
+                                            for (int di = 0; di < d_num_species; di++)
+                                            {
+                                                for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                                                {
+                                                    const int Y_w_id = variable_db->mapVariableAndContextToIndex(
+                                                        d_Harten_mass_fraction_wavelet_coeffs[di*d_Harten_wavelet_num_level + li],
+                                                        data_context);
+                                                    
+                                                    double Y_w_max_local = cell_double_operator.max(Y_w_id);
+                                                    d_Harten_mass_fraction_wavelet_coeffs_maxs[di*d_Harten_wavelet_num_level + li] = 0.0;
+                                                    
+                                                    mpi.Allreduce(
+                                                        &Y_w_max_local,
+                                                        &d_Harten_mass_fraction_wavelet_coeffs_maxs[di*d_Harten_wavelet_num_level + li],
+                                                        1,
+                                                        MPI_DOUBLE,
+                                                        MPI_MAX);
+                                                }
+                                            }
+                                            
+                                            break;
+                                        }
+                                        default:
+                                        {
+                                            TBOX_ERROR(d_object_name
+                                                << ": "
+                                                << "d_flow_model '"
+                                                << d_flow_model
+                                                << "' not yet implemented."
+                                                << std::endl);
+                                        }
                                     }
                                 }
-                            }
-                            else if (variable_key == "VOLUME_FRACTION")
-                            {
-                                switch (d_flow_model)
+                                else if (variable_key == "VOLUME_FRACTION")
                                 {
-                                    case SINGLE_SPECIES: case FOUR_EQN_SHYUE:
+                                    switch (d_flow_model)
                                     {
-                                        TBOX_ERROR(d_object_name
-                                            << ": '"
-                                            << variable_key
-                                            << "' not supported for '"
-                                            << d_flow_model
-                                            << "' flow model."
-                                            << std::endl);
-                                        
-                                        break;
-                                    }
-                                    case FIVE_EQN_ALLAIRE:
-                                    {
-                                        for (int di = 0; di < d_volume_fraction->getDepth(); di++)
+                                        case SINGLE_SPECIES: case FOUR_EQN_SHYUE:
                                         {
-                                            for (int li = 0; li < d_Harten_wavelet_num_level; li++)
-                                            {
-                                                const int Z_w_id = variable_db->mapVariableAndContextToIndex(
-                                                    d_Harten_volume_fraction_wavelet_coeffs[di*d_Harten_wavelet_num_level + li],
-                                                    data_context);
-                                                
-                                                double Z_w_max_local = cell_double_operator.max(Z_w_id);
-                                                d_Harten_volume_fraction_wavelet_coeffs_maxs[di*d_Harten_wavelet_num_level + li] = 0.0;
-                                                
-                                                mpi.Allreduce(
-                                                    &Z_w_max_local,
-                                                    &d_Harten_volume_fraction_wavelet_coeffs_maxs[di*d_Harten_wavelet_num_level + li],
-                                                    1,
-                                                    MPI_DOUBLE,
-                                                    MPI_MAX);
-                                            }
+                                            TBOX_ERROR(d_object_name
+                                                << ": '"
+                                                << variable_key
+                                                << "' not supported for '"
+                                                << d_flow_model
+                                                << "' flow model."
+                                                << std::endl);
+                                            
+                                            break;
                                         }
-                                        
-                                        break;
-                                    }
-                                    default:
-                                    {
-                                        TBOX_ERROR(d_object_name
-                                            << ": "
-                                            << "d_flow_model '"
-                                            << d_flow_model
-                                            << "' not yet implemented."
-                                            << std::endl);
+                                        case FIVE_EQN_ALLAIRE:
+                                        {
+                                            for (int di = 0; di < d_volume_fraction->getDepth(); di++)
+                                            {
+                                                for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                                                {
+                                                    const int Z_w_id = variable_db->mapVariableAndContextToIndex(
+                                                        d_Harten_volume_fraction_wavelet_coeffs[di*d_Harten_wavelet_num_level + li],
+                                                        data_context);
+                                                    
+                                                    double Z_w_max_local = cell_double_operator.max(Z_w_id);
+                                                    d_Harten_volume_fraction_wavelet_coeffs_maxs[di*d_Harten_wavelet_num_level + li] = 0.0;
+                                                    
+                                                    mpi.Allreduce(
+                                                        &Z_w_max_local,
+                                                        &d_Harten_volume_fraction_wavelet_coeffs_maxs[di*d_Harten_wavelet_num_level + li],
+                                                        1,
+                                                        MPI_DOUBLE,
+                                                        MPI_MAX);
+                                                }
+                                            }
+                                            
+                                            break;
+                                        }
+                                        default:
+                                        {
+                                            TBOX_ERROR(d_object_name
+                                                << ": "
+                                                << "d_flow_model '"
+                                                << d_flow_model
+                                                << "' not yet implemented."
+                                                << std::endl);
+                                        }
                                     }
                                 }
                             }
@@ -2587,21 +2590,21 @@ MultiresolutionTagger::getSensorValueStatistics(
                     }
                 }
             }
+            else
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "Number of ghost cells is not set yet."
+                    << std::endl);
+            }
         }
         else
         {
             TBOX_ERROR(d_object_name
                 << ": "
-                << "Number of ghost cells is not set yet."
+                << "Variables are not set yet."
                 << std::endl);
         }
-    }
-    else
-    {
-        TBOX_ERROR(d_object_name
-            << ": "
-            << "Variables are not set yet."
-            << std::endl);
     }
 }
 

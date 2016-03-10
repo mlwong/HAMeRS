@@ -322,9 +322,9 @@ InitialConditions::initializeDataOnPatch(
                             }
                         }
                     }
-                    else if (d_project_name == "2D Kelvin-Helmholtz")
+                    else if (d_project_name == "2D Kelvin-Helmholtz instability")
                     {
-                        // Initialize data for a 2D Kelvin-Helmohltz problem.
+                        // Initialize data for a 2D Kelvin-Helmohltz instability problem.
                         // (McNally, Colin P., Wladimir Lyra, and Jean-Claude Passy.
                         // "A well-posed Kelvin-Helmholtz instability test and comparison."
                         // The Astrophysical Journal Supplement Series 201.2 (2012): 18.)
