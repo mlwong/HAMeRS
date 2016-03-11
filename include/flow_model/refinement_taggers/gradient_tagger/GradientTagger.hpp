@@ -264,8 +264,19 @@ class GradientTagger
         boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_total_energy_gradient;
         boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_pressure_gradient;
         boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_enstrophy_gradient;
-        boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_mass_fraction_gradient;
-        boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_volume_fraction_gradient;
+        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Jameson_mass_fraction_gradient;
+        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Jameson_volume_fraction_gradient;
+        
+        /*
+         * Tag cells using gradient sensor.
+         */
+        void
+        tagCellsWithGradientSensor(
+            hier::Patch& patch,
+            boost::shared_ptr<pdat::CellData<int> > tags,
+            boost::shared_ptr<pdat::CellData<double> > gradient,
+            double& tol,
+            std::string& sensor_key);
         
 };
 

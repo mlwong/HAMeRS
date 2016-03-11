@@ -1,5 +1,7 @@
 #include "flow_model/refinement_taggers/gradient_tagger/GradientTagger.hpp"
 
+#include "boost/lexical_cast.hpp"
+
 #define PLOTTING_GRADIENT_TAGGER
 
 #define EPSILON 1e-40
@@ -302,12 +304,31 @@ GradientTagger::registerGradientTaggerVariables(
                                 
                                     break;
                                 }
-                                case FOUR_EQN_SHYUE: case FIVE_EQN_ALLAIRE:
+                                case FOUR_EQN_SHYUE:
                                 {
-                                    d_Jameson_mass_fraction_gradient =
-                                        boost::shared_ptr<pdat::CellVariable<double> > (
-                                            new pdat::CellVariable<double>(
-                                                d_dim, "Jameson mass fraction gradient", 1));
+                                    for (int di = 0; di < d_mass_fraction->getDepth(); di++)
+                                    {
+                                        d_Jameson_mass_fraction_gradient.push_back(
+                                            boost::make_shared<pdat::CellVariable<double> >(
+                                                d_dim,
+                                                "Jameson mass fraction " + boost::lexical_cast<std::string>(di) +
+                                                " gradient",
+                                                1));
+                                    }
+                                    
+                                    break;
+                                }
+                                case FIVE_EQN_ALLAIRE:
+                                {
+                                    for (int di = 0; di < d_num_species; di++)
+                                    {
+                                        d_Jameson_mass_fraction_gradient.push_back(
+                                            boost::make_shared<pdat::CellVariable<double> >(
+                                                d_dim,
+                                                "Jameson mass fraction " + boost::lexical_cast<std::string>(di) +
+                                                " gradient",
+                                                1));
+                                    }
                                     
                                     break;
                                 }
@@ -340,10 +361,15 @@ GradientTagger::registerGradientTaggerVariables(
                                 }
                                 case FIVE_EQN_ALLAIRE:
                                 {
-                                    d_Jameson_volume_fraction_gradient =
-                                        boost::shared_ptr<pdat::CellVariable<double> > (
-                                            new pdat::CellVariable<double>(
-                                                d_dim, "Jameson volume fraction gradient", 1));
+                                    for (int di = 0; di < d_volume_fraction->getDepth(); di++)
+                                    {
+                                        d_Jameson_volume_fraction_gradient.push_back(
+                                            boost::make_shared<pdat::CellVariable<double> >(
+                                                d_dim,
+                                                "Jameson volume fraction " + boost::lexical_cast<std::string>(di) +
+                                                " gradient",
+                                                1));
+                                    }
                                     
                                     break;
                                 }
@@ -430,15 +456,33 @@ GradientTagger::registerGradientTaggerVariables(
                                     
                                     break;
                                 }
-                                case FOUR_EQN_SHYUE: case FIVE_EQN_ALLAIRE:
+                                case FOUR_EQN_SHYUE:
                                 {
-                                    integrator->registerVariable(
-                                        d_Jameson_mass_fraction_gradient,
-                                        d_num_ghosts,
-                                        RungeKuttaLevelIntegrator::TIME_DEP,
-                                        d_grid_geometry,
-                                        "CONSERVATIVE_COARSEN",
-                                        "CONSERVATIVE_LINEAR_REFINE");
+                                    for (int di = 0; di < d_mass_fraction->getDepth(); di++)
+                                    {
+                                        integrator->registerVariable(
+                                            d_Jameson_mass_fraction_gradient[di],
+                                            d_num_ghosts,
+                                            RungeKuttaLevelIntegrator::TIME_DEP,
+                                            d_grid_geometry,
+                                            "CONSERVATIVE_COARSEN",
+                                            "CONSERVATIVE_LINEAR_REFINE");
+                                    }
+                                        
+                                    break;
+                                }
+                                case FIVE_EQN_ALLAIRE:
+                                {
+                                    for (int di = 0; di < d_num_species; di++)
+                                    {
+                                        integrator->registerVariable(
+                                            d_Jameson_mass_fraction_gradient[di],
+                                            d_num_ghosts,
+                                            RungeKuttaLevelIntegrator::TIME_DEP,
+                                            d_grid_geometry,
+                                            "CONSERVATIVE_COARSEN",
+                                            "CONSERVATIVE_LINEAR_REFINE");
+                                    }
                                     
                                     break;
                                 }
@@ -471,13 +515,16 @@ GradientTagger::registerGradientTaggerVariables(
                                 }
                                 case FIVE_EQN_ALLAIRE:
                                 {
-                                    integrator->registerVariable(
-                                        d_Jameson_volume_fraction_gradient,
-                                        d_num_ghosts,
-                                        RungeKuttaLevelIntegrator::TIME_DEP,
-                                        d_grid_geometry,
-                                        "CONSERVATIVE_COARSEN",
-                                        "CONSERVATIVE_LINEAR_REFINE");
+                                    for (int di = 0; di < d_volume_fraction->getDepth(); di++)
+                                    {
+                                        integrator->registerVariable(
+                                            d_Jameson_volume_fraction_gradient[di],
+                                            d_num_ghosts,
+                                            RungeKuttaLevelIntegrator::TIME_DEP,
+                                            d_grid_geometry,
+                                            "CONSERVATIVE_COARSEN",
+                                            "CONSERVATIVE_LINEAR_REFINE");
+                                    }
                                     
                                     break;
                                 }
@@ -604,14 +651,33 @@ GradientTagger::registerPlotQuantities(
                                     
                                     break;
                                 }
-                                case FOUR_EQN_SHYUE: case FIVE_EQN_ALLAIRE:
+                                case FOUR_EQN_SHYUE:
                                 {
-                                    visit_writer->registerPlotQuantity(
-                                        "Jameson mass fraction gradient",
-                                        "SCALAR",
-                                        vardb->mapVariableAndContextToIndex(
-                                           d_Jameson_mass_fraction_gradient,
-                                           plot_context));
+                                    for (int di = 0; di < d_mass_fraction->getDepth(); di++)
+                                    {
+                                        visit_writer->registerPlotQuantity(
+                                            "Jameson mass fraction " + boost::lexical_cast<std::string>(di) +
+                                                " gradient",
+                                            "SCALAR",
+                                            vardb->mapVariableAndContextToIndex(
+                                               d_Jameson_mass_fraction_gradient[di],
+                                               plot_context));
+                                    }
+                                    
+                                    break;
+                                }
+                                case FIVE_EQN_ALLAIRE:
+                                {
+                                    for (int di = 0; di < d_num_species; di++)
+                                    {
+                                        visit_writer->registerPlotQuantity(
+                                            "Jameson mass fraction " + boost::lexical_cast<std::string>(di) +
+                                                " gradient",
+                                            "SCALAR",
+                                            vardb->mapVariableAndContextToIndex(
+                                               d_Jameson_mass_fraction_gradient[di],
+                                               plot_context));
+                                    }
                                     
                                     break;
                                 }
@@ -644,12 +710,18 @@ GradientTagger::registerPlotQuantities(
                                 }
                                 case FIVE_EQN_ALLAIRE:
                                 {
-                                    visit_writer->registerPlotQuantity(
-                                        "Jameson volume fraction gradient",
-                                        "SCALAR",
-                                        vardb->mapVariableAndContextToIndex(
-                                           d_Jameson_volume_fraction_gradient,
-                                           plot_context));
+                                    for (int di = 0; di < d_volume_fraction->getDepth(); di++)
+                                    {
+                                        visit_writer->registerPlotQuantity(
+                                            "Jameson volume fraction " + boost::lexical_cast<std::string>(di) +
+                                                " gradient",
+                                            "SCALAR",
+                                            vardb->mapVariableAndContextToIndex(
+                                               d_Jameson_volume_fraction_gradient[di],
+                                               plot_context));
+                                    }
+                                    
+                                    break;
                                 }
                                 default:
                                 {
@@ -814,9 +886,6 @@ GradientTagger::tagCells(
             {
                 std::string sensor_key = d_gradient_sensors[si];
                 
-                // Get the pointer of the tags.
-                int* tag_ptr  = tags->getPointer();
-                
                 if (sensor_key == "JAMESON_GRADIENT")
                 {
                     switch (d_flow_model)
@@ -827,6 +896,9 @@ GradientTagger::tagCells(
                             {
                                 // Get the key of the current variable.
                                 std::string variable_key = d_Jameson_gradient_variables[vi];
+                                
+                                // Ge the tolerance for the current variable.
+                                double tol = d_Jameson_gradient_tol[vi];
                                 
                                 boost::shared_ptr<pdat::CellData<double> > gradient;
                                 
@@ -844,6 +916,12 @@ GradientTagger::tagCells(
                                     // Compute the gradient.
                                     d_gradient_sensor_Jameson->computeGradient(patch, density, gradient);
                                     
+                                    tagCellsWithGradientSensor(
+                                        patch,
+                                        tags,
+                                        gradient,
+                                        tol,
+                                        sensor_key);
                                 }
                                 else if (variable_key == "TOTAL_ENERGY")
                                 {
@@ -858,6 +936,13 @@ GradientTagger::tagCells(
                                     
                                     // Compute the gradient.
                                     d_gradient_sensor_Jameson->computeGradient(patch, total_energy, gradient);
+                                    
+                                    tagCellsWithGradientSensor(
+                                        patch,
+                                        tags,
+                                        gradient,
+                                        tol,
+                                        sensor_key);
                                 }
                                 else if (variable_key == "PRESSURE")
                                 {
@@ -951,6 +1036,13 @@ GradientTagger::tagCells(
                                     
                                     // Compute the gradient.
                                     d_gradient_sensor_Jameson->computeGradient(patch, pressure, gradient);
+                                    
+                                    tagCellsWithGradientSensor(
+                                        patch,
+                                        tags,
+                                        gradient,
+                                        tol,
+                                        sensor_key);
                                 }
                                 else if (variable_key == "ENSTROPHY")
                                 {
@@ -1191,6 +1283,13 @@ GradientTagger::tagCells(
                                     
                                     // Compute the gradient.
                                     d_gradient_sensor_Jameson->computeGradient(patch, enstrophy, gradient);
+                                    
+                                    tagCellsWithGradientSensor(
+                                        patch,
+                                        tags,
+                                        gradient,
+                                        tol,
+                                        sensor_key);
                                 }
                                 else
                                 {
@@ -1200,64 +1299,6 @@ GradientTagger::tagCells(
                                         << variable_key
                                         << "\nin input."
                                         << std::endl);
-                                }
-                                
-                                int variable_depth = gradient->getDepth();
-                                
-                                for (int di = 0; di < variable_depth; di++)
-                                {
-                                    // Get the pointer to the gradient.
-                                    double* psi  = gradient->getPointer(di);
-                                    
-                                    // Get the tolerance for the current variable.
-                                    double tol = d_Jameson_gradient_tol[vi];
-                                    
-                                    if (d_dim == tbox::Dimension(1))
-                                    {
-                                        // NOT YET IMPLEMENTED
-                                    }
-                                    else if (d_dim == tbox::Dimension(2))
-                                    {
-                                        for (int j = 0; j < interior_dims[1]; j++)
-                                        {
-                                            for (int i = 0; i < interior_dims[0]; i++)
-                                            {
-                                                // Compute indices.
-                                                const int idx = (i + d_num_ghosts[0]) +
-                                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
-                                                
-                                                const int idx_nghost = i + j*interior_dims[0];
-                                                
-                                                if (psi[idx] > tol)
-                                                {
-                                                    tag_ptr[idx_nghost] |= 1;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    else if (d_dim == tbox::Dimension(3))
-                                    {
-                                        for (int k = 0; k < interior_dims[2]; k++)
-                                        {
-                                            for (int j = 0; j < interior_dims[1]; j++)
-                                            {
-                                                for (int i = 0; i < interior_dims[0]; i++)
-                                                {
-                                                    // Compute indices.
-                                                    const int idx = (i + d_num_ghosts[0]) +
-                                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                                                    
-                                                    const int idx_nghost = i + j*interior_dims[0] + k*interior_dims[0]*interior_dims[1];
-                                                    
-                                                    if (psi[idx] > tol)
-                                                    {
-                                                        tag_ptr[idx_nghost] |= 1;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
                                 }
                             } // Loop over variables.
                             
@@ -1269,6 +1310,9 @@ GradientTagger::tagCells(
                             {
                                 // Get the key of the current variable.
                                 std::string variable_key = d_Jameson_gradient_variables[vi];
+                                
+                                // Ge the tolerance for the current variable.
+                                double tol = d_Jameson_gradient_tol[vi];
                                 
                                 boost::shared_ptr<pdat::CellData<double> > gradient;
                                 
@@ -1286,6 +1330,13 @@ GradientTagger::tagCells(
                                     // Compute the gradient.
                                     d_gradient_sensor_Jameson->computeGradient(patch, density, gradient);
                                     
+                                    tagCellsWithGradientSensor(
+                                        patch,
+                                        tags,
+                                        gradient,
+                                        tol,
+                                        sensor_key);
+                                    
                                 }
                                 else if (variable_key == "TOTAL_ENERGY")
                                 {
@@ -1300,6 +1351,13 @@ GradientTagger::tagCells(
                                     
                                     // Compute the gradient.
                                     d_gradient_sensor_Jameson->computeGradient(patch, total_energy, gradient);
+                                    
+                                    tagCellsWithGradientSensor(
+                                        patch,
+                                        tags,
+                                        gradient,
+                                        tol,
+                                        sensor_key);
                                 }
                                 else if (variable_key == "PRESSURE")
                                 {
@@ -1393,6 +1451,13 @@ GradientTagger::tagCells(
                                     
                                     // Compute the gradient.
                                     d_gradient_sensor_Jameson->computeGradient(patch, pressure, gradient);
+                                    
+                                    tagCellsWithGradientSensor(
+                                        patch,
+                                        tags,
+                                        gradient,
+                                        tol,
+                                        sensor_key);
                                 }
                                 else if (variable_key == "ENSTROPHY")
                                 {
@@ -1633,20 +1698,37 @@ GradientTagger::tagCells(
                                     
                                     // Compute the gradient.
                                     d_gradient_sensor_Jameson->computeGradient(patch, enstrophy, gradient);
+                                    
+                                    tagCellsWithGradientSensor(
+                                        patch,
+                                        tags,
+                                        gradient,
+                                        tol,
+                                        sensor_key);
                                 }
                                 else if (variable_key == "MASS_FRACTION")
                                 {
-                                    // Get the cell data of the mass fraction gradient.
-                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                        patch.getPatchData(d_Jameson_mass_fraction_gradient, data_context));
-                                    
-                                    // Get the cell data of mass fraction.
-                                    boost::shared_ptr<pdat::CellData<double> > mass_fraction(
-                                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                            patch.getPatchData(d_mass_fraction, data_context)));
-                                    
-                                    // Compute the gradient.
-                                    d_gradient_sensor_Jameson->computeGradient(patch, mass_fraction, gradient);
+                                    for (int di = 0; di < d_mass_fraction->getDepth(); di++)
+                                    {
+                                        // Get the cell data of the mass fraction gradient.
+                                        gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                            patch.getPatchData(d_Jameson_mass_fraction_gradient[di], data_context));
+                                        
+                                        // Get the cell data of mass fraction.
+                                        boost::shared_ptr<pdat::CellData<double> > mass_fraction(
+                                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                                patch.getPatchData(d_mass_fraction, data_context)));
+                                        
+                                        // Compute the gradient.
+                                        d_gradient_sensor_Jameson->computeGradient(patch, mass_fraction, gradient, di);
+                                        
+                                        tagCellsWithGradientSensor(
+                                            patch,
+                                            tags,
+                                            gradient,
+                                            tol,
+                                            sensor_key);
+                                    }
                                 }
                                 else
                                 {
@@ -1656,64 +1738,6 @@ GradientTagger::tagCells(
                                         << variable_key
                                         << "\nin input."
                                         << std::endl);
-                                }
-                                
-                                int variable_depth = gradient->getDepth();
-                                
-                                for (int di = 0; di < variable_depth; di++)
-                                {
-                                    // Get the pointer to the gradient.
-                                    double* psi  = gradient->getPointer(di);
-                                    
-                                    // Get the tolerance for the current variable.
-                                    double tol = d_Jameson_gradient_tol[vi];
-                                    
-                                    if (d_dim == tbox::Dimension(1))
-                                    {
-                                        // NOT YET IMPLEMENTED
-                                    }
-                                    else if (d_dim == tbox::Dimension(2))
-                                    {
-                                        for (int j = 0; j < interior_dims[1]; j++)
-                                        {
-                                            for (int i = 0; i < interior_dims[0]; i++)
-                                            {
-                                                // Compute indices.
-                                                const int idx = (i + d_num_ghosts[0]) +
-                                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
-                                                
-                                                const int idx_nghost = i + j*interior_dims[0];
-                                                
-                                                if (psi[idx] > tol)
-                                                {
-                                                    tag_ptr[idx_nghost] |= 1;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    else if (d_dim == tbox::Dimension(3))
-                                    {
-                                        for (int k = 0; k < interior_dims[2]; k++)
-                                        {
-                                            for (int j = 0; j < interior_dims[1]; j++)
-                                            {
-                                                for (int i = 0; i < interior_dims[0]; i++)
-                                                {
-                                                    // Compute indices.
-                                                    const int idx = (i + d_num_ghosts[0]) +
-                                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                                                    
-                                                    const int idx_nghost = i + j*interior_dims[0] + k*interior_dims[0]*interior_dims[1];
-                                                    
-                                                    if (psi[idx] > tol)
-                                                    {
-                                                        tag_ptr[idx_nghost] |= 1;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
                                 }
                             } // Loop over variables.
                             
@@ -1725,6 +1749,9 @@ GradientTagger::tagCells(
                             {
                                 // Get the key of the current variable.
                                 std::string variable_key = d_Jameson_gradient_variables[vi];
+                                
+                                // Ge the tolerance for the current variable.
+                                double tol = d_Jameson_gradient_tol[vi];
                                 
                                 boost::shared_ptr<pdat::CellData<double> > gradient;
                                 
@@ -1807,6 +1834,13 @@ GradientTagger::tagCells(
                                     
                                     // Compute the gradient.
                                     d_gradient_sensor_Jameson->computeGradient(patch, density, gradient);
+                                    
+                                    tagCellsWithGradientSensor(
+                                        patch,
+                                        tags,
+                                        gradient,
+                                        tol,
+                                        sensor_key);
                                 }
                                 else if (variable_key == "TOTAL_ENERGY")
                                 {
@@ -1821,6 +1855,13 @@ GradientTagger::tagCells(
                                     
                                     // Compute the gradient.
                                     d_gradient_sensor_Jameson->computeGradient(patch, total_energy, gradient);
+                                    
+                                    tagCellsWithGradientSensor(
+                                        patch,
+                                        tags,
+                                        gradient,
+                                        tol,
+                                        sensor_key);
                                 }
                                 else if (variable_key == "PRESSURE")
                                 {
@@ -1914,6 +1955,13 @@ GradientTagger::tagCells(
                                     
                                     // Compute the gradient.
                                     d_gradient_sensor_Jameson->computeGradient(patch, pressure, gradient);
+                                    
+                                    tagCellsWithGradientSensor(
+                                        patch,
+                                        tags,
+                                        gradient,
+                                        tol,
+                                        sensor_key);
                                 }
                                 else if (variable_key == "ENSTROPHY")
                                 {
@@ -2154,13 +2202,16 @@ GradientTagger::tagCells(
                                     
                                     // Compute the gradient.
                                     d_gradient_sensor_Jameson->computeGradient(patch, enstrophy, gradient);
+                                    
+                                    tagCellsWithGradientSensor(
+                                        patch,
+                                        tags,
+                                        gradient,
+                                        tol,
+                                        sensor_key);
                                 }
                                 else if (variable_key == "MASS_FRACTION")
                                 {
-                                    // Get the cell data of the mass fraction gradient.
-                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                        patch.getPatchData(d_Jameson_mass_fraction_gradient, data_context));
-                                    
                                     // Get the cell data of partial density.
                                     boost::shared_ptr<pdat::CellData<double> > partial_density(
                                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -2246,22 +2297,46 @@ GradientTagger::tagCells(
                                         }
                                     }
                                     
-                                    // Compute the gradient.
-                                    d_gradient_sensor_Jameson->computeGradient(patch, mass_fraction, gradient);
+                                    for (int di = 0; di < d_num_species; di++)
+                                    {
+                                        // Get the cell data of the mass fraction gradient.
+                                        gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                            patch.getPatchData(d_Jameson_mass_fraction_gradient[di], data_context));
+                                        
+                                        // Compute the gradient.
+                                        d_gradient_sensor_Jameson->computeGradient(patch, mass_fraction, gradient, di);
+                                        
+                                        tagCellsWithGradientSensor(
+                                            patch,
+                                            tags,
+                                            gradient,
+                                            tol,
+                                            sensor_key);
+                                    }
                                 }
                                 else if (variable_key == "VOLUME_FRACTION")
                                 {
-                                    // Get the cell data of the volume fraction gradient.
-                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                        patch.getPatchData(d_Jameson_volume_fraction_gradient, data_context));
-                                    
-                                    // Get the cell data of volume fraction.
-                                    boost::shared_ptr<pdat::CellData<double> > volume_fraction(
-                                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                            patch.getPatchData(d_mass_fraction, data_context)));
-                                    
-                                    // Compute the gradient.
-                                    d_gradient_sensor_Jameson->computeGradient(patch, volume_fraction, gradient);
+                                    for (int di = 0; di < d_volume_fraction->getDepth(); di++)
+                                    {
+                                        // Get the cell data of the volume fraction gradient.
+                                        gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                            patch.getPatchData(d_Jameson_volume_fraction_gradient[di], data_context));
+                                        
+                                        // Get the cell data of volume fraction.
+                                        boost::shared_ptr<pdat::CellData<double> > volume_fraction(
+                                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                                patch.getPatchData(d_mass_fraction, data_context)));
+                                        
+                                        // Compute the gradient.
+                                        d_gradient_sensor_Jameson->computeGradient(patch, volume_fraction, gradient, di);
+                                        
+                                        tagCellsWithGradientSensor(
+                                            patch,
+                                            tags,
+                                            gradient,
+                                            tol,
+                                            sensor_key);
+                                    }
                                 }
                                 else
                                 {
@@ -2271,64 +2346,6 @@ GradientTagger::tagCells(
                                         << variable_key
                                         << "\nin input."
                                         << std::endl);
-                                }
-                                
-                                int variable_depth = gradient->getDepth();
-                                
-                                for (int di = 0; di < variable_depth; di++)
-                                {
-                                    // Get the pointer to the gradient.
-                                    double* psi  = gradient->getPointer(di);
-                                    
-                                    // Get the tolerance for the current variable.
-                                    double tol = d_Jameson_gradient_tol[vi];
-                                    
-                                    if (d_dim == tbox::Dimension(1))
-                                    {
-                                        // NOT YET IMPLEMENTED
-                                    }
-                                    else if (d_dim == tbox::Dimension(2))
-                                    {
-                                        for (int j = 0; j < interior_dims[1]; j++)
-                                        {
-                                            for (int i = 0; i < interior_dims[0]; i++)
-                                            {
-                                                // Compute indices.
-                                                const int idx = (i + d_num_ghosts[0]) +
-                                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
-                                                
-                                                const int idx_nghost = i + j*interior_dims[0];
-                                                
-                                                if (psi[idx] > tol)
-                                                {
-                                                    tag_ptr[idx_nghost] |= 1;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    else if (d_dim == tbox::Dimension(3))
-                                    {
-                                        for (int k = 0; k < interior_dims[2]; k++)
-                                        {
-                                            for (int j = 0; j < interior_dims[1]; j++)
-                                            {
-                                                for (int i = 0; i < interior_dims[0]; i++)
-                                                {
-                                                    // Compute indices.
-                                                    const int idx = (i + d_num_ghosts[0]) +
-                                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                                                    
-                                                    const int idx_nghost = i + j*interior_dims[0] + k*interior_dims[0]*interior_dims[1];
-                                                    
-                                                    if (psi[idx] > tol)
-                                                    {
-                                                        tag_ptr[idx_nghost] |= 1;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
                                 }
                             } // Loop over variables.
                             
@@ -2361,5 +2378,93 @@ GradientTagger::tagCells(
             << ": "
             << "Variables are not set yet."
             << std::endl);
+    }
+}
+
+
+/*
+ * Tag cells using gradient sensor.
+ */
+void
+GradientTagger::tagCellsWithGradientSensor(
+    hier::Patch& patch,
+    boost::shared_ptr<pdat::CellData<int> > tags,
+    boost::shared_ptr<pdat::CellData<double> > gradient,
+    double& tol,
+    std::string& sensor_key)
+{
+    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+            patch.getPatchGeometry()));
+    
+#ifdef DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(patch_geom);
+#endif
+    
+    // Get the dimensions of box that covers the interior of Patch.
+    hier::Box dummy_box = patch.getBox();
+    const hier::Box interior_box = dummy_box;
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+    // Get the dimensions of box that covers interior of Patch plus
+    // ghost cells.
+    dummy_box.grow(d_num_ghosts);
+    const hier::Box ghost_box = dummy_box;
+    const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+    
+    // Get the pointer of the tags.
+    int* tag_ptr  = tags->getPointer(0);
+    
+    // Get the pointer to the gradient.
+    double* psi = gradient->getPointer(0);
+    
+    if (sensor_key == "JAMESON_GRADIENT")
+    {
+        if (d_dim == tbox::Dimension(1))
+        {
+            // NOT YET IMPLEMENTED
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            for (int j = 0; j < interior_dims[1]; j++)
+            {
+                for (int i = 0; i < interior_dims[0]; i++)
+                {
+                    // Compute indices.
+                    const int idx = (i + d_num_ghosts[0]) +
+                        (j + d_num_ghosts[1])*ghostcell_dims[0];
+                    
+                    const int idx_nghost = i + j*interior_dims[0];
+                    
+                    if (psi[idx] > tol)
+                    {
+                        tag_ptr[idx_nghost] |= 1;
+                    }
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            for (int k = 0; k < interior_dims[2]; k++)
+            {
+                for (int j = 0; j < interior_dims[1]; j++)
+                {
+                    for (int i = 0; i < interior_dims[0]; i++)
+                    {
+                        // Compute indices.
+                        const int idx = (i + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                            (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                        
+                        const int idx_nghost = i + j*interior_dims[0] + k*interior_dims[0]*interior_dims[1];
+                        
+                        if (psi[idx] > tol)
+                        {
+                            tag_ptr[idx_nghost] |= 1;
+                        }
+                    }
+                }
+            }
+        }
     }
 }

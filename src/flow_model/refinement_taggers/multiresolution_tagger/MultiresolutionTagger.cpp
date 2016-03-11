@@ -444,10 +444,6 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                 
                 if (sensor_key == "HARTEN_WAVELET")
                 {
-                    d_Harten_Lipschitz_exponent =
-                        boost::shared_ptr<pdat::CellVariable<double> > (
-                            new pdat::CellVariable<double>(d_dim, "Harten Lipschitz's exponent", 1));
-                    
                     for (int vi = 0; vi < static_cast<int>(d_Harten_wavelet_variables.size()); vi++)
                     {
                         // Get the key of the current variable.
@@ -477,6 +473,13 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                             1));
                                 }
                             }
+                            
+                            if (d_Harten_wavelet_uses_alpha_tol)
+                            {
+                                d_Harten_density_Lipschitz_exponent =
+                                    boost::shared_ptr<pdat::CellVariable<double> > (
+                                        new pdat::CellVariable<double>(d_dim, "Harten density Lipschitz's exponent", 1));
+                            }
                         }
                         else if (variable_key == "TOTAL_ENERGY")
                         {
@@ -501,6 +504,13 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                             "Harten total energy local means at level " + boost::lexical_cast<std::string>(li),
                                             1));
                                 }
+                            }
+                            
+                            if (d_Harten_wavelet_uses_alpha_tol)
+                            {
+                                d_Harten_total_energy_Lipschitz_exponent =
+                                    boost::shared_ptr<pdat::CellVariable<double> > (
+                                        new pdat::CellVariable<double>(d_dim, "Harten total energy Lipschitz's exponent", 1));
                             }
                         }
                         else if (variable_key == "PRESSURE")
@@ -527,6 +537,13 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                             1));
                                 }
                             }
+                            
+                            if (d_Harten_wavelet_uses_alpha_tol)
+                            {
+                                d_Harten_pressure_Lipschitz_exponent =
+                                    boost::shared_ptr<pdat::CellVariable<double> > (
+                                        new pdat::CellVariable<double>(d_dim, "Harten pressure Lipschitz's exponent", 1));
+                            }
                         }
                         else if (variable_key == "ENSTROPHY")
                         {
@@ -551,6 +568,13 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                             "Harten enstrophy local means at level " + boost::lexical_cast<std::string>(li),
                                             1));
                                 }
+                            }
+                            
+                            if (d_Harten_wavelet_uses_alpha_tol)
+                            {
+                                d_Harten_enstrophy_Lipschitz_exponent =
+                                    boost::shared_ptr<pdat::CellVariable<double> > (
+                                        new pdat::CellVariable<double>(d_dim, "Harten enstrophy Lipschitz's exponent", 1));
                             }
                         }
                         else if (variable_key == "MASS_FRACTION")
@@ -599,6 +623,16 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                                         1));
                                             }
                                         }
+                                        
+                                        if (d_Harten_wavelet_uses_alpha_tol)
+                                        {
+                                            d_Harten_mass_fraction_Lipschitz_exponent.push_back(
+                                                boost::make_shared<pdat::CellVariable<double> >(
+                                                    d_dim,
+                                                    "Harten mass fraction " + boost::lexical_cast<std::string>(di) +
+                                                        " Lipschitz's exponent",
+                                                    1));
+                                        }
                                     }
                                     
                                     break;
@@ -632,6 +666,16 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                                             boost::lexical_cast<std::string>(li),
                                                         1));
                                             }
+                                        }
+                                        
+                                        if (d_Harten_wavelet_uses_alpha_tol)
+                                        {
+                                            d_Harten_mass_fraction_Lipschitz_exponent.push_back(
+                                                boost::make_shared<pdat::CellVariable<double> >(
+                                                    d_dim,
+                                                    "Harten mass fraction " + boost::lexical_cast<std::string>(di) +
+                                                        " Lipschitz's exponent",
+                                                    1));
                                         }
                                     }
                                     
@@ -694,6 +738,16 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                                         1));
                                             }
                                         }
+                                        
+                                        if (d_Harten_wavelet_uses_alpha_tol)
+                                        {
+                                            d_Harten_volume_fraction_Lipschitz_exponent.push_back(
+                                                boost::make_shared<pdat::CellVariable<double> >(
+                                                    d_dim,
+                                                    "Harten volume fraction " + boost::lexical_cast<std::string>(di) +
+                                                        " Lipschitz's exponent",
+                                                    1));
+                                        }
                                     }
                                     
                                     break;
@@ -719,14 +773,6 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                 << std::endl);
                         }
                     }
-                    
-                    integrator->registerVariable(
-                        d_Harten_Lipschitz_exponent,
-                        d_num_ghosts,
-                        RungeKuttaLevelIntegrator::TIME_DEP,
-                            d_grid_geometry,
-                            "CONSERVATIVE_COARSEN",
-                            "CONSERVATIVE_LINEAR_REFINE");
                     
                     for (int vi = 0; vi < static_cast<int>(d_Harten_wavelet_variables.size()); vi++)
                     {
@@ -756,6 +802,17 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                             "NO_REFINE");
                                 }
                             }
+                            
+                            if (d_Harten_wavelet_uses_alpha_tol)
+                            {
+                                integrator->registerVariable(
+                                    d_Harten_density_Lipschitz_exponent,
+                                    d_num_ghosts,
+                                    RungeKuttaLevelIntegrator::TIME_DEP,
+                                        d_grid_geometry,
+                                        "CONSERVATIVE_COARSEN",
+                                        "CONSERVATIVE_LINEAR_REFINE");
+                            }
                         }
                         else if (variable_key == "TOTAL_ENERGY")
                         {
@@ -779,6 +836,17 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                             "NO_COARSEN",
                                             "NO_REFINE");
                                 }
+                            }
+                            
+                            if (d_Harten_wavelet_uses_alpha_tol)
+                            {
+                                integrator->registerVariable(
+                                    d_Harten_total_energy_Lipschitz_exponent,
+                                    d_num_ghosts,
+                                    RungeKuttaLevelIntegrator::TIME_DEP,
+                                        d_grid_geometry,
+                                        "CONSERVATIVE_COARSEN",
+                                        "CONSERVATIVE_LINEAR_REFINE");
                             }
                         }
                         else if (variable_key == "PRESSURE")
@@ -804,6 +872,17 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                             "NO_REFINE");
                                 }
                             }
+                            
+                            if (d_Harten_wavelet_uses_alpha_tol)
+                            {
+                                integrator->registerVariable(
+                                    d_Harten_pressure_Lipschitz_exponent,
+                                    d_num_ghosts,
+                                    RungeKuttaLevelIntegrator::TIME_DEP,
+                                        d_grid_geometry,
+                                        "CONSERVATIVE_COARSEN",
+                                        "CONSERVATIVE_LINEAR_REFINE");
+                            }
                         }
                         else if (variable_key == "ENSTROPHY")
                         {
@@ -827,6 +906,17 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                             "NO_COARSEN",
                                             "NO_REFINE");
                                 }
+                            }
+                            
+                            if (d_Harten_wavelet_uses_alpha_tol)
+                            {
+                                integrator->registerVariable(
+                                    d_Harten_enstrophy_Lipschitz_exponent,
+                                    d_num_ghosts,
+                                    RungeKuttaLevelIntegrator::TIME_DEP,
+                                        d_grid_geometry,
+                                        "CONSERVATIVE_COARSEN",
+                                        "CONSERVATIVE_LINEAR_REFINE");
                             }
                         }
                         else if (variable_key == "MASS_FRACTION")
@@ -870,6 +960,17 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                                         "NO_REFINE");
                                             }
                                         }
+                                        
+                                        if (d_Harten_wavelet_uses_alpha_tol)
+                                        {
+                                            integrator->registerVariable(
+                                                d_Harten_mass_fraction_Lipschitz_exponent[di],
+                                                d_num_ghosts,
+                                                RungeKuttaLevelIntegrator::TIME_DEP,
+                                                    d_grid_geometry,
+                                                    "CONSERVATIVE_COARSEN",
+                                                    "CONSERVATIVE_LINEAR_REFINE");
+                                        }
                                     }
                                     
                                     break;
@@ -898,6 +999,17 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                                         "NO_COARSEN",
                                                         "NO_REFINE");
                                             }
+                                        }
+                                        
+                                        if (d_Harten_wavelet_uses_alpha_tol)
+                                        {
+                                            integrator->registerVariable(
+                                                d_Harten_mass_fraction_Lipschitz_exponent[di],
+                                                d_num_ghosts,
+                                                RungeKuttaLevelIntegrator::TIME_DEP,
+                                                    d_grid_geometry,
+                                                    "CONSERVATIVE_COARSEN",
+                                                    "CONSERVATIVE_LINEAR_REFINE");
                                         }
                                     }
                                     
@@ -954,6 +1066,17 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                                         "NO_COARSEN",
                                                         "NO_REFINE");
                                             }
+                                        }
+                                        
+                                        if (d_Harten_wavelet_uses_alpha_tol)
+                                        {
+                                            integrator->registerVariable(
+                                                d_Harten_volume_fraction_Lipschitz_exponent[di],
+                                                d_num_ghosts,
+                                                RungeKuttaLevelIntegrator::TIME_DEP,
+                                                    d_grid_geometry,
+                                                    "CONSERVATIVE_COARSEN",
+                                                    "CONSERVATIVE_LINEAR_REFINE");
                                         }
                                     }
                                     
@@ -1025,13 +1148,6 @@ MultiresolutionTagger::registerPlotQuantities(
                 
                 if (sensor_key == "HARTEN_WAVELET")
                 {
-                    visit_writer->registerPlotQuantity(
-                        "Harten Lipschitz's exponent",
-                        "SCALAR",
-                        vardb->mapVariableAndContextToIndex(
-                           d_Harten_Lipschitz_exponent,
-                           plot_context));
-                    
                     for (int vi = 0; vi < static_cast<int>(d_Harten_wavelet_variables.size()); vi++)
                     {
                         // Get the key of the current variable.
@@ -1048,6 +1164,16 @@ MultiresolutionTagger::registerPlotQuantities(
                                        d_Harten_density_wavelet_coeffs[li],
                                        plot_context));
                             }
+                            
+                            if (d_Harten_wavelet_uses_alpha_tol)
+                            {
+                                visit_writer->registerPlotQuantity(
+                                    "Harten density Lipschitz's exponent",
+                                    "SCALAR",
+                                    vardb->mapVariableAndContextToIndex(
+                                       d_Harten_density_Lipschitz_exponent,
+                                       plot_context));
+                            }
                         }
                         else if (variable_key == "TOTAL_ENERGY")
                         {
@@ -1058,6 +1184,16 @@ MultiresolutionTagger::registerPlotQuantities(
                                     "SCALAR",
                                     vardb->mapVariableAndContextToIndex(
                                        d_Harten_total_energy_wavelet_coeffs[li],
+                                       plot_context));
+                            }
+                            
+                            if (d_Harten_wavelet_uses_alpha_tol)
+                            {
+                                visit_writer->registerPlotQuantity(
+                                    "Harten total energy Lipschitz's exponent",
+                                    "SCALAR",
+                                    vardb->mapVariableAndContextToIndex(
+                                       d_Harten_total_energy_Lipschitz_exponent,
                                        plot_context));
                             }
                         }
@@ -1072,6 +1208,16 @@ MultiresolutionTagger::registerPlotQuantities(
                                        d_Harten_pressure_wavelet_coeffs[li],
                                        plot_context));
                             }
+                            
+                            if (d_Harten_wavelet_uses_alpha_tol)
+                            {
+                                visit_writer->registerPlotQuantity(
+                                    "Harten pressure Lipschitz's exponent",
+                                    "SCALAR",
+                                    vardb->mapVariableAndContextToIndex(
+                                       d_Harten_pressure_Lipschitz_exponent,
+                                       plot_context));
+                            }
                         }
                         else if (variable_key == "ENSTROPHY")
                         {
@@ -1082,6 +1228,16 @@ MultiresolutionTagger::registerPlotQuantities(
                                     "SCALAR",
                                     vardb->mapVariableAndContextToIndex(
                                        d_Harten_enstrophy_wavelet_coeffs[li],
+                                       plot_context));
+                            }
+                            
+                            if (d_Harten_wavelet_uses_alpha_tol)
+                            {
+                                visit_writer->registerPlotQuantity(
+                                    "Harten enstrophy Lipschitz's exponent",
+                                    "SCALAR",
+                                    vardb->mapVariableAndContextToIndex(
+                                       d_Harten_enstrophy_Lipschitz_exponent,
                                        plot_context));
                             }
                         }
@@ -1115,6 +1271,17 @@ MultiresolutionTagger::registerPlotQuantities(
                                                    d_Harten_mass_fraction_wavelet_coeffs[di*d_Harten_wavelet_num_level + li],
                                                    plot_context));
                                         }
+                                        
+                                        if (d_Harten_wavelet_uses_alpha_tol)
+                                        {
+                                            visit_writer->registerPlotQuantity(
+                                                "Harten mass fraction " + boost::lexical_cast<std::string>(di) +
+                                                    " Lipschitz's exponent",
+                                                "SCALAR",
+                                                vardb->mapVariableAndContextToIndex(
+                                                   d_Harten_mass_fraction_Lipschitz_exponent[di],
+                                                   plot_context));
+                                        }
                                     }
                                     
                                     break;
@@ -1131,6 +1298,17 @@ MultiresolutionTagger::registerPlotQuantities(
                                                 "SCALAR",
                                                 vardb->mapVariableAndContextToIndex(
                                                    d_Harten_mass_fraction_wavelet_coeffs[di*d_Harten_wavelet_num_level + li],
+                                                   plot_context));
+                                        }
+                                        
+                                        if (d_Harten_wavelet_uses_alpha_tol)
+                                        {
+                                            visit_writer->registerPlotQuantity(
+                                                "Harten mass fraction " + boost::lexical_cast<std::string>(di) +
+                                                    " Lipschitz's exponent",
+                                                "SCALAR",
+                                                vardb->mapVariableAndContextToIndex(
+                                                   d_Harten_mass_fraction_Lipschitz_exponent[di],
                                                    plot_context));
                                         }
                                     }
@@ -1178,7 +1356,20 @@ MultiresolutionTagger::registerPlotQuantities(
                                                        d_Harten_volume_fraction_wavelet_coeffs[di*d_Harten_wavelet_num_level + li],
                                                        plot_context));
                                         }
+                                        
+                                        if (d_Harten_wavelet_uses_alpha_tol)
+                                        {
+                                            visit_writer->registerPlotQuantity(
+                                                "Harten volume fraction " + boost::lexical_cast<std::string>(di) +
+                                                    " Lipschitz's exponent",
+                                                "SCALAR",
+                                                vardb->mapVariableAndContextToIndex(
+                                                   d_Harten_volume_fraction_Lipschitz_exponent[di],
+                                                   plot_context));
+                                        }
                                     }
+                                    
+                                    break;
                                 }
                                 default:
                                 {
@@ -2630,11 +2821,6 @@ MultiresolutionTagger::tagCells(
                 
                 if (sensor_key == "HARTEN_WAVELET")
                 {
-                    boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent(
-                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_Harten_Lipschitz_exponent,
-                            data_context)));
-                    
                     // Loop over the variables for wavelet analysis.
                     for (int vi = 0; vi < static_cast<int>(d_Harten_wavelet_variables.size()); vi++)
                     {
@@ -2684,6 +2870,14 @@ MultiresolutionTagger::tagCells(
                                 }
                             }
                             
+                            boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent;
+                            if (d_Harten_wavelet_uses_alpha_tol)
+                            {
+                                Lipschitz_exponent = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                    patch.getPatchData(d_Harten_density_Lipschitz_exponent,
+                                    data_context));
+                            }
+                            
                             tagCellsWithWaveletSensor(
                                 patch,
                                 tags,
@@ -2715,6 +2909,14 @@ MultiresolutionTagger::tagCells(
                                     variable_local_means.push_back(BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                                         patch.getPatchData(d_Harten_total_energy_local_means[li], data_context)));
                                 }
+                            }
+                            
+                            boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent;
+                            if (d_Harten_wavelet_uses_alpha_tol)
+                            {
+                                Lipschitz_exponent = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                    patch.getPatchData(d_Harten_total_energy_Lipschitz_exponent,
+                                    data_context));
                             }
                             
                             tagCellsWithWaveletSensor(
@@ -2750,6 +2952,14 @@ MultiresolutionTagger::tagCells(
                                 }
                             }
                             
+                            boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent;
+                            if (d_Harten_wavelet_uses_alpha_tol)
+                            {
+                                Lipschitz_exponent = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                    patch.getPatchData(d_Harten_pressure_Lipschitz_exponent,
+                                    data_context));
+                            }
+                            
                             tagCellsWithWaveletSensor(
                                 patch,
                                 tags,
@@ -2781,6 +2991,14 @@ MultiresolutionTagger::tagCells(
                                     variable_local_means.push_back(BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                                         patch.getPatchData(d_Harten_enstrophy_local_means[li], data_context)));
                                 }
+                            }
+                            
+                            boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent;
+                            if (d_Harten_wavelet_uses_alpha_tol)
+                            {
+                                Lipschitz_exponent = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                    patch.getPatchData(d_Harten_enstrophy_Lipschitz_exponent,
+                                    data_context));
                             }
                             
                             tagCellsWithWaveletSensor(
@@ -2848,6 +3066,14 @@ MultiresolutionTagger::tagCells(
                                             }
                                         }
                                         
+                                        boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent;
+                                        if (d_Harten_wavelet_uses_alpha_tol)
+                                        {
+                                            Lipschitz_exponent = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                                patch.getPatchData(d_Harten_mass_fraction_Lipschitz_exponent[di],
+                                                data_context));
+                                        }
+                                        
                                         tagCellsWithWaveletSensor(
                                             patch,
                                             tags,
@@ -2890,6 +3116,14 @@ MultiresolutionTagger::tagCells(
                                                         d_Harten_mass_fraction_local_means[di*d_Harten_wavelet_num_level + li],
                                                         data_context)));
                                             }
+                                        }
+                                        
+                                        boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent;
+                                        if (d_Harten_wavelet_uses_alpha_tol)
+                                        {
+                                            Lipschitz_exponent = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                                patch.getPatchData(d_Harten_mass_fraction_Lipschitz_exponent[di],
+                                                data_context));
                                         }
                                         
                                         tagCellsWithWaveletSensor(
@@ -2969,6 +3203,14 @@ MultiresolutionTagger::tagCells(
                                                         d_Harten_volume_fraction_local_means[di*d_Harten_wavelet_num_level + li],
                                                         data_context)));
                                             }
+                                        }
+                                        
+                                        boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent;
+                                        if (d_Harten_wavelet_uses_alpha_tol)
+                                        {
+                                            Lipschitz_exponent = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                                patch.getPatchData(d_Harten_volume_fraction_Lipschitz_exponent[di],
+                                                data_context));
                                         }
                                         
                                         tagCellsWithWaveletSensor(

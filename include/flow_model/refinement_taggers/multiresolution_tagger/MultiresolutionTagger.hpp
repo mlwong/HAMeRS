@@ -313,7 +313,12 @@ class MultiresolutionTagger
         std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_mass_fraction_local_means;
         std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_volume_fraction_local_means;
         
-        boost::shared_ptr<pdat::CellVariable<double> > d_Harten_Lipschitz_exponent;
+        boost::shared_ptr<pdat::CellVariable<double> > d_Harten_density_Lipschitz_exponent;
+        boost::shared_ptr<pdat::CellVariable<double> > d_Harten_total_energy_Lipschitz_exponent;
+        boost::shared_ptr<pdat::CellVariable<double> > d_Harten_pressure_Lipschitz_exponent;
+        boost::shared_ptr<pdat::CellVariable<double> > d_Harten_enstrophy_Lipschitz_exponent;
+        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_mass_fraction_Lipschitz_exponent;
+        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_volume_fraction_Lipschitz_exponent;
         
         /*
          * Tag cells using wavelet sensor with the combination of three possible criteria:
