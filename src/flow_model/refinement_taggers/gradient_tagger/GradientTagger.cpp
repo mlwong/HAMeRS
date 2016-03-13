@@ -880,6 +880,7 @@ GradientTagger::tagCells(
             const hier::Box ghost_box = dummy_box;
             const hier::IntVector ghostcell_dims = ghost_box.numberCells();
             
+            // Loop over gradient sensors chosen.
             for (int si = 0;
                      si < static_cast<int>(d_gradient_sensors.size());
                      si++)
@@ -888,439 +889,25 @@ GradientTagger::tagCells(
                 
                 if (sensor_key == "JAMESON_GRADIENT")
                 {
-                    switch (d_flow_model)
+                    // Looop over variables chosen.
+                    for (int vi = 0; vi < static_cast<int>(d_Jameson_gradient_variables.size()); vi++)
                     {
-                        case SINGLE_SPECIES:
+                        // Get the key of the current variable.
+                        std::string variable_key = d_Jameson_gradient_variables[vi];
+                        
+                        // Ge the tolerance for the current variable.
+                        double tol = d_Jameson_gradient_tol[vi];
+                        
+                        if (variable_key == "DENSITY")
                         {
-                            for (int vi = 0; vi < static_cast<int>(d_Jameson_gradient_variables.size()); vi++)
+                            switch (d_flow_model)
                             {
-                                // Get the key of the current variable.
-                                std::string variable_key = d_Jameson_gradient_variables[vi];
-                                
-                                // Ge the tolerance for the current variable.
-                                double tol = d_Jameson_gradient_tol[vi];
-                                
-                                boost::shared_ptr<pdat::CellData<double> > gradient;
-                                
-                                if (variable_key == "DENSITY")
+                                case SINGLE_SPECIES: case FOUR_EQN_SHYUE:
                                 {
                                     // Get the cell data of the density gradient.
-                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                        patch.getPatchData(d_Jameson_density_gradient, data_context));
-                                    
-                                    // Get the cell data of density.
-                                    boost::shared_ptr<pdat::CellData<double> > density(
+                                    boost::shared_ptr<pdat::CellData<double> > gradient(
                                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                            patch.getPatchData(d_density, data_context)));
-                                    
-                                    // Compute the gradient.
-                                    d_gradient_sensor_Jameson->computeGradient(patch, density, gradient);
-                                    
-                                    tagCellsWithGradientSensor(
-                                        patch,
-                                        tags,
-                                        gradient,
-                                        tol,
-                                        sensor_key);
-                                }
-                                else if (variable_key == "TOTAL_ENERGY")
-                                {
-                                    // Get the cell data of the total energy gradient.
-                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                            patch.getPatchData(d_Jameson_total_energy_gradient, data_context));
-                                    
-                                    // Get the cell data of total energy.
-                                    boost::shared_ptr<pdat::CellData<double> > total_energy(
-                                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                            patch.getPatchData(d_total_energy, data_context)));
-                                    
-                                    // Compute the gradient.
-                                    d_gradient_sensor_Jameson->computeGradient(patch, total_energy, gradient);
-                                    
-                                    tagCellsWithGradientSensor(
-                                        patch,
-                                        tags,
-                                        gradient,
-                                        tol,
-                                        sensor_key);
-                                }
-                                else if (variable_key == "PRESSURE")
-                                {
-                                    // Get the cell data of the pressure gradient.
-                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                            patch.getPatchData(d_Jameson_pressure_gradient, data_context));
-                                    
-                                    // Get the cell data of density, momentum and total energy.
-                                    boost::shared_ptr<pdat::CellData<double> > density(
-                                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                            patch.getPatchData(d_density, data_context)));
-                                    
-                                    boost::shared_ptr<pdat::CellData<double> > momentum(
-                                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                            patch.getPatchData(d_momentum, data_context)));
-                                    
-                                    boost::shared_ptr<pdat::CellData<double> > total_energy(
-                                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                            patch.getPatchData(d_total_energy, data_context)));
-                                    
-                                    // Allocate temporary cell data for pressure.
-                                    boost::shared_ptr<pdat::CellData<double> > pressure(
-                                        new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
-                                    
-                                    // Get the pointers to density, total energy and pressure.
-                                    double* rho   = density->getPointer(0);
-                                    double* E     = total_energy->getPointer(0);
-                                    double* p     = pressure->getPointer(0);
-                                    
-                                    // Compute the field of pressure.
-                                    if (d_dim == tbox::Dimension(1))
-                                    {
-                                        // NOT YET IMPLEMENTED
-                                    }
-                                    else if (d_dim == tbox::Dimension(2))
-                                    {
-                                        // Get the pointers to momentum components.
-                                        double* rho_u = momentum->getPointer(0);
-                                        double* rho_v = momentum->getPointer(1);
-                                        
-                                        for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
-                                        {
-                                            for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
-                                            {
-                                                // Compute index into linear data array.
-                                                const int idx = (i + d_num_ghosts[0]) +
-                                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
-                                                
-                                                std::vector<const double*> m_ptr;
-                                                m_ptr.push_back(&rho_u[idx]);
-                                                m_ptr.push_back(&rho_v[idx]);
-                                                
-                                                p[idx] = d_equation_of_state->getPressure(
-                                                    &rho[idx],
-                                                    m_ptr,
-                                                    &E[idx]);
-                                            }
-                                        }
-                                    }
-                                    else if (d_dim == tbox::Dimension(3))
-                                    {
-                                        // Get the pointers to momentum components.
-                                        double* rho_u = momentum->getPointer(0);
-                                        double* rho_v = momentum->getPointer(1);
-                                        double* rho_w = momentum->getPointer(2);
-                                        
-                                        for (int k = -d_num_ghosts[2]; k < interior_dims[2] + d_num_ghosts[2]; k++)
-                                        {
-                                            for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
-                                            {
-                                                for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
-                                                {
-                                                    // Compute index into linear data array.
-                                                    const int idx = (i + d_num_ghosts[0]) +
-                                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                                                    
-                                                    std::vector<const double*> m_ptr;
-                                                    m_ptr.push_back(&rho_u[idx]);
-                                                    m_ptr.push_back(&rho_v[idx]);
-                                                    m_ptr.push_back(&rho_w[idx]);
-                                                    
-                                                    p[idx] = d_equation_of_state->getPressure(
-                                                        &rho[idx],
-                                                        m_ptr,
-                                                        &E[idx]);
-                                                }
-                                            }
-                                        }
-                                    }
-                                    
-                                    // Compute the gradient.
-                                    d_gradient_sensor_Jameson->computeGradient(patch, pressure, gradient);
-                                    
-                                    tagCellsWithGradientSensor(
-                                        patch,
-                                        tags,
-                                        gradient,
-                                        tol,
-                                        sensor_key);
-                                }
-                                else if (variable_key == "ENSTROPHY")
-                                {
-                                    // Get the cell data of the enstrophy gradient.
-                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                            patch.getPatchData(d_Jameson_enstrophy_gradient, data_context));
-                                    
-                                    // Get the cell data of density, momentum and total energy.
-                                    boost::shared_ptr<pdat::CellData<double> > density(
-                                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                            patch.getPatchData(d_density, data_context)));
-                                    
-                                    boost::shared_ptr<pdat::CellData<double> > momentum(
-                                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                            patch.getPatchData(d_momentum, data_context)));
-                                    
-                                    // Allocate temporary cell data for velocity.
-                                    boost::shared_ptr<pdat::CellData<double> > velocity(
-                                        new pdat::CellData<double>(interior_box, d_dim.getValue(), d_num_ghosts));
-                                    
-                                    // Allocate temporary cell data for enstrophy.
-                                        boost::shared_ptr<pdat::CellData<double> > enstrophy(
-                                            new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
-                                    
-                                    // Get the pointer to density.
-                                    double* rho   = density->getPointer(0);
-                                    
-                                    // Get the pointer to enstrophy.
-                                    double* Omega = enstrophy->getPointer(0);
-                                    
-                                    // Compute the enstrophy and gradients.
-                                    if (d_dim == tbox::Dimension(1))
-                                    {
-                                        // NOT YET IMPLEMENTED
-                                    }
-                                    else if (d_dim == tbox::Dimension(2))
-                                    {
-                                        // Get the pointers to momentum components.
-                                        double* rho_u = momentum->getPointer(0);
-                                        double* rho_v = momentum->getPointer(1);
-                                        
-                                        // Get the pointers to velocity components.
-                                        double* u = velocity->getPointer(0);
-                                        double* v = velocity->getPointer(1);
-                                        
-                                        // Compute the velocity.
-                                        for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
-                                        {
-                                            for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
-                                            {
-                                                // Compute index into linear data array.
-                                                const int idx = (i + d_num_ghosts[0]) +
-                                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
-                                                
-                                                u[idx] = rho_u[idx]/rho[idx];
-                                                v[idx] = rho_v[idx]/rho[idx];
-                                            }
-                                        }
-                                        
-                                        // Compute the enstrophy.
-                                        for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
-                                        {
-                                            for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
-                                            {
-                                                // Compute indices.
-                                                const int idx = (i + d_num_ghosts[0]) +
-                                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
-                                                
-                                                const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
-                                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
-                                                
-                                                const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
-                                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
-                                                
-                                                const int idx_y_B = (i + d_num_ghosts[0]) +
-                                                    (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
-                                                
-                                                const int idx_y_T = (i + d_num_ghosts[0]) +
-                                                    (j + 1 + d_num_ghosts[1])*ghostcell_dims[0];
-                                                
-                                                double dudy, dvdx;
-                                                
-                                                if (i == -d_num_ghosts[0])
-                                                {
-                                                    dvdx = (v[idx_x_R] - v[idx])/(dx[0]);
-                                                }
-                                                else if (i == interior_dims[0] + d_num_ghosts[0] - 1)
-                                                {
-                                                    dvdx = (v[idx] - v[idx_x_L])/(dx[0]);
-                                                }
-                                                else
-                                                {
-                                                    dvdx = (v[idx_x_R] - v[idx_x_L])/(2*dx[0]);
-                                                }
-                                                
-                                                if (j == -d_num_ghosts[1])
-                                                {
-                                                    dudy = (u[idx_y_T] - u[idx])/(dx[1]);
-                                                }
-                                                else if (j == interior_dims[1] + d_num_ghosts[1] - 1)
-                                                {
-                                                    dudy = (u[idx] - u[idx_y_B])/(dx[1]);
-                                                }
-                                                else
-                                                {
-                                                    dudy = (u[idx_y_T] - u[idx_y_B])/(2*dx[1]);
-                                                }
-                                                
-                                                Omega[idx] = pow(dvdx - dudy, 2);
-                                            }
-                                        }
-                                        
-                                    }
-                                    else if (d_dim == tbox::Dimension(3))
-                                    {
-                                        // Get the pointers to momentum components.
-                                        double* rho_u = momentum->getPointer(0);
-                                        double* rho_v = momentum->getPointer(1);
-                                        double* rho_w = momentum->getPointer(2);
-                                        
-                                        // Get the pointers to velocity components.
-                                        double* u = velocity->getPointer(0);
-                                        double* v = velocity->getPointer(1);
-                                        double* w = velocity->getPointer(2);
-                                        
-                                        // Compute the velocity.
-                                        for (int k = -d_num_ghosts[2]; k < interior_dims[2] + d_num_ghosts[2]; k++)
-                                        {
-                                            for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
-                                            {
-                                                for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
-                                                {
-                                                    // Compute index into linear data array.
-                                                    const int idx = (i + d_num_ghosts[0]) +
-                                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                                                    
-                                                    u[idx] = rho_u[idx]/rho[idx];
-                                                    v[idx] = rho_v[idx]/rho[idx];
-                                                    w[idx] = rho_w[idx]/rho[idx];
-                                                }
-                                            }
-                                        }
-                                        
-                                        // Compute the enstrophy.
-                                        for (int k = -d_num_ghosts[2]; k < interior_dims[2] + d_num_ghosts[2]; k++)
-                                        {
-                                            for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
-                                            {
-                                                for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
-                                                {
-                                                    // Compute indices.
-                                                    const int idx = (i + d_num_ghosts[0]) +
-                                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                                                    
-                                                    const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
-                                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                                                    
-                                                    const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
-                                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                                                    
-                                                    const int idx_y_B = (i + d_num_ghosts[0]) +
-                                                        (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
-                                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                                                    
-                                                    const int idx_y_T = (i + d_num_ghosts[0]) +
-                                                        (j + 1 + d_num_ghosts[1])*ghostcell_dims[0] +
-                                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                                                    
-                                                    const int idx_z_B = (i + d_num_ghosts[0]) +
-                                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                                        (k - 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                                                    
-                                                    const int idx_z_F = (i + d_num_ghosts[0]) +
-                                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                                        (k + 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                                                    
-                                                    double dudy, dudz, dvdx, dvdz, dwdx, dwdy;
-                                                    
-                                                    if (i == -d_num_ghosts[0])
-                                                    {
-                                                        dvdx = (v[idx_x_R] - v[idx])/(dx[0]);
-                                                        dwdx = (w[idx_x_R] - w[idx])/(dx[0]);
-                                                    }
-                                                    else if (i == interior_dims[0] + d_num_ghosts[0] - 1)
-                                                    {
-                                                        dvdx = (v[idx] - v[idx_x_L])/(dx[0]);
-                                                        dwdx = (w[idx] - w[idx_x_L])/(dx[0]);
-                                                    }
-                                                    else
-                                                    {
-                                                        dvdx = (v[idx_x_R] - v[idx_x_L])/(2*dx[0]);
-                                                        dwdx = (w[idx_x_R] - w[idx_x_L])/(2*dx[0]);
-                                                    }
-                                                    
-                                                    if (j == -d_num_ghosts[1])
-                                                    {
-                                                        dudy = (u[idx_y_T] - u[idx])/(dx[1]);
-                                                        dwdy = (w[idx_y_T] - w[idx])/(dx[1]);
-                                                    }
-                                                    else if (j == interior_dims[1] + d_num_ghosts[1] - 1)
-                                                    {
-                                                        dudy = (u[idx] - u[idx_y_B])/(dx[1]);
-                                                        dwdy = (w[idx] - w[idx_y_B])/(dx[1]);
-                                                    }
-                                                    else
-                                                    {
-                                                        dudy = (u[idx_y_T] - u[idx_y_B])/(2*dx[1]);
-                                                        dwdy = (w[idx_y_T] - w[idx_y_B])/(2*dx[1]);
-                                                    }
-                                                    
-                                                    if (k == -d_num_ghosts[2])
-                                                    {
-                                                        dudz = (u[idx_z_F] - u[idx])/(dx[2]);
-                                                        dvdz = (v[idx_z_F] - v[idx])/(dx[2]);
-                                                    }
-                                                    else if (k == interior_dims[2] + d_num_ghosts[2] - 1)
-                                                    {
-                                                        dudz = (u[idx] - u[idx_z_B])/(dx[2]);
-                                                        dvdz = (v[idx] - v[idx_z_B])/(dx[2]);
-                                                    }
-                                                    else
-                                                    {
-                                                        dudz = (u[idx_z_F] - u[idx_z_B])/(2*dx[2]);
-                                                        dvdz = (v[idx_z_F] - v[idx_z_B])/(2*dx[2]);
-                                                    }
-                                                    
-                                                    Omega[idx] = pow(dwdy - dvdz, 2) +
-                                                        pow(dudz - dwdx, 2) +
-                                                        pow(dvdx - dudy, 2);
-                                                }
-                                            }
-                                        }
-                                    }
-                                    
-                                    // Compute the gradient.
-                                    d_gradient_sensor_Jameson->computeGradient(patch, enstrophy, gradient);
-                                    
-                                    tagCellsWithGradientSensor(
-                                        patch,
-                                        tags,
-                                        gradient,
-                                        tol,
-                                        sensor_key);
-                                }
-                                else
-                                {
-                                    TBOX_ERROR(d_object_name
-                                        << ": "
-                                        << "Unknown/unsupported variable: "
-                                        << variable_key
-                                        << "\nin input."
-                                        << std::endl);
-                                }
-                            } // Loop over variables.
-                            
-                            break;
-                        }
-                        case FOUR_EQN_SHYUE:
-                        {
-                            for (int vi = 0; vi < static_cast<int>(d_Jameson_gradient_variables.size()); vi++)
-                            {
-                                // Get the key of the current variable.
-                                std::string variable_key = d_Jameson_gradient_variables[vi];
-                                
-                                // Ge the tolerance for the current variable.
-                                double tol = d_Jameson_gradient_tol[vi];
-                                
-                                boost::shared_ptr<pdat::CellData<double> > gradient;
-                                
-                                if (variable_key == "DENSITY")
-                                {
-                                    // Get the cell data of the density gradient.
-                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                        patch.getPatchData(d_Jameson_density_gradient, data_context));
+                                            patch.getPatchData(d_Jameson_density_gradient, data_context)));
                                     
                                     // Get the cell data of density.
                                     boost::shared_ptr<pdat::CellData<double> > density(
@@ -1337,429 +924,14 @@ GradientTagger::tagCells(
                                         tol,
                                         sensor_key);
                                     
+                                    break;
                                 }
-                                else if (variable_key == "TOTAL_ENERGY")
-                                {
-                                    // Get the cell data of the total energy gradient.
-                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                        patch.getPatchData(d_Jameson_total_energy_gradient, data_context));
-                                    
-                                    // Get the cell data of total energy.
-                                    boost::shared_ptr<pdat::CellData<double> > total_energy(
-                                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                            patch.getPatchData(d_total_energy, data_context)));
-                                    
-                                    // Compute the gradient.
-                                    d_gradient_sensor_Jameson->computeGradient(patch, total_energy, gradient);
-                                    
-                                    tagCellsWithGradientSensor(
-                                        patch,
-                                        tags,
-                                        gradient,
-                                        tol,
-                                        sensor_key);
-                                }
-                                else if (variable_key == "PRESSURE")
-                                {
-                                    // Get the cell data of the pressure gradient.
-                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                        patch.getPatchData(d_Jameson_pressure_gradient, data_context));
-                                    
-                                    // Get the cell data of density, momentum and total energy.
-                                    boost::shared_ptr<pdat::CellData<double> > density(
-                                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                            patch.getPatchData(d_density, data_context)));
-                                    
-                                    boost::shared_ptr<pdat::CellData<double> > momentum(
-                                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                            patch.getPatchData(d_momentum, data_context)));
-                                    
-                                    boost::shared_ptr<pdat::CellData<double> > total_energy(
-                                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                            patch.getPatchData(d_total_energy, data_context)));
-                                    
-                                    // Allocate temporary cell data for pressure.
-                                    boost::shared_ptr<pdat::CellData<double> > pressure(
-                                        new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
-                                    
-                                    // Get the pointers to density, total energy and pressure.
-                                    double* rho   = density->getPointer(0);
-                                    double* E     = total_energy->getPointer(0);
-                                    double* p     = pressure->getPointer(0);
-                                    
-                                    // Compute the field of pressure.
-                                    if (d_dim == tbox::Dimension(1))
-                                    {
-                                        // NOT YET IMPLEMENTED
-                                    }
-                                    else if (d_dim == tbox::Dimension(2))
-                                    {
-                                        // Get the pointers to momentum components.
-                                        double* rho_u = momentum->getPointer(0);
-                                        double* rho_v = momentum->getPointer(1);
-                                        
-                                        for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
-                                        {
-                                            for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
-                                            {
-                                                // Compute index into linear data array.
-                                                const int idx = (i + d_num_ghosts[0]) +
-                                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
-                                                
-                                                std::vector<const double*> m_ptr;
-                                                m_ptr.push_back(&rho_u[idx]);
-                                                m_ptr.push_back(&rho_v[idx]);
-                                                
-                                                p[idx] = d_equation_of_state->getPressure(
-                                                    &rho[idx],
-                                                    m_ptr,
-                                                    &E[idx]);
-                                            }
-                                        }
-                                    }
-                                    else if (d_dim == tbox::Dimension(3))
-                                    {
-                                        // Get the pointers to momentum components.
-                                        double* rho_u = momentum->getPointer(0);
-                                        double* rho_v = momentum->getPointer(1);
-                                        double* rho_w = momentum->getPointer(2);
-                                        
-                                        for (int k = -d_num_ghosts[2]; k < interior_dims[2] + d_num_ghosts[2]; k++)
-                                        {
-                                            for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
-                                            {
-                                                for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
-                                                {
-                                                    // Compute index into linear data array.
-                                                    const int idx = (i + d_num_ghosts[0]) +
-                                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                                                    
-                                                    std::vector<const double*> m_ptr;
-                                                    m_ptr.push_back(&rho_u[idx]);
-                                                    m_ptr.push_back(&rho_v[idx]);
-                                                    m_ptr.push_back(&rho_w[idx]);
-                                                    
-                                                    p[idx] = d_equation_of_state->getPressure(
-                                                        &rho[idx],
-                                                        m_ptr,
-                                                        &E[idx]);
-                                                }
-                                            }
-                                        }
-                                    }
-                                    
-                                    // Compute the gradient.
-                                    d_gradient_sensor_Jameson->computeGradient(patch, pressure, gradient);
-                                    
-                                    tagCellsWithGradientSensor(
-                                        patch,
-                                        tags,
-                                        gradient,
-                                        tol,
-                                        sensor_key);
-                                }
-                                else if (variable_key == "ENSTROPHY")
-                                {
-                                    // Get the cell data of the enstrophy gradient.
-                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                        patch.getPatchData(d_Jameson_enstrophy_gradient, data_context));
-                                    
-                                    // Get the cell data of density, momentum and total energy.
-                                    boost::shared_ptr<pdat::CellData<double> > density(
-                                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                            patch.getPatchData(d_density, data_context)));
-                                    
-                                    boost::shared_ptr<pdat::CellData<double> > momentum(
-                                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                            patch.getPatchData(d_momentum, data_context)));
-                                    
-                                    // Allocate temporary cell data for velocity.
-                                    boost::shared_ptr<pdat::CellData<double> > velocity(
-                                        new pdat::CellData<double>(interior_box, d_dim.getValue(), d_num_ghosts));
-                                    
-                                    // Allocate temporary cell data for enstrophy.
-                                        boost::shared_ptr<pdat::CellData<double> > enstrophy(
-                                            new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
-                                    
-                                    // Get the pointer to density.
-                                    double* rho   = density->getPointer(0);
-                                    
-                                    // Get the pointer to enstrophy.
-                                    double* Omega = enstrophy->getPointer(0);
-                                    
-                                    // Compute the enstrophy and gradients.
-                                    if (d_dim == tbox::Dimension(1))
-                                    {
-                                        // NOT YET IMPLEMENTED
-                                    }
-                                    else if (d_dim == tbox::Dimension(2))
-                                    {
-                                        // Get the pointers to momentum components.
-                                        double* rho_u = momentum->getPointer(0);
-                                        double* rho_v = momentum->getPointer(1);
-                                        
-                                        // Get the pointers to velocity components.
-                                        double* u = velocity->getPointer(0);
-                                        double* v = velocity->getPointer(1);
-                                        
-                                        // Compute the velocity.
-                                        for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
-                                        {
-                                            for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
-                                            {
-                                                // Compute index into linear data array.
-                                                const int idx = (i + d_num_ghosts[0]) +
-                                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
-                                                
-                                                u[idx] = rho_u[idx]/rho[idx];
-                                                v[idx] = rho_v[idx]/rho[idx];
-                                            }
-                                        }
-                                        
-                                        // Compute the enstrophy.
-                                        for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
-                                        {
-                                            for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
-                                            {
-                                                // Compute indices.
-                                                const int idx = (i + d_num_ghosts[0]) +
-                                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
-                                                
-                                                const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
-                                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
-                                                
-                                                const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
-                                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
-                                                
-                                                const int idx_y_B = (i + d_num_ghosts[0]) +
-                                                    (j - 1 + d_num_ghosts[1])*ghostcell_dims[0];
-                                                
-                                                const int idx_y_T = (i + d_num_ghosts[0]) +
-                                                    (j + 1 + d_num_ghosts[1])*ghostcell_dims[0];
-                                                
-                                                double dudy, dvdx;
-                                                
-                                                if (i == -d_num_ghosts[0])
-                                                {
-                                                    dvdx = (v[idx_x_R] - v[idx])/(dx[0]);
-                                                }
-                                                else if (i == interior_dims[0] + d_num_ghosts[0] - 1)
-                                                {
-                                                    dvdx = (v[idx] - v[idx_x_L])/(dx[0]);
-                                                }
-                                                else
-                                                {
-                                                    dvdx = (v[idx_x_R] - v[idx_x_L])/(2*dx[0]);
-                                                }
-                                                
-                                                if (j == -d_num_ghosts[1])
-                                                {
-                                                    dudy = (u[idx_y_T] - u[idx])/(dx[1]);
-                                                }
-                                                else if (j == interior_dims[1] + d_num_ghosts[1] - 1)
-                                                {
-                                                    dudy = (u[idx] - u[idx_y_B])/(dx[1]);
-                                                }
-                                                else
-                                                {
-                                                    dudy = (u[idx_y_T] - u[idx_y_B])/(2*dx[1]);
-                                                }
-                                                
-                                                Omega[idx] = pow(dvdx - dudy, 2);
-                                            }
-                                        }
-                                        
-                                    }
-                                    else if (d_dim == tbox::Dimension(3))
-                                    {
-                                        // Get the pointers to momentum components.
-                                        double* rho_u = momentum->getPointer(0);
-                                        double* rho_v = momentum->getPointer(1);
-                                        double* rho_w = momentum->getPointer(2);
-                                        
-                                        // Get the pointers to velocity components.
-                                        double* u = velocity->getPointer(0);
-                                        double* v = velocity->getPointer(1);
-                                        double* w = velocity->getPointer(2);
-                                        
-                                        // Compute the velocity.
-                                        for (int k = -d_num_ghosts[2]; k < interior_dims[2] + d_num_ghosts[2]; k++)
-                                        {
-                                            for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
-                                            {
-                                                for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
-                                                {
-                                                    // Compute index into linear data array.
-                                                    const int idx = (i + d_num_ghosts[0]) +
-                                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                                                    
-                                                    u[idx] = rho_u[idx]/rho[idx];
-                                                    v[idx] = rho_v[idx]/rho[idx];
-                                                    w[idx] = rho_w[idx]/rho[idx];
-                                                }
-                                            }
-                                        }
-                                        
-                                        // Compute the enstrophy.
-                                        for (int k = -d_num_ghosts[2]; k < interior_dims[2] + d_num_ghosts[2]; k++)
-                                        {
-                                            for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
-                                            {
-                                                for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
-                                                {
-                                                    // Compute indices.
-                                                    const int idx = (i + d_num_ghosts[0]) +
-                                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                                                    
-                                                    const int idx_x_L = (i - 1 + d_num_ghosts[0]) +
-                                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                                                    
-                                                    const int idx_x_R = (i + 1 + d_num_ghosts[0]) +
-                                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                                                    
-                                                    const int idx_y_B = (i + d_num_ghosts[0]) +
-                                                        (j - 1 + d_num_ghosts[1])*ghostcell_dims[0] +
-                                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                                                    
-                                                    const int idx_y_T = (i + d_num_ghosts[0]) +
-                                                        (j + 1 + d_num_ghosts[1])*ghostcell_dims[0] +
-                                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                                                    
-                                                    const int idx_z_B = (i + d_num_ghosts[0]) +
-                                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                                        (k - 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                                                    
-                                                    const int idx_z_F = (i + d_num_ghosts[0]) +
-                                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
-                                                        (k + 1 + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                                                    
-                                                    double dudy, dudz, dvdx, dvdz, dwdx, dwdy;
-                                                    
-                                                    if (i == -d_num_ghosts[0])
-                                                    {
-                                                        dvdx = (v[idx_x_R] - v[idx])/(dx[0]);
-                                                        dwdx = (w[idx_x_R] - w[idx])/(dx[0]);
-                                                    }
-                                                    else if (i == interior_dims[0] + d_num_ghosts[0] - 1)
-                                                    {
-                                                        dvdx = (v[idx] - v[idx_x_L])/(dx[0]);
-                                                        dwdx = (w[idx] - w[idx_x_L])/(dx[0]);
-                                                    }
-                                                    else
-                                                    {
-                                                        dvdx = (v[idx_x_R] - v[idx_x_L])/(2*dx[0]);
-                                                        dwdx = (w[idx_x_R] - w[idx_x_L])/(2*dx[0]);
-                                                    }
-                                                    
-                                                    if (j == -d_num_ghosts[1])
-                                                    {
-                                                        dudy = (u[idx_y_T] - u[idx])/(dx[1]);
-                                                        dwdy = (w[idx_y_T] - w[idx])/(dx[1]);
-                                                    }
-                                                    else if (j == interior_dims[1] + d_num_ghosts[1] - 1)
-                                                    {
-                                                        dudy = (u[idx] - u[idx_y_B])/(dx[1]);
-                                                        dwdy = (w[idx] - w[idx_y_B])/(dx[1]);
-                                                    }
-                                                    else
-                                                    {
-                                                        dudy = (u[idx_y_T] - u[idx_y_B])/(2*dx[1]);
-                                                        dwdy = (w[idx_y_T] - w[idx_y_B])/(2*dx[1]);
-                                                    }
-                                                    
-                                                    if (k == -d_num_ghosts[2])
-                                                    {
-                                                        dudz = (u[idx_z_F] - u[idx])/(dx[2]);
-                                                        dvdz = (v[idx_z_F] - v[idx])/(dx[2]);
-                                                    }
-                                                    else if (k == interior_dims[2] + d_num_ghosts[2] - 1)
-                                                    {
-                                                        dudz = (u[idx] - u[idx_z_B])/(dx[2]);
-                                                        dvdz = (v[idx] - v[idx_z_B])/(dx[2]);
-                                                    }
-                                                    else
-                                                    {
-                                                        dudz = (u[idx_z_F] - u[idx_z_B])/(2*dx[2]);
-                                                        dvdz = (v[idx_z_F] - v[idx_z_B])/(2*dx[2]);
-                                                    }
-                                                    
-                                                    Omega[idx] = pow(dwdy - dvdz, 2) +
-                                                        pow(dudz - dwdx, 2) +
-                                                        pow(dvdx - dudy, 2);
-                                                }
-                                            }
-                                        }
-                                    }
-                                    
-                                    // Compute the gradient.
-                                    d_gradient_sensor_Jameson->computeGradient(patch, enstrophy, gradient);
-                                    
-                                    tagCellsWithGradientSensor(
-                                        patch,
-                                        tags,
-                                        gradient,
-                                        tol,
-                                        sensor_key);
-                                }
-                                else if (variable_key == "MASS_FRACTION")
-                                {
-                                    for (int di = 0; di < d_mass_fraction->getDepth(); di++)
-                                    {
-                                        // Get the cell data of the mass fraction gradient.
-                                        gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                            patch.getPatchData(d_Jameson_mass_fraction_gradient[di], data_context));
-                                        
-                                        // Get the cell data of mass fraction.
-                                        boost::shared_ptr<pdat::CellData<double> > mass_fraction(
-                                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                                patch.getPatchData(d_mass_fraction, data_context)));
-                                        
-                                        // Compute the gradient.
-                                        d_gradient_sensor_Jameson->computeGradient(patch, mass_fraction, gradient, di);
-                                        
-                                        tagCellsWithGradientSensor(
-                                            patch,
-                                            tags,
-                                            gradient,
-                                            tol,
-                                            sensor_key);
-                                    }
-                                }
-                                else
-                                {
-                                    TBOX_ERROR(d_object_name
-                                        << ": "
-                                        << "Unknown/unsupported variable: "
-                                        << variable_key
-                                        << "\nin input."
-                                        << std::endl);
-                                }
-                            } // Loop over variables.
-                            
-                            break;
-                        }
-                        case FIVE_EQN_ALLAIRE:
-                        {
-                            for (int vi = 0; vi < static_cast<int>(d_Jameson_gradient_variables.size()); vi++)
-                            {
-                                // Get the key of the current variable.
-                                std::string variable_key = d_Jameson_gradient_variables[vi];
-                                
-                                // Ge the tolerance for the current variable.
-                                double tol = d_Jameson_gradient_tol[vi];
-                                
-                                boost::shared_ptr<pdat::CellData<double> > gradient;
-                                
-                                if (variable_key == "DENSITY")
+                                case FIVE_EQN_ALLAIRE:
                                 {
                                     // Get the cell data of the density gradient.
-                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                        patch.getPatchData(d_Jameson_density_gradient, data_context));
+                                    boost::shared_ptr<pdat::CellData<double> > gradient(
+                                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                            patch.getPatchData(d_Jameson_density_gradient, data_context)));
                                     
                                     // Get the cell data of partial density.
                                     boost::shared_ptr<pdat::CellData<double> > partial_density(
@@ -1841,12 +1013,30 @@ GradientTagger::tagCells(
                                         gradient,
                                         tol,
                                         sensor_key);
+                                    
+                                    break;
                                 }
-                                else if (variable_key == "TOTAL_ENERGY")
+                                default:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": "
+                                        << "d_flow_model '"
+                                        << d_flow_model
+                                        << "' not yet implemented."
+                                        << std::endl);
+                                }
+                            }
+                        }
+                        else if (variable_key == "TOTAL_ENERGY")
+                        {
+                            switch (d_flow_model)
+                            {
+                                case SINGLE_SPECIES: case FOUR_EQN_SHYUE: case FIVE_EQN_ALLAIRE:
                                 {
                                     // Get the cell data of the total energy gradient.
-                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                        patch.getPatchData(d_Jameson_total_energy_gradient, data_context));
+                                    boost::shared_ptr<pdat::CellData<double> > gradient(
+                                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                            patch.getPatchData(d_Jameson_total_energy_gradient, data_context)));
                                     
                                     // Get the cell data of total energy.
                                     boost::shared_ptr<pdat::CellData<double> > total_energy(
@@ -1862,12 +1052,30 @@ GradientTagger::tagCells(
                                         gradient,
                                         tol,
                                         sensor_key);
+                                    
+                                    break;
                                 }
-                                else if (variable_key == "PRESSURE")
+                                default:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": "
+                                        << "d_flow_model '"
+                                        << d_flow_model
+                                        << "' not yet implemented."
+                                        << std::endl);
+                                }
+                            }
+                        }
+                        else if (variable_key == "PRESSURE")
+                        {
+                            switch (d_flow_model)
+                            {
+                                case SINGLE_SPECIES: case FOUR_EQN_SHYUE: case FIVE_EQN_ALLAIRE:
                                 {
                                     // Get the cell data of the pressure gradient.
-                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                        patch.getPatchData(d_Jameson_pressure_gradient, data_context));
+                                    boost::shared_ptr<pdat::CellData<double> > gradient(
+                                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                            patch.getPatchData(d_Jameson_pressure_gradient, data_context)));
                                     
                                     // Get the cell data of density, momentum and total energy.
                                     boost::shared_ptr<pdat::CellData<double> > density(
@@ -1962,12 +1170,30 @@ GradientTagger::tagCells(
                                         gradient,
                                         tol,
                                         sensor_key);
+                                    
+                                    break;
                                 }
-                                else if (variable_key == "ENSTROPHY")
+                                default:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": "
+                                        << "d_flow_model '"
+                                        << d_flow_model
+                                        << "' not yet implemented."
+                                        << std::endl);
+                                }
+                            }
+                        }
+                        else if (variable_key == "ENSTROPHY")
+                        {
+                            switch (d_flow_model)
+                            {
+                                case SINGLE_SPECIES: case FOUR_EQN_SHYUE: case FIVE_EQN_ALLAIRE:
                                 {
                                     // Get the cell data of the enstrophy gradient.
-                                    gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                        patch.getPatchData(d_Jameson_enstrophy_gradient, data_context));
+                                    boost::shared_ptr<pdat::CellData<double> > gradient(
+                                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                            patch.getPatchData(d_Jameson_enstrophy_gradient, data_context)));
                                     
                                     // Get the cell data of density, momentum and total energy.
                                     boost::shared_ptr<pdat::CellData<double> > density(
@@ -2209,8 +1435,64 @@ GradientTagger::tagCells(
                                         gradient,
                                         tol,
                                         sensor_key);
+                                    
+                                    break;
                                 }
-                                else if (variable_key == "MASS_FRACTION")
+                                default:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": "
+                                        << "d_flow_model '"
+                                        << d_flow_model
+                                        << "' not yet implemented."
+                                        << std::endl);
+                                }
+                            }
+                        }
+                        else if (variable_key == "MASS_FRACTION")
+                        {
+                            switch (d_flow_model)
+                            {
+                                case SINGLE_SPECIES:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": '"
+                                        << variable_key
+                                        << "' not supported for '"
+                                        << d_flow_model
+                                        << "' flow model."
+                                        << std::endl);
+                                    
+                                    break;
+                                }
+                                case FOUR_EQN_SHYUE:
+                                {
+                                    for (int di = 0; di < d_mass_fraction->getDepth(); di++)
+                                    {
+                                        // Get the cell data of the mass fraction gradient.
+                                        boost::shared_ptr<pdat::CellData<double> > gradient(
+                                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                                patch.getPatchData(d_Jameson_mass_fraction_gradient[di], data_context)));
+                                        
+                                        // Get the cell data of mass fraction.
+                                        boost::shared_ptr<pdat::CellData<double> > mass_fraction(
+                                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                                patch.getPatchData(d_mass_fraction, data_context)));
+                                        
+                                        // Compute the gradient.
+                                        d_gradient_sensor_Jameson->computeGradient(patch, mass_fraction, gradient, di);
+                                        
+                                        tagCellsWithGradientSensor(
+                                            patch,
+                                            tags,
+                                            gradient,
+                                            tol,
+                                            sensor_key);
+                                    }
+                                    
+                                    break;
+                                }
+                                case FIVE_EQN_ALLAIRE:
                                 {
                                     // Get the cell data of partial density.
                                     boost::shared_ptr<pdat::CellData<double> > partial_density(
@@ -2300,8 +1582,9 @@ GradientTagger::tagCells(
                                     for (int di = 0; di < d_num_species; di++)
                                     {
                                         // Get the cell data of the mass fraction gradient.
-                                        gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                            patch.getPatchData(d_Jameson_mass_fraction_gradient[di], data_context));
+                                        boost::shared_ptr<pdat::CellData<double> > gradient(
+                                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                                patch.getPatchData(d_Jameson_mass_fraction_gradient[di], data_context)));
                                         
                                         // Compute the gradient.
                                         d_gradient_sensor_Jameson->computeGradient(patch, mass_fraction, gradient, di);
@@ -2313,19 +1596,49 @@ GradientTagger::tagCells(
                                             tol,
                                             sensor_key);
                                     }
+                                    
+                                    break;
                                 }
-                                else if (variable_key == "VOLUME_FRACTION")
+                                default:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": "
+                                        << "d_flow_model '"
+                                        << d_flow_model
+                                        << "' not yet implemented."
+                                        << std::endl);
+                                }
+                            }
+                        }
+                        else if (variable_key == "VOLUME_FRACTION")
+                        {
+                            switch (d_flow_model)
+                            {
+                                case SINGLE_SPECIES: case FOUR_EQN_SHYUE:
+                                {
+                                    TBOX_ERROR(d_object_name
+                                        << ": '"
+                                        << variable_key
+                                        << "' not supported for '"
+                                        << d_flow_model
+                                        << "' flow model."
+                                        << std::endl);
+                                    
+                                    break;
+                                }
+                                case FIVE_EQN_ALLAIRE:
                                 {
                                     for (int di = 0; di < d_volume_fraction->getDepth(); di++)
                                     {
                                         // Get the cell data of the volume fraction gradient.
-                                        gradient = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                            patch.getPatchData(d_Jameson_volume_fraction_gradient[di], data_context));
+                                        boost::shared_ptr<pdat::CellData<double> > gradient(
+                                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                                patch.getPatchData(d_Jameson_volume_fraction_gradient[di], data_context)));
                                         
                                         // Get the cell data of volume fraction.
                                         boost::shared_ptr<pdat::CellData<double> > volume_fraction(
                                             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                                patch.getPatchData(d_mass_fraction, data_context)));
+                                                patch.getPatchData(d_volume_fraction, data_context)));
                                         
                                         // Compute the gradient.
                                         d_gradient_sensor_Jameson->computeGradient(patch, volume_fraction, gradient, di);
@@ -2337,32 +1650,32 @@ GradientTagger::tagCells(
                                             tol,
                                             sensor_key);
                                     }
+                                    
+                                    break;
                                 }
-                                else
+                                default:
                                 {
                                     TBOX_ERROR(d_object_name
                                         << ": "
-                                        << "Unknown/unsupported variable: "
-                                        << variable_key
-                                        << "\nin input."
+                                        << "d_flow_model '"
+                                        << d_flow_model
+                                        << "' not yet implemented."
                                         << std::endl);
                                 }
-                            } // Loop over variables.
-                            
-                            break;
+                            }
                         }
-                        default:
+                        else
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
-                                << "d_flow_model '"
-                                << d_flow_model
-                                << "' not yet implemented."
+                                << "Unknown/unsupported variable: "
+                                << variable_key
+                                << "\nin input."
                                 << std::endl);
                         }
-                    }
+                    } // Looop over variables chosen.
                 }
-            } // Loop over sensors chosen.
+            } // Loop over gradient sensors chosen.
         }
         else
         {
@@ -2422,7 +1735,17 @@ GradientTagger::tagCellsWithGradientSensor(
     {
         if (d_dim == tbox::Dimension(1))
         {
-            // NOT YET IMPLEMENTED
+            for (int i = 0; i < interior_dims[0]; i++)
+            {
+                // Compute indices.
+                const int idx = i + d_num_ghosts[0];
+                const int idx_nghost = i;
+                
+                if (psi[idx] > tol)
+                {
+                    tag_ptr[idx_nghost] |= 1;
+                }
+            }
         }
         else if (d_dim == tbox::Dimension(2))
         {

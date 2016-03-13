@@ -1568,6 +1568,7 @@ MultiresolutionTagger::computeMultiresolutionSensorValues(
             const hier::Box ghost_box = dummy_box;
             const hier::IntVector ghostcell_dims = ghost_box.numberCells();
             
+            // Loop over multiresolution sensors chosen.
             for (int si = 0;
                      si < static_cast<int>(d_multiresolution_sensors.size());
                      si++)
@@ -2514,9 +2515,9 @@ MultiresolutionTagger::computeMultiresolutionSensorValues(
                                 << "\nin input."
                                 << std::endl);
                         }
-                    } // Loop over variables.
+                    } // Looop over variables chosen.
                 }
-            }
+            } // Loop over multiresolution sensors chosen.
         }
         else
         {
@@ -3723,7 +3724,73 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
         
         if (d_dim == tbox::Dimension(1))
         {
-            // NOT YET IMPLEMENTED
+            for (int i = 0; i < interior_dims[0]; i++)
+            {
+                // Compute indices.
+                const int idx = i + d_num_ghosts[0];
+                const int idx_nghost = i;
+                
+                int tag_cell            = 1;
+                int tag_cell_global_tol = 0;
+                int tag_cell_local_tol  = 0;
+                int tag_cell_alpha_tol  = 0;
+                
+                if (d_Harten_wavelet_uses_global_tol)
+                {
+                    for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                    {
+                        if (w[li][idx]/(wavelet_coeffs_maxs[li] + EPSILON) > global_tol)
+                        {
+                            tag_cell_global_tol = 1;
+                            
+                            break;
+                        }
+                    }
+                    
+                    /*
+                    if (w[0][idx]/(wavelet_coeffs_maxs[0] + EPSILON) > global_tol)
+                    {
+                        tag_cell_global_tol = 1;
+                    }
+                    */
+                    
+                    tag_cell &= tag_cell_global_tol;
+                }
+                
+                if (d_Harten_wavelet_uses_local_tol)
+                {
+                    for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                    {
+                        if (w[li][idx]/(u_mean[li][idx] + EPSILON) > local_tol)
+                        {
+                            tag_cell_local_tol = 1;
+                            
+                            break;
+                        }
+                    }
+                    
+                    /*
+                    if (w[0][idx]/(u_mean[0][idx] + EPSILON) > local_tol)
+                    {
+                        tag_cell_local_tol = 1;
+                    }
+                    */
+                    
+                    tag_cell &= tag_cell_local_tol;
+                }
+                
+                if (d_Harten_wavelet_uses_alpha_tol)
+                {
+                    if (alpha[idx] < alpha_tol)
+                    {
+                        tag_cell_alpha_tol = 1;
+                    }
+                    
+                    tag_cell &= tag_cell_alpha_tol;
+                }
+                
+                tag_ptr[idx_nghost] |= tag_cell;
+            }
         }
         else if (d_dim == tbox::Dimension(2))
         {

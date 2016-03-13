@@ -52,7 +52,33 @@ GradientSensorJameson::computeGradient(
     
     if (d_dim == tbox::Dimension(1))
     {
-        // NOT YET IMPLEMENTED
+        // Allocate memory.
+        boost::shared_ptr<pdat::CellData<double> > gradient_x(
+            new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+        boost::shared_ptr<pdat::CellData<double> > local_mean_value_x(
+            new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+        
+        double* psi_x = gradient_x->getPointer(0);
+        double* mean_x = local_mean_value_x->getPointer(0);
+        
+        for (int i = 0; i < interior_dims[0]; i++)
+        {
+            // Compute indices.
+            const int idx = i + d_num_ghosts[0];
+            const int idx_x_L = i - 1 + d_num_ghosts[0];
+            const int idx_x_R = i + 1 + d_num_ghosts[0];
+            
+            psi_x[idx] = f[idx_x_R] - 2*f[idx] + f[idx_x_L];
+            mean_x[idx] = f[idx_x_R] + 2*f[idx] + f[idx_x_L];
+        }
+        
+        for (int i = 0; i < interior_dims[0]; i++)
+        {
+            // Compute indices.
+            const int idx = i + d_num_ghosts[0];
+            
+            psi[idx] = fabs(psi_x[idx])/(mean_x[idx] + EPSILON);
+        }
     }
     else if (d_dim == tbox::Dimension(2))
     {
@@ -70,7 +96,6 @@ GradientSensorJameson::computeGradient(
         double* psi_y = gradient_y->getPointer(0);
         double* mean_x = local_mean_value_x->getPointer(0);
         double* mean_y = local_mean_value_y->getPointer(0);
-        
         
         for (int j = 0; j < interior_dims[1]; j++)
         {

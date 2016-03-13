@@ -163,7 +163,242 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
     
     if (d_dim == tbox::Dimension(1))
     {
-        // NOT YET IMPLEMENTED
+        // Allocate scaling function coefficients.
+        std::vector<boost::shared_ptr<pdat::CellData<double> > > scaling_coeffs_x;
+        for (int li = 0; li < d_num_level; li++)
+        {
+            scaling_coeffs_x.push_back(boost::make_shared<pdat::CellData<double> >(
+                interior_box, 1, d_num_ghosts));
+        }
+        
+        // Get the pointers to the scaling function coefficients and initialize them with zero values.
+        std::vector<double*> f_x;
+        for (int li = 0; li < d_num_level; li++)
+        {
+            f_x.push_back(scaling_coeffs_x[li]->getPointer(0));
+            scaling_coeffs_x[li]->fillAll(0.0);
+        }
+        
+        /*
+         * Compute scaling and wavelet coefficients at first level.
+         */
+        
+        switch (d_k)
+        {
+            case 2:
+            {
+                int start_index_i, end_index_i;
+                
+                /*
+                 * Compute scaling and wavelet coefficients in the x-direction.
+                 */
+                
+                // Get the pointer to the smoothed cell data in the x-direction.
+                if (smooth_cell_data)
+                {
+                    f = smoothed_cell_data->getPointer(0);
+                }
+                else
+                {
+                    f = cell_data->getPointer(depth);
+                }
+                
+                // Compute the starting and ending indices.
+                start_index_i = -d_num_ghosts[0] + 1;
+                end_index_i   = interior_dims[0] + d_num_ghosts[0] - 1;
+                
+                for (int i = start_index_i; i < end_index_i; i++)
+                {
+                    // Compute indices.
+                    const int idx     = i + d_num_ghosts[0];
+                    const int idx_x_L = i - 1 + d_num_ghosts[0];
+                    const int idx_x_R = i + 1 + d_num_ghosts[0];
+                    
+                    f_x[0][idx] = 0.5*(f[idx_x_L] + f[idx_x_R]);
+                    w[0][idx]   = fabs(-0.5*(f[idx_x_L] - 2*f[idx] + f[idx_x_R]));
+                }
+                
+                if (compute_variable_local_means)
+                {
+                    for (int i = 0; i < interior_dims[0]; i++)
+                    {
+                        // Compute indices.
+                        const int idx     = i + d_num_ghosts[0];
+                        const int idx_x_L = i - 1 + d_num_ghosts[0];
+                        const int idx_x_R = i + 1 + d_num_ghosts[0];
+                        
+                        f_mean[0][idx] = 0.5*(f[idx_x_L] + 2*f[idx] + f[idx_x_R]);
+                    }
+                }
+                
+                break;
+            }
+            case 4:
+            {
+                int start_index_i, end_index_i;
+                
+                /*
+                 * Compute scaling and wavelet coefficients in the x-direction.
+                 */
+                
+                // Get the pointer to the smoothed cell data in the x-direction.
+                if (smooth_cell_data)
+                {
+                    f = smoothed_cell_data->getPointer(0);
+                }
+                else
+                {
+                    f = cell_data->getPointer(depth);
+                }
+                
+                // Compute the starting and ending indices.
+                start_index_i = -d_num_ghosts[0] + 2;
+                end_index_i   = interior_dims[0] + d_num_ghosts[0] - 2;
+                
+                for (int i = start_index_i; i < end_index_i; i++)
+                {
+                    // Compute indices.
+                    const int idx      = i + d_num_ghosts[0];
+                    const int idx_x_LL = i - 2 + d_num_ghosts[0];
+                    const int idx_x_L  = i - 1 + d_num_ghosts[0];
+                    const int idx_x_R  = i + 1 + d_num_ghosts[0];
+                    const int idx_x_RR = i + 2 + d_num_ghosts[0];
+                    
+                    f_x[0][idx] = 1.0/6.0*(-f[idx_x_LL] + 4*f[idx_x_L] + 4*f[idx_x_R] - f[idx_x_RR]);
+                    w[0][idx]   = fabs(1.0/6.0*(f[idx_x_LL] - 4*f[idx_x_L] + 6*f[idx] - 4*f[idx_x_R] + f[idx_x_RR]));
+                }
+                
+                if (compute_variable_local_means)
+                {
+                    for (int i = 0; i < interior_dims[0]; i++)
+                    {
+                        // Compute indices.
+                        const int idx      = i + d_num_ghosts[0];
+                        const int idx_x_LL = i - 2 + d_num_ghosts[0];
+                        const int idx_x_L  = i - 1 + d_num_ghosts[0];
+                        const int idx_x_R  = i + 1 + d_num_ghosts[0];
+                        const int idx_x_RR = i + 2 + d_num_ghosts[0];
+                        
+                        f_mean[0][idx] = 1.0/6.0*(f[idx_x_LL] + 4*f[idx_x_L] + 6*f[idx] + 4*f[idx_x_R] + f[idx_x_RR]);
+                    }
+                }
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "number of vanishing moments = "
+                    << d_k
+                    << " not supported."
+                    << std::endl);
+            }
+        }
+        
+        /*
+         * Compute scaling and wavelet coefficients at higher levels.
+         */
+        
+        for (int li = 1; li < d_num_level; li++)
+        {
+            switch (d_k)
+            {
+                case 2:
+                {
+                    int start_index_i, end_index_i;
+                    
+                    /*
+                     * Compute scaling and wavelet coefficients in the x-direction.
+                     */
+                    
+                    // Compute the starting and ending indices.
+                    start_index_i = -d_num_ghosts[0] + pow(2, li);
+                    end_index_i   = interior_dims[0] + d_num_ghosts[0] - pow(2, li);
+                    
+                    for (int i = start_index_i; i < end_index_i; i++)
+                    {
+                        // Compute indices.
+                        const int idx     = i + d_num_ghosts[0];
+                        const int idx_x_L = i - pow(2, li) + d_num_ghosts[0];
+                        const int idx_x_R = i + pow(2, li) + d_num_ghosts[0];
+                        
+                        f_x[li][idx] = 0.5*(f_x[li-1][idx_x_L] + f_x[li-1][idx_x_R]);
+                        w[li][idx]   = fabs(-0.5*(f_x[li-1][idx_x_L] - 2*f_x[li-1][idx] + f_x[li-1][idx_x_R]));
+                    }
+                    
+                    if (compute_variable_local_means)
+                    {
+                        for (int i = 0; i < interior_dims[0]; i++)
+                        {
+                            // Compute indices.
+                            const int idx     = i + d_num_ghosts[0];
+                            const int idx_x_L = i - pow(2, li) + d_num_ghosts[0];
+                            const int idx_x_R = i + pow(2, li) + d_num_ghosts[0];
+                            
+                            f_mean[li][idx] = 0.5*(f_x[li-1][idx_x_L] + 2*f_x[li-1][idx] + f_x[li-1][idx_x_R]);
+                        }
+                    }
+                    
+                    break;
+                }
+                case 4:
+                {
+                    int start_index_i, end_index_i;
+                    
+                    /*
+                     * Compute scaling and wavelet coefficients in the x-direction.
+                     */
+                    
+                    // Compute the starting and ending indices.
+                    start_index_i = -d_num_ghosts[0] + 2*pow(2, li);
+                    end_index_i   = interior_dims[0] + d_num_ghosts[0] - 2*pow(2, li);
+                    
+                    for (int i = start_index_i; i < end_index_i; i++)
+                    {
+                        // Compute indices.
+                        const int idx      = i + d_num_ghosts[0];
+                        const int idx_x_LL = i - 2*pow(2, li) + d_num_ghosts[0];
+                        const int idx_x_L  = i - pow(2, li) + d_num_ghosts[0];
+                        const int idx_x_R  = i + pow(2, li) + d_num_ghosts[0];
+                        const int idx_x_RR = i + 2*pow(2, li) + d_num_ghosts[0];
+                        
+                        f_x[li][idx] = 1.0/6.0*(-f_x[li-1][idx_x_LL] + 4*f_x[li-1][idx_x_L] +
+                            4*f_x[li-1][idx_x_R] - f_x[li-1][idx_x_RR]);
+                        
+                        w[li][idx] = fabs(1.0/6.0*(f_x[li-1][idx_x_LL] - 4*f_x[li-1][idx_x_L] +
+                            6*f_x[li-1][idx] - 4*f_x[li-1][idx_x_R] + f_x[li-1][idx_x_RR]));
+                    }
+                    
+                    if (compute_variable_local_means)
+                    {
+                        for (int i = 0; i < interior_dims[0]; i++)
+                        {
+                            // Compute indices.
+                            const int idx      = i + d_num_ghosts[0];
+                            const int idx_x_LL = i - 2*pow(2, li) + d_num_ghosts[0];
+                            const int idx_x_L  = i - pow(2, li) + d_num_ghosts[0];
+                            const int idx_x_R  = i + pow(2, li) + d_num_ghosts[0];
+                            const int idx_x_RR = i + 2*pow(2, li) + d_num_ghosts[0];
+                            
+                            f_mean[li][idx] = 1.0/6.0*(f_x[li-1][idx_x_LL] + 4*f_x[li-1][idx_x_L] +
+                                6*f_x[li-1][idx] + 4*f_x[li-1][idx_x_R] + f_x[li-1][idx_x_RR]);
+                        }
+                    }
+                    
+                    break;
+                }
+                default:
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": "
+                        << "number of vanishing moments = "
+                        << d_k
+                        << " not supported."
+                        << std::endl);
+                }
+            }
+        }
     }
     else if (d_dim == tbox::Dimension(2))
     {
@@ -1715,7 +1950,39 @@ WaveletTransformHarten::smoothCellData(
     
     if (d_dim == tbox::Dimension(1))
     {
-        // NOT YET IMPLEMENTED
+        int start_index_i, end_index_i;
+        
+        // Get the pointer to the cell data smoothed in the x-direction.
+        double* f_smoothed = smoothed_cell_data->getPointer(0);
+        
+        // Compute the starting and ending indices.
+        start_index_i = -d_num_ghosts[0];
+        end_index_i   = interior_dims[0] + d_num_ghosts[0];
+        
+        for (int i = start_index_i; i < end_index_i; i++)
+        {
+            // Compute the index of the current cell.
+            const int idx = i + d_num_ghosts[0];
+            
+            f_smoothed[idx] = f[idx];
+            
+            int count = 1;
+            
+            // Sum over the neighboring cells.
+            for (int ii = fmax(i - 1, start_index_i); ii < fmin(i + 2, end_index_i); ii++)
+            {
+                if (ii != i)
+                {
+                    const int idx_ii = ii + d_num_ghosts[0];
+                        
+                    f_smoothed[idx] += f[idx_ii];
+                    count++;
+                }
+            }
+            
+            // Compute the average value.
+            f_smoothed[idx] = f_smoothed[idx]/count;
+        }
     }
     else if (d_dim == tbox::Dimension(2))
     {
