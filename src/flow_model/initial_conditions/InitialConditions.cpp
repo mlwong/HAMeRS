@@ -322,6 +322,7 @@ InitialConditions::initializeDataOnPatch(
                             }
                         }
                     }
+                    /*
                     else if (d_project_name == "2D Kelvin-Helmholtz instability")
                     {
                         // Radice, David, and Luciano Rezzolla.
@@ -381,7 +382,7 @@ InitialConditions::initializeDataOnPatch(
                             }
                         }
                     }
-                    /*
+                    */
                     else if (d_project_name == "2D Kelvin-Helmholtz instability")
                     {
                         // Initialize data for a 2D Kelvin-Helmohltz instability problem.
@@ -451,7 +452,6 @@ InitialConditions::initializeDataOnPatch(
                             }
                         }
                     }
-                    */
                     else
                     {
                         TBOX_ERROR(d_object_name
