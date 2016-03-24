@@ -324,6 +324,66 @@ InitialConditions::initializeDataOnPatch(
                     }
                     else if (d_project_name == "2D Kelvin-Helmholtz instability")
                     {
+                        // Radice, David, and Luciano Rezzolla.
+                        // "THC: a new high-order finite-difference high-resolution shock-capturing code
+                        // for special-relativistic hydrodynamics." Astronomy & Astrophysics 547 (2012): A26.
+                        double* rho   = density->getPointer(0);
+                        double* rho_u = momentum->getPointer(0);
+                        double* rho_v = momentum->getPointer(1);
+                        double* E     = total_energy->getPointer(0);
+                        
+                        double gamma = d_equation_of_state->getSpeciesThermodynamicProperty(
+                            "gamma",
+                            0);
+                        
+                        // Some parameters for the problem.
+                        const double a       = 0.01; // Characteristic size of the shear layer.
+                        const double v_shear = 0.5;  // Correspnding to a relative Lorentz factor of W = 2.29
+                        const double A_0     = 0.1;  // Perturbation amplitude.
+                        const double sigma   = 0.1;  // Characteristic lengthscale.
+                        
+                        
+                        const double rho_0 = 0.505;
+                        const double rho_1 = 0.495;
+                        
+                        for (int j = 0; j < patch_dims[1]; j++)
+                        {
+                            for (int i = 0; i < patch_dims[0]; i++)
+                            {
+                                // Compute index into linear data array.
+                                int idx_cell = i + j*patch_dims[0];
+                                
+                                // Compute the coordinates.
+                                double x[2];
+                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                
+                                double u, v;
+                                
+                                if (x[1] > 0)
+                                {
+                                    rho[idx_cell] = rho_0 + rho_1*tanh((x[1] - 0.5)/a);
+                                    u = v_shear*tanh((x[1] - 0.5)/a);
+                                    v = A_0*v_shear*sin(2.0*M_PI*x[0])*exp(-pow(x[1] - 0.5, 2)/sigma);
+                                }
+                                else
+                                {
+                                    rho[idx_cell] = rho_0 - rho_1*tanh((x[1] + 0.5)/a);
+                                    u = -v_shear*tanh((x[1] + 0.5)/a);
+                                    v = -A_0*v_shear*sin(2.0*M_PI*x[0])*exp(-pow(x[1] + 0.5, 2)/sigma);
+                                }
+                                
+                                double p = 1.0;
+                                
+                                rho_u[idx_cell] = rho[idx_cell]*u;
+                                rho_v[idx_cell] = rho[idx_cell]*v;
+                                E[idx_cell]     = p/(gamma - 1.0) + 0.5*rho[idx_cell]*(u*u + v*v);
+                            }
+                        }
+                    }
+                    /*
+                    else if (d_project_name == "2D Kelvin-Helmholtz instability")
+                    {
                         // Initialize data for a 2D Kelvin-Helmohltz instability problem.
                         // (McNally, Colin P., Wladimir Lyra, and Jean-Claude Passy.
                         // "A well-posed Kelvin-Helmholtz instability test and comparison."
@@ -391,6 +451,7 @@ InitialConditions::initializeDataOnPatch(
                             }
                         }
                     }
+                    */
                     else
                     {
                         TBOX_ERROR(d_object_name
