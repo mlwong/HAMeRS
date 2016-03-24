@@ -337,7 +337,7 @@ InitialConditions::initializeDataOnPatch(
                             0);
                         
                         // Some parameters for the problem.
-                        const double a       = 0.05; // Characteristic size of the shear layer.
+                        const double a       = 0.02; // Characteristic size of the shear layer.
                         const double v_shear = 0.5;  // Correspnding to a relative Lorentz factor of W = 2.29
                         const double A_0     = 0.1;  // Perturbation amplitude.
                         const double sigma   = 0.1;  // Characteristic lengthscale.
