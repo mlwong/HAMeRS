@@ -821,7 +821,8 @@ GriddingAlgorithm::makeFinerLevel(
          findRefinementBoxes(new_box_level,
             tag_to_new,
             tag_ln);
-
+            
+            
          if (new_box_level && new_box_level->isInitialized()) {
 
             new_to_tag = &tag_to_new->getTranspose();
@@ -1316,6 +1317,9 @@ GriddingAlgorithm::regridFinerLevel(
             tag_to_new,
             tag_ln);
 
+            
+            
+            
          if (d_print_steps) {
             if (new_box_level && new_box_level->isInitialized()) {
                tbox::plog
@@ -3063,7 +3067,7 @@ GriddingAlgorithm::findRefinementBoxes(
       extend_ghosts,
       new_ln,
       true);
-
+      
    const hier::IntVector extend_ghosts_in_tag_space =
       hier::IntVector::ceilingDivide(extend_ghosts,
          d_hierarchy->getRatioToCoarserLevel(new_ln));
@@ -4306,6 +4310,7 @@ GriddingAlgorithm::getGriddingParameters(
    if (!allow_patches_smaller_than_ghost_width) {
       smallest_patch.max(max_ghosts);
    } else {
+      /*
       const hier::IntVector periodic_dirs(
          d_hierarchy->getGridGeometry()->getPeriodicShift(hier::IntVector::getOne(
                dim)));
@@ -4316,6 +4321,7 @@ GriddingAlgorithm::getGriddingParameters(
                tbox::MathUtilities<int>::Max(smallest_patch(i), max_ghosts(i));
          }
       }
+      */
    }
 
    /*
@@ -4352,19 +4358,22 @@ GriddingAlgorithm::getGriddingParameters(
        */
       smallest_box_to_refine /=
          d_hierarchy->getRatioToCoarserLevel(level_number);
+      
       /*
-       * den = ratio from level_number to Richardson-coarsened
-       * version of level_number+1.
-       */
+      //
+      // den = ratio from level_number to Richardson-coarsened
+      // version of level_number+1.
+      //
       const hier::IntVector den(
          d_hierarchy->getRatioToCoarserLevel(level_number)
          / d_tag_init_strategy->getErrorCoarsenRatio());
-      /*
-       * sz = max ghosts on Richardson-coarsened level_number+1, as
-       * seen on level_number.
-       */
+      //
+      // sz = max ghosts on Richardson-coarsened level_number+1, as
+      // seen on level_number.
+      //
       const hier::IntVector sz(hier::IntVector::ceilingDivide(max_ghosts, den));
       smallest_box_to_refine.max(sz);
+      */
 
    } else {
 
