@@ -1030,8 +1030,12 @@ InitialConditions::initializeDataOnPatch(
                                 << std::endl);
                         }
                         
+                        // Characteristic length of the problem.
                         const double D = 1.0;
-                        const double C_epsilon = 3.0; // C_epsilon for grids in the coarest level
+                        
+                        // Compute the characteristic length of the initial interface thickness.
+                        const double C_epsilon = 3.0;
+                        const double epsilon_i = C_epsilon*0.0025; // epsilon_i for smoothing interface
                         
                         double* Z_rho_1   = partial_density->getPointer(0);
                         double* Z_rho_2   = partial_density->getPointer(1);
@@ -1075,9 +1079,6 @@ InitialConditions::initializeDataOnPatch(
                         const double v_post   = 0.0;
                         const double p_post   = 1.5698/1.4;
                         const double Z_post   = 0.0;
-                        
-                        // Compute the characteristic length of the initial interface thickness.
-                        const double epsilon_i = C_epsilon*0.0025;
                         
                         for (int j = 0; j < patch_dims[1]; j++)
                         {
@@ -1423,7 +1424,7 @@ InitialConditions::initializeDataOnPatch(
                             {
                                 for (int i = 0; i < patch_dims[0]; i++)
                                 {
-                                    // Compute index into linear data array.
+                                    // Compute the linear index of current cell.
                                     int idx_cell = i +
                                         j*patch_dims[0] +
                                         k*patch_dims[0]*patch_dims[1];
@@ -1462,6 +1463,141 @@ InitialConditions::initializeDataOnPatch(
                                             0.5*rho_a*(u_a*u_a + v_a*v_a + w_a*w_a);
                                         Z_1[idx_cell]     = 0.0;
                                         Z_2[idx_cell]     = 1.0;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if (d_project_name == "3D shock-bubble interaction with AMR")
+                    {
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Please provide only two-species for the problem"
+                                << " '3D shock-bubble interaction with AMR'."
+                                << std::endl);
+                        }
+                        
+                        // Compute the characteristic length of the initial interface thickness.
+                        const double C_epsilon = 3.0;
+                        // const double epsilon_i = C_epsilon*0.0025; // epsilon_i for smoothing interface.
+                        const double epsilon_i = C_epsilon*sqrt(dx[0]*dx[1]*dx[2]); // epsilon_i for smoothing interface.
+                        
+                        double* Z_rho_1   = partial_density->getPointer(0);
+                        double* Z_rho_2   = partial_density->getPointer(1);
+                        double* rho_u     = momentum->getPointer(0);
+                        double* rho_v     = momentum->getPointer(1);
+                        double* rho_w     = momentum->getPointer(2);
+                        double* E         = total_energy->getPointer(0);
+                        double* Z_1       = volume_fraction->getPointer(0);
+                        double* Z_2       = volume_fraction->getPointer(1);
+                        
+                        // species 0: Kr
+                        // species 1: air
+                        const double gamma_0 = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                0);
+                        
+                        const double gamma_1 = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                1);
+                        
+                        NULL_USE(gamma_0);
+                        
+                        // Kr, pre-shock condition.
+                        const double rho_Kr = 3.485;
+                        const double u_Kr   = 0.0;
+                        const double v_Kr   = 0.0;
+                        const double w_Kr   = 0.0;
+                        const double p_Kr   = 1.013e5;
+                        const double Z_Kr   = 1.0;
+                        
+                        // air, pre-shock condition.
+                        const double rho_pre = 1.205;
+                        const double u_pre   = 0.0;
+                        const double v_pre   = 0.0;
+                        const double w_pre   = 0.0;
+                        const double p_pre   = 1.013e5;
+                        const double Z_pre   = 0.0;
+                        
+                        // air, post-shock condition.
+                        const double rho_post = 2.609923442;
+                        const double u_post   = 0.0;
+                        const double v_post   = 310.1374648;
+                        const double w_post   = 0.0;
+                        const double p_post   = 3.166131794e5;
+                        const double Z_post   = 0.0;
+                        
+                        for (int k = 0; k < patch_dims[2]; k++)
+                        {
+                            for (int j = 0; j < patch_dims[1]; j++)
+                            {
+                                for (int i = 0; i < patch_dims[0]; i++)
+                                {
+                                    // Compute the linear index of current cell.
+                                    int idx_cell = i +
+                                        j*patch_dims[0] +
+                                        k*patch_dims[0]*patch_dims[1];
+                                    
+                                    // Compute the coordinates.
+                                    double x[3];
+                                    x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                    x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                    x[2] = patch_xlo[2] + (k + 0.5)*dx[2];
+                                    
+                                    // If y < 2cm,
+                                    if (x[1] < 0.02)
+                                    {
+                                        Z_rho_1[idx_cell] = 0.0;
+                                        Z_rho_2[idx_cell] = rho_post;
+                                        rho_u[idx_cell]   = rho_post*u_post;
+                                        rho_v[idx_cell]   = rho_post*v_post;
+                                        rho_w[idx_cell]   = rho_post*w_post;
+                                        E[idx_cell]       = p_post/(gamma_1 - 1.0) +
+                                            0.5*rho_post*(u_post*u_post + v_post*v_post + w_post*w_post);
+                                        Z_1[idx_cell]     = Z_post;
+                                        Z_2[idx_cell]     = 1.0 - Z_post;
+                                    }
+                                    else
+                                    {
+                                        // Compute the distance from the initial material interface.
+                                        const double dR = sqrt(x[0]*x[0] + pow(x[1] - 0.075, 2) + x[2]*x[2]) - 0.0254;
+                                        
+                                        const double f_sm = 0.5*(1.0 + erf(dR/epsilon_i));
+                                        
+                                        // Smooth the primitive quantity.
+                                        const double Z_rho_1_i = rho_Kr*(1.0 - f_sm);
+                                        const double Z_rho_2_i = rho_pre*f_sm;
+                                        const double u_i       = u_Kr*(1.0 - f_sm) + u_pre*f_sm;
+                                        const double v_i       = v_Kr*(1.0 - f_sm) + v_pre*f_sm;
+                                        const double w_i       = w_Kr*(1.0 - f_sm) + w_pre*f_sm;
+                                        const double p_i       = p_Kr*(1.0 - f_sm) + p_pre*f_sm;
+                                        const double Z_1_i     = Z_Kr*(1.0 - f_sm) + Z_pre*f_sm;
+                                        
+                                        const double rho_i = Z_rho_1_i + Z_rho_2_i;
+                                        const double Z_2_i = 1.0 - Z_1_i;
+                                        
+                                        std::vector<const double*> Z_ptr;
+                                        Z_ptr.push_back(&Z_1_i);
+                                        Z_ptr.push_back(&Z_2_i);
+                                        
+                                        const double gamma = d_equation_of_state->
+                                            getMixtureThermodynamicPropertyWithVolumeFraction(
+                                                "gamma",
+                                                Z_ptr);
+                                        
+                                        Z_rho_1[idx_cell] = Z_rho_1_i;
+                                        Z_rho_2[idx_cell] = Z_rho_2_i;
+                                        rho_u[idx_cell]   = rho_i*u_i;
+                                        rho_v[idx_cell]   = rho_i*v_i;
+                                        rho_w[idx_cell]   = rho_i*w_i;
+                                        E[idx_cell]       = p_i/(gamma - 1.0) +
+                                            0.5*rho_i*(u_i*u_i + v_i*v_i + w_i*w_i);
+                                        Z_1[idx_cell]     = Z_1_i;
+                                        Z_2[idx_cell]     = Z_2_i;
                                     }
                                 }
                             }
