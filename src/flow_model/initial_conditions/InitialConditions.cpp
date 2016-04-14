@@ -908,8 +908,12 @@ InitialConditions::initializeDataOnPatch(
                                 << std::endl);
                         }
                         
+                        // Characteristic length of the problem.
                         const double D = 1.0;
+                        
+                        // Compute the characteristic length of the initial interface thickness.
                         const double C_epsilon = 3.0;
+                        const double epsilon_i = C_epsilon*sqrt(dx[0]*dx[1]);
                         
                         double* Z_rho_1   = partial_density->getPointer(0);
                         double* Z_rho_2   = partial_density->getPointer(1);
@@ -953,9 +957,6 @@ InitialConditions::initializeDataOnPatch(
                         const double v_post   = 0.0;
                         const double p_post   = 1.5698/1.4;
                         const double Z_post   = 0.0;
-                        
-                        // Compute the characteristic length of the initial interface thickness.
-                        const double epsilon_i = C_epsilon*sqrt(dx[0]*dx[1]);
                         
                         for (int j = 0; j < patch_dims[1]; j++)
                         {
