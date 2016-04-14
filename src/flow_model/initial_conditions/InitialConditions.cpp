@@ -1031,7 +1031,7 @@ InitialConditions::initializeDataOnPatch(
                         }
                         
                         const double D = 1.0;
-                        const double C_epsilon = 0.75; // C_epsilon for grids in the coarest level
+                        const double C_epsilon = 3.0; // C_epsilon for grids in the coarest level
                         
                         double* Z_rho_1   = partial_density->getPointer(0);
                         double* Z_rho_2   = partial_density->getPointer(1);
@@ -1077,7 +1077,7 @@ InitialConditions::initializeDataOnPatch(
                         const double Z_post   = 0.0;
                         
                         // Compute the characteristic length of the initial interface thickness.
-                        const double epsilon_i = C_epsilon*sqrt(ratio_to_level_zero[0]*ratio_to_level_zero[1])*sqrt(dx[0]*dx[1]);
+                        const double epsilon_i = C_epsilon*0.0025;
                         
                         for (int j = 0; j < patch_dims[1]; j++)
                         {
