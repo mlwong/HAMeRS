@@ -873,7 +873,7 @@ Euler::advanceSingleStep(
                 {
                     for (int i = 0; i < interior_dims[0]; i++)
                     {
-                        for (int k = 0; k < interior_dims[2]; k++)
+                        for (int k = 0; k < interior_dims[2] + 1; k++)
                         {
                             int idx_flux_z = k +
                                 i*(interior_dims[2] + 1) +
@@ -1034,7 +1034,6 @@ Euler::synchronizeHyperbolicFluxes(
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        /*
         for (int k = 0; k < interior_dims[2]; k++)
         {
             for (int j = 0; j < interior_dims[1]; j++)
@@ -1078,7 +1077,6 @@ Euler::synchronizeHyperbolicFluxes(
                 }
             }
         }
-        */
     }
     
     // Update the mass fraction/volume fraction of the last species.
