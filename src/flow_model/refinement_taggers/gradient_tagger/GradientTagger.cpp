@@ -1070,7 +1070,7 @@ GradientTagger::tagCells(
                         {
                             switch (d_flow_model)
                             {
-                                case SINGLE_SPECIES: case FOUR_EQN_SHYUE: case FIVE_EQN_ALLAIRE:
+                                case SINGLE_SPECIES: case FOUR_EQN_SHYUE:
                                 {
                                     // Get the cell data of the pressure gradient.
                                     boost::shared_ptr<pdat::CellData<double> > gradient(
@@ -1170,6 +1170,146 @@ GradientTagger::tagCells(
                                         gradient,
                                         tol,
                                         sensor_key);
+                                    
+                                    break;
+                                }
+                                case FIVE_EQN_ALLAIRE:
+                                {
+                                    // Get the cell data of the pressure gradient.
+                                    boost::shared_ptr<pdat::CellData<double> > gradient(
+                                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                            patch.getPatchData(d_Jameson_pressure_gradient, data_context)));
+                                    
+                                    // Get the cell data of partial density, momentum and total energy.
+                                    boost::shared_ptr<pdat::CellData<double> > partial_density(
+                                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                            patch.getPatchData(d_partial_density, data_context)));
+                                    
+                                    boost::shared_ptr<pdat::CellData<double> > momentum(
+                                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                            patch.getPatchData(d_momentum, data_context)));
+                                    
+                                    boost::shared_ptr<pdat::CellData<double> > total_energy(
+                                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                            patch.getPatchData(d_total_energy, data_context)));
+                                    
+                                    boost::shared_ptr<pdat::CellData<double> > volume_fraction(
+                                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                            patch.getPatchData(d_volume_fraction, data_context)));
+                                    
+                                    // Allocate temporary cell data for pressure.
+                                    boost::shared_ptr<pdat::CellData<double> > pressure(
+                                        new pdat::CellData<double>(interior_box, 1, d_num_ghosts));
+                                    
+                                    // Get the pointers to density, total energy and pressure.
+                                    double* p     = pressure->getPointer(0);
+                                    std::vector<double*> Z_rho;
+                                    for (int si = 0; si < d_num_species; si++)
+                                    {
+                                        Z_rho.push_back(partial_density->getPointer(si));
+                                    }
+                                    double* E     = total_energy->getPointer(0);
+                                    std::vector<double*> Z;
+                                    for (int si = 0; si < d_num_species - 1; si++)
+                                    {
+                                        Z.push_back(volume_fraction->getPointer(si));
+                                    }
+                                    
+                                    // Compute the field of pressure.
+                                    if (d_dim == tbox::Dimension(1))
+                                    {
+                                        // NOT YET IMPLEMENTED
+                                    }
+                                    else if (d_dim == tbox::Dimension(2))
+                                    {
+                                        // Get the pointers to momentum components.
+                                        double* rho_u = momentum->getPointer(0);
+                                        double* rho_v = momentum->getPointer(1);
+                                        
+                                        for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                                        {
+                                            for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                                            {
+                                                // Compute index into linear data array.
+                                                const int idx = (i + d_num_ghosts[0]) +
+                                                    (j + d_num_ghosts[1])*ghostcell_dims[0];
+                                                
+                                                std::vector<const double*> Z_rho_ptr;
+                                                for (int si = 0; si < d_num_species; si++)
+                                                {
+                                                    Z_rho_ptr.push_back(&Z_rho[si][idx]);
+                                                }
+                                                
+                                                std::vector<const double*> Z_ptr;
+                                                for (int si = 0; si < d_num_species - 1; si++)
+                                                {
+                                                    Z_ptr.push_back(&Z[si][idx]);
+                                                }
+                                                
+                                                const double rho = d_equation_of_state->
+                                                    getTotalDensity(
+                                                        Z_rho_ptr);
+                                                
+                                                std::vector<const double*> m_ptr;
+                                                m_ptr.push_back(&rho_u[idx]);
+                                                m_ptr.push_back(&rho_v[idx]);
+                                                
+                                                p[idx] = d_equation_of_state->getPressureWithVolumeFraction(
+                                                    &rho,
+                                                    m_ptr,
+                                                    &E[idx],
+                                                    Z_ptr);
+                                            }
+                                        }
+                                    }
+                                    else if (d_dim == tbox::Dimension(3))
+                                    {
+                                        // Get the pointers to momentum components.
+                                        double* rho_u = momentum->getPointer(0);
+                                        double* rho_v = momentum->getPointer(1);
+                                        double* rho_w = momentum->getPointer(2);
+                                        
+                                        for (int k = -d_num_ghosts[2]; k < interior_dims[2] + d_num_ghosts[2]; k++)
+                                        {
+                                            for (int j = -d_num_ghosts[1]; j < interior_dims[1] + d_num_ghosts[1]; j++)
+                                            {
+                                                for (int i = -d_num_ghosts[0]; i < interior_dims[0] + d_num_ghosts[0]; i++)
+                                                {
+                                                    // Compute index into linear data array.
+                                                    const int idx = (i + d_num_ghosts[0]) +
+                                                        (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                                        (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                                    
+                                                    std::vector<const double*> Z_rho_ptr;
+                                                    for (int si = 0; si < d_num_species; si++)
+                                                    {
+                                                        Z_rho_ptr.push_back(&Z_rho[si][idx]);
+                                                    }
+                                                    
+                                                    std::vector<const double*> Z_ptr;
+                                                    for (int si = 0; si < d_num_species - 1; si++)
+                                                    {
+                                                        Z_ptr.push_back(&Z[si][idx]);
+                                                    }
+                                                    
+                                                    const double rho = d_equation_of_state->
+                                                        getTotalDensity(
+                                                            Z_rho_ptr);
+                                                    
+                                                    std::vector<const double*> m_ptr;
+                                                    m_ptr.push_back(&rho_u[idx]);
+                                                    m_ptr.push_back(&rho_v[idx]);
+                                                    m_ptr.push_back(&rho_w[idx]);
+                                                    
+                                                    p[idx] = d_equation_of_state->getPressureWithVolumeFraction(
+                                                        &rho,
+                                                        m_ptr,
+                                                        &E[idx],
+                                                        Z_ptr);
+                                                }
+                                            }
+                                        }
+                                    }
                                     
                                     break;
                                 }
