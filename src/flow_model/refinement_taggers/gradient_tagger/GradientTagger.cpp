@@ -1311,6 +1311,16 @@ GradientTagger::tagCells(
                                         }
                                     }
                                     
+                                    // Compute the gradient.
+                                    d_gradient_sensor_Jameson->computeGradient(patch, pressure, gradient);
+                                    
+                                    tagCellsWithGradientSensor(
+                                        patch,
+                                        tags,
+                                        gradient,
+                                        tol,
+                                        sensor_key);
+                                    
                                     break;
                                 }
                                 default:
