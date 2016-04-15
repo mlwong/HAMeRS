@@ -1034,6 +1034,7 @@ Euler::synchronizeHyperbolicFluxes(
     }
     else if (d_dim == tbox::Dimension(3))
     {
+        /*
         for (int k = 0; k < interior_dims[2]; k++)
         {
             for (int j = 0; j < interior_dims[1]; j++)
@@ -1077,6 +1078,7 @@ Euler::synchronizeHyperbolicFluxes(
                 }
             }
         }
+        */
     }
     
     // Update the mass fraction/volume fraction of the last species.
