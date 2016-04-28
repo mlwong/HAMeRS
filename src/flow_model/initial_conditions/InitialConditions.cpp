@@ -1481,7 +1481,7 @@ InitialConditions::initializeDataOnPatch(
                         }
                         
                         // Compute the characteristic length of the initial interface thickness.
-                        const double C_epsilon = 0.5;
+                        const double C_epsilon = 0.1;
                         const double epsilon_i = C_epsilon*396.875e-6; // epsilon_i for smoothing interface.
                         //const double epsilon_i = C_epsilon*pow(dx[0]*dx[1]*dx[2], 1.0/3.0); // epsilon_i for smoothing interface.
                         
