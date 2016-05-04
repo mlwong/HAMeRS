@@ -31,6 +31,7 @@
 #include "flow_model/convective_flux_reconstructor/ConvectiveFluxReconstructorWCNS-CU6-M2-HLLC-HLL.hpp"
 #include "flow_model/convective_flux_reconstructor/ConvectiveFluxReconstructorWCNS-HW6-HLLC-HLL.hpp"
 #include "flow_model/convective_flux_reconstructor/ConvectiveFluxReconstructorWCNS-HW6-LD-HLLC-HLL.hpp"
+#include "flow_model/convective_flux_reconstructor/ConvectiveFluxReconstructorWCNS-Test.hpp"
 
 #include "boost/shared_ptr.hpp"
 #include <string>

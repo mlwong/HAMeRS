@@ -995,305 +995,306 @@ class RungeKuttaLevelIntegrator:
             const hier::PatchLevel& patch_level,
             double current_time);
         
-    /*
-     * The patch strategy supplies the application-specific operations
-     * needed to treat data on patches in the AMR hierarchy.
-     */
-    RungeKuttaPatchStrategy* d_patch_strategy;
-
-    /*
-     * The gridding algorithm is used to generate some DLBG data for
-     * levels not on a hiearchy.
-     */
-    boost::shared_ptr<mesh::GriddingAlgorithm> d_gridding_alg;
+        /*
+         * The patch strategy supplies the application-specific operations
+         * needed to treat data on patches in the AMR hierarchy.
+         */
+        RungeKuttaPatchStrategy* d_patch_strategy;
     
-    /*
-     * The object name is used as a handle to databases stored in
-     * restart files and for error reporting purposes.
-     */
-    std::string d_object_name;
-    bool d_use_time_refinement;
-    
-    /*
-     * Courant-Friedrichs-Levy parameters for time increment selection.
-     */
-    double d_cfl;
-    double d_cfl_init;
-    
-    /*
-     * Boolean flags for algorithm variations during time integration.
-     *
-     * d_lag_dt_computation indicates when time increment is computed for
-     *                      next step on a level.  A value of true means
-     *                      that the current solution values will be used to
-     *                      compute dt.  A value of false means that dt will
-     *                      be computed after the current solution is advanced
-     *                      and the new solution is used to compute dt. The
-     *                      default value is true.
-     *
-     * d_use_ghosts_for_dt  indicates whether the time increment computation
-     *                      on a patch requires ghost cell data (e.g., if
-     *                      boundary conditions are needed).  This value must
-     *                      be consistent with the numerical routines used
-     *                      in the Runge-Kutta patch strategy object to
-     *                      calculate the time step size.  The default is true.
-     */
-    bool d_lag_dt_computation;
-    bool d_use_ghosts_for_dt;
-    
-    /*
-     * Number of steps of the Runge-Kutta method, and matrices of alpha, beta,
-     * and gamma values used in updating solution during multi-step process.
-     */
-    int d_number_steps;
-    std::vector<std::vector<double> > d_alpha;
-    std::vector<std::vector<double> > d_beta;
-    std::vector<std::vector<double> > d_gamma;
-    
-    /*
-     * Boolean flags for indicating whether face or side data types are
-     * used for fluxes (choice is determined by numerical routines in
-     * Runge-Kutta patch model).
-     */
-    bool d_hyp_flux_is_face;
-    bool d_hyp_flux_face_registered;
-    bool d_hyp_flux_side_registered;
-    
-    /*
-     * The following communication algorithms and schedules are created and
-     * maintained to manage inter-patch communication during AMR integration.
-     * The algorithms are created in the class constructor.  They are initialized
-     * when variables are "registered" with the integrator.
-     */
-    
-    /*
-     * The "advance" schedule is used prior to advancing a level and
-     * prior to computing dt at initialization. It must be reset each
-     * time a level is regridded. All ghosts are filled with TIME_DEP
-     * and INPUT data at specified time. TIME_DEP data in patch interiors
-     * will be filled with CURRENT_VAR values.
-     */
-    boost::shared_ptr<xfer::RefineAlgorithm> d_bdry_fill_advance;
-    std::vector<boost::shared_ptr<xfer::RefineSchedule> > d_bdry_sched_advance;
-    
-    /*
-     * The "advance new" schedule can be used twice during a time integration
-     * cycle. The first is when ghost cell data is required during the
-     * conservative difference process (i.e., d_use_ghosts_for_cons_diff
-     * is true).  If this is the case, ghosts must be refilled before the
-     * conservative difference on a coarser level during the refluxing
-     * process can take place.  See synchronizeLevelWithCoarser in class
-     * RungeKuttaLevelIntegrator second occurs when the dt calculation is
-     * not lagged and the physical boundary conditions are needed to compute dt
-     * (i.e., (!d_lag_dt_computation && d_use_ghosts_for_dt_computation)
-     * is true).  In either case, all ghosts are filled with TIME_DEP and INPUT
-     * data at specified time.  TIME_DEP data in patch interiors will be filled
-     * with values corresponding to NEW descriptor indices.  See notes
-     * accompanying RungeKuttaLevelIntegrator::advanceLevel.
-     */
-    boost::shared_ptr<xfer::RefineAlgorithm> d_bdry_fill_advance_new;
-    std::vector<boost::shared_ptr<xfer::RefineSchedule> >
-        d_bdry_sched_advance_new;
-    
-    /*
-     * The "advance old" algorithm is used to fill ghosts using time
-     * interpolated data from OLD_VAR and NEW_VAR on the coarser hierarchy
-     * level.  It is currently only used for advancing data on a temporary
-     * level during the Richardson extrapolation algorithm. Use of OLD_VAR
-     * data is required only when three time levels are used
-     * (i.e. d_number_time_data_levels=3).
-     */
-    boost::shared_ptr<xfer::RefineAlgorithm> d_bdry_fill_advance_old;
-    
-    /*
-     * Coarsen algorithms for conservative data synchronization
-     * (e.g., hyperbolic flux correction or refluxing).
-     */
-    boost::shared_ptr<xfer::CoarsenAlgorithm> d_coarsen_hyp_fluxsum;
-    boost::shared_ptr<xfer::CoarsenAlgorithm> d_coarsen_sync_data;
-    boost::shared_ptr<xfer::CoarsenAlgorithm> d_sync_initial_data;
-    
-    /*
-     * Coarsen algorithms for Richardson extrapolation.
-     */
-    boost::shared_ptr<xfer::CoarsenAlgorithm> d_coarsen_rich_extrap_init;
-    boost::shared_ptr<xfer::CoarsenAlgorithm> d_coarsen_rich_extrap_final;
-    
-    /*
-     * Algorithm for filling a new patch level in the hierarchy.
-     */
-    boost::shared_ptr<xfer::RefineAlgorithm> d_fill_new_level;
-    
-    /*
-     * Number of levels of time-dependent data that must be maintained
-     * on each patch level.  This value is used to coordinate the needs
-     * of the time integration and the regridding process with the
-     * patch data types and descriptor indices.
-     */
-    int d_number_time_data_levels;
-    
-    /*
-     * hier::Variable contexts and lists of variables used for data management.
-     * The contexts are set in the constructor.   Note that they must
-     * be consistent with those defined by the concrete subclass of
-     * the RungeKuttaPatchStrategy object.  The variable lists
-     * and component selectors are set in the registerVariable() function.
-     */
-    
-    boost::shared_ptr<hier::VariableContext> d_scratch;
-    boost::shared_ptr<hier::VariableContext> d_current;
-    boost::shared_ptr<hier::VariableContext> d_new;
-    boost::shared_ptr<hier::VariableContext> d_old;
-    boost::shared_ptr<hier::VariableContext> d_plot_context;
-    std::vector<boost::shared_ptr<hier::VariableContext> > d_intermediate;
-    
-    std::list<boost::shared_ptr<hier::Variable> > d_all_variables;
-    std::list<boost::shared_ptr<hier::Variable> > d_time_dep_variables;
-    std::list<boost::shared_ptr<hier::Variable> > d_hyp_flux_variables;
-    std::list<boost::shared_ptr<hier::Variable> > d_hyp_fluxsum_variables;
-    std::list<boost::shared_ptr<hier::Variable> > d_source_variables;
-    
-    /*
-     * SCRATCH descriptor indices for (non-TEMPORARY) variables
-     * (i.e., TIME_DEP, INPUT, HYP_FLUX, SOURCE). Note that these are used
-     * to create scratch space before ghost cells are filled
-     * on level prior to advancing the data.
-     */
-    hier::ComponentSelector d_saved_var_scratch_data;
-    
-    /*
-     * SCRATCH descriptor indices for TEMPORARY variables.  Note that
-     * these are used to create scratch space on a patch-by-patch basis.
-     */
-    hier::ComponentSelector d_temp_var_scratch_data;
-    
-    /*
-     * CURRENT descriptor indices for TIME_DEP, INPUT, NO_FILL
-     * variables.  Note that these are used to create storage for quantities
-     * when new patches are made (e.g., during hierachy initialization,
-     * before error estimation during regridding, after regridding new
-     * patch levels, etc.).
-     */
-    hier::ComponentSelector d_new_patch_init_data;
-    
-    /*
-     * NEW descriptor indices for TIME_DEP variables.  Note that these
-     * are used to create space for new data before patch level is advanced.
-     */
-    hier::ComponentSelector d_new_time_dep_data;
-    
-    /*
-     * Vector of INTERMEDIATE descriptor indices for TIME_DEP variables. These
-     * variables are used to store the intermediate solution during Runge-Kutta
-     * time-stepping.
-     */
-    std::vector<hier::ComponentSelector> d_intermediate_time_dep_data;
-    
-    /*
-     * Descriptor indices for HYP_FLUX quantities and integrals of hyperbolic
-     * fluxes (used to accumulate hyperbolic flux information around fine patch
-     * boundaries). Also, a boolean flag to track hyperbolic flux storage on level
-     * 0.
-     */
-    hier::ComponentSelector d_hyp_flux_var_data;
-    hier::ComponentSelector d_hyp_fluxsum_data;
-    bool d_have_hyp_flux_on_level_zero;
-    
-    /*
-     * Vector of descriptor indices for intermediate HYP_FLUX quantities during
-     * Runge-Kutta time-stepping.
-     */
-    std::vector<hier::ComponentSelector> d_intermediate_hyp_flux_var_data;
-    
-    /*
-     * Descriptor indices for SOURCE quantities.
-     */
-    hier::ComponentSelector d_source_var_data;
-    
-    /*
-     * Vector of descriptor indices for intermediate SOURCE quantities during
-     * Runge-Kutta time-stepping.
-     */
-    std::vector<hier::ComponentSelector> d_intermediate_source_var_data;
-    
-    /*
-     * OLD descriptor indices for TIME_DEP variables.  Note that
-     * these are used only when three time levels of data are used.
-     */
-    hier::ComponentSelector d_old_time_dep_data;
-    
-    /*
-     * Option to distinguish tbox::MPI reduction costs from load imbalances
-     * when doing performance timings.
-     */
-    bool d_distinguish_mpi_reduction_costs;
-    
-    static bool s_barrier_after_error_bdry_fill_comm;
-    
-    /*
-     * Timers interspersed throughout the class.
-     */
-    static boost::shared_ptr<tbox::Timer> t_advance_bdry_fill_comm;
-    static boost::shared_ptr<tbox::Timer> t_error_bdry_fill_create;
-    static boost::shared_ptr<tbox::Timer> t_error_bdry_fill_comm;
-    static boost::shared_ptr<tbox::Timer> t_mpi_reductions;
-    static boost::shared_ptr<tbox::Timer> t_initialize_level_data;
-    static boost::shared_ptr<tbox::Timer> t_init_level_create_sched;
-    static boost::shared_ptr<tbox::Timer> t_init_level_fill_data;
-    static boost::shared_ptr<tbox::Timer> t_init_level_fill_interior;
-    static boost::shared_ptr<tbox::Timer> t_advance_bdry_fill_create;
-    static boost::shared_ptr<tbox::Timer> t_new_advance_bdry_fill_create;
-    static boost::shared_ptr<tbox::Timer> t_apply_gradient_detector;
-    static boost::shared_ptr<tbox::Timer> t_apply_multiresolution_detector;
-    static boost::shared_ptr<tbox::Timer> t_apply_integral_detector;
-    static boost::shared_ptr<tbox::Timer> t_tag_cells;
-    static boost::shared_ptr<tbox::Timer> t_coarsen_rich_extrap;
-    static boost::shared_ptr<tbox::Timer> t_get_level_dt;
-    static boost::shared_ptr<tbox::Timer> t_get_level_dt_sync;
-    static boost::shared_ptr<tbox::Timer> t_advance_level;
-    static boost::shared_ptr<tbox::Timer> t_new_advance_bdry_fill_comm;
-    static boost::shared_ptr<tbox::Timer> t_patch_num_kernel;
-    static boost::shared_ptr<tbox::Timer> t_advance_level_sync;
-    static boost::shared_ptr<tbox::Timer> t_std_level_sync;
-    static boost::shared_ptr<tbox::Timer> t_sync_new_levels;
-    static boost::shared_ptr<tbox::Timer> t_barrier_after_error_bdry_fill_comm;
-    static boost::shared_ptr<tbox::Timer> t_sync_initial_comm;
-    static boost::shared_ptr<tbox::Timer> t_sync_initial_create;
-    static boost::shared_ptr<tbox::Timer> t_coarsen_hyp_fluxsum_create;
-    static boost::shared_ptr<tbox::Timer> t_coarsen_hyp_fluxsum_comm;
-    static boost::shared_ptr<tbox::Timer> t_coarsen_sync_create;
-    static boost::shared_ptr<tbox::Timer> t_coarsen_sync_comm;
-    
+        /*
+         * The gridding algorithm is used to generate some DLBG data for
+         * levels not on a hiearchy.
+         */
+        boost::shared_ptr<mesh::GriddingAlgorithm> d_gridding_alg;
+        
+        /*
+         * The object name is used as a handle to databases stored in
+         * restart files and for error reporting purposes.
+         */
+        std::string d_object_name;
+        bool d_use_time_refinement;
+        
+        /*
+         * Courant-Friedrichs-Levy parameters for time increment selection.
+         */
+        double d_cfl;
+        double d_cfl_init;
+        
+        /*
+         * Boolean flags for algorithm variations during time integration.
+         *
+         * d_lag_dt_computation indicates when time increment is computed for
+         *                      next step on a level.  A value of true means
+         *                      that the current solution values will be used to
+         *                      compute dt.  A value of false means that dt will
+         *                      be computed after the current solution is advanced
+         *                      and the new solution is used to compute dt. The
+         *                      default value is true.
+         *
+         * d_use_ghosts_for_dt  indicates whether the time increment computation
+         *                      on a patch requires ghost cell data (e.g., if
+         *                      boundary conditions are needed).  This value must
+         *                      be consistent with the numerical routines used
+         *                      in the Runge-Kutta patch strategy object to
+         *                      calculate the time step size.  The default is true.
+         */
+        bool d_lag_dt_computation;
+        bool d_use_ghosts_for_dt;
+        
+        /*
+         * Number of steps of the Runge-Kutta method, and matrices of alpha, beta,
+         * and gamma values used in updating solution during multi-step process.
+         */
+        int d_number_steps;
+        std::vector<std::vector<double> > d_alpha;
+        std::vector<std::vector<double> > d_beta;
+        std::vector<std::vector<double> > d_gamma;
+        
+        /*
+         * Boolean flags for indicating whether face or side data types are
+         * used for fluxes (choice is determined by numerical routines in
+         * Runge-Kutta patch model).
+         */
+        bool d_hyp_flux_is_face;
+        bool d_hyp_flux_face_registered;
+        bool d_hyp_flux_side_registered;
+        
+        /*
+         * The following communication algorithms and schedules are created and
+         * maintained to manage inter-patch communication during AMR integration.
+         * The algorithms are created in the class constructor.  They are initialized
+         * when variables are "registered" with the integrator.
+         */
+        
+        /*
+         * The "advance" schedule is used prior to advancing a level and
+         * prior to computing dt at initialization. It must be reset each
+         * time a level is regridded. All ghosts are filled with TIME_DEP
+         * and INPUT data at specified time. TIME_DEP data in patch interiors
+         * will be filled with CURRENT_VAR values.
+         */
+        boost::shared_ptr<xfer::RefineAlgorithm> d_bdry_fill_advance;
+        std::vector<boost::shared_ptr<xfer::RefineSchedule> > d_bdry_sched_advance;
+        
+        /*
+         * The "advance new" schedule can be used twice during a time integration
+         * cycle. The first is when ghost cell data is required during the
+         * conservative difference process (i.e., d_use_ghosts_for_cons_diff
+         * is true).  If this is the case, ghosts must be refilled before the
+         * conservative difference on a coarser level during the refluxing
+         * process can take place.  See synchronizeLevelWithCoarser in class
+         * RungeKuttaLevelIntegrator second occurs when the dt calculation is
+         * not lagged and the physical boundary conditions are needed to compute dt
+         * (i.e., (!d_lag_dt_computation && d_use_ghosts_for_dt_computation)
+         * is true).  In either case, all ghosts are filled with TIME_DEP and INPUT
+         * data at specified time.  TIME_DEP data in patch interiors will be filled
+         * with values corresponding to NEW descriptor indices.  See notes
+         * accompanying RungeKuttaLevelIntegrator::advanceLevel.
+         */
+        boost::shared_ptr<xfer::RefineAlgorithm> d_bdry_fill_advance_new;
+        std::vector<boost::shared_ptr<xfer::RefineSchedule> >
+            d_bdry_sched_advance_new;
+        
+        /*
+         * The "advance old" algorithm is used to fill ghosts using time
+         * interpolated data from OLD_VAR and NEW_VAR on the coarser hierarchy
+         * level.  It is currently only used for advancing data on a temporary
+         * level during the Richardson extrapolation algorithm. Use of OLD_VAR
+         * data is required only when three time levels are used
+         * (i.e. d_number_time_data_levels=3).
+         */
+        boost::shared_ptr<xfer::RefineAlgorithm> d_bdry_fill_advance_old;
+        
+        /*
+         * Coarsen algorithms for conservative data synchronization
+         * (e.g., hyperbolic flux correction or refluxing).
+         */
+        boost::shared_ptr<xfer::CoarsenAlgorithm> d_coarsen_hyp_fluxsum;
+        boost::shared_ptr<xfer::CoarsenAlgorithm> d_coarsen_sync_data;
+        boost::shared_ptr<xfer::CoarsenAlgorithm> d_sync_initial_data;
+        
+        /*
+         * Coarsen algorithms for Richardson extrapolation.
+         */
+        boost::shared_ptr<xfer::CoarsenAlgorithm> d_coarsen_rich_extrap_init;
+        boost::shared_ptr<xfer::CoarsenAlgorithm> d_coarsen_rich_extrap_final;
+        
+        /*
+         * Algorithm for filling a new patch level in the hierarchy.
+         */
+        boost::shared_ptr<xfer::RefineAlgorithm> d_fill_new_level;
+        
+        /*
+         * Number of levels of time-dependent data that must be maintained
+         * on each patch level.  This value is used to coordinate the needs
+         * of the time integration and the regridding process with the
+         * patch data types and descriptor indices.
+         */
+        int d_number_time_data_levels;
+        
+        /*
+         * hier::Variable contexts and lists of variables used for data management.
+         * The contexts are set in the constructor.   Note that they must
+         * be consistent with those defined by the concrete subclass of
+         * the RungeKuttaPatchStrategy object.  The variable lists
+         * and component selectors are set in the registerVariable() function.
+         */
+        
+        boost::shared_ptr<hier::VariableContext> d_scratch;
+        boost::shared_ptr<hier::VariableContext> d_current;
+        boost::shared_ptr<hier::VariableContext> d_new;
+        boost::shared_ptr<hier::VariableContext> d_old;
+        boost::shared_ptr<hier::VariableContext> d_plot_context;
+        std::vector<boost::shared_ptr<hier::VariableContext> > d_intermediate;
+        
+        std::list<boost::shared_ptr<hier::Variable> > d_all_variables;
+        std::list<boost::shared_ptr<hier::Variable> > d_time_dep_variables;
+        std::list<boost::shared_ptr<hier::Variable> > d_hyp_flux_variables;
+        std::list<boost::shared_ptr<hier::Variable> > d_hyp_fluxsum_variables;
+        std::list<boost::shared_ptr<hier::Variable> > d_source_variables;
+        
+        /*
+         * SCRATCH descriptor indices for (non-TEMPORARY) variables
+         * (i.e., TIME_DEP, INPUT, HYP_FLUX, SOURCE). Note that these are used
+         * to create scratch space before ghost cells are filled
+         * on level prior to advancing the data.
+         */
+        hier::ComponentSelector d_saved_var_scratch_data;
+        
+        /*
+         * SCRATCH descriptor indices for TEMPORARY variables.  Note that
+         * these are used to create scratch space on a patch-by-patch basis.
+         */
+        hier::ComponentSelector d_temp_var_scratch_data;
+        
+        /*
+         * CURRENT descriptor indices for TIME_DEP, INPUT, NO_FILL
+         * variables.  Note that these are used to create storage for quantities
+         * when new patches are made (e.g., during hierachy initialization,
+         * before error estimation during regridding, after regridding new
+         * patch levels, etc.).
+         */
+        hier::ComponentSelector d_new_patch_init_data;
+        
+        /*
+         * NEW descriptor indices for TIME_DEP variables.  Note that these
+         * are used to create space for new data before patch level is advanced.
+         */
+        hier::ComponentSelector d_new_time_dep_data;
+        
+        /*
+         * Vector of INTERMEDIATE descriptor indices for TIME_DEP variables. These
+         * variables are used to store the intermediate solution during Runge-Kutta
+         * time-stepping.
+         */
+        std::vector<hier::ComponentSelector> d_intermediate_time_dep_data;
+        
+        /*
+         * Descriptor indices for HYP_FLUX quantities and integrals of hyperbolic
+         * fluxes (used to accumulate hyperbolic flux information around fine patch
+         * boundaries). Also, a boolean flag to track hyperbolic flux storage on level
+         * 0.
+         */
+        hier::ComponentSelector d_hyp_flux_var_data;
+        hier::ComponentSelector d_hyp_fluxsum_data;
+        bool d_have_hyp_flux_on_level_zero;
+        
+        /*
+         * Vector of descriptor indices for intermediate HYP_FLUX quantities during
+         * Runge-Kutta time-stepping.
+         */
+        std::vector<hier::ComponentSelector> d_intermediate_hyp_flux_var_data;
+        
+        /*
+         * Descriptor indices for SOURCE quantities.
+         */
+        hier::ComponentSelector d_source_var_data;
+        
+        /*
+         * Vector of descriptor indices for intermediate SOURCE quantities during
+         * Runge-Kutta time-stepping.
+         */
+        std::vector<hier::ComponentSelector> d_intermediate_source_var_data;
+        
+        /*
+         * OLD descriptor indices for TIME_DEP variables.  Note that
+         * these are used only when three time levels of data are used.
+         */
+        hier::ComponentSelector d_old_time_dep_data;
+        
+        /*
+         * Option to distinguish tbox::MPI reduction costs from load imbalances
+         * when doing performance timings.
+         */
+        bool d_distinguish_mpi_reduction_costs;
+        
+        static bool s_barrier_after_error_bdry_fill_comm;
+        
+        /*
+         * Timers interspersed throughout the class.
+         */
+        static boost::shared_ptr<tbox::Timer> t_advance_bdry_fill_comm;
+        static boost::shared_ptr<tbox::Timer> t_error_bdry_fill_create;
+        static boost::shared_ptr<tbox::Timer> t_error_bdry_fill_comm;
+        static boost::shared_ptr<tbox::Timer> t_mpi_reductions;
+        static boost::shared_ptr<tbox::Timer> t_initialize_level_data;
+        static boost::shared_ptr<tbox::Timer> t_init_level_create_sched;
+        static boost::shared_ptr<tbox::Timer> t_init_level_fill_data;
+        static boost::shared_ptr<tbox::Timer> t_init_level_fill_interior;
+        static boost::shared_ptr<tbox::Timer> t_advance_bdry_fill_create;
+        static boost::shared_ptr<tbox::Timer> t_new_advance_bdry_fill_create;
+        static boost::shared_ptr<tbox::Timer> t_apply_gradient_detector;
+        static boost::shared_ptr<tbox::Timer> t_apply_multiresolution_detector;
+        static boost::shared_ptr<tbox::Timer> t_apply_integral_detector;
+        static boost::shared_ptr<tbox::Timer> t_tag_cells;
+        static boost::shared_ptr<tbox::Timer> t_coarsen_rich_extrap;
+        static boost::shared_ptr<tbox::Timer> t_get_level_dt;
+        static boost::shared_ptr<tbox::Timer> t_get_level_dt_sync;
+        static boost::shared_ptr<tbox::Timer> t_advance_level;
+        static boost::shared_ptr<tbox::Timer> t_new_advance_bdry_fill_comm;
+        static boost::shared_ptr<tbox::Timer> t_patch_num_kernel;
+        static boost::shared_ptr<tbox::Timer> t_advance_level_sync;
+        static boost::shared_ptr<tbox::Timer> t_std_level_sync;
+        static boost::shared_ptr<tbox::Timer> t_sync_new_levels;
+        static boost::shared_ptr<tbox::Timer> t_barrier_after_error_bdry_fill_comm;
+        static boost::shared_ptr<tbox::Timer> t_sync_initial_comm;
+        static boost::shared_ptr<tbox::Timer> t_sync_initial_create;
+        static boost::shared_ptr<tbox::Timer> t_coarsen_hyp_fluxsum_create;
+        static boost::shared_ptr<tbox::Timer> t_coarsen_hyp_fluxsum_comm;
+        static boost::shared_ptr<tbox::Timer> t_coarsen_sync_create;
+        static boost::shared_ptr<tbox::Timer> t_coarsen_sync_comm;
+        
 #ifdef HLI_RECORD_STATS
-    /*
-     * Statistics on number of cells and patches generated.
-     */
-    static std::vector<boost::shared_ptr<tbox::Statistic> > s_boxes_stat;
-    static std::vector<boost::shared_ptr<tbox::Statistic> > s_cells_stat;
-    static std::vector<boost::shared_ptr<tbox::Statistic> > s_timestamp_stat;
+        /*
+         * Statistics on number of cells and patches generated.
+         */
+        static std::vector<boost::shared_ptr<tbox::Statistic> > s_boxes_stat;
+        static std::vector<boost::shared_ptr<tbox::Statistic> > s_cells_stat;
+        static std::vector<boost::shared_ptr<tbox::Statistic> > s_timestamp_stat;
 #endif
-    
-    /*!
-    * @brief Initialize static objects and register shutdown routine.
-    *
-    * Only called by StartupShutdownManager.
-    */
-    static void
-    initializeCallback();
-    
-    /*!
-    * @brief Method registered with ShutdownRegister to cleanup statics.
-    *
-    * Only called by StartupShutdownManager.
-    */
-    static void
-    finalizeCallback();
-    
-    /*
-    * Static initialization and cleanup handler.
-    */
-    static tbox::StartupShutdownManager::Handler
-        s_initialize_handler;
+        
+        /*!
+        * @brief Initialize static objects and register shutdown routine.
+        *
+        * Only called by StartupShutdownManager.
+        */
+        static void
+        initializeCallback();
+        
+        /*!
+        * @brief Method registered with ShutdownRegister to cleanup statics.
+        *
+        * Only called by StartupShutdownManager.
+        */
+        static void
+        finalizeCallback();
+        
+        /*
+        * Static initialization and cleanup handler.
+        */
+        static tbox::StartupShutdownManager::Handler
+            s_initialize_handler;
+        
 };
 
 #endif /* RUNGE_KUTTA_LEVEL_INTEGRATOR_HPP */

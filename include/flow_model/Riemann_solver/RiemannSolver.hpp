@@ -6,6 +6,7 @@
 #include "Directions.hpp"
 #include "equation_of_state/EquationOfStateIdealGas.hpp"
 
+#include "boost/ptr_container/ptr_vector.hpp"
 #include "boost/shared_ptr.hpp"
 #include <string>
 #include <vector>
@@ -29,54 +30,76 @@ class RiemannSolver
         {}
         
         /*
-         * Compute the fluxes and and velocities at the intercell faces
+         * Compute the flux at the intercell face for single-species flow model
+         * from conservative variables.
+         */
+        virtual void
+        computeIntercellFluxForSingleSpeciesFromConservativeVariables(
+            std::vector<double*>& flux_intercell,
+            std::vector<double>& conservative_variables_minus,
+            std::vector<double>& conservative_variables_plus,
+            DIRECTION direction) = 0;
+        
+        /*
+         * Compute the flux at the intercell face for single-species flow model
+         * from primitive variables.
+         */
+        virtual void
+        computeIntercellFluxForSingleSpeciesFromPrimitiveVariables(
+            std::vector<double*>& flux_intercell,
+            std::vector<double>& primitive_variables_minus,
+            std::vector<double>& primitive_variables_plus,
+            DIRECTION direction) = 0;
+        
+        /*
+         * Compute the flux at the intercell face
          * for single-species flow model.
          */
         virtual void
         computeIntercellFluxForSingleSpecies(
-            std::vector<double*> flux_intercell,
+            std::vector<double*>& flux_intercell,
             const double* const density_L,
             const double* const density_R,
-            const std::vector<const double*> momentum_L,
-            const std::vector<const double*> momentum_R,
+            const std::vector<const double*>& momentum_L,
+            const std::vector<const double*>& momentum_R,
             const double* const total_energy_L,
             const double* const total_energy_R,
             DIRECTION direction) = 0;
         
         /*
-         * Compute the fluxes and and velocities at the intercell faces
+         * Compute the flux and velocity at the intercell face
          * for four-equation multi-species flow model by Shyue.
          */
         virtual void
         computeIntercellFluxAndVelocityForFourEqnShyue(
-            std::vector<double*> flux_intercell,
-            std::vector<double*> velocity_intercell,
+            std::vector<double*>& flux_intercell,
+            std::vector<double*>& velocity_intercell,
             const double* const density_L,
             const double* const density_R,
-            const std::vector<const double*> momentum_L,
-            const std::vector<const double*> momentum_R,
+            const std::vector<const double*>& momentum_L,
+            const std::vector<const double*>& momentum_R,
             const double* const total_energy_L,
             const double* const total_energy_R,
-            const std::vector<const double*> mass_fraction_L,
-            const std::vector<const double*> mass_fraction_R,
+            const std::vector<const double*>& mass_fraction_L,
+            const std::vector<const double*>& mass_fraction_R,
             DIRECTION direction) = 0;
         
         /*
-         * Compute the fluxes and and velocities at the intercell faces
+         * Compute the flux and velocity at the intercell face
          * for five-equation multi-species flow model by Allaire.
          */
         virtual void
         computeIntercellFluxAndVelocityForFiveEqnAllaire(
-            std::vector<double*> flux_intercell,
-            std::vector<double*> velocity_intercell,
-            const std::vector<const double*> partial_density_L,
-            const std::vector<const double*> partial_density_R,
-            const std::vector<const double*> momentum_L,
-            const std::vector<const double*> momentum_R,
+            std::vector<double*>& flux_intercell,
+            std::vector<double*>& velocity_intercell,
+            const std::vector<const double*>& partial_density_L,
+            const std::vector<const double*>& partial_density_R,
+            const std::vector<const double*>& momentum_L,
+            const std::vector<const double*>& momentum_R,
             const double* const total_energy_L,
             const double* const total_energy_R,
-            const std::vector<const double*> volume_fraction_L,
-            const std::vector<const double*> volume_fraction_R,
+            const std::vector<const double*>& volume_fraction_L,
+            const std::vector<const double*>& volume_fraction_R,
             DIRECTION direction) = 0;
         
     protected:

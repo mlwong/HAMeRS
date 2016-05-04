@@ -304,6 +304,18 @@ FlowModelManager::initializeConvectiveFluxReconstructor(
             d_equation_of_state,
             shock_capturing_scheme_db));
     }
+    else if (shock_capturing_scheme_str == "WCNS_Test")
+    {
+        conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorWCNS_Test(
+            "WCNS-Test",
+            d_dim,
+            d_grid_geometry,
+            d_flow_model,
+            d_num_eqn,
+            d_num_species,
+            d_equation_of_state,
+            shock_capturing_scheme_db));
+    }
     else
     {
         TBOX_ERROR(d_object_name

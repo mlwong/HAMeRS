@@ -3,6 +3,12 @@
 set(Riemann_solver_source_files
     RiemannSolverHLLC.cpp
     RiemannSolverHLLC_HLL.cpp
+    RiemannSolverSingleSpeciesHLLC.cpp
+    RiemannSolverSingleSpeciesHLLC_HLL.cpp
+    RiemannSolverFourEqnShyueHLLC.cpp
+    RiemannSolverFourEqnShyueHLLC_HLL.cpp
+    RiemannSolverFiveEqnAllaireHLLC.cpp
+    RiemannSolverFiveEqnAllaireHLLC_HLL.cpp
 )
 
 # Create a library called Riemann_solver which includes the 

@@ -9,6 +9,7 @@ set(convective_flux_reconstructor_source_files
     ConvectiveFluxReconstructorWCNS-CU6-M2-HLLC-HLL.cpp
     ConvectiveFluxReconstructorWCNS-HW6-HLLC-HLL.cpp
     ConvectiveFluxReconstructorWCNS-HW6-LD-HLLC-HLL.cpp
+    ConvectiveFluxReconstructorWCNS-Test.cpp
 )
 
 # Create a library called convective_flux_reconstructor which includes the 
@@ -16,7 +17,7 @@ set(convective_flux_reconstructor_source_files
 add_library(convective_flux_reconstructor ${convective_flux_reconstructor_source_files})
 
 TARGET_LINK_LIBRARIES(convective_flux_reconstructor
-  Riemann_solver algs_fortran
+  Riemann_solver flow_model algs_fortran
   SAMRAI_appu SAMRAI_geom SAMRAI_solv SAMRAI_algs SAMRAI_mesh
   SAMRAI_math SAMRAI_pdat SAMRAI_xfer SAMRAI_hier SAMRAI_tbox
   hdf5 gfortran)

@@ -14,6 +14,9 @@
 #include "equation_of_state/EquationOfStateIdealGas.hpp"
 #include "flow_model/FlowModels.hpp"
 
+#include "flow_model/flow_model/FlowModelSingleSpecies.hpp"
+#include "flow_model/flow_model/FlowModelFiveEqnAllaire.hpp"
+
 #include "boost/shared_ptr.hpp"
 #include <string>
 #include <vector>
@@ -44,7 +47,51 @@ class ConvectiveFluxReconstructor
                 d_shock_capturing_scheme_db(shock_capturing_scheme_db),
                 d_variables_set(false),
                 d_num_ghosts_set(false)
-        {}
+        {
+            switch (d_flow_model)
+            {
+                case SINGLE_SPECIES:
+                {
+                    d_flow_model_handler.reset(new FlowModelSingleSpecies(
+                        "single-species flow model",
+                        d_dim,
+                        d_grid_geometry,
+                        d_num_ghosts,
+                        d_num_eqn,
+                        d_num_species,
+                        equation_of_state));
+                    
+                    break;
+                }
+                case FOUR_EQN_SHYUE:
+                {
+                    
+                    break;
+                }
+                case FIVE_EQN_ALLAIRE:
+                {
+                    d_flow_model_handler.reset(new FlowModelFiveEqnAllaire(
+                        "five-equation multi-species flow model by Allaire",
+                        d_dim,
+                        d_grid_geometry,
+                        d_num_ghosts,
+                        d_num_eqn,
+                        d_num_species,
+                        equation_of_state));
+                    
+                    break;
+                }
+                default:
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": "
+                        << "d_flow_model '"
+                        << d_flow_model
+                        << "' not yet implemented."
+                        << std::endl);
+                }
+            }
+        }
         
         /*
          * Get the number of ghost cells needed by the convective flux
@@ -65,6 +112,15 @@ class ConvectiveFluxReconstructor
             d_num_ghosts = num_ghosts;
             
             d_num_ghosts_set = true;
+            
+            if (d_flow_model == SINGLE_SPECIES)
+            {
+                d_flow_model_handler->setNumberOfGhostCells(d_num_ghosts);
+            }
+            else if (d_flow_model == FIVE_EQN_ALLAIRE)
+            {
+                d_flow_model_handler->setNumberOfGhostCells(d_num_ghosts);
+            }
         }
         
         /*
@@ -93,6 +149,11 @@ class ConvectiveFluxReconstructor
             d_source = source;
             
             d_variables_set = true;
+            
+            d_flow_model_handler->setVariablesForSingleSpecies(
+                density,
+                momentum,
+                total_energy);
         }
         
         /*
@@ -124,6 +185,12 @@ class ConvectiveFluxReconstructor
             d_source = source;
             
             d_variables_set = true;
+            
+            d_flow_model_handler->setVariablesForFourEqnShyue(
+                density,
+                momentum,
+                total_energy,
+                mass_fraction);
         }
         
         /*
@@ -155,6 +222,12 @@ class ConvectiveFluxReconstructor
             d_source = source;
             
             d_variables_set = true;
+            
+            d_flow_model_handler->setVariablesForFiveEqnAllaire(
+                partial_density,
+                momentum,
+                total_energy,
+                volume_fraction);
         }
         
         /*
@@ -213,6 +286,11 @@ class ConvectiveFluxReconstructor
          * Flow model.
          */
         const FLOW_MODEL d_flow_model;
+        
+        /*
+         * Flow model.
+         */
+        boost::shared_ptr<FlowModel> d_flow_model_handler;
         
         /*
          * Number of equations.

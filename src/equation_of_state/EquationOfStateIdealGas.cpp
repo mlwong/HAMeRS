@@ -227,7 +227,7 @@ EquationOfStateIdealGas::putToRestart(
 double
 EquationOfStateIdealGas::getPressure(
    const double* const density,
-   const std::vector<const double*> momentum,
+   const std::vector<const double*>& momentum,
    const double* const total_energy)
 {
     double p = 0.0;
@@ -285,9 +285,9 @@ EquationOfStateIdealGas::getPressure(
 double
 EquationOfStateIdealGas::getPressureWithMassFraction(
    const double* const density,
-   const std::vector<const double*> momentum,
+   const std::vector<const double*>& momentum,
    const double* const total_energy,
-   const std::vector<const double*> mass_fraction)
+   const std::vector<const double*>& mass_fraction)
 {
     double p = 0.0;
     
@@ -357,10 +357,10 @@ EquationOfStateIdealGas::getPressureWithMassFraction(
  */
 double
 EquationOfStateIdealGas::getPressureWithMassFraction(
-   const std::vector<const double*> partial_density,
-   const std::vector<const double*> momentum,
+   const std::vector<const double*>& partial_density,
+   const std::vector<const double*>& momentum,
    const double* const total_energy,
-   const std::vector<const double*> mass_fraction)
+   const std::vector<const double*>& mass_fraction)
 {
     double p = 0.0;
     
@@ -431,9 +431,9 @@ EquationOfStateIdealGas::getPressureWithMassFraction(
 double
 EquationOfStateIdealGas::getPressureWithVolumeFraction(
    const double* const density,
-   const std::vector<const double*> momentum,
+   const std::vector<const double*>& momentum,
    const double* const total_energy,
-   const std::vector<const double*> volume_fraction)
+   const std::vector<const double*>& volume_fraction)
 {
     double p = 0.0;
     
@@ -503,10 +503,10 @@ EquationOfStateIdealGas::getPressureWithVolumeFraction(
  */
 double
 EquationOfStateIdealGas::getPressureWithVolumeFraction(
-   const std::vector<const double*> partial_density,
-   const std::vector<const double*> momentum,
+   const std::vector<const double*>& partial_density,
+   const std::vector<const double*>& momentum,
    const double* const total_energy,
-   const std::vector<const double*> volume_fraction)
+   const std::vector<const double*>& volume_fraction)
 {
     double p = 0.0;
     
@@ -612,7 +612,7 @@ EquationOfStateIdealGas::getPressureWithVolumeFraction(
 double
 EquationOfStateIdealGas::getSoundSpeed(
    const double* const density,
-   const std::vector<const double*> momentum,
+   const std::vector<const double*>& momentum,
    const double* const total_energy)
 {
     double c = 0.0;
@@ -682,9 +682,9 @@ EquationOfStateIdealGas::getSoundSpeedWithPressure(
 double
 EquationOfStateIdealGas::getSoundSpeedWithMassFraction(
     const double* const density,
-    const std::vector<const double*> momentum,
+    const std::vector<const double*>& momentum,
     const double* const total_energy,
-    const std::vector<const double*> mass_fraction)
+    const std::vector<const double*>& mass_fraction)
 {
     double c = 0.0;
     
@@ -734,10 +734,10 @@ EquationOfStateIdealGas::getSoundSpeedWithMassFraction(
  */
 double
 EquationOfStateIdealGas::getSoundSpeedWithMassFraction(
-    const std::vector<const double*> partial_density,
-    const std::vector<const double*> momentum,
+    const std::vector<const double*>& partial_density,
+    const std::vector<const double*>& momentum,
     const double* const total_energy,
-    const std::vector<const double*> mass_fraction)
+    const std::vector<const double*>& mass_fraction)
 {
     double c = 0.0;
     
@@ -792,7 +792,7 @@ EquationOfStateIdealGas::getSoundSpeedWithMassFraction(
 double
 EquationOfStateIdealGas::getSoundSpeedWithMassFractionAndPressure(
     const double* const density,
-    const std::vector<const double*> mass_fraction,
+    const std::vector<const double*>& mass_fraction,
     const double* const pressure)
 {
     double c = 0.0;
@@ -840,8 +840,8 @@ EquationOfStateIdealGas::getSoundSpeedWithMassFractionAndPressure(
  */
 double
 EquationOfStateIdealGas::getSoundSpeedWithMassFractionAndPressure(
-    const std::vector<const double*> partial_density,
-    const std::vector<const double*> mass_fraction,
+    const std::vector<const double*>& partial_density,
+    const std::vector<const double*>& mass_fraction,
     const double* const pressure)
 {
     double c = 0.0;
@@ -887,9 +887,9 @@ EquationOfStateIdealGas::getSoundSpeedWithMassFractionAndPressure(
 double
 EquationOfStateIdealGas::getSoundSpeedWithVolumeFraction(
     const double* const density,
-    const std::vector<const double*> momentum,
+    const std::vector<const double*>& momentum,
     const double* const total_energy,
-    const std::vector<const double*> volume_fraction)
+    const std::vector<const double*>& volume_fraction)
 {
     double c = 0.0;
     
@@ -939,10 +939,10 @@ EquationOfStateIdealGas::getSoundSpeedWithVolumeFraction(
  */
 double
 EquationOfStateIdealGas::getSoundSpeedWithVolumeFraction(
-    const std::vector<const double*> partial_density,
-    const std::vector<const double*> momentum,
+    const std::vector<const double*>& partial_density,
+    const std::vector<const double*>& momentum,
     const double* const total_energy,
-    const std::vector<const double*> volume_fraction)
+    const std::vector<const double*>& volume_fraction)
 {
     double c = 0.0;
     
@@ -1014,7 +1014,7 @@ EquationOfStateIdealGas::getSoundSpeedWithVolumeFraction(
 double
 EquationOfStateIdealGas::getSoundSpeedWithVolumeFractionAndPressure(
     const double* const density,
-    const std::vector<const double*> volume_fraction,
+    const std::vector<const double*>& volume_fraction,
     const double* const pressure)
 {
     double c = 0.0;
@@ -1061,8 +1061,8 @@ EquationOfStateIdealGas::getSoundSpeedWithVolumeFractionAndPressure(
  */
 double
 EquationOfStateIdealGas::getSoundSpeedWithVolumeFractionAndPressure(
-    const std::vector<const double*> partial_density,
-    const std::vector<const double*> volume_fraction,
+    const std::vector<const double*>& partial_density,
+    const std::vector<const double*>& volume_fraction,
     const double* const pressure)
 {
     double c = 0.0;
@@ -1117,7 +1117,7 @@ EquationOfStateIdealGas::getSoundSpeedWithVolumeFractionAndPressure(
 double
 EquationOfStateIdealGas::getTotalEnergy(
     const double* const density,
-    const std::vector<const double*> velocity,
+    const std::vector<const double*>& velocity,
     const double* const pressure)
 {
     double E = 0.0;
@@ -1172,9 +1172,9 @@ EquationOfStateIdealGas::getTotalEnergy(
 double
 EquationOfStateIdealGas::getTotalEnergyWithMassFraction(
    const double* const density,
-   const std::vector<const double*> velocity,
+   const std::vector<const double*>& velocity,
    const double* const pressure,
-   const std::vector<const double*> mass_fraction)
+   const std::vector<const double*>& mass_fraction)
 {
     double E = 0.0;
     
@@ -1241,10 +1241,10 @@ EquationOfStateIdealGas::getTotalEnergyWithMassFraction(
  */
 double
 EquationOfStateIdealGas::getTotalEnergyWithMassFraction(
-   const std::vector<const double*> partial_density,
-   const std::vector<const double*> velocity,
+   const std::vector<const double*>& partial_density,
+   const std::vector<const double*>& velocity,
    const double* const pressure,
-   const std::vector<const double*> mass_fraction)
+   const std::vector<const double*>& mass_fraction)
 {
     double E = 0.0;
     
@@ -1312,9 +1312,9 @@ EquationOfStateIdealGas::getTotalEnergyWithMassFraction(
 double
 EquationOfStateIdealGas::getTotalEnergyWithVolumeFraction(
    const double* const density,
-   const std::vector<const double*> velocity,
+   const std::vector<const double*>& velocity,
    const double* const pressure,
-   const std::vector<const double*> volume_fraction)
+   const std::vector<const double*>& volume_fraction)
 {
     double E = 0.0;
     
@@ -1381,10 +1381,10 @@ EquationOfStateIdealGas::getTotalEnergyWithVolumeFraction(
  */
 double
 EquationOfStateIdealGas::getTotalEnergyWithVolumeFraction(
-   const std::vector<const double*> partial_density,
-   const std::vector<const double*> velocity,
+   const std::vector<const double*>& partial_density,
+   const std::vector<const double*>& velocity,
    const double* const pressure,
-   const std::vector<const double*> volume_fraction)
+   const std::vector<const double*>& volume_fraction)
 {
     double E = 0.0;
     
@@ -1485,7 +1485,7 @@ EquationOfStateIdealGas::getTotalEnergyWithVolumeFraction(
 double
 EquationOfStateIdealGas::getMixtureThermodynamicPropertyWithMassFraction(
     const std::string& property_name,
-    const std::vector<const double*> mass_fraction)
+    const std::vector<const double*>& mass_fraction)
 {
     double therm_propty_value = 0.0;
     
@@ -1544,7 +1544,7 @@ EquationOfStateIdealGas::getMixtureThermodynamicPropertyWithMassFraction(
 double
 EquationOfStateIdealGas::getMixtureThermodynamicPropertyWithVolumeFraction(
     const std::string& property_name,
-    const std::vector<const double*> volume_fraction)
+    const std::vector<const double*>& volume_fraction)
 {
     double therm_propty_value = 0.0;
     
@@ -1680,7 +1680,7 @@ EquationOfStateIdealGas::hasThermodynamicProperty(
  */
 double
 EquationOfStateIdealGas::getMixtureGammaWithPartialDensity(
-    const std::vector<const double*> partial_density)
+    const std::vector<const double*>& partial_density)
 {
     double mixture_gamma = 0.0;
     
@@ -1728,7 +1728,7 @@ EquationOfStateIdealGas::getMixtureGammaWithPartialDensity(
  */
 double
 EquationOfStateIdealGas::getMixtureGammaWithMassFraction(
-    const std::vector<const double*> mass_fraction)
+    const std::vector<const double*>& mass_fraction)
 {
     double mixture_gamma = 0.0;
     
@@ -1797,7 +1797,7 @@ EquationOfStateIdealGas::getMixtureGammaWithMassFraction(
  */
 double
 EquationOfStateIdealGas::getMixtureGammaWithVolumeFraction(
-    const std::vector<const double*> volume_fraction)
+    const std::vector<const double*>& volume_fraction)
 {
     double mixture_gamma = 0.0;
     

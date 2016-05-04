@@ -139,4 +139,4 @@ class ConvectiveFluxReconstructorWCNS_HW6_LD_HLLC_HLL: public ConvectiveFluxReco
             const boost::multi_array<double, 2>& W_array);
 };
 
-#endif /* CONVECTIVE_FLUX_RECONSTRUCTOR_TEST_HPP */
+#endif /* CONVECTIVE_FLUX_RECONSTRUCTOR_WCNS_HW6_LD_HLLC_HLL_HPP */

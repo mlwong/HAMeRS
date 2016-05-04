@@ -3,16 +3,127 @@
 #include <cmath>
 
 /*
- * Compute the fluxes and and velocities at the intercell faces
- * for single-species flow model.
+ * Compute the flux at the intercell face for single-species flow model from conservative variables.
+ */
+void
+RiemannSolverHLLC::computeIntercellFluxForSingleSpeciesFromConservativeVariables(
+    std::vector<double*>& flux_intercell,
+    std::vector<double>& conservative_variables_minus,
+    std::vector<double>& conservative_variables_plus,
+    DIRECTION direction)
+{
+#ifdef DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(static_cast<int>(flux_intercell.size()) == d_num_eqn);
+    TBOX_ASSERT(static_cast<int>(conservative_variables_minus.size()) == d_num_eqn);
+    TBOX_ASSERT(static_cast<int>(conservative_variables_plus.size()) == d_num_eqn);
+#endif
+    
+    switch (direction)
+    {
+        case X_DIRECTION:
+        {
+            computeIntercellFluxForSingleSpeciesInXDirectionFromConservativeVariables(
+                flux_intercell,
+                conservative_variables_minus,
+                conservative_variables_plus);
+            
+            break;
+        }
+        case Y_DIRECTION:
+        {
+            computeIntercellFluxForSingleSpeciesInYDirectionFromConservativeVariables(
+                flux_intercell,
+                conservative_variables_minus,
+                conservative_variables_plus);
+            
+            break;
+        }
+        case Z_DIRECTION:
+        {
+            computeIntercellFluxForSingleSpeciesInZDirectionFromConservativeVariables(
+                flux_intercell,
+                conservative_variables_minus,
+                conservative_variables_plus);
+            
+            break;
+        }
+        default:
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Unknown direction."
+                << std::endl);
+        }
+    }
+}
+
+
+/*
+ * Compute the flux at the intercell face for single-species flow model from primitive variables.
+ */
+void
+RiemannSolverHLLC::computeIntercellFluxForSingleSpeciesFromPrimitiveVariables(
+    std::vector<double*>& flux_intercell,
+    std::vector<double>& primitive_variables_minus,
+    std::vector<double>& primitive_variables_plus,
+    DIRECTION direction)
+{
+#ifdef DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(static_cast<int>(flux_intercell.size()) == d_num_eqn);
+    TBOX_ASSERT(static_cast<int>(primitive_variables_minus.size()) == d_num_eqn);
+    TBOX_ASSERT(static_cast<int>(primitive_variables_plus.size()) == d_num_eqn);
+#endif
+    
+    switch (direction)
+    {
+        case X_DIRECTION:
+        {
+            computeIntercellFluxForSingleSpeciesInXDirectionFromPrimitiveVariables(
+                flux_intercell,
+                primitive_variables_minus,
+                primitive_variables_plus);
+            
+            break;
+        }
+        case Y_DIRECTION:
+        {
+            computeIntercellFluxForSingleSpeciesInYDirectionFromPrimitiveVariables(
+                flux_intercell,
+                primitive_variables_minus,
+                primitive_variables_plus);
+            
+            break;
+        }
+        case Z_DIRECTION:
+        {
+            computeIntercellFluxForSingleSpeciesInZDirectionFromPrimitiveVariables(
+                flux_intercell,
+                primitive_variables_minus,
+                primitive_variables_plus);
+            
+            break;
+        }
+        default:
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Unknown direction."
+                << std::endl);
+        }
+    }
+}
+
+
+/*
+ * Compute the fluxes at the intercell face for single-species flow model.
  */
 void
 RiemannSolverHLLC::computeIntercellFluxForSingleSpecies(
-    std::vector<double*> flux_intercell,
+    std::vector<double*>& flux_intercell,
     const double* const density_L,
     const double* const density_R,
-    const std::vector<const double*> momentum_L,
-    const std::vector<const double*> momentum_R,
+    const std::vector<const double*>& momentum_L,
+    const std::vector<const double*>& momentum_R,
     const double* const total_energy_L,
     const double* const total_energy_R,
     DIRECTION direction)
@@ -856,21 +967,21 @@ RiemannSolverHLLC::computeIntercellFluxForSingleSpecies(
 
 
 /*
- * Compute the fluxes and and velocities at the intercell faces
+ * Compute the fluxes and velocities at the intercell face
  * for four-equation multi-species flow model by Shyue.
  */
 void
 RiemannSolverHLLC::computeIntercellFluxAndVelocityForFourEqnShyue(
-    std::vector<double*> flux_intercell,
-    std::vector<double*> velocity_intercell,
+    std::vector<double*>& flux_intercell,
+    std::vector<double*>& velocity_intercell,
     const double* const density_L,
     const double* const density_R,
-    const std::vector<const double*> momentum_L,
-    const std::vector<const double*> momentum_R,
+    const std::vector<const double*>& momentum_L,
+    const std::vector<const double*>& momentum_R,
     const double* const total_energy_L,
     const double* const total_energy_R,
-    const std::vector<const double*> mass_fraction_L,
-    const std::vector<const double*> mass_fraction_R,
+    const std::vector<const double*>& mass_fraction_L,
+    const std::vector<const double*>& mass_fraction_R,
     DIRECTION direction)
 {
     if (d_dim == tbox::Dimension(1))
@@ -2026,21 +2137,21 @@ RiemannSolverHLLC::computeIntercellFluxAndVelocityForFourEqnShyue(
 
 
 /*
- * Compute the fluxes and and velocities at the intercell faces
+ * Compute the fluxes and velocities at the intercell face
  * for five-equation multi-species flow model by Allaire.
  */
 void
 RiemannSolverHLLC::computeIntercellFluxAndVelocityForFiveEqnAllaire(
-    std::vector<double*> flux_intercell,
-    std::vector<double*> velocity_intercell,
-    const std::vector<const double*> partial_density_L,
-    const std::vector<const double*> partial_density_R,
-    const std::vector<const double*> momentum_L,
-    const std::vector<const double*> momentum_R,
+    std::vector<double*>& flux_intercell,
+    std::vector<double*>& velocity_intercell,
+    const std::vector<const double*>& partial_density_L,
+    const std::vector<const double*>& partial_density_R,
+    const std::vector<const double*>& momentum_L,
+    const std::vector<const double*>& momentum_R,
     const double* const total_energy_L,
     const double* const total_energy_R,
-    const std::vector<const double*> volume_fraction_L,
-    const std::vector<const double*> volume_fraction_R,
+    const std::vector<const double*>& volume_fraction_L,
+    const std::vector<const double*>& volume_fraction_R,
     DIRECTION direction)
 {
     if (d_dim == tbox::Dimension(1))
@@ -3333,6 +3444,1247 @@ RiemannSolverHLLC::computeIntercellFluxAndVelocityForFiveEqnAllaire(
                            << ": "
                            << "Unknown direction."
                            << std::endl);
+            }
+        }
+    }
+}
+
+
+/*
+ * Compute the flux in the x-direction at the intercell face for single-species flow model
+ * from conservative variables.
+ */
+void
+RiemannSolverHLLC::computeIntercellFluxForSingleSpeciesInXDirectionFromConservativeVariables(
+    std::vector<double*>& F_x_intercell,
+    std::vector<double>& Q_L,
+    std::vector<double>& Q_R)
+{
+    if (d_dim == tbox::Dimension(1))
+    {
+        const double u_L = Q_L[1]/Q_L[0];
+        const double u_R = Q_R[1]/Q_R[0];
+        
+        std::vector<const double*> m_L(1);
+        std::vector<const double*> m_R(1);
+        m_L[0] = &Q_L[1];
+        m_R[0] = &Q_R[1];
+        
+        const double p_L = d_equation_of_state->getPressure(
+            &Q_L[0],
+            m_L,
+            &Q_L[2]);
+        
+        const double p_R = d_equation_of_state->getPressure(
+            &Q_R[0],
+            m_R,
+            &Q_R[2]);
+        
+        const double c_L = d_equation_of_state->getSoundSpeedWithPressure(
+            &Q_L[0],
+            &p_L);
+        
+        const double c_R = d_equation_of_state->getSoundSpeedWithPressure(
+            &Q_R[0],
+            &p_R);
+        
+        const double u_average = 0.5*(u_L + u_R);
+        const double c_average = 0.5*(c_L + c_R);
+        
+        const double s_L = fmin(u_average - c_average, u_L - c_L);
+        const double s_R = fmax(u_average + c_average, u_R + c_R);
+        
+        const double s_minus = fmin(0.0, s_L);
+        const double s_plus  = fmax(0.0, s_R);
+        
+        const double s_star =
+            (p_R - p_L + Q_L[1]*(s_L - u_L) - Q_R[1]*(s_R - u_R))/(Q_L[0]*(s_L - u_L) -
+                Q_R[0]*(s_R - u_R));
+        
+        if (s_star > 0)
+        {
+            const double Chi_star_L = (s_L - u_L)/(s_L - s_star);
+            
+            double Q_star_L[3];
+            Q_star_L[0] = Chi_star_L*Q_L[0];
+            Q_star_L[1] = Chi_star_L*Q_L[0]*s_star;
+            Q_star_L[2] = Chi_star_L*(Q_L[2] + (s_star - u_L)*(Q_L[0]*s_star + p_L/(s_L - u_L)));
+            
+            double F_x_L[3];
+            F_x_L[0] = Q_L[1];
+            F_x_L[1] = Q_L[1]*u_L + p_L;
+            F_x_L[2] = u_L*(Q_L[2] + p_L);
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                (*F_x_intercell[ei]) = F_x_L[ei] + s_minus*(Q_star_L[ei] - Q_L[ei]);
+            }
+        }
+        else
+        {
+            const double Chi_star_R = (s_R - u_R)/(s_R - s_star);
+            
+            double Q_star_R[3];
+            Q_star_R[0] = Chi_star_R*Q_R[0];
+            Q_star_R[1] = Chi_star_R*Q_R[0]*s_star;
+            Q_star_R[2] = Chi_star_R*(Q_R[2] + (s_star - u_R)*(Q_R[0]*s_star + p_R/(s_R - u_R)));
+            
+            double F_x_R[3];
+            F_x_R[0] = Q_R[1];
+            F_x_R[1] = Q_R[1]*u_R + p_R;
+            F_x_R[2] = u_R*(Q_R[2] + p_R);
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                (*F_x_intercell[ei]) = F_x_R[ei] + s_plus*(Q_star_R[ei] - Q_R[ei]);
+            }
+        }
+        
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        const double u_L = Q_L[1]/Q_L[0];
+        const double u_R = Q_R[1]/Q_R[0];
+        
+        const double v_L = Q_L[2]/Q_L[0];
+        const double v_R = Q_R[2]/Q_R[0];
+        
+        std::vector<const double*> m_L(2);
+        std::vector<const double*> m_R(2);
+        m_L[0] = &Q_L[1];
+        m_R[0] = &Q_R[1];
+        m_L[1] = &Q_L[2];
+        m_R[1] = &Q_R[2];
+        
+        const double p_L = d_equation_of_state->getPressure(
+            &Q_L[0],
+            m_L,
+            &Q_L[3]);
+        
+        const double p_R = d_equation_of_state->getPressure(
+            &Q_R[0],
+            m_R,
+            &Q_R[3]);
+        
+        const double c_L = d_equation_of_state->getSoundSpeedWithPressure(
+            &Q_L[0],
+            &p_L);
+        
+        const double c_R = d_equation_of_state->getSoundSpeedWithPressure(
+            &Q_R[0],
+            &p_R);
+        
+        const double u_average = 0.5*(u_L + u_R);
+        const double c_average = 0.5*(c_L + c_R);
+        
+        const double s_L = fmin(u_average - c_average, u_L - c_L);
+        const double s_R = fmax(u_average + c_average, u_R + c_R);
+        
+        const double s_minus = fmin(0.0, s_L);
+        const double s_plus  = fmax(0.0, s_R);
+        
+        const double s_star =
+            (p_R - p_L + Q_L[1]*(s_L - u_L) - Q_R[1]*(s_R - u_R))/(Q_L[0]*(s_L - u_L) -
+                Q_R[0]*(s_R - u_R));
+        
+        if (s_star > 0)
+        {
+            const double Chi_star_L = (s_L - u_L)/(s_L - s_star);
+            
+            double Q_star_L[4];
+            Q_star_L[0] = Chi_star_L*Q_L[0];
+            Q_star_L[1] = Chi_star_L*Q_L[0]*s_star;
+            Q_star_L[2] = Chi_star_L*Q_L[2];
+            Q_star_L[3] = Chi_star_L*(Q_L[3] + (s_star - u_L)*(Q_L[0]*s_star + p_L/(s_L - u_L)));
+            
+            double F_x_L[4];
+            F_x_L[0] = Q_L[1];
+            F_x_L[1] = Q_L[1]*u_L + p_L;
+            F_x_L[2] = Q_L[1]*v_L;
+            F_x_L[3] = u_L*(Q_L[3] + p_L);
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                (*F_x_intercell[ei]) = F_x_L[ei] + s_minus*(Q_star_L[ei] - Q_L[ei]);
+            }
+        }
+        else
+        {
+            const double Chi_star_R = (s_R - u_R)/(s_R - s_star);
+            
+            double Q_star_R[4];
+            Q_star_R[0] = Chi_star_R*Q_R[0];
+            Q_star_R[1] = Chi_star_R*Q_R[0]*s_star;
+            Q_star_R[2] = Chi_star_R*Q_R[2];
+            Q_star_R[3] = Chi_star_R*(Q_R[3] + (s_star - u_R)*(Q_R[0]*s_star + p_R/(s_R - u_R)));
+            
+            double F_x_R[4];
+            F_x_R[0] = Q_R[1];
+            F_x_R[1] = Q_R[1]*u_R + p_R;
+            F_x_R[2] = Q_R[1]*v_R;
+            F_x_R[3] = u_R*(Q_R[3] + p_R);
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                (*F_x_intercell[ei]) = F_x_R[ei] + s_plus*(Q_star_R[ei] - Q_R[ei]);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const double u_L = Q_L[1]/Q_L[0];
+        const double u_R = Q_R[1]/Q_R[0];
+        
+        const double v_L = Q_L[2]/Q_L[0];
+        const double v_R = Q_R[2]/Q_R[0];
+        
+        const double w_L = Q_L[3]/Q_L[0];
+        const double w_R = Q_R[3]/Q_R[0];
+        
+        std::vector<const double*> m_L(3);
+        std::vector<const double*> m_R(3);
+        m_L[0] = &Q_L[1];
+        m_R[0] = &Q_R[1];
+        m_L[1] = &Q_L[2];
+        m_R[1] = &Q_R[2];
+        m_L[2] = &Q_L[3];
+        m_R[2] = &Q_R[3];
+        
+        const double p_L = d_equation_of_state->getPressure(
+            &Q_L[0],
+            m_L,
+            &Q_L[4]);
+        
+        const double p_R = d_equation_of_state->getPressure(
+            &Q_R[0],
+            m_R,
+            &Q_R[4]);
+        
+        const double c_L = d_equation_of_state->getSoundSpeedWithPressure(
+            &Q_L[0],
+            &p_L);
+        
+        const double c_R = d_equation_of_state->getSoundSpeedWithPressure(
+            &Q_R[0],
+            &p_R);
+        
+        const double u_average = 0.5*(u_L + u_R);
+        const double c_average = 0.5*(c_L + c_R);
+        
+        const double s_L = fmin(u_average - c_average, u_L - c_L);
+        const double s_R = fmax(u_average + c_average, u_R + c_R);
+        
+        const double s_minus = fmin(0.0, s_L);
+        const double s_plus  = fmax(0.0, s_R);
+        
+        const double s_star =
+            (p_R - p_L + Q_L[1]*(s_L - u_L) - Q_R[1]*(s_R - u_R))/(Q_L[0]*(s_L - u_L) -
+                Q_R[0]*(s_R - u_R));
+        
+        if (s_star > 0)
+        {
+            const double Chi_star_L = (s_L - u_L)/(s_L - s_star);
+            
+            double Q_star_L[5];
+            Q_star_L[0] = Chi_star_L*Q_L[0];
+            Q_star_L[1] = Chi_star_L*Q_L[0]*s_star;
+            Q_star_L[2] = Chi_star_L*Q_L[2];
+            Q_star_L[3] = Chi_star_L*Q_L[3];
+            Q_star_L[4] = Chi_star_L*(Q_L[4] + (s_star - u_L)*(Q_L[0]*s_star + p_L/(s_L - u_L)));
+            
+            double F_x_L[5];
+            F_x_L[0] = Q_L[1];
+            F_x_L[1] = Q_L[1]*u_L + p_L;
+            F_x_L[2] = Q_L[1]*v_L;
+            F_x_L[3] = Q_L[1]*w_L;
+            F_x_L[4] = (u_L*(Q_L[4] + p_L));
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                (*F_x_intercell[ei]) = F_x_L[ei] + s_minus*(Q_star_L[ei] - Q_L[ei]);
+            }
+        }
+        else
+        {
+            const double Chi_star_R = (s_R - u_R)/(s_R - s_star);
+            
+            double Q_star_R[5];
+            Q_star_R[0] = Chi_star_R*Q_R[0];
+            Q_star_R[1] = Chi_star_R*Q_R[0]*s_star;
+            Q_star_R[2] = Chi_star_R*Q_R[2];
+            Q_star_R[3] = Chi_star_R*Q_R[3];
+            Q_star_R[4] = Chi_star_R*(Q_R[4] + (s_star - u_R)*(Q_R[0]*s_star + p_R/(s_R - u_R)));
+            
+            double F_x_R[5];
+            F_x_R[0] = Q_R[1];
+            F_x_R[1] = Q_R[1]*u_R + p_R;
+            F_x_R[2] = Q_R[1]*v_R;
+            F_x_R[3] = Q_R[1]*w_R;
+            F_x_R[4] = (u_R*(Q_R[4] + p_R));
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                (*F_x_intercell[ei]) = F_x_R[ei] + s_plus*(Q_star_R[ei] - Q_R[ei]);
+            }
+        }
+    }
+}
+
+
+/*
+ * Compute the flux in the y-direction at the intercell face for single-species flow model
+ * from conservative variables.
+ */
+void
+RiemannSolverHLLC::computeIntercellFluxForSingleSpeciesInYDirectionFromConservativeVariables(
+    std::vector<double*>& F_y_intercell,
+    std::vector<double>& Q_B,
+    std::vector<double>& Q_T)
+{
+    if (d_dim == tbox::Dimension(1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no y direction for 1D problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        const double u_B = Q_B[1]/Q_B[0];
+        const double u_T = Q_T[1]/Q_T[0];
+        
+        const double v_B = Q_B[2]/Q_B[0];
+        const double v_T = Q_T[2]/Q_T[0];
+        
+        std::vector<const double*> m_B(2);
+        std::vector<const double*> m_T(2);
+        m_B[0] = &Q_B[1];
+        m_T[0] = &Q_T[1];
+        m_B[1] = &Q_B[2];
+        m_T[1] = &Q_T[2];
+        
+        const double p_B = d_equation_of_state->getPressure(
+            &Q_B[0],
+            m_B,
+            &Q_B[3]);
+        
+        const double p_T = d_equation_of_state->getPressure(
+            &Q_T[0],
+            m_T,
+            &Q_T[3]);
+        
+        const double c_B = d_equation_of_state->getSoundSpeedWithPressure(
+            &Q_B[0],
+            &p_B);
+        
+        const double c_T = d_equation_of_state->getSoundSpeedWithPressure(
+            &Q_T[0],
+            &p_T);
+        
+        const double v_average = 0.5*(v_B + v_T);
+        const double c_average = 0.5*(c_B + c_T);
+        
+        const double s_B = fmin(v_average - c_average, v_B - c_B);
+        const double s_T = fmax(v_average + c_average, v_T + c_T);
+        
+        const double s_minus = fmin(0.0, s_B);
+        const double s_plus  = fmax(0.0, s_T);
+        
+        const double s_star =
+            (p_T - p_B + Q_B[2]*(s_B - v_B) - Q_T[2]*(s_T - v_T))/(Q_B[0]*(s_B - v_B) -
+                Q_T[0]*(s_T - v_T));
+        
+        if (s_star > 0)
+        {
+            const double Chi_star_B = (s_B - v_B)/(s_B - s_star);
+            
+            double Q_star_B[4];
+            Q_star_B[0] = Chi_star_B*Q_B[0];
+            Q_star_B[1] = Chi_star_B*Q_B[1];
+            Q_star_B[2] = Chi_star_B*Q_B[0]*s_star;
+            Q_star_B[3] = Chi_star_B*(Q_B[3] + (s_star - v_B)*(Q_B[0]*s_star + p_B/(s_B - v_B)));
+            
+            double F_y_B[4];
+            F_y_B[0] = Q_B[2];
+            F_y_B[0] = Q_B[2]*u_B;
+            F_y_B[0] = Q_B[2]*v_B + p_B;
+            F_y_B[0] = v_B*(Q_B[3] + p_B);
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                (*F_y_intercell[ei]) = F_y_B[ei] + s_minus*(Q_star_B[ei] - Q_B[ei]);
+            }
+        }
+        else
+        {
+            const double Chi_star_T = (s_T - v_T)/(s_T - s_star);
+            
+            double Q_star_T[4];
+            Q_star_T[0] = Chi_star_T*Q_T[0];
+            Q_star_T[1] = Chi_star_T*Q_T[1];
+            Q_star_T[2] = Chi_star_T*Q_T[0]*s_star;
+            Q_star_T[3] = Chi_star_T*(Q_T[3] + (s_star - v_T)*(Q_T[0]*s_star + p_T/(s_T - v_T)));
+            
+            double F_y_T[4];
+            F_y_T[0] = Q_T[2];
+            F_y_T[0] = Q_T[2]*u_T;
+            F_y_T[0] = Q_T[2]*v_T + p_T;
+            F_y_T[0] = v_T*(Q_T[3] + p_T);
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                (*F_y_intercell[ei]) = F_y_T[ei] + s_plus*(Q_star_T[ei] - Q_T[ei]);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const double u_B = Q_B[1]/Q_B[0];
+        const double u_T = Q_T[1]/Q_T[0];
+        
+        const double v_B = Q_B[2]/Q_B[0];
+        const double v_T = Q_T[2]/Q_T[0];
+        
+        const double w_B = Q_B[3]/Q_B[0];
+        const double w_T = Q_T[3]/Q_T[0];
+        
+        std::vector<const double*> m_B(3);
+        std::vector<const double*> m_T(3);
+        m_B[0] = &Q_B[1];
+        m_T[0] = &Q_T[1];
+        m_B[1] = &Q_B[2];
+        m_T[1] = &Q_T[2];
+        m_B[2] = &Q_B[3];
+        m_T[2] = &Q_T[3];
+        
+        const double p_B = d_equation_of_state->getPressure(
+            &Q_B[0],
+            m_B,
+            &Q_B[4]);
+        
+        const double p_T = d_equation_of_state->getPressure(
+            &Q_T[0],
+            m_T,
+            &Q_T[0]);
+        
+        const double c_B = d_equation_of_state->getSoundSpeedWithPressure(
+            &Q_B[0],
+            &p_B);
+        
+        const double c_T = d_equation_of_state->getSoundSpeedWithPressure(
+            &Q_T[0],
+            &p_T);
+        
+        const double v_average = 0.5*(v_B + v_T);
+        const double c_average = 0.5*(c_B + c_T);
+        
+        const double s_B = fmin(v_average - c_average, v_B - c_B);
+        const double s_T = fmax(v_average + c_average, v_T + c_T);
+        
+        const double s_minus = fmin(0.0, s_B);
+        const double s_plus  = fmax(0.0, s_T);
+        
+        const double s_star =
+            (p_T - p_B + Q_B[2]*(s_B - v_B) - Q_T[2]*(s_T - v_T))/(Q_B[0]*(s_B - v_B) -
+                Q_T[0]*(s_T - v_T));
+        
+        if (s_star > 0)
+        {
+            const double Chi_star_B = (s_B - v_B)/(s_B - s_star);
+            
+            double Q_star_B[5];
+            Q_star_B[0] = Chi_star_B*Q_B[0];
+            Q_star_B[1] = Chi_star_B*Q_B[1];
+            Q_star_B[2] = Chi_star_B*Q_B[0]*s_star;
+            Q_star_B[3] = Chi_star_B*Q_B[3];
+            Q_star_B[4] = Chi_star_B*(Q_B[4] + (s_star - v_B)*(Q_B[0]*s_star + p_B/(s_B - v_B)));
+            
+            double F_y_B[5];
+            F_y_B[0] = Q_B[2];
+            F_y_B[1] = Q_B[2]*u_B;
+            F_y_B[2] = Q_B[2]*v_B + p_B;
+            F_y_B[3] = Q_B[2]*w_B;
+            F_y_B[4] = v_B*(Q_B[4] + p_B);
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                (*F_y_intercell[ei]) = F_y_B[ei] + s_minus*(Q_star_B[ei] - Q_B[ei]);
+            }
+        }
+        else
+        {
+            const double Chi_star_T = (s_T - v_T)/(s_T - s_star);
+            
+            double Q_star_T[5];
+            Q_star_T[0] = Chi_star_T*Q_T[0];
+            Q_star_T[1] = Chi_star_T*Q_T[1];
+            Q_star_T[2] = Chi_star_T*Q_T[0]*s_star;
+            Q_star_T[3] = Chi_star_T*Q_T[3];
+            Q_star_T[4] = Chi_star_T*(Q_T[4] + (s_star - v_T)*(Q_T[0]*s_star + p_T/(s_T - v_T)));
+            
+            double F_y_T[5];
+            F_y_T[0] = Q_T[2];
+            F_y_T[1] = Q_T[2]*u_T;
+            F_y_T[2] = Q_T[2]*v_T + p_T;
+            F_y_T[3] = Q_T[2]*w_T;
+            F_y_T[4] = v_T*(Q_T[4] + p_T);
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                (*F_y_intercell[ei]) = F_y_T[ei] + s_plus*(Q_star_T[ei] - Q_T[ei]);
+            }
+        }
+    }
+}
+
+
+/*
+ * Compute the flux in the z-direction at the intercell face for single-species flow model
+ * from conservative variables.
+ */
+void
+RiemannSolverHLLC::computeIntercellFluxForSingleSpeciesInZDirectionFromConservativeVariables(
+    std::vector<double*>& F_z_intercell,
+    std::vector<double>& Q_B,
+    std::vector<double>& Q_F)
+{
+    if (d_dim == tbox::Dimension(1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no z direction for 1D problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no z direction for 2D problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const double u_B = Q_B[1]/Q_B[0];
+        const double u_F = Q_F[1]/Q_F[0];
+        
+        const double v_B = Q_B[2]/Q_B[0];
+        const double v_F = Q_F[2]/Q_F[0];
+        
+        const double w_B = Q_B[3]/Q_B[0];
+        const double w_F = Q_F[3]/Q_F[0];
+        
+        std::vector<const double*> m_B(3);
+        std::vector<const double*> m_F(3);
+        m_B[0] = &Q_B[1];
+        m_F[0] = &Q_F[1];
+        m_B[1] = &Q_B[2];
+        m_F[1] = &Q_F[2];
+        m_B[2] = &Q_B[3];
+        m_F[2] = &Q_F[3];
+        
+        const double p_B = d_equation_of_state->getPressure(
+            &Q_B[0],
+            m_B,
+            &Q_B[4]);
+        
+        const double p_F = d_equation_of_state->getPressure(
+            &Q_F[0],
+            m_F,
+            &Q_F[4]);
+        
+        const double c_B = d_equation_of_state->getSoundSpeedWithPressure(
+            &Q_B[0],
+            &p_B);
+        
+        const double c_F = d_equation_of_state->getSoundSpeedWithPressure(
+            &Q_F[0],
+            &p_F);
+        
+        const double w_average = 0.5*(w_B + w_F);
+        const double c_average = 0.5*(c_B + c_F);
+        
+        const double s_B = fmin(w_average - c_average, w_B - c_B);
+        const double s_F = fmax(w_average + c_average, w_F + c_F);
+        
+        const double s_minus = fmin(0.0, s_B);
+        const double s_plus  = fmax(0.0, s_F);
+        
+        const double s_star =
+            (p_F - p_B + Q_B[3]*(s_B - w_B) - Q_F[3]*(s_F - w_F))/(Q_B[0]*(s_B - w_B) -
+                Q_F[0]*(s_F - w_F));
+        
+        if (s_star > 0)
+        {
+            const double Chi_star_B = (s_B - w_B)/(s_B - s_star);
+            
+            double Q_star_B[5];
+            Q_star_B[0] = Chi_star_B*Q_B[0];
+            Q_star_B[1] = Chi_star_B*Q_B[1];
+            Q_star_B[2] = Chi_star_B*Q_B[2];
+            Q_star_B[3] = Chi_star_B*Q_B[0]*s_star;
+            Q_star_B[4] = Chi_star_B*(Q_B[4] + (s_star - w_B)*(Q_B[0]*s_star + p_B/(s_B - w_B)));
+            
+            double F_z_B[5];
+            F_z_B[0] = Q_B[3];
+            F_z_B[1] = Q_B[3]*u_B;
+            F_z_B[2] = Q_B[3]*v_B;
+            F_z_B[3] = Q_B[3]*w_B + p_B;
+            F_z_B[4] = w_B*(Q_B[4] + p_B);
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                (*F_z_intercell[ei]) = F_z_B[ei] + s_minus*(Q_star_B[ei] - Q_B[ei]);
+            }
+        }
+        else
+        {
+            const double Chi_star_F = (s_F - w_F)/(s_F - s_star);
+            
+            double Q_star_F[5];
+            Q_star_F[0] = Chi_star_F*Q_F[0];
+            Q_star_F[1] = Chi_star_F*Q_F[1];
+            Q_star_F[2] = Chi_star_F*Q_F[2];
+            Q_star_F[3] = Chi_star_F*Q_F[0]*s_star;
+            Q_star_F[4] = Chi_star_F*(Q_F[4] + (s_star - w_F)*(Q_F[0]*s_star + p_F/(s_F - w_F)));
+            
+            double F_z_F[5];
+            F_z_F[0] = Q_F[3];
+            F_z_F[1] = Q_F[3]*u_F;
+            F_z_F[2] = Q_F[3]*v_F;
+            F_z_F[3] = Q_F[3]*w_F + p_F;
+            F_z_F[4] = w_F*(Q_F[4] + p_F);
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                (*F_z_intercell[ei]) = F_z_F[ei] + s_plus*(Q_star_F[ei] - Q_F[ei]);
+            }
+        }
+    }
+}
+
+
+/*
+ * Compute the flux in the x-direction at the intercell face for single-species flow model
+ * from primitive variables.
+ */
+void
+RiemannSolverHLLC::computeIntercellFluxForSingleSpeciesInXDirectionFromPrimitiveVariables(
+    std::vector<double*>& F_x_intercell,
+    std::vector<double>& V_L,
+    std::vector<double>& V_R)
+{
+    if (d_dim == tbox::Dimension(1))
+    {
+        const double c_L = d_equation_of_state->getSoundSpeedWithPressure(
+            &V_L[0],
+            &V_L[2]);
+        
+        const double c_R = d_equation_of_state->getSoundSpeedWithPressure(
+            &V_R[0],
+            &V_R[2]);
+        
+        const double u_average = 0.5*(V_L[1] + V_R[1]);
+        const double c_average = 0.5*(c_L + c_R);
+        
+        const double s_L = fmin(u_average - c_average, V_L[1] - c_L);
+        const double s_R = fmax(u_average + c_average, V_R[1] + c_R);
+        
+        const double s_minus = fmin(0.0, s_L);
+        const double s_plus  = fmax(0.0, s_R);
+        
+        const double s_star =
+            (V_R[2] - V_L[2] + V_L[0]*V_L[1]*(s_L - V_L[1]) - V_R[0]*V_R[1]*(s_R - V_R[1]))/(V_L[0]*(s_L - V_L[1]) -
+                V_R[0]*(s_R - V_R[1]));
+        
+        if (s_star > 0)
+        {
+            const double Chi_star_L = (s_L - V_L[1])/(s_L - s_star);
+            
+            std::vector<const double*> vel_L(1);
+            vel_L[0] = &V_L[1];
+            
+            std::vector<double> Q_L(3);
+            Q_L[0] = V_L[0];
+            Q_L[1] = V_L[0]*V_L[1];
+            Q_L[2] = d_equation_of_state->getTotalEnergy(
+                &V_L[0],
+                vel_L,
+                &V_L[2]);
+            
+            std::vector<double> Q_star_L(3);
+            Q_star_L[0] = Chi_star_L*V_L[0];
+            Q_star_L[1] = Chi_star_L*V_L[0]*s_star;
+            Q_star_L[2] = Chi_star_L*(Q_L[2] + (s_star - V_L[1])*(V_L[0]*s_star + V_L[2]/(s_L - V_L[1])));
+            
+            std::vector<double> F_x_L(3);
+            F_x_L[0] = Q_L[1];
+            F_x_L[1] = Q_L[1]*V_L[1] + V_L[2];
+            F_x_L[2] = V_L[1]*(Q_L[2] + V_L[2]);
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                (*F_x_intercell[ei]) = F_x_L[ei] + s_minus*(Q_star_L[ei] - Q_L[ei]);
+            }
+        }
+        else
+        {
+            const double Chi_star_R = (s_R - V_R[1])/(s_R - s_star);
+            
+            std::vector<const double*> vel_R(1);
+            vel_R[0] = &V_R[1];
+            
+            std::vector<double> Q_R(3);
+            Q_R[0] = V_R[0];
+            Q_R[1] = V_R[0]*V_R[1];
+            Q_R[2] = d_equation_of_state->getTotalEnergy(
+                &V_R[0],
+                vel_R,
+                &V_R[2]);
+            
+            std::vector<double> Q_star_R(3);
+            Q_star_R[0] = Chi_star_R*V_R[0];
+            Q_star_R[1] = Chi_star_R*V_R[0]*s_star;
+            Q_star_R[2] = Chi_star_R*(Q_R[2] + (s_star - V_R[1])*(V_R[0]*s_star + V_R[2]/(s_R - V_R[1])));
+            
+            std::vector<double> F_x_R(3);
+            F_x_R[0] = Q_R[1];
+            F_x_R[1] = Q_R[1]*V_R[1] + V_R[2];
+            F_x_R[2] = V_R[1]*(Q_R[2] + V_R[2]);
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                (*F_x_intercell[ei]) = F_x_R[ei] + s_plus*(Q_star_R[ei] - Q_R[ei]);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        const double c_L = d_equation_of_state->getSoundSpeedWithPressure(
+            &V_L[0],
+            &V_L[3]);
+        
+        const double c_R = d_equation_of_state->getSoundSpeedWithPressure(
+            &V_R[0],
+            &V_R[3]);
+        
+        const double u_average = 0.5*(V_L[1] + V_R[1]);
+        const double c_average = 0.5*(c_L + c_R);
+        
+        const double s_L = fmin(u_average - c_average, V_L[1] - c_L);
+        const double s_R = fmax(u_average + c_average, V_R[1] + c_R);
+        
+        const double s_minus = fmin(0.0, s_L);
+        const double s_plus  = fmax(0.0, s_R);
+        
+        const double s_star =
+            (V_R[3] - V_L[3] + V_L[0]*V_L[1]*(s_L - V_L[1]) - V_R[0]*V_R[1]*(s_R - V_R[1]))/(V_L[0]*(s_L - V_L[1]) -
+                V_R[0]*(s_R - V_R[1]));
+        
+        if (s_star > 0)
+        {
+            const double Chi_star_L = (s_L - V_L[1])/(s_L - s_star);
+            
+            std::vector<const double*> vel_L(2);
+            vel_L[0] = &V_L[1];
+            vel_L[1] = &V_L[2];
+            
+            std::vector<double> Q_L(4);
+            Q_L[0] = V_L[0];
+            Q_L[1] = V_L[0]*V_L[1];
+            Q_L[2] = V_L[0]*V_L[2];
+            Q_L[3] = d_equation_of_state->getTotalEnergy(
+                &V_L[0],
+                vel_L,
+                &V_L[3]);
+            
+            std::vector<double> Q_star_L(4);
+            Q_star_L[0] = Chi_star_L*V_L[0];
+            Q_star_L[1] = Chi_star_L*V_L[0]*s_star;
+            Q_star_L[2] = Chi_star_L*Q_L[2];
+            Q_star_L[3] = Chi_star_L*(Q_L[3] + (s_star - V_L[1])*(V_L[0]*s_star + V_L[3]/(s_L - V_L[1])));
+            
+            std::vector<double> F_x_L(4);
+            F_x_L[0] = Q_L[1];
+            F_x_L[1] = Q_L[1]*V_L[1] + V_L[3];
+            F_x_L[2] = Q_L[1]*V_L[2];
+            F_x_L[3] = V_L[1]*(Q_L[3] + V_L[3]);
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                (*F_x_intercell[ei]) = F_x_L[ei] + s_minus*(Q_star_L[ei] - Q_L[ei]);
+            }
+        }
+        else
+        {
+            const double Chi_star_R = (s_R - V_R[1])/(s_R - s_star);
+            
+            std::vector<const double*> vel_R(2);
+            vel_R[0] = &V_R[1];
+            vel_R[1] = &V_R[2];
+            
+            std::vector<double> Q_R(4);
+            Q_R[0] = V_R[0];
+            Q_R[1] = V_R[0]*V_R[1];
+            Q_R[2] = V_R[0]*V_R[2];
+            Q_R[3] = d_equation_of_state->getTotalEnergy(
+                &V_R[0],
+                vel_R,
+                &V_R[3]);
+            
+            std::vector<double> Q_star_R(4);
+            Q_star_R[0] = Chi_star_R*V_R[0];
+            Q_star_R[1] = Chi_star_R*V_R[0]*s_star;
+            Q_star_R[2] = Chi_star_R*Q_R[2];
+            Q_star_R[3] = Chi_star_R*(Q_R[3] + (s_star - V_R[1])*(V_R[0]*s_star + V_R[3]/(s_R - V_R[1])));
+            
+            std::vector<double> F_x_R(4);
+            F_x_R[0] = Q_R[1];
+            F_x_R[1] = Q_R[1]*V_R[1] + V_R[3];
+            F_x_R[2] = Q_R[1]*V_R[2];
+            F_x_R[3] = V_R[1]*(Q_R[3] + V_R[3]);
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                (*F_x_intercell[ei]) = F_x_R[ei] + s_plus*(Q_star_R[ei] - Q_R[ei]);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const double c_L = d_equation_of_state->getSoundSpeedWithPressure(
+            &V_L[0],
+            &V_L[4]);
+        
+        const double c_R = d_equation_of_state->getSoundSpeedWithPressure(
+            &V_R[0],
+            &V_R[4]);
+        
+        const double u_average = 0.5*(V_L[1] + V_R[1]);
+        const double c_average = 0.5*(c_L + c_R);
+        
+        const double s_L = fmin(u_average - c_average, V_L[1] - c_L);
+        const double s_R = fmax(u_average + c_average, V_R[1] + c_R);
+        
+        const double s_minus = fmin(0.0, s_L);
+        const double s_plus  = fmax(0.0, s_R);
+        
+        const double s_star =
+            (V_R[4] - V_L[4] + V_L[0]*V_L[1]*(s_L - V_L[1]) - V_R[0]*V_R[1]*(s_R - V_R[1]))/(V_L[0]*(s_L - V_L[1]) -
+                V_R[0]*(s_R - V_R[1]));
+        
+        if (s_star > 0)
+        {
+            const double Chi_star_L = (s_L - V_L[1])/(s_L - s_star);
+            
+            std::vector<const double*> vel_L(3);
+            vel_L[0] = &V_L[1];
+            vel_L[1] = &V_L[2];
+            vel_L[2] = &V_L[3];
+            
+            std::vector<double> Q_L(5);
+            Q_L[0] = V_L[0];
+            Q_L[1] = V_L[0]*V_L[1];
+            Q_L[2] = V_L[0]*V_L[2];
+            Q_L[3] = V_L[0]*V_L[3];
+            Q_L[4] = d_equation_of_state->getTotalEnergy(
+                &V_L[0],
+                vel_L,
+                &V_L[4]);
+            
+            std::vector<double> Q_star_L(5);
+            Q_star_L[0] = Chi_star_L*V_L[0];
+            Q_star_L[1] = Chi_star_L*V_L[0]*s_star;
+            Q_star_L[2] = Chi_star_L*Q_L[2];
+            Q_star_L[3] = Chi_star_L*Q_L[3];
+            Q_star_L[4] = Chi_star_L*(Q_L[4] + (s_star - V_L[1])*(V_L[0]*s_star + V_L[4]/(s_L - V_L[1])));
+            
+            std::vector<double> F_x_L(5);
+            F_x_L[0] = Q_L[1];
+            F_x_L[1] = Q_L[1]*V_L[1] + V_L[4];
+            F_x_L[2] = Q_L[1]*V_L[2];
+            F_x_L[3] = Q_L[1]*V_L[3];
+            F_x_L[4] = V_L[1]*(Q_L[4] + V_L[4]);
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                (*F_x_intercell[ei]) = F_x_L[ei] + s_minus*(Q_star_L[ei] - Q_L[ei]);
+            }
+        }
+        else
+        {
+            const double Chi_star_R = (s_R - V_R[1])/(s_R - s_star);
+            
+            std::vector<const double*> vel_R(3);
+            vel_R[0] = &V_R[1];
+            vel_R[1] = &V_R[2];
+            vel_R[2] = &V_R[3];
+            
+            std::vector<double> Q_R(5);
+            Q_R[0] = V_R[0];
+            Q_R[1] = V_R[0]*V_R[1];
+            Q_R[2] = V_R[0]*V_R[2];
+            Q_R[3] = V_R[0]*V_R[3];
+            Q_R[4] = d_equation_of_state->getTotalEnergy(
+                &V_R[0],
+                vel_R,
+                &V_R[4]);
+            
+            std::vector<double> Q_star_R(5);
+            Q_star_R[0] = Chi_star_R*V_R[0];
+            Q_star_R[1] = Chi_star_R*V_R[0]*s_star;
+            Q_star_R[2] = Chi_star_R*Q_R[2];
+            Q_star_R[3] = Chi_star_R*Q_R[3];
+            Q_star_R[4] = Chi_star_R*(Q_R[4] + (s_star - V_R[1])*(V_R[0]*s_star + V_R[4]/(s_R - V_R[1])));
+            
+            std::vector<double> F_x_R(5);
+            F_x_R[0] = Q_R[1];
+            F_x_R[1] = Q_R[1]*V_R[1] + V_R[4];
+            F_x_R[2] = Q_R[1]*V_R[2];
+            F_x_R[3] = Q_R[1]*V_R[3];
+            F_x_R[4] = V_R[1]*(Q_R[4] + V_R[4]);
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                (*F_x_intercell[ei]) = F_x_R[ei] + s_plus*(Q_star_R[ei] - Q_R[ei]);
+            }
+        }
+    }
+}
+
+
+/*
+ * Compute the flux in the y-direction at the intercell face for single-species flow model
+ * from primitive variables.
+ */
+void
+RiemannSolverHLLC::computeIntercellFluxForSingleSpeciesInYDirectionFromPrimitiveVariables(
+    std::vector<double*>& F_y_intercell,
+    std::vector<double>& V_B,
+    std::vector<double>& V_T)
+{
+    if (d_dim == tbox::Dimension(1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no y direction for 1D problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        const double c_B = d_equation_of_state->getSoundSpeedWithPressure(
+            &V_B[0],
+            &V_B[3]);
+        
+        const double c_T = d_equation_of_state->getSoundSpeedWithPressure(
+            &V_T[0],
+            &V_T[3]);
+        
+        const double v_average = 0.5*(V_B[2] + V_T[2]);
+        const double c_average = 0.5*(c_B + c_T);
+        
+        const double s_B = fmin(v_average - c_average, V_B[2] - c_B);
+        const double s_T = fmax(v_average + c_average, V_T[2] + c_T);
+        
+        const double s_minus = fmin(0.0, s_B);
+        const double s_plus  = fmax(0.0, s_T);
+        
+        const double s_star =
+            (V_T[3] - V_B[3] + V_B[0]*V_B[2]*(s_B - V_B[2]) - V_T[0]*V_T[2]*(s_T - V_T[2]))/(V_B[0]*(s_B - V_B[2]) -
+                V_T[0]*(s_T - V_T[2]));
+        
+        if (s_star > 0)
+        {
+            const double Chi_star_B = (s_B - V_B[2])/(s_B - s_star);
+            
+            std::vector<const double*> vel_B(2);
+            vel_B[0] = &V_B[1];
+            vel_B[1] = &V_B[2];
+            
+            std::vector<double> Q_B(4);
+            Q_B[0] = V_B[0];
+            Q_B[1] = V_B[0]*V_B[1];
+            Q_B[2] = V_B[0]*V_B[2];
+            Q_B[3] = d_equation_of_state->getTotalEnergy(
+                &V_B[0],
+                vel_B,
+                &V_B[3]);
+            
+            std::vector<double> Q_star_B(4);
+            Q_star_B[0] = Chi_star_B*V_B[0];
+            Q_star_B[1] = Chi_star_B*Q_B[1];
+            Q_star_B[2] = Chi_star_B*V_B[0]*s_star;
+            Q_star_B[3] = Chi_star_B*(Q_B[3] + (s_star - V_B[2])*(V_B[0]*s_star + V_B[3]/(s_B - V_B[2])));
+            
+            std::vector<double> F_y_B(4);
+            F_y_B[0] = Q_B[2];
+            F_y_B[1] = Q_B[2]*V_B[1];
+            F_y_B[2] = Q_B[2]*V_B[2] + V_B[3];
+            F_y_B[3] = V_B[2]*(Q_B[3] + V_B[3]);
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                (*F_y_intercell[ei]) = F_y_B[ei] + s_minus*(Q_star_B[ei] - Q_B[ei]);
+            }
+        }
+        else
+        {
+            const double Chi_star_T = (s_T - V_T[2])/(s_T - s_star);
+            
+            std::vector<const double*> vel_T(2);
+            vel_T[0] = &V_T[1];
+            vel_T[1] = &V_T[2];
+            
+            std::vector<double> Q_T(4);
+            Q_T[0] = V_T[0];
+            Q_T[1] = V_T[0]*V_T[1];
+            Q_T[2] = V_T[0]*V_T[2];
+            Q_T[3] = d_equation_of_state->getTotalEnergy(
+                &V_T[0],
+                vel_T,
+                &V_T[3]);
+            
+            std::vector<double> Q_star_T(4);
+            Q_star_T[0] = Chi_star_T*V_T[0];
+            Q_star_T[1] = Chi_star_T*Q_T[1];
+            Q_star_T[2] = Chi_star_T*V_T[0]*s_star;
+            Q_star_T[3] = Chi_star_T*(Q_T[3] + (s_star - V_T[2])*(V_T[0]*s_star + V_T[3]/(s_T - V_T[2])));
+            
+            std::vector<double> F_y_T(4);
+            F_y_T[0] = Q_T[2];
+            F_y_T[1] = Q_T[2]*V_T[1];
+            F_y_T[2] = Q_T[2]*V_T[2] + V_T[3];
+            F_y_T[3] = V_T[2]*(Q_T[3] + V_T[3]);
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                (*F_y_intercell[ei]) = F_y_T[ei] + s_plus*(Q_star_T[ei] - Q_T[ei]);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const double c_B = d_equation_of_state->getSoundSpeedWithPressure(
+            &V_B[0],
+            &V_B[4]);
+        
+        const double c_T = d_equation_of_state->getSoundSpeedWithPressure(
+            &V_T[0],
+            &V_T[4]);
+        
+        const double v_average = 0.5*(V_B[2] + V_T[2]);
+        const double c_average = 0.5*(c_B + c_T);
+        
+        const double s_B = fmin(v_average - c_average, V_B[2] - c_B);
+        const double s_T = fmax(v_average + c_average, V_T[2] + c_T);
+        
+        const double s_minus = fmin(0.0, s_B);
+        const double s_plus  = fmax(0.0, s_T);
+        
+        const double s_star =
+            (V_T[4] - V_B[4] + V_B[0]*V_B[2]*(s_B - V_B[2]) - V_T[0]*V_T[2]*(s_T - V_T[2]))/(V_B[0]*(s_B - V_B[2]) -
+                V_T[0]*(s_T - V_T[2]));
+        
+        if (s_star > 0)
+        {
+            const double Chi_star_B = (s_B - V_B[2])/(s_B - s_star);
+            
+            std::vector<const double*> vel_B(3);
+            vel_B[0] = &V_B[1];
+            vel_B[1] = &V_B[2];
+            vel_B[2] = &V_B[3];
+            
+            std::vector<double> Q_B(5);
+            Q_B[0] = V_B[0];
+            Q_B[1] = V_B[0]*V_B[1];
+            Q_B[2] = V_B[0]*V_B[2];
+            Q_B[3] = V_B[0]*V_B[3];
+            Q_B[4] = d_equation_of_state->getTotalEnergy(
+                &V_B[0],
+                vel_B,
+                &V_B[4]);
+            
+            std::vector<double> Q_star_B(5);
+            Q_star_B[0] = Chi_star_B*V_B[0];
+            Q_star_B[1] = Chi_star_B*Q_B[1];
+            Q_star_B[2] = Chi_star_B*V_B[0]*s_star;
+            Q_star_B[3] = Chi_star_B*Q_B[3];
+            Q_star_B[4] = Chi_star_B*(Q_B[4] + (s_star - V_B[2])*(V_B[0]*s_star + V_B[4]/(s_B - V_B[2])));
+            
+            std::vector<double> F_y_B(5);
+            F_y_B[0] = Q_B[2];
+            F_y_B[1] = Q_B[2]*V_B[1];
+            F_y_B[2] = Q_B[2]*V_B[2] + V_B[4];
+            F_y_B[3] = Q_B[2]*V_B[3];
+            F_y_B[4] = V_B[2]*(Q_B[4] + V_B[4]);
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                (*F_y_intercell[ei]) = F_y_B[ei] + s_minus*(Q_star_B[ei] - Q_B[ei]);
+            }
+        }
+        else
+        {
+            const double Chi_star_T = (s_T - V_T[2])/(s_T - s_star);
+            
+            std::vector<const double*> vel_T(3);
+            vel_T[0] = &V_T[1];
+            vel_T[1] = &V_T[2];
+            vel_T[2] = &V_T[3];
+            
+            std::vector<double> Q_T(5);
+            Q_T[0] = V_T[0];
+            Q_T[1] = V_T[0]*V_T[1];
+            Q_T[2] = V_T[0]*V_T[2];
+            Q_T[3] = V_T[0]*V_T[3];
+            Q_T[4] = d_equation_of_state->getTotalEnergy(
+                &V_T[0],
+                vel_T,
+                &V_T[4]);
+            
+            std::vector<double> Q_star_T(5);
+            Q_star_T[0] = Chi_star_T*V_T[0];
+            Q_star_T[1] = Chi_star_T*Q_T[1];
+            Q_star_T[2] = Chi_star_T*V_T[0]*s_star;
+            Q_star_T[3] = Chi_star_T*Q_T[3];
+            Q_star_T[4] = Chi_star_T*(Q_T[4] + (s_star - V_T[2])*(V_T[0]*s_star + V_T[4]/(s_T - V_T[2])));
+            
+            std::vector<double> F_y_T(5);
+            F_y_T[0] = Q_T[2];
+            F_y_T[1] = Q_T[2]*V_T[1];
+            F_y_T[2] = Q_T[2]*V_T[2] + V_T[4];
+            F_y_T[3] = Q_T[2]*V_T[3];
+            F_y_T[4] = V_T[2]*(Q_T[4] + V_T[4]);
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                (*F_y_intercell[ei]) = F_y_T[ei] + s_plus*(Q_star_T[ei] - Q_T[ei]);
+            }
+        }
+    }
+}
+
+
+/*
+ * Compute the flux in the z-direction at the intercell face for single-species flow model
+ * from primitive variables.
+ */
+void
+RiemannSolverHLLC::computeIntercellFluxForSingleSpeciesInZDirectionFromPrimitiveVariables(
+    std::vector<double*>& F_z_intercell,
+    std::vector<double>& V_B,
+    std::vector<double>& V_F)
+{
+    if (d_dim == tbox::Dimension(1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no z direction for 1D problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no z direction for 2D problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const double c_B = d_equation_of_state->getSoundSpeedWithPressure(
+            &V_B[0],
+            &V_B[4]);
+        
+        const double c_F = d_equation_of_state->getSoundSpeedWithPressure(
+            &V_F[0],
+            &V_F[4]);
+        
+        const double w_average = 0.5*(V_B[3] + V_F[3]);
+        const double c_average = 0.5*(c_B + c_F);
+        
+        const double s_B = fmin(w_average - c_average, V_B[3] - c_B);
+        const double s_F = fmax(w_average + c_average, V_F[3] + c_F);
+        
+        const double s_minus = fmin(0.0, s_B);
+        const double s_plus  = fmax(0.0, s_F);
+        
+        const double s_star =
+            (V_F[4] - V_B[4] + V_B[0]*V_B[3]*(s_B - V_B[3]) - V_F[0]*V_F[3]*(s_F - V_F[3]))/(V_B[0]*(s_B - V_B[3]) -
+                V_F[0]*(s_F - V_F[3]));
+        
+        if (s_star > 0)
+        {
+            const double Chi_star_B = (s_B - V_B[3])/(s_B - s_star);
+            
+            std::vector<const double*> vel_B(3);
+            vel_B[0] = &V_B[1];
+            vel_B[1] = &V_B[2];
+            vel_B[2] = &V_B[3];
+            
+            std::vector<double> Q_B(5);
+            Q_B[0] = V_B[0];
+            Q_B[1] = V_B[0]*V_B[1];
+            Q_B[2] = V_B[0]*V_B[2];
+            Q_B[3] = V_B[0]*V_B[3];
+            Q_B[4] = d_equation_of_state->getTotalEnergy(
+                &V_B[0],
+                vel_B,
+                &V_B[4]);
+            
+            std::vector<double> Q_star_B(5);
+            Q_star_B[0] = Chi_star_B*V_B[0];
+            Q_star_B[1] = Chi_star_B*Q_B[1];
+            Q_star_B[2] = Chi_star_B*Q_B[2];
+            Q_star_B[3] = Chi_star_B*V_B[0]*s_star;
+            Q_star_B[4] = Chi_star_B*(Q_B[4] + (s_star - V_B[3])*(V_B[0]*s_star + V_B[4]/(s_B - V_B[3])));
+            
+            std::vector<double> F_z_B(5);
+            F_z_B[0] = Q_B[3];
+            F_z_B[1] = Q_B[3]*V_B[1];
+            F_z_B[2] = Q_B[3]*V_B[2];
+            F_z_B[3] = Q_B[3]*V_B[3] + V_B[4];
+            F_z_B[4] = V_B[3]*(Q_B[4] + V_B[4]);
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                (*F_z_intercell[ei]) = F_z_B[ei] + s_minus*(Q_star_B[ei] - Q_B[ei]);
+            }
+        }
+        else
+        {
+            const double Chi_star_F = (s_F - V_F[3])/(s_F - s_star);
+            
+            std::vector<const double*> vel_F(3);
+            vel_F[0] = &V_F[1];
+            vel_F[1] = &V_F[2];
+            vel_F[2] = &V_F[3];
+            
+            std::vector<double> Q_F(5);
+            Q_F[0] = V_F[0];
+            Q_F[1] = V_F[0]*V_F[1];
+            Q_F[2] = V_F[0]*V_F[2];
+            Q_F[3] = V_F[0]*V_F[3];
+            Q_F[4] = d_equation_of_state->getTotalEnergy(
+                &V_F[0],
+                vel_F,
+                &V_F[4]);
+            
+            std::vector<double> Q_star_F(5);
+            Q_star_F[0] = Chi_star_F*V_F[0];
+            Q_star_F[1] = Chi_star_F*Q_F[1];
+            Q_star_F[2] = Chi_star_F*Q_F[2];
+            Q_star_F[3] = Chi_star_F*V_F[0]*s_star;
+            Q_star_F[4] = Chi_star_F*(Q_F[4] + (s_star - V_F[3])*(V_F[0]*s_star + V_F[4]/(s_F - V_F[3])));
+            
+            std::vector<double> F_z_F(5);
+            F_z_F[0] = Q_F[3];
+            F_z_F[1] = Q_F[3]*V_F[1];
+            F_z_F[2] = Q_F[3]*V_F[2];
+            F_z_F[3] = Q_F[3]*V_F[3] + V_F[4];
+            F_z_F[4] = V_F[3]*(Q_F[4] + V_F[4]);
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                (*F_z_intercell[ei]) = F_z_F[ei] + s_plus*(Q_star_F[ei] - Q_F[ei]);
             }
         }
     }

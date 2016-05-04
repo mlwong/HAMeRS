@@ -251,7 +251,7 @@ ConvectiveFluxReconstructorWCNS_JS5_HLLC_HLL::computeConvectiveFluxesAndSources(
                             
                             F_x_node[0][idx] = rho_u[idx];
                             F_x_node[1][idx] = rho_u[idx]*u[idx] + p[idx];
-                            F_x_node[3][idx] = u[idx]*(E[idx] + p[idx]);
+                            F_x_node[2][idx] = u[idx]*(E[idx] + p[idx]);
                         }
                         
                         /*

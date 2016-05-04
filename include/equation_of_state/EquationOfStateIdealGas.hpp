@@ -38,7 +38,7 @@ class EquationOfStateIdealGas: public EquationOfState
         double
         getPressure(
             const double* const density,
-            const std::vector<const double*> momentum,
+            const std::vector<const double*>& momentum,
             const double* const total_energy);
         
         /*
@@ -48,9 +48,9 @@ class EquationOfStateIdealGas: public EquationOfState
         double
         getPressureWithMassFraction(
             const double* const density,
-            const std::vector<const double*> momentum,
+            const std::vector<const double*>& momentum,
             const double* const total_energy,
-            const std::vector<const double*> mass_fraction);
+            const std::vector<const double*>& mass_fraction);
         
         /*
          * Compute the pressure for multi-species flow with partial densities and
@@ -58,10 +58,10 @@ class EquationOfStateIdealGas: public EquationOfState
          */
         double
         getPressureWithMassFraction(
-            const std::vector<const double*> partial_density,
-            const std::vector<const double*> momentum,
+            const std::vector<const double*>& partial_density,
+            const std::vector<const double*>& momentum,
             const double* const total_energy,
-            const std::vector<const double*> mass_fraction);
+            const std::vector<const double*>& mass_fraction);
         
         /*
          * Compute the pressure for multi-species flow with total density and
@@ -70,9 +70,9 @@ class EquationOfStateIdealGas: public EquationOfState
         double
         getPressureWithVolumeFraction(
             const double* const density,
-            const std::vector<const double*> momentum,
+            const std::vector<const double*>& momentum,
             const double* const total_energy,
-            const std::vector<const double*> volume_fraction);
+            const std::vector<const double*>& volume_fraction);
         
         /*
          * Compute the pressure for multi-species flow with partial densities and
@@ -80,10 +80,10 @@ class EquationOfStateIdealGas: public EquationOfState
          */
         double
         getPressureWithVolumeFraction(
-            const std::vector<const double*> partial_density,
-            const std::vector<const double*> momentum,
+            const std::vector<const double*>& partial_density,
+            const std::vector<const double*>& momentum,
             const double* const total_energy,
-            const std::vector<const double*> volume_fraction);
+            const std::vector<const double*>& volume_fraction);
         
         /*
          * Compute the sound speed for single-species flow.
@@ -91,7 +91,7 @@ class EquationOfStateIdealGas: public EquationOfState
         double
         getSoundSpeed(
             const double* const density,
-            const std::vector<const double*> momentum,
+            const std::vector<const double*>& momentum,
             const double* const total_energy);
         
         /*
@@ -112,9 +112,9 @@ class EquationOfStateIdealGas: public EquationOfState
         double
         getSoundSpeedWithMassFraction(
             const double* const density,
-            const std::vector<const double*> momentum,
+            const std::vector<const double*>& momentum,
             const double* const total_energy,
-            const std::vector<const double*> mass_fraction);
+            const std::vector<const double*>& mass_fraction);
         
         /*
          * Compute the sound speed for multi-species flow with partial densities and
@@ -122,10 +122,10 @@ class EquationOfStateIdealGas: public EquationOfState
          */
         double
         getSoundSpeedWithMassFraction(
-            const std::vector<const double*> partial_density,
-            const std::vector<const double*> momentum,
+            const std::vector<const double*>& partial_density,
+            const std::vector<const double*>& momentum,
             const double* const total_energy,
-            const std::vector<const double*> mass_fraction);
+            const std::vector<const double*>& mass_fraction);
         
         /*
          * Compute the sound speed for multi-species flow with total density,
@@ -137,7 +137,7 @@ class EquationOfStateIdealGas: public EquationOfState
         double
         getSoundSpeedWithMassFractionAndPressure(
             const double* const density,
-            const std::vector<const double*> mass_fraction,
+            const std::vector<const double*>& mass_fraction,
             const double* const pressure);
         
         /*
@@ -149,8 +149,8 @@ class EquationOfStateIdealGas: public EquationOfState
          */
         double
         getSoundSpeedWithMassFractionAndPressure(
-            const std::vector<const double*> partial_density,
-            const std::vector<const double*> mass_fraction,
+            const std::vector<const double*>& partial_density,
+            const std::vector<const double*>& mass_fraction,
             const double* const pressure);
         
         /*
@@ -160,9 +160,9 @@ class EquationOfStateIdealGas: public EquationOfState
         double
         getSoundSpeedWithVolumeFraction(
             const double* const density,
-            const std::vector<const double*> momentum,
+            const std::vector<const double*>& momentum,
             const double* const total_energy,
-            const std::vector<const double*> volume_fraction);
+            const std::vector<const double*>& volume_fraction);
         
         /*
          * Compute the sound speed for multi-species flow with partial densities and
@@ -170,10 +170,10 @@ class EquationOfStateIdealGas: public EquationOfState
          */
         double
         getSoundSpeedWithVolumeFraction(
-            const std::vector<const double*> partial_density,
-            const std::vector<const double*> momentum,
+            const std::vector<const double*>& partial_density,
+            const std::vector<const double*>& momentum,
             const double* const total_energy,
-            const std::vector<const double*> volume_fraction);
+            const std::vector<const double*>& volume_fraction);
         
         /*
          * Compute the sound speed for multi-species flow with total density,
@@ -185,7 +185,7 @@ class EquationOfStateIdealGas: public EquationOfState
         double
         getSoundSpeedWithVolumeFractionAndPressure(
             const double* const density,
-            const std::vector<const double*> volume_fraction,
+            const std::vector<const double*>& volume_fraction,
             const double* const pressure);
         
         /*
@@ -196,8 +196,8 @@ class EquationOfStateIdealGas: public EquationOfState
          */
         double
         getSoundSpeedWithVolumeFractionAndPressure(
-            const std::vector<const double*> partial_density,
-            const std::vector<const double*> volume_fraction,
+            const std::vector<const double*>& partial_density,
+            const std::vector<const double*>& volume_fraction,
             const double* const pressure);
         
         /*
@@ -206,7 +206,7 @@ class EquationOfStateIdealGas: public EquationOfState
         double
         getTotalEnergy(
             const double* const density,
-            const std::vector<const double*> velocity,
+            const std::vector<const double*>& velocity,
             const double* const pressure);
         
         /*
@@ -216,9 +216,9 @@ class EquationOfStateIdealGas: public EquationOfState
         double
         getTotalEnergyWithMassFraction(
             const double* const density,
-            const std::vector<const double*> velocity,
+            const std::vector<const double*>& velocity,
             const double* const pressure,
-            const std::vector<const double*> mass_fraction);
+            const std::vector<const double*>& mass_fraction);
         
         /*
          * Compute the total energy for multi-species flow with partial densities and
@@ -226,10 +226,10 @@ class EquationOfStateIdealGas: public EquationOfState
          */
         double
         getTotalEnergyWithMassFraction(
-           const std::vector<const double*> partial_density,
-           const std::vector<const double*> velocity,
+           const std::vector<const double*>& partial_density,
+           const std::vector<const double*>& velocity,
            const double* const pressure,
-           const std::vector<const double*> mass_fraction);
+           const std::vector<const double*>& mass_fraction);
         
         /*
          * Compute the total energy for multi-species flow with total density and
@@ -238,9 +238,9 @@ class EquationOfStateIdealGas: public EquationOfState
         double
         getTotalEnergyWithVolumeFraction(
            const double* const density,
-           const std::vector<const double*> velocity,
+           const std::vector<const double*>& velocity,
            const double* const pressure,
-           const std::vector<const double*> volume_fraction);
+           const std::vector<const double*>& volume_fraction);
         
         /*
          * Compute the total energy for multi-species flow with partial densities and
@@ -248,10 +248,10 @@ class EquationOfStateIdealGas: public EquationOfState
          */
         double
         getTotalEnergyWithVolumeFraction(
-           const std::vector<const double*> partial_density,
-           const std::vector<const double*> velocity,
+           const std::vector<const double*>& partial_density,
+           const std::vector<const double*>& velocity,
            const double* const pressure,
-           const std::vector<const double*> volume_fraction);
+           const std::vector<const double*>& volume_fraction);
         
         /*
          * Compute a thermodynamic property of a particular species
@@ -260,7 +260,7 @@ class EquationOfStateIdealGas: public EquationOfState
         double
         getMixtureThermodynamicPropertyWithMassFraction(
             const std::string& property_name,
-            const std::vector<const double*> mass_fraction);
+            const std::vector<const double*>& mass_fraction);
         
         /*
          * Compute a thermodynamic property of a particular species
@@ -269,7 +269,7 @@ class EquationOfStateIdealGas: public EquationOfState
         double
         getMixtureThermodynamicPropertyWithVolumeFraction(
             const std::string& property_name,
-            const std::vector<const double*> volume_fraction);
+            const std::vector<const double*>& volume_fraction);
         
         /*
          * Get a thermodynamic property of a particular species.
@@ -292,21 +292,21 @@ class EquationOfStateIdealGas: public EquationOfState
          */
         double
         getMixtureGammaWithPartialDensity(
-            const std::vector<const double*> partial_density);
+            const std::vector<const double*>& partial_density);
         
         /*
          * Compute the mixture's gamma for multi-species flow with mass fractions.
          */
         double
         getMixtureGammaWithMassFraction(
-            const std::vector<const double*> mass_fraction);
+            const std::vector<const double*>& mass_fraction);
         
         /*
          * Compute the mixture's gamma for multi-species flow with volume fractions.
          */
         double
         getMixtureGammaWithVolumeFraction(
-            const std::vector<const double*> volume_fraction);
+            const std::vector<const double*>& volume_fraction);
         
         /*
          * Ratio of specific heats of different species.

@@ -26,6 +26,7 @@ link_directories(${AMR-WCNS_SOURCE_DIR}/hdf5/lib
 		 ${AMR-WCNS_BINARY_DIR}/applications/Euler
 		 ${AMR-WCNS_BINARY_DIR}/equation_of_state
                  ${AMR-WCNS_BINARY_DIR}/flow_model
+		 ${AMR-WCNS_BINARY_DIR}/flow_model/flow_model
                  ${AMR-WCNS_BINARY_DIR}/flow_model/boundary_conditions/Euler
 		 ${AMR-WCNS_BINARY_DIR}/flow_model/convective_flux_reconstructor
                  ${AMR-WCNS_BINARY_DIR}/flow_model/initial_conditions
@@ -44,6 +45,7 @@ add_subdirectory(src/applications/Euler)
 add_subdirectory(src/exec)
 add_subdirectory(src/equation_of_state)
 add_subdirectory(src/flow_model)
+add_subdirectory(src/flow_model/flow_model)
 add_subdirectory(src/flow_model/boundary_conditions/Euler)
 add_subdirectory(src/flow_model/convective_flux_reconstructor)
 add_subdirectory(src/flow_model/initial_conditions)
