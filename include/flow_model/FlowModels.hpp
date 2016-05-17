@@ -5,6 +5,7 @@
 #include <string>
 
 enum FLOW_MODEL { SINGLE_SPECIES,
+                  FOUR_EQN_CONSERVATIVE,
                   FOUR_EQN_SHYUE,
                   FIVE_EQN_ALLAIRE };
 
@@ -19,6 +20,7 @@ inline std::ostream& operator<<(std::ostream& os, const FLOW_MODEL& value)
     {
 #define INSERT_ELEMENT(p) strings[p] = #p
         INSERT_ELEMENT(SINGLE_SPECIES);
+        INSERT_ELEMENT(FOUR_EQN_CONSERVATIVE);
         INSERT_ELEMENT(FOUR_EQN_SHYUE);
         INSERT_ELEMENT(FIVE_EQN_ALLAIRE);
 #undef INSERT_ELEMENT

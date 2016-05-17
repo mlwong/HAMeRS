@@ -64,13 +64,13 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
 {
     d_eqn_form.reserve(d_num_eqn);
     
-    // Set the equation form for partial density.
+    // Set the equations form for partial density.
     for (int si = 0; si < d_num_species; si++)
     {
         d_eqn_form.push_back(CONSERVATIVE_EQN);
     }
     
-    // Set the equation form for momentum.
+    // Set the equations form for momentum.
     for (int di = 0; di < d_dim.getValue(); di++)
     {
         d_eqn_form.push_back(CONSERVATIVE_EQN);
@@ -79,7 +79,7 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
     // Set the equation form for total energy.
     d_eqn_form.push_back(CONSERVATIVE_EQN);
     
-    // Set the equation form for volume fraction
+    // Set the equation forms for volume fraction
     for (int si = 0; si < d_num_species - 1; si++)
     {
         d_eqn_form.push_back(ADVECTIVE_EQN);
@@ -108,6 +108,7 @@ FlowModelFiveEqnAllaire::printClassData(std::ostream& os) const
        << (FlowModelFiveEqnAllaire *)this
        << std::endl;
 }
+
 
 /*
  * Register a patch with global cell data of different variables in the patch.
@@ -317,7 +318,7 @@ FlowModelFiveEqnAllaire::registerPatchWithGlobalCellData(
             if (d_num_subghosts_enstrophy > d_num_subghosts_vorticity)
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::registerPatchWithGlobalCellData()\n"
+                    << ": FlowModelFiveEqnAllaire::registerPatchWithGlobalCellData()\n"
                     << "Number of ghosts of 'ENSTROPHY' exceeds"
                     << " number of ghosts of 'VORTICITY'."
                     << std::endl);
@@ -332,7 +333,7 @@ FlowModelFiveEqnAllaire::registerPatchWithGlobalCellData(
                 if (d_num_subghosts_enstrophy > d_num_subghosts_velocity)
                 {
                     TBOX_ERROR(d_object_name
-                        << ": FlowModelSingleSpecies::registerPatchWithGlobalCellData()\n"
+                        << ": FlowModelFiveEqnAllaire::registerPatchWithGlobalCellData()\n"
                         << "Number of ghosts of 'ENSTROPHY' exceeds"
                         << " number of ghosts of 'VELOCITY'."
                         << std::endl);
@@ -599,7 +600,7 @@ FlowModelFiveEqnAllaire::registerPatchWithGlobalCellData(
 
 
 /*
- * Register the required derived variables for the computation of projection matrix
+ * Register the required variables for the computation of projection matrix
  * of conservative variables and its inverse at faces in the registered patch.
  */
 void
@@ -616,7 +617,7 @@ FlowModelFiveEqnAllaire::registerFaceProjectionMatricesOfConservativeVariables(
 
 
 /*
- * Register the required derived variables for the computation of projection matrix
+ * Register the required variables for the computation of projection matrix
  * of primitive variables and its inverse at faces in the registered patch.
  */
 void
@@ -1099,7 +1100,7 @@ FlowModelFiveEqnAllaire::getGlobalCellDataPointerConservativeVariables(
     std::vector<hier::IntVector>& subghostcell_dims)
 {
     /*
-     * Return the numbers of sub-ghost cells and dimesions of boxes with sub-ghost cells.
+     * Return the numbers of sub-ghost cells and dimensions of boxes with sub-ghost cells.
      */
     num_subghosts.clear();
     num_subghosts.reserve(d_num_eqn);
@@ -1124,7 +1125,7 @@ FlowModelFiveEqnAllaire::getGlobalCellDataPointerConservativeVariables(
     std::vector<double*> cell_data;
     cell_data.reserve(d_num_eqn);
     
-    // Get the cell data of the variable partial density and volume fraction.
+    // Get the cell data of the variables partial density and volume fraction.
     boost::shared_ptr<pdat::CellData<double> > d_data_partial_density =
         getGlobalCellDataPartialDensity();
     
@@ -1162,7 +1163,7 @@ FlowModelFiveEqnAllaire::getGlobalCellDataPointerPrimitiveVariables(
     std::vector<hier::IntVector>& subghostcell_dims)
 {
     /*
-     * Return the numbers of sub-ghost cells and dimesions of boxes with sub-ghost cells.
+     * Return the numbers of sub-ghost cells and dimensions of boxes with sub-ghost cells.
      */
     num_subghosts.clear();
     num_subghosts.reserve(d_num_eqn);
@@ -1205,7 +1206,7 @@ FlowModelFiveEqnAllaire::getGlobalCellDataPointerPrimitiveVariables(
     std::vector<double*> cell_data;
     cell_data.reserve(d_num_eqn);
     
-    // Get the cell data of the variable partial density and volume fraction.
+    // Get the cell data of the variables partial density and volume fraction.
     boost::shared_ptr<pdat::CellData<double> > d_data_partial_density =
         getGlobalCellDataPartialDensity();
     
@@ -1242,7 +1243,7 @@ FlowModelFiveEqnAllaire::getGlobalCellDataPointerPrimitiveVariables(
 
 
 /*
- * Compute the local face datum of projection matrix of conservative variables in the
+ * Compute the local face data of projection matrix of conservative variables in the
  * registered patch.
  */
 void
@@ -1265,7 +1266,7 @@ FlowModelFiveEqnAllaire::computeLocalFaceProjectionMatrixOfConservativeVariables
 
 
 /*
- * Compute the local face datum of inverse of projection matrix of conservative variables
+ * Compute the local face data of inverse of projection matrix of conservative variables
  * in the registered patch.
  */
 void
@@ -1288,7 +1289,7 @@ FlowModelFiveEqnAllaire::computeLocalFaceProjectionMatrixInverseOfConservativeVa
 
 
 /*
- * Compute the local face datum of projection matrix of primitive variables in the
+ * Compute the local face data of projection matrix of primitive variables in the
  * registered patch.
  */
 void
@@ -1347,6 +1348,8 @@ FlowModelFiveEqnAllaire::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
         // Compute the linear indices.
         const int idx_minus = cell_index_minus[0] + d_num_ghosts[0];
         const int idx_plus = cell_index_plus[0] + d_num_ghosts[0];
+        const int idx_density_minus = cell_index_minus[0] + d_num_subghosts_density[0];
+        const int idx_density_plus = cell_index_plus[0] + d_num_subghosts_density[0];
         const int idx_sound_speed_minus = cell_index_minus[0] + d_num_subghosts_sound_speed[0];
         const int idx_sound_speed_plus = cell_index_plus[0] + d_num_subghosts_sound_speed[0];
         
@@ -1358,7 +1361,7 @@ FlowModelFiveEqnAllaire::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
         {
             case SIMPLE_AVG:
             {
-                rho_average = 0.5*(rho[idx_minus] + rho[idx_plus]);
+                rho_average = 0.5*(rho[idx_density_minus] + rho[idx_density_plus]);
                 c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
                 
                 for (int si = 0; si < d_num_species; si++)
@@ -1435,6 +1438,12 @@ FlowModelFiveEqnAllaire::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
         const int idx_plus = (cell_index_plus[0] + d_num_ghosts[0]) +
             (cell_index_plus[1] + d_num_ghosts[1])*d_ghostcell_dims[0];
         
+        const int idx_density_minus = (cell_index_minus[0] + d_num_subghosts_density[0]) +
+            (cell_index_minus[1] + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
+        
+        const int idx_density_plus = (cell_index_plus[0] + d_num_subghosts_density[0]) +
+            (cell_index_plus[1] + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
+        
         const int idx_sound_speed_minus = (cell_index_minus[0] + d_num_subghosts_sound_speed[0]) +
             (cell_index_minus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
         
@@ -1449,7 +1458,7 @@ FlowModelFiveEqnAllaire::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
         {
             case SIMPLE_AVG:
             {
-                rho_average = 0.5*(rho[idx_minus] + rho[idx_plus]);
+                rho_average = 0.5*(rho[idx_density_minus] + rho[idx_density_plus]);
                 c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
                 
                 for (int si = 0; si < d_num_species; si++)
@@ -1555,6 +1564,16 @@ FlowModelFiveEqnAllaire::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
             (cell_index_plus[2] + d_num_ghosts[2])*d_ghostcell_dims[0]*
                 d_ghostcell_dims[1];
         
+        const int idx_density_minus = (cell_index_minus[0] + d_num_subghosts_density[0]) +
+            (cell_index_minus[1] + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
+            (cell_index_minus[2] + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
+                d_subghostcell_dims_density[1];
+        
+        const int idx_density_plus = (cell_index_plus[0] + d_num_subghosts_density[0]) +
+            (cell_index_plus[1] + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
+            (cell_index_plus[2] + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
+                d_subghostcell_dims_density[1];
+        
         const int idx_sound_speed_minus = (cell_index_minus[0] + d_num_subghosts_sound_speed[0]) +
             (cell_index_minus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
             (cell_index_minus[2] + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
@@ -1573,7 +1592,7 @@ FlowModelFiveEqnAllaire::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
         {
             case SIMPLE_AVG:
             {
-                rho_average = 0.5*(rho[idx_minus] + rho[idx_plus]);
+                rho_average = 0.5*(rho[idx_density_minus] + rho[idx_density_plus]);
                 c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
                 
                 for (int si = 0; si < d_num_species; si++)
@@ -1701,7 +1720,7 @@ FlowModelFiveEqnAllaire::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
 
 
 /*
- * Compute the local face datum of inverse of projection matrix of primitive variables
+ * Compute the local face data of inverse of projection matrix of primitive variables
  * in the registered patch.
  */
 void
@@ -1760,6 +1779,8 @@ FlowModelFiveEqnAllaire::computeLocalFaceProjectionMatrixInverseOfPrimitiveVaria
         // Compute the linear indices.
         const int idx_minus = cell_index_minus[0] + d_num_ghosts[0];
         const int idx_plus = cell_index_plus[0] + d_num_ghosts[0];
+        const int idx_density_minus = cell_index_minus[0] + d_num_subghosts_density[0];
+        const int idx_density_plus = cell_index_plus[0] + d_num_subghosts_density[0];
         const int idx_sound_speed_minus = cell_index_minus[0] + d_num_subghosts_sound_speed[0];
         const int idx_sound_speed_plus = cell_index_plus[0] + d_num_subghosts_sound_speed[0];
         
@@ -1771,7 +1792,7 @@ FlowModelFiveEqnAllaire::computeLocalFaceProjectionMatrixInverseOfPrimitiveVaria
         {
             case SIMPLE_AVG:
             {
-                rho_average = 0.5*(rho[idx_minus] + rho[idx_plus]);
+                rho_average = 0.5*(rho[idx_density_minus] + rho[idx_density_plus]);
                 c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
                 
                 for (int si = 0; si < d_num_species; si++)
@@ -1848,6 +1869,12 @@ FlowModelFiveEqnAllaire::computeLocalFaceProjectionMatrixInverseOfPrimitiveVaria
         const int idx_plus = (cell_index_plus[0] + d_num_ghosts[0]) +
             (cell_index_plus[1] + d_num_ghosts[1])*d_ghostcell_dims[0];
         
+        const int idx_density_minus = (cell_index_minus[0] + d_num_subghosts_density[0]) +
+            (cell_index_minus[1] + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
+        
+        const int idx_density_plus = (cell_index_plus[0] + d_num_subghosts_density[0]) +
+            (cell_index_plus[1] + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
+        
         const int idx_sound_speed_minus = (cell_index_minus[0] + d_num_subghosts_sound_speed[0]) +
             (cell_index_minus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
         
@@ -1862,7 +1889,7 @@ FlowModelFiveEqnAllaire::computeLocalFaceProjectionMatrixInverseOfPrimitiveVaria
         {
             case SIMPLE_AVG:
             {
-                rho_average = 0.5*(rho[idx_minus] + rho[idx_plus]);
+                rho_average = 0.5*(rho[idx_density_minus] + rho[idx_density_plus]);
                 c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
                 
                 for (int si = 0; si < d_num_species; si++)
@@ -1968,6 +1995,16 @@ FlowModelFiveEqnAllaire::computeLocalFaceProjectionMatrixInverseOfPrimitiveVaria
             (cell_index_plus[2] + d_num_ghosts[2])*d_ghostcell_dims[0]*
                 d_ghostcell_dims[1];
         
+        const int idx_density_minus = (cell_index_minus[0] + d_num_subghosts_density[0]) +
+            (cell_index_minus[1] + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
+            (cell_index_minus[2] + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
+                d_subghostcell_dims_density[1];
+        
+        const int idx_density_plus = (cell_index_plus[0] + d_num_subghosts_density[0]) +
+            (cell_index_plus[1] + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
+            (cell_index_plus[2] + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
+                d_subghostcell_dims_density[1];
+        
         const int idx_sound_speed_minus = (cell_index_minus[0] + d_num_subghosts_sound_speed[0]) +
             (cell_index_minus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
             (cell_index_minus[2] + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
@@ -1986,7 +2023,7 @@ FlowModelFiveEqnAllaire::computeLocalFaceProjectionMatrixInverseOfPrimitiveVaria
         {
             case SIMPLE_AVG:
             {
-                rho_average = 0.5*(rho[idx_minus] + rho[idx_plus]);
+                rho_average = 0.5*(rho[idx_density_minus] + rho[idx_density_plus]);
                 c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
                 
                 for (int si = 0; si < d_num_species; si++)
@@ -3074,11 +3111,6 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityAndPressure()
         // Get the cell data of the variable volume fraction.
         boost::shared_ptr<pdat::CellData<double> > d_data_volume_fraction =
             getGlobalCellDataVolumeFraction();
-        
-        if (!d_data_density)
-        {
-            computeGlobalCellDataDensity();
-        }
         
         if (!d_data_pressure)
         {

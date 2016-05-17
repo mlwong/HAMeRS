@@ -181,6 +181,31 @@ class EulerBoundaryConditions:
         }
         
         /*
+         * Set the cell variables if conservative four-equation multi-species flow model
+         * is chosen.
+         */
+        void
+        setVariablesForFourEqnConservative(
+            const boost::shared_ptr<pdat::CellVariable<double> > partial_density,
+            const boost::shared_ptr<pdat::CellVariable<double> > momentum,
+            const boost::shared_ptr<pdat::CellVariable<double> > total_energy)
+        {
+            if (d_flow_model != FOUR_EQN_CONSERVATIVE)
+            {            
+                TBOX_ERROR(d_object_name
+                           << ": "
+                           << "setVariablesForFourEqnConservative() shouldn't be used."
+                           << std::endl);
+            }
+            
+            d_partial_density = partial_density;
+            d_momentum = momentum;
+            d_total_energy = total_energy;
+            
+            d_variables_set = true;
+        }
+        
+        /*
          * Set the cell variables if four-equation multi-species flow model
          * by Shyue is chosen.
          */
@@ -291,6 +316,15 @@ class EulerBoundaryConditions:
             const std::string& db_name,
             int array_indx,
             std::vector<double>& density,
+            std::vector<double>& momentum,
+            std::vector<double>& total_energy);
+        
+        void
+        readStateDataEntryForFourEqnConservative(
+            boost::shared_ptr<tbox::Database> db,
+            const std::string& db_name,
+            int array_indx,
+            std::vector<double>& partial_density,
             std::vector<double>& momentum,
             std::vector<double>& total_energy);
         

@@ -65,6 +65,31 @@ class InitialConditions
         }
         
         /*
+         * Set the cell variables if four-equation multi-species conservative flow model
+         * is chosen.
+         */
+        void
+        setVariablesForFourEqnConservative(
+            const boost::shared_ptr<pdat::CellVariable<double> >& partial_density,
+            const boost::shared_ptr<pdat::CellVariable<double> >& momentum,
+            const boost::shared_ptr<pdat::CellVariable<double> >& total_energy)
+        {
+            if (d_flow_model != FOUR_EQN_CONSERVATIVE)
+            {            
+                TBOX_ERROR(d_object_name
+                           << ": "
+                           << "setVariablesForFourEqnConservative() shouldn't be used."
+                           << std::endl);
+            }
+            
+            d_partial_density = partial_density;
+            d_momentum = momentum;
+            d_total_energy = total_energy;
+            
+            d_variables_set = true;
+        }
+        
+        /*
          * Set the cell variables if four-equation multi-species flow model
          * by Shyue is chosen.
          */

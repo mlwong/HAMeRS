@@ -1,15 +1,15 @@
-#ifndef FLOW_MODEL_SINGLE_SPECIES_HPP
-#define FLOW_MODEL_SINGLE_SPECIES_HPP
+#ifndef FLOW_MODEL_FOUR_EQN_CONSERVATIVE_HPP
+#define FLOW_MODEL_FOUR_EQN_CONSERVATIVE_HPP
 
 #include "flow_model/flow_model/FlowModel.hpp"
 
-#include "flow_model/Riemann_solver/RiemannSolverSingleSpeciesHLLC.hpp"
-#include "flow_model/Riemann_solver/RiemannSolverSingleSpeciesHLLC_HLL.hpp"
+#include "flow_model/Riemann_solver/RiemannSolverFourEqnConservativeHLLC.hpp"
+#include "flow_model/Riemann_solver/RiemannSolverFourEqnConservativeHLLC_HLL.hpp"
 
-class FlowModelSingleSpecies: public FlowModel
+class FlowModelFourEqnConservative: public FlowModel
 {
     public:
-        FlowModelSingleSpecies(
+        FlowModelFourEqnConservative(
             const std::string& object_name,
             const tbox::Dimension& dim,
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
@@ -100,7 +100,7 @@ class FlowModelSingleSpecies: public FlowModel
             std::vector<hier::IntVector>& subghostcell_dims);
         
         /*
-         * Compute the local face data of projection matrix of conservative variables in the
+         * Compute the local face datum of projection matrix of conservative variables in the
          * registered patch.
          */
         void
@@ -111,7 +111,7 @@ class FlowModelSingleSpecies: public FlowModel
             const DIRECTION& direction);
         
         /*
-         * Compute the local face data of inverse of projection matrix of conservative variables
+         * Compute the local face datum of inverse of projection matrix of conservative variables
          * in the registered patch.
          */
         void
@@ -122,7 +122,7 @@ class FlowModelSingleSpecies: public FlowModel
             const DIRECTION& direction);
         
         /*
-         * Compute the local face data of projection matrix of primitive variables in the
+         * Compute the local face datum of projection matrix of primitive variables in the
          * registered patch.
          */
         void
@@ -133,7 +133,7 @@ class FlowModelSingleSpecies: public FlowModel
             const DIRECTION& direction);
         
         /*
-         * Compute the local face data of inverse of projection matrix of primitive variables
+         * Compute the local face datum of inverse of projection matrix of primitive variables
          * in the registered patch.
          */
         void
@@ -148,7 +148,6 @@ class FlowModelSingleSpecies: public FlowModel
          * from Riemann solver at face.
          * fluxes_face: Convective flux at face.
          * velocity_face: Velocity at face.
-         * The FlowModelSingleSpecies class modifies nothing for velocity_face.
          */
         void
         computeLocalFaceFluxAndVelocityFromRiemannSolverWithConservativeVariables(
@@ -164,7 +163,6 @@ class FlowModelSingleSpecies: public FlowModel
          * from Riemann solver at face.
          * fluxes_face: Convective flux at face.
          * velocity_face: Velocity at face.
-         * The FlowModelSingleSpecies class modifies nothing for velocity_face.
          */
         void
         computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
@@ -195,10 +193,10 @@ class FlowModelSingleSpecies: public FlowModel
         setGhostBoxesAndDimensions();
         
         /*
-         * Get the global cell data of density in the registered patch.
+         * Get the global cell data of partial density in the registered patch.
          */
         boost::shared_ptr<pdat::CellData<double> >
-        getGlobalCellDataDensity();
+        getGlobalCellDataPartialDensity();
         
         /*
          * Get the global cell data of momentum in the registered patch.
@@ -213,43 +211,57 @@ class FlowModelSingleSpecies: public FlowModel
         getGlobalCellDataTotalEnergy();
         
         /*
-         * Compute the global cell data of pressure in the registered patch.
+         * Compute the global cell data of density in the registered patch.
          */
-        void computeGlobalCellDataPressure();
+        void computeGlobalCellDataDensity();
         
         /*
-         * Compute the global cell data of velocity in the registered patch.
+         * Compute the global cell data of mass fraction with density in the registered patch.
          */
-        void computeGlobalCellDataVelocity();
+        void computeGlobalCellDataMassFractionWithDensity();
         
         /*
-         * Compute the global cell data of sound speed with pressure in the registered patch.
+         * Compute the global cell data of pressure with density and mass fraction in the registered patch.
          */
-        void computeGlobalCellDataSoundSpeedWithPressure();
+        void computeGlobalCellDataPressureWithDensityAndMassFraction();
         
         /*
-         * Compute the global cell data of dilatation with velocity in the registered patch.
+         * Compute the global cell data of velocity with density in the registered patch.
          */
-        void computeGlobalCellDataDilatationWithVelocity();
+        void computeGlobalCellDataVelocityWithDensity();
         
         /*
-         * Compute the global cell data of vorticity with velocity in the registered patch.
+         * Compute the global cell data of sound speed with density, mass fraction and pressure in the registered
+         * patch.
          */
-        void computeGlobalCellDataVorticityWithVelocity();
+        void computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
         
         /*
-         * Compute the global cell data of enstrophy with velocity and vorticity in the registered patch.
+         * Compute the global cell data of dilatation with density and velocity in the registered patch.
          */
-        void computeGlobalCellDataEnstrophyWithVelocityAndVorticity();
+        void computeGlobalCellDataDilatationWithDensityAndVelocity();
         
         /*
-         * Compute the global cell data of convective flux with pressure and velocity in the registered patch.
+         * Compute the global cell data of vorticity with density and velocity in the registered patch.
          */
-        void computeGlobalCellDataConvectiveFluxWithPressureAndVelocity(DIRECTION direction);
+        void computeGlobalCellDataVorticityWithDensityAndVelocity();
+        
+        /*
+         * Compute the global cell data of enstrophy with density, velocity and vorticity in the registered patch.
+         */
+        void computeGlobalCellDataEnstrophyWithDensityVelocityAndVorticity();
+        
+        /*
+         * Compute the global cell data of convective flux with density, mass fraction, pressure and velocity in the
+         * registered patch.
+         */
+        void computeGlobalCellDataConvectiveFluxWithDensityMassFractionPressureAndVelocity(DIRECTION direction);
         
         /*
          * Number of sub-ghost cells of derived cell data.
          */
+        hier::IntVector d_num_subghosts_density;
+        hier::IntVector d_num_subghosts_mass_fraction;
         hier::IntVector d_num_subghosts_pressure;
         hier::IntVector d_num_subghosts_velocity;
         hier::IntVector d_num_subghosts_sound_speed;
@@ -263,6 +275,8 @@ class FlowModelSingleSpecies: public FlowModel
         /*
          * Boxes with sub-ghost cells of derived cell data.
          */
+        hier::Box d_subghost_box_density;
+        hier::Box d_subghost_box_mass_fraction;
         hier::Box d_subghost_box_pressure;
         hier::Box d_subghost_box_velocity;
         hier::Box d_subghost_box_sound_speed;
@@ -276,6 +290,8 @@ class FlowModelSingleSpecies: public FlowModel
         /*
          * Dimensions of boxes with sub-ghost cells of derived cell data.
          */
+        hier::IntVector d_subghostcell_dims_density;
+        hier::IntVector d_subghostcell_dims_mass_fraction;
         hier::IntVector d_subghostcell_dims_pressure;
         hier::IntVector d_subghostcell_dims_velocity;
         hier::IntVector d_subghostcell_dims_sound_speed;
@@ -289,6 +305,8 @@ class FlowModelSingleSpecies: public FlowModel
         /*
          * boost::shared_ptr to derived cell data.
          */
+        boost::shared_ptr<pdat::CellData<double> > d_data_density;
+        boost::shared_ptr<pdat::CellData<double> > d_data_mass_fraction;
         boost::shared_ptr<pdat::CellData<double> > d_data_pressure;
         boost::shared_ptr<pdat::CellData<double> > d_data_velocity;
         boost::shared_ptr<pdat::CellData<double> > d_data_sound_speed;
@@ -302,9 +320,15 @@ class FlowModelSingleSpecies: public FlowModel
         /*
          * Riemann solvers.
          */
-        RiemannSolverSingleSpeciesHLLC     d_Riemann_solver_HLLC;
-        RiemannSolverSingleSpeciesHLLC_HLL d_Riemann_solver_HLLC_HLL;
+        RiemannSolverFourEqnConservativeHLLC     d_Riemann_solver_HLLC;
+        RiemannSolverFourEqnConservativeHLLC_HLL d_Riemann_solver_HLLC_HLL;
+        
+        /*
+         * Upper and lower bounds on variables.
+         */
+        double d_Y_bound_lo;
+        double d_Y_bound_up;
         
 };
 
-#endif /* FLOW_MODEL_SINGLE_SPECIES_HPP */
+#endif /* FLOW_MODEL_FOUR_EQN_CONSERVATIVE_HPP */

@@ -608,6 +608,180 @@ InitialConditions::initializeDataOnPatch(
                 
                 break;
             }
+            case FOUR_EQN_CONSERVATIVE:
+            {
+                boost::shared_ptr<pdat::CellData<double> > partial_density(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch.getPatchData(d_partial_density, data_context)));
+                
+                boost::shared_ptr<pdat::CellData<double> > momentum(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch.getPatchData(d_momentum, data_context)));
+                
+                boost::shared_ptr<pdat::CellData<double> > total_energy(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch.getPatchData(d_total_energy, data_context)));
+                
+#ifdef DEBUG_CHECK_ASSERTIONS
+                TBOX_ASSERT(partial_density);
+                TBOX_ASSERT(momentum);
+                TBOX_ASSERT(total_energy);
+#endif
+                
+                if (d_dim == tbox::Dimension(1))
+                {
+                    // NOT YET IMPLEMENTED.
+                    
+                    TBOX_ERROR(d_object_name
+                        << ": "
+                        << "Cannot initialize data for unknown 1D problem"
+                        << " for muti-species flow with conservative four-equation model with name = '"
+                        << d_project_name
+                        << "'."
+                        << std::endl);
+                }
+                else if (d_dim == tbox::Dimension(2))
+                {
+                    if (d_project_name == "2D shock-bubble interaction with AMR")
+                    {
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Please provide only two-species for the problem"
+                                << " '2D shock-bubble interaction with AMR'."
+                                << std::endl);
+                        }
+                        
+                        // Characteristic length of the problem.
+                        const double D = 1.0;
+                        
+                        // Compute the characteristic length of the initial interface thickness.
+                        const double C_epsilon = 6.0;
+                        const double epsilon_i = C_epsilon*0.0025; // epsilon_i for smoothing interface
+                        
+                        double* rho_Y_1   = partial_density->getPointer(0);
+                        double* rho_Y_2   = partial_density->getPointer(1);
+                        double* rho_u     = momentum->getPointer(0);
+                        double* rho_v     = momentum->getPointer(1);
+                        double* E         = total_energy->getPointer(0);
+                        
+                        // species 0: He
+                        // species 1: air
+                        
+                        // He, pre-shock condition.
+                        const double rho_He = 0.1819;
+                        const double u_He   = 0.0;
+                        const double v_He   = 0.0;
+                        const double p_He   = 1.0/1.4;
+                        
+                        // air, pre-shock condition.
+                        const double rho_pre = 1.0;
+                        const double u_pre   = 0.0;
+                        const double v_pre   = 0.0;
+                        const double p_pre   = 1.0/1.4;
+                        
+                        // air, post-shock condition.
+                        const double rho_post = 1.3764;
+                        const double u_post   = -0.3336;
+                        const double v_post   = 0.0;
+                        const double p_post   = 1.5698/1.4;
+                        
+                        for (int j = 0; j < patch_dims[1]; j++)
+                        {
+                            for (int i = 0; i < patch_dims[0]; i++)
+                            {
+                                // Compute index into linear data array.
+                                int idx_cell = i + j*patch_dims[0];
+                                
+                                // Compute the coordinates.
+                                double x[2];
+                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                
+                                if (x[0] > 4.5*D)
+                                {
+                                    const double Y_1 = 0.0;
+                                    const double Y_2 = 1.0;
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.push_back(&Y_1);
+                                    Y_ptr.push_back(&Y_2);
+                                    
+                                    const double gamma = d_equation_of_state->
+                                        getMixtureThermodynamicPropertyWithMassFraction(
+                                            "gamma",
+                                            Y_ptr);
+                                    
+                                    rho_Y_1[idx_cell] = 0.0;
+                                    rho_Y_2[idx_cell] = rho_post;
+                                    rho_u[idx_cell]   = rho_post*u_post;
+                                    rho_v[idx_cell]   = rho_post*v_post;
+                                    E[idx_cell]       = p_post/(gamma - 1.0) +
+                                        0.5*rho_post*(u_post*u_post + v_post*v_post);
+                                }
+                                else
+                                {
+                                    // Compute the distance from the initial material interface.
+                                    const double dR = sqrt(pow(x[0] - 3.5, 2) + x[1]*x[1]) - 0.5*D;
+                                    
+                                    const double f_sm = 0.5*(1.0 + erf(dR/epsilon_i));
+                                    
+                                    // Smooth the primitive quantity.
+                                    const double rho_Y_1_i = rho_He*(1.0 - f_sm);
+                                    const double rho_Y_2_i = rho_pre*f_sm;
+                                    const double u_i       = u_He*(1.0 - f_sm) + u_pre*f_sm;
+                                    const double v_i       = v_He*(1.0 - f_sm) + v_pre*f_sm;
+                                    const double p_i       = p_He*(1.0 - f_sm) + p_pre*f_sm;
+                                    
+                                    const double rho_i = rho_Y_1_i + rho_Y_2_i;
+                                    const double Y_1_i = rho_Y_1_i/rho_i;
+                                    const double Y_2_i = 1.0 - Y_1_i;
+                                    
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.push_back(&Y_1_i);
+                                    Y_ptr.push_back(&Y_2_i);
+                                    
+                                    const double gamma = d_equation_of_state->
+                                        getMixtureThermodynamicPropertyWithMassFraction(
+                                            "gamma",
+                                            Y_ptr);
+                                    
+                                    rho_Y_1[idx_cell] = rho_Y_1_i;
+                                    rho_Y_2[idx_cell] = rho_Y_2_i;
+                                    rho_u[idx_cell]   = rho_i*u_i;
+                                    rho_v[idx_cell]   = rho_i*v_i;
+                                    E[idx_cell]       = p_i/(gamma - 1.0) +
+                                        0.5*rho_i*(u_i*u_i + v_i*v_i);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": "
+                            << "Cannot initialize data for unknown 2D problem"
+                            << " for muti-species flow with conservative four-equation model with name = '"
+                            << d_project_name
+                            << "'."
+                            << std::endl);
+                    }
+                }
+                else if (d_dim == tbox::Dimension(3))
+                {
+                    // NOT YET IMPLEMENTED.
+                    
+                    TBOX_ERROR(d_object_name
+                        << ": "
+                        << "Cannot initialize data for unknown 3D problem"
+                        << " for muti-species flow with conservative four-equation model with name = '"
+                        << d_project_name
+                        << "'."
+                        << std::endl);
+                }
+                
+                break;
+            }
             case FOUR_EQN_SHYUE:
             {
                 boost::shared_ptr<pdat::CellData<double> > density(

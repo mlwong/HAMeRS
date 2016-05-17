@@ -33,7 +33,7 @@ class FlowModelFiveEqnAllaire: public FlowModel
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
-         * Register the required derived variables for the computation of projection matrix
+         * Register the required variables for the computation of projection matrix
          * of conservative variables and its inverse at faces in the registered patch.
          */
         void
@@ -42,7 +42,7 @@ class FlowModelFiveEqnAllaire: public FlowModel
             const AVERAGING& averaging);
         
         /*
-         * Register the required derived variables for the computation of projection matrix
+         * Register the required variables for the computation of projection matrix
          * of primitive variables and its inverse at faces in the registered patch.
          */
         void
@@ -100,7 +100,7 @@ class FlowModelFiveEqnAllaire: public FlowModel
             std::vector<hier::IntVector>& subghostcell_dims);
         
         /*
-         * Compute the local face datum of projection matrix of conservative variables in the
+         * Compute the local face data of projection matrix of conservative variables in the
          * registered patch.
          */
         void
@@ -111,7 +111,7 @@ class FlowModelFiveEqnAllaire: public FlowModel
             const DIRECTION& direction);
         
         /*
-         * Compute the local face datum of inverse of projection matrix of conservative variables
+         * Compute the local face data of inverse of projection matrix of conservative variables
          * in the registered patch.
          */
         void
@@ -122,7 +122,7 @@ class FlowModelFiveEqnAllaire: public FlowModel
             const DIRECTION& direction);
         
         /*
-         * Compute the local face datum of projection matrix of primitive variables in the
+         * Compute the local face data of projection matrix of primitive variables in the
          * registered patch.
          */
         void
@@ -133,7 +133,7 @@ class FlowModelFiveEqnAllaire: public FlowModel
             const DIRECTION& direction);
         
         /*
-         * Compute the local face datum of inverse of projection matrix of primitive variables
+         * Compute the local face data of inverse of projection matrix of primitive variables
          * in the registered patch.
          */
         void

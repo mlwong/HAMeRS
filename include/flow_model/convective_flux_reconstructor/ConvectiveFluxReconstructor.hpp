@@ -15,6 +15,7 @@
 #include "flow_model/FlowModels.hpp"
 
 #include "flow_model/flow_model/FlowModelSingleSpecies.hpp"
+#include "flow_model/flow_model/FlowModelFourEqnConservative.hpp"
 #include "flow_model/flow_model/FlowModelFiveEqnAllaire.hpp"
 
 #include "boost/shared_ptr.hpp"
@@ -53,7 +54,7 @@ class ConvectiveFluxReconstructor
                 case SINGLE_SPECIES:
                 {
                     d_flow_model_handler.reset(new FlowModelSingleSpecies(
-                        "single-species flow model",
+                        "d_flow_model",
                         d_dim,
                         d_grid_geometry,
                         d_num_ghosts,
@@ -63,15 +64,23 @@ class ConvectiveFluxReconstructor
                     
                     break;
                 }
-                case FOUR_EQN_SHYUE:
+                case FOUR_EQN_CONSERVATIVE:
                 {
+                    d_flow_model_handler.reset(new FlowModelFourEqnConservative(
+                        "d_flow_model",
+                        d_dim,
+                        d_grid_geometry,
+                        d_num_ghosts,
+                        d_num_eqn,
+                        d_num_species,
+                        equation_of_state));
                     
                     break;
                 }
                 case FIVE_EQN_ALLAIRE:
                 {
                     d_flow_model_handler.reset(new FlowModelFiveEqnAllaire(
-                        "five-equation multi-species flow model by Allaire",
+                        "d_flow_model",
                         d_dim,
                         d_grid_geometry,
                         d_num_ghosts,
@@ -117,6 +126,10 @@ class ConvectiveFluxReconstructor
             {
                 d_flow_model_handler->setNumberOfGhostCells(d_num_ghosts);
             }
+            else if (d_flow_model == FOUR_EQN_CONSERVATIVE)
+            {
+                d_flow_model_handler->setNumberOfGhostCells(d_num_ghosts);
+            }
             else if (d_flow_model == FIVE_EQN_ALLAIRE)
             {
                 d_flow_model_handler->setNumberOfGhostCells(d_num_ghosts);
@@ -157,6 +170,40 @@ class ConvectiveFluxReconstructor
         }
         
         /*
+         * Set the cell variables if four-equation conservative flow model
+         * is chosen.
+         */
+        void
+        setVariablesForFourEqnConservative(
+            const boost::shared_ptr<pdat::CellVariable<double> >& partial_density,
+            const boost::shared_ptr<pdat::CellVariable<double> >& momentum,
+            const boost::shared_ptr<pdat::CellVariable<double> >& total_energy,
+            const boost::shared_ptr<pdat::FaceVariable<double> >& convective_flux,
+            const boost::shared_ptr<pdat::CellVariable<double> >& source)
+        {
+            if (d_flow_model != FOUR_EQN_CONSERVATIVE)
+            {            
+                TBOX_ERROR(d_object_name
+                           << ": "
+                           << "setVariablesForFourEqnConservative() shouldn't be used."
+                           << std::endl);
+            }
+            
+            d_partial_density = partial_density;
+            d_momentum = momentum;
+            d_total_energy = total_energy;
+            d_convective_flux = convective_flux;
+            d_source = source;
+            
+            d_variables_set = true;
+            
+            d_flow_model_handler->setVariablesForFourEqnConservative(
+                partial_density,
+                momentum,
+                total_energy);
+        }
+        
+        /*
          * Set the cell variables if four-equation multi-species flow model
          * by Shyue is chosen.
          */
@@ -170,7 +217,7 @@ class ConvectiveFluxReconstructor
             const boost::shared_ptr<pdat::CellVariable<double> >& source)
         {
             if (d_flow_model != FOUR_EQN_SHYUE)
-            {            
+            {
                 TBOX_ERROR(d_object_name
                            << ": "
                            << "setVariablesForFourEqnShyue() shouldn't be used."

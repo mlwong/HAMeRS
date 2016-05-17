@@ -2,6 +2,7 @@
 # a list of the source files for the flow_model library
 set(flow_model_source_files
     FlowModelSingleSpecies.cpp
+    FlowModelFourEqnConservative.cpp
     FlowModelFiveEqnAllaire.cpp
 )
 

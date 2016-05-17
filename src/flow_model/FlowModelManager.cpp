@@ -18,6 +18,11 @@ FlowModelManager::FlowModelManager(
         d_flow_model = SINGLE_SPECIES;
         d_num_eqn = 2 + d_dim.getValue();
     }
+    else if (flow_model_str == "FOUR_EQN_CONSERVATIVE")
+    {
+        d_flow_model = FOUR_EQN_CONSERVATIVE;
+        d_num_eqn = d_num_species + d_dim.getValue() + 1;
+    }
     else if (flow_model_str == "FOUR_EQN_SHYUE")
     {
         d_flow_model = FOUR_EQN_SHYUE;
@@ -60,6 +65,13 @@ FlowModelManager::FlowModelManager(
             
             break;
         }
+        case FOUR_EQN_CONSERVATIVE:
+        {
+            d_partial_density = boost::shared_ptr<pdat::CellVariable<double> > (
+                new pdat::CellVariable<double>(d_dim, "partial density", d_num_species));
+            
+            break;
+        }
         case FOUR_EQN_SHYUE:
         {
             d_density = boost::shared_ptr<pdat::CellVariable<double> > (
@@ -94,6 +106,10 @@ FlowModelManager::FlowModelManager(
     switch (d_flow_model)
     {
         case SINGLE_SPECIES:
+        {
+            break;
+        }
+        case FOUR_EQN_CONSERVATIVE:
         {
             break;
         }
@@ -145,6 +161,17 @@ FlowModelManager::initializeEquationOfState(
                     d_num_species,
                     equation_of_state_db,
                     NO_ASSUMPTION));
+                
+                break;
+            }
+            case FOUR_EQN_CONSERVATIVE:
+            {
+                equation_of_state.reset(new EquationOfStateIdealGas(
+                    "ideal gas",
+                    d_dim,
+                    d_num_species,
+                    equation_of_state_db,
+                    ISOTHERMAL));
                 
                 break;
             }
@@ -567,6 +594,34 @@ FlowModelManager::registerConservativeVariables(
             
             break;
         }
+        case FOUR_EQN_CONSERVATIVE:
+        {
+            integrator->registerVariable(
+                d_partial_density,
+                d_num_ghosts,
+                RungeKuttaLevelIntegrator::TIME_DEP,
+                d_grid_geometry,
+                "CONSERVATIVE_COARSEN",
+                "CONSERVATIVE_LINEAR_REFINE");
+            
+            integrator->registerVariable(
+                d_momentum,
+                d_num_ghosts,
+                RungeKuttaLevelIntegrator::TIME_DEP,
+                d_grid_geometry,
+                "CONSERVATIVE_COARSEN",
+                "CONSERVATIVE_LINEAR_REFINE");
+            
+            integrator->registerVariable(
+                d_total_energy,
+                d_num_ghosts,
+                RungeKuttaLevelIntegrator::TIME_DEP,
+                d_grid_geometry,
+                "CONSERVATIVE_COARSEN",
+                "CONSERVATIVE_LINEAR_REFINE");
+            
+            break;
+        }
         case FOUR_EQN_SHYUE:
         {
             integrator->registerVariable(
@@ -729,6 +784,64 @@ FlowModelManager::registerPlotQuantities(
             visit_writer->registerDerivedPlotQuantity("velocity",
                 "VECTOR",
                 this);
+            
+            break;
+        }
+        case FOUR_EQN_CONSERVATIVE:
+        {
+            for (int si = 0; si < d_num_species; si++)
+            {
+                std::string partial_density_name =
+                    "partial density " + tbox::Utilities::intToString(si);
+                
+                visit_writer->registerPlotQuantity(
+                    partial_density_name,
+                    "SCALAR",
+                    vardb->mapVariableAndContextToIndex(
+                        d_partial_density,
+                        d_plot_context),
+                    si);
+            }
+            
+            visit_writer->registerPlotQuantity(
+                "momentum",
+                "VECTOR",
+                vardb->mapVariableAndContextToIndex(
+                   d_momentum,
+                   d_plot_context));
+            
+            visit_writer->registerPlotQuantity(
+                "total energy",
+                "SCALAR",
+                vardb->mapVariableAndContextToIndex(
+                   d_total_energy,
+                   d_plot_context));
+            
+            visit_writer->registerDerivedPlotQuantity("pressure",
+                "SCALAR",
+                this);
+            
+            visit_writer->registerDerivedPlotQuantity("sound speed",
+                "SCALAR",
+                this);
+            
+            visit_writer->registerDerivedPlotQuantity("velocity",
+                "VECTOR",
+                this);
+            
+            visit_writer->registerDerivedPlotQuantity("density",
+                "SCALAR",
+                this);
+            
+            for (int si = 0; si < d_num_species; si++)
+            {
+                std::string mass_fraction_name =
+                    "mass fraction " + tbox::Utilities::intToString(si);
+                    
+                visit_writer->registerDerivedPlotQuantity(mass_fraction_name,
+                                                            "SCALAR",
+                                                            this);
+            }
             
             break;
         }
@@ -1042,6 +1155,213 @@ FlowModelManager::computeStableDtOnPatch(
                                 &(rho[idx_cell]),
                                 m_ptr,
                                 &(E[idx_cell]));
+                            
+                            const double spectral_radius = (fabs(u) + c)/dx[0] + (fabs(v) + c)/dx[1] +
+                                (fabs(w) + c)/dx[2];
+                            
+                            stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius);
+                        }
+                    }
+                }
+            }
+            
+            break;
+        }
+        case FOUR_EQN_CONSERVATIVE:
+        {
+            boost::shared_ptr<pdat::CellData<double> > partial_density(
+                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    patch.getPatchData(d_partial_density, data_context)));
+            
+            boost::shared_ptr<pdat::CellData<double> > momentum(
+                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    patch.getPatchData(d_momentum, data_context)));
+            
+            boost::shared_ptr<pdat::CellData<double> > total_energy(
+                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    patch.getPatchData(d_total_energy, data_context)));
+            
+#ifdef DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(partial_density);
+            TBOX_ASSERT(momentum);
+            TBOX_ASSERT(total_energy);
+            
+            TBOX_ASSERT(partial_density->getGhostCellWidth() == d_num_ghosts);
+            TBOX_ASSERT(momentum->getGhostCellWidth() == d_num_ghosts);
+            TBOX_ASSERT(total_energy->getGhostCellWidth() == d_num_ghosts);
+#endif
+            
+            // Get the pointers to the conservative variables.
+            std::vector<double*> rho_Y;
+            for (int si = 0; si < d_num_species; si++)
+            {
+                rho_Y.push_back(partial_density->getPointer(si));
+            }
+            double* E     = total_energy->getPointer(0);
+            
+            if (d_dim == tbox::Dimension(1))
+            {
+                // Get the pointer to the momentum component.
+                double* rho_u = momentum->getPointer(0);
+                
+                for (int i = 0; i < interior_dims[0]; i++)
+                {
+                    // Compute the linear index.
+                    const int idx = (i + d_num_ghosts[0]);
+                    
+                    // Compute the mixture density.
+                    std::vector<const double*> rho_Y_ptr;
+                    for (int si = 0; si < d_num_species; si++)
+                    {
+                        rho_Y_ptr.push_back(&(rho_Y[si][idx]));
+                    }
+                    const double rho = d_equation_of_state->getTotalDensity(
+                        rho_Y_ptr);
+                    
+                    // Compute the mass fractions.
+                    double Y[d_num_species];
+                    for (int si = 0; si < d_num_species; si++)
+                    {
+                        Y[si] = rho_Y[si][idx]/rho;
+                    }
+                    
+                    // Get the pointers to the mass fractions.
+                    std::vector<const double*> Y_ptr;
+                    Y_ptr.reserve(d_num_species);
+                    for (int si = 0; si < d_num_species; si++)
+                    {
+                        Y_ptr.push_back(&Y[si]);
+                    }
+                    
+                    const double u = rho_u[idx]/rho;
+                    
+                    std::vector<const double*> m_ptr;
+                    m_ptr.push_back(&(rho_u[idx]));
+                    
+                    const double c = d_equation_of_state->getSoundSpeedWithMassFraction(
+                        &rho,
+                        m_ptr,
+                        &(E[idx]),
+                        Y_ptr);
+                    
+                    const double spectral_radius = (fabs(u) + c)/dx[0];
+                    
+                    stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius);
+                }
+            }
+            else if (d_dim == tbox::Dimension(2))
+            {
+                // Get the pointers to the momentum components.
+                double* rho_u = momentum->getPointer(0);
+                double* rho_v = momentum->getPointer(1);
+                
+                for (int j = 0; j < interior_dims[1]; j++)
+                {
+                    for (int i = 0; i < interior_dims[0]; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx = (i + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*ghostcell_dims[0];
+                        
+                        // Compute the mixture density.
+                        std::vector<const double*> rho_Y_ptr;
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            rho_Y_ptr.push_back(&(rho_Y[si][idx]));
+                        }
+                        const double rho = d_equation_of_state->getTotalDensity(
+                            rho_Y_ptr);
+                        
+                        // Compute the mass fractions.
+                        double Y[d_num_species];
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            Y[si] = rho_Y[si][idx]/rho;
+                        }
+                        
+                        // Get the pointers to the mass fractions.
+                        std::vector<const double*> Y_ptr;
+                        Y_ptr.reserve(d_num_species);
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            Y_ptr.push_back(&Y[si]);
+                        }
+                        
+                        const double u = rho_u[idx]/rho;
+                        const double v = rho_v[idx]/rho;
+                        
+                        std::vector<const double*> m_ptr;
+                        m_ptr.push_back(&(rho_u[idx]));
+                        m_ptr.push_back(&(rho_v[idx]));
+                        
+                        const double c = d_equation_of_state->getSoundSpeedWithMassFraction(
+                            &rho,
+                            m_ptr,
+                            &(E[idx]),
+                            Y_ptr);
+                        
+                        const double spectral_radius = (fabs(u) + c)/dx[0] + (fabs(v) + c)/dx[1];
+                        
+                        stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius);
+                    }
+                }
+            }
+            else if (d_dim == tbox::Dimension(3))
+            {
+                // Get the pointers to momentum components.
+                double* rho_u = momentum->getPointer(0);
+                double* rho_v = momentum->getPointer(1);
+                double* rho_w = momentum->getPointer(2);
+                
+                for (int k = 0; k < interior_dims[2]; k++)
+                {
+                    for (int j = 0; j < interior_dims[1]; j++)
+                    {
+                        for (int i = 0; i < interior_dims[0]; i++)
+                        {
+                            // Compute index of cell into linear data array.
+                            const int idx = (i + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*ghostcell_dims[0] +
+                                (k + d_num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            // Compute the mixture density.
+                            std::vector<const double*> rho_Y_ptr;
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                rho_Y_ptr.push_back(&(rho_Y[si][idx]));
+                            }
+                            const double rho = d_equation_of_state->getTotalDensity(
+                                rho_Y_ptr);
+                            
+                            // Compute the mass fractions.
+                            double Y[d_num_species];
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                Y[si] = rho_Y[si][idx]/rho;
+                            }
+                            
+                            // Get the pointers to the mass fractions.
+                            std::vector<const double*> Y_ptr;
+                            Y_ptr.reserve(d_num_species);
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                Y_ptr.push_back(&Y[si]);
+                            }
+                            
+                            const double u = rho_u[idx]/rho;
+                            const double v = rho_v[idx]/rho;
+                            const double w = rho_w[idx]/rho;
+                            
+                            std::vector<const double*> m_ptr;
+                            m_ptr.push_back(&(rho_u[idx]));
+                            m_ptr.push_back(&(rho_v[idx]));
+                            m_ptr.push_back(&(rho_w[idx]));
+                            
+                            const double c = d_equation_of_state->getSoundSpeedWithMassFraction(
+                                &rho,
+                                m_ptr,
+                                &(E[idx]),
+                                Y_ptr);
                             
                             const double spectral_radius = (fabs(u) + c)/dx[0] + (fabs(v) + c)/dx[1] +
                                 (fabs(w) + c)/dx[2];
@@ -1520,6 +1840,49 @@ FlowModelManager::createConservativeVariableVector(
             
             break;
         }
+        case FOUR_EQN_CONSERVATIVE:
+        {
+            boost::shared_ptr<pdat::CellData<double> > partial_density(
+                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    patch.getPatchData(d_partial_density, data_context)));
+            
+            boost::shared_ptr<pdat::CellData<double> > momentum(
+                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    patch.getPatchData(d_momentum, data_context)));
+            
+            boost::shared_ptr<pdat::CellData<double> > total_energy(
+                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    patch.getPatchData(d_total_energy, data_context)));
+                        
+#ifdef DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(partial_density);
+            TBOX_ASSERT(momentum);
+            TBOX_ASSERT(total_energy);
+            
+            TBOX_ASSERT(partial_density->getGhostCellWidth() == d_num_ghosts);
+            TBOX_ASSERT(momentum->getGhostCellWidth() == d_num_ghosts);
+            TBOX_ASSERT(total_energy->getGhostCellWidth() == d_num_ghosts);
+#endif
+            if (fill_zero)
+            {
+                // Initialize all time-dependent data within the interior box with zero values
+                partial_density->fillAll(0.0, interior_box);
+                momentum->fillAll(0.0, interior_box);
+                total_energy->fillAll(0.0, interior_box);
+            }
+            
+            for (int si = 0; si < d_num_species; si++)
+            {
+                Q.push_back(partial_density->getPointer(si));
+            }
+            for (int di = 0; di < d_dim.getValue(); di++)
+            {
+                Q.push_back(momentum->getPointer(di));
+            }
+            Q.push_back(total_energy->getPointer(0));
+            
+            break;
+        }
         case FOUR_EQN_SHYUE:
         {    
             boost::shared_ptr<pdat::CellData<double> > density(
@@ -1679,6 +2042,10 @@ FlowModelManager::updateConservativeVariableVector(
             {
                 break;
             }
+            case FOUR_EQN_CONSERVATIVE:
+            {
+                break;
+            }
             case FOUR_EQN_SHYUE:
             {
                 for (int i = 0; i < interior_dims[0]; i++)
@@ -1729,6 +2096,10 @@ FlowModelManager::updateConservativeVariableVector(
         switch (d_flow_model)
         {
             case SINGLE_SPECIES:
+            {
+                break;
+            }
+            case FOUR_EQN_CONSERVATIVE:
             {
                 break;
             }
@@ -1790,6 +2161,10 @@ FlowModelManager::updateConservativeVariableVector(
         switch (d_flow_model)
         {
             case SINGLE_SPECIES:
+            {
+                break;
+            }
+            case FOUR_EQN_CONSERVATIVE:
             {
                 break;
             }
@@ -1869,6 +2244,11 @@ FlowModelManager::putToRestart(
         case SINGLE_SPECIES:
         {
             restart_db->putString("d_flow_model", "SINGLE_SPECIES");
+            break;
+        }
+        case FOUR_EQN_CONSERVATIVE:
+        {
+            restart_db->putString("d_flow_model", "FOUR_EQN_CONSERVATIVE");
             break;
         }
         case FOUR_EQN_SHYUE:
@@ -2024,6 +2404,198 @@ FlowModelManager::packDerivedDataIntoDoubleBuffer(
                                     &rho[idx_data],
                                     m_ptr,
                                     &E[idx_data]);
+                            }
+                        }
+                    }
+                }
+                
+                data_on_patch = true;
+                
+                break;
+            }
+            case FOUR_EQN_CONSERVATIVE:
+            {
+                boost::shared_ptr<pdat::CellData<double> > partial_density(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch.getPatchData(d_partial_density, d_plot_context)));
+                
+                boost::shared_ptr<pdat::CellData<double> > momentum(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch.getPatchData(d_momentum, d_plot_context)));
+                
+                boost::shared_ptr<pdat::CellData<double> > total_energy(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch.getPatchData(d_total_energy, d_plot_context)));
+                
+#ifdef DEBUG_CHECK_ASSERTIONS
+                TBOX_ASSERT(partial_density);
+                TBOX_ASSERT(momentum);
+                TBOX_ASSERT(total_energy);
+                TBOX_ASSERT(partial_density->getGhostBox().isSpatiallyEqual(patch.getBox()));
+                TBOX_ASSERT(momentum->getGhostBox().isSpatiallyEqual(patch.getBox()));
+                TBOX_ASSERT(total_energy->getGhostBox().isSpatiallyEqual(patch.getBox()));
+#endif
+                
+                // Get the dimensions of box that covers the data.
+                const hier::Box data_box = partial_density->getGhostBox();
+                const hier::IntVector data_dims = data_box.numberCells();
+                
+                // Get the pointers to conservative variables
+                std::vector<const double*> rho_Y;
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    rho_Y.push_back(partial_density->getPointer(si));
+                }
+                const double* const rho_u = momentum->getPointer(0);
+                const double* const rho_v = d_dim > tbox::Dimension(1) ? momentum->getPointer(1) : NULL;
+                const double* const rho_w = d_dim > tbox::Dimension(2) ? momentum->getPointer(2) : NULL;
+                const double* const E     = total_energy->getPointer(0);
+                
+                size_t offset_data = data_box.offset(region.lower());
+                
+                if (d_dim == tbox::Dimension(1))
+                {
+                    for (int i = 0; i < region_dims[0]; i++)
+                    {
+                        // Compute the linear indices.
+                        size_t idx_data = offset_data + i;
+                        
+                        size_t idx_region = i;
+                        
+                        std::vector<const double*> m_ptr;
+                        m_ptr.push_back(&rho_u[idx_data]);
+                        
+                        // Compute the mixture density.
+                        std::vector<const double*> rho_Y_ptr;
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            rho_Y_ptr.push_back(&(rho_Y[si][idx_data]));
+                        }
+                        const double rho = d_equation_of_state->getTotalDensity(
+                            rho_Y_ptr);
+                        
+                        // Compute the mass fractions.
+                        double Y[d_num_species];
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            Y[si] = rho_Y[si][idx_data]/rho;
+                        }
+                        
+                        // Get the pointers to the mass fractions.
+                        std::vector<const double*> Y_ptr;
+                        Y_ptr.reserve(d_num_species);
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            Y_ptr.push_back(&Y[si]);
+                        }
+                        
+                        buffer[idx_region] = d_equation_of_state->getPressureWithMassFraction(
+                            &rho,
+                            m_ptr,
+                            &E[idx_data],
+                            Y_ptr);
+                    }
+                }
+                else if (d_dim == tbox::Dimension(2))
+                {
+                    for (int j = 0; j < region_dims[1]; j++)
+                    {
+                        for (int i = 0; i < region_dims[0]; i++)
+                        {
+                            // Compute the linear indices.
+                            size_t idx_data = offset_data + i +
+                                j*data_dims[0];
+                            
+                            size_t idx_region = i +
+                                j*region_dims[0];
+                            
+                            std::vector<const double*> m_ptr;
+                            m_ptr.push_back(&rho_u[idx_data]);
+                            m_ptr.push_back(&rho_v[idx_data]);
+                            
+                            // Compute the mixture density.
+                            std::vector<const double*> rho_Y_ptr;
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                rho_Y_ptr.push_back(&(rho_Y[si][idx_data]));
+                            }
+                            const double rho = d_equation_of_state->getTotalDensity(
+                                rho_Y_ptr);
+                            
+                            // Compute the mass fractions.
+                            double Y[d_num_species];
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                Y[si] = rho_Y[si][idx_data]/rho;
+                            }
+                            
+                            // Get the pointers to the mass fractions.
+                            std::vector<const double*> Y_ptr;
+                            Y_ptr.reserve(d_num_species);
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                Y_ptr.push_back(&Y[si]);
+                            }
+                            
+                            buffer[idx_region] = d_equation_of_state->getPressureWithMassFraction(
+                                &rho,
+                                m_ptr,
+                                &E[idx_data],
+                                Y_ptr);
+                        }
+                    }
+                }
+                else if (d_dim == tbox::Dimension(3))
+                {
+                    for (int k = 0; k < region_dims[2]; k++)
+                    {
+                        for (int j = 0; j < region_dims[1]; j++)
+                        {
+                            for (int i = 0; i < region_dims[0]; i++)
+                            {
+                                // Compute the linear indices.
+                                size_t idx_data = offset_data + i +
+                                    j*data_dims[0] +
+                                    k*data_dims[0]*data_dims[1];
+                                
+                                size_t idx_region = i +
+                                    j*region_dims[0] +
+                                    k*region_dims[0]*region_dims[1];
+                                
+                                std::vector<const double*> m_ptr;
+                                m_ptr.push_back(&rho_u[idx_data]);
+                                m_ptr.push_back(&rho_v[idx_data]);
+                                m_ptr.push_back(&rho_w[idx_data]);
+                                
+                                // Compute the mixture density.
+                                std::vector<const double*> rho_Y_ptr;
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    rho_Y_ptr.push_back(&(rho_Y[si][idx_data]));
+                                }
+                                const double rho = d_equation_of_state->getTotalDensity(
+                                    rho_Y_ptr);
+                                
+                                // Compute the mass fractions.
+                                double Y[d_num_species];
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y[si] = rho_Y[si][idx_data]/rho;
+                                }
+                                
+                                // Get the pointers to the mass fractions.
+                                std::vector<const double*> Y_ptr;
+                                Y_ptr.reserve(d_num_species);
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_ptr.push_back(&Y[si]);
+                                }
+                                
+                                buffer[idx_region] = d_equation_of_state->getPressureWithMassFraction(
+                                    &rho,
+                                    m_ptr,
+                                    &E[idx_data],
+                                    Y_ptr);
                             }
                         }
                     }
@@ -2462,6 +3034,198 @@ FlowModelManager::packDerivedDataIntoDoubleBuffer(
                 
                 break;
             }
+            case FOUR_EQN_CONSERVATIVE:
+            {
+                boost::shared_ptr<pdat::CellData<double> > partial_density(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch.getPatchData(d_partial_density, d_plot_context)));
+                
+                boost::shared_ptr<pdat::CellData<double> > momentum(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch.getPatchData(d_momentum, d_plot_context)));
+                
+                boost::shared_ptr<pdat::CellData<double> > total_energy(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch.getPatchData(d_total_energy, d_plot_context)));
+                
+#ifdef DEBUG_CHECK_ASSERTIONS
+                TBOX_ASSERT(partial_density);
+                TBOX_ASSERT(momentum);
+                TBOX_ASSERT(total_energy);
+                TBOX_ASSERT(partial_density->getGhostBox().isSpatiallyEqual(patch.getBox()));
+                TBOX_ASSERT(momentum->getGhostBox().isSpatiallyEqual(patch.getBox()));
+                TBOX_ASSERT(total_energy->getGhostBox().isSpatiallyEqual(patch.getBox()));
+#endif
+                
+                // Get the dimensions of box that covers the data.
+                const hier::Box data_box = partial_density->getGhostBox();
+                const hier::IntVector data_dims = data_box.numberCells();
+                
+                // Get the pointers to the conservative variables
+                std::vector<const double*> rho_Y;
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    rho_Y.push_back(partial_density->getPointer(si));
+                }
+                const double* const rho_u = momentum->getPointer(0);
+                const double* const rho_v = d_dim > tbox::Dimension(1) ? momentum->getPointer(1) : NULL;
+                const double* const rho_w = d_dim > tbox::Dimension(2) ? momentum->getPointer(2) : NULL;
+                const double* const E     = total_energy->getPointer(0);
+                
+                size_t offset_data = data_box.offset(region.lower());
+                
+                if (d_dim == tbox::Dimension(1))
+                {
+                    for (int i = 0; i < region_dims[0]; i++)
+                    {
+                        // Compute the linear indices.
+                        size_t idx_data = offset_data + i;
+                        
+                        size_t idx_region = i;
+                        
+                        std::vector<const double*> m_ptr;
+                        m_ptr.push_back(&rho_u[idx_data]);
+                        
+                        // Compute the mixture density.
+                        std::vector<const double*> rho_Y_ptr;
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            rho_Y_ptr.push_back(&(rho_Y[si][idx_data]));
+                        }
+                        const double rho = d_equation_of_state->getTotalDensity(
+                            rho_Y_ptr);
+                        
+                        // Compute the mass fractions.
+                        double Y[d_num_species];
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            Y[si] = rho_Y[si][idx_data]/rho;
+                        }
+                        
+                        // Get the pointers to the mass fractions.
+                        std::vector<const double*> Y_ptr;
+                        Y_ptr.reserve(d_num_species);
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            Y_ptr.push_back(&Y[si]);
+                        }
+                        
+                        buffer[idx_region] = d_equation_of_state->getSoundSpeedWithMassFraction(
+                            &rho,
+                            m_ptr,
+                            &E[idx_data],
+                            Y_ptr);
+                    }
+                }
+                else if (d_dim == tbox::Dimension(2))
+                {
+                    for (int j = 0; j < region_dims[1]; j++)
+                    {
+                        for (int i = 0; i < region_dims[0]; i++)
+                        {
+                            // Compute the linear indices.
+                            size_t idx_data = offset_data + i +
+                                j*data_dims[0];
+                            
+                            size_t idx_region = i +
+                                j*region_dims[0];
+                            
+                            std::vector<const double*> m_ptr;
+                            m_ptr.push_back(&rho_u[idx_data]);
+                            m_ptr.push_back(&rho_v[idx_data]);
+                            
+                            // Compute the mixture density.
+                            std::vector<const double*> rho_Y_ptr;
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                rho_Y_ptr.push_back(&(rho_Y[si][idx_data]));
+                            }
+                            const double rho = d_equation_of_state->getTotalDensity(
+                                rho_Y_ptr);
+                            
+                            // Compute the mass fractions.
+                            double Y[d_num_species];
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                Y[si] = rho_Y[si][idx_data]/rho;
+                            }
+                            
+                            // Get the pointers to the mass fractions.
+                            std::vector<const double*> Y_ptr;
+                            Y_ptr.reserve(d_num_species);
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                Y_ptr.push_back(&Y[si]);
+                            }
+                            
+                            buffer[idx_region] = d_equation_of_state->getSoundSpeedWithMassFraction(
+                                &rho,
+                                m_ptr,
+                                &E[idx_data],
+                                Y_ptr);
+                        }
+                    }
+                }
+                else if (d_dim == tbox::Dimension(3))
+                {
+                    for (int k = 0; k < region_dims[2]; k++)
+                    {
+                        for (int j = 0; j < region_dims[1]; j++)
+                        {
+                            for (int i = 0; i < region_dims[0]; i++)
+                            {
+                                // Compute the linear indices.
+                                size_t idx_data = offset_data + i +
+                                    j*data_dims[0] +
+                                    k*data_dims[0]*data_dims[1];
+                                
+                                size_t idx_region = i +
+                                    j*region_dims[0] +
+                                    k*region_dims[0]*region_dims[1];
+                                
+                                std::vector<const double*> m_ptr;
+                                m_ptr.push_back(&rho_u[idx_data]);
+                                m_ptr.push_back(&rho_v[idx_data]);
+                                m_ptr.push_back(&rho_w[idx_data]);
+                                
+                                // Compute the mixture density.
+                                std::vector<const double*> rho_Y_ptr;
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    rho_Y_ptr.push_back(&(rho_Y[si][idx_data]));
+                                }
+                                const double rho = d_equation_of_state->getTotalDensity(
+                                    rho_Y_ptr);
+                                
+                                // Compute the mass fractions.
+                                double Y[d_num_species];
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y[si] = rho_Y[si][idx_data]/rho;
+                                }
+                                
+                                // Get the pointers to the mass fractions.
+                                std::vector<const double*> Y_ptr;
+                                Y_ptr.reserve(d_num_species);
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    Y_ptr.push_back(&Y[si]);
+                                }
+                                
+                                buffer[idx_region] = d_equation_of_state->getSoundSpeedWithMassFraction(
+                                    &rho,
+                                    m_ptr,
+                                    &E[idx_data],
+                                    Y_ptr);
+                            }
+                        }
+                    }
+                }
+                
+                data_on_patch = true;
+                
+                break;
+            }
             case FOUR_EQN_SHYUE:
             {
                 boost::shared_ptr<pdat::CellData<double> > density(
@@ -2864,6 +3628,117 @@ FlowModelManager::packDerivedDataIntoDoubleBuffer(
                 
                 break;
             }
+            case FOUR_EQN_CONSERVATIVE:
+            {
+                boost::shared_ptr<pdat::CellData<double> > partial_density(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch.getPatchData(d_partial_density, d_plot_context)));
+                
+                boost::shared_ptr<pdat::CellData<double> > momentum(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch.getPatchData(d_momentum, d_plot_context)));
+                
+#ifdef DEBUG_CHECK_ASSERTIONS
+                TBOX_ASSERT(partial_density);
+                TBOX_ASSERT(momentum);
+                TBOX_ASSERT(partial_density->getGhostBox().isSpatiallyEqual(patch.getBox()));
+                TBOX_ASSERT(momentum->getGhostBox().isSpatiallyEqual(patch.getBox()));
+#endif
+                
+                // Get the dimensions of box that covers the data.
+                const hier::Box data_box = partial_density->getGhostBox();
+                const hier::IntVector data_dims = data_box.numberCells();
+                
+                // Get the pointers to the conservative variables.
+                std::vector<const double*> rho_Y;
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    rho_Y.push_back(partial_density->getPointer(si));
+                }
+                const double* const m = momentum->getPointer(depth_id);
+                
+                size_t offset_data = data_box.offset(region.lower());
+                
+                if (d_dim == tbox::Dimension(1))
+                {
+                    for (int i = 0; i < region_dims[0]; i++)
+                    {
+                        // Compute the linear indices.
+                        size_t idx_data = offset_data + i;
+                        
+                        size_t idx_region = i;
+                        
+                        std::vector<const double*> rho_Y_ptr;
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            rho_Y_ptr.push_back(&rho_Y[si][idx_data]);
+                        }
+                        
+                        double rho = d_equation_of_state->getTotalDensity(rho_Y_ptr);
+                        
+                        buffer[idx_region] = m[idx_data]/rho;
+                    }
+                }
+                else if (d_dim == tbox::Dimension(2))
+                {
+                    for (int j = 0; j < region_dims[1]; j++)
+                    {
+                        for (int i = 0; i < region_dims[0]; i++)
+                        {
+                            // Compute the linear indices.
+                            size_t idx_data = offset_data + i +
+                                j*data_dims[0];
+                            
+                            size_t idx_region = i +
+                                j*region_dims[0];
+                            
+                            std::vector<const double*> rho_Y_ptr;
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                rho_Y_ptr.push_back(&rho_Y[si][idx_data]);
+                            }
+                            
+                            double rho = d_equation_of_state->getTotalDensity(rho_Y_ptr);
+                            
+                            buffer[idx_region] = m[idx_data]/rho;
+                        }
+                    }
+                }
+                else if (d_dim == tbox::Dimension(3))
+                {
+                    for (int k = 0; k < region_dims[2]; k++)
+                    {
+                        for (int j = 0; j < region_dims[1]; j++)
+                        {
+                            for (int i = 0; i < region_dims[0]; i++)
+                            {
+                                // Compute the linear indices.
+                                size_t idx_data = offset_data + i +
+                                    j*data_dims[0] +
+                                    k*data_dims[0]*data_dims[1];
+                                
+                                size_t idx_region = i +
+                                    j*region_dims[0] +
+                                    k*region_dims[0]*region_dims[1];
+                                
+                                std::vector<const double*> rho_Y_ptr;
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    rho_Y_ptr.push_back(&rho_Y[si][idx_data]);
+                                }
+                                
+                                double rho = d_equation_of_state->getTotalDensity(rho_Y_ptr);
+                                
+                                buffer[idx_region] = m[idx_data]/rho;
+                            }
+                        }
+                    }
+                }
+                
+                data_on_patch = true;
+                
+                break;
+            }
             case FOUR_EQN_SHYUE:
             {
                 boost::shared_ptr<pdat::CellData<double> > density(
@@ -3075,6 +3950,104 @@ FlowModelManager::packDerivedDataIntoDoubleBuffer(
                 
                 break;
             }
+            case FOUR_EQN_CONSERVATIVE:
+            {
+                boost::shared_ptr<pdat::CellData<double> > partial_density(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch.getPatchData(d_partial_density, d_plot_context)));
+                
+#ifdef DEBUG_CHECK_ASSERTIONS
+                TBOX_ASSERT(partial_density);
+                TBOX_ASSERT(partial_density->getGhostBox().isSpatiallyEqual(patch.getBox()));
+#endif
+                
+                // Get the dimensions of box that covers the data.
+                const hier::Box data_box = partial_density->getGhostBox();
+                const hier::IntVector data_dims = data_box.numberCells();
+                
+                // Get the pointers to the conservative variables.
+                std::vector<const double*> rho_Y;
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    rho_Y.push_back(partial_density->getPointer(si));
+                }
+                
+                size_t offset_data = data_box.offset(region.lower());
+                
+                if (d_dim == tbox::Dimension(1))
+                {
+                    for (int i = 0; i < region_dims[0]; i++)
+                    {
+                        // Compute the linear indices.
+                        size_t idx_data = offset_data + i;
+                        
+                        size_t idx_region = i;
+                        
+                        std::vector<const double*> rho_Y_ptr;
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            rho_Y_ptr.push_back(&rho_Y[si][idx_data]);
+                        }
+                        
+                        buffer[idx_region] = d_equation_of_state->getTotalDensity(rho_Y_ptr);
+                    }
+                }
+                else if (d_dim == tbox::Dimension(2))
+                {
+                    for (int j = 0; j < region_dims[1]; j++)
+                    {
+                        for (int i = 0; i < region_dims[0]; i++)
+                        {
+                            // Compute the linear indices.
+                            size_t idx_data = offset_data + i +
+                                j*data_dims[0];
+                            
+                            size_t idx_region = i +
+                                j*region_dims[0];
+                            
+                            std::vector<const double*> rho_Y_ptr;
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                rho_Y_ptr.push_back(&rho_Y[si][idx_data]);
+                            }
+                            
+                            buffer[idx_region] = d_equation_of_state->getTotalDensity(rho_Y_ptr);
+                        }
+                    }
+                }
+                else if (d_dim == tbox::Dimension(3))
+                {
+                    for (int k = 0; k < region_dims[2]; k++)
+                    {
+                        for (int j = 0; j < region_dims[1]; j++)
+                        {
+                            for (int i = 0; i < region_dims[0]; i++)
+                            {
+                                // Compute the linear indices.
+                                size_t idx_data = offset_data + i +
+                                    j*data_dims[0] +
+                                    k*data_dims[0]*data_dims[1];
+                                
+                                size_t idx_region = i +
+                                    j*region_dims[0] +
+                                    k*region_dims[0]*region_dims[1];
+                                
+                                std::vector<const double*> rho_Y_ptr;
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    rho_Y_ptr.push_back(&rho_Y[si][idx_data]);
+                                }
+                                
+                                buffer[idx_region] = d_equation_of_state->getTotalDensity(rho_Y_ptr);
+                            }
+                        }
+                    }
+                }
+                
+                data_on_patch = true;
+                
+                break;
+            }
             case FOUR_EQN_SHYUE:
             {
                 TBOX_ERROR("Euler::packDerivedDataIntoDoubleBuffer()"
@@ -3200,6 +4173,112 @@ FlowModelManager::packDerivedDataIntoDoubleBuffer(
                    << std::endl);
                 
                 data_on_patch = false;
+                
+                break;
+            }
+            case FOUR_EQN_CONSERVATIVE:
+            {
+                int species_idx = std::stoi(variable_name.substr(14));
+                
+                boost::shared_ptr<pdat::CellData<double> > partial_density(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch.getPatchData(d_partial_density, d_plot_context)));
+                
+#ifdef DEBUG_CHECK_ASSERTIONS
+                TBOX_ASSERT(partial_density);
+                TBOX_ASSERT(partial_density->getGhostBox().isSpatiallyEqual(patch.getBox()));
+#endif
+                
+                // Get the dimensions of box that covers the data.
+                const hier::Box data_box = partial_density->getGhostBox();
+                const hier::IntVector data_dims = data_box.numberCells();
+                
+                // Get the pointers to conservative variables.
+                std::vector<const double*> rho_Y;
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    rho_Y.push_back(partial_density->getPointer(si));
+                }
+                
+                size_t offset_data = data_box.offset(region.lower());
+                
+                if (d_dim == tbox::Dimension(1))
+                {
+                    for (int i = 0; i < region_dims[0]; i++)
+                    {
+                        // Compute the linear indices.
+                        size_t idx_data = offset_data + i;
+                        
+                        size_t idx_region = i;
+                        
+                        std::vector<const double*> rho_Y_ptr;
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            rho_Y_ptr.push_back(&rho_Y[si][idx_data]);
+                        }
+                        
+                        double rho = d_equation_of_state->getTotalDensity(rho_Y_ptr);
+                        
+                        buffer[idx_region] = rho_Y[species_idx][idx_data]/rho;
+                    }
+                }
+                else if (d_dim == tbox::Dimension(2))
+                {
+                    for (int j = 0; j < region_dims[1]; j++)
+                    {
+                        for (int i = 0; i < region_dims[0]; i++)
+                        {
+                            // Compute the linear indices.
+                            size_t idx_data = offset_data + i +
+                                j*data_dims[0];
+                            
+                            size_t idx_region = i +
+                                j*region_dims[0];
+                            
+                            std::vector<const double*> rho_Y_ptr;
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                rho_Y_ptr.push_back(&rho_Y[si][idx_data]);
+                            }
+                            
+                            double rho = d_equation_of_state->getTotalDensity(rho_Y_ptr);
+                            
+                            buffer[idx_region] = rho_Y[species_idx][idx_data]/rho;
+                        }
+                    }
+                }
+                else if (d_dim == tbox::Dimension(3))
+                {
+                    for (int k = 0; k < region_dims[2]; k++)
+                    {
+                        for (int j = 0; j < region_dims[1]; j++)
+                        {
+                            for (int i = 0; i < region_dims[0]; i++)
+                            {
+                                // Compute the linear indices.
+                                size_t idx_data = offset_data + i +
+                                    j*data_dims[0] +
+                                    k*data_dims[0]*data_dims[1];
+                                
+                                size_t idx_region = i +
+                                    j*region_dims[0] +
+                                    k*region_dims[0]*region_dims[1];
+                                
+                                std::vector<const double*> rho_Y_ptr;
+                                for (int si = 0; si < d_num_species; si++)
+                                {
+                                    rho_Y_ptr.push_back(&rho_Y[si][idx_data]);
+                                }
+                                
+                                double rho = d_equation_of_state->getTotalDensity(rho_Y_ptr);
+                                
+                                buffer[idx_region] = rho_Y[species_idx][idx_data]/rho;
+                            }
+                        }
+                    }
+                }
+                
+                data_on_patch = true;
                 
                 break;
             }
@@ -3354,6 +4433,11 @@ FlowModelManager::printClassData(std::ostream& os) const
             os << "d_flow_model = SINGLE_SPECIES" << std::endl;
             break;
         }
+        case FOUR_EQN_CONSERVATIVE:
+        {
+            os << "d_flow_model = FOUR_EQN_CONSERVATIVE" << std::endl;
+            break;
+        }
         case FOUR_EQN_SHYUE:
         {
             os << "d_flow_model = FOUR_EQN_SHYUE" << std::endl;
@@ -3468,6 +4552,84 @@ FlowModelManager::printDataStatistics(
                 MPI_MAX);
             
             os << "Max/min density: " << rho_max_global << "/" << rho_min_global << std::endl;
+            os << "Max/min momentum component: " << m_max_global << "/" << m_min_global << std::endl;
+            os << "Max/min total energy: " << E_max_global << "/" << E_min_global << std::endl;
+            
+            break;
+        }
+        case FOUR_EQN_CONSERVATIVE:
+        {
+            const int rho_Y_id = variable_db->mapVariableAndContextToIndex(
+                d_partial_density,
+                d_plot_context);
+            
+            const int m_id = variable_db->mapVariableAndContextToIndex(
+                d_momentum,
+                d_plot_context);
+            
+            const int E_id = variable_db->mapVariableAndContextToIndex(
+                d_total_energy,
+                d_plot_context);
+            
+            double rho_Y_max_local = cell_double_operator.max(rho_Y_id);
+            double rho_Y_min_local = cell_double_operator.min(rho_Y_id);
+            
+            double m_max_local = cell_double_operator.max(m_id);
+            double m_min_local = cell_double_operator.min(m_id);
+            
+            double E_max_local = cell_double_operator.max(E_id);
+            double E_min_local = cell_double_operator.min(E_id);
+            
+            double rho_Y_max_global = 0.0;
+            double rho_Y_min_global = 0.0;
+            double m_max_global = 0.0;
+            double m_min_global = 0.0;
+            double E_max_global = 0.0;
+            double E_min_global = 0.0;
+            
+            mpi.Allreduce(
+                &rho_Y_max_local,
+                &rho_Y_max_global,
+                1,
+                MPI_DOUBLE,
+                MPI_MAX);
+            
+            mpi.Allreduce(
+                &rho_Y_min_local,
+                &rho_Y_min_global,
+                1,
+                MPI_DOUBLE,
+                MPI_MAX);
+            
+            mpi.Allreduce(
+                &m_max_local,
+                &m_max_global,
+                1,
+                MPI_DOUBLE,
+                MPI_MAX);
+            
+            mpi.Allreduce(
+                &m_min_local,
+                &m_min_global,
+                1,
+                MPI_DOUBLE,
+                MPI_MAX);
+            
+            mpi.Allreduce(
+                &E_max_local,
+                &E_max_global,
+                1,
+                MPI_DOUBLE,
+                MPI_MAX);
+            
+            mpi.Allreduce(
+                &E_min_local,
+                &E_min_global,
+                1,
+                MPI_DOUBLE,
+                MPI_MAX);
+            
+            os << "Max/min partial density component: " << rho_Y_max_global << "/" << rho_Y_min_global << std::endl;
             os << "Max/min momentum component: " << m_max_global << "/" << m_min_global << std::endl;
             os << "Max/min total energy: " << E_max_global << "/" << E_min_global << std::endl;
             
@@ -3712,6 +4874,17 @@ FlowModelManager::setVariablesForConvectiveFluxReconstructor(
             
             break;
         }
+        case FOUR_EQN_CONSERVATIVE:
+        {
+            d_conv_flux_reconstructor->setVariablesForFourEqnConservative(
+                d_partial_density,
+                d_momentum,
+                d_total_energy,
+                convective_flux,
+                source);
+            
+            break;
+        }
         case FOUR_EQN_SHYUE:
         {
             d_conv_flux_reconstructor->setVariablesForFourEqnShyue(
@@ -3767,6 +4940,15 @@ FlowModelManager::setVariablesForInitialConditions()
             
             break;
         }
+        case FOUR_EQN_CONSERVATIVE:
+        {
+            d_initial_conditions->setVariablesForFourEqnConservative(
+                d_partial_density,
+                d_momentum,
+                d_total_energy);
+            
+            break;
+        }
         case FOUR_EQN_SHYUE:
         {
             d_initial_conditions->setVariablesForFourEqnShyue(
@@ -3813,6 +4995,15 @@ FlowModelManager::setVariablesForEulerBoundaryConditions()
         {
             d_Euler_boundary_conditions->setVariablesForSingleSpecies(
                 d_density,
+                d_momentum,
+                d_total_energy);
+            
+            break;
+        }
+        case FOUR_EQN_CONSERVATIVE:
+        {
+            d_Euler_boundary_conditions->setVariablesForFourEqnConservative(
+                d_partial_density,
                 d_momentum,
                 d_total_energy);
             
@@ -3871,6 +5062,10 @@ FlowModelManager::setVariablesForGradientTagger()
                 
                 break;
             }
+            case FOUR_EQN_CONSERVATIVE:
+            {
+                break;
+            }
             case FOUR_EQN_SHYUE:
             {
                 d_gradient_tagger->setVariablesForFourEqnShyue(
@@ -3923,6 +5118,10 @@ FlowModelManager::setVariablesForMultiresolutionTagger()
                     d_momentum,
                     d_total_energy);
                 
+                break;
+            }
+            case FOUR_EQN_CONSERVATIVE:
+            {
                 break;
             }
             case FOUR_EQN_SHYUE:

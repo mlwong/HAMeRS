@@ -1,5 +1,5 @@
-#ifndef RIEMANN_SOLVER_FOUR_EQN_SHYUE_HPP
-#define RIEMANN_SOLVER_FOUR_EQN_SHYUE_HPP
+#ifndef RIEMANN_SOLVER_FOUR_EQN_CONSERVATIVE_HPP
+#define RIEMANN_SOLVER_FOUR_EQN_CONSERVATIVE_HPP
 
 #include "SAMRAI/tbox/Dimension.h"
 
@@ -13,10 +13,10 @@
 
 using namespace SAMRAI;
 
-class RiemannSolverFourEqnShyue
+class RiemannSolverFourEqnConservative
 {
     public:
-        RiemannSolverFourEqnShyue(
+        RiemannSolverFourEqnConservative(
             const std::string& object_name,
             const tbox::Dimension& dim,
             const int& num_eqn,
@@ -30,23 +30,21 @@ class RiemannSolverFourEqnShyue
         {}
         
         /*
-         * Compute the flux and velocity at the intercell face from conservative variables.
+         * Compute the flux at the intercell face from conservative variables.
          */
         virtual void
-        computeIntercellFluxAndVelocityFromConservativeVariables(
+        computeIntercellFluxFromConservativeVariables(
             std::vector<boost::reference_wrapper<double> >& flux_intercell,
-            std::vector<boost::reference_wrapper<double> >& velocity_intercell,
             const std::vector<boost::reference_wrapper<double> >& conservative_variables_minus,
             const std::vector<boost::reference_wrapper<double> >& conservative_variables_plus,
             const DIRECTION& direction) = 0;
         
         /*
-         * Compute the flux and velocity at the intercell face from primitive variables.
+         * Compute the flux at the intercell face from primitive variables.
          */
         virtual void
-        computeIntercellFluxAndVelocityFromPrimitiveVariables(
+        computeIntercellFluxFromPrimitiveVariables(
             std::vector<boost::reference_wrapper<double> >& flux_intercell,
-            std::vector<boost::reference_wrapper<double> >& velocity_intercell,
             const std::vector<boost::reference_wrapper<double> >& primitive_variables_minus,
             const std::vector<boost::reference_wrapper<double> >& primitive_variables_plus,
             const DIRECTION& direction) = 0;
@@ -79,4 +77,4 @@ class RiemannSolverFourEqnShyue
         
 };
 
-#endif /* RIEMANN_SOLVER_FOUR_EQN_SHYUE_HPP */
+#endif /* RIEMANN_SOLVER_FOUR_EQN_CONSERVATIVE_HPP */

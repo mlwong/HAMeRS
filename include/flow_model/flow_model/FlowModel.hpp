@@ -107,8 +107,7 @@ class FlowModel
         virtual void unregisterPatchWithGlobalCellData() = 0;
         
         /*
-         * Compute the global cell data of the registered variables in the registered
-         * patch.
+         * Compute the global cell data of the registered variables in the registered patch.
          */
         virtual void
         computeGlobalCellData() = 0;
@@ -249,6 +248,21 @@ class FlowModel
             const boost::shared_ptr<pdat::CellVariable<double> >& total_energy)
         {
             d_variable_density = density;
+            d_variable_momentum = momentum;
+            d_variable_total_energy = total_energy;
+        }
+        
+        /*
+         * Set the cell variables if four-equation multi-species conservative flow model
+         * is chosen.
+         */
+        void
+        setVariablesForFourEqnConservative(
+            const boost::shared_ptr<pdat::CellVariable<double> >& partial_density,
+            const boost::shared_ptr<pdat::CellVariable<double> >& momentum,
+            const boost::shared_ptr<pdat::CellVariable<double> >& total_energy)
+        {
+            d_variable_partial_density = partial_density;
             d_variable_momentum = momentum;
             d_variable_total_energy = total_energy;
         }

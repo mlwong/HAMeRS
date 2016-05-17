@@ -5,6 +5,8 @@ set(Riemann_solver_source_files
     RiemannSolverHLLC_HLL.cpp
     RiemannSolverSingleSpeciesHLLC.cpp
     RiemannSolverSingleSpeciesHLLC_HLL.cpp
+    RiemannSolverFourEqnConservativeHLLC.cpp
+    RiemannSolverFourEqnConservativeHLLC_HLL.cpp
     RiemannSolverFourEqnShyueHLLC.cpp
     RiemannSolverFourEqnShyueHLLC_HLL.cpp
     RiemannSolverFiveEqnAllaireHLLC.cpp

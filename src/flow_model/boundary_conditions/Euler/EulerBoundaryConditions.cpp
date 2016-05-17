@@ -66,6 +66,14 @@ EulerBoundaryConditions::EulerBoundaryConditions(
                         
                         break;
                     }
+                    case FOUR_EQN_CONSERVATIVE:
+                    {
+                        d_bdry_node_partial_density = boundary_conditions_db->getDoubleVector("d_bdry_node_partial_density");
+                        d_bdry_node_momentum = boundary_conditions_db->getDoubleVector("d_bdry_node_momentum");
+                        d_bdry_node_total_energy = boundary_conditions_db->getDoubleVector("d_bdry_node_total_energy");
+                        
+                        break;
+                    }
                     case FOUR_EQN_SHYUE:
                     {
                         d_bdry_node_density = boundary_conditions_db->getDoubleVector("d_bdry_node_density");
@@ -110,6 +118,14 @@ EulerBoundaryConditions::EulerBoundaryConditions(
                         
                         break;
                     }
+                    case FOUR_EQN_CONSERVATIVE:
+                    {
+                        d_bdry_edge_partial_density = boundary_conditions_db->getDoubleVector("d_bdry_edge_partial_density");
+                        d_bdry_edge_momentum = boundary_conditions_db->getDoubleVector("d_bdry_edge_momentum");
+                        d_bdry_edge_total_energy = boundary_conditions_db->getDoubleVector("d_bdry_edge_total_energy");
+                        
+                        break;
+                    }
                     case FOUR_EQN_SHYUE:
                     {
                         d_bdry_edge_density = boundary_conditions_db->getDoubleVector("d_bdry_edge_density");
@@ -149,6 +165,14 @@ EulerBoundaryConditions::EulerBoundaryConditions(
                     case SINGLE_SPECIES:
                     {
                         d_bdry_face_density = boundary_conditions_db->getDoubleVector("d_bdry_face_density");
+                        d_bdry_face_momentum = boundary_conditions_db->getDoubleVector("d_bdry_face_momentum");
+                        d_bdry_face_total_energy = boundary_conditions_db->getDoubleVector("d_bdry_face_total_energy");
+                        
+                        break;
+                    }
+                    case FOUR_EQN_CONSERVATIVE:
+                    {
+                        d_bdry_face_partial_density = boundary_conditions_db->getDoubleVector("d_bdry_face_partial_density");
                         d_bdry_face_momentum = boundary_conditions_db->getDoubleVector("d_bdry_face_momentum");
                         d_bdry_face_total_energy = boundary_conditions_db->getDoubleVector("d_bdry_face_total_energy");
                         
@@ -424,6 +448,34 @@ EulerBoundaryConditions::printClassData(std::ostream& os) const
                         
                         break;
                     }
+                    case FOUR_EQN_CONSERVATIVE:
+                    {
+                        os << "d_bdry_edge_partial_density["
+                           << j
+                           << "] = "
+                           << d_bdry_edge_partial_density[j*d_num_species + 0];
+                        for (int si = 1; si < d_num_species; si++)
+                        {
+                            os << " , "
+                               << d_bdry_edge_partial_density[j*d_num_species + si];
+                        }
+                        os << std::endl;
+                        
+                        os << "d_bdry_edge_momentum["
+                           << j << "] = "
+                           << d_bdry_edge_momentum[j*d_dim.getValue() + 0]
+                           << " , "
+                           << d_bdry_edge_momentum[j*d_dim.getValue() + 1]
+                           << std::endl;
+                        
+                        os << "d_bdry_edge_total_energy["
+                           << j
+                           << "] = "
+                           << d_bdry_edge_total_energy[j]
+                           << std::endl;
+                        
+                        break;
+                    }
                     case FOUR_EQN_SHYUE:
                     {
                         os << "d_bdry_edge_density["
@@ -612,6 +664,36 @@ EulerBoundaryConditions::printClassData(std::ostream& os) const
                         
                         break;
                     }
+                    case FOUR_EQN_CONSERVATIVE:
+                    {
+                        os << "d_bdry_face_partial_density["
+                           << j
+                           << "] = "
+                           << d_bdry_face_partial_density[j*d_num_species + 0];
+                        for (int si = 1; si < d_num_species; si++)
+                        {
+                            os << " , "
+                               << d_bdry_face_partial_density[j*d_num_species + si];
+                        }
+                        os << std::endl;
+                        
+                        os << "d_bdry_face_momentum["
+                           << j << "] = "
+                           << d_bdry_face_momentum[j*d_dim.getValue() + 0]
+                           << " , "
+                           << d_bdry_face_momentum[j*d_dim.getValue() + 1]
+                           << " , "
+                           << d_bdry_face_momentum[j*d_dim.getValue() + 2]
+                           << std::endl;
+                        
+                        os << "d_bdry_face_total_energy["
+                           << j
+                           << "] = "
+                           << d_bdry_face_total_energy[j]
+                           << std::endl;
+                        
+                        break;
+                    }
                     case FOUR_EQN_SHYUE:
                     {
                         os << "d_bdry_face_density["
@@ -733,6 +815,19 @@ EulerBoundaryConditions::putToRestart(
                 
                 break;
             }
+            case FOUR_EQN_CONSERVATIVE:
+            {
+                restart_db->putDoubleVector("d_bdry_node_partial_density",
+                                            d_bdry_node_partial_density);
+                
+                restart_db->putDoubleVector("d_bdry_node_momentum",
+                                            d_bdry_node_momentum);
+                
+                restart_db->putDoubleVector("d_bdry_node_total_energy",
+                                            d_bdry_node_total_energy);
+                
+                break;
+            }
             case FOUR_EQN_SHYUE:
             {
                 restart_db->putDoubleVector("d_bdry_node_density",
@@ -787,6 +882,19 @@ EulerBoundaryConditions::putToRestart(
             {
                 restart_db->putDoubleVector("d_bdry_edge_density",
                                             d_bdry_edge_density);
+                
+                restart_db->putDoubleVector("d_bdry_edge_momentum",
+                                            d_bdry_edge_momentum);
+                
+                restart_db->putDoubleVector("d_bdry_edge_total_energy",
+                                            d_bdry_edge_total_energy);
+                
+                break;
+            }
+            case FOUR_EQN_CONSERVATIVE:
+            {
+                restart_db->putDoubleVector("d_bdry_edge_partial_density",
+                                            d_bdry_edge_partial_density);
                 
                 restart_db->putDoubleVector("d_bdry_edge_momentum",
                                             d_bdry_edge_momentum);
@@ -853,6 +961,19 @@ EulerBoundaryConditions::putToRestart(
             {
                 restart_db->putDoubleVector("d_bdry_face_density",
                                             d_bdry_face_density);
+                
+                restart_db->putDoubleVector("d_bdry_face_momentum",
+                                            d_bdry_face_momentum);
+                
+                restart_db->putDoubleVector("d_bdry_face_total_energy",
+                                            d_bdry_face_total_energy);
+                
+                break;
+            }
+            case FOUR_EQN_CONSERVATIVE:
+            {
+                restart_db->putDoubleVector("d_bdry_face_partial_density",
+                                            d_bdry_face_partial_density);
                 
                 restart_db->putDoubleVector("d_bdry_face_momentum",
                                             d_bdry_face_momentum);
@@ -945,6 +1066,18 @@ EulerBoundaryConditions::readDirichletBoundaryDataEntry(
                 
                 break;
             }
+            case FOUR_EQN_CONSERVATIVE:
+            {
+                readStateDataEntryForFourEqnConservative(
+                    db,
+                    db_name,
+                    bdry_location_index,
+                    d_bdry_edge_partial_density,
+                    d_bdry_edge_momentum,
+                    d_bdry_edge_total_energy);
+                
+                break;
+            }
             case FOUR_EQN_SHYUE:
             {
                 readStateDataEntryForFourEqnShyue(
@@ -993,6 +1126,18 @@ EulerBoundaryConditions::readDirichletBoundaryDataEntry(
                     db_name,
                     bdry_location_index,
                     d_bdry_face_density,
+                    d_bdry_face_momentum,
+                    d_bdry_face_total_energy);
+                
+                break;
+            }
+            case FOUR_EQN_CONSERVATIVE:
+            {
+                readStateDataEntryForFourEqnConservative(
+                    db,
+                    db_name,
+                    bdry_location_index,
+                    d_bdry_face_partial_density,
                     d_bdry_face_momentum,
                     d_bdry_face_total_energy);
                 
@@ -1230,6 +1375,181 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                             ghost_width_to_fill,
                             d_scalar_bdry_node_conds,
                             d_bdry_face_density);
+                        
+                        appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
+                            "momentum",
+                            momentum,
+                            patch,
+                            ghost_width_to_fill,
+                            d_vector_bdry_node_conds,
+                            d_bdry_face_momentum);
+                        
+                        appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
+                            "total energy",
+                            total_energy,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_node_conds,
+                            d_bdry_face_total_energy);
+                    }
+                    
+                    break;
+                }
+                case FOUR_EQN_CONSERVATIVE:
+                {
+                    boost::shared_ptr<pdat::CellData<double> > partial_density(
+                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(d_partial_density, data_context)));
+                    
+                    boost::shared_ptr<pdat::CellData<double> > momentum(
+                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(d_momentum, data_context)));
+                    
+                    boost::shared_ptr<pdat::CellData<double> > total_energy(
+                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(d_total_energy, data_context)));
+                    
+#ifdef DEBUG_CHECK_ASSERTIONS
+                    TBOX_ASSERT(partial_density);
+                    TBOX_ASSERT(momentum);
+                    TBOX_ASSERT(total_energy);
+                    
+                    TBOX_ASSERT(partial_density->getGhostCellWidth() == d_num_ghosts);
+                    TBOX_ASSERT(momentum->getGhostCellWidth() == d_num_ghosts);
+                    TBOX_ASSERT(total_energy->getGhostCellWidth() == d_num_ghosts);
+#endif
+                    
+                    if (d_dim == tbox::Dimension(1))
+                    {
+                        // NOT YET IMPLEMENTED
+                    }
+                    else if (d_dim == tbox::Dimension(2))
+                    {
+                        /*
+                         * Set boundary conditions for cells corresponding to patch edges.
+                         */
+                        
+                        appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
+                            "partial density",
+                            partial_density,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_edge_conds,
+                            d_bdry_edge_partial_density);
+                        
+                        appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
+                            "momentum",
+                            momentum,
+                            patch,
+                            ghost_width_to_fill,
+                            d_vector_bdry_edge_conds,
+                            d_bdry_edge_momentum);
+                        
+                        appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
+                            "total energy",
+                            total_energy,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_edge_conds,
+                            d_bdry_edge_total_energy);
+                        
+                        /*
+                         *  Set boundary conditions for cells corresponding to patch nodes.
+                         */
+                        
+                        appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
+                            "partial density",
+                            partial_density,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_node_conds,
+                            d_bdry_edge_partial_density);
+                        
+                        appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
+                            "momentum",
+                            momentum,
+                            patch,
+                            ghost_width_to_fill,
+                            d_vector_bdry_node_conds,
+                            d_bdry_edge_momentum);
+                        
+                        appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
+                            "total energy",
+                            total_energy,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_node_conds,
+                            d_bdry_edge_total_energy);
+                    }
+                    else if (d_dim == tbox::Dimension(3))
+                    {
+                        /*
+                         *  Set boundary conditions for cells corresponding to patch faces.
+                         */
+                        
+                        appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
+                            "partial density",
+                            partial_density,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_face_conds,
+                            d_bdry_face_partial_density);
+                        
+                        appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
+                            "momentum",
+                            momentum,
+                            patch,
+                            ghost_width_to_fill,
+                            d_vector_bdry_face_conds,
+                            d_bdry_face_momentum);
+                        
+                        appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
+                            "total energy",
+                            total_energy,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_face_conds,
+                            d_bdry_face_total_energy);
+                        
+                        /*
+                         *  Set boundary conditions for cells corresponding to patch edges.
+                         */
+                        
+                        appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
+                            "partial density",
+                            partial_density,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_edge_conds,
+                            d_bdry_face_partial_density);
+                        
+                        appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
+                            "momentum",
+                            momentum,
+                            patch,
+                            ghost_width_to_fill,
+                            d_vector_bdry_edge_conds,
+                            d_bdry_face_momentum);
+                        
+                        appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
+                            "total energy",
+                            total_energy,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_edge_conds,
+                            d_bdry_face_total_energy);
+                        
+                        /*
+                         *  Set boundary conditions for cells corresponding to patch nodes.
+                         */
+                        
+                        appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
+                            "partial density",
+                            partial_density,
+                            patch,
+                            ghost_width_to_fill,
+                            d_scalar_bdry_node_conds,
+                            d_bdry_face_partial_density);
                         
                         appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
                             "momentum",
@@ -1962,6 +2282,94 @@ EulerBoundaryConditions::readStateDataEntryForSingleSpecies(
 
 
 void
+EulerBoundaryConditions::readStateDataEntryForFourEqnConservative(
+    boost::shared_ptr<tbox::Database> db,
+    const std::string& db_name,
+    int array_indx,
+    std::vector<double>& partial_density,
+    std::vector<double>& momentum,
+    std::vector<double>& total_energy)
+{
+    TBOX_ASSERT(db);
+    TBOX_ASSERT(!db_name.empty());
+    TBOX_ASSERT(array_indx >= 0);
+    TBOX_ASSERT(static_cast<int>(partial_density.size()) > array_indx*d_num_species);
+    TBOX_ASSERT(static_cast<int>(momentum.size()) > array_indx*d_dim.getValue());
+    TBOX_ASSERT(static_cast<int>(total_energy.size()) > array_indx);
+    
+    if (db->keyExists("partial_density"))
+    {
+        std::vector<double> tmp_Z_rho = db->getDoubleVector("partial_density");
+        if (static_cast<int>(tmp_Z_rho.size()) < d_num_species)
+        {
+            TBOX_ERROR(d_object_name
+                       << ": "
+                       << "Insufficient number of 'partial_density' values"
+                       << " given in "
+                       << db_name
+                       << " input database."
+                       << std::endl);
+        }
+        for (int si = 0; si < d_num_species; si++)
+        {
+            partial_density[array_indx*d_num_species + si] = tmp_Z_rho[si];
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+                   << ": "
+                   << "'partial_density' entry missing from "
+                   << db_name
+                   << " input database."
+                   << std::endl);
+    }
+    
+    if (db->keyExists("momentum"))
+    {
+        std::vector<double> tmp_m = db->getDoubleVector("momentum");
+        if (static_cast<int>(tmp_m.size()) < d_dim.getValue())
+        {
+            TBOX_ERROR(d_object_name
+                       << ": "
+                       << "Insufficient number of 'momentum' values"
+                       << " given in "
+                       << db_name
+                       << " input database."
+                       << std::endl);
+        }
+        for (int di = 0; di < d_dim.getValue(); di++)
+        {
+            momentum[array_indx*d_dim.getValue() + di] = tmp_m[di];
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+                   << ": "
+                   << "'momentum' entry missing from "
+                   << db_name
+                   << " input database."
+                   << std::endl);
+    }
+   
+    if (db->keyExists("total_energy"))
+    {
+        total_energy[array_indx] = db->getDouble("total_energy");
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+                   << ": "
+                   << "'total_energy' entry missing from "
+                   << db_name
+                   << " input database."
+                   << std::endl);
+    }
+}
+
+
+void
 EulerBoundaryConditions::readStateDataEntryForFourEqnShyue(
     boost::shared_ptr<tbox::Database> db,
     const std::string& db_name,
@@ -2222,6 +2630,18 @@ EulerBoundaryConditions::setDefaultBoundaryConditions()
                 
                 break;
             }
+            case FOUR_EQN_CONSERVATIVE:
+            {
+                d_bdry_node_partial_density.resize(NUM_1D_NODES*d_num_species);
+                d_bdry_node_momentum.resize(NUM_1D_NODES*d_dim.getValue());
+                d_bdry_node_total_energy.resize(NUM_1D_NODES);
+                
+                tbox::MathUtilities<double>::setVectorToSignalingNaN(d_bdry_node_partial_density);
+                tbox::MathUtilities<double>::setVectorToSignalingNaN(d_bdry_node_momentum);
+                tbox::MathUtilities<double>::setVectorToSignalingNaN(d_bdry_node_total_energy);
+                
+                break;
+            }
             case FOUR_EQN_SHYUE:
             {
                 d_bdry_node_density.resize(NUM_1D_NODES);
@@ -2290,6 +2710,18 @@ EulerBoundaryConditions::setDefaultBoundaryConditions()
             case SINGLE_SPECIES:
             {
                 d_bdry_edge_density.resize(NUM_2D_EDGES);
+                d_bdry_edge_momentum.resize(NUM_2D_EDGES*d_dim.getValue());
+                d_bdry_edge_total_energy.resize(NUM_2D_EDGES);
+                
+                tbox::MathUtilities<double>::setVectorToSignalingNaN(d_bdry_edge_density);
+                tbox::MathUtilities<double>::setVectorToSignalingNaN(d_bdry_edge_momentum);
+                tbox::MathUtilities<double>::setVectorToSignalingNaN(d_bdry_edge_total_energy);
+                
+                break;
+            }
+            case FOUR_EQN_CONSERVATIVE:
+            {
+                d_bdry_edge_partial_density.resize(NUM_2D_EDGES*d_num_species);
                 d_bdry_edge_momentum.resize(NUM_2D_EDGES*d_dim.getValue());
                 d_bdry_edge_total_energy.resize(NUM_2D_EDGES);
                 
@@ -2384,6 +2816,18 @@ EulerBoundaryConditions::setDefaultBoundaryConditions()
                 tbox::MathUtilities<double>::setVectorToSignalingNaN(d_bdry_face_density);
                 tbox::MathUtilities<double>::setVectorToSignalingNaN(d_bdry_face_momentum);
                 tbox::MathUtilities<double>::setVectorToSignalingNaN(d_bdry_face_total_energy);
+                
+                break;
+            }
+            case FOUR_EQN_CONSERVATIVE:
+            {
+                d_bdry_face_partial_density.resize(NUM_3D_FACES*d_num_species);
+                d_bdry_face_momentum.resize(NUM_3D_FACES*d_dim.getValue());
+                d_bdry_face_total_energy.resize(NUM_3D_FACES);
+                
+                tbox::MathUtilities<double>::setVectorToSignalingNaN(d_bdry_edge_partial_density);
+                tbox::MathUtilities<double>::setVectorToSignalingNaN(d_bdry_edge_momentum);
+                tbox::MathUtilities<double>::setVectorToSignalingNaN(d_bdry_edge_total_energy);
                 
                 break;
             }

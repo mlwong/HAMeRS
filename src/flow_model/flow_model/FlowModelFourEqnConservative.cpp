@@ -1,6 +1,6 @@
-#include "flow_model/flow_model/FlowModelSingleSpecies.hpp"
+#include "flow_model/flow_model/FlowModelFourEqnConservative.hpp"
 
-FlowModelSingleSpecies::FlowModelSingleSpecies(
+FlowModelFourEqnConservative::FlowModelFourEqnConservative(
     const std::string& object_name,
     const tbox::Dimension& dim,
     const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
@@ -16,6 +16,8 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
             num_eqn,
             num_species,
             equation_of_state),
+        d_num_subghosts_density(-hier::IntVector::getOne(d_dim)),
+        d_num_subghosts_mass_fraction(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_pressure(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_velocity(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_sound_speed(-hier::IntVector::getOne(d_dim)),
@@ -25,6 +27,8 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
         d_num_subghosts_convective_flux_x(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_convective_flux_y(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_convective_flux_z(-hier::IntVector::getOne(d_dim)),
+        d_subghost_box_density(hier::Box::getEmptyBox(dim)),
+        d_subghost_box_mass_fraction(hier::Box::getEmptyBox(dim)),
         d_subghost_box_pressure(hier::Box::getEmptyBox(dim)),
         d_subghost_box_velocity(hier::Box::getEmptyBox(dim)),
         d_subghost_box_sound_speed(hier::Box::getEmptyBox(dim)),
@@ -34,6 +38,8 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
         d_subghost_box_convective_flux_x(hier::Box::getEmptyBox(dim)),
         d_subghost_box_convective_flux_y(hier::Box::getEmptyBox(dim)),
         d_subghost_box_convective_flux_z(hier::Box::getEmptyBox(dim)),
+        d_subghostcell_dims_density(hier::IntVector::getZero(d_dim)),
+        d_subghostcell_dims_mass_fraction(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_pressure(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_velocity(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_sound_speed(hier::IntVector::getZero(d_dim)),
@@ -58,21 +64,24 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
 {
     d_eqn_form.reserve(d_num_eqn);
     
-    for (int ei = 0; ei < d_num_eqn; ei++)
+    // Set the equation forms for partial density.
+    for (int si = 0; si < d_num_species; si++)
     {
         d_eqn_form.push_back(CONSERVATIVE_EQN);
     }
     
-    /*
-    d_variable_density = boost::shared_ptr<pdat::CellVariable<double> > (
-        new pdat::CellVariable<double>(d_dim, "density", 1));
+    // Set the equation forms for momentum.
+    for (int di = 0; di < d_dim.getValue(); di++)
+    {
+        d_eqn_form.push_back(CONSERVATIVE_EQN);
+    }
     
-    d_variable_momentum = boost::shared_ptr<pdat::CellVariable<double> > (
-        new pdat::CellVariable<double>(d_dim, "momentum", d_dim.getValue()));
+    // Set the equation form for total energy.
+    d_eqn_form.push_back(CONSERVATIVE_EQN);
     
-    d_variable_total_energy = boost::shared_ptr<pdat::CellVariable<double> > (
-        new pdat::CellVariable<double>(d_dim, "total energy", 1));
-    */
+    // Set the bounds for the variables.
+    d_Y_bound_lo = -0.001;
+    d_Y_bound_up = 1.001;
 }
 
 
@@ -80,15 +89,15 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
  * Print all characteristics of the flow model class.
  */
 void
-FlowModelSingleSpecies::printClassData(std::ostream& os) const
+FlowModelFourEqnConservative::printClassData(std::ostream& os) const
 {
-    os << "\nPrint FlowModelSingleSpecies object..."
+    os << "\nPrint FlowModelFourEqnConservative object..."
        << std::endl;
     
     os << std::endl;
     
-    os << "FlowModelSingleSpecies: this = "
-       << (FlowModelSingleSpecies *)this
+    os << "FlowModelFourEqnConservative: this = "
+       << (FlowModelFourEqnConservative *)this
        << std::endl;
 }
 
@@ -97,7 +106,7 @@ FlowModelSingleSpecies::printClassData(std::ostream& os) const
  * Register a patch with global cell data of different variables in the patch.
  */
 void
-FlowModelSingleSpecies::registerPatchWithGlobalCellData(
+FlowModelFourEqnConservative::registerPatchWithGlobalCellData(
     const hier::Patch& patch,
     const std::unordered_map<std::string, hier::IntVector>& num_subghosts_of_data,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -106,7 +115,7 @@ FlowModelSingleSpecies::registerPatchWithGlobalCellData(
     if (d_patch)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::registerPatchWithGlobalCellData()\n"
+            << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
             << "The patch is not yet unregistered."
             << std::endl);
     }
@@ -119,7 +128,7 @@ FlowModelSingleSpecies::registerPatchWithGlobalCellData(
             (it->second > d_num_ghosts))
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::registerPatchWithGlobalCellData()\n"
+                << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
                 << "The number of sub-ghost cells of variables '"
                 << it->first
                 << "' is not between zero and d_num_ghosts."
@@ -129,14 +138,88 @@ FlowModelSingleSpecies::registerPatchWithGlobalCellData(
     
     d_patch = &patch;
     
+    if (num_subghosts_of_data.find("DENSITY") != num_subghosts_of_data.end())
+    {
+        d_num_subghosts_density = num_subghosts_of_data.find("DENSITY")->second;
+    }
+    
+    if (num_subghosts_of_data.find("MASS_FRACTION") != num_subghosts_of_data.end())
+    {
+        d_num_subghosts_mass_fraction = num_subghosts_of_data.find("MASS_FRACTION")->second;
+        
+        if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
+        {
+            if (d_num_subghosts_mass_fraction > d_num_subghosts_density)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
+                    << "Number of ghosts of 'MASS_FRACTION' exceeds"
+                    << " number of ghosts of 'DENSITY'."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            d_num_subghosts_density = d_num_subghosts_mass_fraction;
+        }
+    }
+    
     if (num_subghosts_of_data.find("PRESSURE") != num_subghosts_of_data.end())
     {
         d_num_subghosts_pressure = num_subghosts_of_data.find("PRESSURE")->second;
+        
+        if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
+        {
+            if (d_num_subghosts_pressure > d_num_subghosts_mass_fraction)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
+                    << "Number of ghosts of 'PRESSURE' exceeds"
+                    << " number of ghosts of 'MASS_FRACTION'."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            d_num_subghosts_mass_fraction = d_num_subghosts_pressure;
+            
+            if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
+            {
+                if (d_num_subghosts_pressure > d_num_subghosts_density)
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
+                        << "Number of ghosts of 'PRESSURE' exceeds"
+                        << " number of ghosts of 'DENSITY'."
+                        << std::endl);
+                }
+            }
+            else
+            {
+                d_num_subghosts_density = d_num_subghosts_pressure;
+            }
+        }
     }
     
     if (num_subghosts_of_data.find("VELOCITY") != num_subghosts_of_data.end())
     {
         d_num_subghosts_velocity = num_subghosts_of_data.find("VELOCITY")->second;
+        
+        if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
+        {
+            if (d_num_subghosts_velocity > d_num_subghosts_density)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
+                    << "Number of ghosts of 'VELOCITY' exceeds"
+                    << " number of ghosts of 'DENSITY'."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            d_num_subghosts_density = d_num_subghosts_velocity;
+        }
     }
     
     if (num_subghosts_of_data.find("SOUND_SPEED") != num_subghosts_of_data.end())
@@ -148,7 +231,7 @@ FlowModelSingleSpecies::registerPatchWithGlobalCellData(
             if (d_num_subghosts_sound_speed > d_num_subghosts_pressure)
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::registerPatchWithGlobalCellData()\n"
+                    << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
                     << "Number of ghosts of 'SOUND_SPEED' exceeds"
                     << " number of ghosts of 'PRESSURE'."
                     << std::endl);
@@ -157,6 +240,38 @@ FlowModelSingleSpecies::registerPatchWithGlobalCellData(
         else
         {
             d_num_subghosts_pressure = d_num_subghosts_sound_speed;
+            
+            if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
+            {
+                if (d_num_subghosts_sound_speed > d_num_subghosts_mass_fraction)
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
+                        << "Number of ghosts of 'SOUND_SPEED' exceeds"
+                        << " number of ghosts of 'MASS_FRACTION'."
+                        << std::endl);
+                }
+            }
+            else
+            {
+                d_num_subghosts_mass_fraction = d_num_subghosts_sound_speed;
+                
+                if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
+                {
+                    if (d_num_subghosts_sound_speed > d_num_subghosts_density)
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
+                            << "Number of ghosts of 'SOUND_SPEED' exceeds"
+                            << " number of ghosts of 'DENSITY'."
+                            << std::endl);
+                    }
+                }
+                else
+                {
+                    d_num_subghosts_density = d_num_subghosts_sound_speed;
+                }
+            }
         }
     }
     
@@ -169,7 +284,7 @@ FlowModelSingleSpecies::registerPatchWithGlobalCellData(
             if (d_num_subghosts_dilatation > d_num_subghosts_velocity)
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::registerPatchWithGlobalCellData()\n"
+                    << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
                     << "Number of ghosts of 'DILATATION' exceeds"
                     << " number of ghosts of 'VELOCITY'."
                     << std::endl);
@@ -178,6 +293,22 @@ FlowModelSingleSpecies::registerPatchWithGlobalCellData(
         else
         {
             d_num_subghosts_velocity = d_num_subghosts_dilatation;
+            
+            if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
+            {
+                if (d_num_subghosts_dilatation > d_num_subghosts_density)
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
+                        << "Number of ghosts of 'DILATATION' exceeds"
+                        << " number of ghosts of 'DENSITY'."
+                        << std::endl);
+                }
+            }
+            else
+            {
+                d_num_subghosts_density = d_num_subghosts_dilatation;
+            }
         }
     }
     
@@ -190,7 +321,7 @@ FlowModelSingleSpecies::registerPatchWithGlobalCellData(
             if (d_num_subghosts_vorticity > d_num_subghosts_velocity)
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::registerPatchWithGlobalCellData()\n"
+                    << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
                     << "Number of ghosts of 'VORTICITY' exceeds"
                     << " number of ghosts of 'VELOCITY'."
                     << std::endl);
@@ -199,6 +330,22 @@ FlowModelSingleSpecies::registerPatchWithGlobalCellData(
         else
         {
             d_num_subghosts_velocity = d_num_subghosts_vorticity;
+            
+            if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
+            {
+                if (d_num_subghosts_vorticity > d_num_subghosts_density)
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
+                        << "Number of ghosts of 'VORTICITY' exceeds"
+                        << " number of ghosts of 'DENSITY'."
+                        << std::endl);
+                }
+            }
+            else
+            {
+                d_num_subghosts_density = d_num_subghosts_vorticity;
+            }
         }
     }
     
@@ -211,7 +358,7 @@ FlowModelSingleSpecies::registerPatchWithGlobalCellData(
             if (d_num_subghosts_enstrophy > d_num_subghosts_vorticity)
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::registerPatchWithGlobalCellData()\n"
+                    << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
                     << "Number of ghosts of 'ENSTROPHY' exceeds"
                     << " number of ghosts of 'VORTICITY'."
                     << std::endl);
@@ -226,7 +373,7 @@ FlowModelSingleSpecies::registerPatchWithGlobalCellData(
                 if (d_num_subghosts_enstrophy > d_num_subghosts_velocity)
                 {
                     TBOX_ERROR(d_object_name
-                        << ": FlowModelSingleSpecies::registerPatchWithGlobalCellData()\n"
+                        << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
                         << "Number of ghosts of 'ENSTROPHY' exceeds"
                         << " number of ghosts of 'VELOCITY'."
                         << std::endl);
@@ -235,6 +382,22 @@ FlowModelSingleSpecies::registerPatchWithGlobalCellData(
             else
             {
                 d_num_subghosts_velocity = d_num_subghosts_enstrophy;
+                
+                if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
+                {
+                    if (d_num_subghosts_enstrophy > d_num_subghosts_density)
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
+                            << "Number of ghosts of 'ENSTROPHY' exceeds"
+                            << " number of ghosts of 'DENSITY'."
+                            << std::endl);
+                    }
+                }
+                else
+                {
+                    d_num_subghosts_density = d_num_subghosts_enstrophy;
+                }
             }
         }
     }
@@ -248,7 +411,7 @@ FlowModelSingleSpecies::registerPatchWithGlobalCellData(
             if (d_num_subghosts_convective_flux_x > d_num_subghosts_pressure)
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::registerPatchWithGlobalCellData()\n"
+                    << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
                     << "Number of ghosts of 'CONVECTIVE_FLUX_X' exceeds"
                     << " number of ghosts of 'PRESSURE'."
                     << std::endl);
@@ -257,6 +420,38 @@ FlowModelSingleSpecies::registerPatchWithGlobalCellData(
         else
         {
             d_num_subghosts_pressure = d_num_subghosts_convective_flux_x;
+            
+            if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
+            {
+                if (d_num_subghosts_convective_flux_x > d_num_subghosts_mass_fraction)
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
+                        << "Number of ghosts of 'CONVECTIVE_FLUX_X' exceeds"
+                        << " number of ghosts of 'MASS_FRACTION'."
+                        << std::endl);
+                }
+            }
+            else
+            {
+                d_num_subghosts_mass_fraction = d_num_subghosts_convective_flux_x;
+                
+                if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
+                {
+                    if (d_num_subghosts_convective_flux_x > d_num_subghosts_density)
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
+                            << "Number of ghosts of 'CONVECTIVE_FLUX_X' exceeds"
+                            << " number of ghosts of 'DENSITY'."
+                            << std::endl);
+                    }
+                }
+                else
+                {
+                    d_num_subghosts_density = d_num_subghosts_convective_flux_x;
+                }
+            }
         }
         
         if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
@@ -264,7 +459,7 @@ FlowModelSingleSpecies::registerPatchWithGlobalCellData(
             if (d_num_subghosts_convective_flux_x > d_num_subghosts_velocity)
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::registerPatchWithGlobalCellData()\n"
+                    << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
                     << "Number of ghosts of 'CONVECTIVE_FLUX_X' exceeds"
                     << " number of ghosts of 'VELOCITY'."
                     << std::endl);
@@ -278,95 +473,139 @@ FlowModelSingleSpecies::registerPatchWithGlobalCellData(
     
     if (num_subghosts_of_data.find("CONVECTIVE_FLUX_Y") != num_subghosts_of_data.end())
     {
-        if (d_dim >= tbox::Dimension(2))
+        d_num_subghosts_convective_flux_y = num_subghosts_of_data.find("CONVECTIVE_FLUX_Y")->second;
+        
+        if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
         {
-            d_num_subghosts_convective_flux_y = num_subghosts_of_data.find("CONVECTIVE_FLUX_Y")->second;
-            
-            if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
+            if (d_num_subghosts_convective_flux_y > d_num_subghosts_pressure)
             {
-                if (d_num_subghosts_convective_flux_y > d_num_subghosts_pressure)
-                {
-                    TBOX_ERROR(d_object_name
-                        << ": FlowModelSingleSpecies::registerPatchWithGlobalCellData()\n"
-                        << "Number of ghosts of 'CONVECTIVE_FLUX_Y' exceeds"
-                        << " number of ghosts of 'PRESSURE'."
-                        << std::endl);
-                }
-            }
-            else
-            {
-                d_num_subghosts_pressure = d_num_subghosts_convective_flux_y;
-            }
-            
-            if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
-            {
-                if (d_num_subghosts_convective_flux_y > d_num_subghosts_velocity)
-                {
-                    TBOX_ERROR(d_object_name
-                        << ": FlowModelSingleSpecies::registerPatchWithGlobalCellData()\n"
-                        << "Number of ghosts of 'CONVECTIVE_FLUX_Y' exceeds"
-                        << " number of ghosts of 'VELOCITY'."
-                        << std::endl);
-                }
-            }
-            else
-            {
-                d_num_subghosts_velocity = d_num_subghosts_convective_flux_y;
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
+                    << "Number of ghosts of 'CONVECTIVE_FLUX_Y' exceeds"
+                    << " number of ghosts of 'PRESSURE'."
+                    << std::endl);
             }
         }
         else
         {
-            TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::registerPatchWithGlobalCellData()\n"
-                << "'CONVECTIVE_FLUX_Y' cannot be obtained for problem with dimension less than two."
-                << std::endl);
+            d_num_subghosts_pressure = d_num_subghosts_convective_flux_y;
+            
+            if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
+            {
+                if (d_num_subghosts_convective_flux_y > d_num_subghosts_mass_fraction)
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
+                        << "Number of ghosts of 'CONVECTIVE_FLUX_Y' exceeds"
+                        << " number of ghosts of 'MASS_FRACTION'."
+                        << std::endl);
+                }
+            }
+            else
+            {
+                d_num_subghosts_mass_fraction = d_num_subghosts_convective_flux_y;
+                
+                if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
+                {
+                    if (d_num_subghosts_convective_flux_y > d_num_subghosts_density)
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
+                            << "Number of ghosts of 'CONVECTIVE_FLUX_Y' exceeds"
+                            << " number of ghosts of 'DENSITY'."
+                            << std::endl);
+                    }
+                }
+                else
+                {
+                    d_num_subghosts_density = d_num_subghosts_convective_flux_y;
+                }
+            }
+        }
+        
+        if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
+        {
+            if (d_num_subghosts_convective_flux_y > d_num_subghosts_velocity)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
+                    << "Number of ghosts of 'CONVECTIVE_FLUX_Y' exceeds"
+                    << " number of ghosts of 'VELOCITY'."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            d_num_subghosts_velocity = d_num_subghosts_convective_flux_y;
         }
     }
     
     if (num_subghosts_of_data.find("CONVECTIVE_FLUX_Z") != num_subghosts_of_data.end())
     {
-        if (d_dim == tbox::Dimension(3))
+        d_num_subghosts_convective_flux_z = num_subghosts_of_data.find("CONVECTIVE_FLUX_Z")->second;
+        
+        if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
         {
-            d_num_subghosts_convective_flux_z = num_subghosts_of_data.find("CONVECTIVE_FLUX_Z")->second;
-            
-            if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
+            if (d_num_subghosts_convective_flux_z > d_num_subghosts_pressure)
             {
-                if (d_num_subghosts_convective_flux_z > d_num_subghosts_pressure)
-                {
-                    TBOX_ERROR(d_object_name
-                        << ": FlowModelSingleSpecies::registerPatchWithGlobalCellData()\n"
-                        << "Number of ghosts of 'CONVECTIVE_FLUX_Z' exceeds"
-                        << " number of ghosts of 'PRESSURE'."
-                        << std::endl);
-                }
-            }
-            else
-            {
-                d_num_subghosts_pressure = d_num_subghosts_convective_flux_z;
-            }
-            
-            if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
-            {
-                if (d_num_subghosts_convective_flux_z > d_num_subghosts_velocity)
-                {
-                    TBOX_ERROR(d_object_name
-                        << ": FlowModelSingleSpecies::registerPatchWithGlobalCellData()\n"
-                        << "Number of ghosts of 'CONVECTIVE_FLUX_Z' exceeds"
-                        << " number of ghosts of 'VELOCITY'."
-                        << std::endl);
-                }
-            }
-            else
-            {
-                d_num_subghosts_velocity = d_num_subghosts_convective_flux_z;
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
+                    << "Number of ghosts of 'CONVECTIVE_FLUX_Z' exceeds"
+                    << " number of ghosts of 'PRESSURE'."
+                    << std::endl);
             }
         }
         else
         {
-            TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::registerPatchWithGlobalCellData()\n"
-                << "'CONVECTIVE_FLUX_Z' cannot be obtained for problem with dimension less than three."
-                << std::endl);
+            d_num_subghosts_pressure = d_num_subghosts_convective_flux_z;
+            
+            if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
+            {
+                if (d_num_subghosts_convective_flux_z > d_num_subghosts_mass_fraction)
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
+                        << "Number of ghosts of 'CONVECTIVE_FLUX_Z' exceeds"
+                        << " number of ghosts of 'MASS_FRACTION'."
+                        << std::endl);
+                }
+            }
+            else
+            {
+                d_num_subghosts_mass_fraction = d_num_subghosts_convective_flux_z;
+                
+                if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
+                {
+                    if (d_num_subghosts_convective_flux_z > d_num_subghosts_density)
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
+                            << "Number of ghosts of 'CONVECTIVE_FLUX_Z' exceeds"
+                            << " number of ghosts of 'DENSITY'."
+                            << std::endl);
+                    }
+                }
+                else
+                {
+                    d_num_subghosts_density = d_num_subghosts_convective_flux_z;
+                }
+            }
+        }
+        
+        if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
+        {
+            if (d_num_subghosts_convective_flux_z > d_num_subghosts_velocity)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
+                    << "Number of ghosts of 'CONVECTIVE_FLUX_Z' exceeds"
+                    << " number of ghosts of 'VELOCITY'."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            d_num_subghosts_velocity = d_num_subghosts_convective_flux_z;
         }
     }
     
@@ -375,28 +614,12 @@ FlowModelSingleSpecies::registerPatchWithGlobalCellData(
         hier::IntVector d_num_subghosts_primitive_variables =
             num_subghosts_of_data.find("PRIMITIVE_VARIABLES")->second;;
         
-        if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
-        {
-            if (d_num_subghosts_velocity != d_num_subghosts_primitive_variables)
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::registerPatchWithGlobalCellData()\n"
-                    << "Number of ghosts of 'VELOCITY' is not equal to"
-                    << " number of ghosts of 'PRIMITIVE_VARIABLES'."
-                    << std::endl);
-            }
-        }
-        else
-        {
-            d_num_subghosts_velocity = d_num_subghosts_primitive_variables;
-        }
-        
         if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
         {
             if (d_num_subghosts_pressure != d_num_subghosts_primitive_variables)
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::registerPatchWithGlobalCellData()\n"
+                    << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
                     << "Number of ghosts of 'PRESSURE' is not equal to"
                     << " number of ghosts of 'PRIMITIVE_VARIABLES'."
                     << std::endl);
@@ -405,6 +628,55 @@ FlowModelSingleSpecies::registerPatchWithGlobalCellData(
         else
         {
             d_num_subghosts_pressure = d_num_subghosts_primitive_variables;
+            
+            if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
+            {
+                if (d_num_subghosts_primitive_variables > d_num_subghosts_mass_fraction)
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
+                        << "Number of ghosts of 'PRIMITIVE_VARIABLES' exceeds"
+                        << " number of ghosts of 'MASS_FRACTION'."
+                        << std::endl);
+                }
+            }
+            else
+            {
+                d_num_subghosts_mass_fraction = d_num_subghosts_primitive_variables;
+                
+                if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
+                {
+                    if (d_num_subghosts_primitive_variables > d_num_subghosts_density)
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
+                            << "Number of ghosts of 'PRIMITIVE_VARIABLES' exceeds"
+                            << " number of ghosts of 'DENSITY'."
+                            << std::endl);
+                    }
+                }
+                else
+                {
+                    d_num_subghosts_density = d_num_subghosts_primitive_variables;
+                }
+            }
+            
+        }
+        
+        if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
+        {
+            if (d_num_subghosts_velocity != d_num_subghosts_primitive_variables)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelFourEqnConservative::registerPatchWithGlobalCellData()\n"
+                    << "Number of ghosts of 'VELOCITY' is not equal to"
+                    << " number of ghosts of 'PRIMITIVE_VARIABLES'."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            d_num_subghosts_velocity = d_num_subghosts_primitive_variables;
         }
     }
     
@@ -417,7 +689,7 @@ FlowModelSingleSpecies::registerPatchWithGlobalCellData(
  * of conservative variables and its inverse at faces in the registered patch.
  */
 void
-FlowModelSingleSpecies::registerFaceProjectionMatricesOfConservativeVariables(
+FlowModelFourEqnConservative::registerFaceProjectionMatricesOfConservativeVariables(
     const hier::IntVector& num_subghosts,
     const AVERAGING& averaging)
 {
@@ -434,7 +706,7 @@ FlowModelSingleSpecies::registerFaceProjectionMatricesOfConservativeVariables(
  * of primitive variables and its inverse at faces in the registered patch.
  */
 void
-FlowModelSingleSpecies::registerFaceProjectionMatricesOfPrimitiveVariables(
+FlowModelFourEqnConservative::registerFaceProjectionMatricesOfPrimitiveVariables(
     const hier::IntVector& num_subghosts,
     const AVERAGING& averaging)
 {
@@ -445,7 +717,7 @@ FlowModelSingleSpecies::registerFaceProjectionMatricesOfPrimitiveVariables(
         if (num_subghosts > d_num_subghosts_sound_speed)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::registerFaceProjectionMatrices()\n"
+                << ": FlowModelFourEqnConservative::registerFaceProjectionMatrices()\n"
                 << "Number of ghosts of projection matrices exceeds"
                 << " number of ghosts of 'SOUND_SPEED'."
                 << std::endl);
@@ -460,7 +732,7 @@ FlowModelSingleSpecies::registerFaceProjectionMatricesOfPrimitiveVariables(
             if (num_subghosts > d_num_subghosts_pressure)
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::registerFaceProjectionMatrices()\n"
+                    << ": FlowModelFourEqnConservative::registerFaceProjectionMatrices()\n"
                     << "Number of ghosts of projection matrices exceeds"
                     << " number of ghosts of 'PRESSURE'."
                     << std::endl);
@@ -468,7 +740,39 @@ FlowModelSingleSpecies::registerFaceProjectionMatricesOfPrimitiveVariables(
         }
         else
         {
-            d_num_subghosts_pressure = d_num_subghosts_sound_speed;
+            d_num_subghosts_pressure = num_subghosts;
+            
+            if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
+            {
+                if (num_subghosts > d_num_subghosts_mass_fraction)
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": FlowModelFourEqnConservative::registerFaceProjectionMatrices()\n"
+                        << "Number of ghosts of projection matrices exceeds"
+                        << " number of ghosts of 'MASS_FRACTION'."
+                        << std::endl);
+                }
+            }
+            else
+            {
+                d_num_subghosts_mass_fraction = num_subghosts;
+                
+                if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
+                {
+                    if (num_subghosts > d_num_subghosts_density)
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": FlowModelFourEqnConservative::registerFaceProjectionMatrices()\n"
+                            << "Number of ghosts of projection matrices exceeds"
+                            << " number of ghosts of 'DENSITY'."
+                            << std::endl);
+                    }
+                }
+                else
+                {
+                    d_num_subghosts_density = num_subghosts;
+                }
+            }
         }
     }
     
@@ -479,10 +783,12 @@ FlowModelSingleSpecies::registerFaceProjectionMatricesOfPrimitiveVariables(
 /*
  * Unregister the registered patch and all global cell data in the patch.
  */
-void FlowModelSingleSpecies::unregisterPatchWithGlobalCellData()
+void FlowModelFourEqnConservative::unregisterPatchWithGlobalCellData()
 {
     d_patch = nullptr;
     
+    d_num_subghosts_density           = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_mass_fraction     = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_pressure          = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_velocity          = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_sound_speed       = -hier::IntVector::getOne(d_dim);
@@ -495,6 +801,8 @@ void FlowModelSingleSpecies::unregisterPatchWithGlobalCellData()
     
     d_interior_box                   = hier::Box::getEmptyBox(d_dim);
     d_ghost_box                      = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_density           = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_mass_fraction     = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_pressure          = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_velocity          = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_sound_speed       = hier::Box::getEmptyBox(d_dim);
@@ -507,6 +815,8 @@ void FlowModelSingleSpecies::unregisterPatchWithGlobalCellData()
     
     d_interior_dims                       = hier::IntVector::getZero(d_dim);
     d_ghostcell_dims                      = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_density           = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_mass_fraction     = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_pressure          = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_velocity          = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_sound_speed       = hier::IntVector::getZero(d_dim);
@@ -517,6 +827,8 @@ void FlowModelSingleSpecies::unregisterPatchWithGlobalCellData()
     d_subghostcell_dims_convective_flux_y = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_convective_flux_z = hier::IntVector::getZero(d_dim);
     
+    d_data_density.reset();
+    d_data_mass_fraction.reset();
     d_data_pressure.reset();
     d_data_velocity.reset();
     d_data_sound_speed.reset();
@@ -538,7 +850,7 @@ void FlowModelSingleSpecies::unregisterPatchWithGlobalCellData()
  * Compute the global cell data of the registered variables in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellData()
+FlowModelFourEqnConservative::computeGlobalCellData()
 {
     /*
      * Set the boxes and their dimensions.
@@ -552,12 +864,30 @@ FlowModelSingleSpecies::computeGlobalCellData()
     
     setGhostBoxesAndDimensions();
     
+    // Compute the total density cell data.
+    if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
+    {
+        if (!d_data_density)
+        {
+            computeGlobalCellDataDensity();
+        }
+    }
+    
+    // Compute the mass fraction cell data.
+    if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
+    {
+        if (!d_data_mass_fraction)
+        {
+            computeGlobalCellDataMassFractionWithDensity();
+        }
+    }
+    
     // Compute the pressure cell data.
     if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
     {
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressure();
+            computeGlobalCellDataPressureWithDensityAndMassFraction();
         }
     }
     
@@ -566,7 +896,7 @@ FlowModelSingleSpecies::computeGlobalCellData()
     {
         if (!d_data_velocity)
         {
-            computeGlobalCellDataVelocity();
+            computeGlobalCellDataVelocityWithDensity();
         }
     }
     
@@ -575,7 +905,7 @@ FlowModelSingleSpecies::computeGlobalCellData()
     {
         if (!d_data_sound_speed)
         {
-            computeGlobalCellDataSoundSpeedWithPressure();
+            computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
         }
     }
     
@@ -584,7 +914,7 @@ FlowModelSingleSpecies::computeGlobalCellData()
     {
         if (!d_data_dilatation)
         {
-            computeGlobalCellDataDilatationWithVelocity();
+            computeGlobalCellDataDilatationWithDensityAndVelocity();
         }
     }
     
@@ -593,7 +923,7 @@ FlowModelSingleSpecies::computeGlobalCellData()
     {
         if (!d_data_vorticity)
         {
-            computeGlobalCellDataVorticityWithVelocity();
+            computeGlobalCellDataVorticityWithDensityAndVelocity();
         }
     }
     
@@ -602,7 +932,7 @@ FlowModelSingleSpecies::computeGlobalCellData()
     {
         if (!d_data_enstrophy)
         {
-            computeGlobalCellDataEnstrophyWithVelocityAndVorticity();
+            computeGlobalCellDataEnstrophyWithDensityVelocityAndVorticity();
         }
     }
     
@@ -611,7 +941,7 @@ FlowModelSingleSpecies::computeGlobalCellData()
     {
         if (!d_data_convective_flux_x)
         {
-            computeGlobalCellDataConvectiveFluxWithPressureAndVelocity(X_DIRECTION);
+            computeGlobalCellDataConvectiveFluxWithDensityMassFractionPressureAndVelocity(X_DIRECTION);
         }
     }
     
@@ -620,7 +950,7 @@ FlowModelSingleSpecies::computeGlobalCellData()
     {
         if (!d_data_convective_flux_y)
         {
-            computeGlobalCellDataConvectiveFluxWithPressureAndVelocity(Y_DIRECTION);
+            computeGlobalCellDataConvectiveFluxWithDensityMassFractionPressureAndVelocity(Y_DIRECTION);
         }
     }
     
@@ -629,7 +959,7 @@ FlowModelSingleSpecies::computeGlobalCellData()
     {
         if (!d_data_convective_flux_z)
         {
-            computeGlobalCellDataConvectiveFluxWithPressureAndVelocity(Z_DIRECTION);
+            computeGlobalCellDataConvectiveFluxWithDensityMassFractionPressureAndVelocity(Z_DIRECTION);
         }
     }
 }
@@ -640,7 +970,7 @@ FlowModelSingleSpecies::computeGlobalCellData()
  * The number of sub-ghost cells and the dimensions of box with sub-ghost cells are also returned.
  */
 boost::shared_ptr<pdat::CellData<double> >
-FlowModelSingleSpecies::getGlobalCellData(
+FlowModelFourEqnConservative::getGlobalCellData(
     const std::string& variable_key,
     hier::IntVector& num_subghosts,
     hier::IntVector& subghostcell_dims)
@@ -649,16 +979,16 @@ FlowModelSingleSpecies::getGlobalCellData(
     if (!d_patch)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::getGlobalCellData()\n"
+            << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
             << "No patch is registered yet."
             << std::endl);
     }
     
     boost::shared_ptr<pdat::CellData<double> > cell_data;
     
-    if (variable_key == "DENSITY")
+    if (variable_key == "PARTIAL_DENSITY")
     {
-        cell_data = getGlobalCellDataDensity();
+        cell_data = getGlobalCellDataPartialDensity();
         num_subghosts = d_num_ghosts;
         subghostcell_dims = d_ghostcell_dims;
     }
@@ -674,12 +1004,38 @@ FlowModelSingleSpecies::getGlobalCellData(
         num_subghosts = d_num_ghosts;
         subghostcell_dims = d_ghostcell_dims;
     }
+    else if (variable_key == "DENSITY")
+    {
+        if (!d_data_density)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
+                << "Cell data of 'DENSITY' is not computed yet."
+                << std::endl);
+        }
+        cell_data = d_data_density;
+        num_subghosts = d_num_subghosts_density;
+        subghostcell_dims = d_subghostcell_dims_density;
+    }
+    else if (variable_key == "MASS_FRACTION")
+    {
+        if (!d_data_mass_fraction)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
+                << "Cell data of 'MASS_FRACTION' is not computed yet."
+                << std::endl);
+        }
+        cell_data = d_data_mass_fraction;
+        num_subghosts = d_num_subghosts_mass_fraction;
+        subghostcell_dims = d_subghostcell_dims_mass_fraction;
+    }
     else if (variable_key == "PRESSURE")
     {
         if (!d_data_pressure)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::getGlobalCellData()\n"
+                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
                 << "Cell data of 'PRESSURE' is not computed yet."
                 << std::endl);
         }
@@ -692,7 +1048,7 @@ FlowModelSingleSpecies::getGlobalCellData(
         if (!d_data_velocity)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::getGlobalCellData()\n"
+                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
                 << "Cell data of 'VELOCITY' is not computed yet."
                 << std::endl);
         }
@@ -705,7 +1061,7 @@ FlowModelSingleSpecies::getGlobalCellData(
         if (!d_data_sound_speed)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::getGlobalCellData()\n"
+                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
                 << "Cell data of 'SOUND_SPEED' is not computed yet."
                 << std::endl);
         }
@@ -718,7 +1074,7 @@ FlowModelSingleSpecies::getGlobalCellData(
         if (!d_data_dilatation)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::getGlobalCellData()\n"
+                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
                 << "Cell data of 'DILATATION' is not computed yet."
                 << std::endl);
         }
@@ -731,7 +1087,7 @@ FlowModelSingleSpecies::getGlobalCellData(
         if (!d_data_vorticity)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::getGlobalCellData()\n"
+                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
                 << "Cell data of 'VORTICITY' is not computed yet."
                 << std::endl);
         }
@@ -744,7 +1100,7 @@ FlowModelSingleSpecies::getGlobalCellData(
         if (!d_data_enstrophy)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::getGlobalCellData()\n"
+                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
                 << "Cell data of 'ENSTROPHY' is not computed yet."
                 << std::endl);
         }
@@ -757,7 +1113,7 @@ FlowModelSingleSpecies::getGlobalCellData(
         if (!d_data_convective_flux_x)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::getGlobalCellData()\n"
+                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
                 << "Cell data of 'CONVECTIVE_FLUX_X' is not computed yet."
                 << std::endl);
         }
@@ -770,7 +1126,7 @@ FlowModelSingleSpecies::getGlobalCellData(
         if (!d_data_convective_flux_y)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::getGlobalCellData()\n"
+                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
                 << "Cell data of 'CONVECTIVE_FLUX_Y' is not computed yet."
                 << std::endl);
         }
@@ -783,7 +1139,7 @@ FlowModelSingleSpecies::getGlobalCellData(
         if (!d_data_convective_flux_z)
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::getGlobalCellData()\n"
+                << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
                 << "Cell data of 'CONVECTIVE_FLUX_Z' is not computed yet."
                 << std::endl);
         }
@@ -794,7 +1150,7 @@ FlowModelSingleSpecies::getGlobalCellData(
     else
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::getGlobalCellData()\n"
+            << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
             << "Unknown cell data with variable_key = '" << variable_key
             << "' requested."
             << std::endl);
@@ -809,7 +1165,7 @@ FlowModelSingleSpecies::getGlobalCellData(
  * The numbers of sub-ghost cells and the dimensions of boxes with sub-ghost cells are also returned.
  */
 std::vector<boost::shared_ptr<pdat::CellData<double> > >
-FlowModelSingleSpecies::getGlobalCellData(
+FlowModelFourEqnConservative::getGlobalCellData(
     const std::vector<std::string>& variable_keys,
     std::vector<hier::IntVector>& num_subghosts,
     std::vector<hier::IntVector>& subghostcell_dims)
@@ -834,7 +1190,7 @@ FlowModelSingleSpecies::getGlobalCellData(
  * The numbers of sub-ghost cells and the dimensions of boxes with sub-ghost cells are also returned.
  */
 std::vector<double*>
-FlowModelSingleSpecies::getGlobalCellDataPointerConservativeVariables(
+FlowModelFourEqnConservative::getGlobalCellDataPointerConservativeVariables(
     std::vector<hier::IntVector>& num_subghosts,
     std::vector<hier::IntVector>& subghostcell_dims)
 {
@@ -864,7 +1220,14 @@ FlowModelSingleSpecies::getGlobalCellDataPointerConservativeVariables(
     std::vector<double*> cell_data;
     cell_data.reserve(d_num_eqn);
     
-    cell_data.push_back(getGlobalCellDataDensity()->getPointer(0));
+    // Get the cell data of the variable partial density.
+    boost::shared_ptr<pdat::CellData<double> > d_data_partial_density =
+        getGlobalCellDataPartialDensity();
+    
+    for (int si = 0; si < d_num_species; si++)
+    {
+        cell_data.push_back(d_data_partial_density->getPointer(si));
+    }
     
     for (int di = 0; di < d_dim.getValue(); di++)
     {
@@ -882,7 +1245,7 @@ FlowModelSingleSpecies::getGlobalCellDataPointerConservativeVariables(
  * The numbers of sub-ghost cells and the dimensions of boxes with sub-ghost cells are also returned.
  */
 std::vector<double*>
-FlowModelSingleSpecies::getGlobalCellDataPointerPrimitiveVariables(
+FlowModelFourEqnConservative::getGlobalCellDataPointerPrimitiveVariables(
     std::vector<hier::IntVector>& num_subghosts,
     std::vector<hier::IntVector>& subghostcell_dims)
 {
@@ -892,7 +1255,10 @@ FlowModelSingleSpecies::getGlobalCellDataPointerPrimitiveVariables(
     num_subghosts.clear();
     num_subghosts.reserve(d_num_eqn);
     
-    num_subghosts.push_back(d_num_ghosts);
+    for (int si = 0; si < d_num_species; si++)
+    {
+        num_subghosts.push_back(d_num_ghosts);
+    }
     for (int di = 0; di < d_dim.getValue(); di++)
     {
         num_subghosts.push_back(d_num_subghosts_velocity);
@@ -902,7 +1268,10 @@ FlowModelSingleSpecies::getGlobalCellDataPointerPrimitiveVariables(
     subghostcell_dims.clear();
     subghostcell_dims.reserve(d_num_eqn);
     
-    subghostcell_dims.push_back(d_ghostcell_dims);
+    for (int si = 0; si < d_num_species; si++)
+    {
+        subghostcell_dims.push_back(d_ghostcell_dims);
+    }
     for (int di = 0; di < d_dim.getValue(); di++)
     {
         subghostcell_dims.push_back(d_subghostcell_dims_velocity);
@@ -916,11 +1285,18 @@ FlowModelSingleSpecies::getGlobalCellDataPointerPrimitiveVariables(
     std::vector<double*> cell_data;
     cell_data.reserve(d_num_eqn);
     
-    cell_data.push_back(getGlobalCellDataDensity()->getPointer(0));
+    // Get the cell data of the variable partial density.
+    boost::shared_ptr<pdat::CellData<double> > d_data_partial_density =
+        getGlobalCellDataPartialDensity();
+    
+    for (int si = 0; si < d_num_species; si++)
+    {
+        cell_data.push_back(d_data_partial_density->getPointer(si));
+    }
     
     if (!d_data_velocity)
     {
-        computeGlobalCellDataVelocity();
+        computeGlobalCellDataVelocityWithDensity();
     }
     for (int di = 0; di < d_dim.getValue(); di++)
     {
@@ -929,7 +1305,7 @@ FlowModelSingleSpecies::getGlobalCellDataPointerPrimitiveVariables(
     
     if (!d_data_pressure)
     {
-        computeGlobalCellDataPressure();
+        computeGlobalCellDataPressureWithDensityAndMassFraction();
     }
     cell_data.push_back(d_data_pressure->getPointer(0));
     
@@ -942,7 +1318,7 @@ FlowModelSingleSpecies::getGlobalCellDataPointerPrimitiveVariables(
  * registered patch.
  */
 void
-FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfConservativeVariables(
+FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixOfConservativeVariables(
     boost::multi_array<double, 2>& projection_matrix,
     const hier::Index& cell_index_minus,
     const hier::Index& cell_index_plus,
@@ -954,7 +1330,7 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfConservativeVariables(
     NULL_USE(direction);
     
     TBOX_ERROR(d_object_name
-        << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfConservativeVariables()\n"
+        << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixOfConservativeVariables()\n"
         << "Method computeLocalFaceProjectionMatrixOfConservativeVariables() is not yet implemented."
         << std::endl);
 }
@@ -965,7 +1341,7 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfConservativeVariables(
  * in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfConservativeVariables(
+FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixInverseOfConservativeVariables(
     boost::multi_array<double, 2>& projection_matrix_inv,
     const hier::Index& cell_index_minus,
     const hier::Index& cell_index_plus,
@@ -977,7 +1353,7 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfConservativeVar
     NULL_USE(direction);
     
     TBOX_ERROR(d_object_name
-        << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfConservativeVariables()\n"
+        << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixInverseOfConservativeVariables()\n"
         << "Method computeLocalFaceProjectionMatrixInverseOfConservativeVariables() is not yet implemented."
         << std::endl);
 }
@@ -988,7 +1364,7 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfConservativeVar
  * registered patch.
  */
 void
-FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
+FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
     boost::multi_array<double, 2>& projection_matrix,
     const hier::Index& cell_index_minus,
     const hier::Index& cell_index_plus,
@@ -997,24 +1373,45 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
     if (!d_proj_mat_primitive_var_registered)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
+            << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
             << "Projection matrices is not yet registered."
             << std::endl);
     }
     
     projection_matrix.resize(boost::extents[d_num_eqn][d_num_eqn]);
     
-    // Get the cell data of the variable density.
-    boost::shared_ptr<pdat::CellData<double> > d_data_density =
-        getGlobalCellDataDensity();
+    // Get the cell data of the variable partial density.
+    boost::shared_ptr<pdat::CellData<double> > d_data_partial_density =
+        getGlobalCellDataPartialDensity();
     
-    // Get the pointers to the cell data of density and sound speed.
+    // Get the pointers to the cell data of partial density, total density and sound speed.
+    std::vector<double*> rho_Y;
+    rho_Y.reserve(d_num_species);
+    for (int si = 0; si < d_num_species; si++)
+    {
+        rho_Y.push_back(d_data_partial_density->getPointer(si));
+    }
+    if (!d_data_density)
+    {
+        computeGlobalCellDataDensity();
+    }
     double* rho = d_data_density->getPointer(0);
     if (!d_data_sound_speed)
     {
-        computeGlobalCellDataSoundSpeedWithPressure();
+        computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
     }
     double* c = d_data_sound_speed->getPointer(0);
+    
+    /*
+     * Fill the projection matrix with zeros.
+     */
+    for (int ei = 0; ei < d_num_eqn; ei++)
+    {
+        for (int ej = 0; ej < d_num_eqn; ej++)
+        {
+            projection_matrix[ei][ej] = 0.0;
+        }
+    }
     
     // Compute the projection matrix.
     if (d_dim == tbox::Dimension(1))
@@ -1022,24 +1419,34 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
         // Compute the linear indices.
         const int idx_minus = cell_index_minus[0] + d_num_ghosts[0];
         const int idx_plus = cell_index_plus[0] + d_num_ghosts[0];
+        const int idx_density_minus = cell_index_minus[0] + d_num_subghosts_density[0];
+        const int idx_density_plus = cell_index_plus[0] + d_num_subghosts_density[0];
         const int idx_sound_speed_minus = cell_index_minus[0] + d_num_subghosts_sound_speed[0];
         const int idx_sound_speed_plus = cell_index_plus[0] + d_num_subghosts_sound_speed[0];
         
         // Compute the average values.
         double rho_average, c_average;
+        std::vector<double> rho_Y_average;
+        rho_Y_average.reserve(d_num_species);
         switch (d_proj_mat_primitive_var_averaging)
         {
             case SIMPLE_AVG:
             {
-                rho_average = 0.5*(rho[idx_minus] + rho[idx_plus]);
+                rho_average = 0.5*(rho[idx_density_minus] + rho[idx_density_plus]);
                 c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    rho_Y_average.push_back(0.5*(rho_Y[si][idx_minus] +
+                        rho_Y[si][idx_plus]));
+                }
                 
                 break;
             }
             case ROE_AVG:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
+                    << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
                     << "Roe averaging is not yet implemented."
                     << std::endl);
                 
@@ -1051,7 +1458,7 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
+                    << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
                     << "Unknown d_proj_mat_primitive_var_averaging given."
                     << std::endl);
                 
@@ -1064,22 +1471,25 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
         {
             case X_DIRECTION:
             {
-                projection_matrix[0][0] = 0.0;
-                projection_matrix[0][1] = -0.5*rho_average*c_average;
-                projection_matrix[0][2] = 0.5;
-                projection_matrix[1][0] = 1.0;
-                projection_matrix[1][1] = 0.0;
-                projection_matrix[1][2] = -1.0/(c_average*c_average);
-                projection_matrix[2][0] = 0.0;
-                projection_matrix[2][1] = 0.5*rho_average*c_average;
-                projection_matrix[2][2] = 0.5;
+                projection_matrix[0][d_num_species] = 1.0;
+                projection_matrix[0][d_num_species + 1] = -1.0/(rho_average*c_average);
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    projection_matrix[1 + si][si] = 1.0;
+                    projection_matrix[1 + si][d_num_species + 1] = -rho_Y_average[si]/
+                        (rho_average*c_average*c_average);
+                }
+                
+                projection_matrix[d_num_species + 1][d_num_species] = 1.0;
+                projection_matrix[d_num_species + 1][d_num_species + 1] = 1.0/(rho_average*c_average);
                 
                 break;
             }
             default:
             {
                 TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
+                << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
                 << "There is only x-direction for one-dimensional problem."
                 << std::endl);
             }
@@ -1087,11 +1497,18 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
     }
     else if (d_dim == tbox::Dimension(2))
     {
+        // Compute the linear indices.
         const int idx_minus = (cell_index_minus[0] + d_num_ghosts[0]) +
             (cell_index_minus[1] + d_num_ghosts[1])*d_ghostcell_dims[0];
         
         const int idx_plus = (cell_index_plus[0] + d_num_ghosts[0]) +
             (cell_index_plus[1] + d_num_ghosts[1])*d_ghostcell_dims[0];
+        
+        const int idx_density_minus = (cell_index_minus[0] + d_num_subghosts_density[0]) +
+            (cell_index_minus[1] + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
+        
+        const int idx_density_plus = (cell_index_plus[0] + d_num_subghosts_density[0]) +
+            (cell_index_plus[1] + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
         
         const int idx_sound_speed_minus = (cell_index_minus[0] + d_num_subghosts_sound_speed[0]) +
             (cell_index_minus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
@@ -1101,19 +1518,27 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
         
         // Compute the average values.
         double rho_average, c_average;
+        std::vector<double> rho_Y_average;
+        rho_Y_average.reserve(d_num_species);
         switch (d_proj_mat_primitive_var_averaging)
         {
             case SIMPLE_AVG:
             {
-                rho_average = 0.5*(rho[idx_minus] + rho[idx_plus]);
+                rho_average = 0.5*(rho[idx_density_minus] + rho[idx_density_plus]);
                 c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    rho_Y_average.push_back(0.5*(rho_Y[si][idx_minus] +
+                        rho_Y[si][idx_plus]));
+                }
                 
                 break;
             }
             case ROE_AVG:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
+                    << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
                     << "Roe averaging is not yet implemented."
                     << std::endl);
                 
@@ -1125,7 +1550,7 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
+                    << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
                     << "Unknown d_proj_mat_primitive_var_averaging given."
                     << std::endl);
                 
@@ -1138,50 +1563,46 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
         {
             case X_DIRECTION:
             {
-                projection_matrix[0][0] = 0.0;
-                projection_matrix[0][1] = -0.5*rho_average*c_average;
-                projection_matrix[0][2] = 0.0;
-                projection_matrix[0][3] = 0.5;
-                projection_matrix[1][0] = 1.0;
-                projection_matrix[1][1] = 0.0;
-                projection_matrix[1][2] = 0.0;
-                projection_matrix[1][3] = -1.0/(c_average*c_average);
-                projection_matrix[2][0] = 0.0;
-                projection_matrix[2][1] = 0.0;
-                projection_matrix[2][2] = 1.0;
-                projection_matrix[2][3] = 0.0;
-                projection_matrix[3][0] = 0.0;
-                projection_matrix[3][1] = 0.5*rho_average*c_average;
-                projection_matrix[3][2] = 0.0;
-                projection_matrix[3][3] = 0.5;
+                projection_matrix[0][d_num_species] = 1.0;
+                projection_matrix[0][d_num_species + 2] = -1.0/(rho_average*c_average);
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    projection_matrix[1 + si][si] = 1.0;
+                    projection_matrix[1 + si][d_num_species + 2] = -rho_Y_average[si]/
+                        (rho_average*c_average*c_average);
+                }
+                
+                projection_matrix[d_num_species + 1][d_num_species + 1] = 1.0;
+                
+                projection_matrix[d_num_species + 2][d_num_species] = 1.0;
+                projection_matrix[d_num_species + 2][d_num_species + 2] = 1.0/(rho_average*c_average);
                 
                 break;
             }
             case Y_DIRECTION:
             {
-                projection_matrix[0][0] = 0.0;
-                projection_matrix[0][1] = 0.0;
-                projection_matrix[0][2] = -0.5*rho_average*c_average;
-                projection_matrix[0][3] = 0.5;
-                projection_matrix[1][0] = 1.0;
-                projection_matrix[1][1] = 0.0;
-                projection_matrix[1][2] = 0.0;
-                projection_matrix[1][3] = -1.0/(c_average*c_average);
-                projection_matrix[2][0] = 0.0;
-                projection_matrix[2][1] = 1.0;
-                projection_matrix[2][2] = 0.0;
-                projection_matrix[2][3] = 0.0;
-                projection_matrix[3][0] = 0.0;
-                projection_matrix[3][1] = 0.0;
-                projection_matrix[3][2] = 0.5*rho_average*c_average;
-                projection_matrix[3][3] = 0.5;
+                projection_matrix[0][d_num_species + 1] = 1.0;
+                projection_matrix[0][d_num_species + 2] = -1.0/(rho_average*c_average);
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    projection_matrix[1 + si][si] = 1.0;
+                    projection_matrix[1 + si][d_num_species + 2] = -rho_Y_average[si]/
+                        (rho_average*c_average*c_average);
+                }
+                
+                projection_matrix[d_num_species + 1][d_num_species] = 1.0;
+                
+                projection_matrix[d_num_species + 2][d_num_species + 1] = 1.0;
+                projection_matrix[d_num_species + 2][d_num_species + 2] = 1.0/(rho_average*c_average);
                 
                 break;
             }
             default:
             {
                 TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
+                << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
                 << "There are only x-direction and y-direction for two-dimensional problem."
                 << std::endl);
             }
@@ -1199,6 +1620,16 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
             (cell_index_plus[2] + d_num_ghosts[2])*d_ghostcell_dims[0]*
                 d_ghostcell_dims[1];
         
+        const int idx_density_minus = (cell_index_minus[0] + d_num_subghosts_density[0]) +
+            (cell_index_minus[1] + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
+            (cell_index_minus[2] + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
+                d_subghostcell_dims_density[1];
+        
+        const int idx_density_plus = (cell_index_plus[0] + d_num_subghosts_density[0]) +
+            (cell_index_plus[1] + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
+            (cell_index_plus[2] + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
+                d_subghostcell_dims_density[1];
+        
         const int idx_sound_speed_minus = (cell_index_minus[0] + d_num_subghosts_sound_speed[0]) +
             (cell_index_minus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
             (cell_index_minus[2] + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
@@ -1211,19 +1642,27 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
         
         // Compute the average values.
         double rho_average, c_average;
+        std::vector<double> rho_Y_average;
+        rho_Y_average.reserve(d_num_species);
         switch (d_proj_mat_primitive_var_averaging)
         {
             case SIMPLE_AVG:
             {
-                rho_average = 0.5*(rho[idx_minus] + rho[idx_plus]);
+                rho_average = 0.5*(rho[idx_density_minus] + rho[idx_density_plus]);
                 c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    rho_Y_average.push_back(0.5*(rho_Y[si][idx_minus] +
+                        rho_Y[si][idx_plus]));
+                }
                 
                 break;
             }
             case ROE_AVG:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
+                    << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
                     << "Roe averaging is not yet implemented."
                     << std::endl);
                 
@@ -1235,7 +1674,7 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
+                    << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
                     << "Unknown d_proj_mat_primitive_var_averaging given."
                     << std::endl);
                 
@@ -1248,98 +1687,71 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
         {
             case X_DIRECTION:
             {
-                projection_matrix[0][0] = 0.0;
-                projection_matrix[0][1] = -0.5*rho_average*c_average;
-                projection_matrix[0][2] = 0.0;
-                projection_matrix[0][3] = 0.0;
-                projection_matrix[0][4] = 0.5;
-                projection_matrix[1][0] = 1.0;
-                projection_matrix[1][1] = 0.0;
-                projection_matrix[1][2] = 0.0;
-                projection_matrix[1][3] = 0.0;
-                projection_matrix[1][4] = -1.0/(c_average*c_average);
-                projection_matrix[2][0] = 0.0;
-                projection_matrix[2][1] = 0.0;
-                projection_matrix[2][2] = 1.0;
-                projection_matrix[2][3] = 0.0;
-                projection_matrix[2][4] = 0.0;
-                projection_matrix[3][0] = 0.0;
-                projection_matrix[3][1] = 0.0;
-                projection_matrix[3][2] = 0.0;
-                projection_matrix[3][3] = 1.0;
-                projection_matrix[3][4] = 0.0;
-                projection_matrix[4][0] = 0.0;
-                projection_matrix[4][1] = 0.5*rho_average*c_average;
-                projection_matrix[4][2] = 0.0;
-                projection_matrix[4][3] = 0.0;
-                projection_matrix[4][4] = 0.5;
+                projection_matrix[0][d_num_species] = 1.0;
+                projection_matrix[0][d_num_species + 3] = -1.0/(rho_average*c_average);
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    projection_matrix[1 + si][si] = 1.0;
+                    projection_matrix[1 + si][d_num_species + 3] = -rho_Y_average[si]/
+                        (rho_average*c_average*c_average);
+                }
+                
+                projection_matrix[d_num_species + 1][d_num_species + 1] = 1.0;
+                
+                projection_matrix[d_num_species + 2][d_num_species + 2] = 1.0;
+                
+                projection_matrix[d_num_species + 3][d_num_species] = 1.0;
+                projection_matrix[d_num_species + 3][d_num_species + 3] = 1.0/(rho_average*c_average);
                 
                 break;
             }
             case Y_DIRECTION:
             {
-                projection_matrix[0][0] = 0.0;
-                projection_matrix[0][1] = 0.0;
-                projection_matrix[0][2] = -0.5*rho_average*c_average;
-                projection_matrix[0][3] = 0.0;
-                projection_matrix[0][4] = 0.5;
-                projection_matrix[1][0] = 1.0;
-                projection_matrix[1][1] = 0.0;
-                projection_matrix[1][2] = 0.0;
-                projection_matrix[1][3] = 0.0;
-                projection_matrix[1][4] = -1.0/(c_average*c_average);
-                projection_matrix[2][0] = 0.0;
-                projection_matrix[2][1] = 1.0;
-                projection_matrix[2][2] = 0.0;
-                projection_matrix[2][3] = 0.0;
-                projection_matrix[2][4] = 0.0;
-                projection_matrix[3][0] = 0.0;
-                projection_matrix[3][1] = 0.0;
-                projection_matrix[3][2] = 0.0;
-                projection_matrix[3][3] = 1.0;
-                projection_matrix[3][4] = 0.0;
-                projection_matrix[4][0] = 0.0;
-                projection_matrix[4][1] = 0.0;
-                projection_matrix[4][2] = 0.5*rho_average*c_average;
-                projection_matrix[4][3] = 0.0;
-                projection_matrix[4][4] = 0.5;
+                projection_matrix[0][d_num_species + 1] = 1.0;
+                projection_matrix[0][d_num_species + 3] = -1.0/(rho_average*c_average);
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    projection_matrix[1 + si][si] = 1.0;
+                    projection_matrix[1 + si][d_num_species + 3] = -rho_Y_average[si]/
+                        (rho_average*c_average*c_average);
+                }
+                
+                projection_matrix[d_num_species + 1][d_num_species] = 1.0;
+                
+                projection_matrix[d_num_species + 2][d_num_species + 2] = 1.0;
+                
+                projection_matrix[d_num_species + 3][d_num_species + 1] = 1.0;
+                projection_matrix[d_num_species + 3][d_num_species + 3] = 1.0/(rho_average*c_average);
                 
                 break;
             }
             case Z_DIRECTION:
             {
-                projection_matrix[0][0] = 0.0;
-                projection_matrix[0][1] = 0.0;
-                projection_matrix[0][2] = 0.0;
-                projection_matrix[0][3] = -0.5*rho_average*c_average;
-                projection_matrix[0][4] = 0.5;
-                projection_matrix[1][0] = 1.0;
-                projection_matrix[1][1] = 0.0;
-                projection_matrix[1][2] = 0.0;
-                projection_matrix[1][3] = 0.0;
-                projection_matrix[1][4] = -1.0/(c_average*c_average);
-                projection_matrix[2][0] = 0.0;
-                projection_matrix[2][1] = 1.0;
-                projection_matrix[2][2] = 0.0;
-                projection_matrix[2][3] = 0.0;
-                projection_matrix[2][4] = 0.0;
-                projection_matrix[3][0] = 0.0;
-                projection_matrix[3][1] = 0.0;
-                projection_matrix[3][2] = 1.0;
-                projection_matrix[3][3] = 0.0;
-                projection_matrix[3][4] = 0.0;
-                projection_matrix[4][0] = 0.0;
-                projection_matrix[4][1] = 0.0;
-                projection_matrix[4][2] = 0.0;
-                projection_matrix[4][3] = 0.5*rho_average*c_average;
-                projection_matrix[4][4] = 0.5;
+                projection_matrix[0][d_num_species + 2] = 1.0;
+                projection_matrix[0][d_num_species + 3] = -1.0/(rho_average*c_average);
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    projection_matrix[1 + si][si] = 1.0;
+                    projection_matrix[1 + si][d_num_species + 3] = -rho_Y_average[si]/
+                        (rho_average*c_average*c_average);
+                }
+                
+                projection_matrix[d_num_species + 1][d_num_species] = 1.0;
+                
+                projection_matrix[d_num_species + 2][d_num_species + 1] = 1.0;
+                
+                projection_matrix[d_num_species + 3][d_num_species + 2] = 1.0;
+                projection_matrix[d_num_species + 3][d_num_species + 3] = 1.0/(rho_average*c_average);
                 
                 break;
             }
             default:
             {
                 TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
+                << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
                 << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                 << std::endl);
             }
@@ -1353,7 +1765,7 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
  * in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables(
+FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables(
     boost::multi_array<double, 2>& projection_matrix_inv,
     const hier::Index& cell_index_minus,
     const hier::Index& cell_index_plus,
@@ -1362,50 +1774,80 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariab
     if (!d_proj_mat_primitive_var_registered)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
+            << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
             << "Projection matrices is not yet registered."
             << std::endl);
     }
     
     projection_matrix_inv.resize(boost::extents[d_num_eqn][d_num_eqn]);
     
-    // Get the cell data of the variable density.
-    boost::shared_ptr<pdat::CellData<double> > d_data_density =
-        getGlobalCellDataDensity();
+    // Get the cell data of the variable partial density.
+    boost::shared_ptr<pdat::CellData<double> > d_data_partial_density =
+        getGlobalCellDataPartialDensity();
     
-    // Get the pointers to the cell data of density and sound speed.
+    // Get the pointers to the cell data of partial density, total density and sound speed.
+    std::vector<double*> rho_Y;
+    rho_Y.reserve(d_num_species);
+    for (int si = 0; si < d_num_species; si++)
+    {
+        rho_Y.push_back(d_data_partial_density->getPointer(si));
+    }
+    if (!d_data_density)
+    {
+        computeGlobalCellDataDensity();
+    }
     double* rho = d_data_density->getPointer(0);
     if (!d_data_sound_speed)
     {
-        computeGlobalCellDataSoundSpeedWithPressure();
+        computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
     }
     double* c = d_data_sound_speed->getPointer(0);
-
-    // Compute the inverse of the projection matrix.
+    
+    /*
+     * Fill the inverse of projection matrix with zeros.
+     */
+    for (int ei = 0; ei < d_num_eqn; ei++)
+    {
+        for (int ej = 0; ej < d_num_eqn; ej++)
+        {
+            projection_matrix_inv[ei][ej] = 0.0;
+        }
+    }
+    
+    // Compute the projection matrix.
     if (d_dim == tbox::Dimension(1))
     {
         // Compute the linear indices.
         const int idx_minus = cell_index_minus[0] + d_num_ghosts[0];
         const int idx_plus = cell_index_plus[0] + d_num_ghosts[0];
+        const int idx_density_minus = cell_index_minus[0] + d_num_subghosts_density[0];
+        const int idx_density_plus = cell_index_plus[0] + d_num_subghosts_density[0];
         const int idx_sound_speed_minus = cell_index_minus[0] + d_num_subghosts_sound_speed[0];
         const int idx_sound_speed_plus = cell_index_plus[0] + d_num_subghosts_sound_speed[0];
         
         // Compute the average values.
         double rho_average, c_average;
+        std::vector<double> rho_Y_average;
+        rho_Y_average.reserve(d_num_species);
         switch (d_proj_mat_primitive_var_averaging)
         {
             case SIMPLE_AVG:
             {
-                rho_average = 0.5*(rho[idx_minus] + rho[idx_plus]);
+                rho_average = 0.5*(rho[idx_density_minus] + rho[idx_density_plus]);
                 c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    rho_Y_average.push_back(0.5*(rho_Y[si][idx_minus] +
+                        rho_Y[si][idx_plus]));
+                }
                 
                 break;
             }
             case ROE_AVG:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::"
-                    << "computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
+                    << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
                     << "Roe averaging is not yet implemented."
                     << std::endl);
                 
@@ -1417,8 +1859,7 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariab
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::"
-                    << "computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
+                    << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
                     << "Unknown d_proj_mat_primitive_var_averaging given."
                     << std::endl);
                 
@@ -1431,22 +1872,25 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariab
         {
             case X_DIRECTION:
             {
-                projection_matrix_inv[0][0] = 1.0/(c_average*c_average);
-                projection_matrix_inv[0][1] = 1.0;
-                projection_matrix_inv[0][2] = 1.0/(c_average*c_average);
-                projection_matrix_inv[1][0] = -1.0/(rho_average*c_average);
-                projection_matrix_inv[1][1] = 0.0;
-                projection_matrix_inv[1][2] = 1.0/(rho_average*c_average);
-                projection_matrix_inv[2][0] = 1.0;
-                projection_matrix_inv[2][1] = 0.0;
-                projection_matrix_inv[2][2] = 1.0;
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    projection_matrix_inv[si][0] = -0.5*rho_Y_average[si]/c_average;
+                    projection_matrix_inv[si][si + 1] = 1.0;
+                    projection_matrix_inv[si][d_num_eqn - 1] = 0.5*rho_Y_average[si]/c_average;
+                }
+                
+                projection_matrix_inv[d_num_species][0] = 0.5;
+                projection_matrix_inv[d_num_species][d_num_eqn - 1] = 0.5;
+                
+                projection_matrix_inv[d_num_species + 1][0] = -0.5*rho_average*c_average;
+                projection_matrix_inv[d_num_species + 1][d_num_eqn - 1] = 0.5*rho_average*c_average;
                 
                 break;
             }
             default:
             {
                 TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
+                << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
                 << "There is only x-direction for one-dimensional problem."
                 << std::endl);
             }
@@ -1454,11 +1898,18 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariab
     }
     else if (d_dim == tbox::Dimension(2))
     {
+        // Compute the linear indices.
         const int idx_minus = (cell_index_minus[0] + d_num_ghosts[0]) +
             (cell_index_minus[1] + d_num_ghosts[1])*d_ghostcell_dims[0];
         
         const int idx_plus = (cell_index_plus[0] + d_num_ghosts[0]) +
             (cell_index_plus[1] + d_num_ghosts[1])*d_ghostcell_dims[0];
+        
+        const int idx_density_minus = (cell_index_minus[0] + d_num_subghosts_density[0]) +
+            (cell_index_minus[1] + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
+        
+        const int idx_density_plus = (cell_index_plus[0] + d_num_subghosts_density[0]) +
+            (cell_index_plus[1] + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
         
         const int idx_sound_speed_minus = (cell_index_minus[0] + d_num_subghosts_sound_speed[0]) +
             (cell_index_minus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
@@ -1468,20 +1919,27 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariab
         
         // Compute the average values.
         double rho_average, c_average;
+        std::vector<double> rho_Y_average;
+        rho_Y_average.reserve(d_num_species);
         switch (d_proj_mat_primitive_var_averaging)
         {
             case SIMPLE_AVG:
             {
-                rho_average = 0.5*(rho[idx_minus] + rho[idx_plus]);
+                rho_average = 0.5*(rho[idx_density_minus] + rho[idx_density_plus]);
                 c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    rho_Y_average.push_back(0.5*(rho_Y[si][idx_minus] +
+                        rho_Y[si][idx_plus]));
+                }
                 
                 break;
             }
             case ROE_AVG:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::"
-                    << "computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
+                    << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
                     << "Roe averaging is not yet implemented."
                     << std::endl);
                 
@@ -1493,8 +1951,7 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariab
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::"
-                    << "computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
+                    << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
                     << "Unknown d_proj_mat_primitive_var_averaging given."
                     << std::endl);
                 
@@ -1507,50 +1964,46 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariab
         {
             case X_DIRECTION:
             {
-                projection_matrix_inv[0][0] = 1.0/(c_average*c_average);
-                projection_matrix_inv[0][1] = 1.0;
-                projection_matrix_inv[0][2] = 0.0;
-                projection_matrix_inv[0][3] = 1.0/(c_average*c_average);
-                projection_matrix_inv[1][0] = -1.0/(rho_average*c_average);
-                projection_matrix_inv[1][1] = 0.0;
-                projection_matrix_inv[1][2] = 0.0;
-                projection_matrix_inv[1][3] = 1.0/(rho_average*c_average);
-                projection_matrix_inv[2][0] = 0.0;
-                projection_matrix_inv[2][1] = 0.0;
-                projection_matrix_inv[2][2] = 1.0;
-                projection_matrix_inv[2][3] = 0.0;
-                projection_matrix_inv[3][0] = 1.0;
-                projection_matrix_inv[3][1] = 0.0;
-                projection_matrix_inv[3][2] = 0.0;
-                projection_matrix_inv[3][3] = 1.0;
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    projection_matrix_inv[si][0] = -0.5*rho_Y_average[si]/c_average;
+                    projection_matrix_inv[si][si + 1] = 1.0;
+                    projection_matrix_inv[si][d_num_eqn - 1] = 0.5*rho_Y_average[si]/c_average;
+                }
+                
+                projection_matrix_inv[d_num_species][0] = 0.5;
+                projection_matrix_inv[d_num_species][d_num_eqn - 1] = 0.5;
+                
+                projection_matrix_inv[d_num_species + 1][d_num_species + 1] = 1.0;
+                
+                projection_matrix_inv[d_num_species + 2][0] = -0.5*rho_average*c_average;
+                projection_matrix_inv[d_num_species + 2][d_num_eqn - 1] = 0.5*rho_average*c_average;
                 
                 break;
             }
             case Y_DIRECTION:
             {
-                projection_matrix_inv[0][0] = 1.0/(c_average*c_average);
-                projection_matrix_inv[0][1] = 1.0;
-                projection_matrix_inv[0][2] = 0.0;
-                projection_matrix_inv[0][3] = 1.0/(c_average*c_average);
-                projection_matrix_inv[1][0] = 0.0;
-                projection_matrix_inv[1][1] = 0.0;
-                projection_matrix_inv[1][2] = 1.0;
-                projection_matrix_inv[1][3] = 0.0;
-                projection_matrix_inv[2][0] = -1.0/(rho_average*c_average);
-                projection_matrix_inv[2][1] = 0.0;
-                projection_matrix_inv[2][2] = 0.0;
-                projection_matrix_inv[2][3] = 1.0/(rho_average*c_average);
-                projection_matrix_inv[3][0] = 1.0;
-                projection_matrix_inv[3][1] = 0.0;
-                projection_matrix_inv[3][2] = 0.0;
-                projection_matrix_inv[3][3] = 1.0;
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    projection_matrix_inv[si][0] = -0.5*rho_Y_average[si]/c_average;
+                    projection_matrix_inv[si][si + 1] = 1.0;
+                    projection_matrix_inv[si][d_num_eqn - 1] = 0.5*rho_Y_average[si]/c_average;
+                }
+                
+                projection_matrix_inv[d_num_species][d_num_species + 1] = 1.0;
+                
+                projection_matrix_inv[d_num_species + 1][0] = 0.5;
+                projection_matrix_inv[d_num_species + 1][d_num_eqn - 1] = 0.5;
+                
+                projection_matrix_inv[d_num_species + 2][0] = -0.5*rho_average*c_average;
+                projection_matrix_inv[d_num_species + 2][d_num_eqn - 1] = 0.5*rho_average*c_average;
                 
                 break;
             }
             default:
             {
                 TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
+                << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
                 << "There are only x-direction and y-direction for two-dimensional problem."
                 << std::endl);
             }
@@ -1568,6 +2021,16 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariab
             (cell_index_plus[2] + d_num_ghosts[2])*d_ghostcell_dims[0]*
                 d_ghostcell_dims[1];
         
+        const int idx_density_minus = (cell_index_minus[0] + d_num_subghosts_density[0]) +
+            (cell_index_minus[1] + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
+            (cell_index_minus[2] + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
+                d_subghostcell_dims_density[1];
+        
+        const int idx_density_plus = (cell_index_plus[0] + d_num_subghosts_density[0]) +
+            (cell_index_plus[1] + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
+            (cell_index_plus[2] + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
+                d_subghostcell_dims_density[1];
+        
         const int idx_sound_speed_minus = (cell_index_minus[0] + d_num_subghosts_sound_speed[0]) +
             (cell_index_minus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
             (cell_index_minus[2] + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
@@ -1580,20 +2043,27 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariab
         
         // Compute the average values.
         double rho_average, c_average;
+        std::vector<double> rho_Y_average;
+        rho_Y_average.reserve(d_num_species);
         switch (d_proj_mat_primitive_var_averaging)
         {
             case SIMPLE_AVG:
             {
-                rho_average = 0.5*(rho[idx_minus] + rho[idx_plus]);
+                rho_average = 0.5*(rho[idx_density_minus] + rho[idx_density_plus]);
                 c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    rho_Y_average.push_back(0.5*(rho_Y[si][idx_minus] +
+                        rho_Y[si][idx_plus]));
+                }
                 
                 break;
             }
             case ROE_AVG:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::"
-                    << "computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
+                    << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
                     << "Roe averaging is not yet implemented."
                     << std::endl);
                 
@@ -1605,8 +2075,7 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariab
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::"
-                    << "computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
+                    << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
                     << "Unknown d_proj_mat_primitive_var_averaging given."
                     << std::endl);
                 
@@ -1619,98 +2088,71 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariab
         {
             case X_DIRECTION:
             {
-                projection_matrix_inv[0][0] = 1.0/(c_average*c_average);
-                projection_matrix_inv[0][1] = 1.0;
-                projection_matrix_inv[0][2] = 0.0;
-                projection_matrix_inv[0][3] = 0.0;
-                projection_matrix_inv[0][4] = 1.0/(c_average*c_average);
-                projection_matrix_inv[1][0] = -1.0/(rho_average*c_average);
-                projection_matrix_inv[1][1] = 0.0;
-                projection_matrix_inv[1][2] = 0.0;
-                projection_matrix_inv[1][3] = 0.0;
-                projection_matrix_inv[1][4] = 1.0/(rho_average*c_average);
-                projection_matrix_inv[2][0] = 0.0;
-                projection_matrix_inv[2][1] = 0.0;
-                projection_matrix_inv[2][2] = 1.0;
-                projection_matrix_inv[2][3] = 0.0;
-                projection_matrix_inv[2][4] = 0.0;
-                projection_matrix_inv[3][0] = 0.0;
-                projection_matrix_inv[3][1] = 0.0;
-                projection_matrix_inv[3][2] = 0.0;
-                projection_matrix_inv[3][3] = 1.0;
-                projection_matrix_inv[3][4] = 0.0;
-                projection_matrix_inv[4][0] = 1.0;
-                projection_matrix_inv[4][1] = 0.0;
-                projection_matrix_inv[4][2] = 0.0;
-                projection_matrix_inv[4][3] = 0.0;
-                projection_matrix_inv[4][4] = 1.0;
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    projection_matrix_inv[si][0] = -0.5*rho_Y_average[si]/c_average;
+                    projection_matrix_inv[si][si + 1] = 1.0;
+                    projection_matrix_inv[si][d_num_eqn - 1] = 0.5*rho_Y_average[si]/c_average;
+                }
+                
+                projection_matrix_inv[d_num_species][0] = 0.5;
+                projection_matrix_inv[d_num_species][d_num_eqn - 1] = 0.5;
+                
+                projection_matrix_inv[d_num_species + 1][d_num_species + 1] = 1.0;
+                
+                projection_matrix_inv[d_num_species + 2][d_num_species + 2] = 1.0;
+                
+                projection_matrix_inv[d_num_species + 3][0] = -0.5*rho_average*c_average;
+                projection_matrix_inv[d_num_species + 3][d_num_eqn - 1] = 0.5*rho_average*c_average;
                 
                 break;
             }
             case Y_DIRECTION:
             {
-                projection_matrix_inv[0][0] = 1.0/(c_average*c_average);
-                projection_matrix_inv[0][1] = 1.0;
-                projection_matrix_inv[0][2] = 0.0;
-                projection_matrix_inv[0][3] = 0.0;
-                projection_matrix_inv[0][4] = 1.0/(c_average*c_average);
-                projection_matrix_inv[1][0] = 0.0;
-                projection_matrix_inv[1][1] = 0.0;
-                projection_matrix_inv[1][2] = 1.0;
-                projection_matrix_inv[1][3] = 0.0;
-                projection_matrix_inv[1][4] = 0.0;
-                projection_matrix_inv[2][0] = -1.0/(rho_average*c_average);
-                projection_matrix_inv[2][1] = 0.0;
-                projection_matrix_inv[2][2] = 0.0;
-                projection_matrix_inv[2][3] = 0.0;
-                projection_matrix_inv[2][4] = 1.0/(rho_average*c_average);
-                projection_matrix_inv[3][0] = 0.0;
-                projection_matrix_inv[3][1] = 0.0;
-                projection_matrix_inv[3][2] = 0.0;
-                projection_matrix_inv[3][3] = 1.0;
-                projection_matrix_inv[3][4] = 0.0;
-                projection_matrix_inv[4][0] = 1.0;
-                projection_matrix_inv[4][1] = 0.0;
-                projection_matrix_inv[4][2] = 0.0;
-                projection_matrix_inv[4][3] = 0.0;
-                projection_matrix_inv[4][4] = 1.0;
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    projection_matrix_inv[si][0] = -0.5*rho_Y_average[si]/c_average;
+                    projection_matrix_inv[si][si + 1] = 1.0;
+                    projection_matrix_inv[si][d_num_eqn - 1] = 0.5*rho_Y_average[si]/c_average;
+                }
+                
+                projection_matrix_inv[d_num_species][d_num_species + 1] = 1.0;
+                
+                projection_matrix_inv[d_num_species + 1][0] = 0.5;
+                projection_matrix_inv[d_num_species + 1][d_num_eqn - 1] = 0.5;
+                
+                projection_matrix_inv[d_num_species + 2][d_num_species + 2] = 1.0;
+                
+                projection_matrix_inv[d_num_species + 3][0] = -0.5*rho_average*c_average;
+                projection_matrix_inv[d_num_species + 3][d_num_eqn - 1] = 0.5*rho_average*c_average;
                 
                 break;
             }
             case Z_DIRECTION:
             {
-                projection_matrix_inv[0][0] = 1.0/(c_average*c_average);
-                projection_matrix_inv[0][1] = 1.0;
-                projection_matrix_inv[0][2] = 0.0;
-                projection_matrix_inv[0][3] = 0.0;
-                projection_matrix_inv[0][4] = 1.0/(c_average*c_average);
-                projection_matrix_inv[1][0] = 0.0;
-                projection_matrix_inv[1][1] = 0.0;
-                projection_matrix_inv[1][2] = 1.0;
-                projection_matrix_inv[1][3] = 0.0;
-                projection_matrix_inv[1][4] = 0.0;
-                projection_matrix_inv[2][0] = 0.0;
-                projection_matrix_inv[2][1] = 0.0;
-                projection_matrix_inv[2][2] = 0.0;
-                projection_matrix_inv[2][3] = 1.0;
-                projection_matrix_inv[2][4] = 0.0;
-                projection_matrix_inv[3][0] = -1.0/(rho_average*c_average);
-                projection_matrix_inv[3][1] = 0.0;
-                projection_matrix_inv[3][2] = 0.0;
-                projection_matrix_inv[3][3] = 0.0;
-                projection_matrix_inv[3][4] = 1.0/(rho_average*c_average);
-                projection_matrix_inv[4][0] = 1.0;
-                projection_matrix_inv[4][1] = 0.0;
-                projection_matrix_inv[4][2] = 0.0;
-                projection_matrix_inv[4][3] = 0.0;
-                projection_matrix_inv[4][4] = 1.0;
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    projection_matrix_inv[si][0] = -0.5*rho_Y_average[si]/c_average;
+                    projection_matrix_inv[si][si + 1] = 1.0;
+                    projection_matrix_inv[si][d_num_eqn - 1] = 0.5*rho_Y_average[si]/c_average;
+                }
+                
+                projection_matrix_inv[d_num_species][d_num_species + 1] = 1.0;
+                
+                projection_matrix_inv[d_num_species + 1][d_num_species + 2] = 1.0;
+                
+                projection_matrix_inv[d_num_species + 2][0] = 0.5;
+                projection_matrix_inv[d_num_species + 2][d_num_eqn - 1] = 0.5;
+                
+                projection_matrix_inv[d_num_species + 3][0] = -0.5*rho_average*c_average;
+                projection_matrix_inv[d_num_species + 3][d_num_eqn - 1] = 0.5*rho_average*c_average;
                 
                 break;
             }
             default:
             {
                 TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
+                << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
                 << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
                 << std::endl);
             }
@@ -1724,10 +2166,9 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariab
  * from Riemann solver at face.
  * fluxes_face: Convective flux at face.
  * velocity_face: Velocity at face.
- * The FlowModelSingleSpecies class modifies nothing for velocity_face.
  */
 void
-FlowModelSingleSpecies::computeLocalFaceFluxAndVelocityFromRiemannSolverWithConservativeVariables(
+FlowModelFourEqnConservative::computeLocalFaceFluxAndVelocityFromRiemannSolverWithConservativeVariables(
     std::vector<boost::reference_wrapper<double> >& flux_face,
     std::vector<boost::reference_wrapper<double> >& velocity_face,
     const std::vector<boost::reference_wrapper<double> >& conservative_variables_minus,
@@ -1760,8 +2201,8 @@ FlowModelSingleSpecies::computeLocalFaceFluxAndVelocityFromRiemannSolverWithCons
         default:
         {
             TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::"
-            << "computeLocalIntercellQuantitiesFromRiemannSolverWithConservativeVariables()\n"
+            << ": FlowModelFourEqnConservative::"
+            << "computeLocalFaceFluxAndVelocityFromRiemannSolverWithConservativeVariables()\n"
             << "Unknown Riemann solver required."
             << std::endl);
         }
@@ -1774,10 +2215,9 @@ FlowModelSingleSpecies::computeLocalFaceFluxAndVelocityFromRiemannSolverWithCons
  * from Riemann solver at face.
  * fluxes_face: Convective flux at face.
  * velocity_face: Velocity at face.
- * The FlowModelSingleSpecies class modifies nothing for velocity_face.
  */
 void
-FlowModelSingleSpecies::computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
+FlowModelFourEqnConservative::computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
     std::vector<boost::reference_wrapper<double> >& flux_face,
     std::vector<boost::reference_wrapper<double> >& velocity_face,
     const std::vector<boost::reference_wrapper<double> >& primitive_variables_minus,
@@ -1810,8 +2250,8 @@ FlowModelSingleSpecies::computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrim
         default:
         {
             TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::"
-            << "computeLocalIntercellQuantitiesFromRiemannSolverWithPrimitiveVariables()\n"
+            << ": FlowModelFourEqnConservative::"
+            << "computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables()\n"
             << "Unknown Riemann solver required."
             << std::endl);
         }
@@ -1823,7 +2263,7 @@ FlowModelSingleSpecies::computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrim
  * Check whether the given conservative variables are within the bounds.
  */
 bool
-FlowModelSingleSpecies::haveConservativeVariablesBounded(const std::vector<double>& conservative_variables)
+FlowModelFourEqnConservative::haveConservativeVariablesBounded(const std::vector<double>& conservative_variables)
 {
 #ifdef DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(conservative_variables.size()) == d_num_eqn);
@@ -1831,16 +2271,32 @@ FlowModelSingleSpecies::haveConservativeVariablesBounded(const std::vector<doubl
     
     bool are_bounded = true;
     
-    // Check if the density is bounded.
-    if (conservative_variables[0] < 0.0)
+    // Check if the total energy is bounded.
+    if (conservative_variables[d_num_species + d_dim.getValue()] < 0)
     {
         are_bounded = false;
     }
     
-    // Check if the total energy is bounded.
-    if (conservative_variables[d_num_eqn - 1] < 0.0)
+    // Check if the total density is bounded.
+    double rho = 0.0;
+    for (int si = 0; si < d_num_species; si++)
+    {
+        rho += conservative_variables[si];
+    }
+    if (rho < 0.0)
     {
         are_bounded = false;
+    }
+    
+    // Check if the mass fractions are bounded.
+    for (int si = 0; si < d_num_species; si++)
+    {
+        const double Y = conservative_variables[si]/rho;
+        
+        if (Y < d_Y_bound_lo || Y > d_Y_bound_up)
+        {
+            are_bounded = false;
+        }
     }
     
     return are_bounded;
@@ -1851,7 +2307,7 @@ FlowModelSingleSpecies::haveConservativeVariablesBounded(const std::vector<doubl
  * Check whether the given primitive variables are within the bounds.
  */
 bool
-FlowModelSingleSpecies::havePrimitiveVariablesBounded(const std::vector<double>& primitive_variables)
+FlowModelFourEqnConservative::havePrimitiveVariablesBounded(const std::vector<double>& primitive_variables)
 {
 #ifdef DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(primitive_variables.size()) == d_num_eqn);
@@ -1859,16 +2315,32 @@ FlowModelSingleSpecies::havePrimitiveVariablesBounded(const std::vector<double>&
     
     bool are_bounded = true;
     
-    // Check if the density is bounded.
-    if (primitive_variables[0] < 0.0)
+    // Check if the pressure is bounded.
+    if (primitive_variables[d_num_species + d_dim.getValue()] < 0)
     {
         are_bounded = false;
     }
     
-    // Check if the pressure is bounded.
-    if (primitive_variables[d_num_eqn - 1] < 0.0)
+    // Check if the total density is bounded.
+    double rho = 0.0;
+    for (int si = 0; si < d_num_species; si++)
+    {
+        rho += primitive_variables[si];
+    }
+    if (rho < 0.0)
     {
         are_bounded = false;
+    }
+    
+    // Check if the mass fractions are bounded.
+    for (int si = 0; si < d_num_species; si++)
+    {
+        const double Y = primitive_variables[si]/rho;
+        
+        if (Y < d_Y_bound_lo || Y > d_Y_bound_up)
+        {
+            are_bounded = false;
+        }
     }
     
     return are_bounded;
@@ -1879,8 +2351,22 @@ FlowModelSingleSpecies::havePrimitiveVariablesBounded(const std::vector<double>&
  * Set the ghost boxes and their dimensions.
  */
 void
-FlowModelSingleSpecies::setGhostBoxesAndDimensions()
+FlowModelFourEqnConservative::setGhostBoxesAndDimensions()
 {
+    if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
+    {
+        d_subghost_box_density = d_interior_box;
+        d_subghost_box_density.grow(d_num_subghosts_density);
+        d_subghostcell_dims_density = d_subghost_box_density.numberCells();
+    }
+    
+    if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
+    {
+        d_subghost_box_mass_fraction = d_interior_box;
+        d_subghost_box_mass_fraction.grow(d_num_subghosts_mass_fraction);
+        d_subghostcell_dims_mass_fraction = d_subghost_box_mass_fraction.numberCells();
+    }
+    
     if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
     {
         d_subghost_box_pressure = d_interior_box;
@@ -1947,17 +2433,17 @@ FlowModelSingleSpecies::setGhostBoxesAndDimensions()
 
 
 /*
- * Get the global cell data of density in the registered patch.
+ * Get the global cell data of partial density in the registered patch.
  */
 boost::shared_ptr<pdat::CellData<double> >
-FlowModelSingleSpecies::getGlobalCellDataDensity()
+FlowModelFourEqnConservative::getGlobalCellDataPartialDensity()
 {
-    // Get the cell data of the registered variable density.
-    boost::shared_ptr<pdat::CellData<double> > d_data_density(
+    // Get the cell data of the registered variable partial density.
+    boost::shared_ptr<pdat::CellData<double> > d_data_partial_density(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(d_variable_density, getDataContext())));
+            d_patch->getPatchData(d_variable_partial_density, getDataContext())));
     
-    return d_data_density;
+    return d_data_partial_density;
 }
 
 
@@ -1965,7 +2451,7 @@ FlowModelSingleSpecies::getGlobalCellDataDensity()
  * Get the global cell data of momentum in the registered patch.
  */
 boost::shared_ptr<pdat::CellData<double> >
-FlowModelSingleSpecies::getGlobalCellDataMomentum()
+FlowModelFourEqnConservative::getGlobalCellDataMomentum()
 {
     // Get the cell data of the registered variable momentum.
     boost::shared_ptr<pdat::CellData<double> > d_data_momentum(
@@ -1980,7 +2466,7 @@ FlowModelSingleSpecies::getGlobalCellDataMomentum()
  * Get the global cell data of total energy in the registered patch.
  */
 boost::shared_ptr<pdat::CellData<double> >
-FlowModelSingleSpecies::getGlobalCellDataTotalEnergy()
+FlowModelFourEqnConservative::getGlobalCellDataTotalEnergy()
 {
     // Get the cell data of the registered variable total energy.
     boost::shared_ptr<pdat::CellData<double> > d_data_total_energy(
@@ -1992,10 +2478,267 @@ FlowModelSingleSpecies::getGlobalCellDataTotalEnergy()
 
 
 /*
- * Compute the global cell data of pressure in the registered patch.
+ * Compute the global cell data of density in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataPressure()
+FlowModelFourEqnConservative::computeGlobalCellDataDensity()
+{
+    if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
+    {
+        // Create the cell data of density.
+        d_data_density.reset(
+            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_density));
+        
+        // Get the cell data of the variable partial density.
+        boost::shared_ptr<pdat::CellData<double> > d_data_partial_density =
+            getGlobalCellDataPartialDensity();
+        
+        // Get the pointers to the cell data of denisty and partial density.
+        double* rho = d_data_density->getPointer(0);
+        std::vector<double*> rho_Y;
+        rho_Y.reserve(d_num_species);
+        for (int si = 0; si < d_num_species; si++)
+        {
+            rho_Y.push_back(d_data_partial_density->getPointer(si));
+        }
+        
+        if (d_dim == tbox::Dimension(1))
+        {
+            // Compute the density field.
+            for (int i = -d_num_subghosts_density[0];
+                 i < d_interior_dims[0] + d_num_subghosts_density[0];
+                 i++)
+            {
+                // Compute the linear indices.
+                const int idx = i + d_num_ghosts[0];
+                const int idx_density = i + d_num_subghosts_density[0];
+                
+                std::vector<const double*> rho_Y_ptr;
+                rho_Y_ptr.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    rho_Y_ptr.push_back(&rho_Y[si][idx]);
+                }
+                
+                rho[idx_density] = d_equation_of_state->
+                    getTotalDensity(
+                        rho_Y_ptr);
+            }
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            // Compute the density field.
+            for (int j = -d_num_subghosts_density[1];
+                 j < d_interior_dims[1] + d_num_subghosts_density[1];
+                 j++)
+            {
+                for (int i = -d_num_subghosts_density[0];
+                     i < d_interior_dims[0] + d_num_subghosts_density[0];
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx = (i + d_num_ghosts[0]) +
+                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
+                    
+                    const int idx_density = (i + d_num_subghosts_density[0]) +
+                        (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
+                    
+                    std::vector<const double*> rho_Y_ptr;
+                    rho_Y_ptr.reserve(d_num_species);
+                    for (int si = 0; si < d_num_species; si++)
+                    {
+                        rho_Y_ptr.push_back(&rho_Y[si][idx]);
+                    }
+                    
+                    rho[idx_density] = d_equation_of_state->
+                        getTotalDensity(
+                            rho_Y_ptr);
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            // Compute the density field.
+            for (int k = -d_num_subghosts_density[2];
+                 k < d_interior_dims[2] + d_num_subghosts_density[2];
+                 k++)
+            {
+                for (int j = -d_num_subghosts_density[1];
+                     j < d_interior_dims[1] + d_num_subghosts_density[1];
+                     j++)
+                {
+                    for (int i = -d_num_subghosts_density[0];
+                         i < d_interior_dims[0] + d_num_subghosts_density[0];
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx = (i + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
+                            (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
+                        
+                        const int idx_density = (i + d_num_subghosts_density[0]) +
+                            (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
+                            (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*d_subghostcell_dims_density[1];
+                        
+                        std::vector<const double*> rho_Y_ptr;
+                        rho_Y_ptr.reserve(d_num_species);
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            rho_Y_ptr.push_back(&rho_Y[si][idx]);
+                        }
+                        
+                        rho[idx_density] = d_equation_of_state->
+                            getTotalDensity(
+                                rho_Y_ptr);
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelFourEqnConservative::computeGlobalCellDataDensity()\n"
+            << "Cell data of 'DENSITY' is not yet registered."
+            << std::endl);
+    }
+}
+
+
+/*
+ * Compute the global cell data of mass fraction with density in the registered patch.
+ */
+void
+FlowModelFourEqnConservative::computeGlobalCellDataMassFractionWithDensity()
+{
+    if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
+    {
+        // Create the cell data of mass fraction.
+        d_data_mass_fraction.reset(
+            new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_mass_fraction));
+        
+        // Get the cell data of the variable partial density.
+        boost::shared_ptr<pdat::CellData<double> > d_data_partial_density =
+            getGlobalCellDataPartialDensity();
+        
+        if (!d_data_density)
+        {
+            computeGlobalCellDataDensity();
+        }
+        
+        // Get the pointers to the cell data of mass fraction, denisty and partial density.
+        std::vector<double*> Y;
+        Y.reserve(d_num_species);
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Y.push_back(d_data_mass_fraction->getPointer(si));
+        }
+        double* rho = d_data_density->getPointer(0);
+        std::vector<double*> rho_Y;
+        rho_Y.reserve(d_num_species);
+        for (int si = 0; si < d_num_species; si++)
+        {
+            rho_Y.push_back(d_data_partial_density->getPointer(si));
+        }
+        
+        if (d_dim == tbox::Dimension(1))
+        {
+            // Compute the mass fraction field.
+            for (int i = -d_num_subghosts_mass_fraction[0];
+                 i < d_interior_dims[0] + d_num_subghosts_mass_fraction[0];
+                 i++)
+            {
+                // Compute the linear indices.
+                const int idx = i + d_num_ghosts[0];
+                const int idx_density = i + d_num_subghosts_density[0];
+                const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y[si][idx_mass_fraction] = rho_Y[si][idx]/rho[idx_density];
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            // Compute the mass fraction field.
+            for (int j = -d_num_subghosts_pressure[1];
+                 j < d_interior_dims[1] + d_num_subghosts_pressure[1];
+                 j++)
+            {
+                for (int i = -d_num_subghosts_pressure[0];
+                     i < d_interior_dims[0] + d_num_subghosts_pressure[0];
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx = (i + d_num_ghosts[0]) +
+                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
+                    
+                    const int idx_density = (i + d_num_subghosts_density[0]) +
+                        (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
+                    
+                    const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
+                        (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
+                    
+                    for (int si = 0; si < d_num_species; si++)
+                    {
+                        Y[si][idx_mass_fraction] = rho_Y[si][idx]/rho[idx_density];
+                    }
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            // Compute the mass fraction field.
+            for (int k = -d_num_subghosts_pressure[2];
+                 k < d_interior_dims[2] + d_num_subghosts_pressure[2];
+                 k++)
+            {
+                for (int j = -d_num_subghosts_pressure[1];
+                     j < d_interior_dims[1] + d_num_subghosts_pressure[1];
+                     j++)
+                {
+                    for (int i = -d_num_subghosts_pressure[0];
+                         i < d_interior_dims[0] + d_num_subghosts_pressure[0];
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx = (i + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
+                            (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
+                        
+                        const int idx_density = (i + d_num_subghosts_density[0]) +
+                            (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
+                            (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*d_subghostcell_dims_density[1];
+                        
+                        const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
+                            (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
+                            (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*d_subghostcell_dims_mass_fraction[1];
+                        
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            Y[si][idx_mass_fraction] = rho_Y[si][idx]/rho[idx_density];
+                        }
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelFourEqnConservative::computeGlobalCellDataMassFractionWithDensity()\n"
+            << "Cell data of 'MASS_FRACTION' is not yet registered."
+            << std::endl);
+    }
+}
+
+
+/*
+ * Compute the global cell data of pressure with density and mass fraction in the registered patch.
+ */
+void
+FlowModelFourEqnConservative::computeGlobalCellDataPressureWithDensityAndMassFraction()
 {
     if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
     {
@@ -2003,20 +2746,28 @@ FlowModelSingleSpecies::computeGlobalCellDataPressure()
         d_data_pressure.reset(
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_pressure));
         
-        // Get the cell data of the variables density, momentum and total energy.
-        boost::shared_ptr<pdat::CellData<double> > d_data_density =
-            getGlobalCellDataDensity();
-        
+        // Get the cell data of the variables momentum, total energy and volume fraction.
         boost::shared_ptr<pdat::CellData<double> > d_data_momentum =
             getGlobalCellDataMomentum();
         
         boost::shared_ptr<pdat::CellData<double> > d_data_total_energy =
             getGlobalCellDataTotalEnergy();
         
-        // Get the pointers to the cell data of pressure, density and total energy.
+        if (!d_data_mass_fraction)
+        {
+            computeGlobalCellDataMassFractionWithDensity();
+        }
+        
+        // Get the pointers to the cell data of pressure, density, total energy and mass fraction.
         double* p   = d_data_pressure->getPointer(0);
         double* rho = d_data_density->getPointer(0);
         double* E   = d_data_total_energy->getPointer(0);
+        std::vector<double*> Y;
+        Y.reserve(d_num_species);
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Y.push_back(d_data_mass_fraction->getPointer(si));
+        }
         
         if (d_dim == tbox::Dimension(1))
         {
@@ -2030,17 +2781,27 @@ FlowModelSingleSpecies::computeGlobalCellDataPressure()
             {
                 // Compute the linear indices.
                 const int idx = i + d_num_ghosts[0];
+                const int idx_density = i + d_num_subghosts_density[0];
                 const int idx_pressure = i + d_num_subghosts_pressure[0];
+                const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
                 
                 std::vector<const double*> m_ptr;
                 m_ptr.reserve(1);
                 m_ptr.push_back(&rho_u[idx]);
                 
+                std::vector<const double*> Y_ptr;
+                Y_ptr.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                }
+                
                 p[idx_pressure] = d_equation_of_state->
-                    getPressure(
-                        &rho[idx],
+                    getPressureWithMassFraction(
+                        &rho[idx_density],
                         m_ptr,
-                        &E[idx]);
+                        &E[idx],
+                        Y_ptr);
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -2062,19 +2823,33 @@ FlowModelSingleSpecies::computeGlobalCellDataPressure()
                     const int idx = (i + d_num_ghosts[0]) +
                         (j + d_num_ghosts[1])*d_ghostcell_dims[0];
                     
+                    const int idx_density = (i + d_num_subghosts_density[0]) +
+                        (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
+                    
                     const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
                         (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
+                    
+                    const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
+                        (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
                     
                     std::vector<const double*> m_ptr;
                     m_ptr.reserve(2);
                     m_ptr.push_back(&rho_u[idx]);
                     m_ptr.push_back(&rho_v[idx]);
                     
+                    std::vector<const double*> Y_ptr;
+                    Y_ptr.reserve(d_num_species);
+                    for (int si = 0; si < d_num_species; si++)
+                    {
+                        Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                    }
+                    
                     p[idx_pressure] = d_equation_of_state->
-                        getPressure(
-                            &rho[idx],
+                        getPressureWithMassFraction(
+                            &rho[idx_density],
                             m_ptr,
-                            &E[idx]);
+                            &E[idx],
+                            Y_ptr);
                 }
             }
         }
@@ -2103,9 +2878,20 @@ FlowModelSingleSpecies::computeGlobalCellDataPressure()
                             (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
                             (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
                         
+                        const int idx_density = (i + d_num_subghosts_density[0]) +
+                            (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
+                            (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
+                                d_subghostcell_dims_density[1];
+                        
                         const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
                             (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
-                            (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*d_subghostcell_dims_pressure[1];
+                            (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
+                                d_subghostcell_dims_pressure[1];
+                        
+                        const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
+                            (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
+                            (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*
+                                d_subghostcell_dims_mass_fraction[1];
                         
                         std::vector<const double*> m_ptr;
                         m_ptr.reserve(3);
@@ -2113,11 +2899,19 @@ FlowModelSingleSpecies::computeGlobalCellDataPressure()
                         m_ptr.push_back(&rho_v[idx]);
                         m_ptr.push_back(&rho_w[idx]);
                         
+                        std::vector<const double*> Y_ptr;
+                        Y_ptr.reserve(d_num_species);
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                        }
+                        
                         p[idx_pressure] = d_equation_of_state->
-                            getPressure(
-                                &rho[idx],
+                            getPressureWithMassFraction(
+                                &rho[idx_density],
                                 m_ptr,
-                                &E[idx]);
+                                &E[idx],
+                                Y_ptr);
                     }
                 }
             }
@@ -2126,7 +2920,7 @@ FlowModelSingleSpecies::computeGlobalCellDataPressure()
     else
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::computeGlobalCellDataPressure()\n"
+            << ": FlowModelFourEqnConservative::computeGlobalCellDataPressureWithDensityAndMassFraction()\n"
             << "Cell data of 'PRESSURE' is not yet registered."
             << std::endl);
     }
@@ -2134,10 +2928,10 @@ FlowModelSingleSpecies::computeGlobalCellDataPressure()
 
 
 /*
- * Compute the global cell data of velocity in the registered patch.
+ * Compute the global cell data of velocity with density in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataVelocity()
+FlowModelFourEqnConservative::computeGlobalCellDataVelocityWithDensity()
 {
     if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
     {
@@ -2145,12 +2939,14 @@ FlowModelSingleSpecies::computeGlobalCellDataVelocity()
         d_data_velocity.reset(
             new pdat::CellData<double>(d_interior_box, d_dim.getValue(), d_num_subghosts_velocity));
         
-        // Get the cell data of the variables density and momentum.
-        boost::shared_ptr<pdat::CellData<double> > d_data_density =
-            getGlobalCellDataDensity();
-        
+        // Get the cell data of the variable momentum.
         boost::shared_ptr<pdat::CellData<double> > d_data_momentum =
             getGlobalCellDataMomentum();
+        
+        if (!d_data_density)
+        {
+            computeGlobalCellDataDensity();
+        }
         
         // Get the pointer to the cell data of density.
         double* rho = d_data_density->getPointer(0);
@@ -2170,9 +2966,10 @@ FlowModelSingleSpecies::computeGlobalCellDataVelocity()
             {
                 // Compute the linear indices.
                 const int idx = i + d_num_ghosts[0];
+                const int idx_density = i + d_num_subghosts_density[0];
                 const int idx_velocity = i + d_num_subghosts_velocity[0];
                 
-                u[idx_velocity] = rho_u[idx]/rho[idx];
+                u[idx_velocity] = rho_u[idx]/rho[idx_density];
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -2198,11 +2995,14 @@ FlowModelSingleSpecies::computeGlobalCellDataVelocity()
                     const int idx = (i + d_num_ghosts[0]) +
                         (j + d_num_ghosts[1])*d_ghostcell_dims[0];
                     
+                    const int idx_density = (i + d_num_subghosts_density[0]) +
+                        (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
+                    
                     const int idx_velocity = (i + d_num_subghosts_velocity[0]) +
                         (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
                     
-                    u[idx_velocity] = rho_u[idx]/rho[idx];
-                    v[idx_velocity] = rho_v[idx]/rho[idx];
+                    u[idx_velocity] = rho_u[idx]/rho[idx_density];
+                    v[idx_velocity] = rho_v[idx]/rho[idx_density];
                 }
             }
         }
@@ -2236,13 +3036,17 @@ FlowModelSingleSpecies::computeGlobalCellDataVelocity()
                             (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
                             (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
                         
+                        const int idx_density = (i + d_num_subghosts_density[0]) +
+                            (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
+                            (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*d_subghostcell_dims_density[1];
+                        
                         const int idx_velocity = (i + d_num_subghosts_velocity[0]) +
                             (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
                             (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*d_subghostcell_dims_velocity[1];
                         
-                        u[idx_velocity] = rho_u[idx]/rho[idx];
-                        v[idx_velocity] = rho_v[idx]/rho[idx];
-                        w[idx_velocity] = rho_w[idx]/rho[idx];
+                        u[idx_velocity] = rho_u[idx]/rho[idx_density];
+                        v[idx_velocity] = rho_v[idx]/rho[idx_density];
+                        w[idx_velocity] = rho_w[idx]/rho[idx_density];
                     }
                 }
             }
@@ -2251,7 +3055,7 @@ FlowModelSingleSpecies::computeGlobalCellDataVelocity()
     else
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::computeGlobalCellDataVelocity()\n"
+            << ": FlowModelFourEqnConservative::computeGlobalCellDataVelocityWithDensity()\n"
             << "Cell data of 'VELOCITY' is not yet registered."
             << std::endl);
     }
@@ -2259,10 +3063,11 @@ FlowModelSingleSpecies::computeGlobalCellDataVelocity()
 
 
 /*
- * Compute the global cell data of sound speed with pressure in the registered patch.
+ * Compute the global cell data of sound speed with density, mass fraction and pressure in the registered
+ * patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure()
+FlowModelFourEqnConservative::computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure()
 {
     if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
     {
@@ -2270,18 +3075,20 @@ FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure()
         d_data_sound_speed.reset(
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_sound_speed));
         
-        // Get the cell data of the variable density and pressure.
-        boost::shared_ptr<pdat::CellData<double> > d_data_density =
-            getGlobalCellDataDensity();
-        
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressure();
+            computeGlobalCellDataPressureWithDensityAndMassFraction();
         }
         
-        // Get the pointers to the cell data of sound speed, density and pressure.
+        // Get the pointers to the cell data of sound speed, density, mass fraction and pressure.
         double* c   = d_data_sound_speed->getPointer(0);
         double* rho = d_data_density->getPointer(0);
+        std::vector<double*> Y;
+        Y.reserve(d_num_species);
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Y.push_back(d_data_mass_fraction->getPointer(si));
+        }
         double* p   = d_data_pressure->getPointer(0);
         
         if (d_dim == tbox::Dimension(1))
@@ -2292,13 +3099,22 @@ FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure()
                  i++)
             {
                 // Compute the linear indices.
-                const int idx = i + d_num_ghosts[0];
+                const int idx_density = i + d_num_subghosts_density[0];
                 const int idx_pressure = i + d_num_subghosts_pressure[0];
+                const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
                 const int idx_sound_speed = i + d_num_subghosts_sound_speed[0];
                 
+                std::vector<const double*> Y_ptr;
+                Y_ptr.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                }
+                
                 c[idx_sound_speed] = d_equation_of_state->
-                    getSoundSpeedWithPressure(
-                        &rho[idx],
+                    getSoundSpeedWithMassFractionAndPressure(
+                        &rho[idx_density],
+                        Y_ptr,
                         &p[idx_pressure]);
             }
         }
@@ -2314,18 +3130,29 @@ FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure()
                      i++)
                 {
                     // Compute the linear indices.
-                    const int idx = (i + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
+                    const int idx_density = (i + d_num_subghosts_density[0]) +
+                        (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
                     
                     const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
                         (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
                     
+                    const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
+                        (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
+                    
                     const int idx_sound_speed = (i + d_num_subghosts_sound_speed[0]) +
                         (j + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
                     
+                    std::vector<const double*> Y_ptr;
+                    Y_ptr.reserve(d_num_species);
+                    for (int si = 0; si < d_num_species; si++)
+                    {
+                        Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                    }
+                    
                     c[idx_sound_speed] = d_equation_of_state->
-                        getSoundSpeedWithPressure(
-                            &rho[idx],
+                        getSoundSpeedWithMassFractionAndPressure(
+                            &rho[idx_density],
+                            Y_ptr,
                             &p[idx_pressure]);
                 }
             }
@@ -2346,21 +3173,37 @@ FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure()
                          i++)
                     {
                         // Compute the linear indices.
-                        const int idx = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
+                        const int idx_density = (i + d_num_subghosts_density[0]) +
+                            (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
+                            (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
+                                d_subghostcell_dims_density[1];
                         
                         const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
                             (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
-                            (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*d_subghostcell_dims_pressure[1];
+                            (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
+                                d_subghostcell_dims_pressure[1];
+                        
+                        const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
+                            (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
+                            (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*
+                                d_subghostcell_dims_mass_fraction[1];
                         
                         const int idx_sound_speed = (i + d_num_subghosts_sound_speed[0]) +
                             (j + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
-                            (k + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*d_subghostcell_dims_sound_speed[1];
+                            (k + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
+                                d_subghostcell_dims_sound_speed[1];
+                        
+                        std::vector<const double*> Y_ptr;
+                        Y_ptr.reserve(d_num_species);
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                        }
                         
                         c[idx_sound_speed] = d_equation_of_state->
-                            getSoundSpeedWithPressure(
-                                &rho[idx],
+                            getSoundSpeedWithMassFractionAndPressure(
+                                &rho[idx_density],
+                                Y_ptr,
                                 &p[idx_pressure]);
                     }
                 }
@@ -2370,7 +3213,7 @@ FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure()
     else
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure()\n"
+            << ": FlowModelFourEqnConservative::computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure()\n"
             << "Cell data of 'SOUND_SPEED' is not yet registered."
             << std::endl);
     }
@@ -2378,10 +3221,10 @@ FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure()
 
 
 /*
- * Compute the global cell data of dilatation with velocity in the registered patch.
+ * Compute the global cell data of dilatation with density and velocity in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataDilatationWithVelocity()
+FlowModelFourEqnConservative::computeGlobalCellDataDilatationWithDensityAndVelocity()
 {
     if (d_num_subghosts_dilatation > -hier::IntVector::getOne(d_dim))
     {
@@ -2398,7 +3241,7 @@ FlowModelSingleSpecies::computeGlobalCellDataDilatationWithVelocity()
         
         if (!d_data_velocity)
         {
-            computeGlobalCellDataVelocity();
+            computeGlobalCellDataVelocityWithDensity();
         }
         
         // Get the pointer to the cell data of dilatation.
@@ -2726,7 +3569,7 @@ FlowModelSingleSpecies::computeGlobalCellDataDilatationWithVelocity()
     else
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::computeGlobalCellDataDilatationWithVelocity()\n"
+            << ": FlowModelFourEqnConservative::computeGlobalCellDataDilatationWithDensityAndVelocity()\n"
             << "Cell data of 'DILATATION' is not yet registered."
             << std::endl);
     }
@@ -2734,10 +3577,10 @@ FlowModelSingleSpecies::computeGlobalCellDataDilatationWithVelocity()
 
 
 /*
- * Compute the global cell data of vorticity with velocity in the registered patch.
+ * Compute the global cell data of vorticity with density and velocity in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataVorticityWithVelocity()
+FlowModelFourEqnConservative::computeGlobalCellDataVorticityWithDensityAndVelocity()
 {
     if (d_num_subghosts_vorticity > -hier::IntVector::getOne(d_dim))
     {
@@ -2750,13 +3593,13 @@ FlowModelSingleSpecies::computeGlobalCellDataVorticityWithVelocity()
         
         if (!d_data_velocity)
         {
-            computeGlobalCellDataVelocity();
+            computeGlobalCellDataVelocityWithDensity();
         }
         
         if (d_dim == tbox::Dimension(1))
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::computeGlobalCellDataVorticityWithVelocity()\n"
+                << ": FlowModelFourEqnConservative::computeGlobalCellDataVorticityWithDensityAndVelocity()\n"
                 << "Vorticity cannot be found for one-dimensional flow."
                 << std::endl);
         }
@@ -3059,7 +3902,7 @@ FlowModelSingleSpecies::computeGlobalCellDataVorticityWithVelocity()
     else
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::computeGlobalCellDataVorticityWithVelocity()\n"
+            << ": FlowModelFourEqnConservative::computeGlobalCellDataVorticityWithDensityAndVelocity()\n"
             << "Cell data of 'VORTICITY' is not yet registered."
             << std::endl);
     }
@@ -3067,10 +3910,10 @@ FlowModelSingleSpecies::computeGlobalCellDataVorticityWithVelocity()
 
 
 /*
- * Compute the global cell data of enstrophy with velocity and vorticity in the registered patch.
+ * Compute the global cell data of enstrophy with density, velocity and vorticity in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataEnstrophyWithVelocityAndVorticity()
+FlowModelFourEqnConservative::computeGlobalCellDataEnstrophyWithDensityVelocityAndVorticity()
 {
     if (d_num_subghosts_enstrophy > -hier::IntVector::getOne(d_dim))
     {
@@ -3081,7 +3924,7 @@ FlowModelSingleSpecies::computeGlobalCellDataEnstrophyWithVelocityAndVorticity()
         // Get the cell data of the vorticity.
         if (!d_data_vorticity) // If the pointer is null.
         {
-            computeGlobalCellDataVorticityWithVelocity();
+            computeGlobalCellDataVorticityWithDensityAndVelocity();
         }
         
         // Get the pointer to the cell data of enstrophy.
@@ -3161,7 +4004,7 @@ FlowModelSingleSpecies::computeGlobalCellDataEnstrophyWithVelocityAndVorticity()
     else
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::computeGlobalCellDataEnstrophyWithVelocityAndVorticity()\n"
+            << ": FlowModelFourEqnConservative::computeGlobalCellDataEnstrophyWithDensityVelocityAndVorticity()\n"
             << "Cell data of 'ENSTROPHY' is not yet registered."
             << std::endl);
     }
@@ -3169,10 +4012,11 @@ FlowModelSingleSpecies::computeGlobalCellDataEnstrophyWithVelocityAndVorticity()
 
 
 /*
- * Compute the global cell data of convective flux with pressure and velocity in the registered patch.
+ * Compute the global cell data of convective flux with density, mass fraction, pressure and velocity in the
+ * registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithPressureAndVelocity(DIRECTION direction)
+FlowModelFourEqnConservative::computeGlobalCellDataConvectiveFluxWithDensityMassFractionPressureAndVelocity(DIRECTION direction)
 {
     if (direction == X_DIRECTION)
     {
@@ -3190,6 +4034,9 @@ FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithPressureAndVeloci
                 F_x.push_back(d_data_convective_flux_x->getPointer(ei));
             }
             
+            boost::shared_ptr<pdat::CellData<double> > d_data_partial_density =
+                getGlobalCellDataPartialDensity();
+            
             boost::shared_ptr<pdat::CellData<double> > d_data_momentum =
                 getGlobalCellDataMomentum();
             
@@ -3198,17 +4045,24 @@ FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithPressureAndVeloci
             
             if (!d_data_pressure)
             {
-                computeGlobalCellDataPressure();
+                computeGlobalCellDataPressureWithDensityAndMassFraction();
             }
             
             if (!d_data_velocity)
             {
-                computeGlobalCellDataVelocity();
+                computeGlobalCellDataVelocityWithDensity();
             }
             
-            // Get the pointers to the cell data of total energy and pressure.
-            double* E   = d_data_total_energy->getPointer(0);
-            double* p   = d_data_pressure->getPointer(0);
+            // Get the pointers to the cell data of partial density, total energy, volume fraction
+            // and pressure.
+            std::vector<double*> rho_Y;
+            rho_Y.reserve(d_num_species);
+            for (int si = 0; si < d_num_species; si++)
+            {
+                rho_Y.push_back(d_data_partial_density->getPointer(si));
+            }
+            double* E = d_data_total_energy->getPointer(0);
+            double* p = d_data_pressure->getPointer(0);
             
             if (d_dim == tbox::Dimension(1))
             {
@@ -3229,9 +4083,12 @@ FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithPressureAndVeloci
                     const int idx_velocity = i + d_num_subghosts_velocity[0];
                     const int idx_convective_flux_x = i + d_num_subghosts_convective_flux_x[0];
                     
-                    F_x[0][idx_convective_flux_x] = rho_u[idx];
-                    F_x[1][idx_convective_flux_x] = u[idx_velocity]*rho_u[idx] + p[idx_pressure];
-                    F_x[2][idx_convective_flux_x] = u[idx_velocity]*(E[idx] + p[idx_pressure]);
+                    for (int si = 0; si < d_num_species; si++)
+                    {
+                        F_x[si][idx_convective_flux_x] = u[idx_velocity]*rho_Y[si][idx];
+                    }
+                    F_x[d_num_species][idx_convective_flux_x] = u[idx_velocity]*rho_u[idx] + p[idx_pressure];
+                    F_x[d_num_species + 1][idx_convective_flux_x] = u[idx_velocity]*(E[idx] + p[idx_pressure]);
                 }
             }
             else if (d_dim == tbox::Dimension(2))
@@ -3264,10 +4121,13 @@ FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithPressureAndVeloci
                         const int idx_convective_flux_x = (i + d_num_subghosts_convective_flux_x[0]) +
                             (j + d_num_subghosts_convective_flux_x[1])*d_subghostcell_dims_convective_flux_x[0];
                         
-                        F_x[0][idx_convective_flux_x] = rho_u[idx];
-                        F_x[1][idx_convective_flux_x] = u[idx_velocity]*rho_u[idx] + p[idx_pressure];
-                        F_x[2][idx_convective_flux_x] = u[idx_velocity]*rho_v[idx];
-                        F_x[3][idx_convective_flux_x] = u[idx_velocity]*(E[idx] + p[idx_pressure]);
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            F_x[si][idx_convective_flux_x] = u[idx_velocity]*rho_Y[si][idx];
+                        }
+                        F_x[d_num_species][idx_convective_flux_x] = u[idx_velocity]*rho_u[idx] + p[idx_pressure];
+                        F_x[d_num_species + 1][idx_convective_flux_x] = u[idx_velocity]*rho_v[idx];
+                        F_x[d_num_species + 2][idx_convective_flux_x] = u[idx_velocity]*(E[idx] + p[idx_pressure]);
                     }
                 }
             }
@@ -3314,11 +4174,14 @@ FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithPressureAndVeloci
                                 (k + d_num_subghosts_convective_flux_x[2])*d_subghostcell_dims_convective_flux_x[0]*
                                     d_subghostcell_dims_convective_flux_x[1];
                             
-                            F_x[0][idx_convective_flux_x] = rho_u[idx];
-                            F_x[1][idx_convective_flux_x] = u[idx_velocity]*rho_u[idx]+ p[idx_pressure];
-                            F_x[2][idx_convective_flux_x] = u[idx_velocity]*rho_v[idx];
-                            F_x[3][idx_convective_flux_x] = u[idx_velocity]*rho_w[idx];
-                            F_x[4][idx_convective_flux_x] = u[idx_velocity]*(E[idx] + p[idx_pressure]);
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                F_x[si][idx_convective_flux_x] = u[idx_velocity]*rho_Y[si][idx];
+                            }
+                            F_x[d_num_species][idx_convective_flux_x] = u[idx_velocity]*rho_u[idx] + p[idx_pressure];
+                            F_x[d_num_species + 1][idx_convective_flux_x] = u[idx_velocity]*rho_v[idx];
+                            F_x[d_num_species + 2][idx_convective_flux_x] = u[idx_velocity]*rho_w[idx];
+                            F_x[d_num_species + 3][idx_convective_flux_x] = u[idx_velocity]*(E[idx] + p[idx_pressure]);
                         }
                     }
                 }
@@ -3327,7 +4190,7 @@ FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithPressureAndVeloci
         else
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithPressureAndVelocity()\n"
+                << ": FlowModelFourEqnConservative::computeGlobalCellDataConvectiveFluxWithDensityMassFractionPressureAndVelocity()\n"
                 << "Cell data of 'CONVECTIVE_FLUX_X' is not yet registered."
                 << std::endl);
         }
@@ -3348,6 +4211,9 @@ FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithPressureAndVeloci
                 F_y.push_back(d_data_convective_flux_y->getPointer(ei));
             }
             
+            boost::shared_ptr<pdat::CellData<double> > d_data_partial_density =
+                getGlobalCellDataPartialDensity();
+            
             boost::shared_ptr<pdat::CellData<double> > d_data_momentum =
                 getGlobalCellDataMomentum();
             
@@ -3356,22 +4222,29 @@ FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithPressureAndVeloci
             
             if (!d_data_pressure)
             {
-                computeGlobalCellDataPressure();
+                computeGlobalCellDataPressureWithDensityAndMassFraction();
             }
             
             if (!d_data_velocity)
             {
-                computeGlobalCellDataVelocity();
+                computeGlobalCellDataVelocityWithDensity();
             }
             
-            // Get the pointers to the cell data of total energy and pressure.
-            double* E   = d_data_total_energy->getPointer(0);
-            double* p   = d_data_pressure->getPointer(0);
+            // Get the pointers to the cell data of partial density, total energy, volume fraction
+            // and pressure.
+            std::vector<double*> rho_Y;
+            rho_Y.reserve(d_num_species);
+            for (int si = 0; si < d_num_species; si++)
+            {
+                rho_Y.push_back(d_data_partial_density->getPointer(si));
+            }
+            double* E = d_data_total_energy->getPointer(0);
+            double* p = d_data_pressure->getPointer(0);
             
             if (d_dim == tbox::Dimension(1))
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithPressureAndVelocity()\n"
+                    << ": FlowModelFourEqnConservative::computeGlobalCellDataConvectiveFluxWithDensityMassFractionPressureAndVelocity()\n"
                     << "'CONVECTIVE_FLUX_Y' cannot be obtained for problem with dimension less than two."
                     << std::endl);
             }
@@ -3405,10 +4278,13 @@ FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithPressureAndVeloci
                         const int idx_convective_flux_y = (i + d_num_subghosts_convective_flux_y[0]) +
                             (j + d_num_subghosts_convective_flux_y[1])*d_subghostcell_dims_convective_flux_y[0];
                         
-                        F_y[0][idx_convective_flux_y] = rho_v[idx];
-                        F_y[1][idx_convective_flux_y] = v[idx_velocity]*rho_u[idx];
-                        F_y[2][idx_convective_flux_y] = v[idx_velocity]*rho_v[idx] + p[idx_pressure];
-                        F_y[3][idx_convective_flux_y] = v[idx_velocity]*(E[idx] + p[idx_pressure]);
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            F_y[si][idx_convective_flux_y] = v[idx_velocity]*rho_Y[si][idx];
+                        }
+                        F_y[d_num_species][idx_convective_flux_y] = v[idx_velocity]*rho_u[idx];
+                        F_y[d_num_species + 1][idx_convective_flux_y] = v[idx_velocity]*rho_v[idx] + p[idx_pressure];
+                        F_y[d_num_species + 2][idx_convective_flux_y] = v[idx_velocity]*(E[idx] + p[idx_pressure]);
                     }
                 }
             }
@@ -3455,11 +4331,14 @@ FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithPressureAndVeloci
                                 (k + d_num_subghosts_convective_flux_y[2])*d_subghostcell_dims_convective_flux_y[0]*
                                     d_subghostcell_dims_convective_flux_y[1];
                             
-                            F_y[0][idx_convective_flux_y] = rho_v[idx];
-                            F_y[1][idx_convective_flux_y] = v[idx_velocity]*rho_u[idx];
-                            F_y[2][idx_convective_flux_y] = v[idx_velocity]*rho_v[idx] + p[idx_pressure];
-                            F_y[3][idx_convective_flux_y] = v[idx_velocity]*rho_w[idx];
-                            F_y[4][idx_convective_flux_y] = v[idx_velocity]*(E[idx] + p[idx_pressure]);
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                F_y[si][idx_convective_flux_y] = v[idx_velocity]*rho_Y[si][idx];
+                            }
+                            F_y[d_num_species][idx_convective_flux_y] = v[idx_velocity]*rho_u[idx];
+                            F_y[d_num_species + 1][idx_convective_flux_y] = v[idx_velocity]*rho_v[idx] + p[idx_pressure];
+                            F_y[d_num_species + 2][idx_convective_flux_y] = v[idx_velocity]*rho_w[idx];
+                            F_y[d_num_species + 3][idx_convective_flux_y] = v[idx_velocity]*(E[idx] + p[idx_pressure]);
                         }
                     }
                 }
@@ -3468,7 +4347,7 @@ FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithPressureAndVeloci
         else
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithPressureAndVelocity()\n"
+                << ": FlowModelFourEqnConservative::computeGlobalCellDataConvectiveFluxWithDensityMassFractionPressureAndVelocity()\n"
                 << "Cell data of 'CONVECTIVE_FLUX_Y' is not yet registered."
                 << std::endl);
         }
@@ -3489,6 +4368,9 @@ FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithPressureAndVeloci
                 F_z.push_back(d_data_convective_flux_z->getPointer(ei));
             }
             
+            boost::shared_ptr<pdat::CellData<double> > d_data_partial_density =
+                getGlobalCellDataPartialDensity();
+            
             boost::shared_ptr<pdat::CellData<double> > d_data_momentum =
                 getGlobalCellDataMomentum();
             
@@ -3497,22 +4379,29 @@ FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithPressureAndVeloci
             
             if (!d_data_pressure)
             {
-                computeGlobalCellDataPressure();
+                computeGlobalCellDataPressureWithDensityAndMassFraction();
             }
             
             if (!d_data_velocity)
             {
-                computeGlobalCellDataVelocity();
+                computeGlobalCellDataVelocityWithDensity();
             }
             
-            // Get the pointers to the cell data of total energy and pressure.
-            double* E   = d_data_total_energy->getPointer(0);
-            double* p   = d_data_pressure->getPointer(0);
+            // Get the pointers to the cell data of partial density, total energy, volume fraction
+            // and pressure.
+            std::vector<double*> rho_Y;
+            rho_Y.reserve(d_num_species);
+            for (int si = 0; si < d_num_species; si++)
+            {
+                rho_Y.push_back(d_data_partial_density->getPointer(si));
+            }
+            double* E = d_data_total_energy->getPointer(0);
+            double* p = d_data_pressure->getPointer(0);
             
             if (d_dim == tbox::Dimension(1) || d_dim == tbox::Dimension(2))
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithPressureAndVelocity()\n"
+                    << ": FlowModelFourEqnConservative::computeGlobalCellDataConvectiveFluxWithDensityMassFractionPressureAndVelocity()\n"
                     << "'CONVECTIVE_FLUX_Z' cannot be obtained for problem with dimension less than three."
                     << std::endl);
             }
@@ -3559,11 +4448,14 @@ FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithPressureAndVeloci
                                 (k + d_num_subghosts_convective_flux_z[2])*d_subghostcell_dims_convective_flux_z[0]*
                                     d_subghostcell_dims_convective_flux_z[1];
                             
-                            F_z[0][idx_convective_flux_z] = rho_w[idx];
-                            F_z[1][idx_convective_flux_z] = w[idx_velocity]*rho_u[idx];
-                            F_z[2][idx_convective_flux_z] = w[idx_velocity]*rho_v[idx];
-                            F_z[3][idx_convective_flux_z] = w[idx_velocity]*rho_w[idx] + p[idx_pressure];
-                            F_z[4][idx_convective_flux_z] = w[idx_velocity]*(E[idx] + p[idx_pressure]);
+                            for (int si = 0; si < d_num_species; si++)
+                            {
+                                F_z[si][idx_convective_flux_z] = w[idx_velocity]*rho_Y[si][idx];
+                            }
+                            F_z[d_num_species][idx_convective_flux_z] = w[idx_velocity]*rho_u[idx];
+                            F_z[d_num_species + 1][idx_convective_flux_z] = w[idx_velocity]*rho_v[idx];
+                            F_z[d_num_species + 2][idx_convective_flux_z] = w[idx_velocity]*rho_w[idx] + p[idx_pressure];
+                            F_z[d_num_species + 3][idx_convective_flux_z] = w[idx_velocity]*(E[idx] + p[idx_pressure]);
                         }
                     }
                 }
@@ -3572,7 +4464,7 @@ FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithPressureAndVeloci
         else
         {
             TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithPressureAndVelocity()\n"
+                << ": FlowModelFourEqnConservative::computeGlobalCellDataConvectiveFluxWithDensityMassFractionPressureAndVelocity()\n"
                 << "Cell data of 'CONVECTIVE_FLUX_Z' is not yet registered."
                 << std::endl);
         }
