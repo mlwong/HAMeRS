@@ -57,9 +57,6 @@ link_directories(${HAMeRS_SOURCE_DIR}/hdf5/lib
 
 add_subdirectory(src/algs/integrator/fortran)
 
-# Add the compile flags
-add_definitions("-std=c++11 -g -O3 -Wall -Wno-deprecated")
-
 add_subdirectory(src/algs/patch_strategy)
 add_subdirectory(src/algs/integrator)
 add_subdirectory(src/apps/Euler)
