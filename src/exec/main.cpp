@@ -21,8 +21,6 @@
 
 // Headers for major algorithm/data structure objects
 
-#include "integrator/ExtendedTagAndInitialize.hpp"
-
 #include "SAMRAI/algs/TimeRefinementIntegrator.h"
 #include "SAMRAI/algs/TimeRefinementLevelStrategy.h"
 #include "SAMRAI/appu/VisItDataWriter.h"
@@ -30,13 +28,14 @@
 #include "SAMRAI/hier/PatchHierarchy.h"
 #include "SAMRAI/mesh/BergerRigoutsos.h"
 // #include "SAMRAI/mesh/GriddingAlgorithm.h"
-#include "integrator/GriddingAlgorithm.hpp"
 #include "SAMRAI/mesh/TreeLoadBalancer.h"
 
 // Headers for application-specific algorithm/data structure object
 
-#include "applications/Euler/Euler.hpp"
-#include "integrator/RungeKuttaLevelIntegrator.hpp"
+#include "algs/integrator/ExtendedTagAndInitialize.hpp"
+#include "algs/integrator/GriddingAlgorithm.hpp"
+#include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
+#include "apps/Euler/Euler.hpp"
 
 #include "boost/shared_ptr.hpp"
 #include <fstream>
@@ -406,7 +405,7 @@ int main(int argc, char *argv[])
             input_db->getDatabase("PatchHierarchy")));
     
     Euler* Euler_model = new Euler(
-        "Euler",
+        "Euler_model",
         dim,
         input_db->getDatabase("Euler"),
         grid_geometry);

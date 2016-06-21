@@ -4,7 +4,7 @@ set(CMAKE_CXX_COMPILER mpicxx)
 set(CMAKE_C_COMPILER mpicc)
 set(CMAKE_Fortran_COMPILER gfortran)
 
-project(AMR-WCNS C CXX Fortran)
+project(HAMeRS C CXX Fortran)
 
 find_package(MPI)
 
@@ -12,43 +12,63 @@ if (MPI_FOUND)
   include_directories(${MPI_INCLUDE_PATH})
 endif(MPI_FOUND)
 
+if (NOT CMAKE_BUILD_TYPE)
+    message(STATUS "No build type selected, default to Release")
+    set(CMAKE_BUILD_TYPE "Release")
+endif()
+
+# Intel compiler suite
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+    if (CMAKE_BUILD_TYPE MATCHES "Release")
+        set(CMAKE_CXX_FLAGS "-std=c++11 -g -O3 -Wall -Wno-deprecated -xhost")
+    elseif (CMAKE_BUILD_TYPE MATCHES "Debug")
+        set(CMAKE_CXX_FLAGS "-std=c++11 -g -O3 -Wall -Wno-deprecated")
+    endif()
+
+# Standard GNU compilers
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    if (CMAKE_BUILD_TYPE MATCHES "Release")
+        set(CMAKE_CXX_FLAGS "-std=c++11 -g -O3 -Wall -Wno-deprecated")
+    elseif (CMAKE_BUILD_TYPE MATCHES "Debug")
+        set(CMAKE_CXX_FLAGS "-std=c++11 -g -O3 -Wall -Wno-deprecated")
+    endif()
+endif()
+
 # Directories to look for include files
-include_directories(${AMR-WCNS_SOURCE_DIR}/include
-                    ${AMR-WCNS_SOURCE_DIR}/hdf5/include
-                    ${AMR-WCNS_SOURCE_DIR}/SAMRAI/include)
+include_directories(${HAMeRS_SOURCE_DIR}/include
+                    ${HAMeRS_SOURCE_DIR}/hdf5/include
+                    ${HAMeRS_SOURCE_DIR}/SAMRAI/include)
 
 # Directories to look for libraries
-link_directories(${AMR-WCNS_SOURCE_DIR}/hdf5/lib
-                 ${AMR-WCNS_SOURCE_DIR}/SAMRAI/lib
-		 ${AMR-WCNS_BINARY_DIR}/patch_strategy
-		 ${AMR-WCNS_BINARY_DIR}/integrator/fortran
-                 ${AMR-WCNS_BINARY_DIR}/integrator
-		 ${AMR-WCNS_BINARY_DIR}/applications/Euler
-		 ${AMR-WCNS_BINARY_DIR}/equation_of_state
-                 ${AMR-WCNS_BINARY_DIR}/flow_model
-		 ${AMR-WCNS_BINARY_DIR}/flow_model/flow_model
-                 ${AMR-WCNS_BINARY_DIR}/flow_model/boundary_conditions/Euler
-		 ${AMR-WCNS_BINARY_DIR}/flow_model/convective_flux_reconstructor
-                 ${AMR-WCNS_BINARY_DIR}/flow_model/initial_conditions
-		 ${AMR-WCNS_BINARY_DIR}/flow_model/refinement_taggers
-		 ${AMR-WCNS_BINARY_DIR}/flow_model/Riemann_solver
-		 ${AMR-WCNS_BINARY_DIR}/utils)
+link_directories(${HAMeRS_SOURCE_DIR}/hdf5/lib
+                 ${HAMeRS_SOURCE_DIR}/SAMRAI/lib
+		 ${HAMeRS_BINARY_DIR}/algs/patch_strategy
+		 ${HAMeRS_BINARY_DIR}/algs/integrator/fortran
+                 ${HAMeRS_BINARY_DIR}/algs/integrator
+		 ${HAMeRS_BINARY_DIR}/apps/Euler
+		 ${HAMeRS_BINARY_DIR}/flow/flow_models
+		 ${HAMeRS_BINARY_DIR}/flow/flow_models/Riemann_solvers
+                 ${HAMeRS_BINARY_DIR}/flow/boundary_conditions/Euler
+		 ${HAMeRS_BINARY_DIR}/flow/convective_flux_reconstructors
+                 ${HAMeRS_BINARY_DIR}/flow/initial_conditions
+		 ${HAMeRS_BINARY_DIR}/flow/refinement_taggers
+		 ${HAMeRS_BINARY_DIR}/util
+		 ${HAMeRS_BINARY_DIR}/util/equations_of_state)
 
-add_subdirectory(src/integrator/fortran)
+add_subdirectory(src/algs/integrator/fortran)
 
 # Add the compile flags
 add_definitions("-std=c++11 -g -O3 -Wall -Wno-deprecated")
 
-add_subdirectory(src/patch_strategy)
-add_subdirectory(src/integrator)
-add_subdirectory(src/applications/Euler)
+add_subdirectory(src/algs/patch_strategy)
+add_subdirectory(src/algs/integrator)
+add_subdirectory(src/apps/Euler)
 add_subdirectory(src/exec)
-add_subdirectory(src/equation_of_state)
-add_subdirectory(src/flow_model)
-add_subdirectory(src/flow_model/flow_model)
-add_subdirectory(src/flow_model/boundary_conditions/Euler)
-add_subdirectory(src/flow_model/convective_flux_reconstructor)
-add_subdirectory(src/flow_model/initial_conditions)
-add_subdirectory(src/flow_model/refinement_taggers)
-add_subdirectory(src/flow_model/Riemann_solver)
-add_subdirectory(src/utils)
+add_subdirectory(src/flow/flow_models)
+add_subdirectory(src/flow/flow_models/Riemann_solvers)
+add_subdirectory(src/flow/boundary_conditions/Euler)
+add_subdirectory(src/flow/convective_flux_reconstructors)
+add_subdirectory(src/flow/initial_conditions)
+add_subdirectory(src/flow/refinement_taggers)
+add_subdirectory(src/util)
+add_subdirectory(src/util/equations_of_state)
