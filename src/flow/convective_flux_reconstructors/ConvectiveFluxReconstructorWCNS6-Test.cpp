@@ -59,10 +59,7 @@ ConvectiveFluxReconstructorWCNS6_Test::ConvectiveFluxReconstructorWCNS6_Test(
     d_constant_q          = d_convective_flux_reconstructor_db->getIntegerWithDefault("constant_q", 4);
     d_constant_q          = d_convective_flux_reconstructor_db->getIntegerWithDefault("d_constant_q", d_constant_q);
     
-    d_constant_alpha_TV   = d_convective_flux_reconstructor_db->getDoubleWithDefault("constant_alpha_TV", 5.0);
-    d_constant_alpha_TV   = d_convective_flux_reconstructor_db->getDoubleWithDefault("d_constant_alpha_TV", d_constant_alpha_TV);
-    
-    d_constant_alpha_beta = d_convective_flux_reconstructor_db->getDoubleWithDefault("constant_alpha_beta", 1.5);
+    d_constant_alpha_beta = d_convective_flux_reconstructor_db->getDoubleWithDefault("constant_alpha_beta", 20.0);
     d_constant_alpha_beta = d_convective_flux_reconstructor_db->getDoubleWithDefault("d_constant_alpha_beta", d_constant_alpha_beta);
     
     d_weights_c.resize(boost::extents[4][3]);
@@ -176,9 +173,6 @@ ConvectiveFluxReconstructorWCNS6_Test::printClassData(
     os << "d_constant_q = "
        << d_constant_q
        << std::endl;
-    os << "d_constant_alpha_TV = "
-       << d_constant_alpha_TV
-       << std::endl;
     os << "d_constant_alpha_beta = "
        << d_constant_alpha_beta
        << std::endl;
@@ -196,7 +190,6 @@ ConvectiveFluxReconstructorWCNS6_Test::putToRestart(
     restart_db->putDouble("d_constant_C", d_constant_C);
     restart_db->putInteger("d_constant_p", d_constant_p);
     restart_db->putInteger("d_constant_q", d_constant_q);
-    restart_db->putDouble("d_constant_alpha_TV", d_constant_alpha_TV);
     restart_db->putDouble("d_constant_alpha_beta", d_constant_alpha_beta);
 }
 
@@ -2411,7 +2404,6 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
     const double& C = d_constant_C;
     const int& p = d_constant_p;
     const int& q = d_constant_q;
-    const double& alpha_TV = d_constant_alpha_TV;
     const double& alpha_beta = d_constant_alpha_beta;
     
     for (int ei = 0; ei < d_num_eqn; ei++)
@@ -2419,54 +2411,37 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
         boost::multi_array_ref<double, 2>::const_array_view<1>::type W_array_ei =
             W_array[boost::indices[boost::multi_array_ref<double, 2>::index_range()][ei]];
         
-        // Compute sigma and TV's.
-        double sigma;
-        computeSigmaAndTV(sigma, TV, W_array_ei);
-        
         // Compute beta's.
         computeBeta(beta, W_array_ei);
         computeBetaTilde(beta_tilde, W_array_ei);
-        
-        // Compute ratio of TV's.
-        
-        const double TV_ratio = fmax(fmax(fmax(TV[0], TV[1]), TV[2]), TV[3])/
-            (fmin(fmin(fmin(TV[0], TV[1]), TV[2]), TV[3]) + EPSILON);
-        
-        // Compute ratio of beta's.
-        
-        const double beta_ratio = fmax(fmax(fmax(beta[0], beta[1]), beta[2]), beta[3])/
-            (fmin(fmin(fmin(beta[0], beta[1]), beta[2]), beta[3]) + EPSILON);
-        
-        const double beta_tilde_ratio = fmax(fmax(fmax(beta_tilde[0], beta_tilde[1]), beta_tilde[2]), beta_tilde[3])/
-            (fmin(fmin(fmin(beta_tilde[0], beta_tilde[1]), beta_tilde[2]), beta_tilde[3]) + EPSILON);
         
         /*
          * Compute W_minus of the current characteristic variable.
          */
         
         // Compute the reference smoothness indicators tau_6.
-        const double tau_6 = fabs(beta[3] - 1.0/8*(beta[0] + beta[2] +
-            6*beta[1]));
+        const double beta_avg = 1.0/8*(beta[0] + beta[2] + 6*beta[1]);
+        const double tau_6 = fabs(beta[3] - beta_avg);
         
         // Compute the weights alpha.
         double alpha[4];
         double alpha_sum = 0.0;
         
-        if ((TV_ratio > alpha_TV) &&
-            (beta_ratio > alpha_beta))
+        if(fabs(tau_6/(beta_avg + EPSILON)) > alpha_beta)
         {
             // Compute linear weights d.
             double d[4];
-            const double sigma_to_p = pow(sigma, p);
-            d[0] = (2.0 - sigma_to_p)/32.0;
-            d[1] = 5.0*(4.0 - sigma_to_p)/32.0;
-            d[2] = 5.0*(2.0 + sigma_to_p)/32.0;
-            d[3] = sigma_to_p/32.0;
+            d[0] = 1.0/16.0;
+            d[1] = 5.0/8.0;
+            d[2] = 5.0/16.0;
+            d[3] = 0.0;
+            
+            const double tau_5 = fabs(beta[0] - beta[2]);
             
             for (int r = 0; r < 4; r++)
             {
                 // Compute the weights alpha.
-                alpha[r] = d[r]*(EPSILON + sigma_to_p*C + pow(tau_6/(beta[r] + EPSILON), q));
+                alpha[r] = d[r]*(1.0 + pow(tau_5/(beta[r] + EPSILON), p));
                 
                 // Sum up the weights alpha.
                 alpha_sum += alpha[r];
@@ -2514,28 +2489,28 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
          */
         
         // Compute the reference smoothness indicators tau_6_tilde.
-        const double tau_6_tilde = fabs(beta_tilde[3] - 1.0/8*(beta_tilde[0] +
-            beta_tilde[2] + 6*beta_tilde[1]));
+        const double beta_tilde_avg =  1.0/8*(beta_tilde[0] + beta_tilde[2] + 6*beta_tilde[1]);
+        const double tau_6_tilde = fabs(beta_tilde[3] - beta_tilde_avg);
         
         // Compute the weights alpha_tilde.
         double alpha_tilde[4];
         double alpha_tilde_sum = 0.0;
         
-        if ((TV_ratio > alpha_TV)  &&
-            (beta_tilde_ratio > alpha_beta))
+        if (fabs(tau_6_tilde/(beta_tilde_avg + EPSILON)) > alpha_beta)
         {
             // Compute linear weights d.
-            const double sigma_to_p = pow(sigma, p);
             double d[4];
-            d[0] = (2.0 - sigma_to_p)/32.0;
-            d[1] = 5.0*(4.0 - sigma_to_p)/32.0;
-            d[2] = 5.0*(2.0 + sigma_to_p)/32.0;
-            d[3] = sigma_to_p/32.0;
+            d[0] = 1.0/16.0;
+            d[1] = 5.0/8.0;
+            d[2] = 5.0/16.0;
+            d[3] = 0.0;
+            
+            const double tau_5_tide = fabs(beta_tilde[0] - beta_tilde[2]);
             
             for (int r = 0; r < 4; r++)
             {
                 // Compute the weights alpha_tilde.
-                alpha_tilde[r] = d[r]*(EPSILON + sigma_to_p*C + pow(tau_6_tilde/(beta_tilde[r] + EPSILON), q));
+                alpha_tilde[r] = d[r]*(1.0 + pow(tau_5_tide/(beta_tilde[r] + EPSILON), p));
                 
                 // Sum up the weights alpha.
                 alpha_tilde_sum += alpha_tilde[r];
