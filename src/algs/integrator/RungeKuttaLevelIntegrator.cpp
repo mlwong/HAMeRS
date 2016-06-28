@@ -1450,7 +1450,8 @@ RungeKuttaLevelIntegrator::advanceLevel(
      * (6) Advance solution on all level patches (scratch storage).
      *     In looping over Runge-Kutta steps,
      *     (6a) Copy data from scatch data to the intermediate data.
-     *          Dirchlet boundary conditions are applied.
+     *          Dirchlet boundary conditions are applied at the coarse-fine
+     *          boundaries of patches.
      *     (6b) Compute intermediate hyperbolic fluxes of current step.
      *     (6c) Advance one single Runge-Kutta step and accumulate the
      *          intermediate hyperbolic flux to the total hyperbolic flux
@@ -1527,6 +1528,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
             source_var++;
         }
         
+        const tbox::SAMRAI_MPI& mpi(level->getBoxLevel()->getMPI());
         for (int sn = 0; sn < d_number_steps; sn++)
         {
             // Copy scratch data to intermediate data corresponding to current step.
@@ -1534,12 +1536,29 @@ RungeKuttaLevelIntegrator::advanceLevel(
             
             d_patch_strategy->setDataContext(d_intermediate[sn]);
             
+            /*
+             * Fill the ghost cell data for current intemediate data factory.
+             */
+            
+            boost::shared_ptr<xfer::RefineSchedule> fill_schedule_intermediate;
+            
+            fill_schedule_intermediate =
+                d_bdry_fill_intermediate[sn]->createSchedule(
+                    level,
+                    d_patch_strategy);
+            
+            mpi.Barrier(); // Redundant to add the mpi barrier?
+            
+            fill_schedule_intermediate->fillData(current_time);
+            
+            mpi.Barrier(); // Redundant to add the mpi barrier?
+            
             // Compute flux corresponding to the previous step.
             d_patch_strategy->computeHyperbolicFluxesAndSourcesOnPatch(
-                  *patch,
-                  current_time,
-                  dt,
-                  sn);
+                *patch,
+                current_time,
+                dt,
+                sn);
             
             d_patch_strategy->setDataContext(d_scratch);
             
@@ -2278,6 +2297,21 @@ RungeKuttaLevelIntegrator::registerVariable(
                 scr_id, new_id, cur_id, new_id, scr_id, refine_op, time_int);
             d_fill_new_level->registerRefine(
                 cur_id, cur_id, cur_id, new_id, scr_id, refine_op, time_int);
+            
+            /*
+             * Set boundary fill schedules for data used in the intermediate steps
+             * of the Runge-Kutta integration.
+             */
+            d_bdry_fill_intermediate.resize(d_number_steps);
+            for (int sn = 0; sn < d_number_steps; sn++)
+            {
+                d_bdry_fill_intermediate[sn].reset(new xfer::RefineAlgorithm());
+                d_bdry_fill_intermediate[sn]->registerRefine(
+                    intermediate_id[sn],
+                    scr_id,
+                    intermediate_id[sn],
+                    refine_op);
+            }
             
             /*
              * For data synchronization between levels, the coarsen algorithm

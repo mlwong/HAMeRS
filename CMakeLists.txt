@@ -30,7 +30,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     if (CMAKE_BUILD_TYPE MATCHES "Release")
         set(CMAKE_CXX_FLAGS "-std=c++11 -g -O3 -Wall -Wno-deprecated")
     elseif (CMAKE_BUILD_TYPE MATCHES "Debug")
-        set(CMAKE_CXX_FLAGS "-std=c++11 -g -O3 -Wall -Wno-deprecated")
+        set(CMAKE_CXX_FLAGS "-std=c++11 -g -O0 -Wall -Wno-deprecated")
     endif()
 endif()
 
@@ -53,10 +53,10 @@ link_directories(${HAMeRS_SOURCE_DIR}/hdf5/lib
                  ${HAMeRS_BINARY_DIR}/flow/initial_conditions
 		 ${HAMeRS_BINARY_DIR}/flow/refinement_taggers
 		 ${HAMeRS_BINARY_DIR}/util
+		 ${HAMeRS_BINARY_DIR}/util/basic_boundary_conditions
 		 ${HAMeRS_BINARY_DIR}/util/equations_of_state)
 
 add_subdirectory(src/algs/integrator/fortran)
-
 add_subdirectory(src/algs/patch_strategy)
 add_subdirectory(src/algs/integrator)
 add_subdirectory(src/apps/Euler)
@@ -68,4 +68,5 @@ add_subdirectory(src/flow/convective_flux_reconstructors)
 add_subdirectory(src/flow/initial_conditions)
 add_subdirectory(src/flow/refinement_taggers)
 add_subdirectory(src/util)
+add_subdirectory(src/util/basic_boundary_conditions)
 add_subdirectory(src/util/equations_of_state)

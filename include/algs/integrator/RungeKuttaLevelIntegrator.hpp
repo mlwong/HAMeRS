@@ -1105,6 +1105,8 @@ class RungeKuttaLevelIntegrator:
          */
         boost::shared_ptr<xfer::RefineAlgorithm> d_bdry_fill_advance_old;
         
+std::vector<boost::shared_ptr<xfer::RefineAlgorithm> > d_bdry_fill_intermediate;
+        
         /*
          * Coarsen algorithms for conservative data synchronization
          * (e.g., hyperbolic flux correction or refluxing).
