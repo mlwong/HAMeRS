@@ -1473,6 +1473,129 @@ RungeKuttaLevelIntegrator::advanceLevel(
     
     d_patch_strategy->setDataContext(d_scratch);
     
+    t_patch_num_kernel->start();
+    
+    for (hier::PatchLevel::iterator ip(level->begin());
+         ip != level->end();
+         ip++)
+    {
+        const boost::shared_ptr<hier::Patch>& patch = *ip;
+        
+        patch->allocatePatchData(d_temp_var_scratch_data, current_time);
+        
+        // Fill all hyperbolic fluxes with zero values.
+        
+        std::list<boost::shared_ptr<hier::Variable> >::iterator hyp_flux_var =
+            d_hyp_flux_variables.begin();
+        
+        while (hyp_flux_var != d_hyp_flux_variables.end())
+        {            
+            if (d_hyp_flux_is_face)
+            {
+                boost::shared_ptr<pdat::FaceData<double> > flux_data(
+                    BOOST_CAST<pdat::FaceData<double>, hier::PatchData>(
+                        patch->getPatchData(*hyp_flux_var, d_scratch)));
+                
+                TBOX_ASSERT(flux_data);
+                flux_data->fillAll(0.0);
+            }
+            else
+            {
+                boost::shared_ptr<pdat::SideData<double> > flux_data(
+                    BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
+                        patch->getPatchData(*hyp_flux_var, d_scratch)));
+                
+                TBOX_ASSERT(flux_data);
+                flux_data->fillAll(0.0);
+            }
+            
+            hyp_flux_var++;
+        }
+        
+        // Fill all sources with zero values.
+        
+        std::list<boost::shared_ptr<hier::Variable> >::iterator source_var =
+            d_source_variables.begin();
+        
+        while (source_var != d_source_variables.end())
+        {
+            boost::shared_ptr<pdat::CellData<double> > source_data(
+                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    patch->getPatchData(*source_var, d_scratch)));
+            
+            source_data->fillAll(0.0);
+            
+            source_var++;
+        }
+    }
+    
+    
+    const tbox::SAMRAI_MPI& mpi(hierarchy->getMPI());
+    for (int sn = 0; sn < d_number_steps; sn++)
+    {
+        d_patch_strategy->setDataContext(d_intermediate[sn]);
+        
+        // Copy scratch data to intermediate data corresponding to current step.
+        copyTimeDependentData(level, d_scratch, d_intermediate[sn]);
+        
+        /*
+         * Fill the ghost cell data for current intemediate data factory.
+         */
+        
+        boost::shared_ptr<xfer::RefineSchedule> fill_schedule_intermediate;
+        
+        fill_schedule_intermediate =
+            d_bdry_fill_intermediate[sn]->createSchedule(
+                level,
+                d_patch_strategy);
+        
+        mpi.Barrier(); // Redundant to add the mpi barrier?
+        
+        fill_schedule_intermediate->fillData(current_time);
+        
+        mpi.Barrier(); // Redundant to add the mpi barrier?
+        
+        for (hier::PatchLevel::iterator ip(level->begin());
+             ip != level->end();
+             ip++)
+        {
+            const boost::shared_ptr<hier::Patch>& patch = *ip;
+            
+            d_patch_strategy->setDataContext(d_intermediate[sn]);
+            
+            // Compute flux corresponding to the previous step.
+            d_patch_strategy->computeHyperbolicFluxesAndSourcesOnPatch(
+                *patch,
+                current_time,
+                dt,
+                sn);
+            
+            d_patch_strategy->setDataContext(d_scratch);
+            
+            // Advance a single Runge-Kutta step.
+            d_patch_strategy->advanceSingleStep(
+                *patch,
+                current_time,
+                dt,
+                d_alpha[sn],
+                d_beta[sn],
+                d_gamma[sn],
+                d_intermediate);
+        }
+    }
+    
+    for (hier::PatchLevel::iterator ip(level->begin());
+         ip != level->end();
+         ip++)
+    {
+        const boost::shared_ptr<hier::Patch>& patch = *ip;
+        
+        patch->deallocatePatchData(d_temp_var_scratch_data);
+    }
+    
+    t_patch_num_kernel->stop();
+    
+    /*
     for (hier::PatchLevel::iterator ip(level->begin());
          ip != level->end();
          ip++)
@@ -1536,11 +1659,10 @@ RungeKuttaLevelIntegrator::advanceLevel(
             
             d_patch_strategy->setDataContext(d_intermediate[sn]);
             
-            /*
-             * Fill the ghost cell data for current intemediate data factory.
-             */
+            //
+            // Fill the ghost cell data for current intemediate data factory.
+            //
             
-            /*
             boost::shared_ptr<xfer::RefineSchedule> fill_schedule_intermediate;
             
             fill_schedule_intermediate =
@@ -1553,7 +1675,6 @@ RungeKuttaLevelIntegrator::advanceLevel(
             fill_schedule_intermediate->fillData(current_time);
             
             mpi.Barrier(); // Redundant to add the mpi barrier?
-            */
             
             // Compute flux corresponding to the previous step.
             d_patch_strategy->computeHyperbolicFluxesAndSourcesOnPatch(
@@ -1579,6 +1700,8 @@ RungeKuttaLevelIntegrator::advanceLevel(
         
         patch->deallocatePatchData(d_temp_var_scratch_data);
     }
+    
+    */
     
     d_patch_strategy->clearDataContext();
     
@@ -1702,7 +1825,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
     }
     
     double next_dt = dt_next;
-    const tbox::SAMRAI_MPI& mpi(hierarchy->getMPI());
+// const tbox::SAMRAI_MPI& mpi(hierarchy->getMPI());
     if (mpi.getSize() > 1)
     {
         mpi.AllReduce(&next_dt, 1, MPI_MIN);
