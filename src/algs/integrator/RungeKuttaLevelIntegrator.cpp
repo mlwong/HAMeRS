@@ -1529,7 +1529,6 @@ RungeKuttaLevelIntegrator::advanceLevel(
         }
     }
     
-    
     const tbox::SAMRAI_MPI& mpi(hierarchy->getMPI());
     for (int sn = 0; sn < d_number_steps; sn++)
     {
@@ -1542,7 +1541,6 @@ RungeKuttaLevelIntegrator::advanceLevel(
          * Fill the ghost cell data for current intemediate data factory.
          */
         
-        /*
         boost::shared_ptr<xfer::RefineSchedule> fill_schedule_intermediate;
         
         fill_schedule_intermediate =
@@ -1555,7 +1553,6 @@ RungeKuttaLevelIntegrator::advanceLevel(
         fill_schedule_intermediate->fillData(current_time);
         
         mpi.Barrier(); // Redundant to add the mpi barrier?
-        */
         
         for (hier::PatchLevel::iterator ip(level->begin());
              ip != level->end();
