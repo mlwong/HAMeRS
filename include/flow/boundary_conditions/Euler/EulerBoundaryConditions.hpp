@@ -3,8 +3,8 @@
 
 #include "SAMRAI/SAMRAI_config.h"
 
-#include "SAMRAI/appu/BoundaryUtilityStrategy.h"
-#include "SAMRAI/appu/CartesianBoundaryDefines.h"
+#include "util/basic_boundary_conditions/BoundaryUtilityStrategy.hpp"
+#include "util/basic_boundary_conditions/CartesianBoundaryDefines.hpp"
 
 #include "flow/flow_models/FlowModels.hpp"
 
@@ -15,116 +15,8 @@
 
 using namespace SAMRAI;
 
-/*
- * Function to print out enum NodeBdyLoc2D::Type value as text.
- */
-inline std::ostream& operator<<(std::ostream& os, const NodeBdyLoc2D::Type& value)
-{
-    static std::map<NodeBdyLoc2D::Type, std::string> strings;
-    
-    if (strings.size() == 0)
-    {
-#define INSERT_ELEMENT(p) strings[p] = #p
-        INSERT_ELEMENT(NodeBdyLoc2D::XLO_YLO);
-        INSERT_ELEMENT(NodeBdyLoc2D::XHI_YLO);
-        INSERT_ELEMENT(NodeBdyLoc2D::XLO_YHI);
-        INSERT_ELEMENT(NodeBdyLoc2D::XHI_YHI);
-#undef INSERT_ELEMENT
-    }
-    
-    return os << strings[value];
-}
-
-
-/*
- * Function to print out enum EdgeBdyLoc3D::Type value as text.
- */
-inline std::ostream& operator<<(std::ostream& output, const EdgeBdyLoc3D::Type value)
-{
-    static std::map<EdgeBdyLoc3D::Type, std::string> strings;
-    
-    if (strings.size() == 0)
-    {
-#define INSERT_ELEMENT(p) strings[p] = #p
-        INSERT_ELEMENT(EdgeBdyLoc3D::XLO_YLO);
-        INSERT_ELEMENT(EdgeBdyLoc3D::XHI_YLO);
-        INSERT_ELEMENT(EdgeBdyLoc3D::XLO_YHI);
-        INSERT_ELEMENT(EdgeBdyLoc3D::XHI_YHI);
-        INSERT_ELEMENT(EdgeBdyLoc3D::XLO_ZLO);
-        INSERT_ELEMENT(EdgeBdyLoc3D::XHI_ZLO);
-        INSERT_ELEMENT(EdgeBdyLoc3D::XLO_ZHI);
-        INSERT_ELEMENT(EdgeBdyLoc3D::XHI_ZHI);
-        INSERT_ELEMENT(EdgeBdyLoc3D::YLO_ZLO);
-        INSERT_ELEMENT(EdgeBdyLoc3D::YHI_ZLO);
-        INSERT_ELEMENT(EdgeBdyLoc3D::YLO_ZHI);
-        INSERT_ELEMENT(EdgeBdyLoc3D::YHI_ZHI);
-#undef INSERT_ELEMENT
-    }
-    
-    return output << strings[value];
-}
-
-
-/*
- * Function to print out enum NodeBdyLoc3D::Type value as text.
- */
-inline std::ostream& operator<<(std::ostream& output, const NodeBdyLoc3D::Type value)
-{
-    static std::map<NodeBdyLoc3D::Type, std::string> strings;
-    
-    if (strings.size() == 0)
-    {
-#define INSERT_ELEMENT(p) strings[p] = #p
-        INSERT_ELEMENT(NodeBdyLoc3D::XLO_YLO_ZLO);
-        INSERT_ELEMENT(NodeBdyLoc3D::XHI_YLO_ZLO);
-        INSERT_ELEMENT(NodeBdyLoc3D::XLO_YHI_ZLO);
-        INSERT_ELEMENT(NodeBdyLoc3D::XHI_YHI_ZLO);
-        INSERT_ELEMENT(NodeBdyLoc3D::XLO_YLO_ZHI);
-        INSERT_ELEMENT(NodeBdyLoc3D::XHI_YLO_ZHI);
-        INSERT_ELEMENT(NodeBdyLoc3D::XLO_YHI_ZHI);
-        INSERT_ELEMENT(NodeBdyLoc3D::XHI_YHI_ZHI);
-#undef INSERT_ELEMENT
-    }
-    
-    return output << strings[value];
-}
-
-
-/*
- * Function to print out enum BdryCond::Type value as text.
- */
-inline std::ostream& operator<<(std::ostream& output, const BdryCond::Type value)
-{
-    static std::map<BdryCond::Type, std::string> strings;
-    
-    if (strings.size() == 0)
-    {
-#define INSERT_ELEMENT(p) strings[p] = #p
-        INSERT_ELEMENT(BdryCond::FLOW);
-        INSERT_ELEMENT(BdryCond::REFLECT);
-        INSERT_ELEMENT(BdryCond::DIRICHLET);
-        INSERT_ELEMENT(BdryCond::NEUMANN);
-        INSERT_ELEMENT(BdryCond::XFLOW);
-        INSERT_ELEMENT(BdryCond::YFLOW);
-        INSERT_ELEMENT(BdryCond::ZFLOW);
-        INSERT_ELEMENT(BdryCond::XREFLECT);
-        INSERT_ELEMENT(BdryCond::YREFLECT);
-        INSERT_ELEMENT(BdryCond::ZREFLECT);
-        INSERT_ELEMENT(BdryCond::XDIRICHLET);
-        INSERT_ELEMENT(BdryCond::YDIRICHLET);
-        INSERT_ELEMENT(BdryCond::ZDIRICHLET);
-        INSERT_ELEMENT(BdryCond::XNEUMANN);
-        INSERT_ELEMENT(BdryCond::YNEUMANN);
-        INSERT_ELEMENT(BdryCond::ZNEUMANN);
-#undef INSERT_ELEMENT
-    }
-    
-    return output << strings[value];
-}
-
-
 class EulerBoundaryConditions:
-    public appu::BoundaryUtilityStrategy
+    public BoundaryUtilityStrategy
 {
     public:
         EulerBoundaryConditions(
