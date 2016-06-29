@@ -172,6 +172,15 @@ CartesianBoundaryUtilities2::fillEdgeBoundaryData(
         hier::Index fill_box_lo_idx(fill_box.lower());
         hier::Index fill_box_hi_idx(fill_box.upper());
         
+if (patch_geom->getTouchesRegularBoundary(0, 1) &&
+    patch_geom->getTouchesRegularBoundary(1, 1))
+{
+    tbox::plog << "interior_box_lo_idx: " << interior_box_lo_idx << std::endl;
+    tbox::plog << "interior_box_hi_idx: " << interior_box_hi_idx << std::endl;
+    tbox::plog << "fill_box_lo_idx: " << fill_box_lo_idx << std::endl;
+    tbox::plog << "fill_box_hi_idx: " << fill_box_hi_idx << std::endl;
+}
+        
         /*
          * Offset the indices.
          */
