@@ -4,8 +4,8 @@
 #define BOGUS_BDRY_DATA (-9999)
 
 // routines for managing boundary data
-#include "util/basic_boundary_conditions/CartesianBoundaryUtilities2.hpp"
-#include "util/basic_boundary_conditions/CartesianBoundaryUtilities3.hpp"
+#include "SAMRAI/appu/CartesianBoundaryUtilities2.h"
+#include "SAMRAI/appu/CartesianBoundaryUtilities3.h"
 
 EulerBoundaryConditions::EulerBoundaryConditions(
     const std::string& object_name,
@@ -85,7 +85,7 @@ EulerBoundaryConditions::EulerBoundaryConditions(
             }
             if (d_dim == tbox::Dimension(2))
             {
-                CartesianBoundaryUtilities2::getFromInput(
+                appu::CartesianBoundaryUtilities2::getFromInput(
                     this,
                     boundary_conditions_db,
                     d_master_bdry_edge_conds,
@@ -94,7 +94,7 @@ EulerBoundaryConditions::EulerBoundaryConditions(
             }
             else if (d_dim == tbox::Dimension(3))
             {
-                CartesianBoundaryUtilities3::getFromInput(
+                appu::CartesianBoundaryUtilities3::getFromInput(
                     this,
                     boundary_conditions_db,
                     d_master_bdry_face_conds,
@@ -119,9 +119,9 @@ EulerBoundaryConditions::EulerBoundaryConditions(
             d_scalar_bdry_edge_conds[i] = d_master_bdry_edge_conds[i];
             d_vector_bdry_edge_conds[i] = d_master_bdry_edge_conds[i];
             
-            if (d_master_bdry_edge_conds[i] == BdryCond::Basic::REFLECT)
+            if (d_master_bdry_edge_conds[i] == BdryCond::REFLECT)
             {
-                d_scalar_bdry_edge_conds[i] = BdryCond::Basic::SYMMETRY;
+                d_scalar_bdry_edge_conds[i] = BdryCond::FLOW;
             }
         }
         
@@ -130,19 +130,19 @@ EulerBoundaryConditions::EulerBoundaryConditions(
             d_scalar_bdry_node_conds[i] = d_master_bdry_node_conds[i];
             d_vector_bdry_node_conds[i] = d_master_bdry_node_conds[i];
             
-            if (d_master_bdry_node_conds[i] == BdryCond::Basic::XREFLECT)
+            if (d_master_bdry_node_conds[i] == BdryCond::XREFLECT)
             {
-                d_scalar_bdry_node_conds[i] = BdryCond::Basic::XSYMMETRY;
+                d_scalar_bdry_node_conds[i] = BdryCond::XFLOW;
             }
-            if (d_master_bdry_node_conds[i] == BdryCond::Basic::YREFLECT)
+            if (d_master_bdry_node_conds[i] == BdryCond::YREFLECT)
             {
-                d_scalar_bdry_node_conds[i] = BdryCond::Basic::YSYMMETRY;
+                d_scalar_bdry_node_conds[i] = BdryCond::YFLOW;
             }
             
             if (d_master_bdry_node_conds[i] != BOGUS_BDRY_DATA)
             {
                 d_node_bdry_edge[i] =
-                    CartesianBoundaryUtilities2::getEdgeLocationForNodeBdry(
+                    appu::CartesianBoundaryUtilities2::getEdgeLocationForNodeBdry(
                         i, d_master_bdry_node_conds[i]);
             }
         }
@@ -154,9 +154,9 @@ EulerBoundaryConditions::EulerBoundaryConditions(
             d_scalar_bdry_face_conds[i] = d_master_bdry_face_conds[i];
             d_vector_bdry_face_conds[i] = d_master_bdry_face_conds[i];
             
-            if (d_master_bdry_face_conds[i] == BdryCond::Basic::REFLECT)
+            if (d_master_bdry_face_conds[i] == BdryCond::REFLECT)
             {
-                d_scalar_bdry_face_conds[i] = BdryCond::Basic::SYMMETRY;
+                d_scalar_bdry_face_conds[i] = BdryCond::FLOW;
             }
         }
         
@@ -165,23 +165,23 @@ EulerBoundaryConditions::EulerBoundaryConditions(
             d_scalar_bdry_edge_conds[i] = d_master_bdry_edge_conds[i];
             d_vector_bdry_edge_conds[i] = d_master_bdry_edge_conds[i];
             
-            if (d_master_bdry_edge_conds[i] == BdryCond::Basic::XREFLECT)
+            if (d_master_bdry_edge_conds[i] == BdryCond::XREFLECT)
             {
-                d_scalar_bdry_edge_conds[i] = BdryCond::Basic::XSYMMETRY;
+                d_scalar_bdry_edge_conds[i] = BdryCond::XFLOW;
             }
-            if (d_master_bdry_edge_conds[i] == BdryCond::Basic::YREFLECT)
+            if (d_master_bdry_edge_conds[i] == BdryCond::YREFLECT)
             {
-                d_scalar_bdry_edge_conds[i] = BdryCond::Basic::YSYMMETRY;
+                d_scalar_bdry_edge_conds[i] = BdryCond::YFLOW;
             }
-            if (d_master_bdry_edge_conds[i] == BdryCond::Basic::ZREFLECT)
+            if (d_master_bdry_edge_conds[i] == BdryCond::ZREFLECT)
             {
-                d_scalar_bdry_edge_conds[i] = BdryCond::Basic::ZSYMMETRY;
+                d_scalar_bdry_edge_conds[i] = BdryCond::ZFLOW;
             }
             
             if (d_master_bdry_edge_conds[i] != BOGUS_BDRY_DATA)
             {
                 d_edge_bdry_face[i] =
-                    CartesianBoundaryUtilities3::getFaceLocationForEdgeBdry(
+                    appu::CartesianBoundaryUtilities3::getFaceLocationForEdgeBdry(
                         i, d_master_bdry_edge_conds[i]);
             }
         }
@@ -191,23 +191,23 @@ EulerBoundaryConditions::EulerBoundaryConditions(
             d_scalar_bdry_node_conds[i] = d_master_bdry_node_conds[i];
             d_vector_bdry_node_conds[i] = d_master_bdry_node_conds[i];
             
-            if (d_master_bdry_node_conds[i] == BdryCond::Basic::XREFLECT)
+            if (d_master_bdry_node_conds[i] == BdryCond::XREFLECT)
             {
-                d_scalar_bdry_node_conds[i] = BdryCond::Basic::XSYMMETRY;
+                d_scalar_bdry_node_conds[i] = BdryCond::XFLOW;
             }
-            if (d_master_bdry_node_conds[i] == BdryCond::Basic::YREFLECT)
+            if (d_master_bdry_node_conds[i] == BdryCond::YREFLECT)
             {
-                d_scalar_bdry_node_conds[i] = BdryCond::Basic::YSYMMETRY;
+                d_scalar_bdry_node_conds[i] = BdryCond::YFLOW;
             }
-            if (d_master_bdry_node_conds[i] == BdryCond::Basic::ZREFLECT)
+            if (d_master_bdry_node_conds[i] == BdryCond::ZREFLECT)
             {
-                d_scalar_bdry_node_conds[i] = BdryCond::Basic::ZSYMMETRY;
+                d_scalar_bdry_node_conds[i] = BdryCond::ZFLOW;
             }
             
             if (d_master_bdry_node_conds[i] != BOGUS_BDRY_DATA)
             {
                 d_node_bdry_face[i] =
-                    CartesianBoundaryUtilities3::getFaceLocationForNodeBdry(
+                    appu::CartesianBoundaryUtilities3::getFaceLocationForNodeBdry(
                         i, d_master_bdry_node_conds[i]);
             }
         }
@@ -240,17 +240,17 @@ EulerBoundaryConditions::printClassData(std::ostream& os) const
              os << "d_master_bdry_node_conds["
                 << j
                 << "] = "
-                << static_cast<BdryCond::Basic::Type>(d_master_bdry_node_conds[j])
+                << static_cast<BdryCond::Type>(d_master_bdry_node_conds[j])
                 << std::endl;
              os << "d_scalar_bdry_node_conds["
                 << j
                 << "] = "
-                << static_cast<BdryCond::Basic::Type>(d_scalar_bdry_node_conds[j])
+                << static_cast<BdryCond::Type>(d_scalar_bdry_node_conds[j])
                 << std::endl;
              os << "d_vector_bdry_node_conds["
                 << j
                 << "] = "
-                << static_cast<BdryCond::Basic::Type>(d_vector_bdry_node_conds[j])
+                << static_cast<BdryCond::Type>(d_vector_bdry_node_conds[j])
                 << std::endl;
              os << "d_node_bdry_edge["
                 << j
@@ -266,22 +266,22 @@ EulerBoundaryConditions::printClassData(std::ostream& os) const
             os << "d_master_bdry_edge_conds["
                << j
                << "] = "
-               << static_cast<BdryCond::Basic::Type>(d_master_bdry_edge_conds[j])
+               << static_cast<BdryCond::Type>(d_master_bdry_edge_conds[j])
                << std::endl;
             
             os << "d_scalar_bdry_edge_conds["
                << j
                << "] = "
-               << static_cast<BdryCond::Basic::Type>(d_scalar_bdry_edge_conds[j])
+               << static_cast<BdryCond::Type>(d_scalar_bdry_edge_conds[j])
                << std::endl;
             
             os << "d_vector_bdry_edge_conds["
                << j
                << "] = "
-               << static_cast<BdryCond::Basic::Type>(d_vector_bdry_edge_conds[j])
+               << static_cast<BdryCond::Type>(d_vector_bdry_edge_conds[j])
                << std::endl;
             
-            if (d_master_bdry_edge_conds[j] == BdryCond::Basic::DIRICHLET)
+            if (d_master_bdry_edge_conds[j] == BdryCond::DIRICHLET)
             {
                 for (int vi = 0; vi < static_cast<int>(conservative_var.size()); vi++)
                 {
@@ -310,17 +310,17 @@ EulerBoundaryConditions::printClassData(std::ostream& os) const
             os << "d_master_bdry_node_conds["
                << j
                << "] = "
-               << static_cast<BdryCond::Basic::Type>(d_master_bdry_node_conds[j])
+               << static_cast<BdryCond::Type>(d_master_bdry_node_conds[j])
                << std::endl;
             os << "d_scalar_bdry_node_conds["
                << j
                << "] = "
-               << static_cast<BdryCond::Basic::Type>(d_scalar_bdry_node_conds[j])
+               << static_cast<BdryCond::Type>(d_scalar_bdry_node_conds[j])
                << std::endl;
             os << "d_vector_bdry_node_conds["
                << j
                << "] = "
-               << static_cast<BdryCond::Basic::Type>(d_vector_bdry_node_conds[j])
+               << static_cast<BdryCond::Type>(d_vector_bdry_node_conds[j])
                << std::endl;
             os << "d_node_bdry_face["
                << j
@@ -336,17 +336,17 @@ EulerBoundaryConditions::printClassData(std::ostream& os) const
             os << "d_master_bdry_edge_conds["
                << j
                << "] = "
-               << static_cast<BdryCond::Basic::Type>(d_master_bdry_edge_conds[j])
+               << static_cast<BdryCond::Type>(d_master_bdry_edge_conds[j])
                << std::endl;
             os << "d_scalar_bdry_edge_conds["
                << j
                << "] = "
-               << static_cast<BdryCond::Basic::Type>(d_scalar_bdry_edge_conds[j])
+               << static_cast<BdryCond::Type>(d_scalar_bdry_edge_conds[j])
                << std::endl;
             os << "d_vector_bdry_edge_conds["
                << j
                << "] = "
-               << static_cast<BdryCond::Basic::Type>(d_vector_bdry_edge_conds[j])
+               << static_cast<BdryCond::Type>(d_vector_bdry_edge_conds[j])
                << std::endl;
             os << "d_edge_bdry_face["
                << j
@@ -363,20 +363,20 @@ EulerBoundaryConditions::printClassData(std::ostream& os) const
             os << "d_master_bdry_face_conds["
                << j
                << "] = "
-               << static_cast<BdryCond::Basic::Type>(d_master_bdry_face_conds[j])
+               << static_cast<BdryCond::Type>(d_master_bdry_face_conds[j])
                << std::endl;
             os << "d_scalar_bdry_face_conds["
                << j
                << "] = "
-               << static_cast<BdryCond::Basic::Type>(d_scalar_bdry_face_conds[j])
+               << static_cast<BdryCond::Type>(d_scalar_bdry_face_conds[j])
                << std::endl;
             os << "d_vector_bdry_face_conds["
                << j
                << "] = "
-               << static_cast<BdryCond::Basic::Type>(d_vector_bdry_face_conds[j])
+               << static_cast<BdryCond::Type>(d_vector_bdry_face_conds[j])
                << std::endl;
             
-            if (d_master_bdry_face_conds[j] == BdryCond::Basic::DIRICHLET)
+            if (d_master_bdry_face_conds[j] == BdryCond::DIRICHLET)
             {
                 for (int vi = 0; vi < static_cast<int>(conservative_var.size()); vi++)
                 {
@@ -587,7 +587,6 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
         {
             if (conservative_var_types[vi] == "SCALAR")
             {
-                /*
                 appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
@@ -595,19 +594,9 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     ghost_width_to_fill,
                     d_scalar_bdry_edge_conds,
                     d_bdry_edge_conservative_var[vi]);
-                */
-                
-                CartesianBoundaryUtilities2::fillEdgeBoundaryData(
-                    conservative_var_names[vi],
-                    conservative_var_data[vi],
-                    patch,
-                    d_scalar_bdry_edge_conds,
-                    d_bdry_edge_conservative_var[vi],
-                    ghost_width_to_fill);
             }
             else if (conservative_var_types[vi] == "VECTOR")
             {
-                /*
                 appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
@@ -615,15 +604,6 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     ghost_width_to_fill,
                     d_vector_bdry_edge_conds,
                     d_bdry_edge_conservative_var[vi]);
-                */
-                
-                CartesianBoundaryUtilities2::fillEdgeBoundaryData(
-                    conservative_var_names[vi],
-                    conservative_var_data[vi],
-                    patch,
-                    d_vector_bdry_edge_conds,
-                    d_bdry_edge_conservative_var[vi],
-                    ghost_width_to_fill);
             }
         }
         
@@ -635,7 +615,6 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
         {
             if (conservative_var_types[vi] == "SCALAR")
             {
-                /*
                 appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
@@ -643,19 +622,9 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     ghost_width_to_fill,
                     d_scalar_bdry_node_conds,
                     d_bdry_edge_conservative_var[vi]);
-                */
-                
-                CartesianBoundaryUtilities2::fillNodeBoundaryData(
-                    conservative_var_names[vi],
-                    conservative_var_data[vi],
-                    patch,
-                    d_scalar_bdry_node_conds,
-                    d_bdry_edge_conservative_var[vi],
-                    ghost_width_to_fill);
             }
             else if (conservative_var_types[vi] == "VECTOR")
             {
-                /*
                 appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
@@ -663,15 +632,6 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     ghost_width_to_fill,
                     d_vector_bdry_node_conds,
                     d_bdry_edge_conservative_var[vi]);
-                */
-                
-                CartesianBoundaryUtilities2::fillNodeBoundaryData(
-                    conservative_var_names[vi],
-                    conservative_var_data[vi],
-                    patch,
-                    d_vector_bdry_node_conds,
-                    d_bdry_edge_conservative_var[vi],
-                    ghost_width_to_fill);
             }
         }
     }
@@ -685,7 +645,6 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
         {
             if (conservative_var_types[vi] == "SCALAR")
             {
-                /*
                 appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
@@ -693,19 +652,9 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     ghost_width_to_fill,
                     d_scalar_bdry_face_conds,
                     d_bdry_face_conservative_var[vi]);
-                */
-                
-                CartesianBoundaryUtilities3::fillFaceBoundaryData(
-                    conservative_var_names[vi],
-                    conservative_var_data[vi],
-                    patch,
-                    d_scalar_bdry_face_conds,
-                    d_bdry_face_conservative_var[vi],
-                    ghost_width_to_fill);
             }
             else if (conservative_var_types[vi] == "VECTOR")
             {
-                /*
                 appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
@@ -713,15 +662,6 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     ghost_width_to_fill,
                     d_vector_bdry_face_conds,
                     d_bdry_face_conservative_var[vi]);
-                */
-                
-                CartesianBoundaryUtilities3::fillFaceBoundaryData(
-                    conservative_var_names[vi],
-                    conservative_var_data[vi],
-                    patch,
-                    d_vector_bdry_face_conds,
-                    d_bdry_face_conservative_var[vi],
-                    ghost_width_to_fill);
             }
         }
         
@@ -733,7 +673,6 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
         {
             if (conservative_var_types[vi] == "SCALAR")
             {
-                /*
                 appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
@@ -741,19 +680,9 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     ghost_width_to_fill,
                     d_scalar_bdry_edge_conds,
                     d_bdry_face_conservative_var[vi]);
-                */
-                
-                CartesianBoundaryUtilities3::fillEdgeBoundaryData(
-                    conservative_var_names[vi],
-                    conservative_var_data[vi],
-                    patch,
-                    d_scalar_bdry_edge_conds,
-                    d_bdry_face_conservative_var[vi],
-                    ghost_width_to_fill);
             }
             else if (conservative_var_types[vi] == "VECTOR")
             {
-                /*
                 appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
@@ -761,15 +690,6 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     ghost_width_to_fill,
                     d_vector_bdry_edge_conds,
                     d_bdry_face_conservative_var[vi]);
-                */
-                
-                CartesianBoundaryUtilities3::fillEdgeBoundaryData(
-                    conservative_var_names[vi],
-                    conservative_var_data[vi],
-                    patch,
-                    d_vector_bdry_edge_conds,
-                    d_bdry_face_conservative_var[vi],
-                    ghost_width_to_fill);
             }
         }
         
@@ -781,7 +701,6 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
         {
             if (conservative_var_types[vi] == "SCALAR")
             {
-                /*
                 appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
@@ -789,19 +708,9 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     ghost_width_to_fill,
                     d_scalar_bdry_node_conds,
                     d_bdry_face_conservative_var[vi]);
-                */
-                
-                CartesianBoundaryUtilities3::fillNodeBoundaryData(
-                    conservative_var_names[vi],
-                    conservative_var_data[vi],
-                    patch,
-                    d_scalar_bdry_node_conds,
-                    d_bdry_face_conservative_var[vi],
-                    ghost_width_to_fill);
             }
             else if (conservative_var_types[vi] == "VECTOR")
             {
-                /*
                 appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
@@ -809,15 +718,6 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     ghost_width_to_fill,
                     d_vector_bdry_node_conds,
                     d_bdry_face_conservative_var[vi]);
-                */
-                
-                CartesianBoundaryUtilities3::fillNodeBoundaryData(
-                    conservative_var_names[vi],
-                    conservative_var_data[vi],
-                    patch,
-                    d_vector_bdry_node_conds,
-                    d_bdry_face_conservative_var[vi],
-                    ghost_width_to_fill);
             }
         }
     }
