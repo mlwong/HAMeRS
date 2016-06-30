@@ -645,7 +645,6 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     d_bdry_edge_conservative_var[vi]);
                 */
                 
-                /*
                 CartesianBoundaryUtilities2::fillNodeBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
@@ -653,7 +652,6 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     d_scalar_bdry_node_conds,
                     d_bdry_edge_conservative_var[vi],
                     ghost_width_to_fill);
-                */
             }
             else if (conservative_var_types[vi] == "VECTOR")
             {
@@ -667,7 +665,6 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     d_bdry_edge_conservative_var[vi]);
                 */
                 
-                /*
                 CartesianBoundaryUtilities2::fillNodeBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
@@ -675,7 +672,6 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     d_vector_bdry_node_conds,
                     d_bdry_edge_conservative_var[vi],
                     ghost_width_to_fill);
-                */
             }
         }
     }
