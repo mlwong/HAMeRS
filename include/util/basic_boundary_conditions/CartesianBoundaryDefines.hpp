@@ -11,6 +11,7 @@
 #ifndef CARTESIAN_BOUNDARY_CONDITIONS_HPP
 #define CARTESIAN_BOUNDARY_CONDITIONS_HPP
 
+#include <iostream>
 #include <map>
 
 /*

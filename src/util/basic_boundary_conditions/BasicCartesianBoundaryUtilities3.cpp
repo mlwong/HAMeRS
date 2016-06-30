@@ -2827,6 +2827,6 @@ BasicCartesianBoundaryUtilities3::read3dBdryNodes(
                     << " data found for face "
                     << proper_face << std::endl);
             }
-       } // for (int s = 0 ...
+        } // for (int s = 0 ...
     } // if (num_per_dirs < 1)
 }

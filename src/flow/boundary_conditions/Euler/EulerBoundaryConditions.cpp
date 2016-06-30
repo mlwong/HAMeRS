@@ -587,16 +587,6 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
         {
             if (conservative_var_types[vi] == "SCALAR")
             {
-                /*
-                appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
-                    conservative_var_names[vi],
-                    conservative_var_data[vi],
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_edge_conds,
-                    d_bdry_edge_conservative_var[vi]);
-                */
-                
                 BasicCartesianBoundaryUtilities2::fillEdgeBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
@@ -607,16 +597,6 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
             }
             else if (conservative_var_types[vi] == "VECTOR")
             {
-                /*
-                appu::CartesianBoundaryUtilities2::fillEdgeBoundaryData(
-                    conservative_var_names[vi],
-                    conservative_var_data[vi],
-                    patch,
-                    ghost_width_to_fill,
-                    d_vector_bdry_edge_conds,
-                    d_bdry_edge_conservative_var[vi]);
-                */
-                
                 BasicCartesianBoundaryUtilities2::fillEdgeBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
@@ -635,16 +615,6 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
         {
             if (conservative_var_types[vi] == "SCALAR")
             {
-                /*
-                appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
-                    conservative_var_names[vi],
-                    conservative_var_data[vi],
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_node_conds,
-                    d_bdry_edge_conservative_var[vi]);
-                */
-                
                 BasicCartesianBoundaryUtilities2::fillNodeBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
@@ -655,16 +625,6 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
             }
             else if (conservative_var_types[vi] == "VECTOR")
             {
-                /*
-                appu::CartesianBoundaryUtilities2::fillNodeBoundaryData(
-                    conservative_var_names[vi],
-                    conservative_var_data[vi],
-                    patch,
-                    ghost_width_to_fill,
-                    d_vector_bdry_node_conds,
-                    d_bdry_edge_conservative_var[vi]);
-                */
-                
                 BasicCartesianBoundaryUtilities2::fillNodeBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
@@ -685,16 +645,6 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
         {
             if (conservative_var_types[vi] == "SCALAR")
             {
-                /*
-                appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
-                    conservative_var_names[vi],
-                    conservative_var_data[vi],
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_face_conds,
-                    d_bdry_face_conservative_var[vi]);
-                */
-                
                 BasicCartesianBoundaryUtilities3::fillFaceBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
@@ -705,16 +655,6 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
             }
             else if (conservative_var_types[vi] == "VECTOR")
             {
-                /*
-                appu::CartesianBoundaryUtilities3::fillFaceBoundaryData(
-                    conservative_var_names[vi],
-                    conservative_var_data[vi],
-                    patch,
-                    ghost_width_to_fill,
-                    d_vector_bdry_face_conds,
-                    d_bdry_face_conservative_var[vi]);
-                */
-                
                 BasicCartesianBoundaryUtilities3::fillFaceBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
@@ -733,16 +673,6 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
         {
             if (conservative_var_types[vi] == "SCALAR")
             {
-                /*
-                appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
-                    conservative_var_names[vi],
-                    conservative_var_data[vi],
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_edge_conds,
-                    d_bdry_face_conservative_var[vi]);
-                */
-                
                 BasicCartesianBoundaryUtilities3::fillEdgeBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
@@ -753,16 +683,6 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
             }
             else if (conservative_var_types[vi] == "VECTOR")
             {
-                /*
-                appu::CartesianBoundaryUtilities3::fillEdgeBoundaryData(
-                    conservative_var_names[vi],
-                    conservative_var_data[vi],
-                    patch,
-                    ghost_width_to_fill,
-                    d_vector_bdry_edge_conds,
-                    d_bdry_face_conservative_var[vi]);
-                */
-                
                 BasicCartesianBoundaryUtilities3::fillEdgeBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
@@ -781,16 +701,6 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
         {
             if (conservative_var_types[vi] == "SCALAR")
             {
-                /*
-                appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
-                    conservative_var_names[vi],
-                    conservative_var_data[vi],
-                    patch,
-                    ghost_width_to_fill,
-                    d_scalar_bdry_node_conds,
-                    d_bdry_face_conservative_var[vi]);
-                */
-                
                 BasicCartesianBoundaryUtilities3::fillNodeBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
@@ -801,16 +711,6 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
             }
             else if (conservative_var_types[vi] == "VECTOR")
             {
-                /*
-                appu::CartesianBoundaryUtilities3::fillNodeBoundaryData(
-                    conservative_var_names[vi],
-                    conservative_var_data[vi],
-                    patch,
-                    ghost_width_to_fill,
-                    d_vector_bdry_node_conds,
-                    d_bdry_face_conservative_var[vi]);
-                */
-                
                 BasicCartesianBoundaryUtilities3::fillNodeBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
