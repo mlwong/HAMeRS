@@ -30,7 +30,7 @@
 using namespace SAMRAI;
 
 /*!
- * @brief Class CartesianBoundaryUtilities3 is a utility class that
+ * @brief Class BasicCartesianBoundaryUtilities3 is a utility class that
  * simplifies the implementation of simple physical boundary data in
  * 3 spatial dimensions.  It contains routines for reading boundary data
  * information from input files, applying those boundary conditions,
@@ -112,7 +112,7 @@ using namespace SAMRAI;
  * @see appu::BoundaryUtilityStrategy3
  */
 
-struct CartesianBoundaryUtilities3
+struct BasicCartesianBoundaryUtilities3
 {
     public:
         /*!

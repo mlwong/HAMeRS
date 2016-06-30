@@ -2,8 +2,8 @@
 # a list of the source files for the basic_boundary_conditions library
 set(basic_boundary_conditions_source_files
     BoundaryUtilityStrategy.cpp
-    CartesianBoundaryUtilities2.cpp
-    CartesianBoundaryUtilities3.cpp
+    BasicCartesianBoundaryUtilities2.cpp
+    BasicCartesianBoundaryUtilities3.cpp
 )
 
 # Create a library called basic_boundary_conditions which includes the 

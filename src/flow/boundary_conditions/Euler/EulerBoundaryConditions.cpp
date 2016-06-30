@@ -4,8 +4,8 @@
 #define BOGUS_BDRY_DATA (-9999)
 
 // routines for managing boundary data
-#include "util/basic_boundary_conditions/CartesianBoundaryUtilities2.hpp"
-#include "util/basic_boundary_conditions/CartesianBoundaryUtilities3.hpp"
+#include "util/basic_boundary_conditions/BasicCartesianBoundaryUtilities2.hpp"
+#include "util/basic_boundary_conditions/BasicCartesianBoundaryUtilities3.hpp"
 
 EulerBoundaryConditions::EulerBoundaryConditions(
     const std::string& object_name,
@@ -85,7 +85,7 @@ EulerBoundaryConditions::EulerBoundaryConditions(
             }
             if (d_dim == tbox::Dimension(2))
             {
-                CartesianBoundaryUtilities2::getFromInput(
+                BasicCartesianBoundaryUtilities2::getFromInput(
                     this,
                     boundary_conditions_db,
                     d_master_bdry_edge_conds,
@@ -94,7 +94,7 @@ EulerBoundaryConditions::EulerBoundaryConditions(
             }
             else if (d_dim == tbox::Dimension(3))
             {
-                CartesianBoundaryUtilities3::getFromInput(
+                BasicCartesianBoundaryUtilities3::getFromInput(
                     this,
                     boundary_conditions_db,
                     d_master_bdry_face_conds,
@@ -142,7 +142,7 @@ EulerBoundaryConditions::EulerBoundaryConditions(
             if (d_master_bdry_node_conds[i] != BOGUS_BDRY_DATA)
             {
                 d_node_bdry_edge[i] =
-                    CartesianBoundaryUtilities2::getEdgeLocationForNodeBdry(
+                    BasicCartesianBoundaryUtilities2::getEdgeLocationForNodeBdry(
                         i, d_master_bdry_node_conds[i]);
             }
         }
@@ -181,7 +181,7 @@ EulerBoundaryConditions::EulerBoundaryConditions(
             if (d_master_bdry_edge_conds[i] != BOGUS_BDRY_DATA)
             {
                 d_edge_bdry_face[i] =
-                    CartesianBoundaryUtilities3::getFaceLocationForEdgeBdry(
+                    BasicCartesianBoundaryUtilities3::getFaceLocationForEdgeBdry(
                         i, d_master_bdry_edge_conds[i]);
             }
         }
@@ -207,7 +207,7 @@ EulerBoundaryConditions::EulerBoundaryConditions(
             if (d_master_bdry_node_conds[i] != BOGUS_BDRY_DATA)
             {
                 d_node_bdry_face[i] =
-                    CartesianBoundaryUtilities3::getFaceLocationForNodeBdry(
+                    BasicCartesianBoundaryUtilities3::getFaceLocationForNodeBdry(
                         i, d_master_bdry_node_conds[i]);
             }
         }
@@ -597,7 +597,7 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     d_bdry_edge_conservative_var[vi]);
                 */
                 
-                CartesianBoundaryUtilities2::fillEdgeBoundaryData(
+                BasicCartesianBoundaryUtilities2::fillEdgeBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
                     patch,
@@ -617,7 +617,7 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     d_bdry_edge_conservative_var[vi]);
                 */
                 
-                CartesianBoundaryUtilities2::fillEdgeBoundaryData(
+                BasicCartesianBoundaryUtilities2::fillEdgeBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
                     patch,
@@ -645,7 +645,7 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     d_bdry_edge_conservative_var[vi]);
                 */
                 
-                CartesianBoundaryUtilities2::fillNodeBoundaryData(
+                BasicCartesianBoundaryUtilities2::fillNodeBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
                     patch,
@@ -665,7 +665,7 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     d_bdry_edge_conservative_var[vi]);
                 */
                 
-                CartesianBoundaryUtilities2::fillNodeBoundaryData(
+                BasicCartesianBoundaryUtilities2::fillNodeBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
                     patch,
@@ -695,7 +695,7 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     d_bdry_face_conservative_var[vi]);
                 */
                 
-                CartesianBoundaryUtilities3::fillFaceBoundaryData(
+                BasicCartesianBoundaryUtilities3::fillFaceBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
                     patch,
@@ -715,7 +715,7 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     d_bdry_face_conservative_var[vi]);
                 */
                 
-                CartesianBoundaryUtilities3::fillFaceBoundaryData(
+                BasicCartesianBoundaryUtilities3::fillFaceBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
                     patch,
@@ -743,7 +743,7 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     d_bdry_face_conservative_var[vi]);
                 */
                 
-                CartesianBoundaryUtilities3::fillEdgeBoundaryData(
+                BasicCartesianBoundaryUtilities3::fillEdgeBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
                     patch,
@@ -763,7 +763,7 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     d_bdry_face_conservative_var[vi]);
                 */
                 
-                CartesianBoundaryUtilities3::fillEdgeBoundaryData(
+                BasicCartesianBoundaryUtilities3::fillEdgeBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
                     patch,
@@ -791,7 +791,7 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     d_bdry_face_conservative_var[vi]);
                 */
                 
-                CartesianBoundaryUtilities3::fillNodeBoundaryData(
+                BasicCartesianBoundaryUtilities3::fillNodeBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
                     patch,
@@ -811,7 +811,7 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
                     d_bdry_face_conservative_var[vi]);
                 */
                 
-                CartesianBoundaryUtilities3::fillNodeBoundaryData(
+                BasicCartesianBoundaryUtilities3::fillNodeBoundaryData(
                     conservative_var_names[vi],
                     conservative_var_data[vi],
                     patch,

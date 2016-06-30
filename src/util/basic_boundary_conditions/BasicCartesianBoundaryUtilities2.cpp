@@ -9,24 +9,16 @@
  *
  ************************************************************************/
 
-#include "util/basic_boundary_conditions/CartesianBoundaryUtilities2.hpp"
+#include "util/basic_boundary_conditions/BasicCartesianBoundaryUtilities2.hpp"
 
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 #include "SAMRAI/hier/BoundaryBox.h"
 #include "SAMRAI/pdat/CellIndex.h"
 #include "SAMRAI/tbox/Utilities.h"
+#include "SAMRAI/tbox/MathUtilities.h"
 
+#include "util/basic_boundary_conditions/BasicBoundaryConditions.hpp"
 #include "util/basic_boundary_conditions/CartesianBoundaryDefines.hpp"
-
-/*
- *************************************************************************
- *
- * External declarations for FORTRAN 77 routines used in
- * boundary condition implementation.
- *
- *************************************************************************
- */
-
 
 /*
  * This function reads 2D boundary data from given input database.
@@ -56,7 +48,7 @@
  *                       GridGeometry2::getPeriodicShift())
  */
 void
-CartesianBoundaryUtilities2::getFromInput(
+BasicCartesianBoundaryUtilities2::getFromInput(
     BoundaryUtilityStrategy* bdry_strategy,
     const boost::shared_ptr<tbox::Database>& input_db,
     std::vector<int>& edge_conds,
@@ -103,7 +95,7 @@ CartesianBoundaryUtilities2::getFromInput(
  *    ghost_width_to_fill .. width of ghost region to fill
  */
 void
-CartesianBoundaryUtilities2::fillEdgeBoundaryData(
+BasicCartesianBoundaryUtilities2::fillEdgeBoundaryData(
     const std::string& var_name,
     const boost::shared_ptr<pdat::CellData<double> >& var_data,
     const hier::Patch& patch,
@@ -333,7 +325,7 @@ CartesianBoundaryUtilities2::fillEdgeBoundaryData(
         }
         else
         {
-            TBOX_ERROR("CartesianBoundaryUtilities2: fillEdgeBoundaryData2D()\n"
+            TBOX_ERROR("BasicCartesianBoundaryUtilities2::fillEdgeBoundaryData2D()\n"
                 << "Invalid edge boundary condition!\n"
                 << "edge_loc = " << edge_loc << std::endl
                 << "bdry_edge_conds[edge_loc] = " << bdry_edge_conds[edge_loc]
@@ -356,7 +348,7 @@ CartesianBoundaryUtilities2::fillEdgeBoundaryData(
  *    ghost_width_to_fill .. width of ghost region to fill
  */
 void
-CartesianBoundaryUtilities2::fillNodeBoundaryData(
+BasicCartesianBoundaryUtilities2::fillNodeBoundaryData(
     const std::string& var_name,
     const boost::shared_ptr<pdat::CellData<double> >& var_data,
     const hier::Patch& patch,
@@ -695,7 +687,7 @@ CartesianBoundaryUtilities2::fillNodeBoundaryData(
         }
         else
         {
-            TBOX_ERROR("CartesianBoundaryUtilities2: fillNodeBoundaryData2D()\n"
+            TBOX_ERROR("BasicCartesianBoundaryUtilities2::fillNodeBoundaryData2D()\n"
                 << "Invalid node boundary condition!\n"
                 << "node_loc = " << node_loc << std::endl
                 << "bdry_node_conds[node_loc] = " << bdry_node_conds[node_loc]
@@ -715,7 +707,7 @@ CartesianBoundaryUtilities2::fillNodeBoundaryData(
  * an error results.
  */
 int
-CartesianBoundaryUtilities2::getEdgeLocationForNodeBdry(
+BasicCartesianBoundaryUtilities2::getEdgeLocationForNodeBdry(
     int node_loc,
     int node_btype)
 {
@@ -762,7 +754,7 @@ CartesianBoundaryUtilities2::getEdgeLocationForNodeBdry(
             TBOX_ERROR("Unknown node boundary condition type = "
                 << node_btype
                 << " passed to \n"
-                << "CartesianBoundaryUtilities2::getEdgeLocationForNodeBdry"
+                << "BasicCartesianBoundaryUtilities2::getEdgeLocationForNodeBdry()"
                 << std::endl);
         }
     }
@@ -772,7 +764,7 @@ CartesianBoundaryUtilities2::getEdgeLocationForNodeBdry(
         TBOX_ERROR("Node boundary condition type = "
             << node_btype << " and node location = " << node_loc
             << "\n passed to "
-            << "CartesianBoundaryUtilities2::getEdgeLocationForNodeBdry"
+            << "BasicCartesianBoundaryUtilities2::getEdgeLocationForNodeBdry()"
             << " are inconsistant." << std::endl);
     }
     
@@ -784,7 +776,7 @@ CartesianBoundaryUtilities2::getEdgeLocationForNodeBdry(
  * Private function to read 2D edge boundary data from input database.
  */
 void
-CartesianBoundaryUtilities2::read2dBdryEdges(
+BasicCartesianBoundaryUtilities2::read2dBdryEdges(
     BoundaryUtilityStrategy* bdry_strategy,
     const boost::shared_ptr<tbox::Database>& input_db,
     std::vector<int>& edge_conds,
@@ -896,7 +888,7 @@ CartesianBoundaryUtilities2::read2dBdryEdges(
  * Private function to read 2D node boundary data from input database.
  */
 void
-CartesianBoundaryUtilities2::read2dBdryNodes(
+BasicCartesianBoundaryUtilities2::read2dBdryNodes(
     const boost::shared_ptr<tbox::Database>& input_db,
     const std::vector<int>& edge_conds,
     std::vector<int>& node_conds,

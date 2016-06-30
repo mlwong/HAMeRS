@@ -3,6 +3,7 @@
 
 #include "SAMRAI/SAMRAI_config.h"
 
+#include "util/basic_boundary_conditions/BasicBoundaryConditions.hpp"
 #include "util/basic_boundary_conditions/BoundaryUtilityStrategy.hpp"
 #include "util/basic_boundary_conditions/CartesianBoundaryDefines.hpp"
 

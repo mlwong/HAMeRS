@@ -9,7 +9,7 @@
  *
  ************************************************************************/
 
-#include "util/basic_boundary_conditions/CartesianBoundaryUtilities3.hpp"
+#include "util/basic_boundary_conditions/BasicCartesianBoundaryUtilities3.hpp"
 
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 #include "SAMRAI/hier/BoundaryBox.h"
@@ -17,6 +17,7 @@
 #include "SAMRAI/tbox/Utilities.h"
 #include "SAMRAI/tbox/MathUtilities.h"
 
+#include "util/basic_boundary_conditions/BasicBoundaryConditions.hpp"
 #include "util/basic_boundary_conditions/CartesianBoundaryDefines.hpp"
 
 /*
@@ -49,7 +50,7 @@
  *                       GridGeometry3::getPeriodicShift())
  */
 void
-CartesianBoundaryUtilities3::getFromInput(
+BasicCartesianBoundaryUtilities3::getFromInput(
     BoundaryUtilityStrategy* bdry_strategy,
     const boost::shared_ptr<tbox::Database>& input_db,
     std::vector<int>& face_conds,
@@ -107,7 +108,7 @@ CartesianBoundaryUtilities3::getFromInput(
  *    ghost_width_to_fill .. width of ghost region to fill
  */
 void
-CartesianBoundaryUtilities3::fillFaceBoundaryData(
+BasicCartesianBoundaryUtilities3::fillFaceBoundaryData(
     const std::string& var_name,
     const boost::shared_ptr<pdat::CellData<double> >& var_data,
     const hier::Patch& patch,
@@ -132,7 +133,7 @@ CartesianBoundaryUtilities3::fillFaceBoundaryData(
  *    ghost_width_to_fill .. width of ghost region to fill
  */
 void
-CartesianBoundaryUtilities3::fillEdgeBoundaryData(
+BasicCartesianBoundaryUtilities3::fillEdgeBoundaryData(
     const std::string& var_name,
     const boost::shared_ptr<pdat::CellData<double> >& var_data,
     const hier::Patch& patch,
@@ -157,7 +158,7 @@ CartesianBoundaryUtilities3::fillEdgeBoundaryData(
  *    ghost_width_to_fill .. width of ghost region to fill
  */
 void
-CartesianBoundaryUtilities3::fillNodeBoundaryData(
+BasicCartesianBoundaryUtilities3::fillNodeBoundaryData(
     const std::string& var_name,
     const boost::shared_ptr<pdat::CellData<double> >& var_data,
     const hier::Patch& patch,
@@ -178,7 +179,7 @@ CartesianBoundaryUtilities3::fillNodeBoundaryData(
  * an error results.
  */
 int
-CartesianBoundaryUtilities3::getFaceLocationForEdgeBdry(
+BasicCartesianBoundaryUtilities3::getFaceLocationForEdgeBdry(
     int edge_loc,
     int edge_btype)
 {
@@ -257,7 +258,7 @@ CartesianBoundaryUtilities3::getFaceLocationForEdgeBdry(
             TBOX_ERROR(
                 "Unknown edge boundary condition type = "
                 << edge_btype << " passed to \n"
-                << "CartesianBoundaryUtilities3::getFaceLocationForEdgeBdry"
+                << "BasicCartesianBoundaryUtilities3::getFaceLocationForEdgeBdry()"
                 << std::endl);
         }
     }
@@ -268,7 +269,7 @@ CartesianBoundaryUtilities3::getFaceLocationForEdgeBdry(
             "Edge boundary condition type = "
             << edge_btype << " and edge location = " << edge_loc
             << "\n passed to "
-            << "CartesianBoundaryUtilities3::getFaceLocationForEdgeBdry"
+            << "BasicCartesianBoundaryUtilities3::getFaceLocationForEdgeBdry()"
             << " are inconsistant." << std::endl);
     }
     
@@ -286,7 +287,7 @@ CartesianBoundaryUtilities3::getFaceLocationForEdgeBdry(
  * an error results.
  */
 int
-CartesianBoundaryUtilities3::getFaceLocationForNodeBdry(
+BasicCartesianBoundaryUtilities3::getFaceLocationForNodeBdry(
     int node_loc,
     int node_btype)
 {
@@ -356,7 +357,7 @@ CartesianBoundaryUtilities3::getFaceLocationForNodeBdry(
             TBOX_ERROR(
                 "Unknown node boundary condition type = "
                 << node_btype << " passed to \n"
-                << "CartesianBoundaryUtilities3::getFaceLocationForNodeBdry"
+                << "BasicCartesianBoundaryUtilities3::getFaceLocationForNodeBdry()"
                 << std::endl);
         }
     }
@@ -367,7 +368,7 @@ CartesianBoundaryUtilities3::getFaceLocationForNodeBdry(
             "Node boundary condition type = "
             << node_btype << " and node location = " << node_loc
             << "\n passed to "
-            << "CartesianBoundaryUtilities3::getFaceLocationForNodeBdry"
+            << "BasicCartesianBoundaryUtilities3::getFaceLocationForNodeBdry()"
             << " are inconsistant." << std::endl);
     }
     
@@ -379,7 +380,7 @@ CartesianBoundaryUtilities3::getFaceLocationForNodeBdry(
  * Private function to read 3D face boundary data from input database.
  */
 void
-CartesianBoundaryUtilities3::read3dBdryFaces(
+BasicCartesianBoundaryUtilities3::read3dBdryFaces(
     BoundaryUtilityStrategy* bdry_strategy,
     const boost::shared_ptr<tbox::Database>& input_db,
     std::vector<int>& face_conds,
@@ -506,7 +507,7 @@ CartesianBoundaryUtilities3::read3dBdryFaces(
  * Private function to read 3D edge boundary data from input database.
  */
 void
-CartesianBoundaryUtilities3::read3dBdryEdges(
+BasicCartesianBoundaryUtilities3::read3dBdryEdges(
     const boost::shared_ptr<tbox::Database>& input_db,
     const std::vector<int>& face_conds,
     std::vector<int>& edge_conds,
@@ -1015,7 +1016,7 @@ CartesianBoundaryUtilities3::read3dBdryEdges(
  * Private function to read 3D node boundary data from input database.
  */
 void
-CartesianBoundaryUtilities3::read3dBdryNodes(
+BasicCartesianBoundaryUtilities3::read3dBdryNodes(
     const boost::shared_ptr<tbox::Database>& input_db,
     const std::vector<int>& face_conds,
     std::vector<int>& node_conds,

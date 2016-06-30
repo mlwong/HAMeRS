@@ -9,8 +9,8 @@
  *
  ************************************************************************/
 
-#ifndef CARTESIAN_BOUNDARY_UTILITIES2_HPP
-#define CARTESIAN_BOUNDARY_UTILITIES2_HPP
+#ifndef BASIC_CARTESIAN_BOUNDARY_UTILITIES2_HPP
+#define BASIC_CARTESIAN_BOUNDARY_UTILITIES2_HPP
 
 #include "SAMRAI/SAMRAI_config.h"
 
@@ -45,7 +45,7 @@ using namespace SAMRAI;
 
 
 /*!
- * @brief Class CartesianBoundaryUtilities2 is a utility class that
+ * @brief Class BasicCartesianBoundaryUtilities2 is a utility class that
  * simplifies the implementation of simple physical boundary data in
  * 2 spatial dimensions.  It contains routines for reading boundary data
  * information from input files, applying those boundary conditions,
@@ -106,7 +106,7 @@ using namespace SAMRAI;
  * @see BoundaryUtilityStrategy2
  */
 
-struct CartesianBoundaryUtilities2
+struct BasicCartesianBoundaryUtilities2
 {
     public:
         /*!
@@ -267,4 +267,4 @@ private:
         
 };
 
-#endif /* CARTESIAN_BOUNDARY_UTILITIES2_HPP */
+#endif /* BASIC_CARTESIAN_BOUNDARY_UTILITIES2_HPP */
