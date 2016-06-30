@@ -1,3 +1,16 @@
+/*************************************************************************
+ *
+ * This file is modified from HyperbolicLevelIntegrator.c of the SAMRAI
+ * distribution. For full copyright information, see COPYRIGHT and
+ * COPYING.LESSER of SAMRAI distribution.
+ *
+ * Copyright:     (c) 1997-2014 Lawrence Livermore National Security, LLC
+ * Description:   Runge-Kutta integration routines for single level in AMR
+ *                hierarchy
+ *                (basic hyperbolic systems)
+ *
+ ************************************************************************/
+
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
 
 #include "SAMRAI/pdat/CellData.h"
@@ -1594,114 +1607,6 @@ RungeKuttaLevelIntegrator::advanceLevel(
     
     t_patch_num_kernel->stop();
     
-    /*
-    for (hier::PatchLevel::iterator ip(level->begin());
-         ip != level->end();
-         ip++)
-    {
-        const boost::shared_ptr<hier::Patch>& patch = *ip;
-        
-        patch->allocatePatchData(d_temp_var_scratch_data, current_time);
-        
-        t_patch_num_kernel->start();
-        
-        // Fill all hyperbolic fluxes with zero values.
-        
-        std::list<boost::shared_ptr<hier::Variable> >::iterator hyp_flux_var =
-            d_hyp_flux_variables.begin();
-        
-        while (hyp_flux_var != d_hyp_flux_variables.end())
-        {            
-            if (d_hyp_flux_is_face)
-            {
-                boost::shared_ptr<pdat::FaceData<double> > flux_data(
-                    BOOST_CAST<pdat::FaceData<double>, hier::PatchData>(
-                        patch->getPatchData(*hyp_flux_var, d_scratch)));
-                
-                TBOX_ASSERT(flux_data);
-                flux_data->fillAll(0.0);
-            }
-            else
-            {
-                boost::shared_ptr<pdat::SideData<double> > flux_data(
-                    BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
-                        patch->getPatchData(*hyp_flux_var, d_scratch)));
-                
-                TBOX_ASSERT(flux_data);
-                flux_data->fillAll(0.0);
-            }
-            
-            hyp_flux_var++;
-        }
-        
-        // Fill all sources with zero values.
-        
-        std::list<boost::shared_ptr<hier::Variable> >::iterator source_var =
-            d_source_variables.begin();
-        
-        while (source_var != d_source_variables.end())
-        {
-            boost::shared_ptr<pdat::CellData<double> > source_data(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                    patch->getPatchData(*source_var, d_scratch)));
-            
-            source_data->fillAll(0.0);
-            
-            source_var++;
-        }
-        
-        const tbox::SAMRAI_MPI& mpi(level->getBoxLevel()->getMPI());
-        for (int sn = 0; sn < d_number_steps; sn++)
-        {
-            // Copy scratch data to intermediate data corresponding to current step.
-            copyTimeDependentData(level, d_scratch, d_intermediate[sn]);
-            
-            d_patch_strategy->setDataContext(d_intermediate[sn]);
-            
-            //
-            // Fill the ghost cell data for current intemediate data factory.
-            //
-            
-            boost::shared_ptr<xfer::RefineSchedule> fill_schedule_intermediate;
-            
-            fill_schedule_intermediate =
-                d_bdry_fill_intermediate[sn]->createSchedule(
-                    level,
-                    d_patch_strategy);
-            
-            mpi.Barrier(); // Redundant to add the mpi barrier?
-            
-            fill_schedule_intermediate->fillData(current_time);
-            
-            mpi.Barrier(); // Redundant to add the mpi barrier?
-            
-            // Compute flux corresponding to the previous step.
-            d_patch_strategy->computeHyperbolicFluxesAndSourcesOnPatch(
-                *patch,
-                current_time,
-                dt,
-                sn);
-            
-            d_patch_strategy->setDataContext(d_scratch);
-            
-            // Advance a single Runge-Kutta step.
-            d_patch_strategy->advanceSingleStep(
-                *patch,
-                current_time,
-                dt,
-                d_alpha[sn],
-                d_beta[sn],
-                d_gamma[sn],
-                d_intermediate);
-        }
-        
-        t_patch_num_kernel->stop();
-        
-        patch->deallocatePatchData(d_temp_var_scratch_data);
-    }
-    
-    */
-    
     d_patch_strategy->clearDataContext();
     
     level->setTime(new_time, d_saved_var_scratch_data);
@@ -1824,7 +1729,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
     }
     
     double next_dt = dt_next;
-// const tbox::SAMRAI_MPI& mpi(hierarchy->getMPI());
+    
     if (mpi.getSize() > 1)
     {
         mpi.AllReduce(&next_dt, 1, MPI_MIN);

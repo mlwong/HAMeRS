@@ -1,7 +1,8 @@
 /*************************************************************************
  *
- * This file is modified from CartesianBoundaryUtilities2.c of the SAMRAI distribution.
- * For full copyright information, see COPYRIGHT and COPYING.LESSER.
+ * This file is modified from CartesianBoundaryUtilities2.c of the SAMRAI
+ * distribution. For full copyright information, see COPYRIGHT and
+ * COPYING.LESSER of SAMRAI distribution.
  *
  * Copyright:     (c) 1997-2014 Lawrence Livermore National Security, LLC
  * Description:   Utility routines for manipulating 2D Cartesian boundary data

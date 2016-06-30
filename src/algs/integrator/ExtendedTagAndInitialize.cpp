@@ -1,3 +1,15 @@
+/*************************************************************************
+ *
+ * This file is modified from StandardTagAndInitialize.c of the SAMRAI
+ * distribution. For full copyright information, see COPYRIGHT and
+ * COPYING.LESSER of SAMRAI distribution.
+ *
+ * Copyright:     (c) 1997-2014 Lawrence Livermore National Security, LLC
+ * Description:   Routines for performing cell-tagging and initializing
+ *                a new level.
+ *
+ ************************************************************************/
+
 #include "algs/integrator/ExtendedTagAndInitialize.hpp"
 
 #include "SAMRAI/hier/Box.h"

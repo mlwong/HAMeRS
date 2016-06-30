@@ -1,3 +1,14 @@
+/*************************************************************************
+ *
+ * This file is modified from StandardTagAndInitStrategy.c of the SAMRAI
+ * distribution. For full copyright information, see COPYRIGHT and
+ * COPYING.LESSER of SAMRAI distribution.
+ *
+ * Copyright:     (c) 1997-2014 Lawrence Livermore National Security, LLC
+ * Description:   Strategy interface for error detection.
+ *
+ ************************************************************************/
+
 #include "algs/integrator/ExtendedTagAndInitStrategy.hpp"
 
 #include "SAMRAI/tbox/Utilities.h"

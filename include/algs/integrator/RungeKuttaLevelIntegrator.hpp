@@ -1,3 +1,16 @@
+/*************************************************************************
+ *
+ * This file is modified from HyperbolicLevelIntegrator.h of the SAMRAI
+ * distribution.  For full copyright information, see COPYRIGHT and
+ * COPYING.LESSER of SAMRAI distribution.
+ *
+ * Copyright:     (c) 1997-2014 Lawrence Livermore National Security, LLC
+ * Description:   Runge-Kutta integration routines for single level in AMR
+ *                hierarchy
+ *                (basic hyperbolic systems)
+ *
+ ************************************************************************/
+
 #ifndef RUNGE_KUTTA_LEVEL_INTEGRATOR_HPP
 #define RUNGE_KUTTA_LEVEL_INTEGRATOR_HPP
 

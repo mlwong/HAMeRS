@@ -1,3 +1,15 @@
+/*************************************************************************
+ *
+ * This file is modified from StandardTagAndInitialize.h of the SAMRAI
+ * distribution.  For full copyright information, see COPYRIGHT and
+ * COPYING.LESSER of SAMRAI distribution.
+ *
+ * Copyright:     (c) 1997-2014 Lawrence Livermore National Security, LLC
+ * Description:   Routines for performing cell-tagging and initializing
+ *                a new level.
+ *
+ ************************************************************************/
+
 #ifndef EXTENDED_TAG_AND_INITIALIZE_HPP
 #define EXTENDED_TAG_AND_INITIALIZE_HPP
 
