@@ -149,6 +149,12 @@ CartesianBoundaryUtilities2::fillEdgeBoundaryData(
     hier::Index interior_box_lo_idx(interior_box.lower());
     hier::Index interior_box_hi_idx(interior_box.upper());
     
+    /*
+     * Offset the indices.
+     */
+    interior_box_lo_idx = interior_box_lo_idx - interior_box.lower();
+    interior_box_hi_idx = interior_box_hi_idx - interior_box.lower();
+    
     // Get the dimensions of box that covers interior of patch plus
     // ghost cells.
     const hier::IntVector ghostcell_dims = var_data->getGhostBox().numberCells();
@@ -175,17 +181,16 @@ CartesianBoundaryUtilities2::fillEdgeBoundaryData(
 if (patch_geom->getTouchesRegularBoundary(0, 1) &&
     patch_geom->getTouchesRegularBoundary(1, 1))
 {
-    tbox::plog << "interior_box_lo_idx: " << interior_box_lo_idx << std::endl;
-    tbox::plog << "interior_box_hi_idx: " << interior_box_hi_idx << std::endl;
+    tbox::plog << "interior_box_lo_idx: " << interior_box.lower() << std::endl;
+    tbox::plog << "interior_box_hi_idx: " << interior_box.upper() << std::endl;
     tbox::plog << "fill_box_lo_idx: " << fill_box_lo_idx << std::endl;
     tbox::plog << "fill_box_hi_idx: " << fill_box_hi_idx << std::endl;
+    tbox::plog << "ghostcell_dims: " << ghostcell_dims << std::endl;
 }
         
         /*
          * Offset the indices.
          */
-        interior_box_lo_idx = interior_box_lo_idx - interior_box.lower();
-        interior_box_hi_idx = interior_box_hi_idx - interior_box.lower();
         fill_box_lo_idx = fill_box_lo_idx - interior_box.lower();
         fill_box_hi_idx = fill_box_hi_idx - interior_box.lower();
         
