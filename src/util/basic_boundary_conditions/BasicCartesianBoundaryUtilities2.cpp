@@ -101,15 +101,15 @@ BasicCartesianBoundaryUtilities2::fillEdgeBoundaryData(
     const hier::Patch& patch,
     const std::vector<int>& bdry_edge_conds,
     const std::vector<double>& bdry_edge_values,
-    const hier::IntVector& ghost_fill_width)
+    const hier::IntVector& ghost_width_to_fill)
 {
     TBOX_ASSERT(!var_name.empty());
     TBOX_ASSERT(var_data);
     TBOX_ASSERT(static_cast<int>(bdry_edge_conds.size()) == NUM_2D_EDGES);
     TBOX_ASSERT(static_cast<int>(bdry_edge_values.size()) == NUM_2D_EDGES*(var_data->getDepth()));
     
-    TBOX_DIM_ASSERT(ghost_fill_width.getDim() == tbox::Dimension(2));
-    TBOX_ASSERT_OBJDIM_EQUALITY3(*var_data, patch, ghost_fill_width);
+    TBOX_DIM_ASSERT(ghost_width_to_fill.getDim() == tbox::Dimension(2));
+    TBOX_ASSERT_OBJDIM_EQUALITY3(*var_data, patch, ghost_width_to_fill);
     
     NULL_USE(var_name);
     
@@ -126,7 +126,7 @@ BasicCartesianBoundaryUtilities2::fillEdgeBoundaryData(
     hier::IntVector gcw_to_fill(tbox::Dimension(2));
     
     // If the ghost fill width is not used, it is set to the ghost cell width of the data.
-    if (ghost_fill_width == -hier::IntVector::getOne(tbox::Dimension(2)))
+    if (ghost_width_to_fill == -hier::IntVector::getOne(tbox::Dimension(2)))
     {
         gcw_to_fill = var_data->getGhostCellWidth();
     }
@@ -134,7 +134,7 @@ BasicCartesianBoundaryUtilities2::fillEdgeBoundaryData(
     {
         gcw_to_fill = hier::IntVector::min(
             num_ghosts,
-            ghost_fill_width);
+            ghost_width_to_fill);
     }
     
     // Get the dimensions of box that covers the interior of patch.
@@ -325,7 +325,7 @@ BasicCartesianBoundaryUtilities2::fillEdgeBoundaryData(
         }
         else
         {
-            TBOX_ERROR("BasicCartesianBoundaryUtilities2::fillEdgeBoundaryData2D()\n"
+            TBOX_ERROR("BasicCartesianBoundaryUtilities2::fillEdgeBoundaryData()\n"
                 << "Invalid edge boundary condition!\n"
                 << "edge_loc = " << edge_loc << std::endl
                 << "bdry_edge_conds[edge_loc] = " << bdry_edge_conds[edge_loc]
@@ -354,15 +354,15 @@ BasicCartesianBoundaryUtilities2::fillNodeBoundaryData(
     const hier::Patch& patch,
     const std::vector<int>& bdry_node_conds,
     const std::vector<double>& bdry_edge_values,
-    const hier::IntVector& ghost_fill_width)
+    const hier::IntVector& ghost_width_to_fill)
 {
     TBOX_ASSERT(!var_name.empty());
     TBOX_ASSERT(var_data);
     TBOX_ASSERT(static_cast<int>(bdry_node_conds.size()) == NUM_2D_NODES);
     TBOX_ASSERT(static_cast<int>(bdry_edge_values.size()) == NUM_2D_EDGES*(var_data->getDepth()));
     
-    TBOX_DIM_ASSERT(ghost_fill_width.getDim() == tbox::Dimension(2));
-    TBOX_ASSERT_OBJDIM_EQUALITY3(*var_data, patch, ghost_fill_width);
+    TBOX_DIM_ASSERT(ghost_width_to_fill.getDim() == tbox::Dimension(2));
+    TBOX_ASSERT_OBJDIM_EQUALITY3(*var_data, patch, ghost_width_to_fill);
     
     NULL_USE(var_name);
     
@@ -379,7 +379,7 @@ BasicCartesianBoundaryUtilities2::fillNodeBoundaryData(
     hier::IntVector gcw_to_fill(tbox::Dimension(2));
     
     // If the ghost fill width is not used, it is set to the ghost cell width of the data.
-    if (ghost_fill_width == -hier::IntVector::getOne(tbox::Dimension(2)))
+    if (ghost_width_to_fill == -hier::IntVector::getOne(tbox::Dimension(2)))
     {
         gcw_to_fill = var_data->getGhostCellWidth();
     }
@@ -387,7 +387,7 @@ BasicCartesianBoundaryUtilities2::fillNodeBoundaryData(
     {
         gcw_to_fill = hier::IntVector::min(
             num_ghosts,
-            ghost_fill_width);
+            ghost_width_to_fill);
     }
     
     // Get the dimensions of box that covers the interior of patch.
@@ -410,14 +410,14 @@ BasicCartesianBoundaryUtilities2::fillNodeBoundaryData(
     
     const int var_depth = var_data->getDepth();
     
-    for (int ei = 0; ei < static_cast<int>(node_bdry.size()); ei++)
+    for (int ni = 0; ni < static_cast<int>(node_bdry.size()); ni++)
     {
-        TBOX_ASSERT(node_bdry[ei].getBoundaryType() == Bdry::NODE2D);
+        TBOX_ASSERT(node_bdry[ni].getBoundaryType() == Bdry::NODE2D);
         
-        int node_loc = node_bdry[ei].getLocationIndex();
+        int node_loc = node_bdry[ni].getLocationIndex();
         
         hier::Box fill_box(patch_geom->getBoundaryFillBox(
-            node_bdry[ei],
+            node_bdry[ni],
             interior_box,
             gcw_to_fill));
         
@@ -430,8 +430,8 @@ BasicCartesianBoundaryUtilities2::fillNodeBoundaryData(
         fill_box_lo_idx = fill_box_lo_idx - interior_box.lower();
         fill_box_hi_idx = fill_box_hi_idx - interior_box.lower();
         
-        int edge_loc_0 = 0;
-        int edge_loc_1 = 0;
+        int edge_loc_0 = -1;
+        int edge_loc_1 = -1;
         
         switch (node_loc)
         {
@@ -687,7 +687,7 @@ BasicCartesianBoundaryUtilities2::fillNodeBoundaryData(
         }
         else
         {
-            TBOX_ERROR("BasicCartesianBoundaryUtilities2::fillNodeBoundaryData2D()\n"
+            TBOX_ERROR("BasicCartesianBoundaryUtilities2::fillNodeBoundaryData()\n"
                 << "Invalid node boundary condition!\n"
                 << "node_loc = " << node_loc << std::endl
                 << "bdry_node_conds[node_loc] = " << bdry_node_conds[node_loc]
