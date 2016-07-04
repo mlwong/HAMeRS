@@ -2505,12 +2505,12 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
             d[2] = 5.0/16.0;
             d[3] = 0.0;
             
-            const double tau_5_tide = fabs(beta_tilde[0] - beta_tilde[2]);
+            const double tau_5_tilde = fabs(beta_tilde[0] - beta_tilde[2]);
             
             for (int r = 0; r < 4; r++)
             {
                 // Compute the weights alpha_tilde.
-                alpha_tilde[r] = d[r]*(1.0 + pow(tau_5_tide/(beta_tilde[r] + EPSILON), p));
+                alpha_tilde[r] = d[r]*(1.0 + pow(tau_5_tilde/(beta_tilde[r] + EPSILON), p));
                 
                 // Sum up the weights alpha.
                 alpha_tilde_sum += alpha_tilde[r];
