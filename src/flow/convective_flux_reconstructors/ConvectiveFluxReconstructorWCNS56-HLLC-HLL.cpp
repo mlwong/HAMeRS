@@ -83,7 +83,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
     
     boost::shared_ptr<pdat::FaceData<double> > convective_flux_midpoint(
         new pdat::FaceData<double>(interior_box, d_num_eqn, hier::IntVector::getOne(d_dim)));
-    
+
     if (d_dim == tbox::Dimension(1))
     {
         /*

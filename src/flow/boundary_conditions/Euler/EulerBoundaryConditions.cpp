@@ -721,7 +721,7 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
             }
         }
     }
-    
+
     /*
      * Set the boundary conditions for specific problems.
      */

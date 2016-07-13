@@ -1474,7 +1474,9 @@ RungeKuttaLevelIntegrator::advanceLevel(
      * (7) Copy new solution to from scratch to new storage.
      * (8) Call user-routine to post-process state data, if needed.
      */
+    
     t_patch_num_kernel->start();
+    
     d_patch_strategy->preprocessAdvanceLevelState(
         level,
         current_time,
@@ -1482,6 +1484,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
         first_step,
         last_step,
         regrid_advance);
+    
     t_patch_num_kernel->stop();
     
     d_patch_strategy->setDataContext(d_scratch);
@@ -1556,7 +1559,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
         
         boost::shared_ptr<xfer::RefineSchedule> fill_schedule_intermediate;
         
-        fill_schedule_intermediate =
+        fill_schedule_intermediate = 
             d_bdry_fill_intermediate[sn]->createSchedule(
                 level,
                 d_patch_strategy);
@@ -1594,6 +1597,8 @@ RungeKuttaLevelIntegrator::advanceLevel(
                 d_gamma[sn],
                 d_intermediate);
         }
+        
+        fill_schedule_intermediate.reset();
     }
     
     for (hier::PatchLevel::iterator ip(level->begin());
@@ -2244,6 +2249,13 @@ RungeKuttaLevelIntegrator::registerVariable(
         d_bdry_fill_advance.reset(new xfer::RefineAlgorithm());
         d_bdry_fill_advance_new.reset(new xfer::RefineAlgorithm());
         d_bdry_fill_advance_old.reset(new xfer::RefineAlgorithm());
+        
+        d_bdry_fill_intermediate.resize(d_number_steps);
+        for (int sn = 0; sn < d_number_steps; sn++)
+        {
+            d_bdry_fill_intermediate[sn].reset(new xfer::RefineAlgorithm());
+        }
+        
         d_fill_new_level.reset(new xfer::RefineAlgorithm());
         d_coarsen_hyp_fluxsum.reset(new xfer::CoarsenAlgorithm(dim));
         d_coarsen_sync_data.reset(new xfer::CoarsenAlgorithm(dim));
@@ -2331,10 +2343,8 @@ RungeKuttaLevelIntegrator::registerVariable(
              * Set boundary fill schedules for data used in the intermediate steps
              * of the Runge-Kutta integration.
              */
-            d_bdry_fill_intermediate.resize(d_number_steps);
             for (int sn = 0; sn < d_number_steps; sn++)
             {
-                d_bdry_fill_intermediate[sn].reset(new xfer::RefineAlgorithm());
                 d_bdry_fill_intermediate[sn]->registerRefine(
                     intermediate_id[sn],
                     scr_id,

@@ -756,6 +756,342 @@ InitialConditions::initializeDataOnPatch(
                             }
                         }
                     }
+                    else if (d_project_name == "2D Poggi Richtmyer-Meshkov instability problem")
+                    {
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Please provide only two-species for the problem"
+                                << " '2D Poggi Richtmyer-Meshkov instability problem'."
+                                << std::endl);
+                        }
+                        
+                        // Compute the characteristic length of the initial interface thickness.
+                        const double epsilon_i = 0.015; // epsilon_i for smoothing interface
+                        
+                        double* rho_Y_1   = partial_density->getPointer(0);
+                        double* rho_Y_2   = partial_density->getPointer(1);
+                        double* rho_u     = momentum->getPointer(0);
+                        double* rho_v     = momentum->getPointer(1);
+                        double* E         = total_energy->getPointer(0);
+                        
+                        // species 0: SF6
+                        // species 1: air
+                        const double gamma_0 = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                0);
+                        
+                        const double gamma_1 = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                1);
+                        
+                        NULL_USE(gamma_1);
+                        
+                        // SF6, low-pressure chamber.
+                        const double rho_low = 5.973033969667598;
+                        const double u_low   = 0.0;
+                        const double v_low   = 0.0;
+                        const double p_low   = 101325;
+                        
+                        // SF6, high-pressure chamber.
+                        const double rho_high = 28.804680673513055;
+                        const double u_high   = 0.0;
+                        const double v_high   = 0.0;
+                        const double p_high   = 488635.136526;
+                        
+                        // air.
+                        const double rho_air = 1.1845467750608767;
+                        const double u_air   = 0.0;
+                        const double v_air   = 0.0;
+                        const double p_air   = 101325;
+                        
+                        // Shock hits the interface after 0.4 ms.
+                        const double L_x_shock = 0.121059453870319;
+                        const double L_x_interface = 0.2;
+                        
+                        for (int j = 0; j < patch_dims[1]; j++)
+                        {
+                            for (int i = 0; i < patch_dims[0]; i++)
+                            {
+                                // Compute index into linear data array.
+                                int idx_cell = i + j*patch_dims[0];
+                                
+                                // Compute the coordinates.
+                                double x[2];
+                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                
+                                if (x[0] < L_x_shock)
+                                {
+                                    rho_Y_1[idx_cell] = rho_high;
+                                    rho_Y_2[idx_cell] = 0.0;
+                                    rho_u[idx_cell] = rho_high*u_high;
+                                    rho_v[idx_cell] = rho_high*v_high;
+                                    E[idx_cell]     = p_high/(gamma_0 - 1.0) +
+                                        0.5*rho_high*(u_high*u_high + v_high*v_high);
+                                }
+                                else
+                                {
+                                    const double f_sm = 0.5*(1.0 + erf((x[0] - L_x_interface)/epsilon_i));
+                                    
+                                    // Smooth the primitive quantity;
+                                    const double rho_Y_1_i = rho_low*(1.0 - f_sm);
+                                    const double rho_Y_2_i = rho_air*f_sm;
+                                    const double u_i = u_low*(1.0 - f_sm) + u_air*f_sm;
+                                    const double v_i = v_low*(1.0 - f_sm) + v_air*f_sm;
+                                    const double p_i = p_low*(1.0 - f_sm) + p_air*f_sm;
+                                    
+                                    const double rho_i = rho_Y_1_i + rho_Y_2_i;
+                                    const double Y_1_i = rho_Y_1_i/rho_i;
+                                    const double Y_2_i = 1.0 - Y_1_i;
+                                    
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.reserve(2);
+                                    Y_ptr.push_back(&Y_1_i);
+                                    Y_ptr.push_back(&Y_2_i);
+                                    
+                                    const double gamma = d_equation_of_state->
+                                        getMixtureThermodynamicPropertyWithMassFraction(
+                                            "gamma",
+                                            Y_ptr);
+                                    
+                                    rho_Y_1[idx_cell] = rho_Y_1_i;
+                                    rho_Y_2[idx_cell] = rho_Y_2_i;
+                                    rho_u[idx_cell]   = rho_i*u_i;
+                                    rho_v[idx_cell]   = rho_i*v_i;
+                                    E[idx_cell]       = p_i/(gamma - 1.0) +
+                                        0.5*rho_i*(u_i*u_i + v_i*v_i);
+                                }
+                            }
+                        }
+                    }
+                    else if (d_project_name == "2D Poggi Richtmyer-Meshkov instability problem reflected")
+                    {
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Please provide only two-species for the problem"
+                                << " '2D Poggi Richtmyer-Meshkov instability problem'."
+                                << std::endl);
+                        }
+                        
+                        // Compute the characteristic length of the initial interface thickness.
+                        const double epsilon_i = 0.015; // epsilon_i for smoothing interface
+                        
+                        double* rho_Y_1   = partial_density->getPointer(0);
+                        double* rho_Y_2   = partial_density->getPointer(1);
+                        double* rho_u     = momentum->getPointer(0);
+                        double* rho_v     = momentum->getPointer(1);
+                        double* E         = total_energy->getPointer(0);
+                        
+                        // species 0: SF6
+                        // species 1: air
+                        const double gamma_0 = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                0);
+                        
+                        const double gamma_1 = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                1);
+                        
+                        NULL_USE(gamma_1);
+                        
+                        // SF6, low-pressure chamber.
+                        const double rho_low = 5.973033969667598;
+                        const double u_low   = 0.0;
+                        const double v_low   = 0.0;
+                        const double p_low   = 101325;
+                        
+                        // SF6, high-pressure chamber.
+                        const double rho_high = 28.804680673513055;
+                        const double u_high   = 0.0;
+                        const double v_high   = 0.0;
+                        const double p_high   = 488635.136526;
+                        
+                        // air.
+                        const double rho_air = 1.1845467750608767;
+                        const double u_air   = 0.0;
+                        const double v_air   = 0.0;
+                        const double p_air   = 101325;
+                        
+                        // Shock hits the interface after 0.4 ms.
+                        const double L_x_shock = -0.121059453870319;
+                        const double L_x_interface = -0.2;
+                        
+                        for (int j = 0; j < patch_dims[1]; j++)
+                        {
+                            for (int i = 0; i < patch_dims[0]; i++)
+                            {
+                                // Compute index into linear data array.
+                                int idx_cell = i + j*patch_dims[0];
+                                
+                                // Compute the coordinates.
+                                double x[2];
+                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                
+                                if (x[0] < L_x_shock)
+                                {
+                                    const double f_sm = 0.5*(1.0 + erf(-(x[0] - L_x_interface)/epsilon_i));
+                                    
+                                    // Smooth the primitive quantity;
+                                    const double rho_Y_1_i = rho_low*(1.0 - f_sm);
+                                    const double rho_Y_2_i = rho_air*f_sm;
+                                    const double u_i = u_low*(1.0 - f_sm) + u_air*f_sm;
+                                    const double v_i = v_low*(1.0 - f_sm) + v_air*f_sm;
+                                    const double p_i = p_low*(1.0 - f_sm) + p_air*f_sm;
+                                    
+                                    const double rho_i = rho_Y_1_i + rho_Y_2_i;
+                                    const double Y_1_i = rho_Y_1_i/rho_i;
+                                    const double Y_2_i = 1.0 - Y_1_i;
+                                    
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.reserve(2);
+                                    Y_ptr.push_back(&Y_1_i);
+                                    Y_ptr.push_back(&Y_2_i);
+                                    
+                                    const double gamma = d_equation_of_state->
+                                        getMixtureThermodynamicPropertyWithMassFraction(
+                                            "gamma",
+                                            Y_ptr);
+                                    
+                                    rho_Y_1[idx_cell] = rho_Y_1_i;
+                                    rho_Y_2[idx_cell] = rho_Y_2_i;
+                                    rho_u[idx_cell]   = rho_i*u_i;
+                                    rho_v[idx_cell]   = rho_i*v_i;
+                                    E[idx_cell]       = p_i/(gamma - 1.0) +
+                                        0.5*rho_i*(u_i*u_i + v_i*v_i);
+                                }
+                                else
+                                {
+                                    rho_Y_1[idx_cell] = rho_high;
+                                    rho_Y_2[idx_cell] = 0.0;
+                                    rho_u[idx_cell] = rho_high*u_high;
+                                    rho_v[idx_cell] = rho_high*v_high;
+                                    E[idx_cell]     = p_high/(gamma_0 - 1.0) +
+                                        0.5*rho_high*(u_high*u_high + v_high*v_high);
+                                }
+                            }
+                        }
+                    }
+                    else if (d_project_name == "2D Poggi Richtmyer-Meshkov instability problem vertical")
+                    {
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Please provide only two-species for the problem"
+                                << " '2D Poggi Richtmyer-Meshkov instability problem'."
+                                << std::endl);
+                        }
+                        
+                        // Compute the characteristic length of the initial interface thickness.
+                        const double epsilon_i = 0.015; // epsilon_i for smoothing interface
+                        
+                        double* rho_Y_1   = partial_density->getPointer(0);
+                        double* rho_Y_2   = partial_density->getPointer(1);
+                        double* rho_u     = momentum->getPointer(0);
+                        double* rho_v     = momentum->getPointer(1);
+                        double* E         = total_energy->getPointer(0);
+                        
+                        // species 0: SF6
+                        // species 1: air
+                        const double gamma_0 = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                0);
+                        
+                        const double gamma_1 = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                1);
+                        
+                        NULL_USE(gamma_1);
+                        
+                        // SF6, low-pressure chamber.
+                        const double rho_low = 5.973033969667598;
+                        const double u_low   = 0.0;
+                        const double v_low   = 0.0;
+                        const double p_low   = 101325;
+                        
+                        // SF6, high-pressure chamber.
+                        const double rho_high = 28.804680673513055;
+                        const double u_high   = 0.0;
+                        const double v_high   = 0.0;
+                        const double p_high   = 488635.136526;
+                        
+                        // air.
+                        const double rho_air = 1.1845467750608767;
+                        const double u_air   = 0.0;
+                        const double v_air   = 0.0;
+                        const double p_air   = 101325;
+                        
+                        // Shock hits the interface after 0.4 ms.
+                        const double L_y_shock = 0.121059453870319;
+                        const double L_y_interface = 0.2;
+                        
+                        for (int j = 0; j < patch_dims[1]; j++)
+                        {
+                            for (int i = 0; i < patch_dims[0]; i++)
+                            {
+                                // Compute index into linear data array.
+                                int idx_cell = i + j*patch_dims[0];
+                                
+                                // Compute the coordinates.
+                                double x[2];
+                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                
+                                if (x[1] < L_y_shock)
+                                {
+                                    rho_Y_1[idx_cell] = rho_high;
+                                    rho_Y_2[idx_cell] = 0.0;
+                                    rho_u[idx_cell] = rho_high*u_high;
+                                    rho_v[idx_cell] = rho_high*v_high;
+                                    E[idx_cell]     = p_high/(gamma_0 - 1.0) +
+                                        0.5*rho_high*(u_high*u_high + v_high*v_high);
+                                }
+                                else
+                                {
+                                    const double f_sm = 0.5*(1.0 + erf((x[1] - L_y_interface)/epsilon_i));
+                                    
+                                    // Smooth the primitive quantity;
+                                    const double rho_Y_1_i = rho_low*(1.0 - f_sm);
+                                    const double rho_Y_2_i = rho_air*f_sm;
+                                    const double u_i = u_low*(1.0 - f_sm) + u_air*f_sm;
+                                    const double v_i = v_low*(1.0 - f_sm) + v_air*f_sm;
+                                    const double p_i = p_low*(1.0 - f_sm) + p_air*f_sm;
+                                    
+                                    const double rho_i = rho_Y_1_i + rho_Y_2_i;
+                                    const double Y_1_i = rho_Y_1_i/rho_i;
+                                    const double Y_2_i = 1.0 - Y_1_i;
+                                    
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.reserve(2);
+                                    Y_ptr.push_back(&Y_1_i);
+                                    Y_ptr.push_back(&Y_2_i);
+                                    
+                                    const double gamma = d_equation_of_state->
+                                        getMixtureThermodynamicPropertyWithMassFraction(
+                                            "gamma",
+                                            Y_ptr);
+                                    
+                                    rho_Y_1[idx_cell] = rho_Y_1_i;
+                                    rho_Y_2[idx_cell] = rho_Y_2_i;
+                                    rho_u[idx_cell]   = rho_i*u_i;
+                                    rho_v[idx_cell]   = rho_i*v_i;
+                                    E[idx_cell]       = p_i/(gamma - 1.0) +
+                                        0.5*rho_i*(u_i*u_i + v_i*v_i);
+                                }
+                            }
+                        }
+                    }
                     else
                     {
                         TBOX_ERROR(d_object_name
@@ -769,15 +1105,127 @@ InitialConditions::initializeDataOnPatch(
                 }
                 else if (d_dim == tbox::Dimension(3))
                 {
-                    // NOT YET IMPLEMENTED.
-                    
-                    TBOX_ERROR(d_object_name
-                        << ": "
-                        << "Cannot initialize data for unknown 3D problem"
-                        << " for muti-species flow with conservative four-equation model with name = '"
-                        << d_project_name
-                        << "'."
-                        << std::endl);
+                    if (d_project_name == "3D Poggi Richtmyer-Meshkov instability problem")
+                    {
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Please provide only two-species for the problem"
+                                << " '3D Poggi Richtmyer-Meshkov instability problem'."
+                                << std::endl);
+                        }
+                        
+                        // Compute the characteristic length of the initial interface thickness.
+                        const double epsilon_i = 1.0e-3; // epsilon_i for smoothing interface
+                        
+                        double* rho_Y_1   = partial_density->getPointer(0);
+                        double* rho_Y_2   = partial_density->getPointer(1);
+                        double* rho_u     = momentum->getPointer(0);
+                        double* rho_v     = momentum->getPointer(1);
+                        double* rho_w     = momentum->getPointer(2);
+                        double* E         = total_energy->getPointer(0);
+                        
+                        // species 0: SF6
+                        // species 1: air
+                        const double gamma_0 = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                0);
+                        
+                        const double gamma_1 = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                1);
+                        
+                        NULL_USE(gamma_1);
+                        
+                        // SF6, low-pressure chamber.
+                        const double rho_low = 5.973033969667598;
+                        const double u_low   = 0.0;
+                        const double v_low   = 0.0;
+                        const double w_low   = 0.0;
+                        const double p_low   = 101325;
+                        
+                        // SF6, high-pressure chamber.
+                        const double rho_high = 28.804680673513055;
+                        const double u_high   = 0.0;
+                        const double v_high   = 0.0;
+                        const double w_high   = 0.0;
+                        const double p_high   = 488635.136526;
+                        
+                        // air.
+                        const double rho_air = 1.1845467750608767;
+                        const double u_air   = 0.0;
+                        const double v_air   = 0.0;
+                        const double w_air   = 0.0;
+                        const double p_air   = 101325;
+                        
+                        // Shock hits the interface after 0.4 ms.
+                        const double L_x_shock = 0.121059453870319;
+                        const double L_x_interface = 0.2;
+                        
+                        for (int k = 0; k < patch_dims[2]; k++)
+                        {
+                            for (int j = 0; j < patch_dims[1]; j++)
+                            {
+                                for (int i = 0; i < patch_dims[0]; i++)
+                                {
+                                    // Compute the linear index of current cell.
+                                    int idx_cell = i +
+                                        j*patch_dims[0] +
+                                        k*patch_dims[0]*patch_dims[1];
+                                    
+                                    // Compute the coordinates.
+                                    double x[3];
+                                    x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                    x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                    x[2] = patch_xlo[2] + (k + 0.5)*dx[2];
+                                    
+                                    if (x[0] < L_x_shock)
+                                    {
+                                        rho_Y_1[idx_cell] = rho_high;
+                                        rho_Y_2[idx_cell] = 0.0;
+                                        rho_u[idx_cell] = rho_high*u_high;
+                                        rho_v[idx_cell] = rho_high*v_high;
+                                        rho_w[idx_cell] = rho_high*w_high;
+                                        E[idx_cell]     = p_high/(gamma_0 - 1.0) +
+                                            0.5*rho_high*(u_high*u_high + v_high*v_high + w_high*w_high);
+                                    }
+                                    else if (x[0] < L_x_interface)
+                                    {
+                                        rho_Y_1[idx_cell] = rho_low;
+                                        rho_Y_2[idx_cell] = 0.0;
+                                        rho_u[idx_cell] = rho_low*u_low;
+                                        rho_v[idx_cell] = rho_low*v_low;
+                                        rho_w[idx_cell] = rho_low*w_low;
+                                        E[idx_cell]     = p_low/(gamma_0 - 1.0) +
+                                            0.5*rho_low*(u_low*u_low + v_low*v_low + w_low*w_low);
+                                    }
+                                    else
+                                    {
+                                        rho_Y_1[idx_cell] = 0.0;
+                                        rho_Y_2[idx_cell] = rho_air;
+                                        rho_u[idx_cell] = rho_air*u_air;
+                                        rho_v[idx_cell] = rho_air*v_air;
+                                        rho_w[idx_cell] = rho_air*w_air;
+                                        E[idx_cell]     = p_air/(gamma_1 - 1.0) +
+                                            0.5*rho_air*(u_air*u_air + v_air*v_air + w_air*w_air);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": "
+                            << "Cannot initialize data for unknown 3D problem"
+                            << " for muti-species flow with conservative four-equation model with name = '"
+                            << d_project_name
+                            << "'."
+                            << std::endl);
+                    }
                 }
                 
                 break;
