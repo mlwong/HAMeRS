@@ -1117,7 +1117,7 @@ InitialConditions::initializeDataOnPatch(
                         }
                         
                         // Compute the characteristic length of the initial interface thickness.
-                        const double epsilon_i = 1.0e-3; // epsilon_i for smoothing interface
+                        const double epsilon_i = 0.015; // epsilon_i for smoothing interface
                         
                         double* rho_Y_1   = partial_density->getPointer(0);
                         double* rho_Y_2   = partial_density->getPointer(1);
@@ -1192,25 +1192,39 @@ InitialConditions::initializeDataOnPatch(
                                         E[idx_cell]     = p_high/(gamma_0 - 1.0) +
                                             0.5*rho_high*(u_high*u_high + v_high*v_high + w_high*w_high);
                                     }
-                                    else if (x[0] < L_x_interface)
-                                    {
-                                        rho_Y_1[idx_cell] = rho_low;
-                                        rho_Y_2[idx_cell] = 0.0;
-                                        rho_u[idx_cell] = rho_low*u_low;
-                                        rho_v[idx_cell] = rho_low*v_low;
-                                        rho_w[idx_cell] = rho_low*w_low;
-                                        E[idx_cell]     = p_low/(gamma_0 - 1.0) +
-                                            0.5*rho_low*(u_low*u_low + v_low*v_low + w_low*w_low);
-                                    }
                                     else
                                     {
-                                        rho_Y_1[idx_cell] = 0.0;
-                                        rho_Y_2[idx_cell] = rho_air;
-                                        rho_u[idx_cell] = rho_air*u_air;
-                                        rho_v[idx_cell] = rho_air*v_air;
-                                        rho_w[idx_cell] = rho_air*w_air;
-                                        E[idx_cell]     = p_air/(gamma_1 - 1.0) +
-                                            0.5*rho_air*(u_air*u_air + v_air*v_air + w_air*w_air);
+                                        const double f_sm = 0.5*(1.0 + erf((x[0] - L_x_interface)/epsilon_i));
+                                        
+                                        // Smooth the primitive quantities.
+                                        const double rho_Y_1_i = rho_low*(1.0 - f_sm);
+                                        const double rho_Y_2_i = rho_air*f_sm;
+                                        const double u_i = u_low*(1.0 - f_sm) + u_air*f_sm;
+                                        const double v_i = v_low*(1.0 - f_sm) + v_air*f_sm;
+                                        const double w_i = w_low*(1.0 - f_sm) + w_air*f_sm;
+                                        const double p_i = p_low*(1.0 - f_sm) + p_air*f_sm;
+                                        
+                                        const double rho_i = rho_Y_1_i + rho_Y_2_i;
+                                        const double Y_1_i = rho_Y_1_i/rho_i;
+                                        const double Y_2_i = 1.0 - Y_1_i;
+                                        
+                                        std::vector<const double*> Y_ptr;
+                                        Y_ptr.reserve(2);
+                                        Y_ptr.push_back(&Y_1_i);
+                                        Y_ptr.push_back(&Y_2_i);
+                                        
+                                        const double gamma = d_equation_of_state->
+                                            getMixtureThermodynamicPropertyWithMassFraction(
+                                                "gamma",
+                                                Y_ptr);
+                                        
+                                        rho_Y_1[idx_cell] = rho_Y_1_i;
+                                        rho_Y_2[idx_cell] = rho_Y_2_i;
+                                        rho_u[idx_cell]   = rho_i*u_i;
+                                        rho_v[idx_cell]   = rho_i*v_i;
+                                        rho_w[idx_cell]   = rho_i*w_i;
+                                        E[idx_cell]       = p_i/(gamma - 1.0) +
+                                            0.5*rho_i*(u_i*u_i + v_i*v_i + w_i*w_i);
                                     }
                                 }
                             }
