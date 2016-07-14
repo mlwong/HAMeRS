@@ -315,14 +315,14 @@ BasicCartesianBoundaryUtilities3::fillFaceBoundaryData(
                         {
                             idx_cell_pivot = (i + num_ghosts[0]) +
                                 (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (interior_box_lo_idx[2] + (fill_box_hi_idx[2] - j) + num_ghosts[2])*ghostcell_dims[0]*
+                                (interior_box_lo_idx[2] + (fill_box_hi_idx[2] - k) + num_ghosts[2])*ghostcell_dims[0]*
                                     ghostcell_dims[1];
                         }
                         else if (face_loc == BdryLoc::ZHI)
                         {
                             idx_cell_pivot = (i + num_ghosts[0]) +
                                 (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (interior_box_hi_idx[2] - (j - fill_box_lo_idx[2]) + num_ghosts[2])*ghostcell_dims[0]*
+                                (interior_box_hi_idx[2] - (k - fill_box_lo_idx[2]) + num_ghosts[2])*ghostcell_dims[0]*
                                     ghostcell_dims[1];
                         }
                         
@@ -389,14 +389,14 @@ BasicCartesianBoundaryUtilities3::fillFaceBoundaryData(
                         {
                             idx_cell_pivot = (i + num_ghosts[0]) +
                                 (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (interior_box_lo_idx[2] + (fill_box_hi_idx[2] - j) + num_ghosts[2])*ghostcell_dims[0]*
+                                (interior_box_lo_idx[2] + (fill_box_hi_idx[2] - k) + num_ghosts[2])*ghostcell_dims[0]*
                                     ghostcell_dims[1];
                         }
                         else if (face_loc == BdryLoc::ZHI)
                         {
                             idx_cell_pivot = (i + num_ghosts[0]) +
                                 (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (interior_box_hi_idx[2] - (j - fill_box_lo_idx[2]) + num_ghosts[2])*ghostcell_dims[0]*
+                                (interior_box_hi_idx[2] - (k - fill_box_lo_idx[2]) + num_ghosts[2])*ghostcell_dims[0]*
                                     ghostcell_dims[1];
                         }
                         
@@ -893,7 +893,7 @@ BasicCartesianBoundaryUtilities3::fillEdgeBoundaryData(
                             var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
                         }
                         
-                        var_data->getPointer(1)[idx_cell] = -var_data->getPointer(1)[idx_cell_pivot];
+                        var_data->getPointer(2)[idx_cell] = -var_data->getPointer(2)[idx_cell_pivot];
                     }
                 }
             }
@@ -1059,10 +1059,10 @@ BasicCartesianBoundaryUtilities3::fillNodeBoundaryData(
     /*
      * Determine the ghost cell width to fill.
      */
-    hier::IntVector gcw_to_fill(tbox::Dimension(2));
+    hier::IntVector gcw_to_fill(tbox::Dimension(3));
     
     // If the ghost fill width is not used, it is set to the ghost cell width of the data.
-    if (ghost_width_to_fill == -hier::IntVector::getOne(tbox::Dimension(2)))
+    if (ghost_width_to_fill == -hier::IntVector::getOne(tbox::Dimension(3)))
     {
         gcw_to_fill = var_data->getGhostCellWidth();
     }
@@ -1470,7 +1470,7 @@ BasicCartesianBoundaryUtilities3::fillNodeBoundaryData(
                             var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
                         }
                         
-                        var_data->getPointer(1)[idx_cell] = -var_data->getPointer(1)[idx_cell_pivot];
+                        var_data->getPointer(2)[idx_cell] = -var_data->getPointer(2)[idx_cell_pivot];
                     }
                 }
             }
