@@ -117,7 +117,6 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
         double d_constant_C;
         int d_constant_p;
         int d_constant_q;
-        double d_constant_alpha_TV;
         double d_constant_alpha_beta;
         
         /*
