@@ -166,13 +166,13 @@ FlowModelFourEqnConservative::getNamesOfConservativeVariables(bool have_undersco
     
     if (have_underscores)
     {
-        names.push_back("partail_density");
+        names.push_back("partial_density");
         names.push_back("momentum");
         names.push_back("total_energy");
     }
     else
     {
-        names.push_back("partail density");
+        names.push_back("partial density");
         names.push_back("momentum");
         names.push_back("total energy");
     }

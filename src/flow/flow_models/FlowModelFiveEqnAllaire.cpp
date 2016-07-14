@@ -184,14 +184,14 @@ FlowModelFiveEqnAllaire::getNamesOfConservativeVariables(bool have_underscores)
     
     if (have_underscores)
     {
-        names.push_back("partail_density");
+        names.push_back("partial_density");
         names.push_back("momentum");
         names.push_back("total_energy");
         names.push_back("volume_fraction");
     }
     else
     {
-        names.push_back("partail density");
+        names.push_back("partial density");
         names.push_back("momentum");
         names.push_back("total energy");
         names.push_back("volume fraction");
