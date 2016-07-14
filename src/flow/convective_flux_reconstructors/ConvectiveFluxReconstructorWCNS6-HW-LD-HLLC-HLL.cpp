@@ -40,10 +40,10 @@ ConvectiveFluxReconstructorWCNS6_HW_LD_HLLC_HLL::ConvectiveFluxReconstructorWCNS
     d_constant_q          = d_convective_flux_reconstructor_db->getIntegerWithDefault("constant_q", 4);
     d_constant_q          = d_convective_flux_reconstructor_db->getIntegerWithDefault("d_constant_q", d_constant_q);
     
-    d_constant_alpha_TV   = d_convective_flux_reconstructor_db->getDoubleWithDefault("constant_alpha_TV", 5.0);
+    d_constant_alpha_TV   = d_convective_flux_reconstructor_db->getDoubleWithDefault("constant_alpha_TV", 2.0);
     d_constant_alpha_TV   = d_convective_flux_reconstructor_db->getDoubleWithDefault("d_constant_alpha_TV", d_constant_alpha_TV);
     
-    d_constant_alpha_beta = d_convective_flux_reconstructor_db->getDoubleWithDefault("constant_alpha_beta", 1.5);
+    d_constant_alpha_beta = d_convective_flux_reconstructor_db->getDoubleWithDefault("constant_alpha_beta", 50.0);
     d_constant_alpha_beta = d_convective_flux_reconstructor_db->getDoubleWithDefault("d_constant_alpha_beta", d_constant_alpha_beta);
     
     d_weights_d.reserve(4);
