@@ -63,7 +63,8 @@ class EulerBoundaryConditions:
          * in the base class BoundaryUtilityStrategy.  It is a blank implementation
          * for the purposes of this class.
          */
-        void readNeumannBoundaryDataEntry(
+        void
+        readNeumannBoundaryDataEntry(
             const boost::shared_ptr<tbox::Database>& db,
             std::string& db_name,
             int bdry_location_index);
