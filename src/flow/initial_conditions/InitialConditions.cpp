@@ -768,7 +768,7 @@ InitialConditions::initializeDataOnPatch(
                         }
                         
                         // Compute the characteristic length of the initial interface thickness.
-                        const double epsilon_i = 0.004; // epsilon_i for smoothing interface
+                        const double epsilon_i = 0.001; // epsilon_i for smoothing interface
                         
                         double* rho_Y_1   = partial_density->getPointer(0);
                         double* rho_Y_2   = partial_density->getPointer(1);
@@ -893,7 +893,7 @@ InitialConditions::initializeDataOnPatch(
                         }
                         
                         // Compute the characteristic length of the initial interface thickness.
-                        const double epsilon_i = 0.004; // epsilon_i for smoothing interface
+                        const double epsilon_i = 0.001; // epsilon_i for smoothing interface
                         
                         double* rho_Y_1   = partial_density->getPointer(0);
                         double* rho_Y_2   = partial_density->getPointer(1);
