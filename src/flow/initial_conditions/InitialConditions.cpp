@@ -1092,8 +1092,8 @@ InitialConditions::initializeDataOnPatch(
 				    double Chi = 0.0;
 				    for (int m = 0; m < 6; m++)
 				    {
-				    	double kappa = 2*M_PI/(lambda[m]*h);
-				    	Chi += h/6.0*(cos(kappa*x[1])*cos(kappa*x[2]));
+					double kappa = 2*M_PI/(lambda[m]*h);
+					Chi += h/6.0*(cos(kappa*x[1])*cos(kappa*x[2]));
 
 				    }
 				    
