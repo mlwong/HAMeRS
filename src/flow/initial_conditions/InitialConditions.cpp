@@ -868,6 +868,131 @@ InitialConditions::initializeDataOnPatch(
                             }
                         }
                     }
+                    else if (d_project_name == "2D Poggi Richtmyer-Meshkov instability problem with perturbations")
+                    {
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Please provide only two-species for the problem"
+                                << " '2D Poggi Richtmyer-Meshkov instability problem'."
+                                << std::endl);
+                        }
+                        
+                        // Compute the characteristic length of the initial interface thickness.
+                        const double epsilon_i = 0.001; // epsilon_i for smoothing interface
+                        
+                        double* rho_Y_1   = partial_density->getPointer(0);
+                        double* rho_Y_2   = partial_density->getPointer(1);
+                        double* rho_u     = momentum->getPointer(0);
+                        double* rho_v     = momentum->getPointer(1);
+                        double* E         = total_energy->getPointer(0);
+                        
+                        // species 0: SF6
+                        // species 1: air
+                        const double gamma_0 = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                0);
+                        
+                        const double gamma_1 = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                1);
+                        
+                        NULL_USE(gamma_1);
+                        
+                        // Unshocked SF6.
+                        const double rho_unshocked = 5.972856088;
+                        const double u_unshocked   = 0.0;
+                        const double v_unshocked   = 0.0;
+                        const double p_unshocked   = 101325;
+                        
+                        // Shocked SF6.
+                        const double rho_shocked = 11.94060777;
+                        const double u_shocked   = 98.92358848;
+                        const double v_shocked   = 0.0;
+                        const double p_shocked   = 218274.2532;
+                        
+                        // Air.
+                        const double rho_air = 1.184554102;
+                        const double u_air   = 0.0;
+                        const double v_air   = 0.0;
+                        const double p_air   = 101325;
+                        
+                        // Shock hits the interface after 0.4 ms.
+                        const double L_x_shock = 0.120827285;
+                        const double L_x_interface = 0.2;
+                        
+                        // Perturbations due to S mode.
+                        double h = 0.001; // Length scale of perturbations.
+                        double lambda[]={0.8, 1.0, 1.25, 1.6, 2.0, 2.5}; // Wavelength of perturbations.
+
+                        for (int j = 0; j < patch_dims[1]; j++)
+                        {
+                            for (int i = 0; i < patch_dims[0]; i++)
+                            {
+                                // Compute index into linear data array.
+                                int idx_cell = i + j*patch_dims[0];
+                                
+                                // Compute the coordinates.
+                                double x[2];
+                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                
+                                double x_2 = 0.0;
+                                
+                                double Chi = 0.0;
+                                for (int m = 0; m < 6; m++)
+                                {
+                                    double kappa = 2*M_PI/(lambda[m]*h);
+                                    Chi += h/6.0*(cos(kappa*x[1])*cos(kappa*x_2));
+                                }
+                                 
+                                if (x[0] < L_x_shock)
+                                {
+                                    rho_Y_1[idx_cell] = rho_shocked;
+                                    rho_Y_2[idx_cell] = 0.0;
+                                    rho_u[idx_cell] = rho_shocked*u_shocked;
+                                    rho_v[idx_cell] = rho_shocked*v_shocked;
+                                    E[idx_cell]     = p_shocked/(gamma_0 - 1.0) +
+                                        0.5*rho_shocked*(u_shocked*u_shocked + v_shocked*v_shocked);
+                                }
+                                else
+                                {
+                                    const double f_sm = 0.5*(1.0 + erf((x[0] - (L_x_interface + Chi))/epsilon_i));
+                                    
+                                    // Smooth the primitive quantities;
+                                    const double rho_Y_1_i = rho_unshocked*(1.0 - f_sm);
+                                    const double rho_Y_2_i = rho_air*f_sm;
+                                    const double u_i = u_unshocked*(1.0 - f_sm) + u_air*f_sm;
+                                    const double v_i = v_unshocked*(1.0 - f_sm) + v_air*f_sm;
+                                    const double p_i = p_unshocked*(1.0 - f_sm) + p_air*f_sm;
+                                    
+                                    const double rho_i = rho_Y_1_i + rho_Y_2_i;
+                                    const double Y_1_i = rho_Y_1_i/rho_i;
+                                    const double Y_2_i = 1.0 - Y_1_i;
+                                    
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.reserve(2);
+                                    Y_ptr.push_back(&Y_1_i);
+                                    Y_ptr.push_back(&Y_2_i);
+                                    
+                                    const double gamma = d_equation_of_state->
+                                        getMixtureThermodynamicPropertyWithMassFraction(
+                                            "gamma",
+                                            Y_ptr);
+                                    
+                                    rho_Y_1[idx_cell] = rho_Y_1_i;
+                                    rho_Y_2[idx_cell] = rho_Y_2_i;
+                                    rho_u[idx_cell]   = rho_i*u_i;
+                                    rho_v[idx_cell]   = rho_i*v_i;
+                                    E[idx_cell]       = p_i/(gamma - 1.0) +
+                                        0.5*rho_i*(u_i*u_i + v_i*v_i);
+                                }
+                            }
+                        }
+                    }
                     else
                     {
                         TBOX_ERROR(d_object_name
@@ -1069,7 +1194,7 @@ InitialConditions::initializeDataOnPatch(
                         const double L_x_interface = 0.2;
                         
                         // Perturbations due to S mode.
-                        double h = 0.001; // Length scale of perturbations
+                        double h = 0.001; // Length scale of perturbations.
                         double lambda[]={0.8, 1.0, 1.25, 1.6, 2.0, 2.5}; // Wavelength of perturbations.
                         
                         for (int k = 0; k < patch_dims[2]; k++)
