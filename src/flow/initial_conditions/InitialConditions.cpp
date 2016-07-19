@@ -1069,7 +1069,7 @@ InitialConditions::initializeDataOnPatch(
                         const double L_x_interface = 0.2;
                         
                         // Perturbations due to S mode.
-			double h = 0.001; // Length scale of perturbations
+                        double h = 0.001; // Length scale of perturbations
                         double lambda[]={0.8, 1.0, 1.25, 1.6, 2.0, 2.5}; // Wavelength of perturbations.
                         
                         for (int k = 0; k < patch_dims[2]; k++)
@@ -1089,14 +1089,13 @@ InitialConditions::initializeDataOnPatch(
                                     x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
                                     x[2] = patch_xlo[2] + (k + 0.5)*dx[2];
                                     
-				    double Chi = 0.0;
-				    for (int m = 0; m < 6; m++)
-				    {
-					double kappa = 2*M_PI/(lambda[m]*h);
-					Chi += h/6.0*(cos(kappa*x[1])*cos(kappa*x[2]));
-
-				    }
-				    
+                                    double Chi = 0.0;
+                                    for (int m = 0; m < 6; m++)
+                                    {
+                                        double kappa = 2*M_PI/(lambda[m]*h);
+                                        Chi += h/6.0*(cos(kappa*x[1])*cos(kappa*x[2]));
+                                    }
+                                    
                                     if (x[0] < L_x_shock)
                                     {
                                         rho_Y_1[idx_cell] = rho_shocked;
