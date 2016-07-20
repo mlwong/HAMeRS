@@ -141,7 +141,9 @@ class GradientTagger
         boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_density_gradient;
         boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_total_energy_gradient;
         boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_pressure_gradient;
+        boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_dilatation_gradient;
         boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_enstrophy_gradient;
+        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Jameson_mass_fraction_gradient;
         
 };
 

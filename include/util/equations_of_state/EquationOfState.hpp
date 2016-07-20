@@ -338,7 +338,7 @@ class EquationOfState
         const tbox::Dimension d_dim;
         
         /*
-         * boost::shared_ptr to the grid geometry.
+         * Number of species.
          */
         const int d_num_species;
         

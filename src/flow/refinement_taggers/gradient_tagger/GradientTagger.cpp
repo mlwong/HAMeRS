@@ -2,7 +2,7 @@
 
 #include "boost/lexical_cast.hpp"
 
-#define PLOTTING_GRADIENT_TAGGER
+// #define PLOTTING_GRADIENT_TAGGER
 
 #define EPSILON 1e-40
 
@@ -100,7 +100,9 @@ GradientTagger::GradientTagger(
                         if (!((variable_key == "DENSITY") ||
                               (variable_key == "TOTAL_ENERGY") ||
                               (variable_key == "PRESSURE") ||
-                              (variable_key == "ENSTROPHY")))
+                              (variable_key == "DILATATION") ||
+                              (variable_key == "ENSTROPHY") ||
+                              (variable_key == "MASS_FRACTION")))
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
@@ -238,11 +240,29 @@ GradientTagger::registerGradientTaggerVariables(
                         boost::shared_ptr<pdat::CellVariable<double> > (
                             new pdat::CellVariable<double>(d_dim, "Jameson pressure gradient", 1));
                 }
+                else if (variable_key == "DILATATION")
+                {
+                    d_Jameson_pressure_gradient =
+                        boost::shared_ptr<pdat::CellVariable<double> > (
+                            new pdat::CellVariable<double>(d_dim, "Jameson dilatation gradient", 1));
+                }
                 else if (variable_key == "ENSTROPHY")
                 {
                     d_Jameson_enstrophy_gradient =
                         boost::shared_ptr<pdat::CellVariable<double> > (
                             new pdat::CellVariable<double>(d_dim, "Jameson enstrophy gradient", 1));
+                }
+                else if (variable_key == "MASS_FRACTION")
+                {
+                    d_Jameson_mass_fraction_gradient.reserve(d_num_species);
+                    
+                    for (int spi = 0; spi < d_num_species; spi++)
+                    {
+                        d_Jameson_mass_fraction_gradient.push_back(
+                            boost::shared_ptr<pdat::CellVariable<double> > (
+                                new pdat::CellVariable<double>(d_dim, "Jameson mass fraction " +
+                                    tbox::Utilities::intToString(spi) + " gradient", 1)));
+                    }
                 }
                 else
                 {
@@ -290,6 +310,16 @@ GradientTagger::registerGradientTaggerVariables(
                             "CONSERVATIVE_COARSEN",
                             "CONSERVATIVE_LINEAR_REFINE");
                 }
+                else if (variable_key == "DILATATION")
+                {
+                    integrator->registerVariable(
+                        d_Jameson_dilatation_gradient,
+                        d_num_gradient_ghosts,
+                        RungeKuttaLevelIntegrator::TIME_DEP,
+                            d_grid_geometry,
+                            "CONSERVATIVE_COARSEN",
+                            "CONSERVATIVE_LINEAR_REFINE");
+                }
                 else if (variable_key == "ENSTROPHY")
                 {
                     integrator->registerVariable(
@@ -299,6 +329,19 @@ GradientTagger::registerGradientTaggerVariables(
                             d_grid_geometry,
                             "CONSERVATIVE_COARSEN",
                             "CONSERVATIVE_LINEAR_REFINE");
+                }
+                else if (variable_key == "MASS_FRACTION")
+                {
+                    for (int spi = 0; spi < d_num_species; spi++)
+                    {
+                        integrator->registerVariable(
+                            d_Jameson_mass_fraction_gradient[spi],
+                            d_num_gradient_ghosts,
+                            RungeKuttaLevelIntegrator::TIME_DEP,
+                                d_grid_geometry,
+                                "CONSERVATIVE_COARSEN",
+                                "CONSERVATIVE_LINEAR_REFINE");
+                    }
                 }
                 else
                 {
@@ -366,6 +409,15 @@ GradientTagger::registerPlotQuantities(
                            d_Jameson_pressure_gradient,
                            plot_context));
                 }
+                else if (variable_key == "DILATATION")
+                {
+                    visit_writer->registerPlotQuantity(
+                        "Jameson dilatation gradient",
+                        "SCALAR",
+                        vardb->mapVariableAndContextToIndex(
+                           d_Jameson_dilatation_gradient,
+                           plot_context));
+                }
                 else if (variable_key == "ENSTROPHY")
                 {
                     visit_writer->registerPlotQuantity(
@@ -374,6 +426,19 @@ GradientTagger::registerPlotQuantities(
                         vardb->mapVariableAndContextToIndex(
                            d_Jameson_enstrophy_gradient,
                            plot_context));
+                }
+                else if (variable_key == "MASS_FRACTION")
+                {
+                    for (int spi = 0; spi < d_num_species; spi++)
+                    {
+                        visit_writer->registerPlotQuantity(
+                            "Jameson mass fraction " +
+                                tbox::Utilities::intToString(spi) + " gradient",
+                            "SCALAR",
+                            vardb->mapVariableAndContextToIndex(
+                               d_Jameson_mass_fraction_gradient[spi],
+                               plot_context));
+                    }
                 }
             }
         }
@@ -518,7 +583,7 @@ GradientTagger::tagCells(
                     boost::shared_ptr<pdat::CellData<double> > gradient(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(d_Jameson_density_gradient, data_context)));
-                            
+                    
                     // Compute the gradient.
                     d_gradient_sensor_Jameson->computeGradient(patch, data_density, gradient);
                     
@@ -564,7 +629,7 @@ GradientTagger::tagCells(
                     boost::shared_ptr<pdat::CellData<double> > gradient(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(d_Jameson_total_energy_gradient, data_context)));
-                            
+                    
                     // Compute the gradient.
                     d_gradient_sensor_Jameson->computeGradient(patch, data_total_energy, gradient);
                     
@@ -610,9 +675,55 @@ GradientTagger::tagCells(
                     boost::shared_ptr<pdat::CellData<double> > gradient(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(d_Jameson_pressure_gradient, data_context)));
-                            
+                    
                     // Compute the gradient.
                     d_gradient_sensor_Jameson->computeGradient(patch, data_pressure, gradient);
+                    
+                    // Tag the cells.
+                    tagCellsWithGradientSensor(
+                        patch,
+                        tags,
+                        gradient,
+                        tol,
+                        sensor_key);
+                    
+                    /*
+                     * Unregister the patch and data of all registered derived cell variables in the flow model.
+                     */
+                    
+                    d_flow_model->unregisterPatch();
+                    
+                }
+                else if (variable_key == "DILATATION")
+                {
+                    /*
+                     * Register the patch and dilatation in the flow model and compute the corresponding cell data.
+                     */
+                    
+                    d_flow_model->registerPatchWithDataContext(patch, data_context);
+                    
+                    std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                    
+                    num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("DILATATION", d_num_gradient_ghosts));
+                    
+                    d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+                    
+                    d_flow_model->computeGlobalDerivedCellData();
+                    
+                    /*
+                     * Get the pointer to dilatation data inside the flow model.
+                     */
+                    
+                    boost::shared_ptr<pdat::CellData<double> > data_dilatation =
+                        d_flow_model->getGlobalCellData("DILATATION");
+                    
+                    // Get the cell data of the dilatation gradient.
+                    boost::shared_ptr<pdat::CellData<double> > gradient(
+                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(d_Jameson_dilatation_gradient, data_context)));
+                    
+                    // Compute the gradient.
+                    d_gradient_sensor_Jameson->computeGradient(patch, data_dilatation, gradient);
                     
                     // Tag the cells.
                     tagCellsWithGradientSensor(
@@ -656,7 +767,7 @@ GradientTagger::tagCells(
                     boost::shared_ptr<pdat::CellData<double> > gradient(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(d_Jameson_enstrophy_gradient, data_context)));
-                            
+                    
                     // Compute the gradient.
                     d_gradient_sensor_Jameson->computeGradient(patch, data_enstrophy, gradient);
                     
@@ -674,6 +785,54 @@ GradientTagger::tagCells(
                     
                     d_flow_model->unregisterPatch();
                     
+                }
+                else if (variable_key == "MASS_FRACTION")
+                {
+                    /*
+                     * Register the patch and dilatation in the flow model and compute the corresponding cell data.
+                     */
+                    
+                    d_flow_model->registerPatchWithDataContext(patch, data_context);
+                    
+                    std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                    
+                    num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("MASS_FRACTION", d_num_gradient_ghosts));
+                    
+                    d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+                    
+                    d_flow_model->computeGlobalDerivedCellData();
+                    
+                    /*
+                     * Get the pointer to mass fraction data inside the flow model.
+                     */
+                    
+                    boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                        d_flow_model->getGlobalCellData("MASS_FRACTION");
+                    
+                    for (int spi = 0; spi < d_num_species; spi++)
+                    {
+                        // Get the cell data of the dilatation gradient.
+                        boost::shared_ptr<pdat::CellData<double> > gradient(
+                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                patch.getPatchData(d_Jameson_mass_fraction_gradient[spi], data_context)));
+                        
+                        // Compute the gradient.
+                        d_gradient_sensor_Jameson->computeGradient(patch, data_mass_fraction, gradient, spi);
+                        
+                        // Tag the cells.
+                        tagCellsWithGradientSensor(
+                            patch,
+                            tags,
+                            gradient,
+                            tol,
+                            sensor_key);
+                    }
+                    
+                    /*
+                     * Unregister the patch and data of all registered derived cell variables in the flow model.
+                     */
+                    
+                    d_flow_model->unregisterPatch();
                 }
                 else
                 {

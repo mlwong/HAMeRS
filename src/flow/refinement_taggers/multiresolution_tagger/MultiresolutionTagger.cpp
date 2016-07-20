@@ -2,7 +2,7 @@
 
 #include "boost/lexical_cast.hpp"
 
-#define PLOTTING_MULTIRESOLUTION_TAGGER
+// #define PLOTTING_MULTIRESOLUTION_TAGGER
 
 #define EPSILON 1e-40
 
@@ -159,7 +159,9 @@ MultiresolutionTagger::MultiresolutionTagger(
                         if (!((variable_key == "DENSITY") ||
                               (variable_key == "TOTAL_ENERGY") ||
                               (variable_key == "PRESSURE") ||
-                              (variable_key == "ENSTROPHY")))
+                              (variable_key == "DILATATION") ||
+                              (variable_key == "ENSTROPHY") ||
+                              (variable_key == "MASS_FRACTION")))
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
@@ -494,6 +496,38 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                 new pdat::CellVariable<double>(d_dim, "Harten pressure Lipschitz's exponent", 1));
                     }
                 }
+                else if (variable_key == "DILATATION")
+                {
+                    for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                    {
+                        d_Harten_dilatation_wavelet_coeffs.push_back(
+                            boost::make_shared<pdat::CellVariable<double> >(
+                                d_dim,
+                                "Harten dilatation wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
+                                1));
+                        
+                        if (d_Harten_wavelet_uses_global_tol)
+                        {
+                            d_Harten_dilatation_wavelet_coeffs_maxs.push_back(0.0);
+                        }
+                        
+                        if (d_Harten_wavelet_uses_local_tol)
+                        {
+                            d_Harten_dilatation_local_means.push_back(
+                                boost::make_shared<pdat::CellVariable<double> >(
+                                    d_dim,
+                                    "Harten dilatation local means at level " + boost::lexical_cast<std::string>(li),
+                                    1));
+                        }
+                    }
+                    
+                    if (d_Harten_wavelet_uses_alpha_tol)
+                    {
+                        d_Harten_dilatation_Lipschitz_exponent =
+                            boost::shared_ptr<pdat::CellVariable<double> > (
+                                new pdat::CellVariable<double>(d_dim, "Harten dilatation Lipschitz's exponent", 1));
+                    }
+                }
                 else if (variable_key == "ENSTROPHY")
                 {
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
@@ -524,6 +558,49 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                         d_Harten_enstrophy_Lipschitz_exponent =
                             boost::shared_ptr<pdat::CellVariable<double> > (
                                 new pdat::CellVariable<double>(d_dim, "Harten enstrophy Lipschitz's exponent", 1));
+                    }
+                }
+                else if (variable_key == "MASS_FRACTION")
+                {
+                    d_Harten_mass_fraction_wavelet_coeffs.resize(d_num_species);
+                    d_Harten_mass_fraction_wavelet_coeffs_maxs.resize(d_num_species);
+                    d_Harten_mass_fraction_local_means.resize(d_num_species);
+                    d_Harten_mass_fraction_Lipschitz_exponent.reserve(d_num_species);
+                    
+                    for (int spi = 0; spi < d_num_species; spi++)
+                    {
+                        for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                        {
+                            d_Harten_mass_fraction_wavelet_coeffs[spi].push_back(
+                                boost::make_shared<pdat::CellVariable<double> >(
+                                    d_dim,
+                                    "Harten mass fraction " + boost::lexical_cast<std::string>(spi) +
+                                        " wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
+                                    1));
+                            
+                            if (d_Harten_wavelet_uses_global_tol)
+                            {
+                                d_Harten_mass_fraction_wavelet_coeffs_maxs[spi].push_back(0.0);
+                            }
+                            
+                            if (d_Harten_wavelet_uses_local_tol)
+                            {
+                                d_Harten_mass_fraction_local_means[spi].push_back(
+                                    boost::make_shared<pdat::CellVariable<double> >(
+                                        d_dim,
+                                        "Harten mass fraction " + boost::lexical_cast<std::string>(spi) +
+                                            " local means at level " + boost::lexical_cast<std::string>(li),
+                                        1));
+                            }
+                        }
+                        
+                        if (d_Harten_wavelet_uses_alpha_tol)
+                        {
+                            d_Harten_mass_fraction_Lipschitz_exponent.push_back(
+                                boost::shared_ptr<pdat::CellVariable<double> > (
+                                    new pdat::CellVariable<double>(d_dim, "Harten mass fraction " +
+                                            boost::lexical_cast<std::string>(spi) + " Lipschitz's exponent", 1)));
+                        }
                     }
                 }
                 else
@@ -647,6 +724,41 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                 "CONSERVATIVE_LINEAR_REFINE");
                     }
                 }
+                else if (variable_key == "DILATATION")
+                {
+                    for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                    {
+                        integrator->registerVariable(
+                            d_Harten_dilatation_wavelet_coeffs[li],
+                            d_num_multiresolution_ghosts,
+                            RungeKuttaLevelIntegrator::TIME_DEP,
+                            d_grid_geometry,
+                            "CONSERVATIVE_COARSEN",
+                            "CONSERVATIVE_LINEAR_REFINE");
+                        
+                        if (d_Harten_wavelet_uses_local_tol)
+                        {
+                            integrator->registerVariable(
+                                d_Harten_dilatation_local_means[li],
+                                d_num_multiresolution_ghosts,
+                                RungeKuttaLevelIntegrator::TEMPORARY,
+                                    d_grid_geometry,
+                                    "NO_COARSEN",
+                                    "NO_REFINE");
+                        }
+                    }
+                    
+                    if (d_Harten_wavelet_uses_alpha_tol)
+                    {
+                        integrator->registerVariable(
+                            d_Harten_dilatation_Lipschitz_exponent,
+                            d_num_multiresolution_ghosts,
+                            RungeKuttaLevelIntegrator::TIME_DEP,
+                                d_grid_geometry,
+                                "CONSERVATIVE_COARSEN",
+                                "CONSERVATIVE_LINEAR_REFINE");
+                    }
+                }
                 else if (variable_key == "ENSTROPHY")
                 {
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
@@ -680,6 +792,44 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                 d_grid_geometry,
                                 "CONSERVATIVE_COARSEN",
                                 "CONSERVATIVE_LINEAR_REFINE");
+                    }
+                }
+                else if (variable_key == "MASS_FRACTION")
+                {
+                    for (int spi = 0; spi < d_num_species; spi++)
+                    {
+                        for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                        {
+                            integrator->registerVariable(
+                                d_Harten_mass_fraction_wavelet_coeffs[spi][li],
+                                d_num_multiresolution_ghosts,
+                                RungeKuttaLevelIntegrator::TIME_DEP,
+                                d_grid_geometry,
+                                "CONSERVATIVE_COARSEN",
+                                "CONSERVATIVE_LINEAR_REFINE");
+                            
+                            if (d_Harten_wavelet_uses_local_tol)
+                            {
+                                integrator->registerVariable(
+                                    d_Harten_mass_fraction_local_means[spi][li],
+                                    d_num_multiresolution_ghosts,
+                                    RungeKuttaLevelIntegrator::TEMPORARY,
+                                        d_grid_geometry,
+                                        "NO_COARSEN",
+                                        "NO_REFINE");
+                            }
+                        }
+                        
+                        if (d_Harten_wavelet_uses_alpha_tol)
+                        {
+                            integrator->registerVariable(
+                                d_Harten_mass_fraction_Lipschitz_exponent[spi],
+                                d_num_multiresolution_ghosts,
+                                RungeKuttaLevelIntegrator::TIME_DEP,
+                                    d_grid_geometry,
+                                    "CONSERVATIVE_COARSEN",
+                                    "CONSERVATIVE_LINEAR_REFINE");
+                        }
                     }
                 }
                 else
@@ -787,6 +937,28 @@ MultiresolutionTagger::registerPlotQuantities(
                                plot_context));
                     }
                 }
+                else if (variable_key == "DILATATION")
+                {
+                    for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                    {
+                        visit_writer->registerPlotQuantity(
+                            "Harten dilatation wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
+                            "SCALAR",
+                            vardb->mapVariableAndContextToIndex(
+                               d_Harten_dilatation_wavelet_coeffs[li],
+                               plot_context));
+                    }
+                    
+                    if (d_Harten_wavelet_uses_alpha_tol)
+                    {
+                        visit_writer->registerPlotQuantity(
+                            "Harten dilatation Lipschitz's exponent",
+                            "SCALAR",
+                            vardb->mapVariableAndContextToIndex(
+                               d_Harten_dilatation_Lipschitz_exponent,
+                               plot_context));
+                    }
+                }
                 else if (variable_key == "ENSTROPHY")
                 {
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
@@ -807,6 +979,33 @@ MultiresolutionTagger::registerPlotQuantities(
                             vardb->mapVariableAndContextToIndex(
                                d_Harten_enstrophy_Lipschitz_exponent,
                                plot_context));
+                    }
+                }
+                else if (variable_key == "MASS_FRACTION")
+                {
+                    for (int spi = 0; spi < d_num_species; spi++)
+                    {
+                        for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                        {
+                            visit_writer->registerPlotQuantity(
+                                "Harten mass fraction " + boost::lexical_cast<std::string>(spi) +
+                                    " wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
+                                "SCALAR",
+                                vardb->mapVariableAndContextToIndex(
+                                   d_Harten_mass_fraction_wavelet_coeffs[spi][li],
+                                   plot_context));
+                        }
+                        
+                        if (d_Harten_wavelet_uses_alpha_tol)
+                        {
+                            visit_writer->registerPlotQuantity(
+                                "Harten mass fraction " + boost::lexical_cast<std::string>(spi) +
+                                    " Lipschitz's exponent",
+                                "SCALAR",
+                                vardb->mapVariableAndContextToIndex(
+                                   d_Harten_mass_fraction_Lipschitz_exponent[spi],
+                                   plot_context));
+                        }
                     }
                 }
             }
@@ -1142,6 +1341,76 @@ MultiresolutionTagger::computeMultiresolutionSensorValues(
                             data_pressure,
                             wavelet_coeffs);
                     }
+                    
+                    /*
+                     * Unregister the patch and data of all registered derived cell variables in the flow model.
+                     */
+                    
+                    d_flow_model->unregisterPatch();
+                    
+                }
+                else if (variable_key == "DILATATION")
+                {
+                    /*
+                     * Register the patch and dilatation in the flow model and compute the corresponding cell data.
+                     */
+                    
+                    d_flow_model->registerPatchWithDataContext(patch, data_context);
+                    
+                    std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                    
+                    num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("DILATATION", d_num_multiresolution_ghosts));
+                    
+                    d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+                    
+                    d_flow_model->computeGlobalDerivedCellData();
+                    
+                    /*
+                     * Get the pointer to dilatation data inside the flow model.
+                     */
+                    
+                    boost::shared_ptr<pdat::CellData<double> > data_dilatation =
+                        d_flow_model->getGlobalCellData("DILATATION");
+                    
+                    // Get the wavelet coefficients.
+                    std::vector<boost::shared_ptr<pdat::CellData<double> > > wavelet_coeffs;
+                    for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                    {
+                        wavelet_coeffs.push_back(BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(d_Harten_dilatation_wavelet_coeffs[li], data_context)));
+                    }
+                    
+                    // Compute the wavelet coefficients.
+                    if (d_Harten_wavelet_uses_local_tol)
+                    {
+                        // Get the local means.
+                        std::vector<boost::shared_ptr<pdat::CellData<double> > > variable_local_means;
+                        for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                        {
+                            variable_local_means.push_back(BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                patch.getPatchData(d_Harten_dilatation_local_means[li], data_context)));
+                        }
+                        
+                        d_wavelet_transfrom_Harten->computeWaveletCoefficientsWithVariableLocalMeans(
+                            patch,
+                            data_dilatation,
+                            wavelet_coeffs,
+                            variable_local_means);
+                    }
+                    else
+                    {
+                        d_wavelet_transfrom_Harten->computeWaveletCoefficients(
+                            patch,
+                            data_dilatation,
+                            wavelet_coeffs);
+                    }
+                    
+                    /*
+                     * Unregister the patch and data of all registered derived cell variables in the flow model.
+                     */
+                    
+                    d_flow_model->unregisterPatch();
+                    
                 }
                 else if (variable_key == "ENSTROPHY")
                 {
@@ -1197,6 +1466,74 @@ MultiresolutionTagger::computeMultiresolutionSensorValues(
                             patch,
                             data_enstrophy,
                             wavelet_coeffs);
+                    }
+                    
+                    /*
+                     * Unregister the patch and data of all registered derived cell variables in the flow model.
+                     */
+                    
+                    d_flow_model->unregisterPatch();
+                    
+                }
+                else if (variable_key == "MASS_FRACTION")
+                {
+                    /*
+                     * Register the patch and mass fraction in the flow model and compute the corresponding cell data.
+                     */
+                    
+                    d_flow_model->registerPatchWithDataContext(patch, data_context);
+                    
+                    std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                    
+                    num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("MASS_FRACTION", d_num_multiresolution_ghosts));
+                    
+                    d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+                    
+                    d_flow_model->computeGlobalDerivedCellData();
+                    
+                    /*
+                     * Get the pointer to mass fraction data inside the flow model.
+                     */
+                    
+                    boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                        d_flow_model->getGlobalCellData("MASS_FRACTION");
+                    
+                    for (int spi = 0; spi < d_num_species; spi++)
+                    {
+                        // Get the wavelet coefficients.
+                        std::vector<boost::shared_ptr<pdat::CellData<double> > > wavelet_coeffs;
+                        for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                        {
+                            wavelet_coeffs.push_back(BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                patch.getPatchData(d_Harten_mass_fraction_wavelet_coeffs[spi][li], data_context)));
+                        }
+                        
+                        // Compute the wavelet coefficients.
+                        if (d_Harten_wavelet_uses_local_tol)
+                        {
+                            // Get the local means.
+                            std::vector<boost::shared_ptr<pdat::CellData<double> > > variable_local_means;
+                            for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                            {
+                                variable_local_means.push_back(BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                    patch.getPatchData(d_Harten_mass_fraction_local_means[spi][li], data_context)));
+                            }
+                            
+                            d_wavelet_transfrom_Harten->computeWaveletCoefficientsWithVariableLocalMeans(
+                                patch,
+                                data_mass_fraction,
+                                wavelet_coeffs,
+                                variable_local_means,
+                                spi);
+                        }
+                        else
+                        {
+                            d_wavelet_transfrom_Harten->computeWaveletCoefficients(
+                                patch,
+                                data_mass_fraction,
+                                wavelet_coeffs,
+                                spi);
+                        }
                     }
                     
                     /*
@@ -1312,6 +1649,25 @@ MultiresolutionTagger::getSensorValueStatistics(
                                     MPI_MAX);
                             }
                         }
+                        else if (variable_key == "DILATATION")
+                        {
+                            for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                            {
+                                const int theta_w_id = variable_db->mapVariableAndContextToIndex(
+                                    d_Harten_dilatation_wavelet_coeffs[li],
+                                    data_context);
+                                
+                                double theta_w_max_local = cell_double_operator.max(theta_w_id);
+                                d_Harten_dilatation_wavelet_coeffs_maxs[li] = 0.0;
+                                
+                                mpi.Allreduce(
+                                    &theta_w_max_local,
+                                    &d_Harten_dilatation_wavelet_coeffs_maxs[li],
+                                    1,
+                                    MPI_DOUBLE,
+                                    MPI_MAX);
+                            }
+                        }
                         else if (variable_key == "ENSTROPHY")
                         {
                             for (int li = 0; li < d_Harten_wavelet_num_level; li++)
@@ -1329,6 +1685,28 @@ MultiresolutionTagger::getSensorValueStatistics(
                                     1,
                                     MPI_DOUBLE,
                                     MPI_MAX);
+                            }
+                        }
+                        else if (variable_key == "MASS_FRACTION")
+                        {
+                            for (int spi = 0; spi < d_num_species; spi++)
+                            {
+                                for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                                {
+                                    const int Y_w_id = variable_db->mapVariableAndContextToIndex(
+                                        d_Harten_mass_fraction_wavelet_coeffs[spi][li],
+                                        data_context);
+                                    
+                                    double Y_w_max_local = cell_double_operator.max(Y_w_id);
+                                    d_Harten_mass_fraction_wavelet_coeffs_maxs[spi][li] = 0.0;
+                                    
+                                    mpi.Allreduce(
+                                        &Y_w_max_local,
+                                        &d_Harten_mass_fraction_wavelet_coeffs_maxs[spi][li],
+                                        1,
+                                        MPI_DOUBLE,
+                                        MPI_MAX);
+                                }
                             }
                         }
                     }
@@ -1507,6 +1885,47 @@ MultiresolutionTagger::tagCells(
                         alpha_tol,
                         sensor_key);
                 }
+                else if (variable_key == "DILATATION")
+                {
+                    std::vector<boost::shared_ptr<pdat::CellData<double> > > wavelet_coeffs;
+                    
+                    for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                    {
+                        wavelet_coeffs.push_back(BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(d_Harten_dilatation_wavelet_coeffs[li], data_context)));
+                    }
+                    
+                    std::vector<boost::shared_ptr<pdat::CellData<double> > > variable_local_means;
+                    if (d_Harten_wavelet_uses_local_tol)
+                    {
+                        // Get the local means.
+                        for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                        {
+                            variable_local_means.push_back(BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                patch.getPatchData(d_Harten_dilatation_local_means[li], data_context)));
+                        }
+                    }
+                    
+                    boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent;
+                    if (d_Harten_wavelet_uses_alpha_tol)
+                    {
+                        Lipschitz_exponent = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(d_Harten_dilatation_Lipschitz_exponent,
+                            data_context));
+                    }
+                    
+                    tagCellsWithWaveletSensor(
+                        patch,
+                        tags,
+                        wavelet_coeffs,
+                        d_Harten_dilatation_wavelet_coeffs_maxs,
+                        variable_local_means,
+                        Lipschitz_exponent,
+                        global_tol,
+                        local_tol,
+                        alpha_tol,
+                        sensor_key);
+                }
                 else if (variable_key == "ENSTROPHY")
                 {
                     std::vector<boost::shared_ptr<pdat::CellData<double> > > wavelet_coeffs;
@@ -1547,6 +1966,50 @@ MultiresolutionTagger::tagCells(
                         local_tol,
                         alpha_tol,
                         sensor_key);
+                }
+                else if (variable_key == "MASS_FRACTION")
+                {
+                    for (int spi = 0; spi < d_num_species; spi++)
+                    {
+                        std::vector<boost::shared_ptr<pdat::CellData<double> > > wavelet_coeffs;
+                        
+                        for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                        {
+                            wavelet_coeffs.push_back(BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                patch.getPatchData(d_Harten_mass_fraction_wavelet_coeffs[spi][li], data_context)));
+                        }
+                        
+                        std::vector<boost::shared_ptr<pdat::CellData<double> > > variable_local_means;
+                        if (d_Harten_wavelet_uses_local_tol)
+                        {
+                            // Get the local means.
+                            for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                            {
+                                variable_local_means.push_back(BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                    patch.getPatchData(d_Harten_mass_fraction_local_means[spi][li], data_context)));
+                            }
+                        }
+                        
+                        boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent;
+                        if (d_Harten_wavelet_uses_alpha_tol)
+                        {
+                            Lipschitz_exponent = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                                patch.getPatchData(d_Harten_mass_fraction_Lipschitz_exponent[spi],
+                                data_context));
+                        }
+                        
+                        tagCellsWithWaveletSensor(
+                            patch,
+                            tags,
+                            wavelet_coeffs,
+                            d_Harten_mass_fraction_wavelet_coeffs_maxs[spi],
+                            variable_local_means,
+                            Lipschitz_exponent,
+                            global_tol,
+                            local_tol,
+                            alpha_tol,
+                            sensor_key);
+                    }
                 }
                 else
                 {
