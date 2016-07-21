@@ -128,6 +128,11 @@ class InitialConditions
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
     private:
+        double
+        computePhiModeLocation(
+            const double& x_1,
+            const double& x_2);
+
         /*
          * The object name is used for error/warning reporting.
          */
