@@ -131,7 +131,8 @@ class InitialConditions
         double
         computePhiModeLocation(
             const double& x_1,
-            const double& x_2);
+            const double& x_2,
+            const bool& is_2D);
 
         /*
          * The object name is used for error/warning reporting.
