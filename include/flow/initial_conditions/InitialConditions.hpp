@@ -129,10 +129,13 @@ class InitialConditions
         
     private:
         double
-        computePhiModeLocation(
+        computePhiModeLocation2D(
+            const double& x_1);
+
+        double
+        computePhiModeLocation3D(
             const double& x_1,
-            const double& x_2,
-            const bool& is_2D);
+            const double& x_2);
 
         /*
          * The object name is used for error/warning reporting.
