@@ -806,7 +806,7 @@ InitialConditions::initializeDataOnPatch(
                         const double rho_air = 1.1886;
                         const double u_air   = 0.0;
                         const double v_air   = 0.0;
-                        const double p_air   = 989000;
+                        const double p_air   = 98900;
                         
                         // Shock hits the interface after 0.2 ms.
                         const double L_x_shock = 0.162184942619787;
@@ -1191,7 +1191,7 @@ InitialConditions::initializeDataOnPatch(
                         const double u_air   = 0.0;
                         const double v_air   = 0.0;
                         const double w_air   = 0.0;
-                        const double p_air   = 989000;
+                        const double p_air   = 98900;
                         
                         // Shock hits the interface after 0.2 ms.
                         const double L_x_shock = 0.162184942619787;
