@@ -2271,8 +2271,8 @@ ConvectiveFluxReconstructorWCNS6_Test::computeSigma(
     const double alpha_2 = fabs(W_array[3] - W_array[2]);
     const double alpha_3 = fabs(W_array[4] - W_array[3]);
     
-    const double theta_1 = fabs(alpha_1 - alpha_2)/(alpha_1 + alpha_2);
-    const double theta_2 = fabs(alpha_2 - alpha_3)/(alpha_2 + alpha_3);
+    const double theta_1 = fabs(alpha_1 - alpha_2)/(alpha_1 + alpha_2 + EPSILON);
+    const double theta_2 = fabs(alpha_2 - alpha_3)/(alpha_2 + alpha_3 + EPSILON);
     
     sigma = fmax(theta_1, theta_2);
 }
