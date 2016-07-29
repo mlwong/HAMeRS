@@ -75,12 +75,11 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
             const boost::multi_array<double, 2>& R_intercell);
         
         /*
-         * Compute both sigma's and TV's.
+         * Compute both sigma's.
          */
         void
-        computeSigmaAndTV(
+        computeSigma(
             double& sigma,
-            std::vector<double>& TV,
             const boost::multi_array_ref<double, 2>::const_array_view<1>::type& W_array);
         
         /*
@@ -117,7 +116,6 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
         double d_constant_C;
         int d_constant_p;
         int d_constant_q;
-        double d_constant_alpha_TV;
         double d_constant_alpha_beta;
         
         /*
