@@ -791,25 +791,25 @@ InitialConditions::initializeDataOnPatch(
                         NULL_USE(gamma_1);
                         
                         // Unshocked SF6.
-                        const double rho_unshocked = 6.34;
+                        const double rho_unshocked = 6.28463182515979;
                         const double u_unshocked   = 0.0;
                         const double v_unshocked   = 0.0;
-                        const double p_unshocked   = 98899.8156;
+                        const double p_unshocked   = 98900;
                         
                         // Shocked SF6.
-                        const double rho_shocked = 12.493;
-                        const double u_shocked   = 96.287;
+                        const double rho_shocked = 12.7402170739939;
+                        const double u_shocked   = 96.272793370549;
                         const double v_shocked   = 0.0;
-                        const double p_shocked   = 214999.78266;
+                        const double p_shocked   = 215000;
                         
                         // Air.
-                        const double rho_air = 1.1886;
+                        const double rho_air = 1.20015343047694;
                         const double u_air   = 0.0;
                         const double v_air   = 0.0;
-                        const double p_air   = 98899.9020071999;
+                        const double p_air   = 98900;
                         
                         // Shock hits the interface after 0.2 ms.
-                        const double L_x_shock = 0.162184942619787;
+                        const double L_x_shock = 0.161812011;
                         const double L_x_interface = 0.2;
                         
                         // Perturbations due to S mode.
@@ -1061,28 +1061,28 @@ InitialConditions::initializeDataOnPatch(
                         NULL_USE(gamma_1);
                         
                         // Unshocked SF6.
-                        const double rho_unshocked = 6.34;
+                        const double rho_unshocked = 6.28463182515979;
                         const double u_unshocked   = 0.0;
                         const double v_unshocked   = 0.0;
                         const double w_unshocked   = 0.0;
-                        const double p_unshocked   = 98899.8156;
+                        const double p_unshocked   = 98900;
                         
                         // Shocked SF6.
-                        const double rho_shocked = 12.493;
-                        const double u_shocked   = 96.287;
+                        const double rho_shocked = 12.7402170739939;
+                        const double u_shocked   = 96.272793370549;
                         const double v_shocked   = 0.0;
                         const double w_shocked   = 0.0;
-                        const double p_shocked   = 214999.78266;
+                        const double p_shocked   = 215000;
                         
                         // Air.
-                        const double rho_air = 1.1886;
+                        const double rho_air = 1.20015343047694;
                         const double u_air   = 0.0;
                         const double v_air   = 0.0;
                         const double w_air   = 0.0;
-                        const double p_air   = 98899.9020071999;
+                        const double p_air   = 98900;
                         
                         // Shock hits the interface after 0.2 ms.
-                        const double L_x_shock = 0.162184942619787;
+                        const double L_x_shock = 0.161812011;
                         const double L_x_interface = 0.2;
                         
                         // Perturbations due to S mode.
