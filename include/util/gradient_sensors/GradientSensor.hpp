@@ -26,6 +26,8 @@ class GradientSensor
                 d_num_ghosts(hier::IntVector::getZero(d_dim))
         {}
         
+        virtual ~GradientSensor() {}
+        
         /*
          * Get the number of ghost cells needed by the gradient sensor.
          */

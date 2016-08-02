@@ -12,6 +12,8 @@ class WaveletTransformHarten: public WaveletTransform
             const int num_level,
             const int num_vanishing_moments);
         
+        ~WaveletTransformHarten() {}
+        
         /*
          * Perform the wavelet transformation on the given cell data.
          */

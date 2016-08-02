@@ -10,6 +10,8 @@ class GradientSensorJameson: public GradientSensor
             const std::string& object_name,
             const tbox::Dimension& dim);
         
+        ~GradientSensorJameson() {}
+        
         /*
          * Compute the gradient with the given cell data.
          */

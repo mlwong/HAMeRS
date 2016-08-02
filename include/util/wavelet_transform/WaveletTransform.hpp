@@ -27,6 +27,8 @@ class WaveletTransform
                 d_num_wavelet_ghosts(hier::IntVector::getZero(d_dim))
         {}
         
+        virtual ~WaveletTransform() {}
+        
         /*
          * Get the number of ghost cells needed by the wavelet transformation.
          */
