@@ -71,6 +71,8 @@ class FlowModel:
                 d_proj_mat_primitive_var_averaging(SIMPLE_AVG)
         {}
         
+        virtual ~FlowModel() {}
+        
         /*
          * Get the total number of equations.
          */

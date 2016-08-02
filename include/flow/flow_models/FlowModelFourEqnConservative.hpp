@@ -17,6 +17,8 @@ class FlowModelFourEqnConservative: public FlowModel
             const int& num_species,
             const boost::shared_ptr<EquationOfState>& equation_of_state);
         
+        ~FlowModelFourEqnConservative() {}
+        
         /*
          * Print all characteristics of the flow model class.
          */
