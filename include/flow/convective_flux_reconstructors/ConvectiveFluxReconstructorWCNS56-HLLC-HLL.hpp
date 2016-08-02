@@ -19,6 +19,8 @@ class ConvectiveFluxReconstructorWCNS56: public ConvectiveFluxReconstructor
             const boost::shared_ptr<FlowModel>& flow_model,
             const boost::shared_ptr<tbox::Database>& convective_flux_reconstructor_db);
         
+        virtual ~ConvectiveFluxReconstructorWCNS56() {}
+        
         /*
          * Compute the convective fluxes and sources due to hyperbolization
          * of the equations.

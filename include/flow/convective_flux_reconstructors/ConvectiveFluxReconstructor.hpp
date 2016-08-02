@@ -40,6 +40,8 @@ class ConvectiveFluxReconstructor
                 d_convective_flux_reconstructor_db(convective_flux_reconstructor_db)
         {}
         
+        virtual ~ConvectiveFluxReconstructor() {}
+        
         /*
          * Get the number of ghost cells needed by the convective flux
          * reconstructor.

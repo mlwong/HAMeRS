@@ -15,6 +15,8 @@ class ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL: public ConvectiveFluxReconst
             const boost::shared_ptr<FlowModel>& flow_model,
             const boost::shared_ptr<tbox::Database>& convective_flux_reconstructor_db);
         
+        ~ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL() {}
+        
         /*
          * Print all characteristics of the convective flux reconstruction class.
          */
