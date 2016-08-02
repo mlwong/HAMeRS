@@ -50,7 +50,7 @@ ConvectiveFluxReconstructorWCNS6_Test::ConvectiveFluxReconstructorWCNS6_Test(
 {
     d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*4;
     
-    d_constant_C          = d_convective_flux_reconstructor_db->getDoubleWithDefault("constant_C", 1.0e10);
+    d_constant_C          = d_convective_flux_reconstructor_db->getDoubleWithDefault("constant_C", 5.0e9);
     d_constant_C          = d_convective_flux_reconstructor_db->getDoubleWithDefault("d_constant_C", d_constant_C);
     
     d_constant_p          = d_convective_flux_reconstructor_db->getIntegerWithDefault("constant_p", 2);
@@ -59,7 +59,7 @@ ConvectiveFluxReconstructorWCNS6_Test::ConvectiveFluxReconstructorWCNS6_Test(
     d_constant_q          = d_convective_flux_reconstructor_db->getIntegerWithDefault("constant_q", 4);
     d_constant_q          = d_convective_flux_reconstructor_db->getIntegerWithDefault("d_constant_q", d_constant_q);
     
-    d_constant_alpha_beta = d_convective_flux_reconstructor_db->getDoubleWithDefault("constant_alpha_beta", 20.0);
+    d_constant_alpha_beta = d_convective_flux_reconstructor_db->getDoubleWithDefault("constant_alpha_beta", 30.0);
     d_constant_alpha_beta = d_convective_flux_reconstructor_db->getDoubleWithDefault("d_constant_alpha_beta", d_constant_alpha_beta);
     
     d_weights_c.resize(boost::extents[4][3]);
