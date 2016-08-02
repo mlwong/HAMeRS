@@ -26,6 +26,8 @@ class EquationOfState
                 d_equation_of_state_db(equation_of_state_db)
         {}
         
+        virtual ~EquationOfState() {}
+        
         /*
          * Helper function to compute the total density of the mixture given
          * the partial densities.

@@ -12,6 +12,8 @@ class EquationOfStateIdealGas: public EquationOfState
             const int& num_species,
             const boost::shared_ptr<tbox::Database>& equation_of_state_db);
         
+        ~EquationOfStateIdealGas() {}
+        
         /*
          * Print all characteristics of the equation of state class.
          */
