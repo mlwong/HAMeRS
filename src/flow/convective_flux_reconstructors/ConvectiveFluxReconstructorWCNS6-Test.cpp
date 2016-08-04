@@ -2390,11 +2390,9 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
         boost::multi_array_ref<double, 2>::const_array_view<1>::type W_array_ei =
             W_array[boost::indices[boost::multi_array_ref<double, 2>::index_range()][ei]];
         
-        // Compute sigma and TV's.
+        // Compute sigma.
         double sigma;
         computeSigma(sigma, W_array_ei);
-        
-        double sigma_squared = pow(sigma, 2.0);
 
         // Compute beta's.
         computeBeta(beta, W_array_ei);
@@ -2483,7 +2481,7 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
                 // Compute omega.
                 const double omega_upwind = alpha_upwind[r]/alpha_upwind_sum;
                 const double omega_central = alpha_central[r]/alpha_central_sum;
-                const double omega = (1.0 - sigma_squared)*omega_upwind + sigma_squared*omega_central;
+                const double omega = (1.0 - sigma)*omega_upwind + sigma*omega_central;
                 
                 // Compute the nonlinear interpolated value.
                 W_minus[ei] += omega*W_minus_r;
@@ -2607,7 +2605,7 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
                 // Compute omega_tilde;
                 const double omega_upwind_tilde = alpha_upwind_tilde[r]/alpha_upwind_tilde_sum;
                 const double omega_central_tilde = alpha_central_tilde[r]/alpha_central_tilde_sum;
-                const double omega_tilde = (1.0 - sigma_squared)*omega_upwind_tilde + sigma_squared*omega_central_tilde;
+                const double omega_tilde = (1.0 - sigma)*omega_upwind_tilde + sigma*omega_central_tilde;
                 
                 // Compute the nonlinear interpolated value.
                 W_plus[ei] += omega_tilde*W_plus_r;
