@@ -50,7 +50,7 @@ ConvectiveFluxReconstructorWCNS6_Test::ConvectiveFluxReconstructorWCNS6_Test(
 {
     d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*4;
     
-    d_constant_C          = d_convective_flux_reconstructor_db->getDoubleWithDefault("constant_C", 5.0e9);
+    d_constant_C          = d_convective_flux_reconstructor_db->getDoubleWithDefault("constant_C", 1.0e9);
     d_constant_C          = d_convective_flux_reconstructor_db->getDoubleWithDefault("d_constant_C", d_constant_C);
     
     d_constant_p          = d_convective_flux_reconstructor_db->getIntegerWithDefault("constant_p", 2);
