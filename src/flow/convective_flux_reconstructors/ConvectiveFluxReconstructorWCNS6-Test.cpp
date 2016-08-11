@@ -2399,16 +2399,6 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
         computeBetaTilde(beta_tilde, W_array_ei);
         
         /*
-        // Compute ratio of beta's.
-                
-        const double beta_ratio = fmax(fmax(fmax(beta[0], beta[1]), beta[2]), beta[3])/
-            (fmin(fmin(fmin(beta[0], beta[1]), beta[2]), beta[3]) + EPSILON);
-        
-        const double beta_tilde_ratio = fmax(fmax(fmax(beta_tilde[0], beta_tilde[1]), beta_tilde[2]), beta_tilde[3])/
-            (fmin(fmin(fmin(beta_tilde[0], beta_tilde[1]), beta_tilde[2]), beta_tilde[3]) + EPSILON);
-        */
-
-        /*
          * Compute W_minus of the current characteristic variable.
          */
         
@@ -2417,7 +2407,6 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
         const double tau_6 = fabs(beta[3] - beta_avg);
         
         if(fabs(tau_6/(beta_avg + EPSILON)) > alpha_beta)
-        // if (beta_ratio > alpha_beta)
         {
             /*
              * Compute the weights alpha_upwind.
@@ -2541,7 +2530,6 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
         const double tau_6_tilde = fabs(beta_tilde[3] - beta_tilde_avg);
         
         if (fabs(tau_6_tilde/(beta_tilde_avg + EPSILON)) > alpha_beta)
-        // if (beta_tilde_ratio > alpha_beta)
         {
             /*
              * Compute the weights alpha_upwind_tilde.
