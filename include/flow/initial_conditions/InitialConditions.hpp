@@ -129,6 +129,11 @@ class InitialConditions
         
     private:
         double
+        computeRandomModeLocationSettings1(
+            const double& y,
+            const double& z);
+        
+        double
         computePhiModeLocation2D(
             const double& x_1);
 
