@@ -791,25 +791,25 @@ InitialConditions::initializeDataOnPatch(
                         NULL_USE(gamma_1);
                         
                         // Unshocked SF6.
-                        const double rho_unshocked = 5.68304827884824;
+                        const double rho_unshocked = 5.76557373504479;
                         const double u_unshocked   = 0.0;
                         const double v_unshocked   = 0.0;
                         const double p_unshocked   = 101325;
                         
                         // Shocked SF6.
-                        const double rho_shocked = 11.4539309103702;
-                        const double u_shocked   = 102.690305046476;
+                        const double rho_shocked = 11.60754766421;
+                        const double u_shocked   = 101.897746188077;
                         const double v_shocked   = 0.0;
                         const double p_shocked   = 220271.739130435;
                         
                         // Air.
-                        const double rho_air = 1.14045177500386;
+                        const double rho_air = 1.159219432239060;
                         const double u_air   = 0.0;
                         const double v_air   = 0.0;
                         const double p_air   = 101325;
                         
                         // Shock hits the interface after 0.1 ms.
-                        const double L_x_shock = 0.179618236662783;
+                        const double L_x_shock = 0.179753710871983;
                         const double L_x_interface = 0.2;
                         
                         // Perturbations due to S mode.
@@ -832,7 +832,7 @@ InitialConditions::initializeDataOnPatch(
                                 double S = 0.0;
                                 for (int m = 40; m <= 66; m++)
                                 {
-                                    S += A*(cos(2*M_PI*m/0.05*x[1])*cos(2*M_PI*m/0.05*x_2));
+                                    S += A*(cos(2*M_PI*m/0.05*x[1] + tan(m))*cos(2*M_PI*m/0.05*x_2 + tan(m)));
                                 }
                                 
                                 double phi = computeRandomModeLocationSettings1(x[1], x_2);
@@ -916,25 +916,25 @@ InitialConditions::initializeDataOnPatch(
                         NULL_USE(gamma_1);
                         
                         // Unshocked SF6.
-                        const double rho_unshocked = 5.68304827884824;
+                        const double rho_unshocked = 5.76557373504479;
                         const double u_unshocked   = 0.0;
                         const double v_unshocked   = 0.0;
                         const double p_unshocked   = 101325;
                         
                         // Shocked SF6.
-                        const double rho_shocked = 11.4539309103702;
-                        const double u_shocked   = 102.690305046476;
+                        const double rho_shocked = 11.60754766421;
+                        const double u_shocked   = 101.897746188077;
                         const double v_shocked   = 0.0;
                         const double p_shocked   = 220271.739130435;
                         
                         // Air.
-                        const double rho_air = 1.14045177500386;
+                        const double rho_air = 1.159219432239060;
                         const double u_air   = 0.0;
                         const double v_air   = 0.0;
                         const double p_air   = 101325;
                         
                         // Shock hits the interface after 0.1 ms.
-                        const double L_x_shock = 0.179618236662783;
+                        const double L_x_shock = 0.179753710871983;
                         const double L_x_interface = 0.2;
                         
                         // Perturbations due to S mode.
@@ -957,7 +957,7 @@ InitialConditions::initializeDataOnPatch(
                                 double S = 0.0;
                                 for (int m = 20; m <= 66; m++)
                                 {
-                                    S += A*(cos(2*M_PI*m/0.05*x[1])*cos(2*M_PI*m/0.05*x_2));
+                                    S += A*(cos(2*M_PI*m/0.05*x[1] + tan(m))*cos(2*M_PI*m/0.05*x_2 + tan(m)));
                                 }
                                 
                                 double phi = computeRandomModeLocationSettings1(x[1], x_2);
