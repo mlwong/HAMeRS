@@ -881,6 +881,131 @@ InitialConditions::initializeDataOnPatch(
                             }
                         }
                     }
+                    else if (d_project_name == "2D Poggi Richtmyer-Meshkov instability problem settings 2")
+                    {
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Please provide only two-species for the problem"
+                                << " '2D Poggi Richtmyer-Meshkov instability problem'."
+                                << std::endl);
+                        }
+                        
+                        // Define the characteristic length of the initial interface thickness.
+                        const double epsilon_i = 0.001;
+                        
+                        double* rho_Y_1   = partial_density->getPointer(0);
+                        double* rho_Y_2   = partial_density->getPointer(1);
+                        double* rho_u     = momentum->getPointer(0);
+                        double* rho_v     = momentum->getPointer(1);
+                        double* E         = total_energy->getPointer(0);
+                        
+                        // species 0: SF6.
+                        // species 1: air.
+                        const double gamma_0 = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                0);
+                        
+                        const double gamma_1 = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                1);
+                        
+                        NULL_USE(gamma_1);
+                        
+                        // Unshocked SF6.
+                        const double rho_unshocked = 5.68304827884824;
+                        const double u_unshocked   = 0.0;
+                        const double v_unshocked   = 0.0;
+                        const double p_unshocked   = 101325;
+                        
+                        // Shocked SF6.
+                        const double rho_shocked = 11.4539309103702;
+                        const double u_shocked   = 102.690305046476;
+                        const double v_shocked   = 0.0;
+                        const double p_shocked   = 220271.739130435;
+                        
+                        // Air.
+                        const double rho_air = 1.14045177500386;
+                        const double u_air   = 0.0;
+                        const double v_air   = 0.0;
+                        const double p_air   = 101325;
+                        
+                        // Shock hits the interface after 0.1 ms.
+                        const double L_x_shock = 0.179618236662783;
+                        const double L_x_interface = 0.2;
+                        
+                        // Perturbations due to S mode.
+                        const double A = 0.001/6.0; // Amplidtue.
+                        
+                        for (int j = 0; j < patch_dims[1]; j++)
+                        {
+                            for (int i = 0; i < patch_dims[0]; i++)
+                            {
+                                // Compute index into linear data array.
+                                int idx_cell = i + j*patch_dims[0];
+                                
+                                // Compute the coordinates.
+                                double x[2];
+                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                
+                                const double x_2 = 0.0;
+                                
+                                double S = 0.0;
+                                for (int m = 20; m <= 66; m++)
+                                {
+                                    S += A*(cos(2*M_PI*m/0.05*x[1])*cos(2*M_PI*m/0.05*x_2));
+                                }
+                                
+                                double phi = computeRandomModeLocationSettings1(x[1], x_2);
+                                
+                                if (x[0] < L_x_shock)
+                                {
+                                    rho_Y_1[idx_cell] = rho_shocked;
+                                    rho_Y_2[idx_cell] = 0.0;
+                                    rho_u[idx_cell] = rho_shocked*u_shocked;
+                                    rho_v[idx_cell] = rho_shocked*v_shocked;
+                                    E[idx_cell]     = p_shocked/(gamma_0 - 1.0) +
+                                        0.5*rho_shocked*(u_shocked*u_shocked + v_shocked*v_shocked);
+                                }
+                                else
+                                {
+                                    const double f_sm = 0.5*(1.0 + erf((x[0] - (L_x_interface + S + phi))/epsilon_i));
+                                    
+                                    // Smooth the primitive quantities.
+                                    const double rho_Y_1_i = rho_unshocked*(1.0 - f_sm);
+                                    const double rho_Y_2_i = rho_air*f_sm;
+                                    const double u_i = u_unshocked*(1.0 - f_sm) + u_air*f_sm;
+                                    const double v_i = v_unshocked*(1.0 - f_sm) + v_air*f_sm;
+                                    const double p_i = p_unshocked*(1.0 - f_sm) + p_air*f_sm;
+                                    
+                                    const double rho_i = rho_Y_1_i + rho_Y_2_i;
+                                    const double Y_1_i = rho_Y_1_i/rho_i;
+                                    const double Y_2_i = 1.0 - Y_1_i;
+                                    
+                                    std::vector<const double*> Y_ptr;
+                                    Y_ptr.reserve(2);
+                                    Y_ptr.push_back(&Y_1_i);
+                                    Y_ptr.push_back(&Y_2_i);
+                                    
+                                    const double gamma = d_equation_of_state->
+                                        getMixtureThermodynamicPropertyWithMassFraction(
+                                            "gamma",
+                                            Y_ptr);
+                                    
+                                    rho_Y_1[idx_cell] = rho_Y_1_i;
+                                    rho_Y_2[idx_cell] = rho_Y_2_i;
+                                    rho_u[idx_cell]   = rho_i*u_i;
+                                    rho_v[idx_cell]   = rho_i*v_i;
+                                    E[idx_cell]       = p_i/(gamma - 1.0) +
+                                        0.5*rho_i*(u_i*u_i + v_i*v_i);
+                                }
+                            }
+                        }
+                    }
                     else if (d_project_name == "2D Poggi Richtmyer-Meshkov instability problem")
                     {
                         if (d_num_species != 2)
@@ -2876,7 +3001,7 @@ InitialConditions::computeRandomModeLocationSettings1(
         0.000007, 0.000007, 0.000007, 0.000007, 0.000007, 
         0.000007, 0.000007, 0.000007};
     
-    std::vector<double> ky {0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 
+    std::vector<double> my {0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 
         0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 
         0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 
         0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 
@@ -3530,7 +3655,7 @@ InitialConditions::computeRandomModeLocationSettings1(
         63.000000, 63.000000, 63.000000, 63.000000, 63.000000, 
         63.000000, 63.000000, 64.000000}; 
     
-    std::vector<double> kz {4.000000, 5.000000, 6.000000, 7.000000, 8.000000, 
+    std::vector<double> mz {4.000000, 5.000000, 6.000000, 7.000000, 8.000000, 
         9.000000, 10.000000, 11.000000, 12.000000, 13.000000, 
         14.000000, 15.000000, 16.000000, 17.000000, 18.000000, 
         19.000000, 20.000000, 21.000000, 22.000000, 23.000000, 
@@ -5494,10 +5619,10 @@ InitialConditions::computeRandomModeLocationSettings1(
     
     for (int i = 0; i < n_modes; i++)
     {
-        phi += amp[i]*0.01*(C_1d[i]*(cos(2*M_PI*ky[i]*y/Ly)*cos(2*M_PI*kz[i]*z/Lz) +
-                                sin(2*M_PI*ky[i]*y/Ly)*sin(2*M_PI*kz[i]*z/Lz)) +
-                            D_1d[i]*(cos(2*M_PI*ky[i]*y/Ly)*sin(2*M_PI*kz[i]*z/Lz) +
-                                sin(2*M_PI*ky[i]*y/Ly)*cos(2*M_PI*kz[i]*z/Lz)));
+        phi += amp[i]*0.01*(C_1d[i]*(cos(2*M_PI*my[i]*y/Ly)*cos(2*M_PI*mz[i]*z/Lz) +
+                                sin(2*M_PI*my[i]*y/Ly)*sin(2*M_PI*mz[i]*z/Lz)) +
+                            D_1d[i]*(cos(2*M_PI*my[i]*y/Ly)*sin(2*M_PI*mz[i]*z/Lz) +
+                                sin(2*M_PI*my[i]*y/Ly)*cos(2*M_PI*mz[i]*z/Lz)));
     }
 
     return phi;
