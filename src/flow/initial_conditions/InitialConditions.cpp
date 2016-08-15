@@ -830,9 +830,9 @@ InitialConditions::initializeDataOnPatch(
                                 const double x_2 = 0.0;
                                 
                                 double S = 0.0;
-                                for (int m = 40; m <= 66; m++)
+                                for (int m = 40; m <= 62; m++)
                                 {
-                                    S += A*(cos(2*M_PI*m/0.05*x[1] + tan((double) m))*cos(2*M_PI*m/0.05*x_2 + tan((double) m)));
+                                    S += A*(cos(2.0*M_PI*m/0.05*x[1] + tan(3.0*m))*cos(2.0*M_PI*m/0.05*x_2 + tan(5.0*m)));
                                 }
                                 
                                 double phi = computeRandomModeLocationSettings1(x[1], x_2);
@@ -955,9 +955,9 @@ InitialConditions::initializeDataOnPatch(
                                 const double x_2 = 0.0;
                                 
                                 double S = 0.0;
-                                for (int m = 20; m <= 66; m++)
+                                for (int m = 30; m <= 83; m++)
                                 {
-                                    S += A*(cos(2*M_PI*m/0.05*x[1] + tan((double) m))*cos(2*M_PI*m/0.05*x_2 + tan((double) m)));
+                                    S += A*(cos(2.0*M_PI*m/0.05*x[1] + tan(3.0*m))*cos(2.0*M_PI*m/0.05*x_2 + tan(5.0*m)));
                                 }
                                 
                                 double phi = computeRandomModeLocationSettings1(x[1], x_2);
@@ -1080,9 +1080,9 @@ InitialConditions::initializeDataOnPatch(
                                 const double x_2 = 0.0;
                                 
                                 double S = 0.0;
-                                for (int m = 40; m <= 66; m++)
+                                for (int m = 20; m <= 125; m++)
                                 {
-                                    S += A*(cos(2*M_PI*m/0.05*x[1] + tan(3.0*m))*cos(2*M_PI*m/0.05*x_2 + tan(3.0*m)));
+                                    S += A*(cos(2.0*M_PI*m/0.05*x[1] + tan(3.0*m))*cos(2.0*M_PI*m/0.05*x_2 + tan(5.0*m)));
                                 }
                                 
                                 double phi = computeRandomModeLocationSettings1(x[1], x_2);
