@@ -136,6 +136,42 @@ InitialConditions::initializeDataOnPatch(
                             }
                         }
                     }
+                    else if (d_project_name == "2D convergence test")
+                    {
+                        // Initialize data for a 2D density wave advection problem.
+                        double* rho   = density->getPointer(0);
+                        double* rho_u = momentum->getPointer(0);
+                        double* rho_v = momentum->getPointer(1);
+                        double* E     = total_energy->getPointer(0);
+                        
+                        double gamma = d_equation_of_state->getSpeciesThermodynamicProperty(
+                            "gamma",
+                            0);
+                        
+                        const double u_const = 1.0;
+                        const double v_const = 1.0;
+                        const double p_const = 1.0;
+                        
+                        for (int j = 0; j < patch_dims[1]; j++)
+                        {
+                            for (int i = 0; i < patch_dims[0]; i++)
+                            {
+                                // Compute index into linear data array.
+                                int idx_cell = i + j*patch_dims[0];
+                                
+                                // Compute the coordinates.
+                                double x[2];
+                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                
+                                rho[idx_cell]   = 1.0 + 0.5*sin(M_PI*(x[0] + x[1]));
+                                rho_u[idx_cell] = rho[idx_cell]*u_const;
+                                rho_v[idx_cell] = rho[idx_cell]*v_const;
+                                E[idx_cell]     = p_const/(gamma - 1.0) + 0.5*rho[idx_cell]*(u_const*u_const +
+                                    v_const*v_const);
+                            }
+                        }
+                    }
                     else if (d_project_name == "2D steady wedge flow")
                     {
                         // Initialize data for a 2D steady wedge flow problem.
