@@ -386,6 +386,11 @@ class Euler:
             std::ostream& os,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy) const;
         
+        void
+        printErrorStatistis2DConvergence(
+            std::ostream& os,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy) const;
+
         /*
          * Set the plotting context.
          */

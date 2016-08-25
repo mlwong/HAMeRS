@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
     tbox::plog << "input_filename = " << input_filename << std::endl;
     tbox::plog << "restart_read_dirname = " << restart_read_dirname << std::endl;
     tbox::plog << "restore_num = " << restore_num << std::endl;
-      
+
     /*
      * Create input database and parse all data in input file.
      */
@@ -697,6 +697,8 @@ int main(int argc, char *argv[])
     }
 #endif
     
+    Euler_model->printErrorStatistis2DConvergence(tbox::pout, patch_hierarchy);
+
     tbox::plog << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
     tbox::plog << std::endl;
     tbox::plog << "GriddingAlgorithm statistics:\n";

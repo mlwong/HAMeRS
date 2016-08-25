@@ -153,7 +153,6 @@ InitialConditions::initializeDataOnPatch(
                         const double v_const = 1.0;
                         const double p_const = 1.0;
                         
-                        const double pi = boost::math::constants::pi<double>();
                         for (int j = 0; j < patch_dims[1]; j++)
                         {
                             for (int i = 0; i < patch_dims[0]; i++)
@@ -163,10 +162,11 @@ InitialConditions::initializeDataOnPatch(
                                 
                                 // Compute the coordinates.
                                 double x[2];
+                                
                                 x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
                                 x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
                                 
-                                rho[idx_cell]   = 1.0 + 0.5*sin(pi*(x[0] + x[1]));
+                                rho[idx_cell]   = 1.0 + 0.5*sin(M_PI*(x[0] + x[1]));
                                 rho_u[idx_cell] = rho[idx_cell]*u_const;
                                 rho_v[idx_cell] = rho[idx_cell]*v_const;
                                 E[idx_cell]     = p_const/(gamma - 1.0) + 0.5*rho[idx_cell]*(u_const*u_const +
