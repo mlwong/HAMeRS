@@ -58,8 +58,8 @@ using namespace SAMRAI;
 /*
  ************************************************************************
  *
- * This is the main program for an AMR Euler gas dynamics application
- * built using SAMRAI.   The application program is constructed by
+ * This is the main program for an AMR gas dynamics application
+ * built using SAMRAI.  The application program is constructed by
  * composing a variety of algorithm objects found in SAMRAI plus some
  * others that are specific to this application.   The following brief
  * discussion summarizes these objects.
@@ -146,14 +146,6 @@ using namespace SAMRAI;
  *
  *          executable <input file name> <restart directory> \
  *                     <restart number>
- *
- * Accessory routines used within the main program:
- *
- *   dumpVizData1dPencil - Writes 1d pencil of Euler solution data
- *      to plot files so that it may be viewed in MatLab.  This
- *      routine assumes a single patch level in 2d and 3d.  In
- *      other words, it only plots data on level zero.  It can
- *      handle AMR in 1d.
  *
  *******************************************************************
  */
@@ -697,7 +689,10 @@ int main(int argc, char *argv[])
     }
 #endif
     
-    Euler_model->printErrorStatistis2DConvergence(tbox::pout, patch_hierarchy);
+    tbox::plog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
+    tbox::plog << std::endl;
+    tbox::plog << "Error statistics:\n";
+    Euler_model->printErrorStatistics(tbox::pout, patch_hierarchy);
 
     tbox::plog << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
     tbox::plog << std::endl;
@@ -734,3 +729,4 @@ int main(int argc, char *argv[])
    
     return 0;
 }
+

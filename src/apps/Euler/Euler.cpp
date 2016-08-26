@@ -1739,7 +1739,7 @@ void Euler::printClassData(std::ostream& os) const
 
 
 void
-Euler::printErrorStatistis2DConvergence(
+Euler::printErrorStatistics(
     std::ostream& os,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy) const
 {
@@ -1752,92 +1752,95 @@ Euler::printErrorStatistis2DConvergence(
     std::vector<boost::shared_ptr<pdat::CellVariable<double> > > variables =
         d_flow_model->getConservativeVariables();
     
-    for (int vi = 0; vi < static_cast<int>(variables.size()); vi++)
-    {
-        if (variable_names[vi] == "density")
+   if (d_project_name == "2D single-species convergence test")
+   {
+        for (int vi = 0; vi < static_cast<int>(variables.size()); vi++)
         {
-            boost::shared_ptr<hier::PatchLevel> level_root(
-                patch_hierarchy->getPatchLevel(0));
-            
-            double error_sum_local = 0.0;
-            double error_squared_sum_local = 0.0;
-            double error_max_local = 0.0;
-            
-            for (hier::PatchLevel::iterator ip(level_root->begin());
-                 ip != level_root->end();
-                 ip++)
+            if (variable_names[vi] == "density")
             {
-                const boost::shared_ptr<hier::Patch>& patch = *ip;
+                boost::shared_ptr<hier::PatchLevel> level_root(
+                    patch_hierarchy->getPatchLevel(0));
                 
-                // Get the dimensions of box that covers the interior of Patch.
-                hier::Box patch_box = patch->getBox();
-                const hier::IntVector patch_dims = patch_box.numberCells();
+                double error_sum_local = 0.0;
+                double error_squared_sum_local = 0.0;
+                double error_max_local = 0.0;
                 
-                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-                        patch->getPatchGeometry()));
-                
-                const double* const dx = patch_geom->getDx();
-                const double* const patch_xlo = patch_geom->getXLower();
-                
-                boost::shared_ptr<pdat::CellData<double> > density(
-                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                        patch->getPatchData(variables[vi], d_plot_context)));
-                
-                double* rho = density->getPointer(0);
-                
-                for (int j = 0; j < patch_dims[1]; j++)
+                for (hier::PatchLevel::iterator ip(level_root->begin());
+                     ip != level_root->end();
+                     ip++)
                 {
-                    for (int i = 0; i < patch_dims[0]; i++)
+                    const boost::shared_ptr<hier::Patch>& patch = *ip;
+                    
+                    // Get the dimensions of box that covers the interior of Patch.
+                    hier::Box patch_box = patch->getBox();
+                    const hier::IntVector patch_dims = patch_box.numberCells();
+                    
+                    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+                        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                            patch->getPatchGeometry()));
+                    
+                    const double* const dx = patch_geom->getDx();
+                    const double* const patch_xlo = patch_geom->getXLower();
+                    
+                    boost::shared_ptr<pdat::CellData<double> > density(
+                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch->getPatchData(variables[vi], d_plot_context)));
+                    
+                    double* rho = density->getPointer(0);
+                    
+                    for (int j = 0; j < patch_dims[1]; j++)
                     {
-                        // Compute index into linear data array.
-                        int idx_cell = i + j*patch_dims[0];
-                        
-                        // Compute the coordinates.
-                        double x[2];
-                        x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
-                        x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
-                        
-                        const double rho_exact   = 1.0 + 0.5*sin(M_PI*(x[0] + x[1]));
-                        const double error = fabs(rho_exact - rho[idx_cell]);
-                        
-                        error_sum_local += dx[0]*dx[0]*error;
-                        error_squared_sum_local += dx[0]*dx[0]*error*error;
-                        error_max_local = fmax(error, error_max_local);
+                        for (int i = 0; i < patch_dims[0]; i++)
+                        {
+                            // Compute index into linear data array.
+                            int idx_cell = i + j*patch_dims[0];
+                            
+                            // Compute the coordinates.
+                            double x[2];
+                            x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                            x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                            
+                            const double rho_exact   = 1.0 + 0.5*sin(M_PI*(x[0] + x[1]));
+                            const double error = fabs(rho_exact - rho[idx_cell]);
+                            
+                            error_sum_local += dx[0]*dx[0]*error;
+                            error_squared_sum_local += dx[0]*dx[0]*error*error;
+                            error_max_local = fmax(error, error_max_local);
+                        }
                     }
                 }
+                
+                double error_sum_global = 0.0;
+                double error_squared_sum_global = 0.0;
+                double error_max_global = 0.0;
+                
+                mpi.Allreduce(
+                    &error_sum_local,
+                    &error_sum_global,
+                    1,
+                    MPI_DOUBLE,
+                    MPI_SUM);
+                
+                mpi.Allreduce(
+                    &error_squared_sum_local,
+                    &error_squared_sum_global,
+                    1,
+                    MPI_DOUBLE,
+                    MPI_SUM);
+                
+                mpi.Allreduce(
+                    &error_max_local,
+                    &error_max_global,
+                    1,
+                    MPI_DOUBLE,
+                    MPI_MAX);
+                
+                
+                os.precision(17);
+                os << "L1_error: " << std::scientific << error_sum_global << std::endl;
+                os << "L2_error: " << std::scientific << sqrt(error_squared_sum_global) << std::endl;
+                os << "Linf_error: " << std::scientific << error_max_global << std::endl;
             }
-            
-            double error_sum_global = 0.0;
-            double error_squared_sum_global = 0.0;
-            double error_max_global = 0.0;
-            
-            mpi.Allreduce(
-                &error_sum_local,
-                &error_sum_global,
-                1,
-                MPI_DOUBLE,
-                MPI_SUM);
-            
-            mpi.Allreduce(
-                &error_squared_sum_local,
-                &error_squared_sum_global,
-                1,
-                MPI_DOUBLE,
-                MPI_SUM);
-            
-            mpi.Allreduce(
-                &error_max_local,
-                &error_max_global,
-                1,
-                MPI_DOUBLE,
-                MPI_MAX);
-            
-            
-            os.precision(17);
-            os << "L1_error: " << std::scientific << error_sum_global << std::endl;
-            os << "L2_error: " << std::scientific << sqrt(error_squared_sum_global) << std::endl;
-            os << "Linf_error: " << std::scientific << error_max_global << std::endl;
         }
     }
 }

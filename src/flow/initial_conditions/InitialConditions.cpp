@@ -137,7 +137,7 @@ InitialConditions::initializeDataOnPatch(
                             }
                         }
                     }
-                    else if (d_project_name == "2D convergence test")
+                    else if (d_project_name == "2D single-species convergence test")
                     {
                         // Initialize data for a 2D density wave advection problem.
                         double* rho   = density->getPointer(0);

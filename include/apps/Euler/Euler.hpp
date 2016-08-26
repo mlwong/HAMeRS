@@ -387,7 +387,7 @@ class Euler:
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy) const;
         
         void
-        printErrorStatistis2DConvergence(
+        printErrorStatistics(
             std::ostream& os,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy) const;
 
