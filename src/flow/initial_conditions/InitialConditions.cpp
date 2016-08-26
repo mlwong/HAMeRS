@@ -1607,9 +1607,8 @@ InitialConditions::initializeDataOnPatch(
                         const double L_x_interface = 0.2;
                         
                         // Perturbations due to S mode.
-                        const double A = 0.001/6.0; // Amplidtue.
-                        std::vector<double> m_values = {40, 43, 46, 49, 53, 56, 59, 62}; // Modes.
-
+                        const double A = 0.010908604022514/100.0; // Amplidtue.
+                        
                         for (int j = 0; j < patch_dims[1]; j++)
                         {
                             for (int i = 0; i < patch_dims[0]; i++)
@@ -1625,13 +1624,13 @@ InitialConditions::initializeDataOnPatch(
                                 const double x_2 = 0.0;
                                 
                                 double S = 0.0;
-                                for (int mi = 0; mi < 8; mi++)
+                                for (int m = 40; m <= 60; m++)
                                 {
-                                    int m = m_values[mi];
-                                    S += A*(cos(2.0*M_PI*m/0.05*x[1] + tan(3.0*m))*cos(2.0*M_PI*m/0.05*x_2 + tan(5.0*m)));
+                                    S += A*(cos(2.0*M_PI*m/0.05*x[1] + tan(7.0*m))*cos(2.0*M_PI*m/0.05*x_2 + tan(11.0*m)));
                                 }
                                 
-                                double phi = computeRandomModeLocationSettings1(x[1], x_2);
+                                // No noise.
+                                double phi = 0;
                                 
                                 if (x[0] < L_x_shock)
                                 {
@@ -1734,8 +1733,7 @@ InitialConditions::initializeDataOnPatch(
                         const double L_x_interface = 0.2;
                         
                         // Perturbations due to S mode.
-                        const double A = 0.001/6.0; // Amplidtue.
-                        std::vector<double> m_values = {30, 38, 45, 53, 60, 68, 75, 83}; // Modes.
+                        const double A = 0.010909085429025/100.0; // Amplidtue.
                         
                         for (int j = 0; j < patch_dims[1]; j++)
                         {
@@ -1752,13 +1750,13 @@ InitialConditions::initializeDataOnPatch(
                                 const double x_2 = 0.0;
                                 
                                 double S = 0.0;
-                                for (int mi = 0; mi < 8; mi++)
+                                for (int m = 35; m <= 75; m = m + 2)
                                 {
-                                    int m = m_values[mi];
-                                    S += A*(cos(2.0*M_PI*m/0.05*x[1] + tan(3.0*m))*cos(2.0*M_PI*m/0.05*x_2 + tan(5.0*m)));
+                                    S += A*(cos(2.0*M_PI*m/0.05*x[1] + tan(7.0*m))*cos(2.0*M_PI*m/0.05*x_2 + tan(11.0*m)));
                                 }
                                 
-                                double phi = computeRandomModeLocationSettings1(x[1], x_2);
+                                // No noise.
+                                double phi = 0.0;
                                 
                                 if (x[0] < L_x_shock)
                                 {
@@ -1861,8 +1859,7 @@ InitialConditions::initializeDataOnPatch(
                         const double L_x_interface = 0.2;
                         
                         // Perturbations due to S mode.
-                        const double A = 0.001/6.0; // Amplidtue.
-                        std::vector<double> m_values = {20, 35, 50, 65, 80, 95, 110, 125}; // Modes.
+                        const double A = 0.010910571416262/100.0; // Amplidtue.
                         
                         for (int j = 0; j < patch_dims[1]; j++)
                         {
@@ -1879,13 +1876,13 @@ InitialConditions::initializeDataOnPatch(
                                 const double x_2 = 0.0;
                                 
                                 double S = 0.0;
-                                for (int mi = 0; mi < 8; mi++)
+                                for (int m = 21; m <= 101; m = m + 4)
                                 {
-                                    int m = m_values[mi];
-                                    S += A*(cos(2.0*M_PI*m/0.05*x[1] + tan(3.0*m))*cos(2.0*M_PI*m/0.05*x_2 + tan(5.0*m)));
+                                    S += A*(cos(2.0*M_PI*m/0.05*x[1] + tan(7.0*m))*cos(2.0*M_PI*m/0.05*x_2 + tan(11.0*m)));
                                 }
                                 
-                                double phi = computeRandomModeLocationSettings1(x[1], x_2);
+                                // No noise.
+                                double phi = 0.0;
                                 
                                 if (x[0] < L_x_shock)
                                 {
@@ -1988,9 +1985,8 @@ InitialConditions::initializeDataOnPatch(
                         const double L_x_interface = 0.2;
                         
                         // Perturbations due to S mode.
-                        const double A = 0.001/2.0; // Amplidtue.
-                        std::vector<double> m_values = {40, 43, 46, 49, 53, 56, 59, 62}; // Modes.
-
+                        const double A = 0.020399836537432/100.0; // Amplidtue.
+                        
                         for (int j = 0; j < patch_dims[1]; j++)
                         {
                             for (int i = 0; i < patch_dims[0]; i++)
@@ -2006,13 +2002,13 @@ InitialConditions::initializeDataOnPatch(
                                 const double x_2 = 0.0;
                                 
                                 double S = 0.0;
-                                for (int mi = 0; mi < 8; mi++)
+                                for (int m = 40; m <= 60; m = m + 4)
                                 {
-                                    int m = m_values[mi];
-                                    S += A*(cos(2.0*M_PI*m/0.05*x[1] + tan(3.0*m))*cos(2.0*M_PI*m/0.05*x_2 + tan(5.0*m)));
+                                    S += A*(cos(2.0*M_PI*m/0.05*x[1] + tan(7.0*m))*cos(2.0*M_PI*m/0.05*x_2 + tan(11.0*m)));
                                 }
                                 
-                                double phi = computeRandomModeLocationSettings1(x[1], x_2);
+                                // No noise
+                                double phi = 0.0;
                                 
                                 if (x[0] < L_x_shock)
                                 {
@@ -2115,8 +2111,7 @@ InitialConditions::initializeDataOnPatch(
                         const double L_x_interface = 0.2;
                         
                         // Perturbations due to S mode.
-                        const double A = 0.001/2.0; // Amplidtue.
-                        std::vector<double> m_values = {30, 38, 45, 53, 60, 68, 75, 83}; // Modes.
+                        const double A = 0.020408963791132/100.0; // Amplidtue.
                         
                         for (int j = 0; j < patch_dims[1]; j++)
                         {
@@ -2133,13 +2128,13 @@ InitialConditions::initializeDataOnPatch(
                                 const double x_2 = 0.0;
                                 
                                 double S = 0.0;
-                                for (int mi = 0; mi < 8; mi++)
+                                for (int m = 35; m <= 75; m = m + 8)
                                 {
-                                    int m = m_values[mi];
-                                    S += A*(cos(2.0*M_PI*m/0.05*x[1] + tan(3.0*m))*cos(2.0*M_PI*m/0.05*x_2 + tan(5.0*m)));
+                                    S += A*(cos(2.0*M_PI*m/0.05*x[1] + tan(7.0*m))*cos(2.0*M_PI*m/0.05*x_2 + tan(11.0*m)));
                                 }
                                 
-                                double phi = computeRandomModeLocationSettings1(x[1], x_2);
+                                // No noise.
+                                double phi = 0.0;
                                 
                                 if (x[0] < L_x_shock)
                                 {
@@ -2242,8 +2237,7 @@ InitialConditions::initializeDataOnPatch(
                         const double L_x_interface = 0.2;
                         
                         // Perturbations due to S mode.
-                        const double A = 0.001/2.0; // Amplidtue.
-                        std::vector<double> m_values = {20, 35, 50, 65, 80, 95, 110, 125}; // Modes.
+                        const double A = 0.020408272525034/100.0; // Amplidtue.
                         
                         for (int j = 0; j < patch_dims[1]; j++)
                         {
@@ -2260,13 +2254,13 @@ InitialConditions::initializeDataOnPatch(
                                 const double x_2 = 0.0;
                                 
                                 double S = 0.0;
-                                for (int mi = 0; mi < 8; mi++)
+                                for (int m = 21; m <= 101; m = m + 16)
                                 {
-                                    int m = m_values[mi];
-                                    S += A*(cos(2.0*M_PI*m/0.05*x[1] + tan(3.0*m))*cos(2.0*M_PI*m/0.05*x_2 + tan(5.0*m)));
+                                    S += A*(cos(2.0*M_PI*m/0.05*x[1] + tan(7.0*m))*cos(2.0*M_PI*m/0.05*x_2 + tan(11.0*m)));
                                 }
                                 
-                                double phi = computeRandomModeLocationSettings1(x[1], x_2);
+                                // No noise.
+                                double phi = 0.0;
                                 
                                 if (x[0] < L_x_shock)
                                 {
