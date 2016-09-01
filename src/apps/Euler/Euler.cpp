@@ -1847,7 +1847,7 @@ Euler::printErrorStatistics(
     {
         for (int vi = 0; vi < static_cast<int>(variables.size()); vi++)
         {
-            if (variable_names[vi] == "partial_density")
+            if (variable_names[vi] == "volume fraction")
             {
                 boost::shared_ptr<hier::PatchLevel> level_root(
                 patch_hierarchy->getPatchLevel(0));
@@ -1873,11 +1873,11 @@ Euler::printErrorStatistics(
                     const double* const dx = patch_geom->getDx();
                     const double* const patch_xlo = patch_geom->getXLower();
                     
-                    boost::shared_ptr<pdat::CellData<double> > partial_density(
+                    boost::shared_ptr<pdat::CellData<double> > volume_fraction(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch->getPatchData(variables[vi], d_plot_context)));
                     
-                    double* Z_1 = partial_density->getPointer(0);
+                    double* Z_1 = volume_fraction->getPointer(0);
                     
                     for (int j = 0; j < patch_dims[1]; j++)
                     {
