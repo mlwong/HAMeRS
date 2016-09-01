@@ -3050,7 +3050,75 @@ InitialConditions::initializeDataOnPatch(
                 }
                 else if (d_dim == tbox::Dimension(2))
                 {
-                    if (d_project_name == "2D shock-bubble interaction")
+                    if (d_project_name == "2D multi-species convergence test")
+                    {
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Please provide only two-species for the problem"
+                                << " '2D multi-species convergence test'."
+                                << std::endl);
+                        }
+                        
+                        double* Z_rho_1   = partial_density->getPointer(0);
+                        double* Z_rho_2   = partial_density->getPointer(1);
+                        double* rho_u     = momentum->getPointer(0);
+                        double* rho_v     = momentum->getPointer(1);
+                        double* E         = total_energy->getPointer(0);
+                        double* Z_1       = volume_fraction->getPointer(0);
+                        double* Z_2       = volume_fraction->getPointer(1);
+                        
+                        // species a: gamma = 1.6
+                        // species b: gamma = 1.4
+                        const double gamma_a = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                0);
+                        
+                        const double gamma_b = d_equation_of_state->
+                            getSpeciesThermodynamicProperty(
+                                "gamma",
+                                1);
+                        
+                        const double rho_a = 2.0;
+                        const double rho_b = 1.0;
+                        const double u_const = 1.0;
+                        const double v_const = 1.0;
+                        const double p_const = 1.0;
+                        
+                        for (int j = 0; j < patch_dims[1]; j++)
+                        {
+                            for (int i = 0; i < patch_dims[0]; i++)
+                            {
+                                // Compute index into linear data array.
+                                int idx_cell = i + j*patch_dims[0];
+                                
+                                // Compute the coordinates.
+                                double x[2];
+                                
+                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                
+                                const double Z_a = 0.5 + 0.25*sin(M_PI*(x[0] + x[1]));
+                                const double Z_b = 1.0 - Z_a;
+                                
+                                const double rho = rho_a*Z_a + rho_b*Z_b;
+                                
+                                const double gamma_mixture = 1.0/(Z_a/(gamma_a - 1.0) + Z_b/(gamma_b - 1.0)) + 1.0;
+
+                                Z_rho_1[idx_cell] = rho_a*Z_a;
+                                Z_rho_2[idx_cell] = rho_b*Z_b;
+                                rho_u[idx_cell]   = rho*u_const;
+                                rho_v[idx_cell]   = rho*v_const;
+                                E[idx_cell]       = p_const/(gamma_mixture - 1.0) +
+                                    0.5*rho*(u_const*u_const + v_const*v_const);
+                                Z_1[idx_cell]     = Z_a;
+                                Z_2[idx_cell]     = Z_b;
+                            }
+                        }
+                    }
+                    else if (d_project_name == "2D shock-bubble interaction")
                     {
                         if (d_num_species != 2)
                         {
