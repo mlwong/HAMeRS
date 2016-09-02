@@ -851,7 +851,7 @@ InitialConditions::initializeDataOnPatch(
                         const double L_x_interface = 0.2;
                         
                         // Perturbations due to S mode.
-                        const double A = 0.021817208045028/100.0; // Amplidtue.
+                        const double A = 0.021820852817274/100.0; // Amplidtue.
                         
                         for (int j = 0; j < patch_dims[1]; j++)
                         {
@@ -977,7 +977,7 @@ InitialConditions::initializeDataOnPatch(
                         const double L_x_interface = 0.2;
                         
                         // Perturbations due to S mode.
-                        const double A = 0.021818170858049/100.0; // Amplidtue.
+                        const double A = 0.015616266738902/100.0; // Amplidtue.
                         
                         for (int j = 0; j < patch_dims[1]; j++)
                         {
@@ -994,7 +994,7 @@ InitialConditions::initializeDataOnPatch(
                                 const double x_2 = 0.0;
                                 
                                 double S = 0.0;
-                                for (int m = 35; m <= 75; m = m + 2)
+                                for (int m = 35; m <= 75; m++)
                                 {
                                     S += A*(cos(2.0*M_PI*m/0.05*x[1] + tan(7.0*m))*cos(2.0*M_PI*m/0.05*x_2 + tan(11.0*m)));
                                 }
@@ -1103,7 +1103,7 @@ InitialConditions::initializeDataOnPatch(
                         const double L_x_interface = 0.2;
                         
                         // Perturbations due to S mode.
-                        const double A = 0.021821142832523/100.0; // Amplidtue.
+                        const double A = 0.011110412729256/100.0; // Amplidtue.
                         
                         for (int j = 0; j < patch_dims[1]; j++)
                         {
@@ -1120,7 +1120,7 @@ InitialConditions::initializeDataOnPatch(
                                 const double x_2 = 0.0;
                                 
                                 double S = 0.0;
-                                for (int m = 21; m <= 101; m = m + 4)
+                                for (int m = 20; m <= 100; m++)
                                 {
                                     S += A*(cos(2.0*M_PI*m/0.05*x[1] + tan(7.0*m))*cos(2.0*M_PI*m/0.05*x_2 + tan(11.0*m)));
                                 }
@@ -1229,7 +1229,7 @@ InitialConditions::initializeDataOnPatch(
                         const double L_x_interface = 0.2;
                         
                         // Perturbations due to S mode.
-                        const double A = 0.040799673074864/100.0; // Amplidtue.
+                        const double A = 0.040819711273796/100.0; // Amplidtue.
                         
                         for (int j = 0; j < patch_dims[1]; j++)
                         {
@@ -1355,7 +1355,7 @@ InitialConditions::initializeDataOnPatch(
                         const double L_x_interface = 0.2;
                         
                         // Perturbations due to S mode.
-                        const double A = 0.040817927582263/100.0; // Amplidtue.
+                        const double A = 0.030149937921469/100.0; // Amplidtue.
                         
                         for (int j = 0; j < patch_dims[1]; j++)
                         {
@@ -1372,7 +1372,7 @@ InitialConditions::initializeDataOnPatch(
                                 const double x_2 = 0.0;
                                 
                                 double S = 0.0;
-                                for (int m = 35; m <= 75; m = m + 8)
+                                for (int m = 35; m <= 75; m = m + 4)
                                 {
                                     S += A*(cos(2.0*M_PI*m/0.05*x[1] + tan(7.0*m))*cos(2.0*M_PI*m/0.05*x_2 + tan(11.0*m)));
                                 }
@@ -1481,7 +1481,7 @@ InitialConditions::initializeDataOnPatch(
                         const double L_x_interface = 0.2;
                         
                         // Perturbations due to S mode.
-                        const double A = 0.040816545050069/100.0; // Amplidtue.
+                        const double A = 0.021819725732980/100.0; // Amplidtue.
                         
                         for (int j = 0; j < patch_dims[1]; j++)
                         {
@@ -1498,7 +1498,7 @@ InitialConditions::initializeDataOnPatch(
                                 const double x_2 = 0.0;
                                 
                                 double S = 0.0;
-                                for (int m = 21; m <= 101; m = m + 16)
+                                for (int m = 20; m <= 100; m = m + 4)
                                 {
                                     S += A*(cos(2.0*M_PI*m/0.05*x[1] + tan(7.0*m))*cos(2.0*M_PI*m/0.05*x_2 + tan(11.0*m)));
                                 }
