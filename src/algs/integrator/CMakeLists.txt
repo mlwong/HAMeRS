@@ -5,7 +5,6 @@ set(Runge_Kutta_level_integrator_source_files
     ExtendedTagAndInitializeConnectorWidthRequestor
     ExtendedTagAndInitStrategy.cpp
     RungeKuttaLevelIntegrator.cpp
-    GriddingAlgorithm.cpp
 )
 
 # Create a library called Runge_Kutta_level_integrator which includes the 

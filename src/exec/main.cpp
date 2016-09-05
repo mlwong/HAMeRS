@@ -27,13 +27,12 @@
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/hier/PatchHierarchy.h"
 #include "SAMRAI/mesh/BergerRigoutsos.h"
-// #include "SAMRAI/mesh/GriddingAlgorithm.h"
+#include "SAMRAI/mesh/GriddingAlgorithm.h"
 #include "SAMRAI/mesh/TreeLoadBalancer.h"
 
 // Headers for application-specific algorithm/data structure object
 
 #include "algs/integrator/ExtendedTagAndInitialize.hpp"
-#include "algs/integrator/GriddingAlgorithm.hpp"
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
 #include "apps/Euler/Euler.hpp"
 
