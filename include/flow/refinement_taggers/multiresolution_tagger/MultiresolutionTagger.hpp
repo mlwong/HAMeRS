@@ -191,9 +191,6 @@ class MultiresolutionTagger
         std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_density_wavelet_coeffs;
         std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_total_energy_wavelet_coeffs;
         std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_pressure_wavelet_coeffs;
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_dilatation_wavelet_coeffs;
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_enstrophy_wavelet_coeffs;
-        std::vector<std::vector<boost::shared_ptr<pdat::CellVariable<double> > > > d_Harten_mass_fraction_wavelet_coeffs;
         
         /*
          * Statistics of sensor values.
@@ -201,23 +198,14 @@ class MultiresolutionTagger
         std::vector<double> d_Harten_density_wavelet_coeffs_maxs;
         std::vector<double> d_Harten_total_energy_wavelet_coeffs_maxs;
         std::vector<double> d_Harten_pressure_wavelet_coeffs_maxs;
-        std::vector<double> d_Harten_dilatation_wavelet_coeffs_maxs;
-        std::vector<double> d_Harten_enstrophy_wavelet_coeffs_maxs;
-        std::vector<std::vector<double> > d_Harten_mass_fraction_wavelet_coeffs_maxs;
         
         std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_density_local_means;
         std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_total_energy_local_means;
         std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_pressure_local_means;
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_dilatation_local_means;
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_enstrophy_local_means;
-        std::vector<std::vector<boost::shared_ptr<pdat::CellVariable<double> > > > d_Harten_mass_fraction_local_means;
         
         boost::shared_ptr<pdat::CellVariable<double> > d_Harten_density_Lipschitz_exponent;
         boost::shared_ptr<pdat::CellVariable<double> > d_Harten_total_energy_Lipschitz_exponent;
         boost::shared_ptr<pdat::CellVariable<double> > d_Harten_pressure_Lipschitz_exponent;
-        boost::shared_ptr<pdat::CellVariable<double> > d_Harten_dilatation_Lipschitz_exponent;
-        boost::shared_ptr<pdat::CellVariable<double> > d_Harten_enstrophy_Lipschitz_exponent;
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_mass_fraction_Lipschitz_exponent;
         
 };
 
