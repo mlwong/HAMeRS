@@ -12,7 +12,6 @@ The code consists of the families of explicit high-order WCNS (Weighted Compact 
 Git is used for the version control of the code. To install Git on Debian-based distribution like Ubuntu, try apt-get:
 
 $ sudo apt-get install git-all
-<br>
 
 To code can be downloaded from the repository by:
 
