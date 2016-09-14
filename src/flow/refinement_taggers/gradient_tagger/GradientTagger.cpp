@@ -619,7 +619,7 @@ GradientTagger::tagCells(
 
 
 /*
- * Tag cells using gradient sensor.
+ * Tag cells using value of gradient sensor.
  */
 void
 GradientTagger::tagCellsWithGradientSensor(

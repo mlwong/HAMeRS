@@ -79,7 +79,7 @@ class GradientTagger
         
     private:
         /*
-         * Tag cells using gradient sensor.
+         * Tag cells using value of gradient sensor.
          */
         void
         tagCellsWithGradientSensor(
@@ -105,7 +105,7 @@ class GradientTagger
         const boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
         
         /*
-         * Number of ghost cells needed by the the gradient detector.
+         * Number of ghost cells needed by the the gradient tagger.
          */
         hier::IntVector d_num_gradient_ghosts;
         
@@ -130,20 +130,17 @@ class GradientTagger
         boost::shared_ptr<GradientSensorJameson> d_gradient_sensor_Jameson;
         
         /*
-         * Variables and tolerances for the gradient sensor.
+         * Variables and tolerances for the gradient sensors.
          */
         std::vector<std::string> d_Jameson_gradient_variables;
         std::vector<double> d_Jameson_gradient_tol;
         
         /*
-         * boost::shared_ptr to Jameson's gradient.
+         * boost::shared_ptr to values of Jameson's gradient sensor.
          */
         boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_density_gradient;
         boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_total_energy_gradient;
         boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_pressure_gradient;
-        boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_dilatation_gradient;
-        boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_enstrophy_gradient;
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Jameson_mass_fraction_gradient;
         
 };
 

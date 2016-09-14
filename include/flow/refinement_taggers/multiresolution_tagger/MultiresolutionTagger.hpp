@@ -144,7 +144,7 @@ class MultiresolutionTagger
         const boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
         
         /*
-         * Number of ghost cells needed by the the multiresolution detector.
+         * Number of ghost cells needed by the the multiresolution tagger.
          */
         hier::IntVector d_num_multiresolution_ghosts;
         
@@ -169,13 +169,13 @@ class MultiresolutionTagger
         boost::shared_ptr<WaveletTransformHarten> d_wavelet_transfrom_Harten;
         
         /*
-         * Number of levels and number of vanishing moments of WaveletTransformHarten.
+         * Number of levels and number of vanishing moments for WaveletTransformHarten.
          */
         int d_Harten_wavelet_num_level;
         int d_Harten_wavelet_num_vanishing_moments;
         
         /*
-         * Variables, tolerances and settings for the multiresolution sensor.
+         * Variables, tolerances and settings for the multiresolution sensors.
          */
         std::vector<std::string> d_Harten_wavelet_variables;
         std::vector<double> d_Harten_wavelet_global_tol;
