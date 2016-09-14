@@ -763,6 +763,18 @@ MultiresolutionTagger::printClassData(std::ostream& os) const
             }
         }
         os << std::endl;
+        
+        os << "d_Harten_wavelet_uses_global_tol = ";
+        if (d_Harten_wavelet_uses_global_tol)
+        {
+            os << "True";
+        }
+        else
+        {
+            os << "False";
+        }
+        os << std::endl;
+
         os << "d_Harten_wavelet_global_tol = ";
         for (int ti = 0; ti < static_cast<int>(d_Harten_wavelet_global_tol.size()); ti++)
         {
@@ -774,6 +786,42 @@ MultiresolutionTagger::printClassData(std::ostream& os) const
             }
         }
         os << std::endl;
+        
+        os << "d_Harten_wavelet_uses_local_tol = ";
+        if (d_Harten_wavelet_uses_local_tol)
+        {
+            os << "True";
+        }
+        else
+        {
+            os << "False";
+        }
+        os << std::endl;
+        
+        os << "d_Harten_wavelet_local_tol = ";
+        for (int ti = 0; ti < static_cast<int>(d_Harten_wavelet_local_tol.size()); ti++)
+        {
+            os << "\"" << d_Harten_wavelet_local_tol[ti] << "\"";
+            
+            if (ti < static_cast<int>(d_Harten_wavelet_local_tol.size()) - 1)
+            {
+                os << ", ";
+            }
+        }
+        os << std::endl;
+
+        
+        os << "d_Harten_wavelet_uses_alpha_tol = ";
+         if (d_Harten_wavelet_uses_alpha_tol)
+        {
+            os << "True";
+        }
+        else
+        {
+            os << "False";
+        }
+        os << std::endl;
+              
         os << "d_Harten_wavelet_alpha_tol = ";
         for (int ti = 0; ti < static_cast<int>(d_Harten_wavelet_alpha_tol.size()); ti++)
         {
