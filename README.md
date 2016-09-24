@@ -46,4 +46,4 @@ $ mpirun -np <number of processors> src/exec/main <input filename>
 
 ### Who do I talk to? ###
 
-The code is managed by Man Long, Wong of the UFPA lab (Unsteady Flow Physics and Aeroacoustics Laboratory) at Stanford University. If you have any questions, please feel free to contact Man Long at wongml@stanford.edu.
+The code is managed by Man Long, Wong of the FPAL (Flow Physics and Aeroacoustics Laboratory) at Stanford University. If you have any questions, please feel free to contact Man Long at wongml@stanford.edu.
