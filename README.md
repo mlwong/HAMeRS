@@ -50,3 +50,8 @@ To run the code in parallel, you need OpenMPI/MPI. You can try mpirun:
 ### Who do I talk to? ###
 
 The code is managed by Man-Long Wong of the FPAL (Flow Physics and Aeroacoustics Laboratory) at Stanford University. If you have any questions, please feel free to contact Man-Long(wongml@stanford.edu).
+
+### Copyright ###
+HAMeRS is licensed under a  GNU Lesser General Public License.
+
+![200px-LGPLv3_Logo.svg.png](https://bitbucket.org/repo/zzaMX8/images/2322095073-200px-LGPLv3_Logo.svg.png)
