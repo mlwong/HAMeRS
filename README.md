@@ -4,7 +4,7 @@
 
 HAMeRS (High-performance Adaptive Mesh Refinement Solver) is a compressible Navier-Stokes/Euler solver with the AMR (Adaptive Mesh Refinement) technique. The parallelization of the code and all the construction, management and storage of cells are facilitated by the SAMRAI (Structured Adaptive Mesh Refinement Application Infrastructure) library from the Lawrence Livermore National Lab (computation.llnl.gov/project/SAMRAI/).
 
-The code consists of the families of explicit high-order WCNS (Weighted Compact Nonlinear Scheme) finite difference shock-capturing schemes for simulating shock waves, material interfaces, and turbulent features. The AMR algorithm implemented is based on the one developed by Berger et al. The figure below summarizes the algorithm:
+The code consists of the families of explicit high-order finite difference shock-capturing WCNS's (Weighted Compact Nonlinear Scheme) for capturing shock waves, material interfaces, and turbulent features. The AMR algorithm implemented is based on the one developed by Berger et al. The figure below summarizes the algorithm:
 
 ![AMR_flowchart.png](https://bitbucket.org/repo/zzaMX8/images/1112047813-AMR_flowchart.png)
 
