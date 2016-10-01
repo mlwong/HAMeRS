@@ -16,7 +16,7 @@ Git is used for the version control of the code. To install Git on Debian-based 
 
 To code can be downloaded from the repository by:
 
-> $ git clone https://yourname@bitbucket.org/yourname/hamers.git
+> $ git clone https://yourname@bitbucket.org/manlong/hamers.git
 
 
 To compile the code, in general all you need is to use cmake and then make. For example:
