@@ -8,6 +8,8 @@ The code consists of the families of explicit high-order WCNS (Weighted Compact 
 
 ![AMR_flowchart.png](https://bitbucket.org/repo/zzaMX8/images/4147608442-AMR_flowchart.png)
 
+* The iterative algorithm is started by calling advanceLevel() at level l = 0
+
 ### How do I get set up? ###
 
 Git is used for the version control of the code. To install Git on Debian-based distribution like Ubuntu, try apt-get:
