@@ -40,10 +40,13 @@ using namespace SAMRAI;
  * schedules, for example, which depend on the configuration of the AMR
  * patch hierarchy.  Other routines are virtual here and given default
  * implementations as they are specific to only one type of error estimation
- * method.  Gradient detector functionality requires an implementation of
- * the applyGradientDetector() routine. Multiresolution detector functionality
- * requires an implementation of the applyMultiresolutionDetector() routine.
- * The Richardson extrapolation method requires implementations of the methods:
+ * method. Value detector functionality requires an implementation of the
+ * applyValueDetector() routine. Gradient detector functionality requires an
+ * implementation of the applyGradientDetector() routine. Multiresolution
+ * detector functionality requires an implementation of the
+ * applyMultiresolutionDetector() routine. Integral detector functionality
+ * requires an implementation of the applyIntegralDetector() routine. The
+ * Richardson extrapolation method requires implementations of the methods:
  * applyRichardsonExtrapolation(), coarsenDataForRichardsonExtrapolation(),
  * getLevelDt(), advanceLevel(), resetTimeDependentData(), and
  * resetDataToPreadvanceState().
@@ -237,6 +240,54 @@ class ExtendedTagAndInitStrategy
         
         /**
          * Set integer tags to "one" in cells where refinement of the given
+         * level should occur according to some user-supplied value criteria.
+         * The double time argument is the regrid time.  The integer "tag_index"
+         * argument is the patch descriptor index of the cell-centered integer tag
+         * array on each patch in the hierarchy.  The boolean argument
+         * initial_time indicates whether the level is being subject to refinement
+         * at the initial simulation time.  If it is false, then the error
+         * estimation process is being invoked at some later time after the AMR
+         * hierarchy was initially constructed.  Typically, this information is
+         * passed to the user's patch tagging routines since the error
+         * estimator or value detector may be different in each case.
+         *
+         * The boolean uses_gradient_detector_too is true when gradient detector
+         * is used in addition to the value detector, and false otherwise.  This
+         * argument helps the user to manage multiple regridding criteria.
+         *
+         * The boolean uses_multiresolution_detector_too is true when
+         * multiresolution detector is used in addition to the value detector,
+         * and false otherwise.  This argument helps the user to manage multiple
+         * regridding criteria.
+         *
+         * The boolean uses_integral_detector_too is true when integral detector
+         * is used in addition to the value detector, and false otherwise.  This
+         * argument helps the user to manage multiple regridding criteria.
+         * 
+         * The boolean uses_richardson_extrapolation_too is true when Richardson
+         * extrapolation error estimation is used in addition to the value
+         * detector, and false otherwise.  This argument helps the user to
+         * manage multiple regridding criteria.
+         *
+         * This routine is only when value detector is being used.
+         * It is virtual with an empty implementation here (rather than pure
+         * virtual) so that users are not required to provide an implementation
+         * when the function is not needed.
+         */
+        virtual void
+        applyValueDetector(
+            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const int level_number,
+            const double error_data_time,
+            const int tag_index,
+            const bool initial_time,
+            const bool uses_gradient_detector_too,
+            const bool uses_multiresolution_detector_too,
+            const bool uses_integral_detector_too,
+            const bool uses_richardson_extrapolation_too);
+        
+        /**
+         * Set integer tags to "one" in cells where refinement of the given
          * level should occur according to some user-supplied gradient criteria.
          * The double time argument is the regrid time.  The integer "tag_index"
          * argument is the patch descriptor index of the cell-centered integer tag
@@ -248,15 +299,18 @@ class ExtendedTagAndInitStrategy
          * passed to the user's patch tagging routines since the error
          * estimator or gradient detector may be different in each case.
          *
+         * The boolean uses_value_detector_too is true when value detector is
+         * used in addition to the gradient detector, and false otherwise.  This
+         * argument helps the user to manage multiple regridding criteria.
+         *
          * The boolean uses_multiresolution_detector_too is true when
          * multiresolution detector is used in addition to the gradient
          * detector, and false otherwise.  This argument helps the user to
          * manage multiple regridding criteria.
          *
-         * The boolean uses_integral_detector_too is true when integral
-         * detector is used in addition to the gradient detector, and false
-         * otherwise.  This argument helps the user to manage multiple regridding
-         * criteria.
+         * The boolean uses_integral_detector_too is true when integral detector
+         * is used in addition to the gradient detector, and false otherwise.
+         * This argument helps the user to manage multiple regridding criteria.
          * 
          * The boolean uses_richardson_extrapolation_too is true when Richardson
          * extrapolation error estimation is used in addition to the gradient
@@ -275,6 +329,7 @@ class ExtendedTagAndInitStrategy
             const double error_data_time,
             const int tag_index,
             const bool initial_time,
+            const bool uses_value_detector_too,
             const bool uses_multiresolution_detector_too,
             const bool uses_integral_detector_too,
             const bool uses_richardson_extrapolation_too);
@@ -292,10 +347,13 @@ class ExtendedTagAndInitStrategy
          * passed to the user's patch tagging routines since the error
          * estimator or multiresolution detector may be different in each case.
          *
-         * The boolean uses_gradient_detector_too is true when
-         * gradient detector is used in addition to the multiresolution
-         * detector, and false otherwise.  This argument helps the user to
-         * manage multiple regridding criteria.
+         * The boolean uses_value_detector_too is true when value detector is used
+         * in addition to the multiresolution detector, and false otherwise.  This
+         * argument helps the user to manage multiple regridding criteria.
+         *
+         * The boolean uses_gradient_detector_too is true when gradient detector is
+         * used in addition to the multiresolution detector, and false otherwise.
+         * This argument helps the user to manage multiple regridding criteria.
          *
          * The boolean uses_integral_detector_too is true when integral detector
          * is used in addition to the multiresolution detector, and false
@@ -319,6 +377,7 @@ class ExtendedTagAndInitStrategy
             const double error_data_time,
             const int tag_index,
             const bool initial_time,
+            const bool uses_value_detector_too,
             const bool uses_gradient_detector_too,
             const bool uses_integral_detector_too,
             const bool uses_richardson_extrapolation_too);
@@ -335,6 +394,15 @@ class ExtendedTagAndInitStrategy
          * hierarchy was initially constructed.  Typically, this information is
          * passed to the user's patch tagging routines since the error
          * estimator or integral detector may be different in each case.
+         *
+         * The boolean uses_value_detector_too is true when value detector
+         * is used in addition to the integral detector, and false otherwise.
+         * This argument helps the user to manage multiple regridding criteria.
+         *
+         * The boolean uses_multiresolution_detector_too is true when multiresolution
+         * detector is used in addition to the integral detector, and false
+         * otherwise.  This argument helps the user to manage multiple regridding
+         * criteria.
          *
          * The boolean uses_gradient_detector_too is true when gradient detector
          * is used in addition to the integral detector, and false otherwise.
@@ -362,6 +430,7 @@ class ExtendedTagAndInitStrategy
             const double error_data_time,
             const int tag_index,
             const bool initial_time,
+            const bool uses_value_detector_too,
             const bool uses_gradient_detector_too,
             const bool uses_multiresolution_detector_too,
             const bool uses_richardson_extrapolation_too);
@@ -387,12 +456,15 @@ class ExtendedTagAndInitStrategy
          * application of the Richardson extrapolation process may be different
          * in each case.
          *
-         * The boolean uses_gradient_detector_too is true when a gradient
-         * detector procedure is used in addition to Richardson extrapolation,
-         * and false otherwise.  This argument helps the user to manage multiple
-         * regridding criteria.
+         * The boolean uses_value_detector_too is true when a value detector
+         * is used in addition to Richardson extrapolation, and false otherwise.
+         * This argument helps the user to manage multiple regridding criteria.
          *
-         * The boolean uses_multiresolution_detector_too is true when
+         * The boolean uses_gradient_detector_too is true when a gradient detector
+         * is used in addition to Richardson extrapolation, and false otherwise.
+         * This argument helps the user to manage multiple regridding criteria.
+         *
+         * The boolean uses_multiresolution_detector_too is true when a
          * multiresolution detector is used in addition to the Richardson
          * extrapolation, and false otherwise.  This argument helps the user to
          * manage multiple regridding criteria.
@@ -415,6 +487,7 @@ class ExtendedTagAndInitStrategy
             const double deltat,
             const int error_coarsen_ratio,
             const bool initial_time,
+            const bool uses_value_detector_too,
             const bool uses_gradient_detector_too,
             const bool uses_multiresolution_detector_too,
             const bool uses_integral_detector_too);
@@ -502,3 +575,4 @@ class ExtendedTagAndInitStrategy
 };
 
 #endif /* EXTENDED_TAG_AND_INIT_STRATEGY_HPP */
+

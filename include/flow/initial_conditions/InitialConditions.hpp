@@ -11,7 +11,6 @@
 #include "SAMRAI/tbox/Dimension.h"
 
 #include "flow/flow_models/FlowModels.hpp"
-#include "util/equations_of_state/EquationsOfState.hpp"
 
 #include "boost/shared_ptr.hpp"
 #include <string>
@@ -28,15 +27,13 @@ class InitialConditions
             const tbox::Dimension& dim,
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
             const FLOW_MODEL_LABEL& flow_model_label,
-            const int& num_species,
-            const boost::shared_ptr<EquationOfState>& equation_of_state):
+            const int& num_species):
                 d_object_name(object_name),
                 d_project_name(project_name),
                 d_dim(dim),
                 d_grid_geometry(grid_geometry),
                 d_flow_model_label(flow_model_label),
                 d_num_species(num_species),
-                d_equation_of_state(equation_of_state),
                 d_variables_set(false)
         {}
         
@@ -128,20 +125,6 @@ class InitialConditions
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
     private:
-        double
-        computeRandomModeLocationSettings1(
-            const double& y,
-            const double& z);
-        
-        double
-        computePhiModeLocation2D(
-            const double& x_1);
-
-        double
-        computePhiModeLocation3D(
-            const double& x_1,
-            const double& x_2);
-
         /*
          * The object name is used for error/warning reporting.
          */
@@ -171,11 +154,6 @@ class InitialConditions
          * Number of species.
          */
         const int d_num_species;
-        
-        /*
-         * boost::shared_ptr to EquationOfState.
-         */
-        const boost::shared_ptr<EquationOfState> d_equation_of_state;
         
         /*
          * boost::shared_ptr to solution state.

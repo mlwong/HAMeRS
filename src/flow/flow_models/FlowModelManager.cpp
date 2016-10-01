@@ -5,17 +5,15 @@ FlowModelManager::FlowModelManager(
     const tbox::Dimension& dim,
     const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
     const int& num_species,
-    const boost::shared_ptr<EquationOfState>& equation_of_state,
+    const boost::shared_ptr<tbox::Database>& flow_model_db,
     const std::string& flow_model_str):
         d_object_name(object_name),
         d_dim(dim),
         d_grid_geometry(grid_geometry),
-        d_num_species(num_species),
-        d_equation_of_state(equation_of_state)
+        d_num_species(num_species)
 {
     TBOX_ASSERT(!object_name.empty());
     TBOX_ASSERT(grid_geometry);
-    TBOX_ASSERT(equation_of_state);
     
     if (flow_model_str == "SINGLE_SPECIES")
     {
@@ -27,7 +25,7 @@ FlowModelManager::FlowModelManager(
             d_grid_geometry,
             hier::IntVector::getZero(d_dim),
             d_num_species,
-            d_equation_of_state));
+            flow_model_db));
     }
     else if (flow_model_str == "FOUR_EQN_CONSERVATIVE")
     {
@@ -39,7 +37,7 @@ FlowModelManager::FlowModelManager(
             d_grid_geometry,
             hier::IntVector::getZero(d_dim),
             d_num_species,
-            d_equation_of_state));
+            flow_model_db));
     }
     else if (flow_model_str == "FIVE_EQN_ALLAIRE")
     {
@@ -51,7 +49,7 @@ FlowModelManager::FlowModelManager(
             d_grid_geometry,
             hier::IntVector::getZero(d_dim),
             d_num_species,
-            d_equation_of_state));
+            flow_model_db));
     }
     else
     {
@@ -89,8 +87,7 @@ FlowModelManager::initializeInitialConditions(
         d_dim,
         d_grid_geometry,
         d_flow_model_label,
-        d_num_species,
-        d_equation_of_state));
+        d_num_species));
     
     d_initial_conditions = initial_conditions;
     
@@ -124,6 +121,9 @@ FlowModelManager::printClassData(std::ostream& os) const
     os << "d_flow_model_label = "
        << d_flow_model_label
        << std::endl;
+    
+    os << "================================================================================";
+    d_flow_model->printClassData(os);
 }
 
 

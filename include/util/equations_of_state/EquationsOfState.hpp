@@ -1,7 +1,8 @@
 #ifndef EQUATIONS_OF_STATE_HPP
 #define EQUATIONS_OF_STATE_HPP
 
-#include "util/equations_of_state/EquationOfStateIdealGas.hpp"
+#include "util/equations_of_state/ideal_gas/EquationOfStateIdealGas.hpp"
+#include "util/equations_of_state/ideal_gas/EquationOfStateMixingRulesIdealGas.hpp"
 
 #include <map>
 #include <string>

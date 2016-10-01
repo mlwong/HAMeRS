@@ -130,6 +130,14 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInXDirectionFromConservative
     TBOX_ASSERT(static_cast<int>(Q_R.size()) == d_num_eqn);
 #endif
     
+    // Get the thermodynamic properties of the species.
+    std::vector<const double*> thermo_properties_ptr;
+    thermo_properties_ptr.reserve(static_cast<int> (d_thermo_properties.size()));
+    for (int ti = 0; ti < static_cast<int> (d_thermo_properties.size()); ti++)
+    {
+        thermo_properties_ptr.push_back(&d_thermo_properties[ti]);
+    }
+    
     if (d_dim == tbox::Dimension(1))
     {
         const double u_L = (Q_L[1].get())/(Q_L[0].get());
@@ -145,20 +153,24 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInXDirectionFromConservative
         const double p_L = d_equation_of_state->getPressure(
             &(Q_L[0].get()),
             m_L,
-            &(Q_L[2].get()));
+            &(Q_L[2].get()),
+            thermo_properties_ptr);
         
         const double p_R = d_equation_of_state->getPressure(
             &(Q_R[0].get()),
             m_R,
-            &(Q_R[2].get()));
+            &(Q_R[2].get()),
+            thermo_properties_ptr);
         
-        const double c_L = d_equation_of_state->getSoundSpeedWithPressure(
+        const double c_L = d_equation_of_state->getSoundSpeed(
             &(Q_L[0].get()),
-            &p_L);
+            &p_L,
+            thermo_properties_ptr);
         
-        const double c_R = d_equation_of_state->getSoundSpeedWithPressure(
+        const double c_R = d_equation_of_state->getSoundSpeed(
             &(Q_R[0].get()),
-            &p_R);
+            &p_R,
+            thermo_properties_ptr);
         
         const double u_average = 0.5*(u_L + u_R);
         const double c_average = 0.5*(c_L + c_R);
@@ -230,20 +242,24 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInXDirectionFromConservative
         const double p_L = d_equation_of_state->getPressure(
             &(Q_L[0].get()),
             m_L,
-            &(Q_L[3].get()));
+            &(Q_L[3].get()),
+            thermo_properties_ptr);
         
         const double p_R = d_equation_of_state->getPressure(
             &(Q_R[0].get()),
             m_R,
-            &(Q_R[3].get()));
+            &(Q_R[3].get()),
+            thermo_properties_ptr);
         
-        const double c_L = d_equation_of_state->getSoundSpeedWithPressure(
+        const double c_L = d_equation_of_state->getSoundSpeed(
             &(Q_L[0].get()),
-            &p_L);
+            &p_L,
+            thermo_properties_ptr);
         
-        const double c_R = d_equation_of_state->getSoundSpeedWithPressure(
+        const double c_R = d_equation_of_state->getSoundSpeed(
             &(Q_R[0].get()),
-            &p_R);
+            &p_R,
+            thermo_properties_ptr);
         
         const double u_average = 0.5*(u_L + u_R);
         const double c_average = 0.5*(c_L + c_R);
@@ -320,20 +336,24 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInXDirectionFromConservative
         const double p_L = d_equation_of_state->getPressure(
             &(Q_L[0].get()),
             m_L,
-            &(Q_L[4].get()));
+            &(Q_L[4].get()),
+            thermo_properties_ptr);
         
         const double p_R = d_equation_of_state->getPressure(
             &(Q_R[0].get()),
             m_R,
-            &(Q_R[4].get()));
+            &(Q_R[4].get()),
+            thermo_properties_ptr);
         
-        const double c_L = d_equation_of_state->getSoundSpeedWithPressure(
+        const double c_L = d_equation_of_state->getSoundSpeed(
             &(Q_L[0].get()),
-            &p_L);
+            &p_L,
+            thermo_properties_ptr);
         
-        const double c_R = d_equation_of_state->getSoundSpeedWithPressure(
+        const double c_R = d_equation_of_state->getSoundSpeed(
             &(Q_R[0].get()),
-            &p_R);
+            &p_R,
+            thermo_properties_ptr);
         
         const double u_average = 0.5*(u_L + u_R);
         const double c_average = 0.5*(c_L + c_R);
@@ -414,6 +434,14 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInYDirectionFromConservative
     TBOX_ASSERT(static_cast<int>(Q_T.size()) == d_num_eqn);
 #endif
     
+    // Get the thermodynamic properties of the species.
+    std::vector<const double*> thermo_properties_ptr;
+    thermo_properties_ptr.reserve(static_cast<int> (d_thermo_properties.size()));
+    for (int ti = 0; ti < static_cast<int> (d_thermo_properties.size()); ti++)
+    {
+        thermo_properties_ptr.push_back(&d_thermo_properties[ti]);
+    }
+    
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
@@ -439,20 +467,24 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInYDirectionFromConservative
         const double p_B = d_equation_of_state->getPressure(
             &(Q_B[0].get()),
             m_B,
-            &(Q_B[3].get()));
+            &(Q_B[3].get()),
+            thermo_properties_ptr);
         
         const double p_T = d_equation_of_state->getPressure(
             &(Q_T[0].get()),
             m_T,
-            &(Q_T[3].get()));
+            &(Q_T[3].get()),
+            thermo_properties_ptr);
         
-        const double c_B = d_equation_of_state->getSoundSpeedWithPressure(
+        const double c_B = d_equation_of_state->getSoundSpeed(
             &(Q_B[0].get()),
-            &p_B);
+            &p_B,
+            thermo_properties_ptr);
         
-        const double c_T = d_equation_of_state->getSoundSpeedWithPressure(
+        const double c_T = d_equation_of_state->getSoundSpeed(
             &(Q_T[0].get()),
-            &p_T);
+            &p_T,
+            thermo_properties_ptr);
         
         const double v_average = 0.5*(v_B + v_T);
         const double c_average = 0.5*(c_B + c_T);
@@ -529,20 +561,24 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInYDirectionFromConservative
         const double p_B = d_equation_of_state->getPressure(
             &(Q_B[0].get()),
             m_B,
-            &(Q_B[4].get()));
+            &(Q_B[4].get()),
+            thermo_properties_ptr);
         
         const double p_T = d_equation_of_state->getPressure(
             &(Q_T[0].get()),
             m_T,
-            &(Q_T[4].get()));
+            &(Q_T[4].get()),
+            thermo_properties_ptr);
         
-        const double c_B = d_equation_of_state->getSoundSpeedWithPressure(
+        const double c_B = d_equation_of_state->getSoundSpeed(
             &(Q_B[0].get()),
-            &p_B);
+            &p_B,
+            thermo_properties_ptr);
         
-        const double c_T = d_equation_of_state->getSoundSpeedWithPressure(
+        const double c_T = d_equation_of_state->getSoundSpeed(
             &(Q_T[0].get()),
-            &p_T);
+            &p_T,
+            thermo_properties_ptr);
         
         const double v_average = 0.5*(v_B + v_T);
         const double c_average = 0.5*(c_B + c_T);
@@ -623,6 +659,14 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInZDirectionFromConservative
     TBOX_ASSERT(static_cast<int>(Q_F.size()) == d_num_eqn);
 #endif
     
+    // Get the thermodynamic properties of the species.
+    std::vector<const double*> thermo_properties_ptr;
+    thermo_properties_ptr.reserve(static_cast<int> (d_thermo_properties.size()));
+    for (int ti = 0; ti < static_cast<int> (d_thermo_properties.size()); ti++)
+    {
+        thermo_properties_ptr.push_back(&d_thermo_properties[ti]);
+    }
+    
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
@@ -658,20 +702,24 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInZDirectionFromConservative
         const double p_B = d_equation_of_state->getPressure(
             &(Q_B[0].get()),
             m_B,
-            &(Q_B[4].get()));
+            &(Q_B[4].get()),
+            thermo_properties_ptr);
         
         const double p_F = d_equation_of_state->getPressure(
             &(Q_F[0].get()),
             m_F,
-            &(Q_F[4].get()));
+            &(Q_F[4].get()),
+            thermo_properties_ptr);
         
-        const double c_B = d_equation_of_state->getSoundSpeedWithPressure(
+        const double c_B = d_equation_of_state->getSoundSpeed(
             &(Q_B[0].get()),
-            &p_B);
+            &p_B,
+            thermo_properties_ptr);
         
-        const double c_F = d_equation_of_state->getSoundSpeedWithPressure(
+        const double c_F = d_equation_of_state->getSoundSpeed(
             &(Q_F[0].get()),
-            &p_F);
+            &p_F,
+            thermo_properties_ptr);
         
         const double w_average = 0.5*(w_B + w_F);
         const double c_average = 0.5*(c_B + c_F);
@@ -752,15 +800,25 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInXDirectionFromPrimitiveVar
     TBOX_ASSERT(static_cast<int>(V_R.size()) == d_num_eqn);
 #endif
     
+    // Get the thermodynamic properties of the species.
+    std::vector<const double*> thermo_properties_ptr;
+    thermo_properties_ptr.reserve(static_cast<int> (d_thermo_properties.size()));
+    for (int ti = 0; ti < static_cast<int> (d_thermo_properties.size()); ti++)
+    {
+        thermo_properties_ptr.push_back(&d_thermo_properties[ti]);
+    }
+    
     if (d_dim == tbox::Dimension(1))
     {
-        const double c_L = d_equation_of_state->getSoundSpeedWithPressure(
+        const double c_L = d_equation_of_state->getSoundSpeed(
             &(V_L[0].get()),
-            &(V_L[2].get()));
+            &(V_L[2].get()),
+            thermo_properties_ptr);
         
-        const double c_R = d_equation_of_state->getSoundSpeedWithPressure(
+        const double c_R = d_equation_of_state->getSoundSpeed(
             &(V_R[0].get()),
-            &(V_R[2].get()));
+            &(V_R[2].get()),
+            thermo_properties_ptr);
         
         const double u_average = 0.5*((V_L[1].get()) + (V_R[1].get()));
         const double c_average = 0.5*(c_L + c_R);
@@ -790,7 +848,8 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInXDirectionFromPrimitiveVar
             Q_L[2] = d_equation_of_state->getTotalEnergy(
                 &(V_L[0].get()),
                 vel_L,
-                &(V_L[2].get()));
+                &(V_L[2].get()),
+                thermo_properties_ptr);
             
             double Q_star_L[d_num_eqn];
             Q_star_L[0] = Chi_star_L*(V_L[0].get());
@@ -822,7 +881,8 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInXDirectionFromPrimitiveVar
             Q_R[2] = d_equation_of_state->getTotalEnergy(
                 &(V_R[0].get()),
                 vel_R,
-                &(V_R[2].get()));
+                &(V_R[2].get()),
+                thermo_properties_ptr);
             
             double Q_star_R[d_num_eqn];
             Q_star_R[0] = Chi_star_R*(V_R[0].get());
@@ -843,13 +903,15 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInXDirectionFromPrimitiveVar
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        const double c_L = d_equation_of_state->getSoundSpeedWithPressure(
+        const double c_L = d_equation_of_state->getSoundSpeed(
             &(V_L[0].get()),
-            &(V_L[3].get()));
+            &(V_L[3].get()),
+            thermo_properties_ptr);
         
-        const double c_R = d_equation_of_state->getSoundSpeedWithPressure(
+        const double c_R = d_equation_of_state->getSoundSpeed(
             &(V_R[0].get()),
-            &(V_R[3].get()));
+            &(V_R[3].get()),
+            thermo_properties_ptr);
         
         const double u_average = 0.5*((V_L[1].get()) + (V_R[1].get()));
         const double c_average = 0.5*(c_L + c_R);
@@ -881,7 +943,8 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInXDirectionFromPrimitiveVar
             Q_L[3] = d_equation_of_state->getTotalEnergy(
                 &(V_L[0].get()),
                 vel_L,
-                &(V_L[3].get()));
+                &(V_L[3].get()),
+                thermo_properties_ptr);
             
             double Q_star_L[d_num_eqn];
             Q_star_L[0] = Chi_star_L*(V_L[0].get());
@@ -917,7 +980,8 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInXDirectionFromPrimitiveVar
             Q_R[3] = d_equation_of_state->getTotalEnergy(
                 &(V_R[0].get()),
                 vel_R,
-                &(V_R[3].get()));
+                &(V_R[3].get()),
+                thermo_properties_ptr);
             
             double Q_star_R[d_num_eqn];
             Q_star_R[0] = Chi_star_R*(V_R[0].get());
@@ -940,13 +1004,15 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInXDirectionFromPrimitiveVar
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        const double c_L = d_equation_of_state->getSoundSpeedWithPressure(
+        const double c_L = d_equation_of_state->getSoundSpeed(
             &(V_L[0].get()),
-            &(V_L[4].get()));
+            &(V_L[4].get()),
+            thermo_properties_ptr);
         
-        const double c_R = d_equation_of_state->getSoundSpeedWithPressure(
+        const double c_R = d_equation_of_state->getSoundSpeed(
             &(V_R[0].get()),
-            &(V_R[4].get()));
+            &(V_R[4].get()),
+            thermo_properties_ptr);
         
         const double u_average = 0.5*((V_L[1].get()) + (V_R[1].get()));
         const double c_average = 0.5*(c_L + c_R);
@@ -980,7 +1046,8 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInXDirectionFromPrimitiveVar
             Q_L[4] = d_equation_of_state->getTotalEnergy(
                 &(V_L[0].get()),
                 vel_L,
-                &(V_L[4].get()));
+                &(V_L[4].get()),
+                thermo_properties_ptr);
             
             double Q_star_L[d_num_eqn];
             Q_star_L[0] = Chi_star_L*(V_L[0].get());
@@ -1020,7 +1087,8 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInXDirectionFromPrimitiveVar
             Q_R[4] = d_equation_of_state->getTotalEnergy(
                 &(V_R[0].get()),
                 vel_R,
-                &(V_R[4].get()));
+                &(V_R[4].get()),
+                thermo_properties_ptr);
             
             double Q_star_R[d_num_eqn];
             Q_star_R[0] = Chi_star_R*(V_R[0].get());
@@ -1062,6 +1130,14 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInYDirectionFromPrimitiveVar
     TBOX_ASSERT(static_cast<int>(V_T.size()) == d_num_eqn);
 #endif
     
+    // Get the thermodynamic properties of the species.
+    std::vector<const double*> thermo_properties_ptr;
+    thermo_properties_ptr.reserve(static_cast<int> (d_thermo_properties.size()));
+    for (int ti = 0; ti < static_cast<int> (d_thermo_properties.size()); ti++)
+    {
+        thermo_properties_ptr.push_back(&d_thermo_properties[ti]);
+    }
+    
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
@@ -1072,13 +1148,15 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInYDirectionFromPrimitiveVar
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        const double c_B = d_equation_of_state->getSoundSpeedWithPressure(
+        const double c_B = d_equation_of_state->getSoundSpeed(
             &(V_B[0].get()),
-            &(V_B[3].get()));
+            &(V_B[3].get()),
+            thermo_properties_ptr);
         
-        const double c_T = d_equation_of_state->getSoundSpeedWithPressure(
+        const double c_T = d_equation_of_state->getSoundSpeed(
             &(V_T[0].get()),
-            &(V_T[3].get()));
+            &(V_T[3].get()),
+            thermo_properties_ptr);
         
         const double v_average = 0.5*((V_B[2].get()) + (V_T[2].get()));
         const double c_average = 0.5*(c_B + c_T);
@@ -1110,7 +1188,8 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInYDirectionFromPrimitiveVar
             Q_B[3] = d_equation_of_state->getTotalEnergy(
                 &(V_B[0].get()),
                 vel_B,
-                &(V_B[3].get()));
+                &(V_B[3].get()),
+                thermo_properties_ptr);
             
             double Q_star_B[d_num_eqn];
             Q_star_B[0] = Chi_star_B*(V_B[0].get());
@@ -1146,7 +1225,8 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInYDirectionFromPrimitiveVar
             Q_T[3] = d_equation_of_state->getTotalEnergy(
                 &(V_T[0].get()),
                 vel_T,
-                &(V_T[3].get()));
+                &(V_T[3].get()),
+                thermo_properties_ptr);
             
             double Q_star_T[d_num_eqn];
             Q_star_T[0] = Chi_star_T*(V_T[0].get());
@@ -1169,13 +1249,15 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInYDirectionFromPrimitiveVar
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        const double c_B = d_equation_of_state->getSoundSpeedWithPressure(
+        const double c_B = d_equation_of_state->getSoundSpeed(
             &(V_B[0].get()),
-            &(V_B[4].get()));
+            &(V_B[4].get()),
+            thermo_properties_ptr);
         
-        const double c_T = d_equation_of_state->getSoundSpeedWithPressure(
+        const double c_T = d_equation_of_state->getSoundSpeed(
             &(V_T[0].get()),
-            &(V_T[4].get()));
+            &(V_T[4].get()),
+            thermo_properties_ptr);
         
         const double v_average = 0.5*((V_B[2].get()) + (V_T[2].get()));
         const double c_average = 0.5*(c_B + c_T);
@@ -1209,7 +1291,8 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInYDirectionFromPrimitiveVar
             Q_B[4] = d_equation_of_state->getTotalEnergy(
                 &(V_B[0].get()),
                 vel_B,
-                &(V_B[4].get()));
+                &(V_B[4].get()),
+                thermo_properties_ptr);
             
             double Q_star_B[d_num_eqn];
             Q_star_B[0] = Chi_star_B*(V_B[0].get());
@@ -1249,7 +1332,8 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInYDirectionFromPrimitiveVar
             Q_T[4] = d_equation_of_state->getTotalEnergy(
                 &(V_T[0].get()),
                 vel_T,
-                &(V_T[4].get()));
+                &(V_T[4].get()),
+                thermo_properties_ptr);
             
             double Q_star_T[d_num_eqn];
             Q_star_T[0] = Chi_star_T*(V_T[0].get());
@@ -1291,6 +1375,14 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInZDirectionFromPrimitiveVar
     TBOX_ASSERT(static_cast<int>(V_F.size()) == d_num_eqn);
 #endif
     
+    // Get the thermodynamic properties of the species.
+    std::vector<const double*> thermo_properties_ptr;
+    thermo_properties_ptr.reserve(static_cast<int> (d_thermo_properties.size()));
+    for (int ti = 0; ti < static_cast<int> (d_thermo_properties.size()); ti++)
+    {
+        thermo_properties_ptr.push_back(&d_thermo_properties[ti]);
+    }
+    
     if (d_dim == tbox::Dimension(1))
     {
         TBOX_ERROR(d_object_name
@@ -1309,13 +1401,15 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInZDirectionFromPrimitiveVar
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        const double c_B = d_equation_of_state->getSoundSpeedWithPressure(
+        const double c_B = d_equation_of_state->getSoundSpeed(
             &(V_B[0].get()),
-            &(V_B[4].get()));
+            &(V_B[4].get()),
+            thermo_properties_ptr);
         
-        const double c_F = d_equation_of_state->getSoundSpeedWithPressure(
+        const double c_F = d_equation_of_state->getSoundSpeed(
             &(V_F[0].get()),
-            &(V_F[4].get()));
+            &(V_F[4].get()),
+            thermo_properties_ptr);
         
         const double w_average = 0.5*((V_B[3].get()) + (V_F[3].get()));
         const double c_average = 0.5*(c_B + c_F);
@@ -1349,7 +1443,8 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInZDirectionFromPrimitiveVar
             Q_B[4] = d_equation_of_state->getTotalEnergy(
                 &(V_B[0].get()),
                 vel_B,
-                &(V_B[4].get()));
+                &(V_B[4].get()),
+                thermo_properties_ptr);
             
             double Q_star_B[d_num_eqn];
             Q_star_B[0] = Chi_star_B*(V_B[0].get());
@@ -1389,7 +1484,8 @@ RiemannSolverSingleSpeciesHLLC::computeIntercellFluxInZDirectionFromPrimitiveVar
             Q_F[4] = d_equation_of_state->getTotalEnergy(
                 &(V_F[0].get()),
                 vel_F,
-                &(V_F[4].get()));
+                &(V_F[4].get()),
+                thermo_properties_ptr);
             
             double Q_star_F[d_num_eqn];
             Q_star_F[0] = Chi_star_F*(V_F[0].get());

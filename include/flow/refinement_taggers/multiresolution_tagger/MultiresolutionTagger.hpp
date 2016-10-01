@@ -93,7 +93,7 @@ class MultiresolutionTagger
         void
         tagCells(
             hier::Patch& patch,
-            boost::shared_ptr<pdat::CellData<int> > tags,
+            boost::shared_ptr<pdat::CellData<int> >& tags,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
     private:
@@ -106,7 +106,7 @@ class MultiresolutionTagger
         void
         tagCellsWithWaveletSensor(
             hier::Patch& patch,
-            boost::shared_ptr<pdat::CellData<int> > tags,
+            boost::shared_ptr<pdat::CellData<int> >& tags,
             std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
             std::vector<double>& wavelet_coeffs_maxs,
             std::vector<boost::shared_ptr<pdat::CellData<double> > >& variable_local_means,

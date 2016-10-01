@@ -35,6 +35,7 @@ using namespace SAMRAI;
  * hierarchy levels change and routines for tagging cells for refinement
  * using one (or more) of the following methods:
  *
+ *   - Value Detection
  *   - Gradient Detection
  *   - Multiresolution Detection
  *   - Integral Detection
@@ -43,11 +44,11 @@ using namespace SAMRAI;
  *
  * Tagging methods may be activated at specific cycles and/or times.
  * It is possible to use combinations of the tagging methods (e.g., use
- * gradient detection, multiresolution, Richardson extrapolation, and static
- * refine boxes at the same cycle/time).  The order in which they are executed
- * is fixed (Richardson extrapolation first, multiresolution detection second,
- * gradient detection third and refine boxes fourth). An input entry for this
- * class is optional.
+ * value detection, gradient detection, multiresolution detection, Richardson
+ * extrapolation, and static refine boxes at the same cycle/time).  The order
+ * in which they are executed is fixed (Richardson extrapolation first,
+ * multiresolution detection second, gradient detection third, value detection
+ * fourth and refine boxes last). An input entry for this class is optional.
  * If none is provided, the class will, by default, not use any criteria
  * to tag cells for refinement and issue a warning.
  *
@@ -68,7 +69,8 @@ using namespace SAMRAI;
  *         - \b tag_0
  *           first tagging method in this set of tagging methods
  *              - \b tagging_method = one of RICHARDSON_EXTRAPOLATION,
- *                                    GRADIENT_DETECTOR, REFINE_BOXES, NONE
+ *                                    MULTIRESOLUTION_DETECTOR, GRADIENT_DETECTOR
+ *                                    VALUE_DETECTOR, REFINE_BOXES, NONE
  *              - \b level_m
  *                required if tagging_method is REFINE_BOXES, the static boxes
  *                for the mth level
@@ -95,9 +97,9 @@ using namespace SAMRAI;
  *       "level_m" database.
  *
  *       It is possible to use a "shortcut" input syntax for extremely
- *       simple tagging criteria.  If you only want RICHARDSON_EXTRAPOLATION
- *       or GRADIENT_DETECTOR on for the entire simulation then an input
- *       of the following form may be used:
+ *       simple tagging criteria.  If you only want RICHARDSON_EXTRAPOLATION,
+ *       MULTIRESOLUTION_DETECTOR, GRADIENT_DETECTOR, VALUE_DETECTOR on for
+ *       the entire simulation then an input of the following form may be used:
  *
  * @code
  *    tagging_method = RICHARDSON_EXTRAPOLATION
@@ -280,6 +282,22 @@ class ExtendedTagAndInitialize:
          */
         bool
         usesGradientDetector(
+            int cycle,
+            double time);
+        
+        /*!
+         * Returns true if value detector is used at any cycle or time.
+         */
+        bool
+        everUsesValueDetector() const;
+        
+        /*!
+         * Returns true if value detector is used at the supplied cycle and time.
+         *
+         * @pre !d_use_cycle_criteria || !d_use_time_criteria
+         */
+        bool
+        usesValueDetector(
             int cycle,
             double time);
         
@@ -482,6 +500,28 @@ class ExtendedTagAndInitialize:
          */
         void
         turnOffRefineBoxes(
+            double time);
+
+        /*!
+         * Turn on value detector criteria at the specified time
+         * programmatically.
+         *
+         * @param time Time to turn value detector criteria on.
+         *
+         * @pre d_tag_strategy
+         */
+        void
+        turnOnValueDetector(
+            double time);
+        
+        /*!
+         * Turn off value detector criteria at the specified time
+         * programmatically.
+         *
+         * @param time Time to turn value detector criteria off.
+         */
+        void
+        turnOffValueDetector(
             double time);
         
         /*!
@@ -789,6 +829,11 @@ class ExtendedTagAndInitialize:
          * Flag indicating if any tagging criteria is GRADIENT_DETECTOR.
          */
         bool d_ever_uses_gradient_detector;
+        
+        /*
+         * Flag indicating if any tagging criteria is VALUE_DETECTOR.
+         */
+        bool d_ever_uses_value_detector;
         
         /*
          * Flag indicating if any tagging criteria is REFINE_BOXES.

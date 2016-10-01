@@ -2,7 +2,6 @@
 #define FLOW_MODEL_FOUR_EQN_CONSERVATIVE_HPP
 
 #include "flow/flow_models/FlowModel.hpp"
-
 #include "flow/flow_models/Riemann_solvers/RiemannSolverFourEqnConservativeHLLC.hpp"
 #include "flow/flow_models/Riemann_solvers/RiemannSolverFourEqnConservativeHLLC_HLL.hpp"
 
@@ -15,7 +14,7 @@ class FlowModelFourEqnConservative: public FlowModel
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
             const hier::IntVector& num_ghosts,
             const int& num_species,
-            const boost::shared_ptr<EquationOfState>& equation_of_state);
+            const boost::shared_ptr<tbox::Database>& flow_model_db);
         
         ~FlowModelFourEqnConservative() {}
         
@@ -300,9 +299,16 @@ class FlowModelFourEqnConservative: public FlowModel
         void computeGlobalCellDataMassFractionWithDensity();
         
         /*
-         * Compute the global cell data of pressure with density and mass fraction in the registered patch.
+         * Compute the global cell data of mixture thermodynamic properties with density and mass fraction
+         * in the registered patch.
          */
-        void computeGlobalCellDataPressureWithDensityAndMassFraction();
+        void computeGlobalCellDataMixtureThermoPropertiesWithDensityAndMassFraction();
+        
+        /*
+         * Compute the global cell data of pressure with density, mass fraction and mixture thermodynamic
+         * properties in the registered patch.
+         */
+        void computeGlobalCellDataPressureWithDensityMassFractionAndMixtureThermoProperties();
         
         /*
          * Compute the global cell data of velocity with density in the registered patch.
@@ -310,10 +316,11 @@ class FlowModelFourEqnConservative: public FlowModel
         void computeGlobalCellDataVelocityWithDensity();
         
         /*
-         * Compute the global cell data of sound speed with density, mass fraction and pressure in the registered
+         * Compute the global cell data of sound speed with density, mass fraction, mixture thermodynamic
+         * properties and pressure in the registered
          * patch.
          */
-        void computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
+        void computeGlobalCellDataSoundSpeedWithDensityMassFractionMixtureThermoPropertiesAndPressure();
         
         /*
          * Compute the global cell data of dilatation with density and velocity in the registered patch.
@@ -331,16 +338,18 @@ class FlowModelFourEqnConservative: public FlowModel
         void computeGlobalCellDataEnstrophyWithDensityVelocityAndVorticity();
         
         /*
-         * Compute the global cell data of convective flux with density, mass fraction, pressure and velocity in the
-         * registered patch.
+         * Compute the global cell data of convective flux with density, mass fraction, mixture thermodynamic properties,
+         * pressure and velocity in the registered patch.
          */
-        void computeGlobalCellDataConvectiveFluxWithDensityMassFractionPressureAndVelocity(DIRECTION direction);
+        void computeGlobalCellDataConvectiveFluxWithDensityMassFractionMixtureThermoPropertiesPressureAndVelocity(
+            DIRECTION direction);
         
         /*
-         * Compute the global cell data of maximum wave speed with density, mass fraction, pressure, velocity and
-         * sound speed in the registered patch.
+         * Compute the global cell data of maximum wave speed with density, mass fraction, mixture thermodynamic
+         * properties, pressure, velocity and sound speed in the registered patch.
          */
-        void computeGlobalCellDataMaxWaveSpeedWithDensityMassFractionPressureVelocityAndSoundSpeed(DIRECTION direction);
+        void computeGlobalCellDataMaxWaveSpeedWithDensityMassFractionMixtureThermoPropertiesPressureVelocityAndSoundSpeed(
+            DIRECTION direction);
         
         /*
          * boost::shared_ptr to registered conservative variables.
@@ -354,6 +363,7 @@ class FlowModelFourEqnConservative: public FlowModel
          */
         hier::IntVector d_num_subghosts_density;
         hier::IntVector d_num_subghosts_mass_fraction;
+        hier::IntVector d_num_subghosts_mixture_thermo_properties;
         hier::IntVector d_num_subghosts_pressure;
         hier::IntVector d_num_subghosts_velocity;
         hier::IntVector d_num_subghosts_sound_speed;
@@ -372,6 +382,7 @@ class FlowModelFourEqnConservative: public FlowModel
          */
         hier::Box d_subghost_box_density;
         hier::Box d_subghost_box_mass_fraction;
+        hier::Box d_subghost_box_mixture_thermo_properties;
         hier::Box d_subghost_box_pressure;
         hier::Box d_subghost_box_velocity;
         hier::Box d_subghost_box_sound_speed;
@@ -390,6 +401,7 @@ class FlowModelFourEqnConservative: public FlowModel
          */
         hier::IntVector d_subghostcell_dims_density;
         hier::IntVector d_subghostcell_dims_mass_fraction;
+        hier::IntVector d_subghostcell_dims_mixture_thermo_properties;
         hier::IntVector d_subghostcell_dims_pressure;
         hier::IntVector d_subghostcell_dims_velocity;
         hier::IntVector d_subghostcell_dims_sound_speed;
@@ -408,6 +420,7 @@ class FlowModelFourEqnConservative: public FlowModel
          */
         boost::shared_ptr<pdat::CellData<double> > d_data_density;
         boost::shared_ptr<pdat::CellData<double> > d_data_mass_fraction;
+        boost::shared_ptr<pdat::CellData<double> > d_data_mixture_thermo_properties;
         boost::shared_ptr<pdat::CellData<double> > d_data_pressure;
         boost::shared_ptr<pdat::CellData<double> > d_data_velocity;
         boost::shared_ptr<pdat::CellData<double> > d_data_sound_speed;
@@ -422,10 +435,10 @@ class FlowModelFourEqnConservative: public FlowModel
         boost::shared_ptr<pdat::CellData<double> > d_data_max_wave_speed_z;
         
         /*
-         * Riemann solvers.
+         * boost::shared_ptr to Riemann solvers.
          */
-        RiemannSolverFourEqnConservativeHLLC     d_Riemann_solver_HLLC;
-        RiemannSolverFourEqnConservativeHLLC_HLL d_Riemann_solver_HLLC_HLL;
+        boost::shared_ptr<RiemannSolverFourEqnConservativeHLLC>     d_Riemann_solver_HLLC;
+        boost::shared_ptr<RiemannSolverFourEqnConservativeHLLC_HLL> d_Riemann_solver_HLLC_HLL;
         
         /*
          * Upper and lower bounds on variables.

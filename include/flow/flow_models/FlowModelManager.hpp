@@ -15,7 +15,6 @@
 
 #include "flow/flow_models/FlowModels.hpp"
 #include "flow/initial_conditions/InitialConditions.hpp"
-#include "util/equations_of_state/EquationsOfState.hpp"
 
 #include "boost/shared_ptr.hpp"
 #include <string>
@@ -31,7 +30,7 @@ class FlowModelManager
             const tbox::Dimension& dim,
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
-            const boost::shared_ptr<EquationOfState>& equation_of_state,
+            const boost::shared_ptr<tbox::Database>& flow_model_db,
             const std::string& flow_model_str);
         
         /*
@@ -102,11 +101,6 @@ class FlowModelManager
          * Number of species.
          */
         const int d_num_species;
-        
-        /*
-         * boost::shared_ptr to EquationOfState.
-         */
-        boost::shared_ptr<EquationOfState> d_equation_of_state;
         
         /*
          * boost::shared_ptr to InitialConditions.

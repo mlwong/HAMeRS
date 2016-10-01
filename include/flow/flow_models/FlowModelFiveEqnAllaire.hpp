@@ -2,7 +2,6 @@
 #define FLOW_MODEL_FIVE_EQN_ALLAIRE_HPP
 
 #include "flow/flow_models/FlowModel.hpp"
-
 #include "flow/flow_models/Riemann_solvers/RiemannSolverFiveEqnAllaireHLLC.hpp"
 #include "flow/flow_models/Riemann_solvers/RiemannSolverFiveEqnAllaireHLLC_HLL.hpp"
 
@@ -15,7 +14,7 @@ class FlowModelFiveEqnAllaire: public FlowModel
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
             const hier::IntVector& num_ghosts,
             const int& num_species,
-            const boost::shared_ptr<EquationOfState>& equation_of_state);
+            const boost::shared_ptr<tbox::Database>& flow_model_db);
         
         ~FlowModelFiveEqnAllaire() {}
         
@@ -301,14 +300,19 @@ class FlowModelFiveEqnAllaire: public FlowModel
         void computeGlobalCellDataDensity();
         
         /*
+         * Compute the global cell data of mixture thermodynamic properties in the registered patch.
+         */
+        void computeGlobalCellDataMixtureThermoProperties();
+        
+        /*
          * Compute the global cell data of mass fraction with density in the registered patch.
          */
         void computeGlobalCellDataMassFractionWithDensity();
         
         /*
-         * Compute the global cell data of pressure with density in the registered patch.
+         * Compute the global cell data of pressure with density and mixture thermodynamic properties in the registered patch.
          */
-        void computeGlobalCellDataPressureWithDensity();
+        void computeGlobalCellDataPressureWithDensityAndMixtureThermoProperties();
         
         /*
          * Compute the global cell data of velocity with density in the registered patch.
@@ -316,9 +320,10 @@ class FlowModelFiveEqnAllaire: public FlowModel
         void computeGlobalCellDataVelocityWithDensity();
         
         /*
-         * Compute the global cell data of sound speed with density and pressure in the registered patch.
+         * Compute the global cell data of sound speed with density, mixture thermodynamic properties,
+         * and pressure in the registered patch.
          */
-        void computeGlobalCellDataSoundSpeedWithDensityAndPressure();
+        void computeGlobalCellDataSoundSpeedWithDensityMixtureThermoPropertiesAndPressure();
         
         /*
          * Compute the global cell data of dilatation with density and velocity in the registered patch.
@@ -336,15 +341,18 @@ class FlowModelFiveEqnAllaire: public FlowModel
         void computeGlobalCellDataEnstrophyWithDensityVelocityAndVorticity();
         
         /*
-         * Compute the global cell data of convective flux with pressure and velocity in the registered patch.
+         * Compute the global cell data of convective flux with density, mixture thermodynamic properties,
+         * pressure and velocity in the registered patch.
          */
-        void computeGlobalCellDataConvectiveFluxWithDensityPressureAndVelocity(DIRECTION direction);
+        void computeGlobalCellDataConvectiveFluxWithDensityMixtureThermoPropertiesPressureAndVelocity(
+            DIRECTION direction);
         
         /*
-         * Compute the global cell data of maximum wave speed with density, pressure, velocity and sound speed
-         * in the registered patch.
+         * Compute the global cell data of maximum wave speed with density, mixture thermodynamic properties,
+         * pressure, velocity and sound speed in the registered patch.
          */
-        void computeGlobalCellDataMaxWaveSpeedWithDensityPressureVelocityAndSoundSpeed(DIRECTION direction);
+        void computeGlobalCellDataMaxWaveSpeedWithDensityMixtureThermoPropertiesPressureVelocityAndSoundSpeed(
+            DIRECTION direction);
         
         /*
          * boost::shared_ptr to registered conservative variables.
@@ -358,6 +366,7 @@ class FlowModelFiveEqnAllaire: public FlowModel
          * Number of sub-ghost cells of derived cell data.
          */
         hier::IntVector d_num_subghosts_density;
+        hier::IntVector d_num_subghosts_mixture_thermo_properties;
         hier::IntVector d_num_subghosts_mass_fraction;
         hier::IntVector d_num_subghosts_pressure;
         hier::IntVector d_num_subghosts_velocity;
@@ -376,6 +385,7 @@ class FlowModelFiveEqnAllaire: public FlowModel
          * Boxes with sub-ghost cells of derived cell data.
          */
         hier::Box d_subghost_box_density;
+        hier::Box d_subghost_box_mixture_thermo_properties;
         hier::Box d_subghost_box_mass_fraction;
         hier::Box d_subghost_box_pressure;
         hier::Box d_subghost_box_velocity;
@@ -394,6 +404,7 @@ class FlowModelFiveEqnAllaire: public FlowModel
          * Dimensions of boxes with sub-ghost cells of derived cell data.
          */
         hier::IntVector d_subghostcell_dims_density;
+        hier::IntVector d_subghostcell_dims_mixture_thermo_properties;
         hier::IntVector d_subghostcell_dims_mass_fraction;
         hier::IntVector d_subghostcell_dims_pressure;
         hier::IntVector d_subghostcell_dims_velocity;
@@ -412,6 +423,7 @@ class FlowModelFiveEqnAllaire: public FlowModel
          * boost::shared_ptr to derived cell data.
          */
         boost::shared_ptr<pdat::CellData<double> > d_data_density;
+        boost::shared_ptr<pdat::CellData<double> > d_data_mixture_thermo_properties;
         boost::shared_ptr<pdat::CellData<double> > d_data_mass_fraction;
         boost::shared_ptr<pdat::CellData<double> > d_data_pressure;
         boost::shared_ptr<pdat::CellData<double> > d_data_velocity;
@@ -427,10 +439,10 @@ class FlowModelFiveEqnAllaire: public FlowModel
         boost::shared_ptr<pdat::CellData<double> > d_data_max_wave_speed_z;
         
         /*
-         * Riemann solvers.
+         * boost::shared_ptr to Riemann solvers.
          */
-        RiemannSolverFiveEqnAllaireHLLC     d_Riemann_solver_HLLC;
-        RiemannSolverFiveEqnAllaireHLLC_HLL d_Riemann_solver_HLLC_HLL;
+        boost::shared_ptr<RiemannSolverFiveEqnAllaireHLLC>     d_Riemann_solver_HLLC;
+        boost::shared_ptr<RiemannSolverFiveEqnAllaireHLLC_HLL> d_Riemann_solver_HLLC_HLL;
         
         /*
          * Upper and lower bounds on variables.

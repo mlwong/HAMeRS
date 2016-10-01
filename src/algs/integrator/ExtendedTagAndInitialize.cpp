@@ -105,6 +105,7 @@ ExtendedTagAndInitialize::ExtendedTagAndInitialize(
     d_ever_uses_integral_detector(false),
     d_ever_uses_multiresolution_detector(false),
     d_ever_uses_gradient_detector(false),
+    d_ever_uses_value_detector(false),
     d_ever_uses_refine_boxes(false),
     d_boxes_changed(false),
     d_old_cycle(-1)
@@ -119,19 +120,21 @@ ExtendedTagAndInitialize::ExtendedTagAndInitialize(
     /*
      * If the user wishes to only use the REFINE_BOXES tagging option,
      * the registered strategy class may be null.  In order to use
-     * the GRADIENT_DETECTOR, MULTIRESOLUTION_DETECTOR, INTEGRAL_DETECTOR or
-     * RICHARDSON_EXTRAPOLATION options, the registered ExtendedTagAndInitStrategy
-     * must be non-NULL.
+     * the VALUE_DETECTOR, GRADIENT_DETECTOR, MULTIRESOLUTION_DETECTOR,
+     * INTEGRAL_DETECTOR or RICHARDSON_EXTRAPOLATION options, the registered
+     * ExtendedTagAndInitStrategy must be non-NULL.
      */
     if ((d_ever_uses_richardson_extrapolation || d_ever_uses_integral_detector ||
-         d_ever_uses_multiresolution_detector || d_ever_uses_gradient_detector) &&
+         d_ever_uses_multiresolution_detector || d_ever_uses_gradient_detector ||
+         d_ever_uses_value_detector) &&
         tag_strategy == 0)
     {
         TBOX_ERROR(getObjectName()
             << ":constructor "
             << "\nThe supplied implementation of the "
             << "\nExtendedTagAndInitStrategy is NULL.  It must be"
-            << "\nnon-NULL to use the GRADIENT_DETECTOR, "
+            << "\nnon-NULL to use the VALUE_DETECTOR, "
+            << "\nGRADIENT_DETECTOR, "
             << "\nMULTIRESOLUTION_DETECTOR, "
             << "\nINTEGRAL_DETECTOR, or"
             << "\nRICHARDSON_EXTRAPOLATION tagging options."
@@ -149,8 +152,8 @@ ExtendedTagAndInitialize::~ExtendedTagAndInitialize()
  *************************************************************************
  *
  * Pass requests to initialize level data, reset hierarchy information,
- * and apply an application-specific gradient detector to
- * the subclass of the ExtendedTagAndInitStrategy data member.
+ * and apply application-specific detectors to the subclass of the
+ * ExtendedTagAndInitStrategy data member.
  *
  *************************************************************************
  */
@@ -229,14 +232,16 @@ ExtendedTagAndInitialize::resetHierarchyConfiguration(
  *    2) integral detection
  *    3) multiresolution detection
  *    4) gradient detection
- *    5) user supplied refine boxes.
+ *    5) value detection
+ *    6) user supplied refine boxes.
  *
  * These options may be used individually or in combination.  If used in
  * combination,  it is IMPORTANT TO PRESERVE THE ORDER of the calls
  * (Richardson extrapolation 1st, integral detection 2nd, multiresolution
- * detection 3rd, gradient detection 4th, user-supplied refine boxes 5th)
- * in this method because users may have logic in their code to compare how
- * cells are tagged and changing the order could destroy this logic.
+ * detection 3rd, gradient detection 4th, value detection 5th, user-supplied
+ * refine boxes 6th) in this method because users may have logic in their code
+ * to compare how cells are tagged and changing the order could destroy this
+ * logic.
  *
  *************************************************************************
  */
@@ -257,6 +262,9 @@ ExtendedTagAndInitialize::tagCellsForRefinement(
                 (level_number <= hierarchy->getFinestLevelNumber()));
     TBOX_ASSERT(hierarchy->getPatchLevel(level_number));
     TBOX_ASSERT(tag_index >= 0);
+    
+    bool usesValue =
+        usesValueDetector(regrid_cycle, regrid_time);
     
     bool usesGradient =
         usesGradientDetector(regrid_cycle, regrid_time);
@@ -294,6 +302,7 @@ ExtendedTagAndInitialize::tagCellsForRefinement(
             regrid_time,
             tag_index,
             initial_time,
+            usesValue,
             usesGradient,
             usesMultiresolution,
             usesRichExtrap);
@@ -309,6 +318,7 @@ ExtendedTagAndInitialize::tagCellsForRefinement(
             regrid_time,
             tag_index,
             initial_time,
+            usesValue,
             usesGradient,
             usesIntegral,
             usesRichExtrap);
@@ -324,6 +334,23 @@ ExtendedTagAndInitialize::tagCellsForRefinement(
             regrid_time,
             tag_index,
             initial_time,
+            usesValue,
+            usesMultiresolution,
+            usesIntegral,
+            usesRichExtrap);
+    }
+    
+    if (usesValue)
+    {
+        TBOX_ASSERT(d_tag_strategy != 0);
+        
+        d_tag_strategy->applyValueDetector(
+            hierarchy,
+            level_number,
+            regrid_time,
+            tag_index,
+            initial_time,
+            usesGradient,
             usesMultiresolution,
             usesIntegral,
             usesRichExtrap);
@@ -639,6 +666,7 @@ ExtendedTagAndInitialize::tagCellsUsingRichardsonExtrapolation(
         dt,
         d_error_coarsen_ratio,
         initial_time,
+        usesValueDetector(regrid_cycle, regrid_time),
         usesGradientDetector(regrid_cycle, regrid_time),
         usesMultiresolutionDetector(regrid_cycle, regrid_time),
         usesIntegralDetector(regrid_cycle, regrid_time));
@@ -1374,6 +1402,67 @@ ExtendedTagAndInitialize::usesGradientDetector(
 
 /*
  *************************************************************************
+ * Returns true if there is ever a value detector tagging crtieria.
+ *************************************************************************
+ */
+bool
+ExtendedTagAndInitialize::everUsesValueDetector() const
+{
+    return d_ever_uses_value_detector;
+}
+
+
+/*
+ *************************************************************************
+ * Returns true if there is a value detector tagging crtieria for the
+ * supplied cycle/time.
+ *************************************************************************
+ */
+bool
+ExtendedTagAndInitialize::usesValueDetector(
+    int cycle,
+    double time)
+{
+    TBOX_ASSERT(!d_use_cycle_criteria || !d_use_time_criteria);
+    
+    bool result = false;
+    
+    setCurrentTaggingCriteria(cycle, time);
+    if (d_use_cycle_criteria)
+    {
+        for (std::vector<TagCriteria>::const_iterator i =
+                d_cur_cycle_criteria->d_tag_criteria.begin();
+             i != d_cur_cycle_criteria->d_tag_criteria.end();
+             i++)
+        {
+            if (i->d_tagging_method == "VALUE_DETECTOR")
+            {
+                result = true;
+                break;
+            }
+        }
+    }
+    else if (d_use_time_criteria)
+    {
+        for (std::vector<TagCriteria>::const_iterator i =
+                d_cur_time_criteria->d_tag_criteria.begin();
+             i != d_cur_time_criteria->d_tag_criteria.end();
+             i++)
+        {
+            if (i->d_tagging_method == "VALUE_DETECTOR")
+            {
+                result = true;
+                break;
+            }
+        }
+    }
+    
+    return result;
+}
+
+
+/*
+ *************************************************************************
  * Returns true if there is ever a refine boxes tagging crtieria.
  *************************************************************************
  */
@@ -1449,7 +1538,10 @@ ExtendedTagAndInitialize::refineUserBoxInputOnly(
     if (usesRefineBoxes(cycle, time))
     {
         use_only_refine_boxes = true;
-        if (usesGradientDetector(cycle, time) ||
+        if (usesValueDetector(cycle, time) ||
+            usesGradientDetector(cycle, time) ||
+            usesMultiresolutionDetector(cycle, time) ||
+            usesIntegralDetector(cycle, time) ||
             usesRichardsonExtrapolation(cycle, time))
         {
             use_only_refine_boxes = false;
@@ -1493,6 +1585,7 @@ ExtendedTagAndInitialize::getFromInput(
                   tagging_method == "INTEGRAL_DETECTOR" ||
                   tagging_method == "MULTIRESOLUTION_DETECTOR" ||
                   tagging_method == "GRADIENT_DETECTOR" ||
+                  tagging_method == "VALUE_DETECTOR" ||
                   tagging_method == "REFINE_BOXES" ||
                   tagging_method == "NONE"))
             {
@@ -1598,6 +1691,10 @@ ExtendedTagAndInitialize::getFromInput(
             {
                 d_ever_uses_gradient_detector = true;
             }
+            else if (tagging_method == "VALUE_DETECTOR")
+            {
+                d_ever_uses_value_detector = true;
+            }
             else
             {
                 TBOX_WARNING(getObjectName()
@@ -1698,6 +1795,7 @@ ExtendedTagAndInitialize::getFromInput(
                         tagging_method != "INTEGRAL_DETECTOR" &&
                         tagging_method != "MULTIRESOLUTION_DETECTOR" &&
                         tagging_method != "GRADIENT_DETECTOR" &&
+                        tagging_method != "VALUE_DETECTOR" &&
                         tagging_method != "REFINE_BOXES" &&
                         tagging_method != "NONE")
                     {
@@ -1811,6 +1909,10 @@ ExtendedTagAndInitialize::getFromInput(
                     else if (tagging_method == "GRADIENT_DETECTOR")
                     {
                         d_ever_uses_gradient_detector = true;
+                    }
+                    else if (tagging_method == "VALUE_DETECTOR")
+                    {
+                        d_ever_uses_value_detector = true;
                     }
                     else if (n_tag_keys != 1)
                     {
@@ -2078,6 +2180,86 @@ ExtendedTagAndInitialize::turnOffRefineBoxes(
                 else
                 {
                    j++;
+                }
+            }
+            break;
+        }
+    }
+}
+
+
+void
+ExtendedTagAndInitialize::turnOnValueDetector(
+    double time)
+{
+    if (!d_tag_strategy)
+    {
+        TBOX_ERROR("ExtendedTagAndInitialize::turnOnValueDetector\n"
+            << "A tagging strategy must be defined if value detector is used.\n");
+    }
+    
+    TimeTagCriteria search_for;
+    search_for.d_time = time;
+    std::set<TimeTagCriteria, time_tag_criteria_less>::iterator existing =
+        d_time_criteria.find(search_for);
+    if (existing == d_time_criteria.end())
+    {
+        TimeTagCriteria this_time_crit;
+        TagCriteria this_tag_crit;
+        this_tag_crit.d_tagging_method = "VALUE_DETECTOR";
+        this_time_crit.d_time = time;
+        this_time_crit.d_tag_criteria.push_back(this_tag_crit);
+        d_cur_time_criteria = d_time_criteria.insert(this_time_crit).first;
+    }
+    else
+    {
+        bool val_detect_already_on = false;
+        for (std::vector<TagCriteria>::const_iterator i =
+                existing->d_tag_criteria.begin();
+             i != existing->d_tag_criteria.end();
+             i++)
+        {
+            if (i->d_tagging_method == "VALUE_DETECTOR")
+            {
+                val_detect_already_on = true;
+                break;
+            }
+        }
+        if (!val_detect_already_on)
+        {
+            TagCriteria this_tag_crit;
+            this_tag_crit.d_tagging_method = "VALUE_DETECTOR";
+            std::vector<TagCriteria>& this_tag_criteria =
+                const_cast<std::vector<TagCriteria>&>(existing->d_tag_criteria);
+            this_tag_criteria.push_back(this_tag_crit);
+        }
+    }
+}
+
+
+void
+ExtendedTagAndInitialize::turnOffValueDetector(
+    double time)
+{
+    for (std::set<TimeTagCriteria, time_tag_criteria_less>::iterator i =
+            d_time_criteria.begin();
+         i != d_time_criteria.end();
+         i++)
+    {
+        if (i->d_time <= time)
+        {
+            std::vector<TagCriteria>& tag_crits =
+                const_cast<std::vector<TagCriteria>&>(i->d_tag_criteria);
+            std::vector<TagCriteria>::iterator j = tag_crits.begin();
+            while (j != tag_crits.end())
+            {
+                if (j->d_tagging_method == "VALUE_DETECTOR")
+                {
+                    tag_crits.erase(j);
+                }
+                else
+                {
+                    j++;
                 }
             }
             break;
@@ -2442,6 +2624,7 @@ ExtendedTagAndInitialize::setCurrentTaggingCriteria(
         bool old_use_mr = false;
         bool old_use_gd = false;
         bool old_use_rb = false;
+        bool old_use_vl = false;
         if (d_use_cycle_criteria)
         {
             for (std::vector<TagCriteria>::const_iterator i =
@@ -2464,6 +2647,10 @@ ExtendedTagAndInitialize::setCurrentTaggingCriteria(
                 else if (i->d_tagging_method == "GRADIENT_DETECTOR")
                 {
                     old_use_gd = true;
+                }
+                else if (i->d_tagging_method == "VAlUE_DETECTOR")
+                {
+                    old_use_vl = true;
                 }
                 else if (i->d_tagging_method == "REFINE_BOXES")
                 {
@@ -2493,6 +2680,10 @@ ExtendedTagAndInitialize::setCurrentTaggingCriteria(
                 else if (i->d_tagging_method == "GRADIENT_DETECTOR")
                 {
                     old_use_gd = true;
+                }
+                else if (i->d_tagging_method == "VALUE_DETECTOR")
+                {
+                    old_use_vl = true;
                 }
                 else if (i->d_tagging_method == "REFINE_BOXES")
                 {
@@ -2589,6 +2780,7 @@ ExtendedTagAndInitialize::setCurrentTaggingCriteria(
         bool new_use_in = false;
         bool new_use_mr = false;
         bool new_use_gd = false;
+        bool new_use_vl = false;
         bool new_use_rb = false;
         if (d_use_cycle_criteria)
         {
@@ -2612,6 +2804,10 @@ ExtendedTagAndInitialize::setCurrentTaggingCriteria(
                 else if (i->d_tagging_method == "GRADIENT_DETECTOR")
                 {
                     new_use_gd = true;
+                }
+                else if (i->d_tagging_method == "VALUE_DETECTOR")
+                {
+                    new_use_vl = true;
                 }
                 else if (i->d_tagging_method == "REFINE_BOXES")
                 {
@@ -2642,6 +2838,10 @@ ExtendedTagAndInitialize::setCurrentTaggingCriteria(
                 {
                     new_use_gd = true;
                 }
+                else if (i->d_tagging_method == "VALUE_DETECTOR")
+                {
+                    new_use_vl = true;
+                }
                 else if (i->d_tagging_method == "REFINE_BOXES")
                 {
                     new_use_rb = true;
@@ -2653,7 +2853,7 @@ ExtendedTagAndInitialize::setCurrentTaggingCriteria(
         // boxes changed.
         if ((old_use_re != new_use_re) || (old_use_in != new_use_in) ||
             (old_use_mr != new_use_mr) || (old_use_gd != new_use_gd) ||
-            (old_use_rb != new_use_rb))
+            (old_use_vl != new_use_vl) || (old_use_rb != new_use_rb))
         {
             // If one of the tagging methods which was used is now not used or
             // vice-versa, then the tagged boxes have changed.
@@ -2662,9 +2862,10 @@ ExtendedTagAndInitialize::setCurrentTaggingCriteria(
         else
         {
             // The tagging methods are the same as they were last cycle.
-            if (new_use_re || new_use_in || new_use_mr || new_use_gd)
+            if (new_use_re || new_use_in || new_use_mr || new_use_gd || new_use_vl)
             {
-                // If we're using either Richardson extrapolation or gradient
+                // If we're using either Richardson extrapolation, value detector,
+                // gradient detector, multiresolution detector, or integral
                 // detector we must assume that the boxes have changed.
                 d_boxes_changed = true;
             }

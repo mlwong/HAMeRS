@@ -1,5 +1,5 @@
-#ifndef EQUATION_OF_STATE_MANAGER_HPP
-#define EQUATION_OF_STATE_MANAGER_HPP
+#ifndef EQUATION_OF_STATE_MIXING_RULES_MANAGER_HPP
+#define EQUATION_OF_STATE_MIXING_RULES_MANAGER_HPP
 
 #include "SAMRAI/SAMRAI_config.h"
 
@@ -12,12 +12,15 @@
 
 using namespace SAMRAI;
 
-class EquationOfStateManager
+class EquationOfStateMixingRulesManager
 {
     public:
-        EquationOfStateManager(
+        EquationOfStateMixingRulesManager(
             const std::string& object_name,
             const tbox::Dimension& dim,
+            const int& num_species,
+            const MIXING_CLOSURE_MODEL& mixing_closure_model,
+            const boost::shared_ptr<tbox::Database>& species_db,
             const std::string& equation_of_state_str);
         
         /*
@@ -30,12 +33,12 @@ class EquationOfStateManager
         }
         
         /*
-         * Get the equation of state.
+         * Get the equation of state mixing rules.
          */
-        boost::shared_ptr<EquationOfState>
-        getEquationOfState() const
+        boost::shared_ptr<EquationOfStateMixingRules>
+        getEquationOfStateMixingRules() const
         {
-            return d_equation_of_state;
+            return d_equation_of_state_mixing_rules;
         }
         
         /*
@@ -58,8 +61,8 @@ class EquationOfStateManager
         /*
          * boost::shared_ptr to the equation of state.
          */
-        boost::shared_ptr<EquationOfState> d_equation_of_state;
+        boost::shared_ptr<EquationOfStateMixingRules> d_equation_of_state_mixing_rules;
         
 };
 
-#endif /* EQUATION_OF_STATE_MANAGER_HPP */
+#endif /* EQUATION_OF_STATE_MIXING_RULES_MANAGER_HPP */

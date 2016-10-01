@@ -1,6 +1,7 @@
 # Define a variable refinement_taggers_source_files containing
 # a list of the source files for the refinement_taggers library
 set(refinement_taggers_source_files
+    ./value_tagger/ValueTagger.cpp
     ./gradient_tagger/GradientTagger.cpp
     ./multiresolution_tagger/MultiresolutionTagger.cpp
 )

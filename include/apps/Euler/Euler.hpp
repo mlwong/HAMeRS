@@ -24,10 +24,10 @@
 #include "flow/boundary_conditions/Euler/EulerBoundaryConditions.hpp"
 #include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructorManager.hpp"
 #include "flow/flow_models/FlowModelManager.hpp"
+#include "flow/refinement_taggers/value_tagger/ValueTagger.hpp"
 #include "flow/refinement_taggers/gradient_tagger/GradientTagger.hpp"
 #include "flow/refinement_taggers/multiresolution_tagger/MultiresolutionTagger.hpp"
 #include "flow/initial_conditions/InitialConditions.hpp"
-#include "util/equations_of_state/EquationOfStateManager.hpp"
 
 #include "boost/shared_ptr.hpp"
 #include <string>
@@ -173,6 +173,34 @@ class Euler:
             const double dt);
         
         /**
+         * Preprocess before tagging cells using value detector.
+         */
+        void
+        preprocessTagValueDetectorCells(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const int level_number,
+            const double regrid_time,
+            const bool initial_error,
+            const bool uses_gradient_detector_too,
+            const bool uses_multiresolution_detector_too,
+            const bool uses_integral_detector_too,
+            const bool uses_richardson_extrapolation_too);
+        
+        /**
+         * Tag cells for refinement using value detector.
+         */
+        void
+        tagValueDetectorCells(
+            hier::Patch& patch,
+            const double regrid_time,
+            const bool initial_error,
+            const int tag_indx,
+            const bool uses_gradient_detector_too,
+            const bool uses_multiresolution_detector_too,
+            const bool uses_integral_detector_too,
+            const bool uses_richardson_extrapolation_too);
+        
+        /**
          * Tag cells for refinement using gradient detector.
          */
         void
@@ -181,6 +209,7 @@ class Euler:
             const double regrid_time,
             const bool initial_error,
             const int tag_indx,
+            const bool uses_value_detector_too,
             const bool uses_multiresolution_detector_too,
             const bool uses_integral_detector_too,
             const bool uses_richardson_extrapolation_too);
@@ -194,6 +223,7 @@ class Euler:
             const int level_number,
             const double regrid_time,
             const bool initial_error,
+            const bool uses_value_detector_too,
             const bool uses_gradient_detector_too,
             const bool uses_integral_detector_too,
             const bool uses_richardson_extrapolation_too);
@@ -207,6 +237,7 @@ class Euler:
             const double regrid_time,
             const bool initial_error,
             const int tag_indx,
+            const bool uses_value_detector_too,
             const bool uses_gradient_detector_too,
             const bool uses_integral_detector_too,
             const bool uses_richardson_extrapolation_too);
@@ -400,6 +431,7 @@ class Euler:
         {
             d_plot_context = plot_context;
         }
+
     private:
         /*
          * These private member functions read data from input and restart.
@@ -457,11 +489,6 @@ class Euler:
         hier::IntVector d_num_ghosts;
         
         /*
-         * A string variable to describe the equation of state used.
-         */
-        std::string d_equation_of_state_str;
-        
-        /*
          * A string variable to describe the flow model used.
          */
         std::string d_flow_model_str;
@@ -477,18 +504,13 @@ class Euler:
         int d_num_species;
         
         /*
-         * boost::shared_ptr to EquationOfState and its database.
-         */
-        boost::shared_ptr<EquationOfState> d_equation_of_state;
-        boost::shared_ptr<tbox::Database> d_equation_of_state_db;
-        
-        /*
-         * boost::shared_ptr to FlowModel.
+         * boost::shared_ptr to FlowModel and its database.
          */
         boost::shared_ptr<FlowModel> d_flow_model;
+        boost::shared_ptr<tbox::Database> d_flow_model_db;
         
         /*
-         * boost::shared_ptr to the convective flux reconstructor and its database
+         * boost::shared_ptr to the ConvectiveFluxReconstructor and its database.
          */
         boost::shared_ptr<ConvectiveFluxReconstructor> d_convective_flux_reconstructor;
         boost::shared_ptr<tbox::Database> d_convective_flux_reconstructor_db;
@@ -506,6 +528,12 @@ class Euler:
         bool d_Euler_boundary_conditions_db_is_from_restart;
         
         /*
+         * boost::shared_ptr to ValueTagger and its database.
+         */
+        boost::shared_ptr<ValueTagger> d_value_tagger;
+        boost::shared_ptr<tbox::Database> d_value_tagger_db;
+        
+        /*
          * boost::shared_ptr to GradientTagger and its database.
          */
         boost::shared_ptr<GradientTagger> d_gradient_tagger;
@@ -516,11 +544,6 @@ class Euler:
          */
         boost::shared_ptr<MultiresolutionTagger> d_multiresolution_tagger;
         boost::shared_ptr<tbox::Database> d_multiresolution_tagger_db;
-        
-        /*
-         * boost::shared_ptr to EquationOfStateManager.
-         */
-        boost::shared_ptr<EquationOfStateManager> d_equation_of_state_manager;
         
         /*
          * boost::shared_ptr to FlowModelManager.
@@ -556,8 +579,10 @@ class Euler:
         static boost::shared_ptr<tbox::Timer> t_advance_steps;
         static boost::shared_ptr<tbox::Timer> t_synchronize_hyperbloicfluxes;
         static boost::shared_ptr<tbox::Timer> t_setphysbcs;
+        static boost::shared_ptr<tbox::Timer> t_tagvalue;
         static boost::shared_ptr<tbox::Timer> t_taggradient;
         static boost::shared_ptr<tbox::Timer> t_tagmultiresolution;
 };
 
 #endif /* EULER_HPP */
+

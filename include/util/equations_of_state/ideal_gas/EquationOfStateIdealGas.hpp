@@ -1,108 +1,95 @@
-#ifndef EQUATION_OF_STATE_HPP
-#define EQUATION_OF_STATE_HPP
+#ifndef EQUATION_OF_STATE_IDEAL_GAS_HPP
+#define EQUATION_OF_STATE_IDEAL_GAS_HPP
 
-#include "SAMRAI/tbox/Dimension.h"
+#include "util/equations_of_state/EquationOfState.hpp"
 
-#include <string>
-#include <vector>
-
-using namespace SAMRAI;
-
-class EquationOfState
+class EquationOfStateIdealGas: public EquationOfState
 {
-    public:
-        EquationOfState(
+    public:        
+        EquationOfStateIdealGas(
             const std::string& object_name,
             const tbox::Dimension& dim):
-                d_object_name(object_name),
-                d_dim(dim)
+                EquationOfState(
+                    object_name,
+                    dim)
         {}
         
         /*
          * Print all characteristics of the equation of state class.
          */
-        virtual void
-        printClassData(std::ostream& os) const = 0;
+        void
+        printClassData(std::ostream& os) const;
         
         /*
          * Compute the pressure.
          */
-        virtual double
+        double
         getPressure(
             const double* const density,
             const std::vector<const double*>& momentum,
             const double* const total_energy,
-            const std::vector<const double*>& thermo_properties) const = 0;
+            const std::vector<const double*>& thermo_properties) const;
         
         /*
          * Compute the sound speed.
          */
-        virtual double
+        double
         getSoundSpeed(
             const double* const density,
             const double* const pressure,
-            const std::vector<const double*>& thermo_properties) const = 0;
+            const std::vector<const double*>& thermo_properties) const;
         
         /*
          * Compute the total energy.
          */
-        virtual double
+        double
         getTotalEnergy(
             const double* const density,
             const std::vector<const double*>& velocity,
             const double* const pressure,
-            const std::vector<const double*>& thermo_properties) const = 0;
+            const std::vector<const double*>& thermo_properties) const;
         
         /*
          * Compute the total enthalpy.
          */
-        virtual double
+        double
         getTotalEnthalpy(
             const double* const density,
             const double* const total_energy,
-            const double* const pressure) const = 0;
+            const double* const pressure) const;
         
         /*
          * Compute the temperature.
          */
-        virtual double
+        double
         getTemperature(
             const double* const density,
             const std::vector<const double*>& momentum,
             const double* const total_energy,
-            const std::vector<const double*>& thermo_properties) const = 0;
+            const std::vector<const double*>& thermo_properties) const;
         
         /*
          * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
          */
-        virtual double
+        double
         getIsochoricPartialInternalEnergyPartialPressure(
             const double* const density,
             const std::vector<const double*>& momentum,
             const double* const total_energy,
-            const std::vector<const double*>& thermo_properties) const = 0;
+            const std::vector<const double*>& thermo_properties) const;
         
         /*
          * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
          */
-        virtual double
+        double
         getIsobaricPartialInternalEnergyPartialDensity(
             const double* const density,
             const std::vector<const double*>& momentum,
             const double* const total_energy,
-            const std::vector<const double*>& thermo_properties) const = 0;
+            const std::vector<const double*>& thermo_properties) const;
         
-    protected:
-        /*
-         * The object name is used for error/warning reporting.
-         */
-        const std::string d_object_name;
-        
-        /*
-         * Problem dimension.
-         */
-        const tbox::Dimension d_dim;
+    private:
         
 };
 
-#endif /* EQUATION_OF_STATE_HPP */
+#endif /* EQUATION_OF_STATE_IDEAL_GAS_HPP */

@@ -212,6 +212,7 @@ boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_init_level_fill_data
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_init_level_fill_interior;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_advance_bdry_fill_create;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_new_advance_bdry_fill_create;
+boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_apply_value_detector;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_apply_gradient_detector;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_apply_multiresolution_detector;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_apply_integral_detector;
@@ -535,12 +536,102 @@ RungeKuttaLevelIntegrator::resetHierarchyConfiguration(
  *************************************************************************
  */
 void
+RungeKuttaLevelIntegrator::applyValueDetector(
+    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const int level_number,
+    const double error_data_time,
+    const int tag_index,
+    const bool initial_time,
+    const bool uses_gradient_detector_too,
+    const bool uses_multiresolution_detector_too,
+    const bool uses_integral_detector_too,
+    const bool uses_richardson_extrapolation_too)
+{
+    TBOX_ASSERT(hierarchy);
+    TBOX_ASSERT((level_number >= 0) &&
+                (level_number <= hierarchy->getFinestLevelNumber()));
+    TBOX_ASSERT(hierarchy->getPatchLevel(level_number));
+    
+    t_apply_value_detector->start();
+    
+    boost::shared_ptr<hier::PatchLevel> level(
+        hierarchy->getPatchLevel(level_number));
+    
+    level->allocatePatchData(d_saved_var_scratch_data, error_data_time);
+    level->allocatePatchData(d_temp_var_scratch_data, error_data_time);
+    
+    d_patch_strategy->setDataContext(d_scratch);
+    
+    const tbox::SAMRAI_MPI& mpi(level->getBoxLevel()->getMPI());
+    
+    t_error_bdry_fill_comm->start();
+    d_bdry_sched_advance[level_number]->fillData(error_data_time);
+    
+    if (s_barrier_after_error_bdry_fill_comm)
+    {
+        t_barrier_after_error_bdry_fill_comm->start();
+        mpi.Barrier();
+        t_barrier_after_error_bdry_fill_comm->stop();
+    }
+    t_error_bdry_fill_comm->stop();
+    
+    d_patch_strategy->preprocessTagValueDetectorCells(
+        hierarchy,
+        level_number,
+        error_data_time,
+        initial_time,
+        uses_gradient_detector_too,
+        uses_multiresolution_detector_too,
+        uses_integral_detector_too,
+        uses_richardson_extrapolation_too);
+    
+    t_tag_cells->start();
+    for (hier::PatchLevel::iterator ip(level->begin());
+         ip != level->end();
+         ip++)
+    {
+        const boost::shared_ptr<hier::Patch>& patch = *ip;
+        d_patch_strategy->tagValueDetectorCells(
+            *patch,
+            error_data_time,
+            initial_time,
+            tag_index,
+            uses_gradient_detector_too,
+            uses_multiresolution_detector_too,
+            uses_integral_detector_too,
+            uses_richardson_extrapolation_too);
+    }
+    t_tag_cells->stop();
+    
+    d_patch_strategy->postprocessTagValueDetectorCells(
+        hierarchy,
+        level_number,
+        error_data_time,
+        initial_time,
+        uses_gradient_detector_too,
+        uses_multiresolution_detector_too,
+        uses_integral_detector_too,
+        uses_richardson_extrapolation_too);
+    
+    d_patch_strategy->clearDataContext();
+    
+    copyTimeDependentData(level, d_scratch, d_current);
+    
+    level->deallocatePatchData(d_temp_var_scratch_data);
+    level->deallocatePatchData(d_saved_var_scratch_data);
+    
+    t_apply_value_detector->stop();
+}
+
+
+void
 RungeKuttaLevelIntegrator::applyGradientDetector(
     const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
     const int level_number,
     const double error_data_time,
     const int tag_index,
     const bool initial_time,
+    const bool uses_value_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
     const bool uses_richardson_extrapolation_too)
@@ -578,6 +669,7 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
         level_number,
         error_data_time,
         initial_time,
+        uses_value_detector_too,
         uses_multiresolution_detector_too,
         uses_integral_detector_too,
         uses_richardson_extrapolation_too);
@@ -593,6 +685,7 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
             error_data_time,
             initial_time,
             tag_index,
+            uses_value_detector_too,
             uses_multiresolution_detector_too,
             uses_integral_detector_too,
             uses_richardson_extrapolation_too);
@@ -604,6 +697,7 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
         level_number,
         error_data_time,
         initial_time,
+        uses_value_detector_too,
         uses_multiresolution_detector_too,
         uses_integral_detector_too,
         uses_richardson_extrapolation_too);
@@ -634,6 +728,7 @@ RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
     const double error_data_time,
     const int tag_index,
     const bool initial_time,
+    const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_integral_detector_too,
     const bool uses_richardson_extrapolation_too)
@@ -671,6 +766,7 @@ RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
         level_number,
         error_data_time,
         initial_time,
+        uses_value_detector_too,
         uses_gradient_detector_too,
         uses_integral_detector_too,
         uses_richardson_extrapolation_too);
@@ -686,6 +782,7 @@ RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
             error_data_time,
             initial_time,
             tag_index,
+            uses_value_detector_too,
             uses_gradient_detector_too,
             uses_integral_detector_too,
             uses_richardson_extrapolation_too);
@@ -697,6 +794,7 @@ RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
         level_number,
         error_data_time,
         initial_time,
+        uses_value_detector_too,
         uses_gradient_detector_too,
         uses_integral_detector_too,
         uses_richardson_extrapolation_too);
@@ -727,6 +825,7 @@ RungeKuttaLevelIntegrator::applyIntegralDetector(
     const double error_data_time,
     const int tag_index,
     const bool initial_time,
+    const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_richardson_extrapolation_too)
@@ -764,6 +863,7 @@ RungeKuttaLevelIntegrator::applyIntegralDetector(
         level_number,
         error_data_time,
         initial_time,
+        uses_value_detector_too,
         uses_gradient_detector_too,
         uses_multiresolution_detector_too,
         uses_richardson_extrapolation_too);
@@ -779,6 +879,7 @@ RungeKuttaLevelIntegrator::applyIntegralDetector(
             error_data_time,
             initial_time,
             tag_index,
+            uses_value_detector_too,
             uses_gradient_detector_too,
             uses_multiresolution_detector_too,
             uses_richardson_extrapolation_too);
@@ -790,6 +891,7 @@ RungeKuttaLevelIntegrator::applyIntegralDetector(
         level_number,
         error_data_time,
         initial_time,
+        uses_value_detector_too,
         uses_gradient_detector_too,
         uses_multiresolution_detector_too,
         uses_richardson_extrapolation_too);
@@ -825,6 +927,7 @@ RungeKuttaLevelIntegrator::applyRichardsonExtrapolation(
     const double deltat,
     const int error_coarsen_ratio,
     const bool initial_time,
+    const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too)
@@ -857,6 +960,7 @@ RungeKuttaLevelIntegrator::applyRichardsonExtrapolation(
             error_coarsen_ratio,
             initial_time,
             tag_index,
+            uses_value_detector_too,
             uses_gradient_detector_too,
             uses_multiresolution_detector_too,
             uses_integral_detector_too);
@@ -3668,6 +3772,8 @@ RungeKuttaLevelIntegrator::initializeCallback()
         getTimer("RungeKuttaLevelIntegrator::advance_bdry_fill_create");
     t_new_advance_bdry_fill_create = tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::new_advance_bdry_fill_create");
+    t_apply_value_detector = tbox::TimerManager::getManager()->
+        getTimer("RungeKuttaLevelIntegrator::applyValueDetector()");
     t_apply_gradient_detector = tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::applyGradientDetector()");
     t_apply_multiresolution_detector = tbox::TimerManager::getManager()->
@@ -3727,6 +3833,7 @@ RungeKuttaLevelIntegrator::finalizeCallback()
     t_init_level_fill_interior.reset();
     t_advance_bdry_fill_create.reset();
     t_new_advance_bdry_fill_create.reset();
+    t_apply_value_detector.reset();
     t_apply_gradient_detector.reset();
     t_apply_multiresolution_detector.reset();
     t_apply_integral_detector.reset();
@@ -3756,3 +3863,4 @@ RungeKuttaLevelIntegrator::finalizeCallback()
     s_timestamp_stat.clear();
 #endif
 }
+

@@ -12,7 +12,8 @@
 #include "SAMRAI/pdat/FaceData.h"
 
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
-#include "util/equations_of_state/EquationsOfState.hpp"
+#include "util/equations_of_state/EquationOfStateManager.hpp"
+#include "util/equations_of_state/EquationOfStateMixingRulesManager.hpp"
 #include "Directions.hpp"
 
 #include "boost/multi_array.hpp"
@@ -51,14 +52,13 @@ class FlowModel:
             const hier::IntVector& num_ghosts,
             const int& num_species,
             const int& num_eqn,
-            const boost::shared_ptr<EquationOfState>& equation_of_state):
+            const boost::shared_ptr<tbox::Database>& flow_model_db):
                 d_object_name(object_name),
                 d_dim(dim),
                 d_grid_geometry(grid_geometry),
                 d_num_ghosts(num_ghosts),
                 d_num_species(num_species),
                 d_num_eqn(num_eqn),
-                d_equation_of_state(equation_of_state),
                 d_patch(nullptr),
                 d_patch_registered(false),
                 d_interior_box(hier::Box::getEmptyBox(dim)),
@@ -69,7 +69,9 @@ class FlowModel:
                 d_proj_mat_primitive_var_registered(false),
                 d_proj_mat_conservative_var_averaging(SIMPLE_AVG),
                 d_proj_mat_primitive_var_averaging(SIMPLE_AVG)
-        {}
+        {
+            NULL_USE(flow_model_db);
+        }
         
         virtual ~FlowModel() {}
         
@@ -93,6 +95,20 @@ class FlowModel:
          * Print all characteristics of the flow model class.
          */
         virtual void printClassData(std::ostream& os) const = 0;
+        
+        /*
+         * Put the characteristics of the flow model class into the restart database.
+         */
+        void putToRestart(
+            const boost::shared_ptr<tbox::Database>& restart_db) const
+        {
+            restart_db->putString("d_equation_of_state_str", d_equation_of_state_str);
+            
+            // Put the properties of d_equation_of_state_mixing_rules into the restart database.
+            boost::shared_ptr<tbox::Database> restart_species_db =
+                restart_db->putDatabase("d_species_db");
+            d_equation_of_state_mixing_rules->putToRestart(restart_species_db);
+        }
         
         /*
          * Register the conservative variables.
@@ -347,15 +363,6 @@ class FlowModel:
 #endif
         
         /*
-         * Set the equation of state used.
-         */
-        void
-        setEquationOfState(const boost::shared_ptr<EquationOfState>& equation_of_state)
-        {
-            d_equation_of_state = equation_of_state;
-        }
-        
-        /*
          * Set the number of ghost cells needed.
          */
         void
@@ -413,6 +420,11 @@ class FlowModel:
         hier::IntVector d_num_ghosts;
         
         /*
+         * A string variable to describe the equation of state used.
+         */
+        std::string d_equation_of_state_str;
+        
+        /*
          * Number of species.
          */
         const int d_num_species;
@@ -423,9 +435,20 @@ class FlowModel:
         const int d_num_eqn;
         
         /*
-         * boost::shared_ptr to EquationOfState.
+         * boost::shared_ptr to EquationOfState and EquationOfStateMixingRules.
          */
         boost::shared_ptr<EquationOfState> d_equation_of_state;
+        boost::shared_ptr<EquationOfStateMixingRules> d_equation_of_state_mixing_rules;
+        
+        /*
+         * boost::shared_ptr to EquationOfStateManager.
+         */
+        boost::shared_ptr<EquationOfStateManager> d_equation_of_state_manager;
+        
+        /*
+         * boost::shared_ptr to EquationOfStateMixingRulesManager.
+         */
+        boost::shared_ptr<EquationOfStateMixingRulesManager> d_equation_of_state_mixing_rules_manager;
         
         /*
          * Form of each equation.

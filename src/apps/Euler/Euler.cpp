@@ -49,6 +49,7 @@ boost::shared_ptr<tbox::Timer> Euler::t_compute_hyperbolicfluxes;
 boost::shared_ptr<tbox::Timer> Euler::t_advance_steps;
 boost::shared_ptr<tbox::Timer> Euler::t_synchronize_hyperbloicfluxes;
 boost::shared_ptr<tbox::Timer> Euler::t_setphysbcs;
+boost::shared_ptr<tbox::Timer> Euler::t_tagvalue;
 boost::shared_ptr<tbox::Timer> Euler::t_taggradient;
 boost::shared_ptr<tbox::Timer> Euler::t_tagmultiresolution;
 
@@ -85,6 +86,8 @@ Euler::Euler(
             getTimer("Euler::Euler::synchronizeHyperbolicFluxes()");
         t_setphysbcs = tbox::TimerManager::getManager()->
             getTimer("Euler::setPhysicalBoundaryConditions()");
+        t_tagvalue = tbox::TimerManager::getManager()->
+            getTimer("Euler::tagValueDetectorCells()");
         t_taggradient = tbox::TimerManager::getManager()->
             getTimer("Euler::tagGradientDetectorCells()");
         t_tagmultiresolution = tbox::TimerManager::getManager()->
@@ -103,19 +106,6 @@ Euler::Euler(
     getFromInput(input_db, is_from_restart);
     
     /*
-     * Initialize d_equation_of_state_manager and get the equation of state object.
-     */
-    
-    d_equation_of_state_manager.reset(new EquationOfStateManager(
-        "d_equation_of_state",
-        d_dim,
-        d_num_species,
-        d_equation_of_state_db,
-        d_equation_of_state_str));
-    
-    d_equation_of_state = d_equation_of_state_manager->getEquationOfState();
-    
-    /*
      * Initialize d_flow_model_manager and get the flow model object.
      */
     
@@ -124,7 +114,7 @@ Euler::Euler(
         d_dim,
         d_grid_geometry,
         d_num_species,
-        d_equation_of_state,
+        d_flow_model_db,
         d_flow_model_str));
     
     d_flow_model = d_flow_model_manager->getFlowModel();
@@ -168,6 +158,21 @@ Euler::Euler(
         d_Euler_boundary_conditions_db_is_from_restart));
     
     /*
+     * Initialize d_value_tagger.
+     */
+    
+    if (d_value_tagger_db != nullptr)
+    {
+        d_value_tagger.reset(new ValueTagger(
+            "d_value_tagger",
+            d_dim,
+            d_grid_geometry,
+            d_num_species,
+            d_flow_model,
+            d_value_tagger_db));
+    }
+    
+    /*
      * Initialize d_gradient_tagger.
      */
     
@@ -208,6 +213,13 @@ Euler::Euler(
         d_num_ghosts = hier::IntVector::max(
             d_num_ghosts,
             d_convective_flux_reconstructor->getConvectiveFluxNumberOfGhostCells());
+        
+        if (d_value_tagger != nullptr)
+        {
+            d_num_ghosts = hier::IntVector::max(
+                d_num_ghosts,
+                d_value_tagger->getValueTaggerNumberOfGhostCells());
+        }
         
         if (d_gradient_tagger != nullptr)
         {
@@ -254,6 +266,7 @@ Euler::~Euler()
     t_advance_steps.reset();
     t_synchronize_hyperbloicfluxes.reset();
     t_setphysbcs.reset();
+    t_tagvalue.reset();
     t_taggradient.reset();
     t_tagmultiresolution.reset();
 }
@@ -294,6 +307,11 @@ Euler::registerModelVariables(
      * Register the temporary variables used in refinement taggers.
      */
     
+    if (d_value_tagger != nullptr)
+    {
+        d_value_tagger->registerValueTaggerVariables(integrator);
+    }
+    
     if (d_gradient_tagger != nullptr)
     {
         d_gradient_tagger->registerGradientTaggerVariables(integrator);
@@ -319,6 +337,13 @@ Euler::registerModelVariables(
     {
         d_flow_model->registerPlotQuantities(
             d_visit_writer);
+        
+        if (d_value_tagger != nullptr)
+        {
+            d_value_tagger->registerPlotQuantities(
+                d_visit_writer,
+                integrator->getPlotContext());
+        }
         
         if (d_gradient_tagger != nullptr)
         {
@@ -1398,6 +1423,102 @@ Euler::synchronizeHyperbolicFluxes(
 
 
 /*
+ * Preprocess before tagging cells using value detector.
+ */
+void
+Euler::preprocessTagValueDetectorCells(
+   const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+   const int level_number,
+   const double regrid_time,
+   const bool initial_error,
+   const bool uses_gradient_detector_too,
+   const bool uses_multiresolution_detector_too,
+   const bool uses_integral_detector_too,
+   const bool uses_richardson_extrapolation_too)
+{
+    NULL_USE(regrid_time);
+    NULL_USE(initial_error);
+    NULL_USE(uses_gradient_detector_too);
+    NULL_USE(uses_multiresolution_detector_too);
+    NULL_USE(uses_integral_detector_too);
+    NULL_USE(uses_richardson_extrapolation_too);
+    
+    if (d_value_tagger != nullptr)
+    {
+        boost::shared_ptr<hier::PatchLevel> level(
+            patch_hierarchy->getPatchLevel(level_number));
+        
+        for (hier::PatchLevel::iterator ip(level->begin());
+             ip != level->end();
+             ip++)
+        {
+            const boost::shared_ptr<hier::Patch>& patch = *ip;
+            
+            d_value_tagger->computeValueTaggerValues(
+                *patch,
+                getDataContext());
+        }
+        
+        d_value_tagger->getValueStatistics(
+            patch_hierarchy,
+            level_number,
+            getDataContext());
+    }
+}
+
+
+/*
+ * Tag cells for refinement using value detector.
+ */
+void
+Euler::tagValueDetectorCells(
+    hier::Patch& patch,
+    const double regrid_time,
+    const bool initial_error,
+    const int tag_indx,
+    const bool uses_gradient_detector_too,
+    const bool uses_multiresolution_detector_too,
+    const bool uses_integral_detector_too,
+    const bool uses_richardson_extrapolation_too)
+{
+    NULL_USE(regrid_time);
+    NULL_USE(initial_error);
+    
+    t_tagvalue->start();
+    
+    // Get the tags.
+    boost::shared_ptr<pdat::CellData<int> > tags(
+        BOOST_CAST<pdat::CellData<int>, hier::PatchData>(
+            patch.getPatchData(tag_indx)));
+    
+#ifdef DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(tags);
+    TBOX_ASSERT(tags->getGhostCellWidth() == 0);
+#endif
+    
+    // Initialize values of all tags to zero.
+    if ((!uses_richardson_extrapolation_too) &&
+        (!uses_integral_detector_too) &&
+        (!uses_multiresolution_detector_too) &&
+        (!uses_gradient_detector_too)) 
+    {
+        tags->fillAll(0);
+    }
+    
+    // Tag the cells by using d_value_tagger.
+    if (d_value_tagger != nullptr)
+    {
+        d_value_tagger->tagCells(
+            patch,
+            tags,
+            getDataContext());
+    }
+    
+    t_tagvalue->stop();
+}
+
+
+/*
  * Tag cells for refinement using gradient detector.
  */
 void
@@ -1406,15 +1527,14 @@ Euler::tagGradientDetectorCells(
     const double regrid_time,
     const bool initial_error,
     const int tag_indx,
+    const bool uses_value_detector_too,
     const bool uses_multiresolution_detector_too,
     const bool uses_integral_detector_too,
     const bool uses_richardson_extrapolation_too)
 {
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
-    NULL_USE(uses_multiresolution_detector_too);
-    NULL_USE(uses_integral_detector_too);
-    NULL_USE(uses_richardson_extrapolation_too);
+    NULL_USE(uses_value_detector_too);
     
     t_taggradient->start();
     
@@ -1430,7 +1550,8 @@ Euler::tagGradientDetectorCells(
     
     // Initialize values of all tags to zero.
     if ((!uses_richardson_extrapolation_too) &&
-        (!uses_multiresolution_detector_too))
+        (!uses_integral_detector_too) &&
+        (!uses_multiresolution_detector_too)) 
     {
         tags->fillAll(0);
     }
@@ -1457,12 +1578,14 @@ Euler::preprocessTagMultiresolutionDetectorCells(
    const int level_number,
    const double regrid_time,
    const bool initial_error,
+   const bool uses_value_detector_too,
    const bool uses_gradient_detector_too,
    const bool uses_integral_detector_too,
    const bool uses_richardson_extrapolation_too)
 {
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
+    NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
     NULL_USE(uses_integral_detector_too);
     NULL_USE(uses_richardson_extrapolation_too);
@@ -1500,15 +1623,15 @@ Euler::tagMultiresolutionDetectorCells(
     const double regrid_time,
     const bool initial_error,
     const int tag_indx,
+    const bool uses_value_detector_too,
     const bool uses_gradient_detector_too,
     const bool uses_integral_detector_too,
     const bool uses_richardson_extrapolation_too)
 {
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
+    NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
-    NULL_USE(uses_integral_detector_too);
-    NULL_USE(uses_richardson_extrapolation_too);
     
     t_tagmultiresolution->start();
     
@@ -1523,7 +1646,8 @@ Euler::tagMultiresolutionDetectorCells(
 #endif
     
     // Initialize values of all tags to zero.
-    if (!uses_richardson_extrapolation_too)
+    if ((!uses_richardson_extrapolation_too) &&
+        (!uses_integral_detector_too))
     {
         tags->fillAll(0);
     }
@@ -1571,14 +1695,12 @@ Euler::putToRestart(
     
     restart_db->putInteger("d_num_species", d_num_species);
     
-    restart_db->putString("d_equation_of_state_str", d_equation_of_state_str);
-    
-    // Put the properties of d_equation_of_state into the restart database.
-    boost::shared_ptr<tbox::Database> restart_equation_of_state_db =
-        restart_db->putDatabase("d_equation_of_state_db");
-    d_equation_of_state->putToRestart(restart_equation_of_state_db);
-    
     restart_db->putString("d_flow_model_str", d_flow_model_str);
+    
+    // Put the properties of d_flow_model into the restart database.
+    boost::shared_ptr<tbox::Database> restart_flow_model_db =
+        restart_db->putDatabase("d_flow_model_db");
+    d_flow_model->putToRestart(restart_flow_model_db);
     
     restart_db->putString("d_convective_flux_reconstructor_str", d_convective_flux_reconstructor_str);
     
@@ -1591,6 +1713,14 @@ Euler::putToRestart(
         restart_db->putDatabase("d_Euler_boundary_conditions_db");
     
     d_Euler_boundary_conditions->putToRestart(restart_Euler_boundary_conditions_db);
+    
+    if (d_value_tagger != nullptr)
+    {
+        boost::shared_ptr<tbox::Database> restart_value_tagger_db =
+            restart_db->putDatabase("d_value_tagger_db");
+        
+        d_value_tagger->putToRestart(restart_value_tagger_db);
+    }
     
     if (d_gradient_tagger != nullptr)
     {
@@ -1710,13 +1840,6 @@ void Euler::printClassData(std::ostream& os) const
     os << "d_periodic_shift = " << d_grid_geometry->getPeriodicShift(hier::IntVector::getOne(d_dim));
     os << std::endl;
     
-    os << "--------------------------------------------------------------------------------";
-    
-    /*
-     * Print data of d_equation_of_state object
-     */
-    
-    d_equation_of_state->printClassData(os);
     os << "--------------------------------------------------------------------------------";
     
     /*
@@ -2050,37 +2173,6 @@ Euler::getFromInput(
         }
         
         /*
-         * Get the equation of state.
-         */
-        if (input_db->keyExists("equation_of_state"))
-        {
-            d_equation_of_state_str = input_db->getString("equation_of_state");
-        }
-        else
-        {
-            TBOX_ERROR(d_object_name
-                << ": "
-                << "Key data 'equation_of_state' not found in input database."
-                << std::endl);            
-        }
-        
-        /*
-         * Get the database of the equation of state.
-         */
-        if (input_db->keyExists("Equation_of_state"))
-        {
-            d_equation_of_state_db =
-                input_db->getDatabase("Equation_of_state");
-        }
-        else
-        {
-            TBOX_ERROR(d_object_name
-                << ": "
-                << "Key data 'Equation_of_state' not found in input database."
-                << std::endl);
-        }
-        
-        /*
          * Get the flow model.
          */
         if (input_db->keyExists("flow_model"))
@@ -2094,6 +2186,21 @@ Euler::getFromInput(
                 << "Key data 'flow_model' not found in input database."
                 << " Compressible flow model is unknown."
                 << std::endl);            
+        }
+        
+        /*
+         * Get the database of the flow model.
+         */
+        if (input_db->keyExists("Flow_model"))
+        {
+            d_flow_model_db = input_db->getDatabase("Flow_model");
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Key data 'Flow_model' not found in input database."
+                << std::endl);
         }
         
         /*
@@ -2124,6 +2231,12 @@ Euler::getFromInput(
                 << ": "
                 << "Key data 'Convective_flux_reconstructor' not found in input database."
                 << std::endl);
+        }
+        
+        if (input_db->keyExists("Value_tagger"))
+        {
+            d_value_tagger_db =
+                input_db->getDatabase("Value_tagger");
         }
         
         if (input_db->keyExists("Gradient_tagger"))
@@ -2198,11 +2311,9 @@ void Euler::getFromRestart()
     
     d_num_species = db->getInteger("d_num_species");
     
-    d_equation_of_state_str = db->getString("d_equation_of_state_str");
-    
-    d_equation_of_state_db = db->getDatabase("d_equation_of_state_db");
-    
     d_flow_model_str = db->getString("d_flow_model_str");
+    
+    d_flow_model_db = db->getDatabase("d_flow_model_db");
     
     d_convective_flux_reconstructor_str = db->getString("d_convective_flux_reconstructor_str");
     
@@ -2211,6 +2322,11 @@ void Euler::getFromRestart()
     d_Euler_boundary_conditions_db = db->getDatabase("d_Euler_boundary_conditions_db");
     
     d_Euler_boundary_conditions_db_is_from_restart = true;
+    
+    if (db->keyExists("d_value_tagger_db"))
+    {
+        d_value_tagger_db = db->getDatabase("d_value_tagger_db");
+    }
     
     if (db->keyExists("d_gradient_tagger_db"))
     {
@@ -2222,3 +2338,4 @@ void Euler::getFromRestart()
         d_multiresolution_tagger_db = db->getDatabase("d_multiresolution_tagger_db");
     }
 }
+

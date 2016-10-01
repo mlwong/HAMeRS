@@ -2,7 +2,6 @@
 #define FLOW_MODEL_SINGLE_SPECIES_HPP
 
 #include "flow/flow_models/FlowModel.hpp"
-
 #include "flow/flow_models/Riemann_solvers/RiemannSolverSingleSpeciesHLLC.hpp"
 #include "flow/flow_models/Riemann_solvers/RiemannSolverSingleSpeciesHLLC_HLL.hpp"
 
@@ -15,7 +14,7 @@ class FlowModelSingleSpecies: public FlowModel
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
             const hier::IntVector& num_ghosts,
             const int& num_species,
-            const boost::shared_ptr<EquationOfState>& equation_of_state);
+            const boost::shared_ptr<tbox::Database>& flow_model_db);
         
         ~FlowModelSingleSpecies() {}
         
@@ -403,10 +402,15 @@ class FlowModelSingleSpecies: public FlowModel
         boost::shared_ptr<pdat::CellData<double> > d_data_max_wave_speed_z;
         
         /*
-         * Riemann solvers.
+         * boost::shared_ptr to Riemann solvers.
          */
-        RiemannSolverSingleSpeciesHLLC     d_Riemann_solver_HLLC;
-        RiemannSolverSingleSpeciesHLLC_HLL d_Riemann_solver_HLLC_HLL;
+        boost::shared_ptr<RiemannSolverSingleSpeciesHLLC>     d_Riemann_solver_HLLC;
+        boost::shared_ptr<RiemannSolverSingleSpeciesHLLC_HLL> d_Riemann_solver_HLLC_HLL;
+        
+        /*
+         * Thermodynamic properties of the species.
+         */
+        std::vector<double> d_thermo_properties;
         
 };
 

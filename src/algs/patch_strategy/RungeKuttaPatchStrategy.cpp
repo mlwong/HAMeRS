@@ -36,11 +36,12 @@ RungeKuttaPatchStrategy::~RungeKuttaPatchStrategy()
  */
 
 void
-RungeKuttaPatchStrategy::tagGradientDetectorCells(
+RungeKuttaPatchStrategy::tagValueDetectorCells(
    hier::Patch& patch,
    const double regrid_time,
    const bool initial_error,
    const int tag_index,
+   const bool uses_gradient_detector_too,
    const bool uses_multiresolution_detector_too,
    const bool uses_integral_detector_too,
    const bool uses_richardson_extrapolation_too)
@@ -49,6 +50,77 @@ RungeKuttaPatchStrategy::tagGradientDetectorCells(
    NULL_USE(regrid_time);
    NULL_USE(initial_error);
    NULL_USE(tag_index);
+   NULL_USE(uses_gradient_detector_too);
+   NULL_USE(uses_multiresolution_detector_too);
+   NULL_USE(uses_integral_detector_too);
+   NULL_USE(uses_richardson_extrapolation_too);
+   TBOX_ERROR("RungeKuttaPatchStrategy::tagValueDetectorCells()"
+      << "\nNo derived class supplies a concrete implementation for "
+      << "\nthis method."
+      << std::endl);
+}
+
+
+void
+RungeKuttaPatchStrategy::preprocessTagValueDetectorCells(
+   const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+   const int level_number,
+   const double regrid_time,
+   const bool initial_error,
+   const bool uses_gradient_detector_too,
+   const bool uses_multiresolution_detector_too,
+   const bool uses_integral_detector_too,
+   const bool uses_richardson_extrapolation_too)
+{
+   NULL_USE(patch_hierarchy);
+   NULL_USE(level_number);
+   NULL_USE(regrid_time);
+   NULL_USE(initial_error);
+   NULL_USE(uses_gradient_detector_too);
+   NULL_USE(uses_multiresolution_detector_too);
+   NULL_USE(uses_integral_detector_too);
+   NULL_USE(uses_richardson_extrapolation_too);
+}
+
+
+void
+RungeKuttaPatchStrategy::postprocessTagValueDetectorCells(
+   const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+   const int level_number,
+   const double regrid_time,
+   const bool initial_error,
+   const bool uses_gradient_detector_too,
+   const bool uses_multiresolution_detector_too,
+   const bool uses_integral_detector_too,
+   const bool uses_richardson_extrapolation_too)
+{
+   NULL_USE(patch_hierarchy);
+   NULL_USE(level_number);
+   NULL_USE(regrid_time);
+   NULL_USE(initial_error);
+   NULL_USE(uses_gradient_detector_too);
+   NULL_USE(uses_multiresolution_detector_too);
+   NULL_USE(uses_integral_detector_too);
+   NULL_USE(uses_richardson_extrapolation_too);
+}
+
+
+void
+RungeKuttaPatchStrategy::tagGradientDetectorCells(
+   hier::Patch& patch,
+   const double regrid_time,
+   const bool initial_error,
+   const int tag_index,
+   const bool uses_value_detector_too,
+   const bool uses_multiresolution_detector_too,
+   const bool uses_integral_detector_too,
+   const bool uses_richardson_extrapolation_too)
+{
+   NULL_USE(patch);
+   NULL_USE(regrid_time);
+   NULL_USE(initial_error);
+   NULL_USE(tag_index);
+   NULL_USE(uses_value_detector_too);
    NULL_USE(uses_multiresolution_detector_too);
    NULL_USE(uses_integral_detector_too);
    NULL_USE(uses_richardson_extrapolation_too);
@@ -65,6 +137,7 @@ RungeKuttaPatchStrategy::preprocessTagGradientDetectorCells(
    const int level_number,
    const double regrid_time,
    const bool initial_error,
+   const bool uses_value_detector_too,
    const bool uses_multiresolution_detector_too,
    const bool uses_integral_detector_too,
    const bool uses_richardson_extrapolation_too)
@@ -73,6 +146,7 @@ RungeKuttaPatchStrategy::preprocessTagGradientDetectorCells(
    NULL_USE(level_number);
    NULL_USE(regrid_time);
    NULL_USE(initial_error);
+   NULL_USE(uses_value_detector_too);
    NULL_USE(uses_multiresolution_detector_too);
    NULL_USE(uses_integral_detector_too);
    NULL_USE(uses_richardson_extrapolation_too);
@@ -85,6 +159,7 @@ RungeKuttaPatchStrategy::postprocessTagGradientDetectorCells(
    const int level_number,
    const double regrid_time,
    const bool initial_error,
+   const bool uses_value_detector_too,
    const bool uses_multiresolution_detector_too,
    const bool uses_integral_detector_too,
    const bool uses_richardson_extrapolation_too)
@@ -93,6 +168,7 @@ RungeKuttaPatchStrategy::postprocessTagGradientDetectorCells(
    NULL_USE(level_number);
    NULL_USE(regrid_time);
    NULL_USE(initial_error);
+   NULL_USE(uses_value_detector_too);
    NULL_USE(uses_multiresolution_detector_too);
    NULL_USE(uses_integral_detector_too);
    NULL_USE(uses_richardson_extrapolation_too);
@@ -105,6 +181,7 @@ RungeKuttaPatchStrategy::tagMultiresolutionDetectorCells(
    const double regrid_time,
    const bool initial_error,
    const int tag_index,
+   const bool uses_value_detector_too,
    const bool uses_gradient_detector_too,
    const bool uses_integral_detector_too,
    const bool uses_richardson_extrapolation_too)
@@ -113,6 +190,7 @@ RungeKuttaPatchStrategy::tagMultiresolutionDetectorCells(
    NULL_USE(regrid_time);
    NULL_USE(initial_error);
    NULL_USE(tag_index);
+   NULL_USE(uses_value_detector_too);
    NULL_USE(uses_gradient_detector_too);
    NULL_USE(uses_integral_detector_too);
    NULL_USE(uses_richardson_extrapolation_too);
@@ -129,6 +207,7 @@ RungeKuttaPatchStrategy::preprocessTagMultiresolutionDetectorCells(
    const int level_number,
    const double regrid_time,
    const bool initial_error,
+   const bool uses_value_detector_too,
    const bool uses_gradient_detector_too,
    const bool uses_integral_detector_too,
    const bool uses_richardson_extrapolation_too)
@@ -137,6 +216,7 @@ RungeKuttaPatchStrategy::preprocessTagMultiresolutionDetectorCells(
    NULL_USE(level_number);
    NULL_USE(regrid_time);
    NULL_USE(initial_error);
+   NULL_USE(uses_value_detector_too);
    NULL_USE(uses_gradient_detector_too);
    NULL_USE(uses_integral_detector_too);
    NULL_USE(uses_richardson_extrapolation_too);
@@ -149,6 +229,7 @@ RungeKuttaPatchStrategy::postprocessTagMultiresolutionDetectorCells(
    const int level_number,
    const double regrid_time,
    const bool initial_error,
+   const bool uses_value_detector_too,
    const bool uses_gradient_detector_too,
    const bool uses_integral_detector_too,
    const bool uses_richardson_extrapolation_too)
@@ -157,6 +238,7 @@ RungeKuttaPatchStrategy::postprocessTagMultiresolutionDetectorCells(
    NULL_USE(level_number);
    NULL_USE(regrid_time);
    NULL_USE(initial_error);
+   NULL_USE(uses_value_detector_too);
    NULL_USE(uses_gradient_detector_too);
    NULL_USE(uses_integral_detector_too);
    NULL_USE(uses_richardson_extrapolation_too);
@@ -169,6 +251,7 @@ RungeKuttaPatchStrategy::tagIntegralDetectorCells(
    const double regrid_time,
    const bool initial_error,
    const int tag_index,
+   const bool uses_value_detector_too,
    const bool uses_gradient_detector_too,
    const bool uses_multiresolution_detector_too,
    const bool uses_richardson_extrapolation_too)
@@ -177,6 +260,7 @@ RungeKuttaPatchStrategy::tagIntegralDetectorCells(
    NULL_USE(regrid_time);
    NULL_USE(initial_error);
    NULL_USE(tag_index);
+   NULL_USE(uses_value_detector_too);
    NULL_USE(uses_gradient_detector_too);
    NULL_USE(uses_multiresolution_detector_too);
    NULL_USE(uses_richardson_extrapolation_too);
@@ -193,6 +277,7 @@ RungeKuttaPatchStrategy::preprocessTagIntegralDetectorCells(
    const int level_number,
    const double regrid_time,
    const bool initial_error,
+   const bool uses_value_detector_too,
    const bool uses_gradient_detector_too,
    const bool uses_multiresolution_detector_too,
    const bool uses_richardson_extrapolation_too)
@@ -201,6 +286,7 @@ RungeKuttaPatchStrategy::preprocessTagIntegralDetectorCells(
    NULL_USE(level_number);
    NULL_USE(regrid_time);
    NULL_USE(initial_error);
+   NULL_USE(uses_value_detector_too);
    NULL_USE(uses_gradient_detector_too);
    NULL_USE(uses_multiresolution_detector_too);
    NULL_USE(uses_richardson_extrapolation_too);
@@ -213,6 +299,7 @@ RungeKuttaPatchStrategy::postprocessTagIntegralDetectorCells(
    const int level_number,
    const double regrid_time,
    const bool initial_error,
+   const bool uses_value_detector_too,
    const bool uses_gradient_detector_too,
    const bool uses_multiresolution_detector_too,
    const bool uses_richardson_extrapolation_too)
@@ -221,6 +308,7 @@ RungeKuttaPatchStrategy::postprocessTagIntegralDetectorCells(
    NULL_USE(level_number);
    NULL_USE(regrid_time);
    NULL_USE(initial_error);
+   NULL_USE(uses_value_detector_too);
    NULL_USE(uses_gradient_detector_too);
    NULL_USE(uses_multiresolution_detector_too);
    NULL_USE(uses_richardson_extrapolation_too);
@@ -238,6 +326,7 @@ RungeKuttaPatchStrategy::tagRichardsonExtrapolationCells(
    const int error_coarsen_ratio,
    const bool initial_error,
    const int tag_index,
+   const bool uses_value_detector_too,
    const bool uses_gradient_detector_too,
    const bool uses_multiresolution_detector_too,
    const bool uses_integral_detector_too)
@@ -251,6 +340,7 @@ RungeKuttaPatchStrategy::tagRichardsonExtrapolationCells(
    NULL_USE(error_coarsen_ratio);
    NULL_USE(initial_error);
    NULL_USE(tag_index);
+   NULL_USE(uses_value_detector_too);
    NULL_USE(uses_gradient_detector_too);
    NULL_USE(uses_multiresolution_detector_too);
    NULL_USE(uses_integral_detector_too);

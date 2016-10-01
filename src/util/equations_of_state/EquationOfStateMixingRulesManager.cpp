@@ -1,8 +1,11 @@
-#include "util/equations_of_state/EquationOfStateManager.hpp"
+#include "util/equations_of_state/EquationOfStateMixingRulesManager.hpp"
 
-EquationOfStateManager::EquationOfStateManager(
+EquationOfStateMixingRulesManager::EquationOfStateMixingRulesManager(
     const std::string& object_name,
     const tbox::Dimension& dim,
+    const int& num_species,
+    const MIXING_CLOSURE_MODEL& mixing_closure_model,
+    const boost::shared_ptr<tbox::Database>& species_db,
     const std::string& equation_of_state_str):
         d_object_name(object_name)
 {
@@ -12,9 +15,12 @@ EquationOfStateManager::EquationOfStateManager(
     {
         d_equation_of_state_label = IDEAL_GAS;
         
-        d_equation_of_state.reset(new EquationOfStateIdealGas(
-            "d_equation_of_state",
-            dim));
+        d_equation_of_state_mixing_rules.reset(new EquationOfStateMixingRulesIdealGas(
+                "d_equation_of_state_mixing_rules",
+                dim,
+                num_species,
+                mixing_closure_model,
+                species_db));
     }
     else
     {
@@ -32,15 +38,15 @@ EquationOfStateManager::EquationOfStateManager(
  * Print all characteristics of equation of state manager.
  */
 void
-EquationOfStateManager::printClassData(std::ostream& os) const
+EquationOfStateMixingRulesManager::printClassData(std::ostream& os) const
 {
-    os << "\nPrint EquationOfStateManager object..."
+    os << "\nPrint EquationOfStateMixingRulesManager object..."
        << std::endl;
     
     os << std::endl;
     
-    os << "EquationOfStateManager: this = "
-       << (EquationOfStateManager *)this
+    os << "EquationOfStateMixingRulesManager: this = "
+       << (EquationOfStateMixingRulesManager *)this
        << std::endl;
     
     os << "d_object_name = "
@@ -52,5 +58,5 @@ EquationOfStateManager::printClassData(std::ostream& os) const
        << std::endl;
     
     os << "................................................................................";
-    d_equation_of_state->printClassData(os);
+    d_equation_of_state_mixing_rules->printClassData(os);
 }

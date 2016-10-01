@@ -2,7 +2,10 @@
 # a list of the source files for the equations_of_state library
 set(equations_of_state_source_files
     EquationOfStateManager.cpp
-    EquationOfStateIdealGas.cpp
+    EquationOfStateManager.cpp
+    EquationOfStateMixingRulesManager.cpp
+    ./ideal_gas/EquationOfStateIdealGas.cpp
+    ./ideal_gas/EquationOfStateMixingRulesIdealGas.cpp
 )
 
 # Create a library called equations_of_state which includes the 

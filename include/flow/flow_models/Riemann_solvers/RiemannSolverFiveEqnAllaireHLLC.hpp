@@ -13,13 +13,15 @@ class RiemannSolverFiveEqnAllaireHLLC: public RiemannSolverFiveEqnAllaire
             const tbox::Dimension& dim,
             const int& num_eqn,
             const int& num_species,
-            boost::shared_ptr<EquationOfState> equation_of_state):
+            boost::shared_ptr<EquationOfState> equation_of_state,
+            boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules):
                 RiemannSolverFiveEqnAllaire(
                     object_name,
                     dim,
                     num_eqn,
                     num_species,
-                    equation_of_state)
+                    equation_of_state,
+                    equation_of_state_mixing_rules)
         {}
         
         /*

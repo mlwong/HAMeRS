@@ -6,7 +6,7 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
     const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
     const hier::IntVector& num_ghosts,
     const int& num_species,
-    const boost::shared_ptr<EquationOfState>& equation_of_state):
+    const boost::shared_ptr<tbox::Database>& flow_model_db):
         FlowModel(
             object_name,
             dim,
@@ -14,7 +14,7 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
             num_ghosts,
             num_species,
             2 + dim.getValue(),
-            equation_of_state),
+            flow_model_db),
         d_num_subghosts_pressure(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_velocity(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_sound_speed(-hier::IntVector::getOne(d_dim)),
@@ -50,19 +50,7 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
         d_subghostcell_dims_convective_flux_z(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_max_wave_speed_x(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_max_wave_speed_y(hier::IntVector::getZero(d_dim)),
-        d_subghostcell_dims_max_wave_speed_z(hier::IntVector::getZero(d_dim)),
-        d_Riemann_solver_HLLC(
-            d_object_name,
-            d_dim,
-            d_num_eqn,
-            d_num_species,
-            d_equation_of_state),
-        d_Riemann_solver_HLLC_HLL(
-            d_object_name,
-            d_dim,
-            d_num_eqn,
-            d_num_species,
-            d_equation_of_state)
+        d_subghostcell_dims_max_wave_speed_z(hier::IntVector::getZero(d_dim))
 {
     d_eqn_form.reserve(d_num_eqn);
     
@@ -83,6 +71,106 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
     
     d_variable_total_energy = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "total energy", 1));
+    
+    /*
+     * Initialize d_equation_of_state_manager and get the equation of state object.
+     */
+    
+    if (flow_model_db->keyExists("equation_of_state"))
+    {
+        d_equation_of_state_str = flow_model_db->getString("equation_of_state");
+    }
+    else if (flow_model_db->keyExists("d_equation_of_state_str"))
+    {
+        d_equation_of_state_str = flow_model_db->getString("d_equation_of_state_str");
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "No key 'equation_of_state'/'d_equation_of_state_str' found in data for flow model"
+            << std::endl);
+    }
+    
+    d_equation_of_state_manager.reset(new EquationOfStateManager(
+        "d_equation_of_state_manager",
+        d_dim,
+        d_equation_of_state_str));
+    
+    d_equation_of_state =
+        d_equation_of_state_manager->getEquationOfState();
+    
+    /*
+     * Initialize d_equation_of_state_mixing_rules_manager and get the equation of state mixing rules object.
+     */
+    
+    boost::shared_ptr<tbox::Database> species_db;
+    
+    if (flow_model_db->keyExists("Species"))
+    {
+        species_db = flow_model_db->getDatabase("Species");
+    }
+    else if (flow_model_db->keyExists("d_species_db"))
+    {
+        species_db = flow_model_db->getDatabase("d_species_db");
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "No key 'Species'/'d_species_db' found in data for flow model"
+            << std::endl);
+    }
+    
+    d_equation_of_state_mixing_rules_manager.reset(new EquationOfStateMixingRulesManager(
+        "d_equation_of_state_mixing_rules_manager",
+        d_dim,
+        d_num_species,
+        NO_MODEL,
+        species_db,
+        d_equation_of_state_str));
+    
+    d_equation_of_state_mixing_rules =
+        d_equation_of_state_mixing_rules_manager->getEquationOfStateMixingRules();
+    
+    std::vector<double*> thermo_properties_ptr;
+    
+    const int num_thermo_properties = d_equation_of_state_mixing_rules->
+        getNumberOfSpeciesThermodynamicProperties();
+    
+    thermo_properties_ptr.reserve(num_thermo_properties);
+    d_thermo_properties.resize(num_thermo_properties);
+    
+    for (int ti = 0; ti < num_thermo_properties; ti++)
+    {
+        thermo_properties_ptr.push_back(&d_thermo_properties[ti]);
+    }
+    
+    d_equation_of_state_mixing_rules->getSpeciesThermodynamicProperties(
+        thermo_properties_ptr,
+        0);
+    
+    /*
+     * Initialize the Riemann solvers.
+     */
+    d_Riemann_solver_HLLC = boost::shared_ptr<RiemannSolverSingleSpeciesHLLC> (
+        new RiemannSolverSingleSpeciesHLLC(
+            d_object_name,
+            d_dim,
+            d_num_eqn,
+            d_num_species,
+            d_equation_of_state,
+            d_equation_of_state_mixing_rules));
+    
+    d_Riemann_solver_HLLC_HLL = boost::shared_ptr<RiemannSolverSingleSpeciesHLLC_HLL> (
+        new RiemannSolverSingleSpeciesHLLC_HLL(
+            d_object_name,
+            d_dim,
+            d_num_eqn,
+            d_num_species,
+            d_equation_of_state,
+            d_equation_of_state_mixing_rules));
+    
 }
 
 
@@ -100,6 +188,12 @@ FlowModelSingleSpecies::printClassData(std::ostream& os) const
     os << "FlowModelSingleSpecies: this = "
        << (FlowModelSingleSpecies *)this
        << std::endl;
+    
+    os << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+    d_equation_of_state_manager->printClassData(os);
+    
+    os << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+    d_equation_of_state_mixing_rules_manager->printClassData(os);
 }
 
 
@@ -2131,7 +2225,7 @@ FlowModelSingleSpecies::computeLocalFaceFluxAndVelocityFromRiemannSolverWithCons
     {
         case HLLC_RIEMANN_SOLVER:
         {
-            d_Riemann_solver_HLLC.computeIntercellFluxFromConservativeVariables(
+            d_Riemann_solver_HLLC->computeIntercellFluxFromConservativeVariables(
                 flux_face,
                 conservative_variables_minus,
                 conservative_variables_plus,
@@ -2141,7 +2235,7 @@ FlowModelSingleSpecies::computeLocalFaceFluxAndVelocityFromRiemannSolverWithCons
         }
         case HLLC_HLL_RIEMANN_SOLVER:
         {
-            d_Riemann_solver_HLLC_HLL.computeIntercellFluxFromConservativeVariables(
+            d_Riemann_solver_HLLC_HLL->computeIntercellFluxFromConservativeVariables(
                 flux_face,
                 conservative_variables_minus,
                 conservative_variables_plus,
@@ -2181,7 +2275,7 @@ FlowModelSingleSpecies::computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrim
     {
         case HLLC_RIEMANN_SOLVER:
         {
-            d_Riemann_solver_HLLC.computeIntercellFluxFromPrimitiveVariables(
+            d_Riemann_solver_HLLC->computeIntercellFluxFromPrimitiveVariables(
                 flux_face,
                 primitive_variables_minus,
                 primitive_variables_plus,
@@ -2191,7 +2285,7 @@ FlowModelSingleSpecies::computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrim
         }
         case HLLC_HLL_RIEMANN_SOLVER:
         {
-            d_Riemann_solver_HLLC_HLL.computeIntercellFluxFromPrimitiveVariables(
+            d_Riemann_solver_HLLC_HLL->computeIntercellFluxFromPrimitiveVariables(
                 flux_face,
                 primitive_variables_minus,
                 primitive_variables_plus,
@@ -2286,11 +2380,20 @@ FlowModelSingleSpecies::convertLocalCellDataPointersConservativeVariablesToPrimi
         m_ptr.push_back(Q[1 + di]);
     }
     
+    // Get the thermodynamic properties of the species.
+    std::vector<const double*> thermo_properties_ptr;
+    thermo_properties_ptr.reserve(static_cast<int> (d_thermo_properties.size()));
+    for (int ti = 0; ti < static_cast<int> (d_thermo_properties.size()); ti++)
+    {
+        thermo_properties_ptr.push_back(&d_thermo_properties[ti]);
+    }
+    
     // Compute the pressure.
     const double p = d_equation_of_state->getPressure(
         Q[0],
         m_ptr,
-        Q[1 + d_dim.getValue()]);
+        Q[1 + d_dim.getValue()],
+        thermo_properties_ptr);
     
     // Convert the conservative variables to primitive variables.
     *V[0] = *Q[0];
@@ -2321,11 +2424,20 @@ FlowModelSingleSpecies::convertLocalCellDataPointersPrimitiveVariablesToConserva
         vel_ptr.push_back(V[1 + di]);
     }
     
+    // Get the thermodynamic properties of the species.
+    std::vector<const double*> thermo_properties_ptr;
+    thermo_properties_ptr.reserve(static_cast<int> (d_thermo_properties.size()));
+    for (int ti = 0; ti < static_cast<int> (d_thermo_properties.size()); ti++)
+    {
+        thermo_properties_ptr.push_back(&d_thermo_properties[ti]);
+    }
+    
     // Compute the total energy.
     const double E = d_equation_of_state->getTotalEnergy(
         V[0],
         vel_ptr,
-        V[1 + d_dim.getValue()]);
+        V[1 + d_dim.getValue()],
+        thermo_properties_ptr);
     
     // Convert the primitive variables to conservative variables.
     *Q[0] = *V[0];
@@ -2406,6 +2518,14 @@ FlowModelSingleSpecies::packDerivedDataIntoDoubleBuffer(
         
         size_t offset_data = data_box.offset(region.lower());
         
+        // Get the thermodynamic properties of the species.
+        std::vector<const double*> thermo_properties_ptr;
+        thermo_properties_ptr.reserve(static_cast<int> (d_thermo_properties.size()));
+        for (int ti = 0; ti < static_cast<int> (d_thermo_properties.size()); ti++)
+        {
+            thermo_properties_ptr.push_back(&d_thermo_properties[ti]);
+        }
+        
         if (d_dim == tbox::Dimension(1))
         {
             for (int i = 0; i < region_dims[0]; i++)
@@ -2420,7 +2540,8 @@ FlowModelSingleSpecies::packDerivedDataIntoDoubleBuffer(
                 buffer[idx_region] = d_equation_of_state->getPressure(
                     &rho[idx_data],
                     m_ptr,
-                    &E[idx_data]);
+                    &E[idx_data],
+                    thermo_properties_ptr);
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -2443,7 +2564,8 @@ FlowModelSingleSpecies::packDerivedDataIntoDoubleBuffer(
                     buffer[idx_region] = d_equation_of_state->getPressure(
                         &rho[idx_data],
                         m_ptr,
-                        &E[idx_data]);
+                        &E[idx_data],
+                        thermo_properties_ptr);
                 }
             }
         }
@@ -2472,7 +2594,8 @@ FlowModelSingleSpecies::packDerivedDataIntoDoubleBuffer(
                         buffer[idx_region] = d_equation_of_state->getPressure(
                             &rho[idx_data],
                             m_ptr,
-                            &E[idx_data]);
+                            &E[idx_data],
+                            thermo_properties_ptr);
                     }
                 }
             }
@@ -2516,6 +2639,14 @@ FlowModelSingleSpecies::packDerivedDataIntoDoubleBuffer(
         
         size_t offset_data = data_box.offset(region.lower());
         
+        // Get the thermodynamic properties of the species.
+        std::vector<const double*> thermo_properties_ptr;
+        thermo_properties_ptr.reserve(static_cast<int> (d_thermo_properties.size()));
+        for (int ti = 0; ti < static_cast<int> (d_thermo_properties.size()); ti++)
+        {
+            thermo_properties_ptr.push_back(&d_thermo_properties[ti]);
+        }
+        
         if (d_dim == tbox::Dimension(1))
         {
             for (int i = 0; i < region_dims[0]; i++)
@@ -2527,10 +2658,16 @@ FlowModelSingleSpecies::packDerivedDataIntoDoubleBuffer(
                 std::vector<const double*> m_ptr;
                 m_ptr.push_back(&rho_u[idx_data]);
                 
-                buffer[idx_region] = d_equation_of_state->getSoundSpeed(
+                const double p = d_equation_of_state->getPressure(
                     &rho[idx_data],
                     m_ptr,
-                    &E[idx_data]);
+                    &E[idx_data],
+                    thermo_properties_ptr);
+                
+                buffer[idx_region] = d_equation_of_state->getSoundSpeed(
+                    &rho[idx_data],
+                    &p,
+                    thermo_properties_ptr);
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -2550,10 +2687,16 @@ FlowModelSingleSpecies::packDerivedDataIntoDoubleBuffer(
                     m_ptr.push_back(&rho_u[idx_data]);
                     m_ptr.push_back(&rho_v[idx_data]);
                     
-                    buffer[idx_region] = d_equation_of_state->getSoundSpeed(
+                    const double p = d_equation_of_state->getPressure(
                         &rho[idx_data],
                         m_ptr,
-                        &E[idx_data]);
+                        &E[idx_data],
+                        thermo_properties_ptr);
+                    
+                    buffer[idx_region] = d_equation_of_state->getSoundSpeed(
+                        &rho[idx_data],
+                        &p,
+                        thermo_properties_ptr);
                 }
             }
         }
@@ -2579,10 +2722,16 @@ FlowModelSingleSpecies::packDerivedDataIntoDoubleBuffer(
                         m_ptr.push_back(&rho_v[idx_data]);
                         m_ptr.push_back(&rho_w[idx_data]);
                         
-                        buffer[idx_region] = d_equation_of_state->getSoundSpeed(
+                        const double p = d_equation_of_state->getPressure(
                             &rho[idx_data],
                             m_ptr,
-                            &E[idx_data]);
+                            &E[idx_data],
+                            thermo_properties_ptr);
+                        
+                        buffer[idx_region] = d_equation_of_state->getSoundSpeed(
+                            &rho[idx_data],
+                            &p,
+                            thermo_properties_ptr);
                     }
                 }
             }
@@ -2904,6 +3053,14 @@ FlowModelSingleSpecies::computeGlobalCellDataPressure()
         double* rho = data_density->getPointer(0);
         double* E   = data_total_energy->getPointer(0);
         
+        // Get the thermodynamic properties of the species.
+        std::vector<const double*> thermo_properties_ptr;
+        thermo_properties_ptr.reserve(static_cast<int> (d_thermo_properties.size()));
+        for (int ti = 0; ti < static_cast<int> (d_thermo_properties.size()); ti++)
+        {
+            thermo_properties_ptr.push_back(&d_thermo_properties[ti]);
+        }
+        
         if (d_dim == tbox::Dimension(1))
         {
             // Get the pointer to cell data of momentum.
@@ -2926,7 +3083,8 @@ FlowModelSingleSpecies::computeGlobalCellDataPressure()
                     getPressure(
                         &rho[idx],
                         m_ptr,
-                        &E[idx]);
+                        &E[idx],
+                        thermo_properties_ptr);
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -2960,7 +3118,8 @@ FlowModelSingleSpecies::computeGlobalCellDataPressure()
                         getPressure(
                             &rho[idx],
                             m_ptr,
-                            &E[idx]);
+                            &E[idx],
+                            thermo_properties_ptr);
                 }
             }
         }
@@ -3003,7 +3162,8 @@ FlowModelSingleSpecies::computeGlobalCellDataPressure()
                             getPressure(
                                 &rho[idx],
                                 m_ptr,
-                                &E[idx]);
+                                &E[idx],
+                                thermo_properties_ptr);
                     }
                 }
             }
@@ -3170,6 +3330,14 @@ FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure()
         double* rho = data_density->getPointer(0);
         double* p   = d_data_pressure->getPointer(0);
         
+        // Get the thermodynamic properties of the species.
+        std::vector<const double*> thermo_properties_ptr;
+        thermo_properties_ptr.reserve(static_cast<int> (d_thermo_properties.size()));
+        for (int ti = 0; ti < static_cast<int> (d_thermo_properties.size()); ti++)
+        {
+            thermo_properties_ptr.push_back(&d_thermo_properties[ti]);
+        }
+        
         if (d_dim == tbox::Dimension(1))
         {
             // Compute the sound speed field.
@@ -3183,9 +3351,10 @@ FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure()
                 const int idx_sound_speed = i + d_num_subghosts_sound_speed[0];
                 
                 c[idx_sound_speed] = d_equation_of_state->
-                    getSoundSpeedWithPressure(
+                    getSoundSpeed(
                         &rho[idx],
-                        &p[idx_pressure]);
+                        &p[idx_pressure],
+                        thermo_properties_ptr);
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -3210,9 +3379,10 @@ FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure()
                         (j + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
                     
                     c[idx_sound_speed] = d_equation_of_state->
-                        getSoundSpeedWithPressure(
+                        getSoundSpeed(
                             &rho[idx],
-                            &p[idx_pressure]);
+                            &p[idx_pressure],
+                            thermo_properties_ptr);
                 }
             }
         }
@@ -3245,9 +3415,10 @@ FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure()
                             (k + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*d_subghostcell_dims_sound_speed[1];
                         
                         c[idx_sound_speed] = d_equation_of_state->
-                            getSoundSpeedWithPressure(
+                            getSoundSpeed(
                                 &rho[idx],
-                                &p[idx_pressure]);
+                                &p[idx_pressure],
+                                thermo_properties_ptr);
                     }
                 }
             }
