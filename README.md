@@ -6,7 +6,7 @@ HAMeRS (High-performance Adaptive Mesh Refinement Solver) is a compressible Navi
 
 The code consists of the families of explicit high-order finite difference shock-capturing WCNS's (Weighted Compact Nonlinear Scheme) for capturing shock waves, material interfaces, and turbulent features. The AMR algorithm implemented is based on the one developed by Berger et al. The figure below summarizes the algorithm:
 
-![AMR_flowchart.png](https://bitbucket.org/repo/zzaMX8/images/4244149417-AMR_flowchart.png)
+![AMR_flowchart.png](https://bitbucket.org/repo/zzaMX8/images/1016768229-AMR_flowchart.png)
 
 * The iterative algorithm is started by calling advanceLevel() at level l = 0
 
