@@ -1,4 +1,4 @@
-#include "flow/refinement_taggers/value_tagger/ValueTagger.hpp"
+#include "flow/refinement_taggers/ValueTagger.hpp"
 
 #include <algorithm>
 #include "boost/lexical_cast.hpp"

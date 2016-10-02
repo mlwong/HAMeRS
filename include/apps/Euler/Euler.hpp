@@ -24,9 +24,9 @@
 #include "flow/boundary_conditions/Euler/EulerBoundaryConditions.hpp"
 #include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructorManager.hpp"
 #include "flow/flow_models/FlowModelManager.hpp"
-#include "flow/refinement_taggers/value_tagger/ValueTagger.hpp"
-#include "flow/refinement_taggers/gradient_tagger/GradientTagger.hpp"
-#include "flow/refinement_taggers/multiresolution_tagger/MultiresolutionTagger.hpp"
+#include "flow/refinement_taggers/GradientTagger.hpp"
+#include "flow/refinement_taggers/MultiresolutionTagger.hpp"
+#include "flow/refinement_taggers/ValueTagger.hpp"
 #include "flow/initial_conditions/InitialConditions.hpp"
 
 #include "boost/shared_ptr.hpp"

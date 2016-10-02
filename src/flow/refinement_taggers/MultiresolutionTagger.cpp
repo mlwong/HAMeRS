@@ -1,4 +1,4 @@
-#include "flow/refinement_taggers/multiresolution_tagger/MultiresolutionTagger.hpp"
+#include "flow/refinement_taggers/MultiresolutionTagger.hpp"
 
 #include <algorithm>
 #include "boost/lexical_cast.hpp"

@@ -1,4 +1,4 @@
-#include "flow/refinement_taggers/gradient_tagger/GradientTagger.hpp"
+#include "flow/refinement_taggers/GradientTagger.hpp"
 
 #include "boost/lexical_cast.hpp"
 
