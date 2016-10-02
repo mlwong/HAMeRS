@@ -111,6 +111,9 @@ class MultiresolutionTagger
             std::vector<double>& wavelet_coeffs_maxs,
             std::vector<boost::shared_ptr<pdat::CellData<double> > >& variable_local_means,
             boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent,
+            bool& uses_global_tol,
+            bool& uses_local_tol,
+            bool& uses_alpha_tol,
             double& global_tol,
             double& local_tol,
             double& alpha_tol,
@@ -181,9 +184,9 @@ class MultiresolutionTagger
         std::vector<double> d_Harten_wavelet_global_tol;
         std::vector<double> d_Harten_wavelet_local_tol;
         std::vector<double> d_Harten_wavelet_alpha_tol;
-        bool d_Harten_wavelet_uses_global_tol;
-        bool d_Harten_wavelet_uses_local_tol;
-        bool d_Harten_wavelet_uses_alpha_tol;
+        std::vector<bool> d_Harten_wavelet_uses_global_tol;
+        std::vector<bool> d_Harten_wavelet_uses_local_tol;
+        std::vector<bool> d_Harten_wavelet_uses_alpha_tol;
         
         /*
          * boost::shared_ptr to wavelet coefficients at different levels.

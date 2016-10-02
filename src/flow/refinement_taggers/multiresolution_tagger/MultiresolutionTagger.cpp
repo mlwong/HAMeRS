@@ -1,5 +1,6 @@
 #include "flow/refinement_taggers/multiresolution_tagger/MultiresolutionTagger.hpp"
 
+#include <algorithm>
 #include "boost/lexical_cast.hpp"
 
 // #define PLOTTING_MULTIRESOLUTION_TAGGER
@@ -18,10 +19,7 @@ MultiresolutionTagger::MultiresolutionTagger(
         d_grid_geometry(grid_geometry),
         d_num_multiresolution_ghosts(hier::IntVector::getZero(d_dim)),
         d_num_species(num_species),
-        d_flow_model(flow_model),
-        d_Harten_wavelet_uses_global_tol(false),
-        d_Harten_wavelet_uses_local_tol(false),
-        d_Harten_wavelet_uses_alpha_tol(false)
+        d_flow_model(flow_model)
 {
     if (multiresolution_tagger_db != nullptr)
     {
@@ -146,7 +144,7 @@ MultiresolutionTagger::MultiresolutionTagger(
                     {
                         TBOX_ERROR(d_object_name
                             << ": "
-                            << "No key 'Harten_wavelet_variables'/'d_Harten_wavelet_variables' found in data for "
+                            << "No key 'Harten_wavelet_variables'/'d_Harten_wavelet_variables' found in database for "
                             << sensor_key
                             << "."
                             << std::endl);
@@ -169,27 +167,48 @@ MultiresolutionTagger::MultiresolutionTagger(
                         }
                     }
                     
-                    // Get the settings for wavelet global filter.
+                    int num_true = 0;
+                    
+                    /*
+                     * Get the settings for wavelet global tolerances.
+                     */
+                    
                     if (sensor_db->keyExists("Harten_wavelet_uses_global_tol"))
                     {
-                        d_Harten_wavelet_uses_global_tol = sensor_db->getBool("Harten_wavelet_uses_global_tol");
+                        d_Harten_wavelet_uses_global_tol = sensor_db->getBoolVector("Harten_wavelet_uses_global_tol");
                     }
                     else if (sensor_db->keyExists("d_Harten_wavelet_uses_global_tol"))
                     {
-                        d_Harten_wavelet_uses_global_tol = sensor_db->getBool("d_Harten_wavelet_uses_global_tol");
+                        d_Harten_wavelet_uses_global_tol = sensor_db->getBoolVector("d_Harten_wavelet_uses_global_tol");
                     }
                     else
                     {
                         TBOX_ERROR(d_object_name
                             << ": "
                             << "No key 'Harten_wavelet_uses_global_tol'/'d_Harten_wavelet_uses_global_tol'"
-                            << " found in data for "
+                            << " found in database for "
                             << sensor_key
                             << "."
                             << std::endl);
                     }
                     
-                    if (d_Harten_wavelet_uses_global_tol)
+                    if (static_cast<int>(d_Harten_wavelet_variables.size()) !=
+                        static_cast<int>(d_Harten_wavelet_uses_global_tol.size()))
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": "
+                            << "The numbers of variables and switches for global tolerances provided don't match"
+                            << " in database for "
+                            << sensor_key
+                            << "."
+                            << std::endl);
+                    }
+                    
+                    num_true = std::count(d_Harten_wavelet_uses_global_tol.begin(),
+                        d_Harten_wavelet_uses_global_tol.end(),
+                        true);
+                    
+                    if (num_true > 0)
                     {
                         if (sensor_db->keyExists("Harten_wavelet_global_tol"))
                         {
@@ -203,44 +222,65 @@ MultiresolutionTagger::MultiresolutionTagger(
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
-                                << "No key 'Harten_wavelet_global_tol'/'d_Harten_wavelet_global_tol' found in data for "
+                                << "No key 'Harten_wavelet_global_tol'/'d_Harten_wavelet_global_tol' found in database for "
                                 << sensor_key
                                 << "."
                                 << std::endl);
                         }
                         
-                        if (static_cast<int>(d_Harten_wavelet_variables.size()) != static_cast<int>(d_Harten_wavelet_global_tol.size()))
+                        if (num_true != static_cast<int>(d_Harten_wavelet_global_tol.size()))
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
-                                << "The numbers of variables and global tolerances provided don't match for "
+                                << "The number of variables that use global tolerances and number of"
+                                << " global tolerances provided don't match"
+                                << " in database for "
                                 << sensor_key
                                 << "."
                                 << std::endl);
                         }
                     }
                     
-                    // Get the settings for wavelet local filter.
+                    /*
+                     * Get the settings for wavelet local tolerances.
+                     */
+                    
                     if (sensor_db->keyExists("Harten_wavelet_uses_local_tol"))
                     {
-                        d_Harten_wavelet_uses_local_tol = sensor_db->getBool("Harten_wavelet_uses_local_tol");
+                        d_Harten_wavelet_uses_local_tol = sensor_db->getBoolVector("Harten_wavelet_uses_local_tol");
                     }
                     else if (sensor_db->keyExists("d_Harten_wavelet_uses_local_tol"))
                     {
-                        d_Harten_wavelet_uses_local_tol = sensor_db->getBool("d_Harten_wavelet_uses_local_tol");
+                        d_Harten_wavelet_uses_local_tol = sensor_db->getBoolVector("d_Harten_wavelet_uses_local_tol");
                     }
                     else
                     {
                         TBOX_ERROR(d_object_name
                             << ": "
                             << "No key 'Harten_wavelet_uses_local_tol'/'d_Harten_wavelet_uses_local_tol'"
-                            << " found in data for "
+                            << " found in database for "
                             << sensor_key
                             << "."
                             << std::endl);
                     }
                     
-                    if (d_Harten_wavelet_uses_local_tol)
+                    if (static_cast<int>(d_Harten_wavelet_variables.size()) !=
+                        static_cast<int>(d_Harten_wavelet_uses_local_tol.size()))
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": "
+                            << "The numbers of variables and switches for local tolerances provided don't match"
+                            << " in database for "
+                            << sensor_key
+                            << "."
+                            << std::endl);
+                    }
+                    
+                    num_true = std::count(d_Harten_wavelet_uses_local_tol.begin(),
+                        d_Harten_wavelet_uses_local_tol.end(),
+                        true);
+                    
+                    if (num_true > 0)
                     {
                         if (sensor_db->keyExists("Harten_wavelet_local_tol"))
                         {
@@ -254,44 +294,65 @@ MultiresolutionTagger::MultiresolutionTagger(
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
-                                << "No key 'Harten_wavelet_local_tol'/'d_Harten_wavelet_local_tol' found in data for "
+                                << "No key 'Harten_wavelet_local_tol'/'d_Harten_wavelet_local_tol' found in database for "
                                 << sensor_key
                                 << "."
                                 << std::endl);
                         }
                         
-                        if (static_cast<int>(d_Harten_wavelet_variables.size()) != static_cast<int>(d_Harten_wavelet_local_tol.size()))
+                        if (num_true != static_cast<int>(d_Harten_wavelet_local_tol.size()))
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
-                                << "The numbers of variables and local tolerances provided don't match for "
+                                << "The number of variables that use local tolerances and number of"
+                                << " local tolerances provided don't match"
+                                << " in database for "
                                 << sensor_key
                                 << "."
                                 << std::endl);
                         }
                     }
                     
-                    // Get the settings for wavelet Lipschitz's filter.
+                    /*
+                     * Get the settings for wavelet Lipschitz's tolerances.
+                     */
+                    
                     if (sensor_db->keyExists("Harten_wavelet_uses_alpha_tol"))
                     {
-                        d_Harten_wavelet_uses_alpha_tol = sensor_db->getBool("Harten_wavelet_uses_alpha_tol");
+                        d_Harten_wavelet_uses_alpha_tol = sensor_db->getBoolVector("Harten_wavelet_uses_alpha_tol");
                     }
                     else if (sensor_db->keyExists("d_Harten_wavelet_uses_alpha_tol"))
                     {
-                        d_Harten_wavelet_uses_alpha_tol = sensor_db->getBool("d_Harten_wavelet_uses_alpha_tol");
+                        d_Harten_wavelet_uses_alpha_tol = sensor_db->getBoolVector("d_Harten_wavelet_uses_alpha_tol");
                     }
                     else
                     {
                         TBOX_ERROR(d_object_name
                             << ": "
                             << "No key 'Harten_wavelet_uses_alpha_tol'/'d_Harten_wavelet_uses_alpha_tol'"
-                            << " found in data for "
+                            << " found in database for "
                             << sensor_key
                             << "."
                             << std::endl);
                     }
                     
-                    if (d_Harten_wavelet_uses_alpha_tol)
+                    if (static_cast<int>(d_Harten_wavelet_variables.size()) !=
+                        static_cast<int>(d_Harten_wavelet_uses_alpha_tol.size()))
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": "
+                            << "The numbers of variables and switches for Lipschitz's tolerances provided don't match"
+                            << " in database for "
+                            << sensor_key
+                            << "."
+                            << std::endl);
+                    }
+                    
+                    num_true = std::count(d_Harten_wavelet_uses_alpha_tol.begin(),
+                        d_Harten_wavelet_uses_alpha_tol.end(),
+                        true);
+                    
+                    if (num_true > 0)
                     {
                         if (sensor_db->keyExists("Harten_wavelet_alpha_tol"))
                         {
@@ -305,17 +366,19 @@ MultiresolutionTagger::MultiresolutionTagger(
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
-                                << "No key 'Harten_wavelet_alpha_tol'/'d_Harten_wavelet_alpha_tol' found in data for "
+                                << "No key 'Harten_wavelet_alpha_tol'/'d_Harten_wavelet_alpha_tol' found in database for "
                                 << sensor_key
                                 << "."
                                 << std::endl);
                         }
                         
-                        if (static_cast<int>(d_Harten_wavelet_variables.size()) != static_cast<int>(d_Harten_wavelet_alpha_tol.size()))
+                        if (num_true != static_cast<int>(d_Harten_wavelet_alpha_tol.size()))
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
-                                << "The numbers of variables and Lipschitz's tolerances provided don't match for "
+                                << "The number of variables that use Lipschitz's tolerances and number of"
+                                << " Lipschitz's tolerances provided don't match"
+                                << " in database for "
                                 << sensor_key
                                 << "."
                                 << std::endl);
@@ -407,12 +470,12 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                 "Harten density wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
                                 1));
                         
-                        if (d_Harten_wavelet_uses_global_tol)
+                        if (d_Harten_wavelet_uses_global_tol[vi])
                         {
                             d_Harten_density_wavelet_coeffs_maxs.push_back(0.0);
                         }
                         
-                        if (d_Harten_wavelet_uses_local_tol)
+                        if (d_Harten_wavelet_uses_local_tol[vi])
                         {
                             d_Harten_density_local_means.push_back(
                                 boost::make_shared<pdat::CellVariable<double> >(
@@ -422,7 +485,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                         }
                     }
                     
-                    if (d_Harten_wavelet_uses_alpha_tol)
+                    if (d_Harten_wavelet_uses_alpha_tol[vi])
                     {
                         d_Harten_density_Lipschitz_exponent =
                             boost::shared_ptr<pdat::CellVariable<double> > (
@@ -439,12 +502,12 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                 "Harten total energy wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
                                 1));
                         
-                        if (d_Harten_wavelet_uses_global_tol)
+                        if (d_Harten_wavelet_uses_global_tol[vi])
                         {
                             d_Harten_total_energy_wavelet_coeffs_maxs.push_back(0.0);
                         }
                         
-                        if (d_Harten_wavelet_uses_local_tol)
+                        if (d_Harten_wavelet_uses_local_tol[vi])
                         {
                             d_Harten_total_energy_local_means.push_back(
                                 boost::make_shared<pdat::CellVariable<double> >(
@@ -454,7 +517,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                         }
                     }
                     
-                    if (d_Harten_wavelet_uses_alpha_tol)
+                    if (d_Harten_wavelet_uses_alpha_tol[vi])
                     {
                         d_Harten_total_energy_Lipschitz_exponent =
                             boost::shared_ptr<pdat::CellVariable<double> > (
@@ -471,12 +534,12 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                 "Harten pressure wavelet coefficients at level " + boost::lexical_cast<std::string>(li),
                                 1));
                         
-                        if (d_Harten_wavelet_uses_global_tol)
+                        if (d_Harten_wavelet_uses_global_tol[vi])
                         {
                             d_Harten_pressure_wavelet_coeffs_maxs.push_back(0.0);
                         }
                         
-                        if (d_Harten_wavelet_uses_local_tol)
+                        if (d_Harten_wavelet_uses_local_tol[vi])
                         {
                             d_Harten_pressure_local_means.push_back(
                                 boost::make_shared<pdat::CellVariable<double> >(
@@ -486,7 +549,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                         }
                     }
                     
-                    if (d_Harten_wavelet_uses_alpha_tol)
+                    if (d_Harten_wavelet_uses_alpha_tol[vi])
                     {
                         d_Harten_pressure_Lipschitz_exponent =
                             boost::shared_ptr<pdat::CellVariable<double> > (
@@ -521,7 +584,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                                 "CONSERVATIVE_COARSEN",
                                 "CONSERVATIVE_LINEAR_REFINE");
                         
-                        if (d_Harten_wavelet_uses_local_tol)
+                        if (d_Harten_wavelet_uses_local_tol[vi])
                         {
                             integrator->registerVariable(
                                 d_Harten_density_local_means[li],
@@ -533,7 +596,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                         }
                     }
                     
-                    if (d_Harten_wavelet_uses_alpha_tol)
+                    if (d_Harten_wavelet_uses_alpha_tol[vi])
                     {
                         integrator->registerVariable(
                             d_Harten_density_Lipschitz_exponent,
@@ -556,7 +619,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                             "CONSERVATIVE_COARSEN",
                             "CONSERVATIVE_LINEAR_REFINE");
                         
-                        if (d_Harten_wavelet_uses_local_tol)
+                        if (d_Harten_wavelet_uses_local_tol[vi])
                         {
                             integrator->registerVariable(
                                 d_Harten_total_energy_local_means[li],
@@ -568,7 +631,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                         }
                     }
                     
-                    if (d_Harten_wavelet_uses_alpha_tol)
+                    if (d_Harten_wavelet_uses_alpha_tol[vi])
                     {
                         integrator->registerVariable(
                             d_Harten_total_energy_Lipschitz_exponent,
@@ -591,7 +654,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                             "CONSERVATIVE_COARSEN",
                             "CONSERVATIVE_LINEAR_REFINE");
                         
-                        if (d_Harten_wavelet_uses_local_tol)
+                        if (d_Harten_wavelet_uses_local_tol[vi])
                         {
                             integrator->registerVariable(
                                 d_Harten_pressure_local_means[li],
@@ -603,7 +666,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                         }
                     }
                     
-                    if (d_Harten_wavelet_uses_alpha_tol)
+                    if (d_Harten_wavelet_uses_alpha_tol[vi])
                     {
                         integrator->registerVariable(
                             d_Harten_pressure_Lipschitz_exponent,
@@ -765,16 +828,17 @@ MultiresolutionTagger::printClassData(std::ostream& os) const
         os << std::endl;
         
         os << "d_Harten_wavelet_uses_global_tol = ";
-        if (d_Harten_wavelet_uses_global_tol)
+        for (int ti = 0; ti < static_cast<int>(d_Harten_wavelet_uses_global_tol.size()); ti++)
         {
-            os << "True";
-        }
-        else
-        {
-            os << "False";
+            os << "\"" << d_Harten_wavelet_uses_global_tol[ti] << "\"";
+            
+            if (ti < static_cast<int>(d_Harten_wavelet_uses_global_tol.size()) - 1)
+            {
+                os << ", ";
+            }
         }
         os << std::endl;
-
+        
         os << "d_Harten_wavelet_global_tol = ";
         for (int ti = 0; ti < static_cast<int>(d_Harten_wavelet_global_tol.size()); ti++)
         {
@@ -788,13 +852,14 @@ MultiresolutionTagger::printClassData(std::ostream& os) const
         os << std::endl;
         
         os << "d_Harten_wavelet_uses_local_tol = ";
-        if (d_Harten_wavelet_uses_local_tol)
+        for (int ti = 0; ti < static_cast<int>(d_Harten_wavelet_uses_local_tol.size()); ti++)
         {
-            os << "True";
-        }
-        else
-        {
-            os << "False";
+            os << "\"" << d_Harten_wavelet_uses_local_tol[ti] << "\"";
+            
+            if (ti < static_cast<int>(d_Harten_wavelet_uses_local_tol.size()) - 1)
+            {
+                os << ", ";
+            }
         }
         os << std::endl;
         
@@ -809,19 +874,19 @@ MultiresolutionTagger::printClassData(std::ostream& os) const
             }
         }
         os << std::endl;
-
         
-        os << "d_Harten_wavelet_uses_alpha_tol = ";
-         if (d_Harten_wavelet_uses_alpha_tol)
+        os << "d_uses_global_d_Harten_wavelet_uses_alpha_toltol_up = ";
+        for (int ti = 0; ti < static_cast<int>(d_Harten_wavelet_uses_alpha_tol.size()); ti++)
         {
-            os << "True";
-        }
-        else
-        {
-            os << "False";
+            os << "\"" << d_Harten_wavelet_uses_alpha_tol[ti] << "\"";
+            
+            if (ti < static_cast<int>(d_Harten_wavelet_uses_alpha_tol.size()) - 1)
+            {
+                os << ", ";
+            }
         }
         os << std::endl;
-              
+        
         os << "d_Harten_wavelet_alpha_tol = ";
         for (int ti = 0; ti < static_cast<int>(d_Harten_wavelet_alpha_tol.size()); ti++)
         {
@@ -866,28 +931,39 @@ MultiresolutionTagger::putToRestart(
             sensor_db->putStringVector("d_Harten_wavelet_variables",
                 d_Harten_wavelet_variables);
             
-            sensor_db->putBool("d_Harten_wavelet_uses_global_tol",
+            sensor_db->putBoolVector("d_Harten_wavelet_uses_global_tol",
                 d_Harten_wavelet_uses_global_tol);
             
-            sensor_db->putBool("d_Harten_wavelet_uses_local_tol",
+            sensor_db->putBoolVector("d_Harten_wavelet_uses_local_tol",
                 d_Harten_wavelet_uses_local_tol);
             
-            sensor_db->putBool("d_Harten_wavelet_uses_alpha_tol",
+            sensor_db->putBoolVector("d_Harten_wavelet_uses_alpha_tol",
                 d_Harten_wavelet_uses_alpha_tol);
             
-            if (d_Harten_wavelet_uses_global_tol)
+            int num_true = 0;
+            
+            num_true = std::count(d_Harten_wavelet_uses_global_tol.begin(),
+                d_Harten_wavelet_uses_global_tol.end(),
+                true);
+            if (num_true > 0)
             {
                 sensor_db->putDoubleVector("d_Harten_wavelet_global_tol",
                     d_Harten_wavelet_global_tol);
             }
             
-            if (d_Harten_wavelet_uses_local_tol)
+            num_true = std::count(d_Harten_wavelet_local_tol.begin(),
+                d_Harten_wavelet_local_tol.end(),
+                true);
+            if (num_true > 0)
             {
                 sensor_db->putDoubleVector("d_Harten_wavelet_local_tol",
                     d_Harten_wavelet_local_tol);
             }
             
-            if (d_Harten_wavelet_uses_alpha_tol)
+            num_true = std::count(d_Harten_wavelet_alpha_tol.begin(),
+                d_Harten_wavelet_alpha_tol.end(),
+                true);
+            if (num_true > 0)
             {
                 sensor_db->putDoubleVector("d_Harten_wavelet_alpha_tol",
                     d_Harten_wavelet_alpha_tol);
@@ -951,7 +1027,7 @@ MultiresolutionTagger::computeMultiresolutionSensorValues(
                     }
                     
                     // Compute the wavelet coefficients.
-                    if (d_Harten_wavelet_uses_local_tol)
+                    if (d_Harten_wavelet_uses_local_tol[vi])
                     {
                         // Get the local means.
                         std::vector<boost::shared_ptr<pdat::CellData<double> > > variable_local_means;
@@ -1014,7 +1090,7 @@ MultiresolutionTagger::computeMultiresolutionSensorValues(
                     }
                     
                     // Compute the wavelet coefficients.
-                    if (d_Harten_wavelet_uses_local_tol)
+                    if (d_Harten_wavelet_uses_local_tol[vi])
                     {
                         // Get the local means.
                         std::vector<boost::shared_ptr<pdat::CellData<double> > > variable_local_means;
@@ -1077,7 +1153,7 @@ MultiresolutionTagger::computeMultiresolutionSensorValues(
                     }
                     
                     // Compute the wavelet coefficients.
-                    if (d_Harten_wavelet_uses_local_tol)
+                    if (d_Harten_wavelet_uses_local_tol[vi])
                     {
                         // Get the local means.
                         std::vector<boost::shared_ptr<pdat::CellData<double> > > variable_local_means;
@@ -1133,86 +1209,83 @@ MultiresolutionTagger::getSensorValueStatistics(
     const int level_number,
     const boost::shared_ptr<hier::VariableContext>& data_context)
 {
-    if (d_Harten_wavelet_uses_global_tol)
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    math::HierarchyCellDataOpsReal<double> cell_double_operator(patch_hierarchy, level_number, level_number);
+    
+    hier::VariableDatabase* variable_db = hier::VariableDatabase::getDatabase();
+    
+    for (int si = 0;
+             si < static_cast<int>(d_multiresolution_sensors.size());
+             si++)
     {
-        const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+        std::string sensor_key = d_multiresolution_sensors[si];
         
-        math::HierarchyCellDataOpsReal<double> cell_double_operator(patch_hierarchy, level_number, level_number);
-        
-        hier::VariableDatabase* variable_db = hier::VariableDatabase::getDatabase();
-        
-        for (int si = 0;
-                 si < static_cast<int>(d_multiresolution_sensors.size());
-                 si++)
+        if (sensor_key == "HARTEN_WAVELET")
         {
-            std::string sensor_key = d_multiresolution_sensors[si];
-            
-            if (sensor_key == "HARTEN_WAVELET")
+            for (int vi = 0; vi < static_cast<int>(d_Harten_wavelet_variables.size()); vi++)
             {
-                // Only get the statistics if global filter is used.
-                if (d_Harten_wavelet_uses_global_tol)
+                // Only get the statistics if global tolerances is used.
+                if (d_Harten_wavelet_uses_global_tol[vi])
                 {
-                    for (int vi = 0; vi < static_cast<int>(d_Harten_wavelet_variables.size()); vi++)
+                    // Get the key of the current variable.
+                    std::string variable_key = d_Harten_wavelet_variables[vi];
+                    
+                    if (variable_key == "DENSITY")
                     {
-                        // Get the key of the current variable.
-                        std::string variable_key = d_Harten_wavelet_variables[vi];
-                        
-                        if (variable_key == "DENSITY")
+                        for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                         {
-                            for (int li = 0; li < d_Harten_wavelet_num_level; li++)
-                            {
-                                const int rho_w_id = variable_db->mapVariableAndContextToIndex(
-                                    d_Harten_density_wavelet_coeffs[li],
-                                    data_context);
-                                
-                                double rho_w_max_local = cell_double_operator.max(rho_w_id);
-                                d_Harten_density_wavelet_coeffs_maxs[li] = 0.0;
-                                
-                                mpi.Allreduce(
-                                    &rho_w_max_local,
-                                    &d_Harten_density_wavelet_coeffs_maxs[li],
-                                    1,
-                                    MPI_DOUBLE,
-                                    MPI_MAX);
-                            }
+                            const int rho_w_id = variable_db->mapVariableAndContextToIndex(
+                                d_Harten_density_wavelet_coeffs[li],
+                                data_context);
+                            
+                            double rho_w_max_local = cell_double_operator.max(rho_w_id);
+                            d_Harten_density_wavelet_coeffs_maxs[li] = 0.0;
+                            
+                            mpi.Allreduce(
+                                &rho_w_max_local,
+                                &d_Harten_density_wavelet_coeffs_maxs[li],
+                                1,
+                                MPI_DOUBLE,
+                                MPI_MAX);
                         }
-                        else if (variable_key == "TOTAL_ENERGY")
+                    }
+                    else if (variable_key == "TOTAL_ENERGY")
+                    {
+                        for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                         {
-                            for (int li = 0; li < d_Harten_wavelet_num_level; li++)
-                            {
-                                const int E_w_id = variable_db->mapVariableAndContextToIndex(
-                                    d_Harten_total_energy_wavelet_coeffs[li],
-                                    data_context);
-                                
-                                double E_w_max_local = cell_double_operator.max(E_w_id);
-                                d_Harten_total_energy_wavelet_coeffs_maxs[li] = 0.0;
-                                
-                                mpi.Allreduce(
-                                    &E_w_max_local,
-                                    &d_Harten_total_energy_wavelet_coeffs_maxs[li],
-                                    1,
-                                    MPI_DOUBLE,
-                                    MPI_MAX);
-                            }
+                            const int E_w_id = variable_db->mapVariableAndContextToIndex(
+                                d_Harten_total_energy_wavelet_coeffs[li],
+                                data_context);
+                            
+                            double E_w_max_local = cell_double_operator.max(E_w_id);
+                            d_Harten_total_energy_wavelet_coeffs_maxs[li] = 0.0;
+                            
+                            mpi.Allreduce(
+                                &E_w_max_local,
+                                &d_Harten_total_energy_wavelet_coeffs_maxs[li],
+                                1,
+                                MPI_DOUBLE,
+                                MPI_MAX);
                         }
-                        else if (variable_key == "PRESSURE")
+                    }
+                    else if (variable_key == "PRESSURE")
+                    {
+                        for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                         {
-                            for (int li = 0; li < d_Harten_wavelet_num_level; li++)
-                            {
-                                const int p_w_id = variable_db->mapVariableAndContextToIndex(
-                                    d_Harten_pressure_wavelet_coeffs[li],
-                                    data_context);
-                                
-                                double p_w_max_local = cell_double_operator.max(p_w_id);
-                                d_Harten_pressure_wavelet_coeffs_maxs[li] = 0.0;
-                                
-                                mpi.Allreduce(
-                                    &p_w_max_local,
-                                    &d_Harten_pressure_wavelet_coeffs_maxs[li],
-                                    1,
-                                    MPI_DOUBLE,
-                                    MPI_MAX);
-                            }
+                            const int p_w_id = variable_db->mapVariableAndContextToIndex(
+                                d_Harten_pressure_wavelet_coeffs[li],
+                                data_context);
+                            
+                            double p_w_max_local = cell_double_operator.max(p_w_id);
+                            d_Harten_pressure_wavelet_coeffs_maxs[li] = 0.0;
+                            
+                            mpi.Allreduce(
+                                &p_w_max_local,
+                                &d_Harten_pressure_wavelet_coeffs_maxs[li],
+                                1,
+                                MPI_DOUBLE,
+                                MPI_MAX);
                         }
                     }
                 }
@@ -1239,11 +1312,19 @@ MultiresolutionTagger::tagCells(
         
         if (sensor_key == "HARTEN_WAVELET")
         {
+            int count_global_tol = 0;
+            int count_local_tol = 0;
+            int count_alpha_tol = 0;
+            
             // Loop over the variables for wavelet analysis.
             for (int vi = 0; vi < static_cast<int>(d_Harten_wavelet_variables.size()); vi++)
             {
                 // Get the key of the current variable.
                 std::string variable_key = d_Harten_wavelet_variables[vi];
+                
+                bool uses_global_tol = d_Harten_wavelet_uses_global_tol[vi];
+                bool uses_local_tol = d_Harten_wavelet_uses_local_tol[vi];
+                bool uses_alpha_tol = d_Harten_wavelet_uses_alpha_tol[vi];
                 
                 /*
                  * Get the wavelet coefficients and the statistics of the wavelet coefficients
@@ -1254,17 +1335,22 @@ MultiresolutionTagger::tagCells(
                 double local_tol = 0.0;
                 double alpha_tol = 0.0;
                 
-                if (d_Harten_wavelet_uses_global_tol)
+                if (uses_global_tol)
                 {
-                    global_tol = d_Harten_wavelet_global_tol[vi];
+                    global_tol = d_Harten_wavelet_global_tol[count_global_tol];
+                    count_global_tol++;
                 }
-                if (d_Harten_wavelet_uses_local_tol)
+                
+                if (uses_local_tol)
                 {
-                    local_tol = d_Harten_wavelet_local_tol[vi];
+                    local_tol = d_Harten_wavelet_local_tol[count_local_tol];
+                    count_local_tol++;
                 }
-                if (d_Harten_wavelet_uses_alpha_tol)
+                
+                if (uses_alpha_tol)
                 {
-                    alpha_tol = d_Harten_wavelet_alpha_tol[vi];
+                    alpha_tol = d_Harten_wavelet_alpha_tol[count_alpha_tol];
+                    count_alpha_tol++;
                 }
                 
                 if (variable_key == "DENSITY")
@@ -1278,7 +1364,7 @@ MultiresolutionTagger::tagCells(
                     }
                     
                     std::vector<boost::shared_ptr<pdat::CellData<double> > > variable_local_means;
-                    if (d_Harten_wavelet_uses_local_tol)
+                    if (uses_local_tol)
                     {
                         // Get the local means.
                         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
@@ -1289,7 +1375,7 @@ MultiresolutionTagger::tagCells(
                     }
                     
                     boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent;
-                    if (d_Harten_wavelet_uses_alpha_tol)
+                    if (uses_alpha_tol)
                     {
                         Lipschitz_exponent = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(d_Harten_density_Lipschitz_exponent,
@@ -1303,6 +1389,9 @@ MultiresolutionTagger::tagCells(
                         d_Harten_density_wavelet_coeffs_maxs,
                         variable_local_means,
                         Lipschitz_exponent,
+                        uses_global_tol,
+                        uses_local_tol,
+                        uses_alpha_tol,
                         global_tol,
                         local_tol,
                         alpha_tol,
@@ -1319,7 +1408,7 @@ MultiresolutionTagger::tagCells(
                     }
                     
                     std::vector<boost::shared_ptr<pdat::CellData<double> > > variable_local_means;
-                    if (d_Harten_wavelet_uses_local_tol)
+                    if (uses_local_tol)
                     {
                         // Get the local means.
                         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
@@ -1330,7 +1419,7 @@ MultiresolutionTagger::tagCells(
                     }
                     
                     boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent;
-                    if (d_Harten_wavelet_uses_alpha_tol)
+                    if (uses_alpha_tol)
                     {
                         Lipschitz_exponent = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(d_Harten_total_energy_Lipschitz_exponent,
@@ -1344,6 +1433,9 @@ MultiresolutionTagger::tagCells(
                         d_Harten_total_energy_wavelet_coeffs_maxs,
                         variable_local_means,
                         Lipschitz_exponent,
+                        uses_global_tol,
+                        uses_local_tol,
+                        uses_alpha_tol,
                         global_tol,
                         local_tol,
                         alpha_tol,
@@ -1360,7 +1452,7 @@ MultiresolutionTagger::tagCells(
                     }
                     
                     std::vector<boost::shared_ptr<pdat::CellData<double> > > variable_local_means;
-                    if (d_Harten_wavelet_uses_local_tol)
+                    if (uses_local_tol)
                     {
                         // Get the local means.
                         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
@@ -1371,7 +1463,7 @@ MultiresolutionTagger::tagCells(
                     }
                     
                     boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent;
-                    if (d_Harten_wavelet_uses_alpha_tol)
+                    if (uses_alpha_tol)
                     {
                         Lipschitz_exponent = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(d_Harten_pressure_Lipschitz_exponent,
@@ -1385,6 +1477,9 @@ MultiresolutionTagger::tagCells(
                         d_Harten_pressure_wavelet_coeffs_maxs,
                         variable_local_means,
                         Lipschitz_exponent,
+                        uses_global_tol,
+                        uses_local_tol,
+                        uses_alpha_tol,
                         global_tol,
                         local_tol,
                         alpha_tol,
@@ -1793,6 +1888,9 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
     std::vector<double>& wavelet_coeffs_maxs,
     std::vector<boost::shared_ptr<pdat::CellData<double> > >& variable_local_means,
     boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent,
+    bool& uses_global_tol,
+    bool& uses_local_tol,
+    bool& uses_alpha_tol,
     double& global_tol,
     double& local_tol,
     double& alpha_tol,
@@ -1823,7 +1921,7 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
     
     // Get the pointers to the variable local means.
     std::vector<double*> u_mean;
-    if (d_Harten_wavelet_uses_local_tol)
+    if (uses_local_tol)
     {
         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
         {
@@ -1836,7 +1934,7 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
     
     if (sensor_key == "HARTEN_WAVELET")
     {
-        if (d_Harten_wavelet_uses_alpha_tol)
+        if (uses_alpha_tol)
         {
             alpha = Lipschitz_exponent->getPointer(0);
             
@@ -1860,7 +1958,7 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                 int tag_cell_local_tol  = 0;
                 int tag_cell_alpha_tol  = 0;
                 
-                if (d_Harten_wavelet_uses_global_tol)
+                if (uses_global_tol)
                 {
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                     {
@@ -1875,7 +1973,7 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                     tag_cell &= tag_cell_global_tol;
                 }
                 
-                if (d_Harten_wavelet_uses_local_tol)
+                if (uses_local_tol)
                 {
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                     {
@@ -1890,7 +1988,7 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                     tag_cell &= tag_cell_local_tol;
                 }
                 
-                if (d_Harten_wavelet_uses_alpha_tol)
+                if (uses_alpha_tol)
                 {
                     if (alpha[idx] < alpha_tol)
                     {
@@ -1920,7 +2018,7 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                     int tag_cell_local_tol  = 0;
                     int tag_cell_alpha_tol  = 0;
                     
-                    if (d_Harten_wavelet_uses_global_tol)
+                    if (uses_global_tol)
                     {
                         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                         {
@@ -1935,7 +2033,7 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                         tag_cell &= tag_cell_global_tol;
                     }
                     
-                    if (d_Harten_wavelet_uses_local_tol)
+                    if (uses_local_tol)
                     {
                         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                         {
@@ -1950,7 +2048,7 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                         tag_cell &= tag_cell_local_tol;
                     }
                     
-                    if (d_Harten_wavelet_uses_alpha_tol)
+                    if (uses_alpha_tol)
                     {
                         if (alpha[idx] < alpha_tol)
                         {
@@ -1985,7 +2083,7 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                         int tag_cell_local_tol  = 0;
                         int tag_cell_alpha_tol  = 0;
                         
-                        if (d_Harten_wavelet_uses_global_tol)
+                        if (uses_global_tol)
                         {
                             for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                             {
@@ -2000,7 +2098,7 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                             tag_cell &= tag_cell_global_tol;
                         }
                         
-                        if (d_Harten_wavelet_uses_local_tol)
+                        if (uses_local_tol)
                         {
                             for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                             {
@@ -2015,7 +2113,7 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                             tag_cell &= tag_cell_local_tol;
                         }
                         
-                        if (d_Harten_wavelet_uses_alpha_tol)
+                        if (uses_alpha_tol)
                         {
                             if (alpha[idx] <= alpha_tol)
                             {

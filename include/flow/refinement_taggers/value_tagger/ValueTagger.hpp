@@ -105,6 +105,10 @@ class ValueTagger
             const boost::shared_ptr<pdat::CellData<int> >& tags,
             const boost::shared_ptr<pdat::CellVariable<double> >& variable_value_tagger,
             double& value_max,
+            bool& uses_global_tol_up,
+            bool& uses_global_tol_lo,
+            bool& uses_local_tol_up,
+            bool& uses_local_tol_lo,
             double& global_tol_up,
             double& global_tol_lo,
             double& local_tol_up,
@@ -158,10 +162,10 @@ class ValueTagger
         std::vector<double> d_global_tol_lo;
         std::vector<double> d_local_tol_up;
         std::vector<double> d_local_tol_lo;
-        bool d_uses_global_tol_up;
-        bool d_uses_global_tol_lo;
-        bool d_uses_local_tol_up;
-        bool d_uses_local_tol_lo;
+        std::vector<bool> d_uses_global_tol_up;
+        std::vector<bool> d_uses_global_tol_lo;
+        std::vector<bool> d_uses_local_tol_up;
+        std::vector<bool> d_uses_local_tol_lo;
         
         /*
          * boost::shared_ptr to data values.

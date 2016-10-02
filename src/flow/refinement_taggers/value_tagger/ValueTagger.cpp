@@ -1,5 +1,6 @@
 #include "flow/refinement_taggers/value_tagger/ValueTagger.hpp"
 
+#include <algorithm>
 #include "boost/lexical_cast.hpp"
 
 // #define PLOTTING_VALUE_TAGGER
@@ -64,14 +65,19 @@ ValueTagger::ValueTagger(
             }
         }
         
-        // Get the settings for global tolerances.
+        int num_true = 0;
+        
+        /*
+         * Get the settings for global upper tolerances.
+         */
+        
         if (value_tagger_db->keyExists("uses_global_tol_up"))
         {
-            d_uses_global_tol_up = value_tagger_db->getBool("uses_global_tol_up");
+            d_uses_global_tol_up = value_tagger_db->getBoolVector("uses_global_tol_up");
         }
         else if (value_tagger_db->keyExists("d_uses_global_tol_up"))
         {
-            d_uses_global_tol_up = value_tagger_db->getBool("d_uses_global_tol_up");
+            d_uses_global_tol_up = value_tagger_db->getBoolVector("d_uses_global_tol_up");
         }
         else
         {
@@ -82,7 +88,18 @@ ValueTagger::ValueTagger(
                 << std::endl);
         }
         
-        if (d_uses_global_tol_up)
+        if (static_cast<int>(d_variables.size()) != static_cast<int>(d_uses_global_tol_up.size()))
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "The numbers of variables and switches for global upper tolerances provided don't match"
+                << " in database of value tagger."
+                << std::endl);
+        }
+        
+        num_true = std::count(d_uses_global_tol_up.begin(), d_uses_global_tol_up.end(), true);
+        
+        if (num_true > 0)
         {
             if (value_tagger_db->keyExists("global_tol_up"))
             {
@@ -100,23 +117,27 @@ ValueTagger::ValueTagger(
                     << std::endl);
             }
             
-            if (static_cast<int>(d_variables.size()) != static_cast<int>(d_global_tol_up.size()))
+            if (num_true != static_cast<int>(d_global_tol_up.size()))
             {
                 TBOX_ERROR(d_object_name
                     << ": "
-                    << "The numbers of variables and upper global tolerances provided don't match"
-                    << " in database of value tagger."
+                    << "The number of variables that use global upper tolerances and number of"
+                    << " global upper tolerances provided don't match in database of value tagger."
                     << std::endl);
             }
         }
         
+        /*
+         * Get the settings for global lower tolerances.
+         */
+        
         if (value_tagger_db->keyExists("uses_global_tol_lo"))
         {
-            d_uses_global_tol_lo = value_tagger_db->getBool("uses_global_tol_lo");
+            d_uses_global_tol_lo = value_tagger_db->getBoolVector("uses_global_tol_lo");
         }
         else if (value_tagger_db->keyExists("d_uses_global_tol_lo"))
         {
-            d_uses_global_tol_lo = value_tagger_db->getBool("d_uses_global_tol_lo");
+            d_uses_global_tol_lo = value_tagger_db->getBoolVector("d_uses_global_tol_lo");
         }
         else
         {
@@ -127,7 +148,18 @@ ValueTagger::ValueTagger(
                 << std::endl);
         }
         
-        if (d_uses_global_tol_lo)
+        if (static_cast<int>(d_variables.size()) != static_cast<int>(d_uses_global_tol_lo.size()))
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "The numbers of variables and switches for global lower tolerances provided don't match"
+                << " in database of value tagger."
+                << std::endl);
+        }
+        
+        num_true = std::count(d_uses_global_tol_lo.begin(), d_uses_global_tol_lo.end(), true);
+        
+        if (num_true > 0)
         {
             if (value_tagger_db->keyExists("global_tol_lo"))
             {
@@ -145,24 +177,27 @@ ValueTagger::ValueTagger(
                     << std::endl);
             }
             
-            if (static_cast<int>(d_variables.size()) != static_cast<int>(d_global_tol_lo.size()))
+            if (num_true != static_cast<int>(d_global_tol_lo.size()))
             {
                 TBOX_ERROR(d_object_name
                     << ": "
-                    << "The numbers of variables and lower global tolerances provided don't match"
-                    << " in database of value tagger."
+                    << "The number of variables that use global lower tolerances and number of"
+                    << " global lower tolerances provided don't match in database of value tagger."
                     << std::endl);
             }
         }
         
-        // Get the settings for local tolerances.
+        /*
+         * Get the settings for local upper tolerances.
+         */
+        
         if (value_tagger_db->keyExists("uses_local_tol_up"))
         {
-            d_uses_local_tol_up = value_tagger_db->getBool("uses_local_tol_up");
+            d_uses_local_tol_up = value_tagger_db->getBoolVector("uses_local_tol_up");
         }
         else if (value_tagger_db->keyExists("d_uses_local_tol_up"))
         {
-            d_uses_local_tol_up = value_tagger_db->getBool("d_uses_local_tol_up");
+            d_uses_local_tol_up = value_tagger_db->getBoolVector("d_uses_local_tol_up");
         }
         else
         {
@@ -173,7 +208,18 @@ ValueTagger::ValueTagger(
                 << std::endl);
         }
         
-        if (d_uses_local_tol_up)
+        if (static_cast<int>(d_variables.size()) != static_cast<int>(d_uses_local_tol_up.size()))
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "The numbers of variables and switches for local upper tolerances provided don't match"
+                << " in database of value tagger."
+                << std::endl);
+        }
+        
+        num_true = std::count(d_uses_local_tol_up.begin(), d_uses_local_tol_up.end(), true);
+        
+        if (num_true > 0)
         {
             if (value_tagger_db->keyExists("local_tol_up"))
             {
@@ -191,23 +237,27 @@ ValueTagger::ValueTagger(
                     << std::endl);
             }
             
-            if (static_cast<int>(d_variables.size()) != static_cast<int>(d_local_tol_up.size()))
+            if (num_true != static_cast<int>(d_local_tol_up.size()))
             {
                 TBOX_ERROR(d_object_name
                     << ": "
-                    << "The numbers of variables and upper local tolerances provided don't match"
-                    << " in database of value tagger."
+                    << "The number of variables that use local upper tolerances and number of"
+                    << " local upper tolerances provided don't match in database of value tagger."
                     << std::endl);
             }
         }
         
+        /*
+         * Get the settings for local lower tolerances.
+         */
+        
         if (value_tagger_db->keyExists("uses_local_tol_lo"))
         {
-            d_uses_local_tol_lo = value_tagger_db->getBool("uses_local_tol_lo");
+            d_uses_local_tol_lo = value_tagger_db->getBoolVector("uses_local_tol_lo");
         }
         else if (value_tagger_db->keyExists("d_uses_local_tol_lo"))
         {
-            d_uses_local_tol_lo = value_tagger_db->getBool("d_uses_local_tol_lo");
+            d_uses_local_tol_lo = value_tagger_db->getBoolVector("d_uses_local_tol_lo");
         }
         else
         {
@@ -218,7 +268,18 @@ ValueTagger::ValueTagger(
                 << std::endl);
         }
         
-        if (d_uses_local_tol_lo)
+        if (static_cast<int>(d_variables.size()) != static_cast<int>(d_uses_local_tol_lo.size()))
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "The numbers of variables and switches for local lower tolerances provided don't match"
+                << " in database of value tagger."
+                << std::endl);
+        }
+        
+        num_true = std::count(d_uses_local_tol_lo.begin(), d_uses_local_tol_lo.end(), true);
+        
+        if (num_true > 0)
         {
             if (value_tagger_db->keyExists("local_tol_lo"))
             {
@@ -236,12 +297,12 @@ ValueTagger::ValueTagger(
                     << std::endl);
             }
             
-            if (static_cast<int>(d_variables.size()) != static_cast<int>(d_local_tol_lo.size()))
+            if (num_true != static_cast<int>(d_local_tol_lo.size()))
             {
                 TBOX_ERROR(d_object_name
                     << ": "
-                    << "The numbers of variables and loser local tolerances provided don't match"
-                    << " in database of value tagger."
+                    << "The number of variables that use local lower tolerances and number of"
+                    << " local lower tolerances provided don't match in database of value tagger."
                     << std::endl);
             }
         }
@@ -317,7 +378,7 @@ ValueTagger::registerValueTaggerVariables(
                     1));
             }
             
-            if (d_uses_global_tol_up || d_uses_global_tol_lo)
+            if (d_uses_global_tol_up[vi] || d_uses_global_tol_lo[vi])
             {
                 d_value_tagger_mass_fraction_max.reserve(d_num_species);
                 
@@ -377,24 +438,26 @@ ValueTagger::printClassData(std::ostream& os) const
     os << std::endl;
     
     os << "d_uses_global_tol_up = ";
-    if (d_uses_global_tol_up)
+    for (int ti = 0; ti < static_cast<int>(d_uses_global_tol_up.size()); ti++)
     {
-        os << "True";
-    }
-    else
-    {
-        os << "False";
+        os << "\"" << d_uses_global_tol_up[ti] << "\"";
+        
+        if (ti < static_cast<int>(d_uses_global_tol_up.size()) - 1)
+        {
+            os << ", ";
+        }
     }
     os << std::endl;
     
     os << "d_uses_global_tol_lo = ";
-    if (d_uses_global_tol_lo)
+    for (int ti = 0; ti < static_cast<int>(d_uses_global_tol_lo.size()); ti++)
     {
-        os << "True";
-    }
-    else
-    {
-        os << "False";
+        os << "\"" << d_uses_global_tol_lo[ti] << "\"";
+        
+        if (ti < static_cast<int>(d_uses_global_tol_lo.size()) - 1)
+        {
+            os << ", ";
+        }
     }
     os << std::endl;
     
@@ -423,24 +486,26 @@ ValueTagger::printClassData(std::ostream& os) const
     os << std::endl;
     
     os << "d_uses_local_tol_up = ";
-    if (d_uses_local_tol_up)
+    for (int ti = 0; ti < static_cast<int>(d_uses_local_tol_up.size()); ti++)
     {
-        os << "True";
-    }
-    else
-    {
-        os << "False";
+        os << "\"" << d_uses_local_tol_up[ti] << "\"";
+        
+        if (ti < static_cast<int>(d_uses_local_tol_up.size()) - 1)
+        {
+            os << ", ";
+        }
     }
     os << std::endl;
     
     os << "d_uses_local_tol_lo = ";
-    if (d_uses_local_tol_lo)
+    for (int ti = 0; ti < static_cast<int>(d_uses_local_tol_lo.size()); ti++)
     {
-        os << "True";
-    }
-    else
-    {
-        os << "False";
+        os << "\"" << d_uses_local_tol_lo[ti] << "\"";
+        
+        if (ti < static_cast<int>(d_uses_local_tol_lo.size()) - 1)
+        {
+            os << ", ";
+        }
     }
     os << std::endl;
     
@@ -481,33 +546,35 @@ ValueTagger::putToRestart(
     restart_db->putStringVector("d_variables",
         d_variables);
     
-    restart_db->putBool("d_uses_global_tol_up", d_uses_global_tol_up);
-    restart_db->putBool("d_uses_global_tol_lo", d_uses_global_tol_lo);
-    restart_db->putBool("d_uses_local_tol_up", d_uses_local_tol_up);
-    restart_db->putBool("d_uses_local_tol_lo", d_uses_local_tol_lo);
+    restart_db->putBoolVector("d_uses_global_tol_up", d_uses_global_tol_up);
+    restart_db->putBoolVector("d_uses_global_tol_lo", d_uses_global_tol_lo);
+    restart_db->putBoolVector("d_uses_local_tol_up", d_uses_local_tol_up);
+    restart_db->putBoolVector("d_uses_local_tol_lo", d_uses_local_tol_lo);
     
-    if (d_uses_global_tol_up)
+    int num_true = 0;
+    
+    num_true = std::count(d_uses_global_tol_up.begin(), d_uses_global_tol_up.end(), true);
+    if (num_true > 0)
     {
-        restart_db->putDoubleVector("d_global_tol_up",
-            d_global_tol_up);
+        restart_db->putDoubleVector("d_global_tol_up", d_global_tol_up);
     }
     
-    if (d_uses_global_tol_lo)
+    num_true = std::count(d_uses_global_tol_lo.begin(), d_uses_global_tol_lo.end(), true);
+    if (num_true > 0)
     {
-        restart_db->putDoubleVector("d_global_tol_lo",
-            d_global_tol_lo);
+        restart_db->putDoubleVector("d_global_tol_lo", d_global_tol_lo);
     }
     
-    if (d_uses_local_tol_up)
+    num_true = std::count(d_uses_local_tol_up.begin(), d_uses_local_tol_up.end(), true);
+    if (num_true > 0)
     {
-        restart_db->putDoubleVector("d_local_tol_up",
-            d_local_tol_up);
+        restart_db->putDoubleVector("d_local_tol_up", d_local_tol_up);
     }
     
-    if (d_uses_local_tol_lo)
+    num_true = std::count(d_uses_local_tol_lo.begin(), d_uses_local_tol_lo.end(), true);
+    if (num_true > 0)
     {
-        restart_db->putDoubleVector("d_local_tol_lo",
-            d_local_tol_lo);
+        restart_db->putDoubleVector("d_local_tol_lo", d_local_tol_lo);
     }
 }
 
@@ -782,16 +849,16 @@ ValueTagger::getValueStatistics(
     const int level_number,
     const boost::shared_ptr<hier::VariableContext>& data_context)
 {
-    if (d_uses_global_tol_up || d_uses_global_tol_lo)
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    math::HierarchyCellDataOpsReal<double> cell_double_operator(patch_hierarchy, level_number, level_number);
+    
+    hier::VariableDatabase* variable_db = hier::VariableDatabase::getDatabase();
+    
+    // Loop over variables chosen.
+    for (int vi = 0; vi < static_cast<int>(d_variables.size()); vi++)
     {
-        const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
-        
-        math::HierarchyCellDataOpsReal<double> cell_double_operator(patch_hierarchy, level_number, level_number);
-        
-        hier::VariableDatabase* variable_db = hier::VariableDatabase::getDatabase();
-        
-        // Loop over variables chosen.
-        for (int vi = 0; vi < static_cast<int>(d_variables.size()); vi++)
+        if (d_uses_global_tol_up[vi] || d_uses_global_tol_lo[vi])
         {
             // Get the key of the current variable.
             std::string variable_key = d_variables[vi];
@@ -909,35 +976,49 @@ ValueTagger::tagCells(
    boost::shared_ptr<pdat::CellData<int> > tags,
    const boost::shared_ptr<hier::VariableContext>& data_context)
 {
+    int count_global_tol_up = 0;
+    int count_global_tol_lo = 0;
+    int count_local_tol_up = 0;
+    int count_local_tol_lo = 0;
+    
     // Loop over variables chosen.
     for (int vi = 0; vi < static_cast<int>(d_variables.size()); vi++)
     {
         // Get the key of the current variable.
         std::string variable_key = d_variables[vi];
         
+        bool uses_global_tol_up = d_uses_global_tol_up[vi];
+        bool uses_global_tol_lo = d_uses_global_tol_lo[vi];
+        bool uses_local_tol_up = d_uses_local_tol_up[vi];
+        bool uses_local_tol_lo = d_uses_local_tol_lo[vi];
+        
         double global_tol_up = 0.0;
         double global_tol_lo = 0.0;
         double local_tol_up = 0.0;
         double local_tol_lo = 0.0;
         
-        if (d_uses_global_tol_up)
+        if (uses_global_tol_up)
         {
-            global_tol_up = d_global_tol_up[vi];
+            global_tol_up = d_global_tol_up[count_global_tol_up];
+            count_global_tol_up++;
         }
         
-        if (d_uses_global_tol_lo)
+        if (uses_global_tol_lo)
         {
-            global_tol_lo = d_global_tol_lo[vi];
+            global_tol_lo = d_global_tol_lo[count_global_tol_lo];
+            count_global_tol_lo++;
         }
         
-        if (d_uses_local_tol_up)
+        if (uses_local_tol_up)
         {
-            local_tol_up = d_local_tol_up[vi];
+            local_tol_up = d_local_tol_up[count_local_tol_up];
+            count_local_tol_up++;
         }
         
-        if (d_uses_local_tol_lo)
+        if (uses_local_tol_lo)
         {
-            local_tol_lo = d_local_tol_lo[vi];
+            local_tol_lo = d_local_tol_lo[count_local_tol_lo];
+            count_local_tol_lo++;
         }
         
         if (variable_key == "DENSITY")
@@ -947,6 +1028,10 @@ ValueTagger::tagCells(
                 tags,
                 d_value_tagger_variable_density,
                 d_value_tagger_density_max,
+                uses_global_tol_up,
+                uses_global_tol_lo,
+                uses_local_tol_up,
+                uses_local_tol_lo,
                 global_tol_up,
                 global_tol_lo,
                 local_tol_up,
@@ -959,6 +1044,10 @@ ValueTagger::tagCells(
                 tags,
                 d_value_tagger_variable_total_energy,
                 d_value_tagger_total_energy_max,
+                uses_global_tol_up,
+                uses_global_tol_lo,
+                uses_local_tol_up,
+                uses_local_tol_lo,
                 global_tol_up,
                 global_tol_lo,
                 local_tol_up,
@@ -971,6 +1060,10 @@ ValueTagger::tagCells(
                 tags,
                 d_value_tagger_variable_pressure,
                 d_value_tagger_pressure_max,
+                uses_global_tol_up,
+                uses_global_tol_lo,
+                uses_local_tol_up,
+                uses_local_tol_lo,
                 global_tol_up,
                 global_tol_lo,
                 local_tol_up,
@@ -983,6 +1076,10 @@ ValueTagger::tagCells(
                 tags,
                 d_value_tagger_variable_dilatation,
                 d_value_tagger_dilatation_max,
+                uses_global_tol_up,
+                uses_global_tol_lo,
+                uses_local_tol_up,
+                uses_local_tol_lo,
                 global_tol_up,
                 global_tol_lo,
                 local_tol_up,
@@ -995,6 +1092,10 @@ ValueTagger::tagCells(
                 tags,
                 d_value_tagger_variable_enstrophy,
                 d_value_tagger_enstrophy_max,
+                uses_global_tol_up,
+                uses_global_tol_lo,
+                uses_local_tol_up,
+                uses_local_tol_lo,
                 global_tol_up,
                 global_tol_lo,
                 local_tol_up,
@@ -1009,6 +1110,10 @@ ValueTagger::tagCells(
                     tags,
                     d_value_tagger_variable_mass_fraction[si],
                     d_value_tagger_mass_fraction_max[si],
+                    uses_global_tol_up,
+                    uses_global_tol_lo,
+                    uses_local_tol_up,
+                    uses_local_tol_lo,
                     global_tol_up,
                     global_tol_lo,
                     local_tol_up,
@@ -1029,6 +1134,10 @@ ValueTagger::tagCellsWithValue(
     const boost::shared_ptr<pdat::CellData<int> >& tags,
     const boost::shared_ptr<pdat::CellVariable<double> >& variable_value_tagger,
     double& value_max,
+    bool& uses_global_tol_up,
+    bool& uses_global_tol_lo,
+    bool& uses_local_tol_up,
+    bool& uses_local_tol_lo,
     double& global_tol_up,
     double& global_tol_lo,
     double& local_tol_up,
@@ -1065,7 +1174,7 @@ ValueTagger::tagCellsWithValue(
             
             int tag_cell = 1;
             
-            if (d_uses_global_tol_up)
+            if (uses_global_tol_up)
             {
                 if (u[idx]/(value_max + EPSILON) <= global_tol_up)
                 {
@@ -1077,7 +1186,7 @@ ValueTagger::tagCellsWithValue(
                 }
             }
             
-            if (d_uses_global_tol_lo)
+            if (uses_global_tol_lo)
             {
                 if (u[idx]/(value_max + EPSILON) >= global_tol_lo)
                 {
@@ -1089,7 +1198,7 @@ ValueTagger::tagCellsWithValue(
                 }
             }
             
-            if (d_uses_local_tol_up)
+            if (uses_local_tol_up)
             {
                 if (u[idx] <= local_tol_up)
                 {
@@ -1101,7 +1210,7 @@ ValueTagger::tagCellsWithValue(
                 }
             }
             
-            if (d_uses_local_tol_lo)
+            if (uses_local_tol_lo)
             {
                 if (u[idx] >= local_tol_lo)
                 {
@@ -1130,7 +1239,7 @@ ValueTagger::tagCellsWithValue(
                 
                 int tag_cell = 1;
                 
-                if (d_uses_global_tol_up)
+                if (uses_global_tol_up)
                 {
                     if (u[idx]/(value_max + EPSILON) <= global_tol_up)
                     {
@@ -1142,7 +1251,7 @@ ValueTagger::tagCellsWithValue(
                     }
                 }
                 
-                if (d_uses_global_tol_lo)
+                if (uses_global_tol_lo)
                 {
                     if (u[idx]/(value_max + EPSILON) >= global_tol_lo)
                     {
@@ -1154,7 +1263,7 @@ ValueTagger::tagCellsWithValue(
                     }
                 }
                 
-                if (d_uses_local_tol_up)
+                if (uses_local_tol_up)
                 {
                     if (u[idx] <= local_tol_up)
                     {
@@ -1166,7 +1275,7 @@ ValueTagger::tagCellsWithValue(
                     }
                 }
                 
-                if (d_uses_local_tol_lo)
+                if (uses_local_tol_lo)
                 {
                     if (u[idx] >= local_tol_lo)
                     {
@@ -1200,7 +1309,7 @@ ValueTagger::tagCellsWithValue(
                     
                     int tag_cell = 1;
                     
-                    if (d_uses_global_tol_up)
+                    if (uses_global_tol_up)
                     {
                         if (u[idx]/(value_max + EPSILON) <= global_tol_up)
                         {
@@ -1212,7 +1321,7 @@ ValueTagger::tagCellsWithValue(
                         }
                     }
                     
-                    if (d_uses_global_tol_lo)
+                    if (uses_global_tol_lo)
                     {
                         if (u[idx]/(value_max + EPSILON) >= global_tol_lo)
                         {
@@ -1224,7 +1333,7 @@ ValueTagger::tagCellsWithValue(
                         }
                     }
                     
-                    if (d_uses_local_tol_up)
+                    if (uses_local_tol_up)
                     {
                         if (u[idx] <= local_tol_up)
                         {
@@ -1236,7 +1345,7 @@ ValueTagger::tagCellsWithValue(
                         }
                     }
                     
-                    if (d_uses_local_tol_lo)
+                    if (uses_local_tol_lo)
                     {
                         if (u[idx] >= local_tol_lo)
                         {
