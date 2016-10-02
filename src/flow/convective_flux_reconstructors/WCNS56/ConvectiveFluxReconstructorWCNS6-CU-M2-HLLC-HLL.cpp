@@ -1,8 +1,10 @@
-#include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructorWCNS6-HW-HLLC-HLL.hpp"
+#include "flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS6-CU-M2-HLLC-HLL.hpp"
+
+#include "SAMRAI/geom/CartesianPatchGeometry.h"
 
 #define EPSILON 1e-40
 
-ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL::ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL(
+ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL::ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL(
     const std::string& object_name,
     const tbox::Dimension& dim,
     const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
@@ -30,16 +32,24 @@ ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL::ConvectiveFluxReconstructorWCNS6_H
      * Set the constants that are used in the scheme.
      */
     
-    d_constant_C     = convective_flux_reconstructor_db->getDoubleWithDefault("constant_C", 5.0);
-    d_constant_C     = convective_flux_reconstructor_db->getDoubleWithDefault("d_constant_C", d_constant_C);
+    d_constant_C       = convective_flux_reconstructor_db->getDoubleWithDefault("constant_C", 1000.0);
+    d_constant_C       = convective_flux_reconstructor_db->getDoubleWithDefault("d_constant_C", d_constant_C);
     
-    d_constant_r_c   = convective_flux_reconstructor_db->getDoubleWithDefault("constant_r_c", 0.5);
-    d_constant_r_c   = convective_flux_reconstructor_db->getDoubleWithDefault("d_constant_r_c", d_constant_r_c);
+    d_constant_q       = convective_flux_reconstructor_db->getIntegerWithDefault("constant_q", 4);
+    d_constant_q       = convective_flux_reconstructor_db->getIntegerWithDefault("d_constant_q", d_constant_q);
     
-    d_constant_delta = convective_flux_reconstructor_db->getDoubleWithDefault("constant_delta",
-        0.9*d_constant_r_c/(1.0 - 0.9*d_constant_r_c)*1.0e-6);
-    d_constant_delta = convective_flux_reconstructor_db->getDoubleWithDefault("d_constant_delta", d_constant_delta);
-
+    d_constant_epsilon = convective_flux_reconstructor_db->getDoubleWithDefault("constant_epsilon", 1.0e-8);
+    d_constant_epsilon = convective_flux_reconstructor_db->getDoubleWithDefault("d_constant_epsilon", d_constant_epsilon);
+    
+    d_constant_Chi     = convective_flux_reconstructor_db->getDoubleWithDefault("constant_Chi", 1.0e8);
+    d_constant_Chi     = convective_flux_reconstructor_db->getDoubleWithDefault("d_constant_Chi", d_constant_Chi);
+    
+    d_weights_d.reserve(4);
+    d_weights_d.push_back(1.0/32.0);
+    d_weights_d.push_back(15.0/32.0);
+    d_weights_d.push_back(15.0/32.0);
+    d_weights_d.push_back(1.0/32.0);
+    
     d_weights_c.resize(boost::extents[4][3]);
     d_weights_c[0][0] = 3.0/8;
     d_weights_c[0][1] = -5.0/4;
@@ -60,16 +70,16 @@ ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL::ConvectiveFluxReconstructorWCNS6_H
  * Print all characteristics of the convective flux reconstruction class.
  */
 void
-ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL::printClassData(
+ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL::printClassData(
     std::ostream& os) const
 {
-    os << "\nPrint ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL object..."
+    os << "\nPrint ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL object..."
        << std::endl;
     
     os << std::endl;
     
-    os << "ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL: this = "
-       << (ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL *)this
+    os << "ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL: this = "
+       << (ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL *)this
        << std::endl;
     os << "d_object_name = "
        << d_object_name
@@ -77,11 +87,14 @@ ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL::printClassData(
     os << "d_constant_C = "
        << d_constant_C
        << std::endl;
-    os << "d_constant_r_c = "
-       << d_constant_r_c
+    os << "d_constant_q = "
+       << d_constant_q
        << std::endl;
-    os << "d_constant_delta = "
-       << d_constant_delta
+    os << "d_constant_epsilon = "
+       << d_constant_epsilon
+       << std::endl;
+    os << "d_constant_Chi = "
+       << d_constant_Chi
        << std::endl;
 }
 
@@ -91,52 +104,13 @@ ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL::printClassData(
  * into the restart database.
  */
 void
-ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL::putToRestart(
+ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL::putToRestart(
    const boost::shared_ptr<tbox::Database>& restart_db) const
 {
     restart_db->putDouble("d_constant_C", d_constant_C);
-    restart_db->putDouble("d_constant_r_c", d_constant_r_c);
-    restart_db->putDouble("d_constant_delta", d_constant_delta);
-}
-
-
-/*
- * Compute sigma's.
- */
-void
-ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL::computeSigma(
-    double& sigma,
-    const boost::multi_array_ref<double, 2>::const_array_view<1>::type& W_array)
-{
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(W_array.shape()[0]) == 6);
-#endif
-    
-    const double& delta = d_constant_delta;
-    
-    double W_array_diff[5];
-    for (int r = 0; r < 5; r++)
-    {
-        W_array_diff[r] = fabs(W_array[r + 1] - W_array[r]);
-    }
-    
-    /*
-     * Compute the sigma.
-     */
-    
-    const double r_1 = (2*W_array_diff[1]*W_array_diff[0] + delta)/
-        (W_array_diff[1]*W_array_diff[1] + W_array_diff[0]*W_array_diff[0] + delta);
-    
-    const double r_2 = (2*W_array_diff[2]*W_array_diff[1] + delta)/
-        (W_array_diff[2]*W_array_diff[2] + W_array_diff[1]*W_array_diff[1] + delta);
-    
-    const double r_3 = (2*W_array_diff[3]*W_array_diff[2] + delta)/
-        (W_array_diff[3]*W_array_diff[3] + W_array_diff[2]*W_array_diff[2] + delta);
-        
-    const double r_4 = (2*W_array_diff[4]*W_array_diff[3] + delta)/
-        (W_array_diff[4]*W_array_diff[4] + W_array_diff[3]*W_array_diff[3] + delta);
-    
-    sigma = fmin(1.0, fmin(fmin(r_1, r_2), fmin(r_3, r_4))/d_constant_r_c);
+    restart_db->putInteger("d_constant_q", d_constant_q);
+    restart_db->putDouble("d_constant_epsilon", d_constant_epsilon);
+    restart_db->putDouble("d_constant_Chi", d_constant_Chi);
 }
 
 
@@ -144,7 +118,7 @@ ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL::computeSigma(
  * Compute beta's.
  */
 void
-ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL::computeBeta(
+ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL::computeBeta(
     std::vector<double>& beta,
     const boost::multi_array_ref<double, 2>::const_array_view<1>::type& W_array)
 {
@@ -177,7 +151,7 @@ ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL::computeBeta(
  * Compute beta_tilde's.
  */
 void
-ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL::computeBetaTilde(
+ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL::computeBetaTilde(
     std::vector<double>& beta_tilde,
     const boost::multi_array_ref<double, 2>::const_array_view<1>::type& W_array)
 {
@@ -210,7 +184,7 @@ ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL::computeBetaTilde(
  * Perform WENO interpolation.
  */
 void
-ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL::performWENOInterpolation(
+ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL::performWENOInterpolation(
     std::vector<double>& U_minus,
     std::vector<double>& U_plus,
     const boost::multi_array<const double*, 2>& U_array,
@@ -243,17 +217,38 @@ ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL::performWENOInterpolation(
      */
     
     const double& C = d_constant_C;
+    const int& q = d_constant_q;
+    const double& epsilon = d_constant_epsilon;
+    const double& Chi = d_constant_Chi;
     
+    const std::vector<double>& d = d_weights_d;
     const boost::multi_array<double, 2>& c = d_weights_c;
+    
+    const double* const grid_spacing = d_grid_geometry->getDx();
+    double dx = 0.0;
+    if (direction == X_DIRECTION)
+    {
+        dx = grid_spacing[0];
+    }
+    else if (direction == Y_DIRECTION)
+    {
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+        TBOX_ASSERT(d_dim.getValue() >= 2);
+#endif
+        dx = grid_spacing[1];
+    }
+    else if (direction == Z_DIRECTION)
+    {
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+        TBOX_ASSERT(d_dim.getValue() >= 3);
+#endif
+        dx = grid_spacing[2];
+    }
     
     for (int ei = 0; ei < d_num_eqn; ei++)
     {
         boost::multi_array_ref<double, 2>::const_array_view<1>::type W_array_ei =
             W_array[boost::indices[boost::multi_array_ref<double, 2>::index_range()][ei]];
-        
-        // Compute sigma.
-        double sigma;
-        computeSigma(sigma, W_array_ei);
         
         // Compute beta's.
         computeBeta(beta, W_array_ei);
@@ -264,14 +259,8 @@ ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL::performWENOInterpolation(
          */
         
         // Compute the reference smoothness indicators tau_6.
-        const double tau_6 = fabs(beta[3] - 1.0/8*(beta[0] + beta[2] + 6*beta[1]));
-        
-        // Compute hybrid linear weights d_h.
-        double d_h[4];
-        d_h[0] = (2.0 - sigma)/32.0;
-        d_h[1] = 5.0*(4.0 - sigma)/32.0;
-        d_h[2] = 5.0*(2.0 + sigma)/32.0;
-        d_h[3] = sigma/32.0;
+        const double beta_average = 1.0/8*(beta[0] + beta[2] + 6*beta[1]);
+        const double tau_6 = fabs(beta[3] - beta_average);
         
         // Compute the weights alpha.
         double alpha[4];
@@ -280,7 +269,8 @@ ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL::performWENOInterpolation(
         for (int r = 0; r < 4; r++)
         {
             // Compute the weights alpha.
-            alpha[r] = d_h[r]*(C + tau_6/(beta[r] + EPSILON));
+            alpha[r] = d[r]*pow(C + tau_6/(beta[r] + epsilon*dx*dx)*
+                (beta_average + Chi*dx*dx)/(beta[r] + Chi*dx*dx), q);
             
             // Sum up the weights alpha.
             alpha_sum += alpha[r];
@@ -309,13 +299,9 @@ ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL::performWENOInterpolation(
          */
         
         // Compute the reference smoothness indicators tau_6_tilde.
-        const double tau_6_tilde = fabs(beta_tilde[3] - 1.0/8*(beta_tilde[0] + beta_tilde[2] + 6*beta_tilde[1]));
+        const double beta_tilde_average = 1.0/8*(beta_tilde[0] + beta_tilde[2] + 6*beta_tilde[1]);
         
-        // Compute hybrid linear weights d_h.
-        d_h[0] = (2.0 - sigma)/32.0;
-        d_h[1] = 5.0*(4.0 - sigma)/32.0;
-        d_h[2] = 5.0*(2.0 + sigma)/32.0;
-        d_h[3] = sigma/32.0;
+        const double tau_6_tilde = fabs(beta_tilde[3] - beta_tilde_average);
         
         // Compute the weights alpha_tilde.
         double alpha_tilde[4];
@@ -324,7 +310,8 @@ ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL::performWENOInterpolation(
         for (int r = 0; r < 4; r++)
         {
             // Compute the weights alpha_tilde.
-            alpha_tilde[r] = d_h[r]*(C + tau_6_tilde/(beta_tilde[r] + EPSILON));
+            alpha_tilde[r] = d[r]*pow(C + tau_6_tilde/(beta_tilde[r] + epsilon*dx*dx)*
+                (beta_tilde_average + Chi*dx*dx)/(beta_tilde[r] + Chi*dx*dx), q);
             
             // Sum up the weights alpha.
             alpha_tilde_sum += alpha_tilde[r];

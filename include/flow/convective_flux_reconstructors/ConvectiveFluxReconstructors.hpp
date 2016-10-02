@@ -1,14 +1,15 @@
 #ifndef CONVECTIVE_FLUX_RECONSTRUCTORS_HPP
 #define CONVECTIVE_FLUX_RECONSTRUCTORS_HPP
 
-#include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructorFirstOrderLLF.hpp"
-#include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructorFirstOrderHLLC.hpp"
-#include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructorWCNS5-JS-HLLC-HLL.hpp"
-#include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.hpp"
-#include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructorWCNS6-CU-M2-HLLC-HLL.hpp"
-#include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructorWCNS6-HW-HLLC-HLL.hpp"
-#include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructorWCNS6-HW-LD-HLLC-HLL.hpp"
-#include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructorWCNS6-Test.hpp"
+#include "flow/convective_flux_reconstructors/first_order/ConvectiveFluxReconstructorFirstOrderLLF.hpp"
+#include "flow/convective_flux_reconstructors/first_order/ConvectiveFluxReconstructorFirstOrderHLLC.hpp"
+#include "flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-JS-HLLC-HLL.hpp"
+#include "flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.hpp"
+#include "flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS6-CU-M2-HLLC-HLL.hpp"
+#include "flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS6-HW-HLLC-HLL.hpp"
+#include "flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS6-HW-LD-HLLC-HLL.hpp"
+#include "flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS6-LD-HLLC-HLL.hpp"
+#include "flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS6-Test.hpp"
 
 #include <map>
 #include <string>
@@ -20,6 +21,7 @@ enum CONVECTIVE_FLUX_RECONSTRUCTOR_LABEL { FIRST_ORDER_LLF,
                                            WCNS6_CU_M2_HLLC_HLL,
                                            WCNS6_HW_HLLC_HLL,
                                            WCNS6_HW_LD_HLLC_HLL,
+                                           WCNS6_LD_HLLC_HLL,
                                            WCNS6_TEST};
 
 /*
@@ -39,6 +41,7 @@ inline std::ostream& operator<<(std::ostream& os, const CONVECTIVE_FLUX_RECONSTR
         INSERT_ELEMENT(WCNS6_CU_M2_HLLC_HLL);
         INSERT_ELEMENT(WCNS6_HW_HLLC_HLL);
         INSERT_ELEMENT(WCNS6_HW_LD_HLLC_HLL);
+        INSERT_ELEMENT(WCNS6_LD_HLLC_HLL);
         INSERT_ELEMENT(WCNS6_TEST);
 #undef INSERT_ELEMENT
     }

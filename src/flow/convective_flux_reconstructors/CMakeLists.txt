@@ -2,15 +2,16 @@
 # a list of the source files for the convective_flux_reconstructors library
 set(convective_flux_reconstructors_source_files
     ConvectiveFluxReconstructorManager.cpp
-    ConvectiveFluxReconstructorFirstOrderLLF.cpp
-    ConvectiveFluxReconstructorFirstOrderHLLC.cpp
-    ConvectiveFluxReconstructorWCNS56-HLLC-HLL.cpp
-    ConvectiveFluxReconstructorWCNS5-JS-HLLC-HLL.cpp
-    ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp
-    ConvectiveFluxReconstructorWCNS6-CU-M2-HLLC-HLL.cpp
-    ConvectiveFluxReconstructorWCNS6-HW-HLLC-HLL.cpp
-    ConvectiveFluxReconstructorWCNS6-HW-LD-HLLC-HLL.cpp
-    ConvectiveFluxReconstructorWCNS6-Test.cpp
+    ./first_order/ConvectiveFluxReconstructorFirstOrderLLF.cpp
+    ./first_order/ConvectiveFluxReconstructorFirstOrderHLLC.cpp
+    ./WCNS56/ConvectiveFluxReconstructorWCNS56-HLLC-HLL.cpp
+    ./WCNS56/ConvectiveFluxReconstructorWCNS5-JS-HLLC-HLL.cpp
+    ./WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp
+    ./WCNS56/ConvectiveFluxReconstructorWCNS6-CU-M2-HLLC-HLL.cpp
+    ./WCNS56/ConvectiveFluxReconstructorWCNS6-HW-HLLC-HLL.cpp
+    ./WCNS56/ConvectiveFluxReconstructorWCNS6-HW-LD-HLLC-HLL.cpp
+    ./WCNS56/ConvectiveFluxReconstructorWCNS6-LD-HLLC-HLL.cpp
+    ./WCNS56/ConvectiveFluxReconstructorWCNS6-Test.cpp
 )
 
 # Create a library called convective_flux_reconstructors which includes the 

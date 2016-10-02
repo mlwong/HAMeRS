@@ -1,8 +1,8 @@
-#include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.hpp"
+#include "flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-JS-HLLC-HLL.hpp"
 
 #define EPSILON 1e-40
 
-ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL(
+ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL(
     const std::string& object_name,
     const tbox::Dimension& dim,
     const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
@@ -58,16 +58,16 @@ ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::ConvectiveFluxReconstructorWCNS5_Z_
  * Print all characteristics of the convective flux reconstruction class.
  */
 void
-ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::printClassData(
+ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::printClassData(
     std::ostream& os) const
 {
-    os << "\nPrint ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL object..."
+    os << "\nPrint ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL object..."
        << std::endl;
     
     os << std::endl;
     
-    os << "ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL: this = "
-       << (ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL *)this
+    os << "ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL: this = "
+       << (ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL *)this
        << std::endl;
     os << "d_object_name = "
        << d_object_name
@@ -83,7 +83,7 @@ ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::printClassData(
  * into the restart database.
  */
 void
-ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::putToRestart(
+ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::putToRestart(
    const boost::shared_ptr<tbox::Database>& restart_db) const
 {
     restart_db->putInteger("d_constant_q", d_constant_q);
@@ -94,7 +94,7 @@ ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::putToRestart(
  * Compute beta's.
  */
 void
-ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::computeBeta(
+ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::computeBeta(
     std::vector<double>& beta,
     const boost::multi_array_ref<double, 2>::const_array_view<1>::type& W_array)
 {
@@ -118,7 +118,7 @@ ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::computeBeta(
  * Compute beta_tilde's.
  */
 void
-ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::computeBetaTilde(
+ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::computeBetaTilde(
     std::vector<double>& beta_tilde,
     const boost::multi_array_ref<double, 2>::const_array_view<1>::type& W_array)
 {
@@ -142,7 +142,7 @@ ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::computeBetaTilde(
  * Perform WENO interpolation.
  */
 void
-ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::performWENOInterpolation(
+ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::performWENOInterpolation(
     std::vector<double>& U_minus,
     std::vector<double>& U_plus,
     const boost::multi_array<const double*, 2>& U_array,
@@ -192,9 +192,6 @@ ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::performWENOInterpolation(
          * Compute W_minus of the current characteristic variable.
          */
         
-        // Compute the reference smoothness indicators tau_5.
-        const double tau_5 = fabs(beta[0] - beta[2]);
-        
         // Compute the weights alpha.
         double alpha[3];
         double alpha_sum = 0.0;
@@ -202,7 +199,7 @@ ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::performWENOInterpolation(
         for (int r = 0; r < 3; r++)
         {
             // Compute the weights alpha.
-            alpha[r] = d[r]*(1 + pow(tau_5/(beta[r] + EPSILON), q));
+            alpha[r] = d[r]/pow((beta[r] + EPSILON), q);
             
             // Sum up the weights alpha.
             alpha_sum += alpha[r];
@@ -230,9 +227,6 @@ ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::performWENOInterpolation(
          * Compute W_plus of the current characteristic variable.
          */
         
-        // Compute the reference smoothness indicators tau_5_tilde.
-        const double tau_5_tilde = fabs(beta_tilde[0] - beta_tilde[2]);
-        
         // Compute the weights alpha_tilde.
         double alpha_tilde[3];
         double alpha_tilde_sum = 0.0;
@@ -240,7 +234,7 @@ ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL::performWENOInterpolation(
         for (int r = 0; r < 3; r++)
         {
             // Compute the weights alpha_tilde.
-            alpha_tilde[r] = d[r]*(1 + pow(tau_5_tilde/(beta_tilde[r] + EPSILON), q));
+            alpha_tilde[r] = d[r]/pow((beta_tilde[r] + EPSILON), q);
             
             // Sum up the weights alpha.
             alpha_tilde_sum += alpha_tilde[r];

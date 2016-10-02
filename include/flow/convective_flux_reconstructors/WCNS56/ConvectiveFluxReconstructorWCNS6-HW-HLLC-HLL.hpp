@@ -1,12 +1,12 @@
-#ifndef CONVECTIVE_FLUX_RECONSTRUCTOR_WCNS6_CU_M2_HLLC_HLL_HPP
-#define CONVECTIVE_FLUX_RECONSTRUCTOR_WCNS6_CU_M2_HLLC_HLL_HPP
+#ifndef CONVECTIVE_FLUX_RECONSTRUCTOR_WCNS6_HW_HLLC_HLL_HPP
+#define CONVECTIVE_FLUX_RECONSTRUCTOR_WCNS6_HW_HLLC_HLL_HPP
 
-#include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructorWCNS56-HLLC-HLL.hpp"
+#include "flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS56-HLLC-HLL.hpp"
 
-class ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL: public ConvectiveFluxReconstructorWCNS56
+class ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL: public ConvectiveFluxReconstructorWCNS56
 {
     public:
-        ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL(
+        ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL(
             const std::string& object_name,
             const tbox::Dimension& dim,
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
@@ -15,7 +15,7 @@ class ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL: public ConvectiveFluxReco
             const boost::shared_ptr<FlowModel>& flow_model,
             const boost::shared_ptr<tbox::Database>& convective_flux_reconstructor_db);
         
-        ~ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL() {}
+        ~ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL() {}
         
         /*
          * Print all characteristics of the convective flux reconstruction class.
@@ -32,6 +32,14 @@ class ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL: public ConvectiveFluxReco
             const boost::shared_ptr<tbox::Database>& restart_db) const;
     
     private:
+        /*
+         * Compute sigma's.
+         */
+        void
+        computeSigma(
+            double& sigma,
+            const boost::multi_array_ref<double, 2>::const_array_view<1>::type& W_array);
+        
         /*
          * Compute beta's.
          */
@@ -64,14 +72,12 @@ class ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL: public ConvectiveFluxReco
          * Constants used by the scheme.
          */
         double d_constant_C;
-        int d_constant_q;
-        double d_constant_epsilon;
-        double d_constant_Chi;
+        double d_constant_r_c;
+        double d_constant_delta;
         
         /*
          * Weights used in WENO interpolations.
          */
-        std::vector<double> d_weights_d;
         boost::multi_array<double, 2> d_weights_c;
         
         /*
@@ -99,4 +105,4 @@ class ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL: public ConvectiveFluxReco
         
 };
 
-#endif /* CONVECTIVE_FLUX_RECONSTRUCTOR_WCNS6_CU_M2_HLLC_HLL_HPP */
+#endif /* CONVECTIVE_FLUX_RECONSTRUCTOR_WCNS6_HW_HLLC_HLL_HPP */

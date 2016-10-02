@@ -1,4 +1,4 @@
-#include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructorWCNS6-HW-LD-HLLC-HLL.hpp"
+#include "flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS6-HW-LD-HLLC-HLL.hpp"
 
 #define EPSILON 1e-40
 

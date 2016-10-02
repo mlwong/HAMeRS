@@ -103,6 +103,19 @@ ConvectiveFluxReconstructorManager::ConvectiveFluxReconstructorManager(
             flow_model,
             convective_flux_reconstructor_db));
     }
+    else if (convective_flux_reconstructor_str == "WCNS6_LD_HLLC_HLL")
+    {
+        d_convective_flux_reconstructor_label = WCNS6_LD_HLLC_HLL;
+        
+        d_conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL(
+            "d_convective_flux_reconstructor",
+            dim,
+            grid_geometry,
+            flow_model->getNumberOfEquations(),
+            num_species,
+            flow_model,
+            convective_flux_reconstructor_db));
+    }
     else if (convective_flux_reconstructor_str == "WCNS6_TEST")
     {
         d_convective_flux_reconstructor_label = WCNS6_TEST;

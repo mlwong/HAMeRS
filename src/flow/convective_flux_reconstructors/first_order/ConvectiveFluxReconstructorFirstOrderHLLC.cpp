@@ -1,4 +1,4 @@
-#include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructorFirstOrderHLLC.hpp"
+#include "flow/convective_flux_reconstructors/first_order/ConvectiveFluxReconstructorFirstOrderHLLC.hpp"
 
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 

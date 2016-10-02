@@ -1,12 +1,12 @@
-#ifndef CONVECTIVE_FLUX_RECONSTRUCTOR_WCNS6_HW_HLLC_HLL_HPP
-#define CONVECTIVE_FLUX_RECONSTRUCTOR_WCNS6_HW_HLLC_HLL_HPP
+#ifndef CONVECTIVE_FLUX_RECONSTRUCTOR_WCNS6_LD_HLLC_HLL_HPP
+#define CONVECTIVE_FLUX_RECONSTRUCTOR_WCNS6_LD_HLLC_HLL_HPP
 
-#include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructorWCNS56-HLLC-HLL.hpp"
+#include "flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS56-HLLC-HLL.hpp"
 
-class ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL: public ConvectiveFluxReconstructorWCNS56
+class ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL: public ConvectiveFluxReconstructorWCNS56
 {
     public:
-        ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL(
+        ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL(
             const std::string& object_name,
             const tbox::Dimension& dim,
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
@@ -15,7 +15,7 @@ class ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL: public ConvectiveFluxReconst
             const boost::shared_ptr<FlowModel>& flow_model,
             const boost::shared_ptr<tbox::Database>& convective_flux_reconstructor_db);
         
-        ~ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL() {}
+        ~ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL() {}
         
         /*
          * Print all characteristics of the convective flux reconstruction class.
@@ -30,7 +30,7 @@ class ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL: public ConvectiveFluxReconst
         void
         putToRestart(
             const boost::shared_ptr<tbox::Database>& restart_db) const;
-    
+        
     private:
         /*
          * Compute sigma's.
@@ -72,8 +72,9 @@ class ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL: public ConvectiveFluxReconst
          * Constants used by the scheme.
          */
         double d_constant_C;
-        double d_constant_r_c;
-        double d_constant_delta;
+        int d_constant_p;
+        int d_constant_q;
+        double d_constant_alpha_tau;
         
         /*
          * Weights used in WENO interpolations.
@@ -100,9 +101,10 @@ class ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL: public ConvectiveFluxReconst
         /*
          * Containers used in WENO interpolation.
          */
+        std::vector<double> TV;
         std::vector<double> beta;
         std::vector<double> beta_tilde;
         
 };
 
-#endif /* CONVECTIVE_FLUX_RECONSTRUCTOR_WCNS6_HW_HLLC_HLL_HPP */
+#endif /* CONVECTIVE_FLUX_RECONSTRUCTOR_WCNS6_LD_HLLC_HLL_HPP */

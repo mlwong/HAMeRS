@@ -1,12 +1,12 @@
-#ifndef CONVECTIVE_FLUX_RECONSTRUCTOR_WCNS5_JS_HLLC_HLL_HPP
-#define CONVECTIVE_FLUX_RECONSTRUCTOR_WCNS5_JS_HLLC_HLL_HPP
+#ifndef CONVECTIVE_FLUX_RECONSTRUCTOR_WCNS5_Z_HLLC_HLL_HPP
+#define CONVECTIVE_FLUX_RECONSTRUCTOR_WCNS5_Z_HLLC_HLL_HPP
 
-#include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructorWCNS56-HLLC-HLL.hpp"
+#include "flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS56-HLLC-HLL.hpp"
 
-class ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL: public ConvectiveFluxReconstructorWCNS56
+class ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL: public ConvectiveFluxReconstructorWCNS56
 {
     public:
-        ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL(
+        ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL(
             const std::string& object_name,
             const tbox::Dimension& dim,
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
@@ -15,7 +15,7 @@ class ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL: public ConvectiveFluxReconst
             const boost::shared_ptr<FlowModel>& flow_model,
             const boost::shared_ptr<tbox::Database>& convective_flux_reconstructor_db);
         
-        ~ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL() {}
+        ~ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL() {}
         
         /*
          * Print all characteristics of the convective flux reconstruction class.
@@ -96,4 +96,4 @@ class ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL: public ConvectiveFluxReconst
         
 };
 
-#endif /* CONVECTIVE_FLUX_RECONSTRUCTOR_WCNS5_JS_HLLC_HLL_HPP */
+#endif /* CONVECTIVE_FLUX_RECONSTRUCTOR_WCNS5_Z_HLLC_HLL_HPP */

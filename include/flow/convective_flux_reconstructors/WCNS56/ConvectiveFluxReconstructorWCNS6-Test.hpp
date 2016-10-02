@@ -75,7 +75,7 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
             const boost::multi_array<double, 2>& R_intercell);
         
         /*
-         * Compute both sigma's.
+         * Compute sigma's.
          */
         void
         computeSigma(
