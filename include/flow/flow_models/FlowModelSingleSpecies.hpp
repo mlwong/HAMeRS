@@ -301,9 +301,9 @@ class FlowModelSingleSpecies: public FlowModel
         void computeGlobalCellDataVelocity();
         
         /*
-         * Compute the global cell data of sound speed with pressure in the registered patch.
+         * Compute the global cell data of sound speed with pressure and velocity in the registered patch.
          */
-        void computeGlobalCellDataSoundSpeedWithPressure();
+        void computeGlobalCellDataSoundSpeedWithPressureAndVelocity();
         
         /*
          * Compute the global cell data of dilatation with velocity in the registered patch.

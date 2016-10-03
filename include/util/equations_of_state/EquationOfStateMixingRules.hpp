@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include "util/equations_of_state/EquationOfState.hpp"
 #include "util/equations_of_state/MixingClosureModels.hpp"
 
 using namespace SAMRAI;
@@ -40,6 +41,36 @@ class EquationOfStateMixingRules
         virtual void
         putToRestart(
             const boost::shared_ptr<tbox::Database>& restart_db) const = 0;
+        
+        /*
+         * Compute the pressure of the mixture.
+         */
+        virtual double
+        getPressure(
+            const std::vector<const double*>& partial_density,
+            const std::vector<const double*>& momentum,
+            const double* const total_energy,
+            const std::vector<const double*>& volume_fraction) const = 0;
+        
+        /*
+         * Compute the sound speed of the mixture.
+         */
+        virtual double
+        getSoundSpeed(
+            const std::vector<const double*>& partial_density,
+            const std::vector<const double*>& velocity,
+            const double* const pressure,
+            const std::vector<const double*>& volume_fraction) const = 0;
+        
+        /*
+         * Compute the total energy per unit volume of the mixture.
+         */
+        virtual double
+        getTotalEnergy(
+            const std::vector<const double*>& partial_density,
+            const std::vector<const double*>& velocity,
+            const double* const pressure,
+            const std::vector<const double*>& volume_fraction) const = 0;
         
         /*
          * Get the number of thermodynamic properties of the mixture.
@@ -98,6 +129,11 @@ class EquationOfStateMixingRules
             
             return mixture_density;            
         }
+        
+        /*
+         * boost::shared_ptr to EquationOfState.
+         */
+        boost::shared_ptr<EquationOfState> d_equation_of_state;
         
     protected:
         /*

@@ -3,6 +3,8 @@
 
 #include "util/equations_of_state/EquationOfStateMixingRules.hpp"
 
+#include "util/equations_of_state/ideal_gas/EquationOfStateIdealGas.hpp"
+
 class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
 {
     public:        
@@ -26,6 +28,36 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
         void
         putToRestart(
             const boost::shared_ptr<tbox::Database>& restart_db) const;
+        
+        /*
+         * Compute the pressure of the mixture.
+         */
+        double
+        getPressure(
+            const std::vector<const double*>& partial_density,
+            const std::vector<const double*>& momentum,
+            const double* const total_energy,
+            const std::vector<const double*>& volume_fraction) const;
+        
+        /*
+         * Compute the sound speed of the mixture.
+         */
+        double
+        getSoundSpeed(
+            const std::vector<const double*>& partial_density,
+            const std::vector<const double*>& velocity,
+            const double* const pressure,
+            const std::vector<const double*>& volume_fraction) const;
+        
+        /*
+         * Compute the total energy per unit volume of the mixture.
+         */
+        double
+        getTotalEnergy(
+            const std::vector<const double*>& partial_density,
+            const std::vector<const double*>& velocity,
+            const double* const pressure,
+            const std::vector<const double*>& volume_fraction) const;
         
         /*
          * Get the number of thermodynamic properties of the mixture.

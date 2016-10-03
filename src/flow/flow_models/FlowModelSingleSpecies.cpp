@@ -73,7 +73,7 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
         new pdat::CellVariable<double>(d_dim, "total energy", 1));
     
     /*
-     * Initialize d_equation_of_state_manager and get the equation of state object.
+     * Initialize d_equation_of_state_mixing_rules_manager and get the equation of state mixing rules object.
      */
     
     if (flow_model_db->keyExists("equation_of_state"))
@@ -91,18 +91,6 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
             << "No key 'equation_of_state'/'d_equation_of_state_str' found in data for flow model"
             << std::endl);
     }
-    
-    d_equation_of_state_manager.reset(new EquationOfStateManager(
-        "d_equation_of_state_manager",
-        d_dim,
-        d_equation_of_state_str));
-    
-    d_equation_of_state =
-        d_equation_of_state_manager->getEquationOfState();
-    
-    /*
-     * Initialize d_equation_of_state_mixing_rules_manager and get the equation of state mixing rules object.
-     */
     
     boost::shared_ptr<tbox::Database> species_db;
     
@@ -159,7 +147,6 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
             d_dim,
             d_num_eqn,
             d_num_species,
-            d_equation_of_state,
             d_equation_of_state_mixing_rules));
     
     d_Riemann_solver_HLLC_HLL = boost::shared_ptr<RiemannSolverSingleSpeciesHLLC_HLL> (
@@ -168,7 +155,6 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
             d_dim,
             d_num_eqn,
             d_num_species,
-            d_equation_of_state,
             d_equation_of_state_mixing_rules));
     
 }
@@ -188,9 +174,6 @@ FlowModelSingleSpecies::printClassData(std::ostream& os) const
     os << "FlowModelSingleSpecies: this = "
        << (FlowModelSingleSpecies *)this
        << std::endl;
-    
-    os << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
-    d_equation_of_state_manager->printClassData(os);
     
     os << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
     d_equation_of_state_mixing_rules_manager->printClassData(os);
@@ -423,6 +406,22 @@ FlowModelSingleSpecies::registerDerivedCellVariable(
         else
         {
             d_num_subghosts_pressure = d_num_subghosts_sound_speed;
+        }
+        
+        if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
+        {
+            if (d_num_subghosts_sound_speed > d_num_subghosts_velocity)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::registerDerivedCellVariable()\n"
+                    << "Number of ghosts of 'SOUND_SPEED' exceeds"
+                    << " number of ghosts of 'VELOCITY'."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            d_num_subghosts_velocity = d_num_subghosts_sound_speed;
         }
     }
     
@@ -708,22 +707,22 @@ FlowModelSingleSpecies::registerDerivedCellVariable(
             {
                 d_num_subghosts_pressure = d_num_subghosts_max_wave_speed_x;
             }
-        }
-        
-        if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
-        {
-            if (d_num_subghosts_max_wave_speed_x > d_num_subghosts_velocity)
+            
+            if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
             {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::registerDerivedCellVariable()\n"
-                    << "Number of ghosts of 'MAX_WAVE_SPEED_X' exceeds"
-                    << " number of ghosts of 'VELOCITY'."
-                    << std::endl);
+                if (d_num_subghosts_max_wave_speed_x > d_num_subghosts_velocity)
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": FlowModelSingleSpecies::registerDerivedCellVariable()\n"
+                        << "Number of ghosts of 'MAX_WAVE_SPEED_X' exceeds"
+                        << " number of ghosts of 'VELOCITY'."
+                        << std::endl);
+                }
             }
-        }
-        else
-        {
-            d_num_subghosts_velocity = d_num_subghosts_max_wave_speed_x;
+            else
+            {
+                d_num_subghosts_velocity = d_num_subghosts_max_wave_speed_x;
+            }
         }
     }
     
@@ -761,22 +760,22 @@ FlowModelSingleSpecies::registerDerivedCellVariable(
             {
                 d_num_subghosts_pressure = d_num_subghosts_max_wave_speed_y;
             }
-        }
-        
-        if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
-        {
-            if (d_num_subghosts_max_wave_speed_y > d_num_subghosts_velocity)
+            
+            if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
             {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::registerDerivedCellVariable()\n"
-                    << "Number of ghosts of 'MAX_WAVE_SPEED_Y' exceeds"
-                    << " number of ghosts of 'VELOCITY'."
-                    << std::endl);
+                if (d_num_subghosts_max_wave_speed_y > d_num_subghosts_velocity)
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": FlowModelSingleSpecies::registerDerivedCellVariable()\n"
+                        << "Number of ghosts of 'MAX_WAVE_SPEED_Y' exceeds"
+                        << " number of ghosts of 'VELOCITY'."
+                        << std::endl);
+                }
             }
-        }
-        else
-        {
-            d_num_subghosts_velocity = d_num_subghosts_max_wave_speed_y;
+            else
+            {
+                d_num_subghosts_velocity = d_num_subghosts_max_wave_speed_y;
+            }
         }
     }
     
@@ -814,22 +813,22 @@ FlowModelSingleSpecies::registerDerivedCellVariable(
             {
                 d_num_subghosts_pressure = d_num_subghosts_max_wave_speed_z;
             }
-        }
-        
-        if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
-        {
-            if (d_num_subghosts_max_wave_speed_z > d_num_subghosts_velocity)
+            
+            if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
             {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::registerDerivedCellVariable()\n"
-                    << "Number of ghosts of 'MAX_WAVE_SPEED_Z' exceeds"
-                    << " number of ghosts of 'VELOCITY'."
-                    << std::endl);
+                if (d_num_subghosts_max_wave_speed_z > d_num_subghosts_velocity)
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": FlowModelSingleSpecies::registerDerivedCellVariable()\n"
+                        << "Number of ghosts of 'MAX_WAVE_SPEED_Z' exceeds"
+                        << " number of ghosts of 'VELOCITY'."
+                        << std::endl);
+                }
             }
-        }
-        else
-        {
-            d_num_subghosts_velocity = d_num_subghosts_max_wave_speed_z;
+            else
+            {
+                d_num_subghosts_velocity = d_num_subghosts_max_wave_speed_z;
+            }
         }
     }
 }
@@ -910,6 +909,22 @@ FlowModelSingleSpecies::registerFaceProjectionMatricesOfPrimitiveVariables(
         else
         {
             d_num_subghosts_pressure = d_num_subghosts_sound_speed;
+        }
+        
+        if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
+        {
+            if (num_subghosts > d_num_subghosts_velocity)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::registerFaceProjectionMatrices()\n"
+                    << "Number of ghosts of projection matrices exceeds"
+                    << " number of ghosts of 'VELOCITY'."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            d_num_subghosts_velocity = d_num_subghosts_sound_speed;
         }
     }
     
@@ -1041,7 +1056,7 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_sound_speed)
         {
-            computeGlobalCellDataSoundSpeedWithPressure();
+            computeGlobalCellDataSoundSpeedWithPressureAndVelocity();
         }
     }
     
@@ -1498,7 +1513,7 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
     double* rho = data_density->getPointer(0);
     if (!d_data_sound_speed)
     {
-        computeGlobalCellDataSoundSpeedWithPressure();
+        computeGlobalCellDataSoundSpeedWithPressureAndVelocity();
     }
     double* c = d_data_sound_speed->getPointer(0);
     
@@ -1863,7 +1878,7 @@ FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariab
     double* rho = data_density->getPointer(0);
     if (!d_data_sound_speed)
     {
-        computeGlobalCellDataSoundSpeedWithPressure();
+        computeGlobalCellDataSoundSpeedWithPressureAndVelocity();
     }
     double* c = d_data_sound_speed->getPointer(0);
 
@@ -2389,11 +2404,12 @@ FlowModelSingleSpecies::convertLocalCellDataPointersConservativeVariablesToPrimi
     }
     
     // Compute the pressure.
-    const double p = d_equation_of_state->getPressure(
-        Q[0],
-        m_ptr,
-        Q[1 + d_dim.getValue()],
-        thermo_properties_ptr);
+    const double p = d_equation_of_state_mixing_rules->d_equation_of_state->
+        getPressure(
+            Q[0],
+            m_ptr,
+            Q[1 + d_dim.getValue()],
+            thermo_properties_ptr);
     
     // Convert the conservative variables to primitive variables.
     *V[0] = *Q[0];
@@ -2433,11 +2449,12 @@ FlowModelSingleSpecies::convertLocalCellDataPointersPrimitiveVariablesToConserva
     }
     
     // Compute the total energy.
-    const double E = d_equation_of_state->getTotalEnergy(
-        V[0],
-        vel_ptr,
-        V[1 + d_dim.getValue()],
-        thermo_properties_ptr);
+    const double E = d_equation_of_state_mixing_rules->d_equation_of_state->
+        getTotalEnergy(
+            V[0],
+            vel_ptr,
+            V[1 + d_dim.getValue()],
+            thermo_properties_ptr);
     
     // Convert the primitive variables to conservative variables.
     *Q[0] = *V[0];
@@ -2537,11 +2554,12 @@ FlowModelSingleSpecies::packDerivedDataIntoDoubleBuffer(
                 std::vector<const double*> m_ptr;
                 m_ptr.push_back(&rho_u[idx_data]);
                 
-                buffer[idx_region] = d_equation_of_state->getPressure(
-                    &rho[idx_data],
-                    m_ptr,
-                    &E[idx_data],
-                    thermo_properties_ptr);
+                buffer[idx_region] = d_equation_of_state_mixing_rules->d_equation_of_state->
+                    getPressure(
+                        &rho[idx_data],
+                        m_ptr,
+                        &E[idx_data],
+                        thermo_properties_ptr);
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -2561,11 +2579,12 @@ FlowModelSingleSpecies::packDerivedDataIntoDoubleBuffer(
                     m_ptr.push_back(&rho_u[idx_data]);
                     m_ptr.push_back(&rho_v[idx_data]);
                     
-                    buffer[idx_region] = d_equation_of_state->getPressure(
-                        &rho[idx_data],
-                        m_ptr,
-                        &E[idx_data],
-                        thermo_properties_ptr);
+                    buffer[idx_region] = d_equation_of_state_mixing_rules->d_equation_of_state->
+                        getPressure(
+                            &rho[idx_data],
+                            m_ptr,
+                            &E[idx_data],
+                            thermo_properties_ptr);
                 }
             }
         }
@@ -2591,11 +2610,12 @@ FlowModelSingleSpecies::packDerivedDataIntoDoubleBuffer(
                         m_ptr.push_back(&rho_v[idx_data]);
                         m_ptr.push_back(&rho_w[idx_data]);
                         
-                        buffer[idx_region] = d_equation_of_state->getPressure(
-                            &rho[idx_data],
-                            m_ptr,
-                            &E[idx_data],
-                            thermo_properties_ptr);
+                        buffer[idx_region] = d_equation_of_state_mixing_rules->d_equation_of_state->
+                            getPressure(
+                                &rho[idx_data],
+                                m_ptr,
+                                &E[idx_data],
+                                thermo_properties_ptr);
                     }
                 }
             }
@@ -2656,18 +2676,28 @@ FlowModelSingleSpecies::packDerivedDataIntoDoubleBuffer(
                 size_t idx_region = i;
                 
                 std::vector<const double*> m_ptr;
+                m_ptr.reserve(1);
                 m_ptr.push_back(&rho_u[idx_data]);
                 
-                const double p = d_equation_of_state->getPressure(
-                    &rho[idx_data],
-                    m_ptr,
-                    &E[idx_data],
-                    thermo_properties_ptr);
+                const double u = rho_u[idx_data]/rho[idx_data];
                 
-                buffer[idx_region] = d_equation_of_state->getSoundSpeed(
-                    &rho[idx_data],
-                    &p,
-                    thermo_properties_ptr);
+                std::vector<const double*> vel_ptr;
+                vel_ptr.reserve(1);
+                vel_ptr.push_back(&u);
+                
+                const double p = d_equation_of_state_mixing_rules->d_equation_of_state->
+                    getPressure(
+                        &rho[idx_data],
+                        m_ptr,
+                        &E[idx_data],
+                        thermo_properties_ptr);
+                
+                buffer[idx_region] = d_equation_of_state_mixing_rules->d_equation_of_state->
+                    getSoundSpeed(
+                        &rho[idx_data],
+                        vel_ptr,
+                        &p,
+                        thermo_properties_ptr);
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -2684,19 +2714,31 @@ FlowModelSingleSpecies::packDerivedDataIntoDoubleBuffer(
                         j*region_dims[0];
                     
                     std::vector<const double*> m_ptr;
+                    m_ptr.reserve(2);
                     m_ptr.push_back(&rho_u[idx_data]);
                     m_ptr.push_back(&rho_v[idx_data]);
                     
-                    const double p = d_equation_of_state->getPressure(
-                        &rho[idx_data],
-                        m_ptr,
-                        &E[idx_data],
-                        thermo_properties_ptr);
+                    const double u = rho_u[idx_data]/rho[idx_data];
+                    const double v = rho_v[idx_data]/rho[idx_data];
                     
-                    buffer[idx_region] = d_equation_of_state->getSoundSpeed(
-                        &rho[idx_data],
-                        &p,
-                        thermo_properties_ptr);
+                    std::vector<const double*> vel_ptr;
+                    vel_ptr.reserve(2);
+                    vel_ptr.push_back(&u);
+                    vel_ptr.push_back(&v);
+                    
+                    const double p = d_equation_of_state_mixing_rules->d_equation_of_state->
+                        getPressure(
+                            &rho[idx_data],
+                            m_ptr,
+                            &E[idx_data],
+                            thermo_properties_ptr);
+                    
+                    buffer[idx_region] = d_equation_of_state_mixing_rules->d_equation_of_state->
+                        getSoundSpeed(
+                            &rho[idx_data],
+                            vel_ptr,
+                            &p,
+                            thermo_properties_ptr);
                 }
             }
         }
@@ -2718,20 +2760,34 @@ FlowModelSingleSpecies::packDerivedDataIntoDoubleBuffer(
                             k*region_dims[0]*region_dims[1];
                         
                         std::vector<const double*> m_ptr;
+                        m_ptr.reserve(3);
                         m_ptr.push_back(&rho_u[idx_data]);
                         m_ptr.push_back(&rho_v[idx_data]);
                         m_ptr.push_back(&rho_w[idx_data]);
                         
-                        const double p = d_equation_of_state->getPressure(
-                            &rho[idx_data],
-                            m_ptr,
-                            &E[idx_data],
-                            thermo_properties_ptr);
+                        const double u = rho_u[idx_data]/rho[idx_data];
+                        const double v = rho_v[idx_data]/rho[idx_data];
+                        const double w = rho_w[idx_data]/rho[idx_data];
                         
-                        buffer[idx_region] = d_equation_of_state->getSoundSpeed(
-                            &rho[idx_data],
-                            &p,
-                            thermo_properties_ptr);
+                        std::vector<const double*> vel_ptr;
+                        vel_ptr.reserve(3);
+                        vel_ptr.push_back(&u);
+                        vel_ptr.push_back(&v);
+                        vel_ptr.push_back(&w);
+                        
+                        const double p = d_equation_of_state_mixing_rules->d_equation_of_state->
+                            getPressure(
+                                &rho[idx_data],
+                                m_ptr,
+                                &E[idx_data],
+                                thermo_properties_ptr);
+                        
+                        buffer[idx_region] = d_equation_of_state_mixing_rules->d_equation_of_state->
+                            getSoundSpeed(
+                                &rho[idx_data],
+                                vel_ptr,
+                                &p,
+                                thermo_properties_ptr);
                     }
                 }
             }
@@ -3079,7 +3135,7 @@ FlowModelSingleSpecies::computeGlobalCellDataPressure()
                 m_ptr.reserve(1);
                 m_ptr.push_back(&rho_u[idx]);
                 
-                p[idx_pressure] = d_equation_of_state->
+                p[idx_pressure] = d_equation_of_state_mixing_rules->d_equation_of_state->
                     getPressure(
                         &rho[idx],
                         m_ptr,
@@ -3114,7 +3170,7 @@ FlowModelSingleSpecies::computeGlobalCellDataPressure()
                     m_ptr.push_back(&rho_u[idx]);
                     m_ptr.push_back(&rho_v[idx]);
                     
-                    p[idx_pressure] = d_equation_of_state->
+                    p[idx_pressure] = d_equation_of_state_mixing_rules->d_equation_of_state->
                         getPressure(
                             &rho[idx],
                             m_ptr,
@@ -3158,7 +3214,7 @@ FlowModelSingleSpecies::computeGlobalCellDataPressure()
                         m_ptr.push_back(&rho_v[idx]);
                         m_ptr.push_back(&rho_w[idx]);
                         
-                        p[idx_pressure] = d_equation_of_state->
+                        p[idx_pressure] = d_equation_of_state_mixing_rules->d_equation_of_state->
                             getPressure(
                                 &rho[idx],
                                 m_ptr,
@@ -3305,10 +3361,10 @@ FlowModelSingleSpecies::computeGlobalCellDataVelocity()
 
 
 /*
- * Compute the global cell data of sound speed with pressure in the registered patch.
+ * Compute the global cell data of sound speed with pressure and velocity in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure()
+FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressureAndVelocity()
 {
     if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
     {
@@ -3323,6 +3379,11 @@ FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure()
         if (!d_data_pressure)
         {
             computeGlobalCellDataPressure();
+        }
+        
+        if (!d_data_velocity)
+        {
+            computeGlobalCellDataVelocity();
         }
         
         // Get the pointers to the cell data of sound speed, density and pressure.
@@ -3340,6 +3401,9 @@ FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure()
         
         if (d_dim == tbox::Dimension(1))
         {
+            // Get the pointer to cell data of velocity.
+            double* u = d_data_velocity->getPointer(0);
+            
             // Compute the sound speed field.
             for (int i = -d_num_subghosts_sound_speed[0];
                  i < d_interior_dims[0] + d_num_subghosts_sound_speed[0];
@@ -3349,17 +3413,27 @@ FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure()
                 const int idx = i + d_num_ghosts[0];
                 const int idx_pressure = i + d_num_subghosts_pressure[0];
                 const int idx_sound_speed = i + d_num_subghosts_sound_speed[0];
+                const int idx_velocity = i + d_num_subghosts_velocity[0];
                 
-                c[idx_sound_speed] = d_equation_of_state->
+                std::vector<const double*> vel_ptr;
+                vel_ptr.reserve(1);
+                vel_ptr.push_back(&u[idx_velocity]);
+                
+                c[idx_sound_speed] = d_equation_of_state_mixing_rules->d_equation_of_state->
                     getSoundSpeed(
                         &rho[idx],
+                        vel_ptr,
                         &p[idx_pressure],
                         thermo_properties_ptr);
             }
         }
         else if (d_dim == tbox::Dimension(2))
         {
-             // Compute the sound speed field.
+            // Get the pointer to cell data of velocity.
+            double* u = d_data_velocity->getPointer(0);
+            double* v = d_data_velocity->getPointer(1);
+            
+            // Compute the sound speed field.
             for (int j = -d_num_subghosts_sound_speed[1];
                  j < d_interior_dims[1] + d_num_subghosts_sound_speed[1];
                  j++)
@@ -3378,9 +3452,18 @@ FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure()
                     const int idx_sound_speed = (i + d_num_subghosts_sound_speed[0]) +
                         (j + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
                     
-                    c[idx_sound_speed] = d_equation_of_state->
+                    const int idx_velocity = (i + d_num_subghosts_velocity[0]) +
+                        (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
+                    
+                    std::vector<const double*> vel_ptr;
+                    vel_ptr.reserve(2);
+                    vel_ptr.push_back(&u[idx_velocity]);
+                    vel_ptr.push_back(&v[idx_velocity]);
+                    
+                    c[idx_sound_speed] = d_equation_of_state_mixing_rules->d_equation_of_state->
                         getSoundSpeed(
                             &rho[idx],
+                            vel_ptr,
                             &p[idx_pressure],
                             thermo_properties_ptr);
                 }
@@ -3388,6 +3471,11 @@ FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure()
         }
         else if (d_dim == tbox::Dimension(3))
         {
+            // Get the pointer to cell data of velocity.
+            double* u = d_data_velocity->getPointer(0);
+            double* v = d_data_velocity->getPointer(1);
+            double* w = d_data_velocity->getPointer(1);
+            
             // Compute the sound speed field.
             for (int k = -d_num_subghosts_sound_speed[2];
                  k < d_interior_dims[2] + d_num_subghosts_sound_speed[2];
@@ -3414,9 +3502,20 @@ FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure()
                             (j + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
                             (k + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*d_subghostcell_dims_sound_speed[1];
                         
-                        c[idx_sound_speed] = d_equation_of_state->
+                        const int idx_velocity = (i + d_num_subghosts_velocity[0]) +
+                            (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
+                            (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*d_subghostcell_dims_velocity[1];
+                        
+                        std::vector<const double*> vel_ptr;
+                        vel_ptr.reserve(3);
+                        vel_ptr.push_back(&u[idx_velocity]);
+                        vel_ptr.push_back(&v[idx_velocity]);
+                        vel_ptr.push_back(&w[idx_velocity]);
+                        
+                        c[idx_sound_speed] = d_equation_of_state_mixing_rules->d_equation_of_state->
                             getSoundSpeed(
                                 &rho[idx],
+                                vel_ptr,
                                 &p[idx_pressure],
                                 thermo_properties_ptr);
                     }
@@ -3427,7 +3526,7 @@ FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure()
     else
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure()\n"
+            << ": FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressureAndVelocity()\n"
             << "Cell data of 'SOUND_SPEED' is not yet registered."
             << std::endl);
     }
@@ -4654,7 +4753,7 @@ FlowModelSingleSpecies::computeGlobalCellDataMaxWaveSpeedWithPressureVelocityAnd
             
             if (!d_data_sound_speed)
             {
-                computeGlobalCellDataSoundSpeedWithPressure();
+                computeGlobalCellDataSoundSpeedWithPressureAndVelocity();
             }
             
             if (!d_data_velocity)
@@ -4762,7 +4861,7 @@ FlowModelSingleSpecies::computeGlobalCellDataMaxWaveSpeedWithPressureVelocityAnd
             
             if (!d_data_sound_speed)
             {
-                computeGlobalCellDataSoundSpeedWithPressure();
+                computeGlobalCellDataSoundSpeedWithPressureAndVelocity();
             }
             
             if (!d_data_velocity)
@@ -4862,7 +4961,7 @@ FlowModelSingleSpecies::computeGlobalCellDataMaxWaveSpeedWithPressureVelocityAnd
             
             if (!d_data_sound_speed)
             {
-                computeGlobalCellDataSoundSpeedWithPressure();
+                computeGlobalCellDataSoundSpeedWithPressureAndVelocity();
             }
             
             if (!d_data_velocity)

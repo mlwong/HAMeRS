@@ -16,9 +16,8 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
             dim.getValue() + 2*num_species,
             flow_model_db),
         d_num_subghosts_density(-hier::IntVector::getOne(d_dim)),
-        d_num_subghosts_mixture_thermo_properties(-hier::IntVector::getOne(d_dim)),
-        d_num_subghosts_mass_fraction(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_pressure(-hier::IntVector::getOne(d_dim)),
+        d_num_subghosts_mass_fraction(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_velocity(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_sound_speed(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_dilatation(-hier::IntVector::getOne(d_dim)),
@@ -31,9 +30,8 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
         d_num_subghosts_max_wave_speed_y(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_max_wave_speed_z(-hier::IntVector::getOne(d_dim)),
         d_subghost_box_density(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_mixture_thermo_properties(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_mass_fraction(hier::Box::getEmptyBox(dim)),
         d_subghost_box_pressure(hier::Box::getEmptyBox(dim)),
+        d_subghost_box_mass_fraction(hier::Box::getEmptyBox(dim)),
         d_subghost_box_velocity(hier::Box::getEmptyBox(dim)),
         d_subghost_box_sound_speed(hier::Box::getEmptyBox(dim)),
         d_subghost_box_dilatation(hier::Box::getEmptyBox(dim)),
@@ -46,9 +44,8 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
         d_subghost_box_max_wave_speed_y(hier::Box::getEmptyBox(dim)),
         d_subghost_box_max_wave_speed_z(hier::Box::getEmptyBox(dim)),
         d_subghostcell_dims_density(hier::IntVector::getZero(d_dim)),
-        d_subghostcell_dims_mixture_thermo_properties(hier::IntVector::getZero(d_dim)),
-        d_subghostcell_dims_mass_fraction(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_pressure(hier::IntVector::getZero(d_dim)),
+        d_subghostcell_dims_mass_fraction(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_velocity(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_sound_speed(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_dilatation(hier::IntVector::getZero(d_dim)),
@@ -107,7 +104,7 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
         new pdat::CellVariable<double>(d_dim, "volume fraction", d_num_species));
     
     /*
-     * Initialize d_equation_of_state_manager and get the equation of state object.
+     * Initialize d_equation_of_state_mixing_rules_manager and get the equation of state mixing rules object.
      */
     
     if (flow_model_db->keyExists("equation_of_state"))
@@ -125,18 +122,6 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
             << "No key 'equation_of_state'/'d_equation_of_state_str' found in data for flow model"
             << std::endl);
     }
-    
-    d_equation_of_state_manager.reset(new EquationOfStateManager(
-        "d_equation_of_state_manager",
-        d_dim,
-        d_equation_of_state_str));
-    
-    d_equation_of_state =
-        d_equation_of_state_manager->getEquationOfState();
-    
-    /*
-     * Initialize d_equation_of_state_mixing_rules_manager and get the equation of state mixing rules object.
-     */
     
     boost::shared_ptr<tbox::Database> species_db;
     
@@ -176,7 +161,6 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
             d_dim,
             d_num_eqn,
             d_num_species,
-            d_equation_of_state,
             d_equation_of_state_mixing_rules));
     
     d_Riemann_solver_HLLC_HLL = boost::shared_ptr<RiemannSolverFiveEqnAllaireHLLC_HLL> (
@@ -185,7 +169,6 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
             d_dim,
             d_num_eqn,
             d_num_species,
-            d_equation_of_state,
             d_equation_of_state_mixing_rules));
 }
 
@@ -204,9 +187,6 @@ FlowModelFiveEqnAllaire::printClassData(std::ostream& os) const
     os << "FlowModelFiveEqnAllaire: this = "
        << (FlowModelFiveEqnAllaire *)this
        << std::endl;
-    
-    os << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
-    d_equation_of_state_manager->printClassData(os);
     
     os << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
     d_equation_of_state_mixing_rules_manager->printClassData(os);
@@ -436,50 +416,29 @@ FlowModelFiveEqnAllaire::registerDerivedCellVariable(
         d_num_subghosts_density = num_subghosts_of_data.find("DENSITY")->second;
     }
     
-    if (num_subghosts_of_data.find("MIXTURE_THERMO_PROPERTIES") != num_subghosts_of_data.end())
+    if (num_subghosts_of_data.find("PRESSURE") != num_subghosts_of_data.end())
     {
-        d_num_subghosts_mass_fraction = num_subghosts_of_data.find("MIXTURE_THERMO_PROPERTIES")->second;
+        d_num_subghosts_pressure = num_subghosts_of_data.find("PRESSURE")->second;
     }
     
     if (num_subghosts_of_data.find("MASS_FRACTION") != num_subghosts_of_data.end())
     {
         d_num_subghosts_mass_fraction = num_subghosts_of_data.find("MASS_FRACTION")->second;
-    }
-    
-    if (num_subghosts_of_data.find("PRESSURE") != num_subghosts_of_data.end())
-    {
-        d_num_subghosts_pressure = num_subghosts_of_data.find("PRESSURE")->second;
         
         if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
         {
-            if (d_num_subghosts_pressure > d_num_subghosts_density)
+            if (d_num_subghosts_mass_fraction > d_num_subghosts_density)
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                    << "Number of ghosts of 'PRESSURE' exceeds"
+                    << "Number of ghosts of 'MASS_FRACTION' exceeds"
                     << " number of ghosts of 'DENSITY'."
                     << std::endl);
             }
         }
         else
         {
-            d_num_subghosts_density = d_num_subghosts_pressure;
-        }
-        
-        if (d_num_subghosts_mixture_thermo_properties > -hier::IntVector::getOne(d_dim))
-        {
-            if (d_num_subghosts_pressure > d_num_subghosts_mixture_thermo_properties)
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                    << "Number of ghosts of 'PRESSURE' exceeds"
-                    << " number of ghosts of 'MIXTURE_THERMO_PROPERTIES'."
-                    << std::endl);
-            }
-        }
-        else
-        {
-            d_num_subghosts_mixture_thermo_properties = d_num_subghosts_pressure;
+            d_num_subghosts_density = d_num_subghosts_mass_fraction;
         }
     }
     
@@ -522,6 +481,22 @@ FlowModelFiveEqnAllaire::registerDerivedCellVariable(
         else
         {
             d_num_subghosts_pressure = d_num_subghosts_sound_speed;
+        }
+        
+        if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
+        {
+            if (d_num_subghosts_sound_speed > d_num_subghosts_velocity)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
+                    << "Number of ghosts of 'SOUND_SPEED' exceeds"
+                    << " number of ghosts of 'VELOCITY'."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            d_num_subghosts_velocity = d_num_subghosts_sound_speed;
             
             if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
             {
@@ -537,22 +512,6 @@ FlowModelFiveEqnAllaire::registerDerivedCellVariable(
             else
             {
                 d_num_subghosts_density = d_num_subghosts_sound_speed;
-            }
-            
-            if (d_num_subghosts_mixture_thermo_properties > -hier::IntVector::getOne(d_dim))
-            {
-                if (d_num_subghosts_sound_speed > d_num_subghosts_mixture_thermo_properties)
-                {
-                    TBOX_ERROR(d_object_name
-                        << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                        << "Number of ghosts of 'SOUND_SPEED' exceeds"
-                        << " number of ghosts of 'MIXTURE_THERMO_PROPERTIES'."
-                        << std::endl);
-                }
-            }
-            else
-            {
-                d_num_subghosts_mixture_thermo_properties = d_num_subghosts_sound_speed;
             }
         }
     }
@@ -702,38 +661,6 @@ FlowModelFiveEqnAllaire::registerDerivedCellVariable(
         else
         {
             d_num_subghosts_pressure = d_num_subghosts_convective_flux_x;
-            
-            if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
-            {
-                if (d_num_subghosts_convective_flux_x > d_num_subghosts_density)
-                {
-                    TBOX_ERROR(d_object_name
-                        << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                        << "Number of ghosts of 'CONVECTIVE_FLUX_X' exceeds"
-                        << " number of ghosts of 'DENSITY'."
-                        << std::endl);
-                }
-            }
-            else
-            {
-                d_num_subghosts_density = d_num_subghosts_convective_flux_x;
-            }
-            
-            if (d_num_subghosts_mixture_thermo_properties > -hier::IntVector::getOne(d_dim))
-            {
-                if (d_num_subghosts_convective_flux_x > d_num_subghosts_mixture_thermo_properties)
-                {
-                    TBOX_ERROR(d_object_name
-                        << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                        << "Number of ghosts of 'CONVECTIVE_FLUX_X' exceeds"
-                        << " number of ghosts of 'MIXTURE_THERMO_PROPERTIES'."
-                        << std::endl);
-                }
-            }
-            else
-            {
-                d_num_subghosts_mixture_thermo_properties = d_num_subghosts_convective_flux_x;
-            }
         }
         
         if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
@@ -750,6 +677,22 @@ FlowModelFiveEqnAllaire::registerDerivedCellVariable(
         else
         {
             d_num_subghosts_velocity = d_num_subghosts_convective_flux_x;
+            
+            if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
+            {
+                if (d_num_subghosts_convective_flux_x > d_num_subghosts_density)
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
+                        << "Number of ghosts of 'CONVECTIVE_FLUX_X' exceeds"
+                        << " number of ghosts of 'DENSITY'."
+                        << std::endl);
+                }
+            }
+            else
+            {
+                d_num_subghosts_density = d_num_subghosts_convective_flux_x;
+            }
         }
     }
     
@@ -773,38 +716,6 @@ FlowModelFiveEqnAllaire::registerDerivedCellVariable(
             else
             {
                 d_num_subghosts_pressure = d_num_subghosts_convective_flux_y;
-                
-                if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
-                {
-                    if (d_num_subghosts_convective_flux_y > d_num_subghosts_density)
-                    {
-                        TBOX_ERROR(d_object_name
-                            << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                            << "Number of ghosts of 'CONVECTIVE_FLUX_Y' exceeds"
-                            << " number of ghosts of 'DENSITY'."
-                            << std::endl);
-                    }
-                }
-                else
-                {
-                    d_num_subghosts_density = d_num_subghosts_convective_flux_y;
-                }
-                
-                if (d_num_subghosts_mixture_thermo_properties > -hier::IntVector::getOne(d_dim))
-                {
-                    if (d_num_subghosts_convective_flux_y > d_num_subghosts_mixture_thermo_properties)
-                    {
-                        TBOX_ERROR(d_object_name
-                            << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                            << "Number of ghosts of 'CONVECTIVE_FLUX_Y' exceeds"
-                            << " number of ghosts of 'MIXTURE_THERMO_PROPERTIES'."
-                            << std::endl);
-                    }
-                }
-                else
-                {
-                    d_num_subghosts_mixture_thermo_properties = d_num_subghosts_convective_flux_y;
-                }
             }
             
             if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
@@ -821,6 +732,22 @@ FlowModelFiveEqnAllaire::registerDerivedCellVariable(
             else
             {
                 d_num_subghosts_velocity = d_num_subghosts_convective_flux_y;
+                
+                if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
+                {
+                    if (d_num_subghosts_convective_flux_y > d_num_subghosts_density)
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
+                            << "Number of ghosts of 'CONVECTIVE_FLUX_Y' exceeds"
+                            << " number of ghosts of 'DENSITY'."
+                            << std::endl);
+                    }
+                }
+                else
+                {
+                    d_num_subghosts_density = d_num_subghosts_convective_flux_y;
+                }
             }
         }
         else
@@ -852,38 +779,6 @@ FlowModelFiveEqnAllaire::registerDerivedCellVariable(
             else
             {
                 d_num_subghosts_pressure = d_num_subghosts_convective_flux_z;
-                
-                if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
-                {
-                    if (d_num_subghosts_convective_flux_z > d_num_subghosts_density)
-                    {
-                        TBOX_ERROR(d_object_name
-                            << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                            << "Number of ghosts of 'CONVECTIVE_FLUX_Z' exceeds"
-                            << " number of ghosts of 'DENSITY'."
-                            << std::endl);
-                    }
-                }
-                else
-                {
-                    d_num_subghosts_density = d_num_subghosts_convective_flux_z;
-                }
-                
-                if (d_num_subghosts_mixture_thermo_properties > -hier::IntVector::getOne(d_dim))
-                {
-                    if (d_num_subghosts_convective_flux_z > d_num_subghosts_mixture_thermo_properties)
-                    {
-                        TBOX_ERROR(d_object_name
-                            << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                            << "Number of ghosts of 'CONVECTIVE_FLUX_Z' exceeds"
-                            << " number of ghosts of 'MIXTURE_THERMO_PROPERTIES'."
-                            << std::endl);
-                    }
-                }
-                else
-                {
-                    d_num_subghosts_mixture_thermo_properties = d_num_subghosts_convective_flux_z;
-                }
             }
             
             if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
@@ -900,6 +795,22 @@ FlowModelFiveEqnAllaire::registerDerivedCellVariable(
             else
             {
                 d_num_subghosts_velocity = d_num_subghosts_convective_flux_z;
+                
+                if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
+                {
+                    if (d_num_subghosts_convective_flux_z > d_num_subghosts_density)
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
+                            << "Number of ghosts of 'CONVECTIVE_FLUX_Z' exceeds"
+                            << " number of ghosts of 'DENSITY'."
+                            << std::endl);
+                    }
+                }
+                else
+                {
+                    d_num_subghosts_density = d_num_subghosts_convective_flux_z;
+                }
             }
         }
         else
@@ -930,38 +841,6 @@ FlowModelFiveEqnAllaire::registerDerivedCellVariable(
         else
         {
             d_num_subghosts_pressure = d_num_subghosts_primitive_variables;
-            
-            if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
-            {
-                if (d_num_subghosts_primitive_variables > d_num_subghosts_density)
-                {
-                    TBOX_ERROR(d_object_name
-                        << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                        << "Number of ghosts of 'PRIMITIVE_VARIABLES' exceeds"
-                        << " number of ghosts of 'DENSITY'."
-                        << std::endl);
-                }
-            }
-            else
-            {
-                d_num_subghosts_density = d_num_subghosts_primitive_variables;
-            }
-            
-            if (d_num_subghosts_mixture_thermo_properties > -hier::IntVector::getOne(d_dim))
-            {
-                if (d_num_subghosts_primitive_variables > d_num_subghosts_mixture_thermo_properties)
-                {
-                    TBOX_ERROR(d_object_name
-                        << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                        << "Number of ghosts of 'PRIMITIVE_VARIABLES' exceeds"
-                        << " number of ghosts of 'MIXTURE_THERMO_PROPERTIES'."
-                        << std::endl);
-                }
-            }
-            else
-            {
-                d_num_subghosts_mixture_thermo_properties = d_num_subghosts_primitive_variables;
-            }
         }
         
         if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
@@ -969,7 +848,7 @@ FlowModelFiveEqnAllaire::registerDerivedCellVariable(
             if (d_num_subghosts_velocity != d_num_subghosts_primitive_variables)
             {
                 TBOX_ERROR(d_object_name
-                    << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
+                    << ": FlowModelFourEqnConservative::registerDerivedCellVariable()\n"
                     << "Number of ghosts of 'VELOCITY' is not equal to"
                     << " number of ghosts of 'PRIMITIVE_VARIABLES'."
                     << std::endl);
@@ -1014,6 +893,22 @@ FlowModelFiveEqnAllaire::registerDerivedCellVariable(
             else
             {
                 d_num_subghosts_pressure = d_num_subghosts_max_wave_speed_x;
+            }
+            
+            if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
+            {
+                if (d_num_subghosts_max_wave_speed_x > d_num_subghosts_velocity)
+                {
+                    TBOX_ERROR(d_object_name
+                        << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
+                        << "Number of ghosts of 'MAX_WAVE_SPEED_X' exceeds"
+                        << " number of ghosts of 'VELOCITY'."
+                        << std::endl);
+                }
+            }
+            else
+            {
+                d_num_subghosts_velocity = d_num_subghosts_max_wave_speed_x;
                 
                 if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
                 {
@@ -1030,209 +925,165 @@ FlowModelFiveEqnAllaire::registerDerivedCellVariable(
                 {
                     d_num_subghosts_density = d_num_subghosts_max_wave_speed_x;
                 }
-                
-                if (d_num_subghosts_mixture_thermo_properties > -hier::IntVector::getOne(d_dim))
-                {
-                    if (d_num_subghosts_max_wave_speed_x > d_num_subghosts_mixture_thermo_properties)
-                    {
-                        TBOX_ERROR(d_object_name
-                            << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                            << "Number of ghosts of 'MAX_WAVE_SPEED_X' exceeds"
-                            << " number of ghosts of 'MIXTURE_THERMO_PROPERTIES'."
-                            << std::endl);
-                    }
-                }
-                else
-                {
-                    d_num_subghosts_mixture_thermo_properties = d_num_subghosts_max_wave_speed_x;
-                }
             }
-        }
-        
-        if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
-        {
-            if (d_num_subghosts_max_wave_speed_x > d_num_subghosts_velocity)
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                    << "Number of ghosts of 'MAX_WAVE_SPEED_X' exceeds"
-                    << " number of ghosts of 'VELOCITY'."
-                    << std::endl);
-            }
-        }
-        else
-        {
-            d_num_subghosts_velocity = d_num_subghosts_max_wave_speed_x;
         }
     }
     
     if (num_subghosts_of_data.find("MAX_WAVE_SPEED_Y") != num_subghosts_of_data.end())
     {
-        d_num_subghosts_max_wave_speed_y = num_subghosts_of_data.find("MAX_WAVE_SPEED_Y")->second;
-        
-        if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
+        if (d_dim >= tbox::Dimension(2))
         {
-            if (d_num_subghosts_max_wave_speed_y > d_num_subghosts_sound_speed)
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                    << "Number of ghosts of 'MAX_WAVE_SPEED_Y' exceeds"
-                    << " number of ghosts of 'SOUND_SPEED'."
-                    << std::endl);
-            }
-        }
-        else
-        {
-            d_num_subghosts_sound_speed = d_num_subghosts_max_wave_speed_y;
+            d_num_subghosts_max_wave_speed_y = num_subghosts_of_data.find("MAX_WAVE_SPEED_Y")->second;
             
-            if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
+            if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
             {
-                if (d_num_subghosts_max_wave_speed_y > d_num_subghosts_pressure)
+                if (d_num_subghosts_max_wave_speed_y > d_num_subghosts_sound_speed)
                 {
                     TBOX_ERROR(d_object_name
                         << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
                         << "Number of ghosts of 'MAX_WAVE_SPEED_Y' exceeds"
-                        << " number of ghosts of 'PRESSURE'."
+                        << " number of ghosts of 'SOUND_SPEED'."
                         << std::endl);
                 }
             }
             else
             {
-                d_num_subghosts_pressure = d_num_subghosts_max_wave_speed_y;
+                d_num_subghosts_sound_speed = d_num_subghosts_max_wave_speed_y;
                 
-                if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
+                if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
                 {
-                    if (d_num_subghosts_max_wave_speed_y > d_num_subghosts_density)
+                    if (d_num_subghosts_max_wave_speed_y > d_num_subghosts_pressure)
                     {
                         TBOX_ERROR(d_object_name
                             << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
                             << "Number of ghosts of 'MAX_WAVE_SPEED_Y' exceeds"
-                            << " number of ghosts of 'DENSITY'."
+                            << " number of ghosts of 'PRESSURE'."
                             << std::endl);
                     }
                 }
                 else
                 {
-                    d_num_subghosts_density = d_num_subghosts_max_wave_speed_y;
+                    d_num_subghosts_pressure = d_num_subghosts_max_wave_speed_y;
                 }
                 
-                if (d_num_subghosts_mixture_thermo_properties > -hier::IntVector::getOne(d_dim))
+                if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
                 {
-                    if (d_num_subghosts_max_wave_speed_y > d_num_subghosts_mixture_thermo_properties)
+                    if (d_num_subghosts_max_wave_speed_y > d_num_subghosts_velocity)
                     {
                         TBOX_ERROR(d_object_name
                             << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
                             << "Number of ghosts of 'MAX_WAVE_SPEED_Y' exceeds"
-                            << " number of ghosts of 'MIXTURE_THERMO_PROPERTIES'."
+                            << " number of ghosts of 'VELOCITY'."
                             << std::endl);
                     }
                 }
                 else
                 {
-                    d_num_subghosts_mixture_thermo_properties = d_num_subghosts_max_wave_speed_y;
+                    d_num_subghosts_velocity = d_num_subghosts_max_wave_speed_y;
+                    
+                    if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
+                    {
+                        if (d_num_subghosts_max_wave_speed_y > d_num_subghosts_density)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
+                                << "Number of ghosts of 'MAX_WAVE_SPEED_Y' exceeds"
+                                << " number of ghosts of 'DENSITY'."
+                                << std::endl);
+                        }
+                    }
+                    else
+                    {
+                        d_num_subghosts_density = d_num_subghosts_max_wave_speed_y;
+                    }
                 }
-            }
-        }
-        
-        if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
-        {
-            if (d_num_subghosts_max_wave_speed_y > d_num_subghosts_velocity)
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                    << "Number of ghosts of 'MAX_WAVE_SPEED_Y' exceeds"
-                    << " number of ghosts of 'VELOCITY'."
-                    << std::endl);
             }
         }
         else
         {
-            d_num_subghosts_velocity = d_num_subghosts_max_wave_speed_y;
+            TBOX_ERROR(d_object_name
+                << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
+                << "'MAX_WAVE_SPEED_Y' cannot be obtained for problem with dimension less than two."
+                << std::endl);
         }
     }
     
     if (num_subghosts_of_data.find("MAX_WAVE_SPEED_Z") != num_subghosts_of_data.end())
     {
-        d_num_subghosts_max_wave_speed_z = num_subghosts_of_data.find("MAX_WAVE_SPEED_Z")->second;
-        
-        if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
+        if (d_dim == tbox::Dimension(3))
         {
-            if (d_num_subghosts_max_wave_speed_z > d_num_subghosts_sound_speed)
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                    << "Number of ghosts of 'MAX_WAVE_SPEED_Z' exceeds"
-                    << " number of ghosts of 'SOUND_SPEED'."
-                    << std::endl);
-            }
-        }
-        else
-        {
-            d_num_subghosts_sound_speed = d_num_subghosts_max_wave_speed_z;
+            d_num_subghosts_max_wave_speed_z = num_subghosts_of_data.find("MAX_WAVE_SPEED_Z")->second;
             
-            if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
+            if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
             {
-                if (d_num_subghosts_max_wave_speed_z > d_num_subghosts_pressure)
+                if (d_num_subghosts_max_wave_speed_z > d_num_subghosts_sound_speed)
                 {
                     TBOX_ERROR(d_object_name
                         << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
                         << "Number of ghosts of 'MAX_WAVE_SPEED_Z' exceeds"
-                        << " number of ghosts of 'PRESSURE'."
+                        << " number of ghosts of 'SOUND_SPEED'."
                         << std::endl);
                 }
             }
             else
             {
-                d_num_subghosts_pressure = d_num_subghosts_max_wave_speed_z;
+                d_num_subghosts_sound_speed = d_num_subghosts_max_wave_speed_z;
                 
-                if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
+                if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
                 {
-                    if (d_num_subghosts_max_wave_speed_z > d_num_subghosts_density)
+                    if (d_num_subghosts_max_wave_speed_z > d_num_subghosts_pressure)
                     {
                         TBOX_ERROR(d_object_name
                             << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
                             << "Number of ghosts of 'MAX_WAVE_SPEED_Z' exceeds"
-                            << " number of ghosts of 'DENSITY'."
+                            << " number of ghosts of 'PRESSURE'."
                             << std::endl);
                     }
                 }
                 else
                 {
-                    d_num_subghosts_density = d_num_subghosts_max_wave_speed_z;
+                    d_num_subghosts_pressure = d_num_subghosts_max_wave_speed_z;
                 }
                 
-                if (d_num_subghosts_mixture_thermo_properties > -hier::IntVector::getOne(d_dim))
+                if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
                 {
-                    if (d_num_subghosts_max_wave_speed_z > d_num_subghosts_mixture_thermo_properties)
+                    if (d_num_subghosts_max_wave_speed_z > d_num_subghosts_velocity)
                     {
                         TBOX_ERROR(d_object_name
                             << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
                             << "Number of ghosts of 'MAX_WAVE_SPEED_Z' exceeds"
-                            << " number of ghosts of 'MIXTURE_THERMO_PROPERTIES'."
+                            << " number of ghosts of 'VELOCITY'."
                             << std::endl);
                     }
                 }
                 else
                 {
-                    d_num_subghosts_mixture_thermo_properties = d_num_subghosts_max_wave_speed_z;
+                    d_num_subghosts_velocity = d_num_subghosts_max_wave_speed_z;
+                    
+                    if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
+                    {
+                        if (d_num_subghosts_max_wave_speed_z > d_num_subghosts_density)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
+                                << "Number of ghosts of 'MAX_WAVE_SPEED_Z' exceeds"
+                                << " number of ghosts of 'DENSITY'."
+                                << std::endl);
+                        }
+                    }
+                    else
+                    {
+                        d_num_subghosts_density = d_num_subghosts_max_wave_speed_z;
+                    }
                 }
-            }
-        }
-        
-        if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
-        {
-            if (d_num_subghosts_max_wave_speed_z > d_num_subghosts_velocity)
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                    << "Number of ghosts of 'MAX_WAVE_SPEED_Z' exceeds"
-                    << " number of ghosts of 'VELOCITY'."
-                    << std::endl);
             }
         }
         else
         {
-            d_num_subghosts_velocity = d_num_subghosts_max_wave_speed_z;
+            TBOX_ERROR(d_object_name
+                << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
+                << "'MAX_WAVE_SPEED_Z' cannot be obtained for problem with dimension less than three."
+                << std::endl);
         }
     }
 }
@@ -1313,6 +1164,22 @@ FlowModelFiveEqnAllaire::registerFaceProjectionMatricesOfPrimitiveVariables(
         else
         {
             d_num_subghosts_pressure = num_subghosts;
+        }
+        
+        if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
+        {
+            if (num_subghosts > d_num_subghosts_velocity)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelFiveEqnAllaire::registerFaceProjectionMatrices()\n"
+                    << "Number of ghosts of projection matrices exceeds"
+                    << " number of ghosts of 'VELOCITY'."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            d_num_subghosts_velocity = num_subghosts;
             
             if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
             {
@@ -1328,22 +1195,6 @@ FlowModelFiveEqnAllaire::registerFaceProjectionMatricesOfPrimitiveVariables(
             else
             {
                 d_num_subghosts_density = num_subghosts;
-            }
-            
-            if (d_num_subghosts_mixture_thermo_properties > -hier::IntVector::getOne(d_dim))
-            {
-                if (num_subghosts > d_num_subghosts_mixture_thermo_properties)
-                {
-                    TBOX_ERROR(d_object_name
-                        << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                        << "Number of ghosts of projection matrices exceeds"
-                        << " number of ghosts of 'MIXTURE_THERMO_PROPERTIES'."
-                        << std::endl);
-                }
-            }
-            else
-            {
-                d_num_subghosts_mixture_thermo_properties = num_subghosts;
             }
         }
     }
@@ -1370,9 +1221,8 @@ void FlowModelFiveEqnAllaire::unregisterPatch()
     d_patch = nullptr;
     
     d_num_subghosts_density                   = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_mixture_thermo_properties = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_mass_fraction             = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_pressure                  = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_mass_fraction             = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_velocity                  = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_sound_speed               = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_dilatation                = -hier::IntVector::getOne(d_dim);
@@ -1388,9 +1238,8 @@ void FlowModelFiveEqnAllaire::unregisterPatch()
     d_interior_box                           = hier::Box::getEmptyBox(d_dim);
     d_ghost_box                              = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_density                   = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_mixture_thermo_properties = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_mass_fraction             = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_pressure                  = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_mass_fraction             = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_velocity                  = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_sound_speed               = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_dilatation                = hier::Box::getEmptyBox(d_dim);
@@ -1407,9 +1256,8 @@ void FlowModelFiveEqnAllaire::unregisterPatch()
     d_interior_dims                               = hier::IntVector::getZero(d_dim);
     d_ghostcell_dims                              = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_density                   = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_mixture_thermo_properties = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_mass_fraction             = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_pressure                  = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_mass_fraction             = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_velocity                  = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_sound_speed               = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_dilatation                = hier::IntVector::getZero(d_dim);
@@ -1423,9 +1271,8 @@ void FlowModelFiveEqnAllaire::unregisterPatch()
     d_subghostcell_dims_max_wave_speed_z          = hier::IntVector::getZero(d_dim);
     
     d_data_density.reset();
-    d_data_mass_fraction.reset();
-    d_data_mixture_thermo_properties.reset();
     d_data_pressure.reset();
+    d_data_mass_fraction.reset();
     d_data_velocity.reset();
     d_data_sound_speed.reset();
     d_data_dilatation.reset();
@@ -1474,12 +1321,12 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
         }
     }
     
-    // Compute the mixture thermodynamic properties cell data.
-    if (d_num_subghosts_mixture_thermo_properties > -hier::IntVector::getOne(d_dim))
+    // Compute the pressure cell data.
+    if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_data_mixture_thermo_properties)
+        if (!d_data_pressure)
         {
-            computeGlobalCellDataMixtureThermoProperties();
+            computeGlobalCellDataPressure();
         }
     }
     
@@ -1489,15 +1336,6 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
         if (!d_data_mass_fraction)
         {
             computeGlobalCellDataMassFractionWithDensity();
-        }
-    }
-    
-    // Compute the pressure cell data.
-    if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
-    {
-        if (!d_data_pressure)
-        {
-            computeGlobalCellDataPressureWithDensityAndMixtureThermoProperties();
         }
     }
     
@@ -1515,7 +1353,7 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_sound_speed)
         {
-            computeGlobalCellDataSoundSpeedWithDensityMixtureThermoPropertiesAndPressure();
+            computeGlobalCellDataSoundSpeedWithDensityPressureAndVelocity();
         }
     }
     
@@ -1551,7 +1389,7 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_convective_flux_x)
         {
-            computeGlobalCellDataConvectiveFluxWithDensityMixtureThermoPropertiesPressureAndVelocity(X_DIRECTION);
+            computeGlobalCellDataConvectiveFluxWithDensityPressureAndVelocity(X_DIRECTION);
         }
     }
     
@@ -1560,7 +1398,7 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_convective_flux_y)
         {
-            computeGlobalCellDataConvectiveFluxWithDensityMixtureThermoPropertiesPressureAndVelocity(Y_DIRECTION);
+            computeGlobalCellDataConvectiveFluxWithDensityPressureAndVelocity(Y_DIRECTION);
         }
     }
     
@@ -1569,7 +1407,7 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_convective_flux_z)
         {
-            computeGlobalCellDataConvectiveFluxWithDensityMixtureThermoPropertiesPressureAndVelocity(Z_DIRECTION);
+            computeGlobalCellDataConvectiveFluxWithDensityPressureAndVelocity(Z_DIRECTION);
         }
     }
     
@@ -1578,7 +1416,7 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_max_wave_speed_x)
         {
-            computeGlobalCellDataMaxWaveSpeedWithDensityMixtureThermoPropertiesPressureVelocityAndSoundSpeed(X_DIRECTION);
+            computeGlobalCellDataMaxWaveSpeedWithDensityPressureVelocityAndSoundSpeed(X_DIRECTION);
         }
     }
     
@@ -1587,7 +1425,7 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_max_wave_speed_y)
         {
-            computeGlobalCellDataMaxWaveSpeedWithDensityMixtureThermoPropertiesPressureVelocityAndSoundSpeed(Y_DIRECTION);
+            computeGlobalCellDataMaxWaveSpeedWithDensityPressureVelocityAndSoundSpeed(Y_DIRECTION);
         }
     }
     
@@ -1596,7 +1434,7 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_max_wave_speed_z)
         {
-            computeGlobalCellDataMaxWaveSpeedWithDensityMixtureThermoPropertiesPressureVelocityAndSoundSpeed(Z_DIRECTION);
+            computeGlobalCellDataMaxWaveSpeedWithDensityPressureVelocityAndSoundSpeed(Z_DIRECTION);
         }
     }
 }
@@ -1647,16 +1485,16 @@ FlowModelFiveEqnAllaire::getGlobalCellData(
         }
         cell_data = d_data_density;
     }
-    else if (variable_key == "MIXTURE_THERMO_PROPERTIES")
+    else if (variable_key == "PRESSURE")
     {
-        if (!d_data_mixture_thermo_properties)
+        if (!d_data_pressure)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFiveEqnAllaire::getGlobalCellData()\n"
-                << "Cell data of 'MIXTURE_THERMO_PROPERTIES' is not registered/computed yet."
+                << "Cell data of 'PRESSURE' is not registered/computed yet."
                 << std::endl);
         }
-        cell_data = d_data_mixture_thermo_properties;
+        cell_data = d_data_pressure;
     }
     else if (variable_key == "MASS_FRACTION")
     {
@@ -1668,17 +1506,6 @@ FlowModelFiveEqnAllaire::getGlobalCellData(
                 << std::endl);
         }
         cell_data = d_data_mass_fraction;
-    }
-    else if (variable_key == "PRESSURE")
-    {
-        if (!d_data_pressure)
-        {
-            TBOX_ERROR(d_object_name
-                << ": FlowModelFiveEqnAllaire::getGlobalCellData()\n"
-                << "Cell data of 'PRESSURE' is not registered/computed yet."
-                << std::endl);
-        }
-        cell_data = d_data_pressure;
     }
     else if (variable_key == "VELOCITY")
     {
@@ -1997,7 +1824,7 @@ FlowModelFiveEqnAllaire::getGlobalCellDataPrimitiveVariables()
     global_cell_data.push_back(d_data_velocity);
     if (!d_data_pressure)
     {
-        computeGlobalCellDataPressureWithDensityAndMixtureThermoProperties();
+        computeGlobalCellDataPressure();
     }
     global_cell_data.push_back(d_data_pressure);
     global_cell_data.push_back(getGlobalCellDataVolumeFraction());
@@ -2086,7 +1913,7 @@ FlowModelFiveEqnAllaire::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
     }
     if (!d_data_sound_speed)
     {
-        computeGlobalCellDataSoundSpeedWithDensityMixtureThermoPropertiesAndPressure();
+        computeGlobalCellDataSoundSpeedWithDensityPressureAndVelocity();
     }
     double* rho = d_data_density->getPointer(0);
     double* c = d_data_sound_speed->getPointer(0);
@@ -2513,7 +2340,7 @@ FlowModelFiveEqnAllaire::computeLocalFaceProjectionMatrixInverseOfPrimitiveVaria
     }
     if (!d_data_sound_speed)
     {
-        computeGlobalCellDataSoundSpeedWithDensityMixtureThermoPropertiesAndPressure();
+        computeGlobalCellDataSoundSpeedWithDensityPressureAndVelocity();
     }
     double* rho = d_data_density->getPointer(0);
     double* c = d_data_sound_speed->getPointer(0);
@@ -3176,33 +3003,12 @@ FlowModelFiveEqnAllaire::convertLocalCellDataPointersConservativeVariablesToPrim
         m_ptr.push_back(Q[d_num_species + di]);
     }
     
-    // Get the mixture thermodynamic properties.
-    std::vector<double> mixture_thermo_properties;
-    std::vector<double*> mixture_thermo_properties_ptr;
-    std::vector<const double*> mixture_thermo_properties_const_ptr;
-    
-    const int num_thermo_properties = d_equation_of_state_mixing_rules->
-        getNumberOfMixtureThermodynamicProperties();
-    
-    mixture_thermo_properties.resize(num_thermo_properties);
-    mixture_thermo_properties_ptr.reserve(num_thermo_properties);
-    
-    for (int ti = 0; ti < num_thermo_properties; ti++)
-    {
-        mixture_thermo_properties_ptr.push_back(&mixture_thermo_properties[ti]);
-        mixture_thermo_properties_const_ptr.push_back(&mixture_thermo_properties[ti]);
-    }
-    
-    d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-        mixture_thermo_properties_ptr,
-        Z_ptr);
-    
     // Compute the pressure.
-    const double p = d_equation_of_state->getPressure(
-        &rho,
+    const double p = d_equation_of_state_mixing_rules->getPressure(
+        Z_rho_ptr,
         m_ptr,
         Q[d_num_species + d_dim.getValue()],
-        mixture_thermo_properties_const_ptr);
+        Z_ptr);
     
     // Convert the conservative variables to primitive variables.
     for (int si = 0; si < d_num_species; si++)
@@ -3279,33 +3085,12 @@ FlowModelFiveEqnAllaire::convertLocalCellDataPointersPrimitiveVariablesToConserv
         vel_ptr.push_back(V[d_num_species + di]);
     }
     
-    // Get the mixture thermodynamic properties.
-    std::vector<double> mixture_thermo_properties;
-    std::vector<double*> mixture_thermo_properties_ptr;
-    std::vector<const double*> mixture_thermo_properties_const_ptr;
-    
-    const int num_thermo_properties = d_equation_of_state_mixing_rules->
-        getNumberOfMixtureThermodynamicProperties();
-    
-    mixture_thermo_properties.resize(num_thermo_properties);
-    mixture_thermo_properties_ptr.reserve(num_thermo_properties);
-    
-    for (int ti = 0; ti < num_thermo_properties; ti++)
-    {
-        mixture_thermo_properties_ptr.push_back(&mixture_thermo_properties[ti]);
-        mixture_thermo_properties_const_ptr.push_back(&mixture_thermo_properties[ti]);
-    }
-    
-    d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-        mixture_thermo_properties_ptr,
-        Z_ptr);
-    
     // Compute the total energy.
-    const double E = d_equation_of_state->getTotalEnergy(
-        &rho,
+    const double E = d_equation_of_state_mixing_rules->getTotalEnergy(
+        Z_rho_ptr,
         vel_ptr,
         V[d_num_species + d_dim.getValue()],
-        mixture_thermo_properties_const_ptr);
+        Z_ptr);
     
     // Convert the primitive variables to conservative variables.
     for (int si = 0; si < d_num_species; si++)
@@ -3546,37 +3331,12 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                     Z_ptr.push_back(&Z[si][idx_data]);
                 }
                 
-                // Compute the mixture density.
-                const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
-                    Z_rho_ptr);
-                
-                // Get the mixture thermodynamic properties.
-                std::vector<double> mixture_thermo_properties;
-                std::vector<double*> mixture_thermo_properties_ptr;
-                std::vector<const double*> mixture_thermo_properties_const_ptr;
-                
-                const int num_thermo_properties = d_equation_of_state_mixing_rules->
-                    getNumberOfMixtureThermodynamicProperties();
-                
-                mixture_thermo_properties.resize(num_thermo_properties);
-                mixture_thermo_properties_ptr.reserve(num_thermo_properties);
-                mixture_thermo_properties_const_ptr.reserve(num_thermo_properties);
-                
-                for (int ti = 0; ti < num_thermo_properties; ti++)
-                {
-                    mixture_thermo_properties_ptr.push_back(&mixture_thermo_properties[ti]);
-                    mixture_thermo_properties_const_ptr.push_back(&mixture_thermo_properties[ti]);
-                }
-                
-                d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-                    mixture_thermo_properties_ptr,
-                    Z_ptr);
-                
-                buffer[idx_region] = d_equation_of_state->getPressure(
-                    &rho,
-                    m_ptr,
-                    &E[idx_data],
-                    mixture_thermo_properties_const_ptr);
+                buffer[idx_region] = d_equation_of_state_mixing_rules->
+                    getPressure(
+                        Z_rho_ptr,
+                        m_ptr,
+                        &E[idx_data],
+                        Z_ptr);
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -3611,37 +3371,12 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                         Z_ptr.push_back(&Z[si][idx_data]);
                     }
                     
-                    // Compute the mixture density.
-                    const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
-                        Z_rho_ptr);
-                    
-                    // Get the mixture thermodynamic properties.
-                    std::vector<double> mixture_thermo_properties;
-                    std::vector<double*> mixture_thermo_properties_ptr;
-                    std::vector<const double*> mixture_thermo_properties_const_ptr;
-                    
-                    const int num_thermo_properties = d_equation_of_state_mixing_rules->
-                        getNumberOfMixtureThermodynamicProperties();
-                    
-                    mixture_thermo_properties.resize(num_thermo_properties);
-                    mixture_thermo_properties_ptr.reserve(num_thermo_properties);
-                    mixture_thermo_properties_const_ptr.reserve(num_thermo_properties);
-                    
-                    for (int ti = 0; ti < num_thermo_properties; ti++)
-                    {
-                        mixture_thermo_properties_ptr.push_back(&mixture_thermo_properties[ti]);
-                        mixture_thermo_properties_const_ptr.push_back(&mixture_thermo_properties[ti]);
-                    }
-                    
-                    d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-                        mixture_thermo_properties_ptr,
-                        Z_ptr);
-                    
-                    buffer[idx_region] = d_equation_of_state->getPressure(
-                        &rho,
-                        m_ptr,
-                        &E[idx_data],
-                        mixture_thermo_properties_const_ptr);
+                    buffer[idx_region] = d_equation_of_state_mixing_rules->
+                        getPressure(
+                            Z_rho_ptr,
+                            m_ptr,
+                            &E[idx_data],
+                            Z_ptr);
                 }
             }
         }
@@ -3682,37 +3417,12 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                             Z_ptr.push_back(&Z[si][idx_data]);
                         }
                         
-                        // Compute the mixture density.
-                        const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
-                            Z_rho_ptr);
-                        
-                        // Get the mixture thermodynamic properties.
-                        std::vector<double> mixture_thermo_properties;
-                        std::vector<double*> mixture_thermo_properties_ptr;
-                        std::vector<const double*> mixture_thermo_properties_const_ptr;
-                        
-                        const int num_thermo_properties = d_equation_of_state_mixing_rules->
-                            getNumberOfMixtureThermodynamicProperties();
-                        
-                        mixture_thermo_properties.resize(num_thermo_properties);
-                        mixture_thermo_properties_ptr.reserve(num_thermo_properties);
-                        mixture_thermo_properties_const_ptr.reserve(num_thermo_properties);
-                        
-                        for (int ti = 0; ti < num_thermo_properties; ti++)
-                        {
-                            mixture_thermo_properties_ptr.push_back(&mixture_thermo_properties[ti]);
-                            mixture_thermo_properties_const_ptr.push_back(&mixture_thermo_properties[ti]);
-                        }
-                        
-                        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-                            mixture_thermo_properties_ptr,
-                            Z_ptr);
-                        
-                        buffer[idx_region] = d_equation_of_state->getPressure(
-                            &rho,
-                            m_ptr,
-                            &E[idx_data],
-                            mixture_thermo_properties_const_ptr);
+                        buffer[idx_region] = d_equation_of_state_mixing_rules->
+                            getPressure(
+                                Z_rho_ptr,
+                                m_ptr,
+                                &E[idx_data],
+                                Z_ptr);
                     }
                 }
             }
@@ -3787,6 +3497,8 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                 {
                     Z_rho_ptr.push_back(&Z_rho[si][idx_data]);
                 }
+                const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+                    Z_rho_ptr);
                 
                 std::vector<const double*> m_ptr;
                 m_ptr.reserve(d_dim.getValue());
@@ -3799,42 +3511,25 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                     Z_ptr.push_back(&Z[si][idx_data]);
                 }
                 
-                // Compute the mixture density.
-                const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
-                    Z_rho_ptr);
+                const double u = rho_u[idx_data]/rho;
                 
-                // Get the mixture thermodynamic properties.
-                std::vector<double> mixture_thermo_properties;
-                std::vector<double*> mixture_thermo_properties_ptr;
-                std::vector<const double*> mixture_thermo_properties_const_ptr;
+                std::vector<const double*> vel_ptr;
+                vel_ptr.reserve(d_dim.getValue());
+                vel_ptr.push_back(&u);
                 
-                const int num_thermo_properties = d_equation_of_state_mixing_rules->
-                    getNumberOfMixtureThermodynamicProperties();
+                const double p = d_equation_of_state_mixing_rules->
+                    getPressure(
+                        Z_rho_ptr,
+                        m_ptr,
+                        &E[idx_data],
+                        Z_ptr);
                 
-                mixture_thermo_properties.resize(num_thermo_properties);
-                mixture_thermo_properties_ptr.reserve(num_thermo_properties);
-                mixture_thermo_properties_const_ptr.reserve(num_thermo_properties);
-                
-                for (int ti = 0; ti < num_thermo_properties; ti++)
-                {
-                    mixture_thermo_properties_ptr.push_back(&mixture_thermo_properties[ti]);
-                    mixture_thermo_properties_const_ptr.push_back(&mixture_thermo_properties[ti]);
-                }
-                
-                d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-                    mixture_thermo_properties_ptr,
-                    Z_ptr);
-                
-                const double p = d_equation_of_state->getPressure(
-                    &rho,
-                    m_ptr,
-                    &E[idx_data],
-                    mixture_thermo_properties_const_ptr);
-                
-                buffer[idx_region] = d_equation_of_state->getSoundSpeed(
-                    &rho,
-                    &p,
-                    mixture_thermo_properties_const_ptr);
+                buffer[idx_region] = d_equation_of_state_mixing_rules->
+                    getSoundSpeed(
+                        Z_rho_ptr,
+                        vel_ptr,
+                        &p,
+                        Z_ptr);
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -3856,11 +3551,12 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                     {
                         Z_rho_ptr.push_back(&Z_rho[si][idx_data]);
                     }
+                    const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+                        Z_rho_ptr);
                     
                     std::vector<const double*> m_ptr;
                     m_ptr.reserve(d_dim.getValue());
                     m_ptr.push_back(&rho_u[idx_data]);
-                    m_ptr.push_back(&rho_v[idx_data]);
                     
                     std::vector<const double*> Z_ptr;
                     Z_ptr.reserve(d_num_species - 1);
@@ -3869,42 +3565,27 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                         Z_ptr.push_back(&Z[si][idx_data]);
                     }
                     
-                    // Compute the mixture density.
-                    const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
-                        Z_rho_ptr);
+                    const double u = rho_u[idx_data]/rho;
+                    const double v = rho_v[idx_data]/rho;
                     
-                    // Get the mixture thermodynamic properties.
-                    std::vector<double> mixture_thermo_properties;
-                    std::vector<double*> mixture_thermo_properties_ptr;
-                    std::vector<const double*> mixture_thermo_properties_const_ptr;
+                    std::vector<const double*> vel_ptr;
+                    vel_ptr.reserve(d_dim.getValue());
+                    vel_ptr.push_back(&u);
+                    vel_ptr.push_back(&v);
                     
-                    const int num_thermo_properties = d_equation_of_state_mixing_rules->
-                        getNumberOfMixtureThermodynamicProperties();
+                    const double p = d_equation_of_state_mixing_rules->
+                        getPressure(
+                            Z_rho_ptr,
+                            m_ptr,
+                            &E[idx_data],
+                            Z_ptr);
                     
-                    mixture_thermo_properties.resize(num_thermo_properties);
-                    mixture_thermo_properties_ptr.reserve(num_thermo_properties);
-                    mixture_thermo_properties_const_ptr.reserve(num_thermo_properties);
-                    
-                    for (int ti = 0; ti < num_thermo_properties; ti++)
-                    {
-                        mixture_thermo_properties_ptr.push_back(&mixture_thermo_properties[ti]);
-                        mixture_thermo_properties_const_ptr.push_back(&mixture_thermo_properties[ti]);
-                    }
-                    
-                    d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-                        mixture_thermo_properties_ptr,
-                        Z_ptr);
-                    
-                    const double p = d_equation_of_state->getPressure(
-                        &rho,
-                        m_ptr,
-                        &E[idx_data],
-                        mixture_thermo_properties_const_ptr);
-                    
-                    buffer[idx_region] = d_equation_of_state->getSoundSpeed(
-                        &rho,
-                        &p,
-                        mixture_thermo_properties_const_ptr);
+                    buffer[idx_region] = d_equation_of_state_mixing_rules->
+                        getSoundSpeed(
+                            Z_rho_ptr,
+                            vel_ptr,
+                            &p,
+                            Z_ptr);
                 }
             }
         }
@@ -3931,12 +3612,12 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                         {
                             Z_rho_ptr.push_back(&Z_rho[si][idx_data]);
                         }
+                        const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+                            Z_rho_ptr);
                         
                         std::vector<const double*> m_ptr;
                         m_ptr.reserve(d_dim.getValue());
                         m_ptr.push_back(&rho_u[idx_data]);
-                        m_ptr.push_back(&rho_v[idx_data]);
-                        m_ptr.push_back(&rho_w[idx_data]);
                         
                         std::vector<const double*> Z_ptr;
                         Z_ptr.reserve(d_num_species - 1);
@@ -3945,42 +3626,29 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                             Z_ptr.push_back(&Z[si][idx_data]);
                         }
                         
-                        // Compute the mixture density.
-                        const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
-                            Z_rho_ptr);
+                        const double u = rho_u[idx_data]/rho;
+                        const double v = rho_v[idx_data]/rho;
+                        const double w = rho_w[idx_data]/rho;
                         
-                        // Get the mixture thermodynamic properties.
-                        std::vector<double> mixture_thermo_properties;
-                        std::vector<double*> mixture_thermo_properties_ptr;
-                        std::vector<const double*> mixture_thermo_properties_const_ptr;
+                        std::vector<const double*> vel_ptr;
+                        vel_ptr.reserve(d_dim.getValue());
+                        vel_ptr.push_back(&u);
+                        vel_ptr.push_back(&v);
+                        vel_ptr.push_back(&w);
                         
-                        const int num_thermo_properties = d_equation_of_state_mixing_rules->
-                            getNumberOfMixtureThermodynamicProperties();
+                        const double p = d_equation_of_state_mixing_rules->
+                            getPressure(
+                                Z_rho_ptr,
+                                m_ptr,
+                                &E[idx_data],
+                                Z_ptr);
                         
-                        mixture_thermo_properties.resize(num_thermo_properties);
-                        mixture_thermo_properties_ptr.reserve(num_thermo_properties);
-                        mixture_thermo_properties_const_ptr.reserve(num_thermo_properties);
-                        
-                        for (int ti = 0; ti < num_thermo_properties; ti++)
-                        {
-                            mixture_thermo_properties_ptr.push_back(&mixture_thermo_properties[ti]);
-                            mixture_thermo_properties_const_ptr.push_back(&mixture_thermo_properties[ti]);
-                        }
-                        
-                        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-                            mixture_thermo_properties_ptr,
-                            Z_ptr);
-                        
-                        const double p = d_equation_of_state->getPressure(
-                            &rho,
-                            m_ptr,
-                            &E[idx_data],
-                            mixture_thermo_properties_const_ptr);
-                        
-                        buffer[idx_region] = d_equation_of_state->getSoundSpeed(
-                            &rho,
-                            &p,
-                            mixture_thermo_properties_const_ptr);
+                        buffer[idx_region] = d_equation_of_state_mixing_rules->
+                            getSoundSpeed(
+                                Z_rho_ptr,
+                                vel_ptr,
+                                &p,
+                                Z_ptr);
                     }
                 }
             }
@@ -4331,11 +3999,11 @@ FlowModelFiveEqnAllaire::setGhostBoxesAndDimensionsDerivedCellVariables()
         d_subghostcell_dims_density = d_subghost_box_density.numberCells();
     }
     
-    if (d_num_subghosts_mixture_thermo_properties > -hier::IntVector::getOne(d_dim))
+    if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
     {
-        d_subghost_box_mixture_thermo_properties = d_interior_box;
-        d_subghost_box_mixture_thermo_properties.grow(d_num_subghosts_mixture_thermo_properties);
-        d_subghostcell_dims_mixture_thermo_properties = d_subghost_box_mixture_thermo_properties.numberCells();
+        d_subghost_box_pressure = d_interior_box;
+        d_subghost_box_pressure.grow(d_num_subghosts_pressure);
+        d_subghostcell_dims_pressure = d_subghost_box_pressure.numberCells();
     }
     
     if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
@@ -4343,13 +4011,6 @@ FlowModelFiveEqnAllaire::setGhostBoxesAndDimensionsDerivedCellVariables()
         d_subghost_box_mass_fraction = d_interior_box;
         d_subghost_box_mass_fraction.grow(d_num_subghosts_mass_fraction);
         d_subghostcell_dims_mass_fraction = d_subghost_box_mass_fraction.numberCells();
-    }
-    
-    if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
-    {
-        d_subghost_box_pressure = d_interior_box;
-        d_subghost_box_pressure.grow(d_num_subghosts_pressure);
-        d_subghostcell_dims_pressure = d_subghost_box_pressure.numberCells();
     }
     
     if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
@@ -4620,34 +4281,39 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataDensity()
 
 
 /*
- * Compute the global cell data of mixture thermodynamic properties in the registered patch.
+ * Compute the global cell data of pressure in the registered patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataMixtureThermoProperties()
+FlowModelFiveEqnAllaire::computeGlobalCellDataPressure()
 {
-    if (d_num_subghosts_mixture_thermo_properties > -hier::IntVector::getOne(d_dim))
+    if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
     {
-        // Create the cell data of mixture thermodynamic properties.
-        const int num_thermo_properties = d_equation_of_state_mixing_rules->
-            getNumberOfMixtureThermodynamicProperties();
+        // Create the cell data of pressure.
+        d_data_pressure.reset(
+            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_pressure));
         
-        d_data_mixture_thermo_properties.reset(
-            new pdat::CellData<double>(
-                d_interior_box,
-                num_thermo_properties,
-                d_num_subghosts_mixture_thermo_properties));
+        // Get the cell data of the variables partial density, momentum, total energy and volume fraction.
+        boost::shared_ptr<pdat::CellData<double> > data_partial_density =
+            getGlobalCellDataPartialDensity();
         
-        // Get the cell data of the variable volume fraction.
+        boost::shared_ptr<pdat::CellData<double> > data_momentum =
+            getGlobalCellDataMomentum();
+        
+        boost::shared_ptr<pdat::CellData<double> > data_total_energy =
+            getGlobalCellDataTotalEnergy();
+        
         boost::shared_ptr<pdat::CellData<double> > data_volume_fraction =
             getGlobalCellDataVolumeFraction();
         
-        // Get the pointers to the cell data of mixture thermodynamic properties and volume fraction.
-        std::vector<double*> mixture_thermo_properties;
-        mixture_thermo_properties.reserve(num_thermo_properties);
-        for (int ti = 0; ti < num_thermo_properties; ti++)
+        // Get the pointers to the cell data of pressure, partial density, total energy and volume fraction.
+        double* p   = d_data_pressure->getPointer(0);
+        std::vector<double*> Z_rho;
+        Z_rho.reserve(d_num_species);
+        for (int si = 0; si < d_num_species; si++)
         {
-            mixture_thermo_properties.push_back(d_data_mixture_thermo_properties->getPointer(ti));
+            Z_rho.push_back(data_partial_density->getPointer(si));
         }
+        double* E   = data_total_energy->getPointer(0);
         std::vector<double*> Z;
         Z.reserve(d_num_species - 1);
         for (int si = 0; si < d_num_species - 1; si++)
@@ -4657,15 +4323,28 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMixtureThermoProperties()
         
         if (d_dim == tbox::Dimension(1))
         {
-            // Compute the mixture thermodynamic properties.
-            for (int i = -d_num_subghosts_mixture_thermo_properties[0];
-                 i < d_interior_dims[0] + d_num_subghosts_mixture_thermo_properties[0];
+            // Get the pointer to cell data of momentum.
+            double* rho_u = data_momentum->getPointer(0);
+            
+            // Compute the pressure field.
+            for (int i = -d_num_subghosts_pressure[0];
+                 i < d_interior_dims[0] + d_num_subghosts_pressure[0];
                  i++)
             {
                 // Compute the linear indices.
                 const int idx = i + d_num_ghosts[0];
-                const int idx_mixture_thermo_properties =
-                    i + d_num_subghosts_mixture_thermo_properties[0];
+                const int idx_pressure = i + d_num_subghosts_pressure[0];
+                
+                std::vector<const double*> Z_rho_ptr;
+                Z_rho_ptr.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Z_rho_ptr.push_back(&Z_rho[si][idx]);
+                }
+                
+                std::vector<const double*> m_ptr;
+                m_ptr.reserve(1);
+                m_ptr.push_back(&rho_u[idx]);
                 
                 std::vector<const double*> Z_ptr;
                 Z_ptr.reserve(d_num_species - 1);
@@ -4674,39 +4353,47 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMixtureThermoProperties()
                     Z_ptr.push_back(&Z[si][idx]);
                 }
                 
-                std::vector<double*> mixture_thermo_properties_ptr;
-                mixture_thermo_properties_ptr.reserve(num_thermo_properties);
-                
-                for (int ti = 0; ti < num_thermo_properties; ti++)
-                {
-                    mixture_thermo_properties_ptr.push_back(
-                        &mixture_thermo_properties[ti][idx_mixture_thermo_properties]);
-                }
-                
-                d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-                    mixture_thermo_properties_ptr,
-                    Z_ptr);
+                p[idx_pressure] = d_equation_of_state_mixing_rules->
+                    getPressure(
+                        Z_rho_ptr,
+                        m_ptr,
+                        &E[idx],
+                        Z_ptr);
             }
         }
         else if (d_dim == tbox::Dimension(2))
         {
-            // Compute the mixture thermodynamic properties.
-            for (int j = -d_num_subghosts_mixture_thermo_properties[1];
-                 j < d_interior_dims[1] + d_num_subghosts_mixture_thermo_properties[1];
+            // Get the pointers to the cell data of momentum.
+            double* rho_u = data_momentum->getPointer(0);
+            double* rho_v = data_momentum->getPointer(1);
+            
+            // Compute the pressure field.
+            for (int j = -d_num_subghosts_pressure[1];
+                 j < d_interior_dims[1] + d_num_subghosts_pressure[1];
                  j++)
             {
-                for (int i = -d_num_subghosts_mixture_thermo_properties[0];
-                     i < d_interior_dims[0] + d_num_subghosts_mixture_thermo_properties[0];
+                for (int i = -d_num_subghosts_pressure[0];
+                     i < d_interior_dims[0] + d_num_subghosts_pressure[0];
                      i++)
                 {
                     // Compute the linear indices.
                     const int idx = (i + d_num_ghosts[0]) +
                         (j + d_num_ghosts[1])*d_ghostcell_dims[0];
                     
-                    const int idx_mixture_thermo_properties =
-                        (i + d_num_subghosts_mixture_thermo_properties[0]) +
-                        (j + d_num_subghosts_mixture_thermo_properties[1])*
-                            d_subghostcell_dims_mixture_thermo_properties[0];
+                    const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
+                        (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
+                    
+                    std::vector<const double*> Z_rho_ptr;
+                    Z_rho_ptr.reserve(d_num_species);
+                    for (int si = 0; si < d_num_species; si++)
+                    {
+                        Z_rho_ptr.push_back(&Z_rho[si][idx]);
+                    }
+                    
+                    std::vector<const double*> m_ptr;
+                    m_ptr.reserve(2);
+                    m_ptr.push_back(&rho_u[idx]);
+                    m_ptr.push_back(&rho_v[idx]);
                     
                     std::vector<const double*> Z_ptr;
                     Z_ptr.reserve(d_num_species - 1);
@@ -4715,34 +4402,33 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMixtureThermoProperties()
                         Z_ptr.push_back(&Z[si][idx]);
                     }
                     
-                    std::vector<double*> mixture_thermo_properties_ptr;
-                    mixture_thermo_properties_ptr.reserve(num_thermo_properties);
-                    
-                    for (int ti = 0; ti < num_thermo_properties; ti++)
-                    {
-                        mixture_thermo_properties_ptr.push_back(
-                            &mixture_thermo_properties[ti][idx_mixture_thermo_properties]);
-                    }
-                    
-                    d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-                        mixture_thermo_properties_ptr,
-                        Z_ptr);
+                    p[idx_pressure] = d_equation_of_state_mixing_rules->
+                        getPressure(
+                            Z_rho_ptr,
+                            m_ptr,
+                            &E[idx],
+                            Z_ptr);
                 }
             }
         }
         else if (d_dim == tbox::Dimension(3))
         {
-            // Compute the mixture thermodynamic properties.
-            for (int k = -d_num_subghosts_mixture_thermo_properties[2];
-                 k < d_interior_dims[2] + d_num_subghosts_mixture_thermo_properties[2];
+            // Get the pointers to the cell data of momentum.
+            double* rho_u = data_momentum->getPointer(0);
+            double* rho_v = data_momentum->getPointer(1);
+            double* rho_w = data_momentum->getPointer(2);
+            
+            // Compute the pressure field.
+            for (int k = -d_num_subghosts_pressure[2];
+                 k < d_interior_dims[2] + d_num_subghosts_pressure[2];
                  k++)
             {
-                for (int j = -d_num_subghosts_mixture_thermo_properties[1];
-                     j < d_interior_dims[1] + d_num_subghosts_mixture_thermo_properties[1];
+                for (int j = -d_num_subghosts_pressure[1];
+                     j < d_interior_dims[1] + d_num_subghosts_pressure[1];
                      j++)
                 {
-                    for (int i = -d_num_subghosts_mixture_thermo_properties[0];
-                         i < d_interior_dims[0] + d_num_subghosts_mixture_thermo_properties[0];
+                    for (int i = -d_num_subghosts_pressure[0];
+                         i < d_interior_dims[0] + d_num_subghosts_pressure[0];
                          i++)
                     {
                         // Compute the linear indices.
@@ -4750,13 +4436,22 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMixtureThermoProperties()
                             (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
                             (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
                         
-                        const int idx_mixture_thermo_properties =
-                            (i + d_num_subghosts_mixture_thermo_properties[0]) +
-                            (j + d_num_subghosts_mixture_thermo_properties[1])*
-                                d_subghostcell_dims_mixture_thermo_properties[0] +
-                            (k + d_num_subghosts_mixture_thermo_properties[2])*
-                                d_subghostcell_dims_mixture_thermo_properties[0]*
-                                    d_subghostcell_dims_mixture_thermo_properties[1];
+                        const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
+                            (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
+                            (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*d_subghostcell_dims_pressure[1];
+                        
+                        std::vector<const double*> Z_rho_ptr;
+                        Z_rho_ptr.reserve(d_num_species);
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            Z_rho_ptr.push_back(&Z_rho[si][idx]);
+                        }
+                        
+                        std::vector<const double*> m_ptr;
+                        m_ptr.reserve(3);
+                        m_ptr.push_back(&rho_u[idx]);
+                        m_ptr.push_back(&rho_v[idx]);
+                        m_ptr.push_back(&rho_w[idx]);
                         
                         std::vector<const double*> Z_ptr;
                         Z_ptr.reserve(d_num_species - 1);
@@ -4765,18 +4460,12 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMixtureThermoProperties()
                             Z_ptr.push_back(&Z[si][idx]);
                         }
                         
-                        std::vector<double*> mixture_thermo_properties_ptr;
-                        mixture_thermo_properties_ptr.reserve(num_thermo_properties);
-                        
-                        for (int ti = 0; ti < num_thermo_properties; ti++)
-                        {
-                            mixture_thermo_properties_ptr.push_back(
-                                &mixture_thermo_properties[ti][idx_mixture_thermo_properties]);
-                        }
-                        
-                        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-                            mixture_thermo_properties_ptr,
-                            Z_ptr);
+                        p[idx_pressure] = d_equation_of_state_mixing_rules->
+                            getPressure(
+                                Z_rho_ptr,
+                                m_ptr,
+                                &E[idx],
+                                Z_ptr);
                     }
                 }
             }
@@ -4785,8 +4474,8 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMixtureThermoProperties()
     else
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::computeGlobalCellDataMixtureThermoProperties()\n"
-            << "Cell data of 'MIXTURE_THERMO_PROPERTIES' is not yet registered."
+            << ": FlowModelFiveEqnAllaire::computeGlobalCellDataPressure()\n"
+            << "Cell data of 'PRESSURE' is not yet registered."
             << std::endl);
     }
 }
@@ -4916,217 +4605,6 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMassFractionWithDensity()
         TBOX_ERROR(d_object_name
             << ": FlowModelFiveEqnAllaire::computeGlobalCellDataMassFractionWithDensity()\n"
             << "Cell data of 'MASS_FRACTION' is not yet registered."
-            << std::endl);
-    }
-}
-
-
-/*
- * Compute the global cell data of pressure with density and mixture thermodynamic properties in the registered patch.
- */
-void
-FlowModelFiveEqnAllaire::computeGlobalCellDataPressureWithDensityAndMixtureThermoProperties()
-{
-    if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
-    {
-        // Create the cell data of pressure.
-        d_data_pressure.reset(
-            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_pressure));
-        
-        // Get the cell data of the variables momentum, total energy and volume fraction.
-        boost::shared_ptr<pdat::CellData<double> > data_momentum =
-            getGlobalCellDataMomentum();
-        
-        boost::shared_ptr<pdat::CellData<double> > data_total_energy =
-            getGlobalCellDataTotalEnergy();
-        
-        boost::shared_ptr<pdat::CellData<double> > data_volume_fraction =
-            getGlobalCellDataVolumeFraction();
-        
-        if (!d_data_density)
-        {
-            computeGlobalCellDataDensity();
-        }
-        
-        if (!d_data_mixture_thermo_properties)
-        {
-            computeGlobalCellDataMixtureThermoProperties();
-        }
-        
-        // Get the pointers to the cell data of pressure, total energy, density and mixture
-        // thermodynamic properties.
-        double* p   = d_data_pressure->getPointer(0);
-        double* E   = data_total_energy->getPointer(0);
-        double* rho = d_data_density->getPointer(0);
-        std::vector<double*> mixture_thermo_properties;
-        const int num_thermo_properties = d_equation_of_state_mixing_rules->
-            getNumberOfMixtureThermodynamicProperties();
-        mixture_thermo_properties.reserve(num_thermo_properties);
-        for (int ti = 0; ti < num_thermo_properties; ti++)
-        {
-            mixture_thermo_properties.push_back(d_data_mixture_thermo_properties->getPointer(ti));
-        }
-        
-        if (d_dim == tbox::Dimension(1))
-        {
-            // Get the pointer to cell data of momentum.
-            double* rho_u = data_momentum->getPointer(0);
-            
-            // Compute the pressure field.
-            for (int i = -d_num_subghosts_pressure[0];
-                 i < d_interior_dims[0] + d_num_subghosts_pressure[0];
-                 i++)
-            {
-                // Compute the linear indices.
-                const int idx = i + d_num_ghosts[0];
-                const int idx_density = i + d_num_subghosts_density[0];
-                const int idx_mixture_thermo_properties =
-                    i + d_num_subghosts_mixture_thermo_properties[0];
-                const int idx_pressure = i + d_num_subghosts_pressure[0];
-                
-                std::vector<const double*> m_ptr;
-                m_ptr.reserve(1);
-                m_ptr.push_back(&rho_u[idx]);
-                
-                std::vector<const double*> mixture_thermo_properties_ptr;
-                mixture_thermo_properties_ptr.reserve(num_thermo_properties);
-                for (int ti = 0; ti < num_thermo_properties; ti++)
-                {
-                    mixture_thermo_properties_ptr.push_back(
-                        &mixture_thermo_properties[ti][idx_mixture_thermo_properties]);
-                }
-                
-                p[idx_pressure] = d_equation_of_state->
-                    getPressure(
-                        &rho[idx_density],
-                        m_ptr,
-                        &E[idx],
-                        mixture_thermo_properties_ptr);
-            }
-        }
-        else if (d_dim == tbox::Dimension(2))
-        {
-            // Get the pointers to the cell data of momentum.
-            double* rho_u = data_momentum->getPointer(0);
-            double* rho_v = data_momentum->getPointer(1);
-            
-            // Compute the pressure field.
-            for (int j = -d_num_subghosts_pressure[1];
-                 j < d_interior_dims[1] + d_num_subghosts_pressure[1];
-                 j++)
-            {
-                for (int i = -d_num_subghosts_pressure[0];
-                     i < d_interior_dims[0] + d_num_subghosts_pressure[0];
-                     i++)
-                {
-                    // Compute the linear indices.
-                    const int idx = (i + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
-                    
-                    const int idx_density = (i + d_num_subghosts_density[0]) +
-                        (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
-                    
-                    const int idx_mixture_thermo_properties =
-                        (i + d_num_subghosts_mixture_thermo_properties[0]) +
-                        (j + d_num_subghosts_mixture_thermo_properties[1])*
-                            d_subghostcell_dims_mixture_thermo_properties[0];
-                    
-                    const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                        (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
-                    
-                    std::vector<const double*> m_ptr;
-                    m_ptr.reserve(2);
-                    m_ptr.push_back(&rho_u[idx]);
-                    m_ptr.push_back(&rho_v[idx]);
-                    
-                    std::vector<const double*> mixture_thermo_properties_ptr;
-                    mixture_thermo_properties_ptr.reserve(num_thermo_properties);
-                    for (int ti = 0; ti < num_thermo_properties; ti++)
-                    {
-                        mixture_thermo_properties_ptr.push_back(
-                            &mixture_thermo_properties[ti][idx_mixture_thermo_properties]);
-                    }
-                    
-                    p[idx_pressure] = d_equation_of_state->
-                        getPressure(
-                            &rho[idx_density],
-                            m_ptr,
-                            &E[idx],
-                            mixture_thermo_properties_ptr);
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            // Get the pointers to the cell data of momentum.
-            double* rho_u = data_momentum->getPointer(0);
-            double* rho_v = data_momentum->getPointer(1);
-            double* rho_w = data_momentum->getPointer(2);
-            
-            // Compute the pressure field.
-            for (int k = -d_num_subghosts_pressure[2];
-                 k < d_interior_dims[2] + d_num_subghosts_pressure[2];
-                 k++)
-            {
-                for (int j = -d_num_subghosts_pressure[1];
-                     j < d_interior_dims[1] + d_num_subghosts_pressure[1];
-                     j++)
-                {
-                    for (int i = -d_num_subghosts_pressure[0];
-                         i < d_interior_dims[0] + d_num_subghosts_pressure[0];
-                         i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
-                        
-                        const int idx_density = (i + d_num_subghosts_density[0]) +
-                            (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
-                            (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*d_subghostcell_dims_density[1];
-                        
-                        const int idx_mixture_thermo_properties =
-                            (i + d_num_subghosts_mixture_thermo_properties[0]) +
-                            (j + d_num_subghosts_mixture_thermo_properties[1])*
-                                d_subghostcell_dims_mixture_thermo_properties[0] +
-                            (k + d_num_subghosts_mixture_thermo_properties[2])*
-                                d_subghostcell_dims_mixture_thermo_properties[0]*
-                                    d_subghostcell_dims_mixture_thermo_properties[1];
-                        
-                        const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                            (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
-                            (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*d_subghostcell_dims_pressure[1];
-                        
-                        std::vector<const double*> m_ptr;
-                        m_ptr.reserve(3);
-                        m_ptr.push_back(&rho_u[idx]);
-                        m_ptr.push_back(&rho_v[idx]);
-                        m_ptr.push_back(&rho_w[idx]);
-                        
-                        std::vector<const double*> mixture_thermo_properties_ptr;
-                        mixture_thermo_properties_ptr.reserve(num_thermo_properties);
-                        for (int ti = 0; ti < num_thermo_properties; ti++)
-                        {
-                            mixture_thermo_properties_ptr.push_back(
-                                &mixture_thermo_properties[ti][idx_mixture_thermo_properties]);
-                        }
-                        
-                        p[idx_pressure] = d_equation_of_state->
-                            getPressure(
-                                &rho[idx_density],
-                                m_ptr,
-                                &E[idx],
-                                mixture_thermo_properties_ptr);
-                    }
-                }
-            }
-        }
-    }
-    else
-    {
-        TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::computeGlobalCellDataPressureWithDensityAndMixtureThermoProperties()\n"
-            << "Cell data of 'PRESSURE' is not yet registered."
             << std::endl);
     }
 }
@@ -5268,11 +4746,10 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataVelocityWithDensity()
 
 
 /*
- * Compute the global cell data of sound speed with density, mixture thermodynamic properties,
- * and pressure in the registered patch.
+ * Compute the global cell data of sound speed with density, pressure and velocity in the registered patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityMixtureThermoPropertiesAndPressure()
+FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityPressureAndVelocity()
 {
     if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
     {
@@ -5280,61 +4757,88 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityMixtureThermo
         d_data_sound_speed.reset(
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_sound_speed));
         
-        // Get the cell data of the variable volume fraction.
+        // Get the cell data of the variables partial density and volume fraction.
+        boost::shared_ptr<pdat::CellData<double> > data_partial_density =
+            getGlobalCellDataPartialDensity();
+        
         boost::shared_ptr<pdat::CellData<double> > data_volume_fraction =
             getGlobalCellDataVolumeFraction();
         
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithDensityAndMixtureThermoProperties();
+            computeGlobalCellDataPressure();
         }
         
-        // Get the pointers to the cell data of sound speed, density, mixture thermodynamic properties
-        // and pressure.
-        double* c   = d_data_sound_speed->getPointer(0);
-        double* rho = d_data_density->getPointer(0);
-        std::vector<double*> mixture_thermo_properties;
-        const int num_thermo_properties = d_equation_of_state_mixing_rules->
-            getNumberOfMixtureThermodynamicProperties();
-        mixture_thermo_properties.reserve(num_thermo_properties);
-        for (int ti = 0; ti < num_thermo_properties; ti++)
+        if (!d_data_velocity)
         {
-            mixture_thermo_properties.push_back(d_data_mixture_thermo_properties->getPointer(ti));
+            computeGlobalCellDataVelocityWithDensity();
+        }
+        
+        // Get the pointers to the cell data of sound speed, partial density, pressure and volume fraction.
+        double* c   = d_data_sound_speed->getPointer(0);
+        std::vector<double*> Z_rho;
+        Z_rho.reserve(d_num_species);
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Z_rho.push_back(data_partial_density->getPointer(si));
         }
         double* p   = d_data_pressure->getPointer(0);
+        std::vector<double*> Z;
+        Z.reserve(d_num_species - 1);
+        for (int si = 0; si < d_num_species - 1; si++)
+        {
+            Z.push_back(data_volume_fraction->getPointer(si));
+        }
         
         if (d_dim == tbox::Dimension(1))
         {
+            // Get the pointers to the cell data of velocity.
+            double* u = d_data_velocity->getPointer(0);
+            
             // Compute the sound speed field.
             for (int i = -d_num_subghosts_sound_speed[0];
                  i < d_interior_dims[0] + d_num_subghosts_sound_speed[0];
                  i++)
             {
                 // Compute the linear indices.
-                const int idx_density = i + d_num_subghosts_density[0];
-                const int idx_mixture_thermo_properties =
-                    i + d_num_subghosts_mixture_thermo_properties[0];
+                const int idx = i + d_num_ghosts[0];
                 const int idx_pressure = i + d_num_subghosts_pressure[0];
+                const int idx_velocity = i + d_num_subghosts_velocity[0];
                 const int idx_sound_speed = i + d_num_subghosts_sound_speed[0];
                 
-                std::vector<const double*> mixture_thermo_properties_ptr;
-                mixture_thermo_properties_ptr.reserve(num_thermo_properties);
-                for (int ti = 0; ti < num_thermo_properties; ti++)
+                std::vector<const double*> Z_rho_ptr;
+                Z_rho_ptr.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
                 {
-                    mixture_thermo_properties_ptr.push_back(
-                        &mixture_thermo_properties[ti][idx_mixture_thermo_properties]);
+                    Z_rho_ptr.push_back(&Z_rho[si][idx]);
                 }
                 
-                c[idx_sound_speed] = d_equation_of_state->
+                std::vector<const double*> vel_ptr;
+                vel_ptr.reserve(1);
+                vel_ptr.push_back(&u[idx_velocity]);
+                
+                std::vector<const double*> Z_ptr;
+                Z_ptr.reserve(d_num_species - 1);
+                for (int si = 0; si < d_num_species - 1; si++)
+                {
+                    Z_ptr.push_back(&Z[si][idx]);
+                }
+                
+                c[idx_sound_speed] = d_equation_of_state_mixing_rules->
                     getSoundSpeed(
-                        &rho[idx_density],
+                        Z_rho_ptr,
+                        vel_ptr,
                         &p[idx_pressure],
-                        mixture_thermo_properties_ptr);
+                        Z_ptr);
             }
         }
         else if (d_dim == tbox::Dimension(2))
         {
-             // Compute the sound speed field.
+            // Get the pointers to the cell data of velocity.
+            double* u = d_data_velocity->getPointer(0);
+            double* v = d_data_velocity->getPointer(1);
+            
+            // Compute the sound speed field.
             for (int j = -d_num_subghosts_sound_speed[1];
                  j < d_interior_dims[1] + d_num_subghosts_sound_speed[1];
                  j++)
@@ -5344,38 +4848,53 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityMixtureThermo
                      i++)
                 {
                     // Compute the linear indices.
-                    const int idx_density = (i + d_num_subghosts_density[0]) +
-                        (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
-                    
-                    const int idx_mixture_thermo_properties =
-                        (i + d_num_subghosts_mixture_thermo_properties[0]) +
-                        (j + d_num_subghosts_mixture_thermo_properties[1])*
-                            d_subghostcell_dims_mixture_thermo_properties[0];
+                    const int idx = (i + d_num_ghosts[0]) +
+                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
                     
                     const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
                         (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
                     
+                    const int idx_velocity = (i + d_num_subghosts_velocity[0]) +
+                        (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
+                    
                     const int idx_sound_speed = (i + d_num_subghosts_sound_speed[0]) +
                         (j + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
                     
-                    std::vector<const double*> mixture_thermo_properties_ptr;
-                    mixture_thermo_properties_ptr.reserve(num_thermo_properties);
-                    for (int ti = 0; ti < num_thermo_properties; ti++)
+                    std::vector<const double*> Z_rho_ptr;
+                    Z_rho_ptr.reserve(d_num_species);
+                    for (int si = 0; si < d_num_species; si++)
                     {
-                        mixture_thermo_properties_ptr.push_back(
-                            &mixture_thermo_properties[ti][idx_mixture_thermo_properties]);
+                        Z_rho_ptr.push_back(&Z_rho[si][idx]);
                     }
                     
-                    c[idx_sound_speed] = d_equation_of_state->
+                    std::vector<const double*> vel_ptr;
+                    vel_ptr.reserve(2);
+                    vel_ptr.push_back(&u[idx_velocity]);
+                    vel_ptr.push_back(&v[idx_velocity]);
+                    
+                    std::vector<const double*> Z_ptr;
+                    Z_ptr.reserve(d_num_species - 1);
+                    for (int si = 0; si < d_num_species - 1; si++)
+                    {
+                        Z_ptr.push_back(&Z[si][idx]);
+                    }
+                    
+                    c[idx_sound_speed] = d_equation_of_state_mixing_rules->
                         getSoundSpeed(
-                            &rho[idx_density],
+                            Z_rho_ptr,
+                            vel_ptr,
                             &p[idx_pressure],
-                            mixture_thermo_properties_ptr);
+                            Z_ptr);
                 }
             }
         }
         else if (d_dim == tbox::Dimension(3))
         {
+            // Get the pointers to the cell data of velocity.
+            double* u = d_data_velocity->getPointer(0);
+            double* v = d_data_velocity->getPointer(1);
+            double* w = d_data_velocity->getPointer(2);
+            
             // Compute the sound speed field.
             for (int k = -d_num_subghosts_sound_speed[2];
                  k < d_interior_dims[2] + d_num_subghosts_sound_speed[2];
@@ -5390,39 +4909,50 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityMixtureThermo
                          i++)
                     {
                         // Compute the linear indices.
-                        const int idx_density = (i + d_num_subghosts_density[0]) +
-                            (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
-                            (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*d_subghostcell_dims_density[1];
-                        
-                        const int idx_mixture_thermo_properties =
-                            (i + d_num_subghosts_mixture_thermo_properties[0]) +
-                            (j + d_num_subghosts_mixture_thermo_properties[1])*
-                                d_subghostcell_dims_mixture_thermo_properties[0] +
-                            (k + d_num_subghosts_mixture_thermo_properties[2])*
-                                d_subghostcell_dims_mixture_thermo_properties[0]*
-                                    d_subghostcell_dims_mixture_thermo_properties[1];
+                        const int idx = (i + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
+                            (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
                         
                         const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
                             (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
-                            (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*d_subghostcell_dims_pressure[1];
+                            (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
+                                d_subghostcell_dims_pressure[1];
+                        
+                        const int idx_velocity = (i + d_num_subghosts_velocity[0]) +
+                            (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
+                            (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*d_subghostcell_dims_velocity[1];
                         
                         const int idx_sound_speed = (i + d_num_subghosts_sound_speed[0]) +
                             (j + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
-                            (k + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*d_subghostcell_dims_sound_speed[1];
+                            (k + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
+                                d_subghostcell_dims_sound_speed[1];
                         
-                        std::vector<const double*> mixture_thermo_properties_ptr;
-                        mixture_thermo_properties_ptr.reserve(num_thermo_properties);
-                        for (int ti = 0; ti < num_thermo_properties; ti++)
+                        std::vector<const double*> Z_rho_ptr;
+                        Z_rho_ptr.reserve(d_num_species);
+                        for (int si = 0; si < d_num_species; si++)
                         {
-                            mixture_thermo_properties_ptr.push_back(
-                                &mixture_thermo_properties[ti][idx_mixture_thermo_properties]);
+                            Z_rho_ptr.push_back(&Z_rho[si][idx]);
                         }
                         
-                        c[idx_sound_speed] = d_equation_of_state->
+                        std::vector<const double*> vel_ptr;
+                        vel_ptr.reserve(3);
+                        vel_ptr.push_back(&u[idx_velocity]);
+                        vel_ptr.push_back(&v[idx_velocity]);
+                        vel_ptr.push_back(&w[idx_velocity]);
+                        
+                        std::vector<const double*> Z_ptr;
+                        Z_ptr.reserve(d_num_species - 1);
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            Z_ptr.push_back(&Z[si][idx]);
+                        }
+                        
+                        c[idx_sound_speed] = d_equation_of_state_mixing_rules->
                             getSoundSpeed(
-                                &rho[idx_density],
+                                Z_rho_ptr,
+                                vel_ptr,
                                 &p[idx_pressure],
-                                mixture_thermo_properties_ptr);
+                                Z_ptr);
                     }
                 }
             }
@@ -5431,7 +4961,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityMixtureThermo
     else
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityMixtureThermoPropertiesAndPressure()\n"
+            << ": FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityPressureAndVelocity()\n"
             << "Cell data of 'SOUND_SPEED' is not yet registered."
             << std::endl);
     }
@@ -6230,11 +5760,11 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataEnstrophyWithDensityVelocityAndVor
 
 
 /*
- * Compute the global cell data of convective flux with density, mixture thermodynamic properties,
- * pressure and velocity in the registered patch.
+ * Compute the global cell data of convective flux with density, pressure and velocity in the registered
+ * patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithDensityMixtureThermoPropertiesPressureAndVelocity(
+FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithDensityPressureAndVelocity(
     DIRECTION direction)
 {
     if (direction == X_DIRECTION)
@@ -6267,7 +5797,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithDensityMixtureTh
             
             if (!d_data_pressure)
             {
-                computeGlobalCellDataPressureWithDensityAndMixtureThermoProperties();
+                computeGlobalCellDataPressure();
             }
             
             if (!d_data_velocity)
@@ -6431,7 +5961,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithDensityMixtureTh
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFiveEqnAllaire::"
-                << "computeGlobalCellDataConvectiveFluxWithDensityMixtureThermoPropertiesPressureAndVelocity()\n"
+                << "computeGlobalCellDataConvectiveFluxWithDensityPressureAndVelocity()\n"
                 << "Cell data of 'CONVECTIVE_FLUX_X' is not yet registered."
                 << std::endl);
         }
@@ -6466,7 +5996,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithDensityMixtureTh
             
             if (!d_data_pressure)
             {
-                computeGlobalCellDataPressureWithDensityAndMixtureThermoProperties();
+                computeGlobalCellDataPressure();
             }
             
             if (!d_data_velocity)
@@ -6495,7 +6025,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithDensityMixtureTh
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelFiveEqnAllaire::"
-                    << "computeGlobalCellDataConvectiveFluxWithDensityMixtureThermoPropertiesPressureAndVelocity()\n"
+                    << "computeGlobalCellDataConvectiveFluxWithDensityPressureAndVelocity()\n"
                     << "'CONVECTIVE_FLUX_Y' cannot be obtained for problem with dimension less than two."
                     << std::endl);
             }
@@ -6608,7 +6138,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithDensityMixtureTh
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFiveEqnAllaire::"
-                << "computeGlobalCellDataConvectiveFluxWithDensityMixtureThermoPropertiesPressureAndVelocity()\n"
+                << "computeGlobalCellDataConvectiveFluxWithDensityPressureAndVelocity()\n"
                 << "Cell data of 'CONVECTIVE_FLUX_Y' is not yet registered."
                 << std::endl);
         }
@@ -6643,7 +6173,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithDensityMixtureTh
             
             if (!d_data_pressure)
             {
-                computeGlobalCellDataPressureWithDensityAndMixtureThermoProperties();
+                computeGlobalCellDataPressure();
             }
             
             if (!d_data_velocity)
@@ -6672,7 +6202,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithDensityMixtureTh
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelFiveEqnAllaire::"
-                    << "computeGlobalCellDataConvectiveFluxWithDensityMixtureThermoPropertiesPressureAndVelocity()\n"
+                    << "computeGlobalCellDataConvectiveFluxWithDensityPressureAndVelocity()\n"
                     << "'CONVECTIVE_FLUX_Z' cannot be obtained for problem with dimension less than three."
                     << std::endl);
             }
@@ -6740,7 +6270,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithDensityMixtureTh
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFiveEqnAllaire::"
-                << "computeGlobalCellDataConvectiveFluxWithDensityMixtureThermoPropertiesPressureAndVelocity()\n"
+                << "computeGlobalCellDataConvectiveFluxWithDensityPressureAndVelocity()\n"
                 << "Cell data of 'CONVECTIVE_FLUX_Z' is not yet registered."
                 << std::endl);
         }
@@ -6749,11 +6279,11 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithDensityMixtureTh
 
 
 /*
- * Compute the global cell data of maximum wave speed with density, mixture thermodynamic properties,
- * pressure, velocity and sound speed in the registered patch.
+ * Compute the global cell data of maximum wave speed with density, pressure, velocity and sound speed
+ * in the registered patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithDensityMixtureThermoPropertiesPressureVelocityAndSoundSpeed(
+FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithDensityPressureVelocityAndSoundSpeed(
     DIRECTION direction)
 {
     if (direction == X_DIRECTION)
@@ -6766,7 +6296,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithDensityMixtureTher
             
             if (!d_data_sound_speed)
             {
-                computeGlobalCellDataSoundSpeedWithDensityMixtureThermoPropertiesAndPressure();
+                computeGlobalCellDataSoundSpeedWithDensityPressureAndVelocity();
             }
             
             if (!d_data_velocity)
@@ -6860,7 +6390,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithDensityMixtureTher
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFiveEqnAllaire::"
-                << "computeGlobalCellDataMaxWaveSpeedWithDensityMixtureThermoPropertiesPressureVelocityAndSoundSpeed()\n"
+                << "computeGlobalCellDataMaxWaveSpeedWithDensityPressureVelocityAndSoundSpeed()\n"
                 << "Cell data of 'MAX_WAVE_SPEED_X' is not yet registered."
                 << std::endl);
         }
@@ -6875,7 +6405,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithDensityMixtureTher
             
             if (!d_data_sound_speed)
             {
-                computeGlobalCellDataSoundSpeedWithDensityMixtureThermoPropertiesAndPressure();
+                computeGlobalCellDataSoundSpeedWithDensityPressureAndVelocity();
             }
             
             if (!d_data_velocity)
@@ -6892,7 +6422,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithDensityMixtureTher
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelFiveEqnAllaire::"
-                    << "computeGlobalCellDataMaxWaveSpeedWithDensityMixtureThermoPropertiesPressureVelocityAndSoundSpeed()\n"
+                    << "computeGlobalCellDataMaxWaveSpeedWithDensityPressureVelocityAndSoundSpeed()\n"
                     << "'MAX_WAVE_SPEED_Y' cannot be obtained for problem with dimension less than two."
                     << std::endl);
             }
@@ -6962,7 +6492,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithDensityMixtureTher
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFiveEqnAllaire::"
-                << "computeGlobalCellDataMaxWaveSpeedWithDensityMixtureThermoPropertiesPressureVelocityAndSoundSpeed()\n"
+                << "computeGlobalCellDataMaxWaveSpeedWithDensityPressureVelocityAndSoundSpeed()\n"
                 << "Cell data of 'MAX_WAVE_SPEED_Y' is not yet registered."
                 << std::endl);
         }
@@ -6977,7 +6507,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithDensityMixtureTher
             
             if (!d_data_sound_speed)
             {
-                computeGlobalCellDataSoundSpeedWithDensityMixtureThermoPropertiesAndPressure();
+                computeGlobalCellDataSoundSpeedWithDensityPressureAndVelocity();
             }
             
             if (!d_data_velocity)
@@ -6994,7 +6524,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithDensityMixtureTher
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelFiveEqnAllaire::"
-                    << "computeGlobalCellDataMaxWaveSpeedWithDensityMixtureThermoPropertiesPressureVelocityAndSoundSpeed()\n"
+                    << "computeGlobalCellDataMaxWaveSpeedWithDensityPressureVelocityAndSoundSpeed()\n"
                     << "'MAX_WAVE_SPEED_Z' cannot be obtained for problem with dimension less than three."
                     << std::endl);
             }
@@ -7039,7 +6569,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithDensityMixtureTher
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFiveEqnAllaire::"
-                << "computeGlobalCellDataMaxWaveSpeedWithDensityMixtureThermoPropertiesPressureVelocityAndSoundSpeed()\n"
+                << "computeGlobalCellDataMaxWaveSpeedWithDensityPressureVelocityAndSoundSpeed()\n"
                 << "Cell data of 'MAX_WAVE_SPEED_Z' is not yet registered."
                 << std::endl);
         }

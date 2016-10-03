@@ -13,6 +13,10 @@ EquationOfStateMixingRulesIdealGas::EquationOfStateMixingRulesIdealGas(
             mixing_closure_model,
             species_db)
 {
+    d_equation_of_state.reset(new EquationOfStateIdealGas(
+        "d_equation_of_state",
+        dim));
+    
     /*
      * Get the ratio of specific heats of each species from the database.
      */
@@ -176,6 +180,267 @@ EquationOfStateMixingRulesIdealGas::putToRestart(
 {
     restart_db->putDoubleVector("d_species_gamma", d_species_gamma);
     restart_db->putDoubleVector("d_species_R", d_species_R);
+}
+
+
+/*
+ * Compute the pressure of the mixture.
+ */
+double
+EquationOfStateMixingRulesIdealGas::getPressure(
+    const std::vector<const double*>& partial_density,
+    const std::vector<const double*>& momentum,
+    const double* const total_energy,
+    const std::vector<const double*>& volume_fraction) const
+{
+    const double rho = getMixtureDensity(
+        partial_density);
+    
+    // Get the mixture thermodynamic properties.
+    std::vector<double> mixture_thermo_properties;
+    std::vector<double*> mixture_thermo_properties_ptr;
+    std::vector<const double*> mixture_thermo_properties_const_ptr;
+    
+    const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
+    
+    mixture_thermo_properties.resize(num_thermo_properties);
+    mixture_thermo_properties_ptr.reserve(num_thermo_properties);
+    mixture_thermo_properties_const_ptr.reserve(num_thermo_properties);
+    
+    for (int ti = 0; ti < num_thermo_properties; ti++)
+    {
+        mixture_thermo_properties_ptr.push_back(&mixture_thermo_properties[ti]);
+        mixture_thermo_properties_const_ptr.push_back(&mixture_thermo_properties[ti]);
+    }
+    
+    switch (d_mixing_closure_model)
+    {
+        case ISOTHERMAL_AND_ISOBARIC:
+        {
+            /*
+             * Compute the mass fractions.
+             */
+            double Y[d_num_species];
+            for (int si = 0; si < d_num_species; si++)
+            {
+                Y[si] = *(partial_density[si])/rho;
+            }
+            
+            /*
+             * Get the pointers to the mass fractions.
+             */
+            std::vector<const double*> Y_ptr;
+            Y_ptr.reserve(d_num_species);
+            for (int si = 0; si < d_num_species; si++)
+            {
+                Y_ptr.push_back(&Y[si]);
+            }
+            
+            getMixtureThermodynamicProperties(
+                mixture_thermo_properties_ptr,
+                Y_ptr);
+            
+            break;
+        }
+        case ISOBARIC:
+        {
+            getMixtureThermodynamicProperties(
+                mixture_thermo_properties_ptr,
+                volume_fraction);
+            
+            break;
+        }
+        case NO_MODEL:
+        {
+            getSpeciesThermodynamicProperties(
+                mixture_thermo_properties_ptr,
+                0);
+            
+            break;
+        }
+    }
+    
+    double p = d_equation_of_state->getPressure(
+        &rho,
+        momentum,
+        total_energy,
+        mixture_thermo_properties_const_ptr);
+    
+    return p;
+}
+
+
+/*
+ * Compute the sound speed of the mixture.
+ */
+double
+EquationOfStateMixingRulesIdealGas::getSoundSpeed(
+    const std::vector<const double*>& partial_density,
+    const std::vector<const double*>& velocity,
+    const double* const pressure,
+    const std::vector<const double*>& volume_fraction) const
+{
+    const double rho = getMixtureDensity(
+        partial_density);
+    
+    // Get the mixture thermodynamic properties.
+    std::vector<double> mixture_thermo_properties;
+    std::vector<double*> mixture_thermo_properties_ptr;
+    std::vector<const double*> mixture_thermo_properties_const_ptr;
+    
+    const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
+    
+    mixture_thermo_properties.resize(num_thermo_properties);
+    mixture_thermo_properties_ptr.reserve(num_thermo_properties);
+    mixture_thermo_properties_const_ptr.reserve(num_thermo_properties);
+    
+    for (int ti = 0; ti < num_thermo_properties; ti++)
+    {
+        mixture_thermo_properties_ptr.push_back(&mixture_thermo_properties[ti]);
+        mixture_thermo_properties_const_ptr.push_back(&mixture_thermo_properties[ti]);
+    }
+    
+    switch (d_mixing_closure_model)
+    {
+        case ISOTHERMAL_AND_ISOBARIC:
+        {
+            /*
+             * Compute the mass fractions.
+             */
+            double Y[d_num_species];
+            for (int si = 0; si < d_num_species; si++)
+            {
+                Y[si] = *(partial_density[si])/rho;
+            }
+            
+            /*
+             * Get the pointers to the mass fractions.
+             */
+            std::vector<const double*> Y_ptr;
+            Y_ptr.reserve(d_num_species);
+            for (int si = 0; si < d_num_species; si++)
+            {
+                Y_ptr.push_back(&Y[si]);
+            }
+            
+            getMixtureThermodynamicProperties(
+                mixture_thermo_properties_ptr,
+                Y_ptr);
+            
+            break;
+        }
+        case ISOBARIC:
+        {
+            getMixtureThermodynamicProperties(
+                mixture_thermo_properties_ptr,
+                volume_fraction);
+            
+            break;
+        }
+        case NO_MODEL:
+        {
+            getSpeciesThermodynamicProperties(
+                mixture_thermo_properties_ptr,
+                0);
+            
+            break;
+        }
+    }
+    
+    double c = d_equation_of_state->getSoundSpeed(
+        &rho,
+        velocity,
+        pressure,
+        mixture_thermo_properties_const_ptr);
+    
+    return c;
+}
+
+
+/*
+ * Compute the total energy per unit volume of the mixture.
+ */
+double
+EquationOfStateMixingRulesIdealGas::getTotalEnergy(
+    const std::vector<const double*>& partial_density,
+    const std::vector<const double*>& velocity,
+    const double* const pressure,
+    const std::vector<const double*>& volume_fraction) const
+{
+    const double rho = getMixtureDensity(
+        partial_density);
+    
+    // Get the mixture thermodynamic properties.
+    std::vector<double> mixture_thermo_properties;
+    std::vector<double*> mixture_thermo_properties_ptr;
+    std::vector<const double*> mixture_thermo_properties_const_ptr;
+    
+    const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
+    
+    mixture_thermo_properties.resize(num_thermo_properties);
+    mixture_thermo_properties_ptr.reserve(num_thermo_properties);
+    mixture_thermo_properties_const_ptr.reserve(num_thermo_properties);
+    
+    for (int ti = 0; ti < num_thermo_properties; ti++)
+    {
+        mixture_thermo_properties_ptr.push_back(&mixture_thermo_properties[ti]);
+        mixture_thermo_properties_const_ptr.push_back(&mixture_thermo_properties[ti]);
+    }
+    
+    switch (d_mixing_closure_model)
+    {
+        case ISOTHERMAL_AND_ISOBARIC:
+        {
+            /*
+             * Compute the mass fractions.
+             */
+            double Y[d_num_species];
+            for (int si = 0; si < d_num_species; si++)
+            {
+                Y[si] = *(partial_density[si])/rho;
+            }
+            
+            /*
+             * Get the pointers to the mass fractions.
+             */
+            std::vector<const double*> Y_ptr;
+            Y_ptr.reserve(d_num_species);
+            for (int si = 0; si < d_num_species; si++)
+            {
+                Y_ptr.push_back(&Y[si]);
+            }
+            
+            getMixtureThermodynamicProperties(
+                mixture_thermo_properties_ptr,
+                Y_ptr);
+            
+            break;
+        }
+        case ISOBARIC:
+        {
+            getMixtureThermodynamicProperties(
+                mixture_thermo_properties_ptr,
+                volume_fraction);
+            
+            break;
+        }
+        case NO_MODEL:
+        {
+            getSpeciesThermodynamicProperties(
+                mixture_thermo_properties_ptr,
+                0);
+            
+            break;
+        }
+    }
+    
+    double E = d_equation_of_state->getTotalEnergy(
+        &rho,
+        velocity,
+        pressure,
+        mixture_thermo_properties_const_ptr);
+    
+    return E;
 }
 
 

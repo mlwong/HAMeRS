@@ -1,8 +1,6 @@
 # Define a variable equations_of_state_source_files containing
 # a list of the source files for the equations_of_state library
 set(equations_of_state_source_files
-    EquationOfStateManager.cpp
-    EquationOfStateManager.cpp
     EquationOfStateMixingRulesManager.cpp
     ./ideal_gas/EquationOfStateIdealGas.cpp
     ./ideal_gas/EquationOfStateMixingRulesIdealGas.cpp

@@ -12,7 +12,6 @@
 #include "SAMRAI/pdat/FaceData.h"
 
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
-#include "util/equations_of_state/EquationOfStateManager.hpp"
 #include "util/equations_of_state/EquationOfStateMixingRulesManager.hpp"
 #include "Directions.hpp"
 
@@ -435,15 +434,9 @@ class FlowModel:
         const int d_num_eqn;
         
         /*
-         * boost::shared_ptr to EquationOfState and EquationOfStateMixingRules.
+         * boost::shared_ptr and EquationOfStateMixingRules.
          */
-        boost::shared_ptr<EquationOfState> d_equation_of_state;
         boost::shared_ptr<EquationOfStateMixingRules> d_equation_of_state_mixing_rules;
-        
-        /*
-         * boost::shared_ptr to EquationOfStateManager.
-         */
-        boost::shared_ptr<EquationOfStateManager> d_equation_of_state_manager;
         
         /*
          * boost::shared_ptr to EquationOfStateMixingRulesManager.

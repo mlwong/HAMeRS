@@ -40,11 +40,12 @@ class EquationOfState
         virtual double
         getSoundSpeed(
             const double* const density,
+            const std::vector<const double*>& velocity,
             const double* const pressure,
             const std::vector<const double*>& thermo_properties) const = 0;
         
         /*
-         * Compute the total energy.
+         * Compute the total energy per unit volume.
          */
         virtual double
         getTotalEnergy(
@@ -54,7 +55,7 @@ class EquationOfState
             const std::vector<const double*>& thermo_properties) const = 0;
         
         /*
-         * Compute the total enthalpy.
+         * Compute the specific total enthalpy.
          */
         virtual double
         getTotalEnthalpy(

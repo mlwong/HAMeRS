@@ -300,9 +300,9 @@ class FlowModelFiveEqnAllaire: public FlowModel
         void computeGlobalCellDataDensity();
         
         /*
-         * Compute the global cell data of mixture thermodynamic properties in the registered patch.
+         * Compute the global cell data of pressure in the registered patch.
          */
-        void computeGlobalCellDataMixtureThermoProperties();
+        void computeGlobalCellDataPressure();
         
         /*
          * Compute the global cell data of mass fraction with density in the registered patch.
@@ -310,20 +310,15 @@ class FlowModelFiveEqnAllaire: public FlowModel
         void computeGlobalCellDataMassFractionWithDensity();
         
         /*
-         * Compute the global cell data of pressure with density and mixture thermodynamic properties in the registered patch.
-         */
-        void computeGlobalCellDataPressureWithDensityAndMixtureThermoProperties();
-        
-        /*
          * Compute the global cell data of velocity with density in the registered patch.
          */
         void computeGlobalCellDataVelocityWithDensity();
         
         /*
-         * Compute the global cell data of sound speed with density, mixture thermodynamic properties,
-         * and pressure in the registered patch.
+         * Compute the global cell data of sound speed with density, pressure and velocity in the registered
+         * patch.
          */
-        void computeGlobalCellDataSoundSpeedWithDensityMixtureThermoPropertiesAndPressure();
+        void computeGlobalCellDataSoundSpeedWithDensityPressureAndVelocity();
         
         /*
          * Compute the global cell data of dilatation with density and velocity in the registered patch.
@@ -341,17 +336,17 @@ class FlowModelFiveEqnAllaire: public FlowModel
         void computeGlobalCellDataEnstrophyWithDensityVelocityAndVorticity();
         
         /*
-         * Compute the global cell data of convective flux with density, mixture thermodynamic properties,
-         * pressure and velocity in the registered patch.
+         * Compute the global cell data of convective flux with density, pressure and velocity in the registered
+         * patch.
          */
-        void computeGlobalCellDataConvectiveFluxWithDensityMixtureThermoPropertiesPressureAndVelocity(
+        void computeGlobalCellDataConvectiveFluxWithDensityPressureAndVelocity(
             DIRECTION direction);
         
         /*
-         * Compute the global cell data of maximum wave speed with density, mixture thermodynamic properties,
-         * pressure, velocity and sound speed in the registered patch.
+         * Compute the global cell data of maximum wave speed with density, pressure, velocity and sound speed
+         * in the registered patch.
          */
-        void computeGlobalCellDataMaxWaveSpeedWithDensityMixtureThermoPropertiesPressureVelocityAndSoundSpeed(
+        void computeGlobalCellDataMaxWaveSpeedWithDensityPressureVelocityAndSoundSpeed(
             DIRECTION direction);
         
         /*
@@ -366,9 +361,8 @@ class FlowModelFiveEqnAllaire: public FlowModel
          * Number of sub-ghost cells of derived cell data.
          */
         hier::IntVector d_num_subghosts_density;
-        hier::IntVector d_num_subghosts_mixture_thermo_properties;
-        hier::IntVector d_num_subghosts_mass_fraction;
         hier::IntVector d_num_subghosts_pressure;
+        hier::IntVector d_num_subghosts_mass_fraction;
         hier::IntVector d_num_subghosts_velocity;
         hier::IntVector d_num_subghosts_sound_speed;
         hier::IntVector d_num_subghosts_dilatation;
@@ -385,9 +379,8 @@ class FlowModelFiveEqnAllaire: public FlowModel
          * Boxes with sub-ghost cells of derived cell data.
          */
         hier::Box d_subghost_box_density;
-        hier::Box d_subghost_box_mixture_thermo_properties;
-        hier::Box d_subghost_box_mass_fraction;
         hier::Box d_subghost_box_pressure;
+        hier::Box d_subghost_box_mass_fraction;
         hier::Box d_subghost_box_velocity;
         hier::Box d_subghost_box_sound_speed;
         hier::Box d_subghost_box_dilatation;
@@ -404,9 +397,8 @@ class FlowModelFiveEqnAllaire: public FlowModel
          * Dimensions of boxes with sub-ghost cells of derived cell data.
          */
         hier::IntVector d_subghostcell_dims_density;
-        hier::IntVector d_subghostcell_dims_mixture_thermo_properties;
-        hier::IntVector d_subghostcell_dims_mass_fraction;
         hier::IntVector d_subghostcell_dims_pressure;
+        hier::IntVector d_subghostcell_dims_mass_fraction;
         hier::IntVector d_subghostcell_dims_velocity;
         hier::IntVector d_subghostcell_dims_sound_speed;
         hier::IntVector d_subghostcell_dims_dilatation;
@@ -423,9 +415,8 @@ class FlowModelFiveEqnAllaire: public FlowModel
          * boost::shared_ptr to derived cell data.
          */
         boost::shared_ptr<pdat::CellData<double> > d_data_density;
-        boost::shared_ptr<pdat::CellData<double> > d_data_mixture_thermo_properties;
-        boost::shared_ptr<pdat::CellData<double> > d_data_mass_fraction;
         boost::shared_ptr<pdat::CellData<double> > d_data_pressure;
+        boost::shared_ptr<pdat::CellData<double> > d_data_mass_fraction;
         boost::shared_ptr<pdat::CellData<double> > d_data_velocity;
         boost::shared_ptr<pdat::CellData<double> > d_data_sound_speed;
         boost::shared_ptr<pdat::CellData<double> > d_data_dilatation;

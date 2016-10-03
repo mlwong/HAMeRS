@@ -36,11 +36,12 @@ class EquationOfStateIdealGas: public EquationOfState
         double
         getSoundSpeed(
             const double* const density,
+            const std::vector<const double*>& velocity,
             const double* const pressure,
             const std::vector<const double*>& thermo_properties) const;
         
         /*
-         * Compute the total energy.
+         * Compute the total energy per unit volume.
          */
         double
         getTotalEnergy(
@@ -50,7 +51,7 @@ class EquationOfStateIdealGas: public EquationOfState
             const std::vector<const double*>& thermo_properties) const;
         
         /*
-         * Compute the total enthalpy.
+         * Compute the specific total enthalpy.
          */
         double
         getTotalEnthalpy(

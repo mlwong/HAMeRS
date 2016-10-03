@@ -160,85 +160,38 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInXDirectionFromCo
         m_L.push_back(&(Q_L[d_num_species].get()));
         m_R.push_back(&(Q_R[d_num_species].get()));
         
-        /*
-         * Compute the mass fractions.
-         */
-        double Y_L[d_num_species];
-        double Y_R[d_num_species];
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y_L[si] = Q_L[si]/rho_L;
-            Y_R[si] = Q_R[si]/rho_R;
-        }
+        std::vector<const double*> vel_L;
+        std::vector<const double*> vel_R;
+        vel_L.reserve(1);
+        vel_R.reserve(1);
+        vel_L.push_back(&u_L);
+        vel_R.push_back(&u_R);
         
-        /*
-         * Get the pointers to the mass fractions.
-         */
-        std::vector<const double*> Y_L_ptr;
-        std::vector<const double*> Y_R_ptr;
-        Y_L_ptr.reserve(d_num_species);
-        Y_R_ptr.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y_L_ptr.push_back(&Y_L[si]);
-            Y_R_ptr.push_back(&Y_R[si]);
-        }
+        std::vector<const double*> empty_ptr;
         
-        // Get the mixture thermodynamic properties.
-        std::vector<double> mixture_thermo_properties_L;
-        std::vector<double> mixture_thermo_properties_R;
-        std::vector<double*> mixture_thermo_properties_L_ptr;
-        std::vector<double*> mixture_thermo_properties_R_ptr;
-        std::vector<const double*> mixture_thermo_properties_L_const_ptr;
-        std::vector<const double*> mixture_thermo_properties_R_const_ptr;
-        
-        const int num_thermo_properties = d_equation_of_state_mixing_rules->
-            getNumberOfMixtureThermodynamicProperties();
-        
-        mixture_thermo_properties_L.resize(num_thermo_properties);
-        mixture_thermo_properties_R.resize(num_thermo_properties);
-        mixture_thermo_properties_L_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_R_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_L_const_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_R_const_ptr.reserve(num_thermo_properties);
-        
-        for (int ti = 0; ti < num_thermo_properties; ti++)
-        {
-            mixture_thermo_properties_L_ptr.push_back(&mixture_thermo_properties_L[ti]);
-            mixture_thermo_properties_R_ptr.push_back(&mixture_thermo_properties_R[ti]);
-            mixture_thermo_properties_L_const_ptr.push_back(&mixture_thermo_properties_L[ti]);
-            mixture_thermo_properties_R_const_ptr.push_back(&mixture_thermo_properties_R[ti]);
-        }
-        
-        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-            mixture_thermo_properties_L_ptr,
-            Y_L_ptr);
-        
-        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-            mixture_thermo_properties_R_ptr,
-            Y_R_ptr);
-        
-        const double p_L = d_equation_of_state->getPressure(
-            &rho_L,
+        const double p_L = d_equation_of_state_mixing_rules->getPressure(
+            rho_Y_L,
             m_L,
             &(Q_L[d_num_species + d_dim.getValue()].get()),
-            mixture_thermo_properties_L_const_ptr);
+            empty_ptr);
         
-        const double p_R = d_equation_of_state->getPressure(
-            &rho_R,
+        const double p_R = d_equation_of_state_mixing_rules->getPressure(
+            rho_Y_R,
             m_R,
             &(Q_R[d_num_species + d_dim.getValue()].get()),
-            mixture_thermo_properties_R_const_ptr);
+            empty_ptr);
         
-        const double c_L = d_equation_of_state->getSoundSpeed(
-            &rho_L,
+        const double c_L = d_equation_of_state_mixing_rules->getSoundSpeed(
+            rho_Y_L,
+            vel_L,
             &p_L,
-            mixture_thermo_properties_L_const_ptr);
+            empty_ptr);
         
-        const double c_R = d_equation_of_state->getSoundSpeed(
-            &rho_R,
+        const double c_R = d_equation_of_state_mixing_rules->getSoundSpeed(
+            rho_Y_R,
+            vel_R,
             &p_R,
-            mixture_thermo_properties_R_const_ptr);
+            empty_ptr);
         
         const double u_average = 0.5*(u_L + u_R);
         const double c_average = 0.5*(c_L + c_R);
@@ -342,85 +295,40 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInXDirectionFromCo
         m_L.push_back(&(Q_L[d_num_species + 1].get()));
         m_R.push_back(&(Q_R[d_num_species + 1].get()));
         
-        /*
-         * Compute the mass fractions.
-         */
-        double Y_L[d_num_species];
-        double Y_R[d_num_species];
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y_L[si] = Q_L[si]/rho_L;
-            Y_R[si] = Q_R[si]/rho_R;
-        }
+        std::vector<const double*> vel_L;
+        std::vector<const double*> vel_R;
+        vel_L.reserve(2);
+        vel_R.reserve(2);
+        vel_L.push_back(&u_L);
+        vel_R.push_back(&u_R);
+        vel_L.push_back(&v_L);
+        vel_R.push_back(&v_R);
         
-        /*
-         * Get the pointers to the mass fractions.
-         */
-        std::vector<const double*> Y_L_ptr;
-        std::vector<const double*> Y_R_ptr;
-        Y_L_ptr.reserve(d_num_species);
-        Y_R_ptr.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y_L_ptr.push_back(&Y_L[si]);
-            Y_R_ptr.push_back(&Y_R[si]);
-        }
+        std::vector<const double*> empty_ptr;
         
-        // Get the mixture thermodynamic properties.
-        std::vector<double> mixture_thermo_properties_L;
-        std::vector<double> mixture_thermo_properties_R;
-        std::vector<double*> mixture_thermo_properties_L_ptr;
-        std::vector<double*> mixture_thermo_properties_R_ptr;
-        std::vector<const double*> mixture_thermo_properties_L_const_ptr;
-        std::vector<const double*> mixture_thermo_properties_R_const_ptr;
-        
-        const int num_thermo_properties = d_equation_of_state_mixing_rules->
-            getNumberOfMixtureThermodynamicProperties();
-        
-        mixture_thermo_properties_L.resize(num_thermo_properties);
-        mixture_thermo_properties_R.resize(num_thermo_properties);
-        mixture_thermo_properties_L_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_R_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_L_const_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_R_const_ptr.reserve(num_thermo_properties);
-        
-        for (int ti = 0; ti < num_thermo_properties; ti++)
-        {
-            mixture_thermo_properties_L_ptr.push_back(&mixture_thermo_properties_L[ti]);
-            mixture_thermo_properties_R_ptr.push_back(&mixture_thermo_properties_R[ti]);
-            mixture_thermo_properties_L_const_ptr.push_back(&mixture_thermo_properties_L[ti]);
-            mixture_thermo_properties_R_const_ptr.push_back(&mixture_thermo_properties_R[ti]);
-        }
-        
-        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-            mixture_thermo_properties_L_ptr,
-            Y_L_ptr);
-        
-        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-            mixture_thermo_properties_R_ptr,
-            Y_R_ptr);
-        
-        const double p_L = d_equation_of_state->getPressure(
-            &rho_L,
+        const double p_L = d_equation_of_state_mixing_rules->getPressure(
+            rho_Y_L,
             m_L,
             &(Q_L[d_num_species + d_dim.getValue()].get()),
-            mixture_thermo_properties_L_const_ptr);
+            empty_ptr);
         
-        const double p_R = d_equation_of_state->getPressure(
-            &rho_R,
+        const double p_R = d_equation_of_state_mixing_rules->getPressure(
+            rho_Y_R,
             m_R,
             &(Q_R[d_num_species + d_dim.getValue()].get()),
-            mixture_thermo_properties_R_const_ptr);
+            empty_ptr);
         
-        const double c_L = d_equation_of_state->getSoundSpeed(
-            &rho_L,
+        const double c_L = d_equation_of_state_mixing_rules->getSoundSpeed(
+            rho_Y_L,
+            vel_L,
             &p_L,
-            mixture_thermo_properties_L_const_ptr);
+            empty_ptr);
         
-        const double c_R = d_equation_of_state->getSoundSpeed(
-            &rho_R,
+        const double c_R = d_equation_of_state_mixing_rules->getSoundSpeed(
+            rho_Y_R,
+            vel_R,
             &p_R,
-            mixture_thermo_properties_R_const_ptr);
+            empty_ptr);
         
         const double u_average = 0.5*(u_L + u_R);
         const double c_average = 0.5*(c_L + c_R);
@@ -654,85 +562,42 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInXDirectionFromCo
         m_L.push_back(&(Q_L[d_num_species + 2].get()));
         m_R.push_back(&(Q_R[d_num_species + 2].get()));
         
-        /*
-         * Compute the mass fractions.
-         */
-        double Y_L[d_num_species];
-        double Y_R[d_num_species];
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y_L[si] = Q_L[si]/rho_L;
-            Y_R[si] = Q_R[si]/rho_R;
-        }
+        std::vector<const double*> vel_L;
+        std::vector<const double*> vel_R;
+        vel_L.reserve(3);
+        vel_R.reserve(3);
+        vel_L.push_back(&u_L);
+        vel_R.push_back(&u_R);
+        vel_L.push_back(&v_L);
+        vel_R.push_back(&v_R);
+        vel_L.push_back(&w_L);
+        vel_R.push_back(&w_R);
         
-        /*
-         * Get the pointers to the mass fractions.
-         */
-        std::vector<const double*> Y_L_ptr;
-        std::vector<const double*> Y_R_ptr;
-        Y_L_ptr.reserve(d_num_species);
-        Y_R_ptr.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y_L_ptr.push_back(&Y_L[si]);
-            Y_R_ptr.push_back(&Y_R[si]);
-        }
+        std::vector<const double*> empty_ptr;
         
-        // Get the mixture thermodynamic properties.
-        std::vector<double> mixture_thermo_properties_L;
-        std::vector<double> mixture_thermo_properties_R;
-        std::vector<double*> mixture_thermo_properties_L_ptr;
-        std::vector<double*> mixture_thermo_properties_R_ptr;
-        std::vector<const double*> mixture_thermo_properties_L_const_ptr;
-        std::vector<const double*> mixture_thermo_properties_R_const_ptr;
-        
-        const int num_thermo_properties = d_equation_of_state_mixing_rules->
-            getNumberOfMixtureThermodynamicProperties();
-        
-        mixture_thermo_properties_L.resize(num_thermo_properties);
-        mixture_thermo_properties_R.resize(num_thermo_properties);
-        mixture_thermo_properties_L_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_R_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_L_const_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_R_const_ptr.reserve(num_thermo_properties);
-        
-        for (int ti = 0; ti < num_thermo_properties; ti++)
-        {
-            mixture_thermo_properties_L_ptr.push_back(&mixture_thermo_properties_L[ti]);
-            mixture_thermo_properties_R_ptr.push_back(&mixture_thermo_properties_R[ti]);
-            mixture_thermo_properties_L_const_ptr.push_back(&mixture_thermo_properties_L[ti]);
-            mixture_thermo_properties_R_const_ptr.push_back(&mixture_thermo_properties_R[ti]);
-        }
-        
-        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-            mixture_thermo_properties_L_ptr,
-            Y_L_ptr);
-        
-        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-            mixture_thermo_properties_R_ptr,
-            Y_R_ptr);
-        
-        const double p_L = d_equation_of_state->getPressure(
-            &rho_L,
+        const double p_L = d_equation_of_state_mixing_rules->getPressure(
+            rho_Y_L,
             m_L,
             &(Q_L[d_num_species + d_dim.getValue()].get()),
-            mixture_thermo_properties_L_const_ptr);
+            empty_ptr);
         
-        const double p_R = d_equation_of_state->getPressure(
-            &rho_R,
+        const double p_R = d_equation_of_state_mixing_rules->getPressure(
+            rho_Y_R,
             m_R,
             &(Q_R[d_num_species + d_dim.getValue()].get()),
-            mixture_thermo_properties_R_const_ptr);
+            empty_ptr);
         
-        const double c_L = d_equation_of_state->getSoundSpeed(
-            &rho_L,
+        const double c_L = d_equation_of_state_mixing_rules->getSoundSpeed(
+            rho_Y_L,
+            vel_L,
             &p_L,
-            mixture_thermo_properties_L_const_ptr);
+            empty_ptr);
         
-        const double c_R = d_equation_of_state->getSoundSpeed(
-            &rho_R,
+        const double c_R = d_equation_of_state_mixing_rules->getSoundSpeed(
+            rho_Y_R,
+            vel_R,
             &p_R,
-            mixture_thermo_properties_R_const_ptr);
+            empty_ptr);
         
         const double u_average = 0.5*(u_L + u_R);
         const double c_average = 0.5*(c_L + c_R);
@@ -996,85 +861,40 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInYDirectionFromCo
         m_B.push_back(&(Q_B[d_num_species + 1].get()));
         m_T.push_back(&(Q_T[d_num_species + 1].get()));
         
-        /*
-         * Compute the mass fractions.
-         */
-        double Y_B[d_num_species];
-        double Y_T[d_num_species];
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y_B[si] = Q_B[si]/rho_B;
-            Y_T[si] = Q_T[si]/rho_T;
-        }
+        std::vector<const double*> vel_B;
+        std::vector<const double*> vel_T;
+        vel_B.reserve(2);
+        vel_T.reserve(2);
+        vel_B.push_back(&u_B);
+        vel_T.push_back(&u_T);
+        vel_B.push_back(&v_B);
+        vel_T.push_back(&v_T);
         
-        /*
-         * Get the pointers to the mass fractions.
-         */
-        std::vector<const double*> Y_B_ptr;
-        std::vector<const double*> Y_T_ptr;
-        Y_B_ptr.reserve(d_num_species);
-        Y_T_ptr.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y_B_ptr.push_back(&Y_B[si]);
-            Y_T_ptr.push_back(&Y_T[si]);
-        }
+        std::vector<const double*> empty_ptr;
         
-        // Get the mixture thermodynamic properties.
-        std::vector<double> mixture_thermo_properties_B;
-        std::vector<double> mixture_thermo_properties_T;
-        std::vector<double*> mixture_thermo_properties_B_ptr;
-        std::vector<double*> mixture_thermo_properties_T_ptr;
-        std::vector<const double*> mixture_thermo_properties_B_const_ptr;
-        std::vector<const double*> mixture_thermo_properties_T_const_ptr;
-        
-        const int num_thermo_properties = d_equation_of_state_mixing_rules->
-            getNumberOfMixtureThermodynamicProperties();
-        
-        mixture_thermo_properties_B.resize(num_thermo_properties);
-        mixture_thermo_properties_T.resize(num_thermo_properties);
-        mixture_thermo_properties_B_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_T_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_B_const_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_T_const_ptr.reserve(num_thermo_properties);
-        
-        for (int ti = 0; ti < num_thermo_properties; ti++)
-        {
-            mixture_thermo_properties_B_ptr.push_back(&mixture_thermo_properties_B[ti]);
-            mixture_thermo_properties_T_ptr.push_back(&mixture_thermo_properties_T[ti]);
-            mixture_thermo_properties_B_const_ptr.push_back(&mixture_thermo_properties_B[ti]);
-            mixture_thermo_properties_T_const_ptr.push_back(&mixture_thermo_properties_T[ti]);
-        }
-        
-        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-            mixture_thermo_properties_B_ptr,
-            Y_B_ptr);
-        
-        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-            mixture_thermo_properties_T_ptr,
-            Y_T_ptr);
-        
-        const double p_B = d_equation_of_state->getPressure(
-            &rho_B,
+        const double p_B = d_equation_of_state_mixing_rules->getPressure(
+            rho_Y_B,
             m_B,
             &(Q_B[d_num_species + d_dim.getValue()].get()),
-            mixture_thermo_properties_B_const_ptr);
+            empty_ptr);
         
-        const double p_T = d_equation_of_state->getPressure(
-            &rho_T,
+        const double p_T = d_equation_of_state_mixing_rules->getPressure(
+            rho_Y_T,
             m_T,
             &(Q_T[d_num_species + d_dim.getValue()].get()),
-            mixture_thermo_properties_T_const_ptr);
+            empty_ptr);
         
-        const double c_B = d_equation_of_state->getSoundSpeed(
-            &rho_B,
+        const double c_B = d_equation_of_state_mixing_rules->getSoundSpeed(
+            rho_Y_B,
+            vel_B,
             &p_B,
-            mixture_thermo_properties_B_const_ptr);
+            empty_ptr);
         
-        const double c_T = d_equation_of_state->getSoundSpeed(
-            &rho_T,
+        const double c_T = d_equation_of_state_mixing_rules->getSoundSpeed(
+            rho_Y_T,
+            vel_T,
             &p_T,
-            mixture_thermo_properties_T_const_ptr);
+            empty_ptr);
         
         const double v_average = 0.5*(v_B + v_T);
         const double c_average = 0.5*(c_B + c_T);
@@ -1308,85 +1128,42 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInYDirectionFromCo
         m_B.push_back(&(Q_B[d_num_species + 2].get()));
         m_T.push_back(&(Q_T[d_num_species + 2].get()));
         
-        /*
-         * Compute the mass fractions.
-         */
-        double Y_B[d_num_species];
-        double Y_T[d_num_species];
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y_B[si] = Q_B[si]/rho_B;
-            Y_T[si] = Q_T[si]/rho_T;
-        }
+        std::vector<const double*> vel_B;
+        std::vector<const double*> vel_T;
+        vel_B.reserve(3);
+        vel_T.reserve(3);
+        vel_B.push_back(&u_B);
+        vel_T.push_back(&u_T);
+        vel_B.push_back(&v_B);
+        vel_T.push_back(&v_T);
+        vel_B.push_back(&w_B);
+        vel_T.push_back(&w_T);
         
-        /*
-         * Get the pointers to the mass fractions.
-         */
-        std::vector<const double*> Y_B_ptr;
-        std::vector<const double*> Y_T_ptr;
-        Y_B_ptr.reserve(d_num_species);
-        Y_T_ptr.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y_B_ptr.push_back(&Y_B[si]);
-            Y_T_ptr.push_back(&Y_T[si]);
-        }
+        std::vector<const double*> empty_ptr;
         
-        // Get the mixture thermodynamic properties.
-        std::vector<double> mixture_thermo_properties_B;
-        std::vector<double> mixture_thermo_properties_T;
-        std::vector<double*> mixture_thermo_properties_B_ptr;
-        std::vector<double*> mixture_thermo_properties_T_ptr;
-        std::vector<const double*> mixture_thermo_properties_B_const_ptr;
-        std::vector<const double*> mixture_thermo_properties_T_const_ptr;
-        
-        const int num_thermo_properties = d_equation_of_state_mixing_rules->
-            getNumberOfMixtureThermodynamicProperties();
-        
-        mixture_thermo_properties_B.resize(num_thermo_properties);
-        mixture_thermo_properties_T.resize(num_thermo_properties);
-        mixture_thermo_properties_B_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_T_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_B_const_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_T_const_ptr.reserve(num_thermo_properties);
-        
-        for (int ti = 0; ti < num_thermo_properties; ti++)
-        {
-            mixture_thermo_properties_B_ptr.push_back(&mixture_thermo_properties_B[ti]);
-            mixture_thermo_properties_T_ptr.push_back(&mixture_thermo_properties_T[ti]);
-            mixture_thermo_properties_B_const_ptr.push_back(&mixture_thermo_properties_B[ti]);
-            mixture_thermo_properties_T_const_ptr.push_back(&mixture_thermo_properties_T[ti]);
-        }
-        
-        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-            mixture_thermo_properties_B_ptr,
-            Y_B_ptr);
-        
-        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-            mixture_thermo_properties_T_ptr,
-            Y_T_ptr);
-        
-        const double p_B = d_equation_of_state->getPressure(
-            &rho_B,
+        const double p_B = d_equation_of_state_mixing_rules->getPressure(
+            rho_Y_B,
             m_B,
             &(Q_B[d_num_species + d_dim.getValue()].get()),
-            mixture_thermo_properties_B_const_ptr);
+            empty_ptr);
         
-        const double p_T = d_equation_of_state->getPressure(
-            &rho_T,
+        const double p_T = d_equation_of_state_mixing_rules->getPressure(
+            rho_Y_T,
             m_T,
             &(Q_T[d_num_species + d_dim.getValue()].get()),
-            mixture_thermo_properties_T_const_ptr);
+            empty_ptr);
         
-        const double c_B = d_equation_of_state->getSoundSpeed(
-            &rho_B,
+        const double c_B = d_equation_of_state_mixing_rules->getSoundSpeed(
+            rho_Y_B,
+            vel_B,
             &p_B,
-            mixture_thermo_properties_B_const_ptr);
+            empty_ptr);
         
-        const double c_T = d_equation_of_state->getSoundSpeed(
-            &rho_T,
+        const double c_T = d_equation_of_state_mixing_rules->getSoundSpeed(
+            rho_Y_T,
+            vel_T,
             &p_T,
-            mixture_thermo_properties_T_const_ptr);
+            empty_ptr);
         
         const double v_average = 0.5*(v_B + v_T);
         const double c_average = 0.5*(c_B + c_T);
@@ -1663,85 +1440,42 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInZDirectionFromCo
         m_B.push_back(&(Q_B[d_num_species + 2].get()));
         m_F.push_back(&(Q_F[d_num_species + 2].get()));
         
-        /*
-         * Compute the mass fractions.
-         */
-        double Y_B[d_num_species];
-        double Y_F[d_num_species];
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y_B[si] = Q_B[si]/rho_B;
-            Y_F[si] = Q_F[si]/rho_F;
-        }
+        std::vector<const double*> vel_B;
+        std::vector<const double*> vel_F;
+        vel_B.reserve(3);
+        vel_F.reserve(3);
+        vel_B.push_back(&u_B);
+        vel_F.push_back(&u_F);
+        vel_B.push_back(&v_B);
+        vel_F.push_back(&v_F);
+        vel_B.push_back(&w_B);
+        vel_F.push_back(&w_F);
         
-        /*
-         * Get the pointers to the mass fractions.
-         */
-        std::vector<const double*> Y_B_ptr;
-        std::vector<const double*> Y_F_ptr;
-        Y_B_ptr.reserve(d_num_species);
-        Y_F_ptr.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y_B_ptr.push_back(&Y_B[si]);
-            Y_F_ptr.push_back(&Y_F[si]);
-        }
+        std::vector<const double*> empty_ptr;
         
-        // Get the mixture thermodynamic properties.
-        std::vector<double> mixture_thermo_properties_B;
-        std::vector<double> mixture_thermo_properties_F;
-        std::vector<double*> mixture_thermo_properties_B_ptr;
-        std::vector<double*> mixture_thermo_properties_F_ptr;
-        std::vector<const double*> mixture_thermo_properties_B_const_ptr;
-        std::vector<const double*> mixture_thermo_properties_F_const_ptr;
-        
-        const int num_thermo_properties = d_equation_of_state_mixing_rules->
-            getNumberOfMixtureThermodynamicProperties();
-        
-        mixture_thermo_properties_B.resize(num_thermo_properties);
-        mixture_thermo_properties_F.resize(num_thermo_properties);
-        mixture_thermo_properties_B_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_F_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_B_const_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_F_const_ptr.reserve(num_thermo_properties);
-        
-        for (int ti = 0; ti < num_thermo_properties; ti++)
-        {
-            mixture_thermo_properties_B_ptr.push_back(&mixture_thermo_properties_B[ti]);
-            mixture_thermo_properties_F_ptr.push_back(&mixture_thermo_properties_F[ti]);
-            mixture_thermo_properties_B_const_ptr.push_back(&mixture_thermo_properties_B[ti]);
-            mixture_thermo_properties_F_const_ptr.push_back(&mixture_thermo_properties_F[ti]);
-        }
-        
-        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-            mixture_thermo_properties_B_ptr,
-            Y_B_ptr);
-        
-        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-            mixture_thermo_properties_F_ptr,
-            Y_F_ptr);
-        
-        const double p_B = d_equation_of_state->getPressure(
-            &rho_B,
+        const double p_B = d_equation_of_state_mixing_rules->getPressure(
+            rho_Y_B,
             m_B,
             &(Q_B[d_num_species + d_dim.getValue()].get()),
-            mixture_thermo_properties_B_const_ptr);
+            empty_ptr);
         
-        const double p_F = d_equation_of_state->getPressure(
-            &rho_F,
+        const double p_F = d_equation_of_state_mixing_rules->getPressure(
+            rho_Y_F,
             m_F,
             &(Q_F[d_num_species + d_dim.getValue()].get()),
-            mixture_thermo_properties_F_const_ptr);
+            empty_ptr);
         
-        const double c_B = d_equation_of_state->getSoundSpeed(
-            &rho_B,
+        const double c_B = d_equation_of_state_mixing_rules->getSoundSpeed(
+            rho_Y_B,
+            vel_B,
             &p_B,
-            mixture_thermo_properties_B_const_ptr);
+            empty_ptr);
         
-        const double c_F = d_equation_of_state->getSoundSpeed(
-            &rho_F,
+        const double c_F = d_equation_of_state_mixing_rules->getSoundSpeed(
+            rho_Y_F,
+            vel_F,
             &p_F,
-            mixture_thermo_properties_F_const_ptr);
+            empty_ptr);
         
         const double w_average = 0.5*(w_B + w_F);
         const double c_average = 0.5*(c_B + c_F);
@@ -1973,79 +1707,32 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInXDirectionFromPr
             rho_Y_R.push_back(&(V_R[si].get()));
         }
         
+        std::vector<const double*> vel_L;
+        std::vector<const double*> vel_R;
+        vel_L.reserve(1);
+        vel_R.reserve(1);
+        vel_L.push_back(&(V_L[d_num_species].get()));
+        vel_R.push_back(&(V_R[d_num_species].get()));
+        
         const double rho_L = d_equation_of_state_mixing_rules->getMixtureDensity(
             rho_Y_L);
         
         const double rho_R = d_equation_of_state_mixing_rules->getMixtureDensity(
             rho_Y_R);
         
-        /*
-         * Compute the mass fractions.
-         */
-        double Y_L[d_num_species];
-        double Y_R[d_num_species];
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y_L[si] = V_L[si]/rho_L;
-            Y_R[si] = V_R[si]/rho_R;
-        }
+        std::vector<const double*> empty_ptr;
         
-        /*
-         * Get the pointers to the mass fractions.
-         */
-        std::vector<const double*> Y_L_ptr;
-        std::vector<const double*> Y_R_ptr;
-        Y_L_ptr.reserve(d_num_species);
-        Y_R_ptr.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y_L_ptr.push_back(&Y_L[si]);
-            Y_R_ptr.push_back(&Y_R[si]);
-        }
-        
-        // Get the mixture thermodynamic properties.
-        std::vector<double> mixture_thermo_properties_L;
-        std::vector<double> mixture_thermo_properties_R;
-        std::vector<double*> mixture_thermo_properties_L_ptr;
-        std::vector<double*> mixture_thermo_properties_R_ptr;
-        std::vector<const double*> mixture_thermo_properties_L_const_ptr;
-        std::vector<const double*> mixture_thermo_properties_R_const_ptr;
-        
-        const int num_thermo_properties = d_equation_of_state_mixing_rules->
-            getNumberOfMixtureThermodynamicProperties();
-        
-        mixture_thermo_properties_L.resize(num_thermo_properties);
-        mixture_thermo_properties_R.resize(num_thermo_properties);
-        mixture_thermo_properties_L_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_R_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_L_const_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_R_const_ptr.reserve(num_thermo_properties);
-        
-        for (int ti = 0; ti < num_thermo_properties; ti++)
-        {
-            mixture_thermo_properties_L_ptr.push_back(&mixture_thermo_properties_L[ti]);
-            mixture_thermo_properties_R_ptr.push_back(&mixture_thermo_properties_R[ti]);
-            mixture_thermo_properties_L_const_ptr.push_back(&mixture_thermo_properties_L[ti]);
-            mixture_thermo_properties_R_const_ptr.push_back(&mixture_thermo_properties_R[ti]);
-        }
-        
-        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-            mixture_thermo_properties_L_ptr,
-            Y_L_ptr);
-        
-        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-            mixture_thermo_properties_R_ptr,
-            Y_R_ptr);
-        
-        const double c_L = d_equation_of_state->getSoundSpeed(
-            &rho_L,
+        const double c_L = d_equation_of_state_mixing_rules->getSoundSpeed(
+            rho_Y_L,
+            vel_L,
             &(V_L[d_num_species + d_dim.getValue()].get()),
-            mixture_thermo_properties_L_const_ptr);
+            empty_ptr);
         
-        const double c_R = d_equation_of_state->getSoundSpeed(
-            &rho_R,
+        const double c_R = d_equation_of_state_mixing_rules->getSoundSpeed(
+            rho_Y_R,
+            vel_R,
             &(V_R[d_num_species + d_dim.getValue()].get()),
-            mixture_thermo_properties_R_const_ptr);
+            empty_ptr);
         
         const double u_average = 0.5*((V_L[d_num_species].get()) + (V_R[d_num_species].get()));
         const double c_average = 0.5*(c_L + c_R);
@@ -2076,11 +1763,11 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInXDirectionFromPr
                 Q_L[si] = (V_L[si].get());
             }
             Q_L[d_num_species] = rho_L*(V_L[d_num_species].get());
-            Q_L[d_num_species + d_dim.getValue()] = d_equation_of_state->getTotalEnergy(
-                &rho_L,
+            Q_L[d_num_species + d_dim.getValue()] = d_equation_of_state_mixing_rules->getTotalEnergy(
+                rho_Y_L,
                 vel_L,
                 &(V_L[d_num_species + d_dim.getValue()].get()),
-                mixture_thermo_properties_L_const_ptr);
+                empty_ptr);
             
             double Q_star_L[d_num_eqn];
             for (int si = 0; si < d_num_species; si++)
@@ -2121,11 +1808,11 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInXDirectionFromPr
                 Q_R[si] = (V_R[si].get());
             }
             Q_R[d_num_species] = rho_R*(V_R[d_num_species].get());
-            Q_R[d_num_species + d_dim.getValue()] = d_equation_of_state->getTotalEnergy(
-                &rho_R,
+            Q_R[d_num_species + d_dim.getValue()] = d_equation_of_state_mixing_rules->getTotalEnergy(
+                rho_Y_R,
                 vel_R,
                 &(V_R[d_num_species + d_dim.getValue()].get()),
-                mixture_thermo_properties_R_const_ptr);
+                empty_ptr);
             
             double Q_star_R[d_num_eqn];
             for (int si = 0; si < d_num_species; si++)
@@ -2168,79 +1855,34 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInXDirectionFromPr
             rho_Y_R.push_back(&(V_R[si].get()));
         }
         
+        std::vector<const double*> vel_L;
+        std::vector<const double*> vel_R;
+        vel_L.reserve(2);
+        vel_R.reserve(2);
+        vel_L.push_back(&(V_L[d_num_species].get()));
+        vel_R.push_back(&(V_R[d_num_species].get()));
+        vel_L.push_back(&(V_L[d_num_species + 1].get()));
+        vel_R.push_back(&(V_R[d_num_species + 1].get()));
+        
         const double rho_L = d_equation_of_state_mixing_rules->getMixtureDensity(
             rho_Y_L);
         
         const double rho_R = d_equation_of_state_mixing_rules->getMixtureDensity(
             rho_Y_R);
         
-        /*
-         * Compute the mass fractions.
-         */
-        double Y_L[d_num_species];
-        double Y_R[d_num_species];
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y_L[si] = V_L[si]/rho_L;
-            Y_R[si] = V_R[si]/rho_R;
-        }
+        std::vector<const double*> empty_ptr;
         
-        /*
-         * Get the pointers to the mass fractions.
-         */
-        std::vector<const double*> Y_L_ptr;
-        std::vector<const double*> Y_R_ptr;
-        Y_L_ptr.reserve(d_num_species);
-        Y_R_ptr.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y_L_ptr.push_back(&Y_L[si]);
-            Y_R_ptr.push_back(&Y_R[si]);
-        }
-        
-        // Get the mixture thermodynamic properties.
-        std::vector<double> mixture_thermo_properties_L;
-        std::vector<double> mixture_thermo_properties_R;
-        std::vector<double*> mixture_thermo_properties_L_ptr;
-        std::vector<double*> mixture_thermo_properties_R_ptr;
-        std::vector<const double*> mixture_thermo_properties_L_const_ptr;
-        std::vector<const double*> mixture_thermo_properties_R_const_ptr;
-        
-        const int num_thermo_properties = d_equation_of_state_mixing_rules->
-            getNumberOfMixtureThermodynamicProperties();
-        
-        mixture_thermo_properties_L.resize(num_thermo_properties);
-        mixture_thermo_properties_R.resize(num_thermo_properties);
-        mixture_thermo_properties_L_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_R_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_L_const_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_R_const_ptr.reserve(num_thermo_properties);
-        
-        for (int ti = 0; ti < num_thermo_properties; ti++)
-        {
-            mixture_thermo_properties_L_ptr.push_back(&mixture_thermo_properties_L[ti]);
-            mixture_thermo_properties_R_ptr.push_back(&mixture_thermo_properties_R[ti]);
-            mixture_thermo_properties_L_const_ptr.push_back(&mixture_thermo_properties_L[ti]);
-            mixture_thermo_properties_R_const_ptr.push_back(&mixture_thermo_properties_R[ti]);
-        }
-        
-        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-            mixture_thermo_properties_L_ptr,
-            Y_L_ptr);
-        
-        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-            mixture_thermo_properties_R_ptr,
-            Y_R_ptr);
-        
-        const double c_L = d_equation_of_state->getSoundSpeed(
-            &rho_L,
+        const double c_L = d_equation_of_state_mixing_rules->getSoundSpeed(
+            rho_Y_L,
+            vel_L,
             &(V_L[d_num_species + d_dim.getValue()].get()),
-            mixture_thermo_properties_L_const_ptr);
+            empty_ptr);
         
-        const double c_R = d_equation_of_state->getSoundSpeed(
-            &rho_R,
+        const double c_R = d_equation_of_state_mixing_rules->getSoundSpeed(
+            rho_Y_R,
+            vel_R,
             &(V_R[d_num_species + d_dim.getValue()].get()),
-            mixture_thermo_properties_R_const_ptr);
+            empty_ptr);
         
         const double u_average = 0.5*((V_L[d_num_species].get()) + (V_R[d_num_species].get()));
         const double c_average = 0.5*(c_L + c_R);
@@ -2277,11 +1919,11 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInXDirectionFromPr
             }
             Q_L[d_num_species] = rho_L*(V_L[d_num_species].get());
             Q_L[d_num_species + 1] = rho_L*(V_L[d_num_species + 1].get());
-            Q_L[d_num_species + d_dim.getValue()] = d_equation_of_state->getTotalEnergy(
-                &rho_L,
+            Q_L[d_num_species + d_dim.getValue()] = d_equation_of_state_mixing_rules->getTotalEnergy(
+                rho_Y_L,
                 vel_L,
                 &(V_L[d_num_species + d_dim.getValue()].get()),
-                mixture_thermo_properties_L_const_ptr);
+                empty_ptr);
             
             double Q_star_L[d_num_eqn];
             for (int si = 0; si < d_num_species; si++)
@@ -2328,11 +1970,11 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInXDirectionFromPr
                 vel_R.push_back(&(V_R[d_num_species].get()));
                 vel_R.push_back(&(V_R[d_num_species + 1].get()));
                 
-                double E_R = d_equation_of_state->getTotalEnergy(
-                    &rho_R,
+                double E_R = d_equation_of_state_mixing_rules->getTotalEnergy(
+                    rho_Y_R,
                     vel_R,
                     &(V_R[d_num_species + d_dim.getValue()].get()),
-                    mixture_thermo_properties_R_const_ptr);
+                    empty_ptr);
                 
                 if (s_R <= 0)
                 {
@@ -2396,11 +2038,11 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInXDirectionFromPr
             }
             Q_R[d_num_species] = rho_R*(V_R[d_num_species].get());
             Q_R[d_num_species + 1] = rho_R*(V_R[d_num_species + 1].get());
-            Q_R[d_num_species + d_dim.getValue()] = d_equation_of_state->getTotalEnergy(
-                &rho_R,
+            Q_R[d_num_species + d_dim.getValue()] = d_equation_of_state_mixing_rules->getTotalEnergy(
+                rho_Y_R,
                 vel_R,
                 &(V_R[d_num_species + d_dim.getValue()].get()),
-                mixture_thermo_properties_R_const_ptr);
+                empty_ptr);
             
             double Q_star_R[d_num_eqn];
             for (int si = 0; si < d_num_species; si++)
@@ -2447,11 +2089,11 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInXDirectionFromPr
                 vel_L.push_back(&(V_L[d_num_species].get()));
                 vel_L.push_back(&(V_L[d_num_species + 1].get()));
                 
-                double E_L = d_equation_of_state->getTotalEnergy(
-                    &rho_L,
+                double E_L = d_equation_of_state_mixing_rules->getTotalEnergy(
+                    rho_Y_L,
                     vel_L,
                     &(V_L[d_num_species + d_dim.getValue()].get()),
-                    mixture_thermo_properties_L_const_ptr);
+                    empty_ptr);
                 
                 if (s_L >= 0)
                 {
@@ -2547,79 +2189,36 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInXDirectionFromPr
             rho_Y_R.push_back(&(V_R[si].get()));
         }
         
+        std::vector<const double*> vel_L;
+        std::vector<const double*> vel_R;
+        vel_L.reserve(3);
+        vel_R.reserve(3);
+        vel_L.push_back(&(V_L[d_num_species].get()));
+        vel_R.push_back(&(V_R[d_num_species].get()));
+        vel_L.push_back(&(V_L[d_num_species + 1].get()));
+        vel_R.push_back(&(V_R[d_num_species + 1].get()));
+        vel_L.push_back(&(V_L[d_num_species + 2].get()));
+        vel_R.push_back(&(V_R[d_num_species + 2].get()));
+        
         const double rho_L = d_equation_of_state_mixing_rules->getMixtureDensity(
             rho_Y_L);
         
         const double rho_R = d_equation_of_state_mixing_rules->getMixtureDensity(
             rho_Y_R);
         
-        /*
-         * Compute the mass fractions.
-         */
-        double Y_L[d_num_species];
-        double Y_R[d_num_species];
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y_L[si] = V_L[si]/rho_L;
-            Y_R[si] = V_R[si]/rho_R;
-        }
+        std::vector<const double*> empty_ptr;
         
-        /*
-         * Get the pointers to the mass fractions.
-         */
-        std::vector<const double*> Y_L_ptr;
-        std::vector<const double*> Y_R_ptr;
-        Y_L_ptr.reserve(d_num_species);
-        Y_R_ptr.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y_L_ptr.push_back(&Y_L[si]);
-            Y_R_ptr.push_back(&Y_R[si]);
-        }
-        
-        // Get the mixture thermodynamic properties.
-        std::vector<double> mixture_thermo_properties_L;
-        std::vector<double> mixture_thermo_properties_R;
-        std::vector<double*> mixture_thermo_properties_L_ptr;
-        std::vector<double*> mixture_thermo_properties_R_ptr;
-        std::vector<const double*> mixture_thermo_properties_L_const_ptr;
-        std::vector<const double*> mixture_thermo_properties_R_const_ptr;
-        
-        const int num_thermo_properties = d_equation_of_state_mixing_rules->
-            getNumberOfMixtureThermodynamicProperties();
-        
-        mixture_thermo_properties_L.resize(num_thermo_properties);
-        mixture_thermo_properties_R.resize(num_thermo_properties);
-        mixture_thermo_properties_L_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_R_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_L_const_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_R_const_ptr.reserve(num_thermo_properties);
-        
-        for (int ti = 0; ti < num_thermo_properties; ti++)
-        {
-            mixture_thermo_properties_L_ptr.push_back(&mixture_thermo_properties_L[ti]);
-            mixture_thermo_properties_R_ptr.push_back(&mixture_thermo_properties_R[ti]);
-            mixture_thermo_properties_L_const_ptr.push_back(&mixture_thermo_properties_L[ti]);
-            mixture_thermo_properties_R_const_ptr.push_back(&mixture_thermo_properties_R[ti]);
-        }
-        
-        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-            mixture_thermo_properties_L_ptr,
-            Y_L_ptr);
-        
-        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-            mixture_thermo_properties_R_ptr,
-            Y_R_ptr);
-        
-        const double c_L = d_equation_of_state->getSoundSpeed(
-            &rho_L,
+        const double c_L = d_equation_of_state_mixing_rules->getSoundSpeed(
+            rho_Y_L,
+            vel_L,
             &(V_L[d_num_species + d_dim.getValue()].get()),
-            mixture_thermo_properties_L_const_ptr);
+            empty_ptr);
         
-        const double c_R = d_equation_of_state->getSoundSpeed(
-            &rho_R,
+        const double c_R = d_equation_of_state_mixing_rules->getSoundSpeed(
+            rho_Y_R,
+            vel_R,
             &(V_R[d_num_species + d_dim.getValue()].get()),
-            mixture_thermo_properties_R_const_ptr);
+            empty_ptr);
         
         const double u_average = 0.5*((V_L[d_num_species].get()) + (V_R[d_num_species].get()));
         const double c_average = 0.5*(c_L + c_R);
@@ -2658,11 +2257,11 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInXDirectionFromPr
             Q_L[d_num_species] = rho_L*(V_L[d_num_species].get());
             Q_L[d_num_species + 1] = rho_L*(V_L[d_num_species + 1].get());
             Q_L[d_num_species + 2] = rho_L*(V_L[d_num_species + 2].get());
-            Q_L[d_num_species + d_dim.getValue()] = d_equation_of_state->getTotalEnergy(
-                &rho_L,
+            Q_L[d_num_species + d_dim.getValue()] = d_equation_of_state_mixing_rules->getTotalEnergy(
+                rho_Y_L,
                 vel_L,
                 &(V_L[d_num_species + d_dim.getValue()].get()),
-                mixture_thermo_properties_L_const_ptr);
+                empty_ptr);
             
             double Q_star_L[d_num_eqn];
             for (int si = 0; si < d_num_species; si++)
@@ -2712,11 +2311,11 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInXDirectionFromPr
                 vel_R.push_back(&(V_R[d_num_species + 1].get()));
                 vel_R.push_back(&(V_R[d_num_species + 2].get()));
                 
-                double E_R = d_equation_of_state->getTotalEnergy(
-                    &rho_R,
+                double E_R = d_equation_of_state_mixing_rules->getTotalEnergy(
+                    rho_Y_R,
                     vel_R,
                     &(V_R[d_num_species + d_dim.getValue()].get()),
-                    mixture_thermo_properties_R_const_ptr);
+                    empty_ptr);
                 
                 if (s_R <= 0)
                 {
@@ -2785,11 +2384,11 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInXDirectionFromPr
             Q_R[d_num_species] = rho_R*(V_R[d_num_species].get());
             Q_R[d_num_species + 1] = rho_R*(V_R[d_num_species + 1].get());
             Q_R[d_num_species + 2] = rho_R*(V_R[d_num_species + 2].get());
-            Q_R[d_num_species + d_dim.getValue()] = d_equation_of_state->getTotalEnergy(
-                &rho_R,
+            Q_R[d_num_species + d_dim.getValue()] = d_equation_of_state_mixing_rules->getTotalEnergy(
+                rho_Y_R,
                 vel_R,
                 &(V_R[d_num_species + d_dim.getValue()].get()),
-                mixture_thermo_properties_R_const_ptr);
+                empty_ptr);
             
             double Q_star_R[d_num_eqn];
             for (int si = 0; si < d_num_species; si++)
@@ -2839,11 +2438,11 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInXDirectionFromPr
                 vel_L.push_back(&(V_R[d_num_species + 1].get()));
                 vel_L.push_back(&(V_R[d_num_species + 2].get()));
                 
-                double E_L = d_equation_of_state->getTotalEnergy(
-                    &rho_L,
+                double E_L = d_equation_of_state_mixing_rules->getTotalEnergy(
+                    rho_Y_L,
                     vel_L,
                     &(V_L[d_num_species + d_dim.getValue()].get()),
-                    mixture_thermo_properties_L_const_ptr);
+                    empty_ptr);
                 
                 if (s_L >= 0)
                 {
@@ -2972,79 +2571,34 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInYDirectionFromPr
             rho_Y_T.push_back(&(V_T[si].get()));
         }
         
+        std::vector<const double*> vel_B;
+        std::vector<const double*> vel_T;
+        vel_B.reserve(2);
+        vel_T.reserve(2);
+        vel_B.push_back(&(V_B[d_num_species].get()));
+        vel_T.push_back(&(V_T[d_num_species].get()));
+        vel_B.push_back(&(V_B[d_num_species + 1].get()));
+        vel_T.push_back(&(V_T[d_num_species + 1].get()));
+        
         const double rho_B = d_equation_of_state_mixing_rules->getMixtureDensity(
             rho_Y_B);
         
         const double rho_T = d_equation_of_state_mixing_rules->getMixtureDensity(
             rho_Y_T);
         
-        /*
-         * Compute the mass fractions.
-         */
-        double Y_B[d_num_species];
-        double Y_T[d_num_species];
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y_B[si] = V_B[si]/rho_B;
-            Y_T[si] = V_T[si]/rho_T;
-        }
+        std::vector<const double*> empty_ptr;
         
-        /*
-         * Get the pointers to the mass fractions.
-         */
-        std::vector<const double*> Y_B_ptr;
-        std::vector<const double*> Y_T_ptr;
-        Y_B_ptr.reserve(d_num_species);
-        Y_T_ptr.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y_B_ptr.push_back(&Y_B[si]);
-            Y_T_ptr.push_back(&Y_T[si]);
-        }
-        
-        // Get the mixture thermodynamic properties.
-        std::vector<double> mixture_thermo_properties_B;
-        std::vector<double> mixture_thermo_properties_T;
-        std::vector<double*> mixture_thermo_properties_B_ptr;
-        std::vector<double*> mixture_thermo_properties_T_ptr;
-        std::vector<const double*> mixture_thermo_properties_B_const_ptr;
-        std::vector<const double*> mixture_thermo_properties_T_const_ptr;
-        
-        const int num_thermo_properties = d_equation_of_state_mixing_rules->
-            getNumberOfMixtureThermodynamicProperties();
-        
-        mixture_thermo_properties_B.resize(num_thermo_properties);
-        mixture_thermo_properties_T.resize(num_thermo_properties);
-        mixture_thermo_properties_B_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_T_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_B_const_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_T_const_ptr.reserve(num_thermo_properties);
-        
-        for (int ti = 0; ti < num_thermo_properties; ti++)
-        {
-            mixture_thermo_properties_B_ptr.push_back(&mixture_thermo_properties_B[ti]);
-            mixture_thermo_properties_T_ptr.push_back(&mixture_thermo_properties_T[ti]);
-            mixture_thermo_properties_B_const_ptr.push_back(&mixture_thermo_properties_B[ti]);
-            mixture_thermo_properties_T_const_ptr.push_back(&mixture_thermo_properties_T[ti]);
-        }
-        
-        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-            mixture_thermo_properties_B_ptr,
-            Y_B_ptr);
-        
-        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-            mixture_thermo_properties_T_ptr,
-            Y_T_ptr);
-        
-        const double c_B = d_equation_of_state->getSoundSpeed(
-            &rho_B,
+        const double c_B = d_equation_of_state_mixing_rules->getSoundSpeed(
+            rho_Y_B,
+            vel_B,
             &(V_B[d_num_species + d_dim.getValue()].get()),
-            mixture_thermo_properties_B_const_ptr);
+            empty_ptr);
         
-        const double c_T = d_equation_of_state->getSoundSpeed(
-            &rho_T,
+        const double c_T = d_equation_of_state_mixing_rules->getSoundSpeed(
+            rho_Y_T,
+            vel_T,
             &(V_T[d_num_species + d_dim.getValue()].get()),
-            mixture_thermo_properties_T_const_ptr);
+            empty_ptr);
         
         const double v_average = 0.5*((V_B[d_num_species + 1].get()) + (V_T[d_num_species + 1].get()));
         const double c_average = 0.5*(c_B + c_T);
@@ -3081,11 +2635,11 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInYDirectionFromPr
             }
             Q_B[d_num_species] = rho_B*(V_B[d_num_species].get());
             Q_B[d_num_species + 1] = rho_B*(V_B[d_num_species + 1].get());
-            Q_B[d_num_species + d_dim.getValue()] = d_equation_of_state->getTotalEnergy(
-                &rho_B,
+            Q_B[d_num_species + d_dim.getValue()] = d_equation_of_state_mixing_rules->getTotalEnergy(
+                rho_Y_B,
                 vel_B,
                 &(V_B[d_num_species + d_dim.getValue()].get()),
-                mixture_thermo_properties_B_const_ptr);
+                empty_ptr);
             
             double Q_star_B[d_num_eqn];
             for (int si = 0; si < d_num_species; si++)
@@ -3132,11 +2686,11 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInYDirectionFromPr
                 vel_T.push_back(&(V_T[d_num_species].get()));
                 vel_T.push_back(&(V_T[d_num_species + 1].get()));
                 
-                double E_T = d_equation_of_state->getTotalEnergy(
-                    &rho_T,
+                double E_T = d_equation_of_state_mixing_rules->getTotalEnergy(
+                    rho_Y_T,
                     vel_T,
                     &(V_T[d_num_species + d_dim.getValue()].get()),
-                    mixture_thermo_properties_T_const_ptr);
+                    empty_ptr);
                 
                 if (s_T <= 0)
                 {
@@ -3200,11 +2754,11 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInYDirectionFromPr
             }
             Q_T[d_num_species] = rho_T*(V_T[d_num_species].get());
             Q_T[d_num_species + 1] = rho_T*(V_T[d_num_species + 1].get());
-            Q_T[d_num_species + d_dim.getValue()] = d_equation_of_state->getTotalEnergy(
-                &rho_T,
+            Q_T[d_num_species + d_dim.getValue()] = d_equation_of_state_mixing_rules->getTotalEnergy(
+                rho_Y_T,
                 vel_T,
                 &(V_T[d_num_species + d_dim.getValue()].get()),
-                mixture_thermo_properties_T_const_ptr);
+                empty_ptr);
             
             double Q_star_T[d_num_eqn];
             for (int si = 0; si < d_num_species; si++)
@@ -3251,11 +2805,11 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInYDirectionFromPr
                 vel_B.push_back(&(V_B[d_num_species].get()));
                 vel_B.push_back(&(V_B[d_num_species + 1].get()));
                 
-                double E_B = d_equation_of_state->getTotalEnergy(
-                    &rho_B,
+                double E_B = d_equation_of_state_mixing_rules->getTotalEnergy(
+                    rho_Y_B,
                     vel_B,
                     &(V_B[d_num_species + d_dim.getValue()].get()),
-                    mixture_thermo_properties_B_const_ptr);
+                    empty_ptr);
                 
                 if (s_B >= 0)
                 {
@@ -3351,79 +2905,36 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInYDirectionFromPr
             rho_Y_T.push_back(&(V_T[si].get()));
         }
         
+        std::vector<const double*> vel_B;
+        std::vector<const double*> vel_T;
+        vel_B.reserve(3);
+        vel_T.reserve(3);
+        vel_B.push_back(&(V_B[d_num_species].get()));
+        vel_T.push_back(&(V_T[d_num_species].get()));
+        vel_B.push_back(&(V_B[d_num_species + 1].get()));
+        vel_T.push_back(&(V_T[d_num_species + 1].get()));
+        vel_B.push_back(&(V_B[d_num_species + 2].get()));
+        vel_T.push_back(&(V_T[d_num_species + 2].get()));
+        
         const double rho_B = d_equation_of_state_mixing_rules->getMixtureDensity(
             rho_Y_B);
         
         const double rho_T = d_equation_of_state_mixing_rules->getMixtureDensity(
             rho_Y_T);
         
-        /*
-         * Compute the mass fractions.
-         */
-        double Y_B[d_num_species];
-        double Y_T[d_num_species];
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y_B[si] = V_B[si]/rho_B;
-            Y_T[si] = V_T[si]/rho_T;
-        }
+        std::vector<const double*> empty_ptr;
         
-        /*
-         * Get the pointers to the mass fractions.
-         */
-        std::vector<const double*> Y_B_ptr;
-        std::vector<const double*> Y_T_ptr;
-        Y_B_ptr.reserve(d_num_species);
-        Y_T_ptr.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y_B_ptr.push_back(&Y_B[si]);
-            Y_T_ptr.push_back(&Y_T[si]);
-        }
-        
-        // Get the mixture thermodynamic properties.
-        std::vector<double> mixture_thermo_properties_B;
-        std::vector<double> mixture_thermo_properties_T;
-        std::vector<double*> mixture_thermo_properties_B_ptr;
-        std::vector<double*> mixture_thermo_properties_T_ptr;
-        std::vector<const double*> mixture_thermo_properties_B_const_ptr;
-        std::vector<const double*> mixture_thermo_properties_T_const_ptr;
-        
-        const int num_thermo_properties = d_equation_of_state_mixing_rules->
-            getNumberOfMixtureThermodynamicProperties();
-        
-        mixture_thermo_properties_B.resize(num_thermo_properties);
-        mixture_thermo_properties_T.resize(num_thermo_properties);
-        mixture_thermo_properties_B_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_T_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_B_const_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_T_const_ptr.reserve(num_thermo_properties);
-        
-        for (int ti = 0; ti < num_thermo_properties; ti++)
-        {
-            mixture_thermo_properties_B_ptr.push_back(&mixture_thermo_properties_B[ti]);
-            mixture_thermo_properties_T_ptr.push_back(&mixture_thermo_properties_T[ti]);
-            mixture_thermo_properties_B_const_ptr.push_back(&mixture_thermo_properties_B[ti]);
-            mixture_thermo_properties_T_const_ptr.push_back(&mixture_thermo_properties_T[ti]);
-        }
-        
-        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-            mixture_thermo_properties_B_ptr,
-            Y_B_ptr);
-        
-        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-            mixture_thermo_properties_T_ptr,
-            Y_T_ptr);
-        
-        const double c_B = d_equation_of_state->getSoundSpeed(
-            &rho_B,
+        const double c_B = d_equation_of_state_mixing_rules->getSoundSpeed(
+            rho_Y_B,
+            vel_B,
             &(V_B[d_num_species + d_dim.getValue()].get()),
-            mixture_thermo_properties_B_const_ptr);
+            empty_ptr);
         
-        const double c_T = d_equation_of_state->getSoundSpeed(
-            &rho_T,
+        const double c_T = d_equation_of_state_mixing_rules->getSoundSpeed(
+            rho_Y_T,
+            vel_T,
             &(V_T[d_num_species + d_dim.getValue()].get()),
-            mixture_thermo_properties_T_const_ptr);
+            empty_ptr);
         
         const double v_average = 0.5*((V_B[d_num_species + 1].get()) + (V_T[d_num_species + 1].get()));
         const double c_average = 0.5*(c_B + c_T);
@@ -3462,11 +2973,11 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInYDirectionFromPr
             Q_B[d_num_species] = rho_B*(V_B[d_num_species].get());
             Q_B[d_num_species + 1] = rho_B*(V_B[d_num_species + 1].get());
             Q_B[d_num_species + 2] = rho_B*(V_B[d_num_species + 2].get());
-            Q_B[d_num_species + d_dim.getValue()] = d_equation_of_state->getTotalEnergy(
-                &rho_B,
+            Q_B[d_num_species + d_dim.getValue()] = d_equation_of_state_mixing_rules->getTotalEnergy(
+                rho_Y_B,
                 vel_B,
                 &(V_B[d_num_species + d_dim.getValue()].get()),
-                mixture_thermo_properties_B_const_ptr);
+                empty_ptr);
             
             double Q_star_B[d_num_eqn];
             for (int si = 0; si < d_num_species; si++)
@@ -3516,11 +3027,11 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInYDirectionFromPr
                 vel_T.push_back(&(V_T[d_num_species + 1].get()));
                 vel_T.push_back(&(V_T[d_num_species + 2].get()));
                 
-                double E_T = d_equation_of_state->getTotalEnergy(
-                    &rho_T,
+                double E_T = d_equation_of_state_mixing_rules->getTotalEnergy(
+                    rho_Y_T,
                     vel_T,
                     &(V_T[d_num_species + d_dim.getValue()].get()),
-                    mixture_thermo_properties_T_const_ptr);
+                    empty_ptr);
                 
                 if (s_T <= 0)
                 {
@@ -3589,11 +3100,11 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInYDirectionFromPr
             Q_T[d_num_species] = rho_T*(V_T[d_num_species].get());
             Q_T[d_num_species + 1] = rho_T*(V_T[d_num_species + 1].get());
             Q_T[d_num_species + 2] = rho_T*(V_T[d_num_species + 2].get());
-            Q_T[d_num_species + d_dim.getValue()] = d_equation_of_state->getTotalEnergy(
-                &rho_T,
+            Q_T[d_num_species + d_dim.getValue()] = d_equation_of_state_mixing_rules->getTotalEnergy(
+                rho_Y_T,
                 vel_T,
                 &(V_T[d_num_species + d_dim.getValue()].get()),
-                mixture_thermo_properties_T_const_ptr);
+                empty_ptr);
             
             double Q_star_T[d_num_eqn];
             for (int si = 0; si < d_num_species; si++)
@@ -3643,11 +3154,11 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInYDirectionFromPr
                 vel_B.push_back(&(V_B[d_num_species + 1].get()));
                 vel_B.push_back(&(V_B[d_num_species + 2].get()));
                 
-                double E_B = d_equation_of_state->getTotalEnergy(
-                    &rho_B,
+                double E_B = d_equation_of_state_mixing_rules->getTotalEnergy(
+                    rho_Y_B,
                     vel_B,
                     &(V_B[d_num_species + d_dim.getValue()].get()),
-                    mixture_thermo_properties_B_const_ptr);
+                    empty_ptr);
                 
                 if (s_B >= 0)
                 {
@@ -3784,79 +3295,36 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInZDirectionFromPr
             rho_Y_F.push_back(&(V_F[si].get()));
         }
         
+        std::vector<const double*> vel_B;
+        std::vector<const double*> vel_F;
+        vel_B.reserve(3);
+        vel_F.reserve(3);
+        vel_B.push_back(&(V_B[d_num_species].get()));
+        vel_F.push_back(&(V_F[d_num_species].get()));
+        vel_B.push_back(&(V_B[d_num_species + 1].get()));
+        vel_F.push_back(&(V_F[d_num_species + 1].get()));
+        vel_B.push_back(&(V_B[d_num_species + 2].get()));
+        vel_F.push_back(&(V_F[d_num_species + 2].get()));
+        
         const double rho_B = d_equation_of_state_mixing_rules->getMixtureDensity(
             rho_Y_B);
         
         const double rho_F = d_equation_of_state_mixing_rules->getMixtureDensity(
             rho_Y_F);
         
-        /*
-         * Compute the mass fractions.
-         */
-        double Y_B[d_num_species];
-        double Y_F[d_num_species];
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y_B[si] = V_B[si]/rho_B;
-            Y_F[si] = V_F[si]/rho_F;
-        }
+        std::vector<const double*> empty_ptr;
         
-        /*
-         * Get the pointers to the mass fractions.
-         */
-        std::vector<const double*> Y_B_ptr;
-        std::vector<const double*> Y_F_ptr;
-        Y_B_ptr.reserve(d_num_species);
-        Y_F_ptr.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y_B_ptr.push_back(&Y_B[si]);
-            Y_F_ptr.push_back(&Y_F[si]);
-        }
-        
-        // Get the mixture thermodynamic properties.
-        std::vector<double> mixture_thermo_properties_B;
-        std::vector<double> mixture_thermo_properties_F;
-        std::vector<double*> mixture_thermo_properties_B_ptr;
-        std::vector<double*> mixture_thermo_properties_F_ptr;
-        std::vector<const double*> mixture_thermo_properties_B_const_ptr;
-        std::vector<const double*> mixture_thermo_properties_F_const_ptr;
-        
-        const int num_thermo_properties = d_equation_of_state_mixing_rules->
-            getNumberOfMixtureThermodynamicProperties();
-        
-        mixture_thermo_properties_B.resize(num_thermo_properties);
-        mixture_thermo_properties_F.resize(num_thermo_properties);
-        mixture_thermo_properties_B_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_F_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_B_const_ptr.reserve(num_thermo_properties);
-        mixture_thermo_properties_F_const_ptr.reserve(num_thermo_properties);
-        
-        for (int ti = 0; ti < num_thermo_properties; ti++)
-        {
-            mixture_thermo_properties_B_ptr.push_back(&mixture_thermo_properties_B[ti]);
-            mixture_thermo_properties_F_ptr.push_back(&mixture_thermo_properties_F[ti]);
-            mixture_thermo_properties_B_const_ptr.push_back(&mixture_thermo_properties_B[ti]);
-            mixture_thermo_properties_F_const_ptr.push_back(&mixture_thermo_properties_F[ti]);
-        }
-        
-        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-            mixture_thermo_properties_B_ptr,
-            Y_B_ptr);
-        
-        d_equation_of_state_mixing_rules->getMixtureThermodynamicProperties(
-            mixture_thermo_properties_F_ptr,
-            Y_F_ptr);
-        
-        const double c_B = d_equation_of_state->getSoundSpeed(
-            &rho_B,
+        const double c_B = d_equation_of_state_mixing_rules->getSoundSpeed(
+            rho_Y_B,
+            vel_B,
             &(V_B[d_num_species + d_dim.getValue()].get()),
-            mixture_thermo_properties_B_const_ptr);
+            empty_ptr);
         
-        const double c_F = d_equation_of_state->getSoundSpeed(
-            &rho_F,
+        const double c_F = d_equation_of_state_mixing_rules->getSoundSpeed(
+            rho_Y_F,
+            vel_F,
             &(V_F[d_num_species + d_dim.getValue()].get()),
-            mixture_thermo_properties_F_const_ptr);
+            empty_ptr);
         
         const double w_average = 0.5*((V_B[d_num_species + 2].get()) + (V_F[d_num_species + 2].get()));
         const double c_average = 0.5*(c_B + c_F);
@@ -3895,11 +3363,11 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInZDirectionFromPr
             Q_B[d_num_species] = rho_B*(V_B[d_num_species].get());
             Q_B[d_num_species + 1] = rho_B*(V_B[d_num_species + 1].get());
             Q_B[d_num_species + 2] = rho_B*(V_B[d_num_species + 2].get());
-            Q_B[d_num_species + d_dim.getValue()] = d_equation_of_state->getTotalEnergy(
-                &rho_B,
+            Q_B[d_num_species + d_dim.getValue()] = d_equation_of_state_mixing_rules->getTotalEnergy(
+                rho_Y_B,
                 vel_B,
                 &(V_B[d_num_species + d_dim.getValue()].get()),
-                mixture_thermo_properties_B_const_ptr);
+                empty_ptr);
             
             double Q_star_B[d_num_eqn];
             for (int si = 0; si < d_num_species; si++)
@@ -3949,11 +3417,11 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInZDirectionFromPr
                 vel_F.push_back(&(V_F[d_num_species + 1].get()));
                 vel_F.push_back(&(V_F[d_num_species + 2].get()));
                 
-                double E_F = d_equation_of_state->getTotalEnergy(
-                    &rho_F,
+                double E_F = d_equation_of_state_mixing_rules->getTotalEnergy(
+                    rho_Y_F,
                     vel_F,
                     &(V_F[d_num_species + d_dim.getValue()].get()),
-                    mixture_thermo_properties_F_const_ptr);
+                    empty_ptr);
                 
                 if (s_F <= 0)
                 {
@@ -4022,11 +3490,11 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInZDirectionFromPr
             Q_F[d_num_species] = rho_F*(V_F[d_num_species].get());
             Q_F[d_num_species + 1] = rho_F*(V_F[d_num_species + 1].get());
             Q_F[d_num_species + 2] = rho_F*(V_F[d_num_species + 2].get());
-            Q_F[d_num_species + d_dim.getValue()] = d_equation_of_state->getTotalEnergy(
-                &rho_F,
+            Q_F[d_num_species + d_dim.getValue()] = d_equation_of_state_mixing_rules->getTotalEnergy(
+                rho_Y_F,
                 vel_F,
                 &(V_F[d_num_species + d_dim.getValue()].get()),
-                mixture_thermo_properties_F_const_ptr);
+                empty_ptr);
             
             double Q_star_F[d_num_eqn];
             for (int si = 0; si < d_num_species; si++)
@@ -4076,11 +3544,11 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInZDirectionFromPr
                 vel_B.push_back(&(V_B[d_num_species + 1].get()));
                 vel_B.push_back(&(V_B[d_num_species + 2].get()));
                 
-                double E_B = d_equation_of_state->getTotalEnergy(
-                    &rho_B,
+                double E_B = d_equation_of_state_mixing_rules->getTotalEnergy(
+                    rho_Y_B,
                     vel_B,
                     &(V_B[d_num_species + d_dim.getValue()].get()),
-                    mixture_thermo_properties_B_const_ptr);
+                    empty_ptr);
                 
                 if (s_B >= 0)
                 {

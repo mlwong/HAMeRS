@@ -4,7 +4,6 @@
 #include "SAMRAI/tbox/Dimension.h"
 
 #include "Directions.hpp"
-#include "util/equations_of_state/EquationOfState.hpp"
 #include "util/equations_of_state/EquationOfStateMixingRules.hpp"
 
 #include "boost/ref.hpp"
@@ -22,13 +21,11 @@ class RiemannSolverFiveEqnAllaire
             const tbox::Dimension& dim,
             const int& num_eqn,
             const int& num_species,
-            boost::shared_ptr<EquationOfState> equation_of_state,
             boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules):
                 d_object_name(object_name),
                 d_dim(dim),
                 d_num_eqn(num_eqn),
                 d_num_species(num_species),
-                d_equation_of_state(equation_of_state),
                 d_equation_of_state_mixing_rules(equation_of_state_mixing_rules)
         {}
         
@@ -76,9 +73,8 @@ class RiemannSolverFiveEqnAllaire
         int d_num_species;
         
         /*
-         * boost::shared_ptr to EquationOfState and EquationOfStateMixingRules.
+         * boost::shared_ptr to EquationOfStateMixingRules.
          */
-        boost::shared_ptr<EquationOfState> d_equation_of_state;
         boost::shared_ptr<EquationOfStateMixingRules> d_equation_of_state_mixing_rules;
         
 };

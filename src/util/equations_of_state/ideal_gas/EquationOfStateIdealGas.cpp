@@ -84,9 +84,12 @@ EquationOfStateIdealGas::getPressure(
 double
 EquationOfStateIdealGas::getSoundSpeed(
     const double* const density,
+    const std::vector<const double*>& velocity,
     const double* const pressure,
     const std::vector<const double*>& thermo_properties) const
 {
+    NULL_USE(velocity);
+    
     double c = 0.0;
     
 #ifdef DEBUG_CHECK_DEV_ASSERTIONS
@@ -105,7 +108,7 @@ EquationOfStateIdealGas::getSoundSpeed(
 
 
 /*
- * Compute the total energy.
+ * Compute the total energy per unit volume.
  */
 double
 EquationOfStateIdealGas::getTotalEnergy(
@@ -161,7 +164,7 @@ EquationOfStateIdealGas::getTotalEnergy(
 
 
 /*
- * Compute the total enthalpy.
+ * Compute the specific total enthalpy.
  */
 double
 EquationOfStateIdealGas::getTotalEnthalpy(
