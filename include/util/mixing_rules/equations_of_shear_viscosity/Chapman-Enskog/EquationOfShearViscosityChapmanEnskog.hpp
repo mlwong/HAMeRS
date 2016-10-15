@@ -3,6 +3,8 @@
 
 #include "util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosity.hpp"
 
+#include <cmath>
+
 class EquationOfShearViscosityChapmanEnskog: public EquationOfShearViscosity
 {
     public:
