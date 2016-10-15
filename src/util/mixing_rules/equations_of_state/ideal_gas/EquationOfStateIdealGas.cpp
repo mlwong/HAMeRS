@@ -40,7 +40,9 @@ EquationOfStateIdealGas::getPressure(
     const double& rho = *density;
     const double& epsilon = *internal_energy;
     
-    return (gamma - 1.0)*rho*epsilon;
+    double p = (gamma - 1.0)*rho*epsilon;
+    
+    return p;
 }
 
 
@@ -62,7 +64,9 @@ EquationOfStateIdealGas::getSoundSpeed(
     const double& rho = *density;
     const double& p = *pressure;
     
-    return sqrt(gamma*p/rho);
+    double c = sqrt(gamma*p/rho);
+    
+    return c;
 }
 
 
@@ -84,7 +88,9 @@ EquationOfStateIdealGas::getInternalEnergy(
     const double& rho = *density;
     const double& p = *pressure;
     
-    return p/((gamma - 1.0)*rho);
+    double epsilon = p/((gamma - 1.0)*rho);
+    
+    return epsilon;
 }
 
 
@@ -106,7 +112,9 @@ EquationOfStateIdealGas::getEnthalpy(
     const double& rho = *density;
     const double& p = *pressure;
     
-    return gamma*p/((gamma - 1.0)*rho);
+    double h = gamma*p/((gamma - 1.0)*rho);
+    
+    return h;
 }
 
 
@@ -129,7 +137,9 @@ EquationOfStateIdealGas::getTemperature(
     const double& rho = *density;
     const double& p = *pressure;
     
-    return p/((gamma - 1.0)*c_v*rho);
+    double T = p/((gamma - 1.0)*c_v*rho);
+    
+    return T;
 }
 
 
