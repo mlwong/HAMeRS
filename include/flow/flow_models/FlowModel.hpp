@@ -12,7 +12,7 @@
 #include "SAMRAI/pdat/FaceData.h"
 
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
-#include "util/equations_of_state/EquationOfStateMixingRulesManager.hpp"
+#include "util/mixing_rules/equations_of_state/EquationOfStateMixingRulesManager.hpp"
 #include "Directions.hpp"
 
 #include "boost/multi_array.hpp"
@@ -104,9 +104,9 @@ class FlowModel:
             restart_db->putString("d_equation_of_state_str", d_equation_of_state_str);
             
             // Put the properties of d_equation_of_state_mixing_rules into the restart database.
-            boost::shared_ptr<tbox::Database> restart_species_db =
-                restart_db->putDatabase("d_species_db");
-            d_equation_of_state_mixing_rules->putToRestart(restart_species_db);
+            boost::shared_ptr<tbox::Database> restart_equation_of_state_mixing_rules_db =
+                restart_db->putDatabase("d_equation_of_state_mixing_rules_db");
+            d_equation_of_state_mixing_rules->putToRestart(restart_equation_of_state_mixing_rules_db);
         }
         
         /*
@@ -434,7 +434,7 @@ class FlowModel:
         const int d_num_eqn;
         
         /*
-         * boost::shared_ptr and EquationOfStateMixingRules.
+         * boost::shared_ptr to EquationOfStateMixingRules.
          */
         boost::shared_ptr<EquationOfStateMixingRules> d_equation_of_state_mixing_rules;
         

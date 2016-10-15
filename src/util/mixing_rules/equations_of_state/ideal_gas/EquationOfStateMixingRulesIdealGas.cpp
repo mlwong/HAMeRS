@@ -1,17 +1,17 @@
-#include "util/equations_of_state/ideal_gas/EquationOfStateMixingRulesIdealGas.hpp"
+#include "util/mixing_rules/equations_of_state/ideal_gas/EquationOfStateMixingRulesIdealGas.hpp"
 
 EquationOfStateMixingRulesIdealGas::EquationOfStateMixingRulesIdealGas(
     const std::string& object_name,
     const tbox::Dimension& dim,
     const int& num_species,
     const MIXING_CLOSURE_MODEL& mixing_closure_model,
-    const boost::shared_ptr<tbox::Database>& species_db):
+    const boost::shared_ptr<tbox::Database>& equation_of_state_mixing_rules_db):
         EquationOfStateMixingRules(
             object_name,
             dim,
             num_species,
             mixing_closure_model,
-            species_db)
+            equation_of_state_mixing_rules_db)
 {
     d_equation_of_state.reset(new EquationOfStateIdealGas(
         "d_equation_of_state",
@@ -21,12 +21,12 @@ EquationOfStateMixingRulesIdealGas::EquationOfStateMixingRulesIdealGas(
      * Get the ratio of specific heats of each species from the database.
      */
     
-    if (species_db->keyExists("species_gamma"))
+    if (equation_of_state_mixing_rules_db->keyExists("species_gamma"))
     {
-        size_t species_gamma_array_size = species_db->getArraySize("species_gamma");
+        size_t species_gamma_array_size = equation_of_state_mixing_rules_db->getArraySize("species_gamma");
         if (static_cast<int>(species_gamma_array_size) == d_num_species)
         {
-            d_species_gamma = species_db->getDoubleVector("species_gamma");
+            d_species_gamma = equation_of_state_mixing_rules_db->getDoubleVector("species_gamma");
         }
         else
         {
@@ -36,12 +36,12 @@ EquationOfStateMixingRulesIdealGas::EquationOfStateMixingRulesIdealGas(
                 << std::endl);
         }
     }
-    else if (species_db->keyExists("d_species_gamma"))
+    else if (equation_of_state_mixing_rules_db->keyExists("d_species_gamma"))
     {
-        size_t species_gamma_array_size = species_db->getArraySize("d_species_gamma");
+        size_t species_gamma_array_size = equation_of_state_mixing_rules_db->getArraySize("d_species_gamma");
         if (static_cast<int>(species_gamma_array_size) == d_num_species)
         {
-            d_species_gamma = species_db->getDoubleVector("d_species_gamma");
+            d_species_gamma = equation_of_state_mixing_rules_db->getDoubleVector("d_species_gamma");
         }
         else
         {
@@ -64,12 +64,12 @@ EquationOfStateMixingRulesIdealGas::EquationOfStateMixingRulesIdealGas(
      * Get the gas constant of each species from the database.
      */
     
-    if (species_db->keyExists("species_R"))
+    if (equation_of_state_mixing_rules_db->keyExists("species_R"))
     {
-        size_t species_R_array_size = species_db->getArraySize("species_R");
+        size_t species_R_array_size = equation_of_state_mixing_rules_db->getArraySize("species_R");
         if (static_cast<int>(species_R_array_size) == d_num_species)
         {
-            d_species_R = species_db->getDoubleVector("species_R");
+            d_species_R = equation_of_state_mixing_rules_db->getDoubleVector("species_R");
         }
         else
         {
@@ -79,12 +79,12 @@ EquationOfStateMixingRulesIdealGas::EquationOfStateMixingRulesIdealGas(
                 << std::endl);
         }
     }
-    else if (species_db->keyExists("d_species_R"))
+    else if (equation_of_state_mixing_rules_db->keyExists("d_species_R"))
     {
-        size_t species_R_array_size = species_db->getArraySize("d_species_R");
+        size_t species_R_array_size = equation_of_state_mixing_rules_db->getArraySize("d_species_R");
         if (static_cast<int>(species_R_array_size) == d_num_species)
         {
-            d_species_R = species_db->getDoubleVector("d_species_R");
+            d_species_R = equation_of_state_mixing_rules_db->getDoubleVector("d_species_R");
         }
         else
         {
@@ -184,17 +184,20 @@ EquationOfStateMixingRulesIdealGas::putToRestart(
 
 
 /*
- * Compute the pressure of the mixture.
+ * Compute the pressure of the mixture with isothermal and isobaric assumptions.
  */
 double
 EquationOfStateMixingRulesIdealGas::getPressure(
-    const std::vector<const double*>& partial_density,
-    const std::vector<const double*>& momentum,
-    const double* const total_energy,
-    const std::vector<const double*>& volume_fraction) const
+    const double* const density,
+    const double* const internal_energy,
+    const std::vector<const double*>& mass_fraction) const
 {
-    const double rho = getMixtureDensity(
-        partial_density);
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT((d_mixing_closure_model == ISOTHERMAL_AND_ISOBARIC) ||
+                (d_mixing_closure_model == NO_MODEL && d_num_species == 1));
+    TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
+                (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
+#endif
     
     // Get the mixture thermodynamic properties.
     std::vector<double> mixture_thermo_properties;
@@ -213,75 +216,80 @@ EquationOfStateMixingRulesIdealGas::getPressure(
         mixture_thermo_properties_const_ptr.push_back(&mixture_thermo_properties[ti]);
     }
     
-    switch (d_mixing_closure_model)
-    {
-        case ISOTHERMAL_AND_ISOBARIC:
-        {
-            /*
-             * Compute the mass fractions.
-             */
-            double Y[d_num_species];
-            for (int si = 0; si < d_num_species; si++)
-            {
-                Y[si] = *(partial_density[si])/rho;
-            }
-            
-            /*
-             * Get the pointers to the mass fractions.
-             */
-            std::vector<const double*> Y_ptr;
-            Y_ptr.reserve(d_num_species);
-            for (int si = 0; si < d_num_species; si++)
-            {
-                Y_ptr.push_back(&Y[si]);
-            }
-            
-            getMixtureThermodynamicProperties(
-                mixture_thermo_properties_ptr,
-                Y_ptr);
-            
-            break;
-        }
-        case ISOBARIC:
-        {
-            getMixtureThermodynamicProperties(
-                mixture_thermo_properties_ptr,
-                volume_fraction);
-            
-            break;
-        }
-        case NO_MODEL:
-        {
-            getSpeciesThermodynamicProperties(
-                mixture_thermo_properties_ptr,
-                0);
-            
-            break;
-        }
-    }
+    getMixtureThermodynamicProperties(
+        mixture_thermo_properties_ptr,
+        mass_fraction);
     
-    double p = d_equation_of_state->getPressure(
-        &rho,
-        momentum,
-        total_energy,
+    return d_equation_of_state->getPressure(
+        density,
+        internal_energy,
         mixture_thermo_properties_const_ptr);
-    
-    return p;
 }
 
 
 /*
- * Compute the sound speed of the mixture.
+ * Compute the pressure of the mixture with isobaric assumption.
+ */
+double
+EquationOfStateMixingRulesIdealGas::getPressure(
+    const double* const density,
+    const double* const internal_energy,
+    const std::vector<const double*>& mass_fraction,
+    const std::vector<const double*>& volume_fraction) const
+{
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(d_mixing_closure_model == ISOBARIC);
+    TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
+                (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
+    TBOX_ASSERT((static_cast<int>(volume_fraction.size()) == d_num_species) ||
+                (static_cast<int>(volume_fraction.size()) == d_num_species - 1));
+#endif
+    
+    NULL_USE(mass_fraction);
+    
+    // Get the mixture thermodynamic properties.
+    std::vector<double> mixture_thermo_properties;
+    std::vector<double*> mixture_thermo_properties_ptr;
+    std::vector<const double*> mixture_thermo_properties_const_ptr;
+    
+    const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
+    
+    mixture_thermo_properties.resize(num_thermo_properties);
+    mixture_thermo_properties_ptr.reserve(num_thermo_properties);
+    mixture_thermo_properties_const_ptr.reserve(num_thermo_properties);
+    
+    for (int ti = 0; ti < num_thermo_properties; ti++)
+    {
+        mixture_thermo_properties_ptr.push_back(&mixture_thermo_properties[ti]);
+        mixture_thermo_properties_const_ptr.push_back(&mixture_thermo_properties[ti]);
+    }
+    
+    getMixtureThermodynamicProperties(
+        mixture_thermo_properties_ptr,
+        volume_fraction);
+    
+    return d_equation_of_state->getPressure(
+        density,
+        internal_energy,
+        mixture_thermo_properties_const_ptr);
+}
+
+
+/*
+ * Compute the sound speed of the mixture with isothermal and isobaric assumptions.
  */
 double
 EquationOfStateMixingRulesIdealGas::getSoundSpeed(
-    const std::vector<const double*>& partial_density,
-    const std::vector<const double*>& velocity,
+    const double* const density,
     const double* const pressure,
-    const std::vector<const double*>& volume_fraction) const
+    const std::vector<const double*>& mass_fraction) const
 {
-    const double rho = getMixtureDensity(
-        partial_density);
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT((d_mixing_closure_model == ISOTHERMAL_AND_ISOBARIC) ||
+                (d_mixing_closure_model == NO_MODEL && d_num_species == 1));
+    TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
+                (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
+#endif
     
     // Get the mixture thermodynamic properties.
     std::vector<double> mixture_thermo_properties;
@@ -300,75 +308,36 @@ EquationOfStateMixingRulesIdealGas::getSoundSpeed(
         mixture_thermo_properties_const_ptr.push_back(&mixture_thermo_properties[ti]);
     }
     
-    switch (d_mixing_closure_model)
-    {
-        case ISOTHERMAL_AND_ISOBARIC:
-        {
-            /*
-             * Compute the mass fractions.
-             */
-            double Y[d_num_species];
-            for (int si = 0; si < d_num_species; si++)
-            {
-                Y[si] = *(partial_density[si])/rho;
-            }
-            
-            /*
-             * Get the pointers to the mass fractions.
-             */
-            std::vector<const double*> Y_ptr;
-            Y_ptr.reserve(d_num_species);
-            for (int si = 0; si < d_num_species; si++)
-            {
-                Y_ptr.push_back(&Y[si]);
-            }
-            
-            getMixtureThermodynamicProperties(
-                mixture_thermo_properties_ptr,
-                Y_ptr);
-            
-            break;
-        }
-        case ISOBARIC:
-        {
-            getMixtureThermodynamicProperties(
-                mixture_thermo_properties_ptr,
-                volume_fraction);
-            
-            break;
-        }
-        case NO_MODEL:
-        {
-            getSpeciesThermodynamicProperties(
-                mixture_thermo_properties_ptr,
-                0);
-            
-            break;
-        }
-    }
+    getMixtureThermodynamicProperties(
+        mixture_thermo_properties_ptr,
+        mass_fraction);
     
-    double c = d_equation_of_state->getSoundSpeed(
-        &rho,
-        velocity,
+    return d_equation_of_state->getSoundSpeed(
+        density,
         pressure,
         mixture_thermo_properties_const_ptr);
-    
-    return c;
 }
 
 
 /*
- * Compute the total energy per unit volume of the mixture.
+ * Compute the sound speed of the mixture with isobaric assumption.
  */
 double
-EquationOfStateMixingRulesIdealGas::getTotalEnergy(
-    const std::vector<const double*>& partial_density,
-    const std::vector<const double*>& velocity,
+EquationOfStateMixingRulesIdealGas::getSoundSpeed(
+    const double* const density,
     const double* const pressure,
+    const std::vector<const double*>& mass_fraction,
     const std::vector<const double*>& volume_fraction) const
 {
-    const double rho = getMixtureDensity(
-        partial_density);
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(d_mixing_closure_model == ISOBARIC);
+    TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
+                (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
+    TBOX_ASSERT((static_cast<int>(volume_fraction.size()) == d_num_species) ||
+                (static_cast<int>(volume_fraction.size()) == d_num_species - 1));
+#endif
+    
+    NULL_USE(mass_fraction);
     
     // Get the mixture thermodynamic properties.
     std::vector<double> mixture_thermo_properties;
@@ -387,60 +356,180 @@ EquationOfStateMixingRulesIdealGas::getTotalEnergy(
         mixture_thermo_properties_const_ptr.push_back(&mixture_thermo_properties[ti]);
     }
     
-    switch (d_mixing_closure_model)
-    {
-        case ISOTHERMAL_AND_ISOBARIC:
-        {
-            /*
-             * Compute the mass fractions.
-             */
-            double Y[d_num_species];
-            for (int si = 0; si < d_num_species; si++)
-            {
-                Y[si] = *(partial_density[si])/rho;
-            }
-            
-            /*
-             * Get the pointers to the mass fractions.
-             */
-            std::vector<const double*> Y_ptr;
-            Y_ptr.reserve(d_num_species);
-            for (int si = 0; si < d_num_species; si++)
-            {
-                Y_ptr.push_back(&Y[si]);
-            }
-            
-            getMixtureThermodynamicProperties(
-                mixture_thermo_properties_ptr,
-                Y_ptr);
-            
-            break;
-        }
-        case ISOBARIC:
-        {
-            getMixtureThermodynamicProperties(
-                mixture_thermo_properties_ptr,
-                volume_fraction);
-            
-            break;
-        }
-        case NO_MODEL:
-        {
-            getSpeciesThermodynamicProperties(
-                mixture_thermo_properties_ptr,
-                0);
-            
-            break;
-        }
-    }
+    getMixtureThermodynamicProperties(
+        mixture_thermo_properties_ptr,
+        volume_fraction);
     
-    double E = d_equation_of_state->getTotalEnergy(
-        &rho,
-        velocity,
+    return d_equation_of_state->getSoundSpeed(
+        density,
         pressure,
         mixture_thermo_properties_const_ptr);
+}
+
+
+/*
+ * Compute the specific internal energy of the mixture with isothermal and isobaric assumptions.
+ */
+double
+EquationOfStateMixingRulesIdealGas::getInternalEnergy(
+    const double* const density,
+    const double* const pressure,
+    const std::vector<const double*>& mass_fraction) const
+{
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT((d_mixing_closure_model == ISOTHERMAL_AND_ISOBARIC) ||
+                (d_mixing_closure_model == NO_MODEL && d_num_species == 1));
+    TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
+                (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
+#endif
     
-    return E;
+    // Get the mixture thermodynamic properties.
+    std::vector<double> mixture_thermo_properties;
+    std::vector<double*> mixture_thermo_properties_ptr;
+    std::vector<const double*> mixture_thermo_properties_const_ptr;
+    
+    const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
+    
+    mixture_thermo_properties.resize(num_thermo_properties);
+    mixture_thermo_properties_ptr.reserve(num_thermo_properties);
+    mixture_thermo_properties_const_ptr.reserve(num_thermo_properties);
+    
+    for (int ti = 0; ti < num_thermo_properties; ti++)
+    {
+        mixture_thermo_properties_ptr.push_back(&mixture_thermo_properties[ti]);
+        mixture_thermo_properties_const_ptr.push_back(&mixture_thermo_properties[ti]);
+    }
+    
+    getMixtureThermodynamicProperties(
+        mixture_thermo_properties_ptr,
+        mass_fraction);
+    
+    return d_equation_of_state->getInternalEnergy(
+        density,
+        pressure,
+        mixture_thermo_properties_const_ptr);
+}
+
+
+/*
+ * Compute the specific internal energy of the mixture with isobaric assumption.
+ */
+double
+EquationOfStateMixingRulesIdealGas::getInternalEnergy(
+    const double* const density,
+    const double* const pressure,
+    const std::vector<const double*>& mass_fraction,
+    const std::vector<const double*>& volume_fraction) const
+{
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(d_mixing_closure_model == ISOBARIC);
+    TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
+                (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
+    TBOX_ASSERT((static_cast<int>(volume_fraction.size()) == d_num_species) ||
+                (static_cast<int>(volume_fraction.size()) == d_num_species - 1));
+#endif
+    
+    NULL_USE(mass_fraction);
+    
+    // Get the mixture thermodynamic properties.
+    std::vector<double> mixture_thermo_properties;
+    std::vector<double*> mixture_thermo_properties_ptr;
+    std::vector<const double*> mixture_thermo_properties_const_ptr;
+    
+    const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
+    
+    mixture_thermo_properties.resize(num_thermo_properties);
+    mixture_thermo_properties_ptr.reserve(num_thermo_properties);
+    mixture_thermo_properties_const_ptr.reserve(num_thermo_properties);
+    
+    for (int ti = 0; ti < num_thermo_properties; ti++)
+    {
+        mixture_thermo_properties_ptr.push_back(&mixture_thermo_properties[ti]);
+        mixture_thermo_properties_const_ptr.push_back(&mixture_thermo_properties[ti]);
+    }
+    
+    getMixtureThermodynamicProperties(
+        mixture_thermo_properties_ptr,
+        volume_fraction);
+    
+    return d_equation_of_state->getInternalEnergy(
+        density,
+        pressure,
+        mixture_thermo_properties_const_ptr);
+}
+
+
+/*
+ * Compute the temperature of the mixture with isothermal and isobaric assumptions.
+ */
+double
+EquationOfStateMixingRulesIdealGas::getTemperature(
+    const double* const density,
+    const double* const pressure,
+    const std::vector<const double*>& mass_fraction) const
+{
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT((d_mixing_closure_model == ISOTHERMAL_AND_ISOBARIC) ||
+                (d_mixing_closure_model == NO_MODEL && d_num_species == 1));
+    TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
+                (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
+#endif
+    
+    // Get the mixture thermodynamic properties.
+    std::vector<double> mixture_thermo_properties;
+    std::vector<double*> mixture_thermo_properties_ptr;
+    std::vector<const double*> mixture_thermo_properties_const_ptr;
+    
+    const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
+    
+    mixture_thermo_properties.resize(num_thermo_properties);
+    mixture_thermo_properties_ptr.reserve(num_thermo_properties);
+    mixture_thermo_properties_const_ptr.reserve(num_thermo_properties);
+    
+    for (int ti = 0; ti < num_thermo_properties; ti++)
+    {
+        mixture_thermo_properties_ptr.push_back(&mixture_thermo_properties[ti]);
+        mixture_thermo_properties_const_ptr.push_back(&mixture_thermo_properties[ti]);
+    }
+    
+    getMixtureThermodynamicProperties(
+        mixture_thermo_properties_ptr,
+        mass_fraction);
+    
+    return d_equation_of_state->getTemperature(
+        density,
+        pressure,
+        mixture_thermo_properties_const_ptr);
+}
+
+
+/*
+ * Get the thermodynamic properties of a species.
+ */
+void
+EquationOfStateMixingRulesIdealGas::getSpeciesThermodynamicProperties(
+    std::vector<double*>& species_thermo_properties,
+    const int& species_index) const
+{
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(static_cast<int>(species_thermo_properties.size()) == 4);
+    TBOX_ASSERT(species_index >= 0);
+    TBOX_ASSERT(species_index < d_num_species);
+#endif
+    
+    // Get references to gamma and R of species.
+    double& gamma = *(species_thermo_properties[0]);
+    double& R = *(species_thermo_properties[1]);
+    
+    // Get references to c_p and c_v of species.
+    double& c_p = *(species_thermo_properties[2]);
+    double& c_v = *(species_thermo_properties[3]);
+    
+    gamma = d_species_gamma[species_index];
+    R = d_species_R[species_index];
+    
+    c_p = d_species_c_p[species_index];
+    c_v = d_species_c_v[species_index];
 }
 
 
@@ -516,36 +605,6 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicProperties(
             break;
         }
     }
-}
-
-
-/*
- * Get the thermodynamic properties of a species.
- */
-void
-EquationOfStateMixingRulesIdealGas::getSpeciesThermodynamicProperties(
-    std::vector<double*>& species_thermo_properties,
-    const int& species_index) const
-{
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(species_thermo_properties.size()) == 4);
-    TBOX_ASSERT(species_index >= 0);
-    TBOX_ASSERT(species_index < d_num_species);
-#endif
-    
-    // Get references to gamma and R of species.
-    double& gamma = *(species_thermo_properties[0]);
-    double& R = *(species_thermo_properties[1]);
-    
-    // Get references to c_p and c_v of species.
-    double& c_p = *(species_thermo_properties[2]);
-    double& c_v = *(species_thermo_properties[3]);
-    
-    gamma = d_species_gamma[species_index];
-    R = d_species_R[species_index];
-    
-    c_p = d_species_c_p[species_index];
-    c_v = d_species_c_v[species_index];
 }
 
 

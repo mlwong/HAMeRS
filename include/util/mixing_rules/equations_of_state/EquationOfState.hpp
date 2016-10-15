@@ -30,8 +30,7 @@ class EquationOfState
         virtual double
         getPressure(
             const double* const density,
-            const std::vector<const double*>& momentum,
-            const double* const total_energy,
+            const double* const internal_energy,
             const std::vector<const double*>& thermo_properties) const = 0;
         
         /*
@@ -40,28 +39,26 @@ class EquationOfState
         virtual double
         getSoundSpeed(
             const double* const density,
-            const std::vector<const double*>& velocity,
             const double* const pressure,
             const std::vector<const double*>& thermo_properties) const = 0;
         
         /*
-         * Compute the total energy per unit volume.
+         * Compute the specific internal energy.
          */
         virtual double
-        getTotalEnergy(
+        getInternalEnergy(
             const double* const density,
-            const std::vector<const double*>& velocity,
             const double* const pressure,
             const std::vector<const double*>& thermo_properties) const = 0;
         
         /*
-         * Compute the specific total enthalpy.
+         * Compute the specific enthalpy.
          */
         virtual double
-        getTotalEnthalpy(
+        getEnthalpy(
             const double* const density,
-            const double* const total_energy,
-            const double* const pressure) const = 0;
+            const double* const pressure,
+            const std::vector<const double*>& thermo_properties) const = 0;
         
         /*
          * Compute the temperature.
@@ -69,8 +66,7 @@ class EquationOfState
         virtual double
         getTemperature(
             const double* const density,
-            const std::vector<const double*>& momentum,
-            const double* const total_energy,
+            const double* const pressure,
             const std::vector<const double*>& thermo_properties) const = 0;
         
         /*
@@ -79,8 +75,7 @@ class EquationOfState
         virtual double
         getIsochoricPartialInternalEnergyPartialPressure(
             const double* const density,
-            const std::vector<const double*>& momentum,
-            const double* const total_energy,
+            const double* const pressure,
             const std::vector<const double*>& thermo_properties) const = 0;
         
         /*
@@ -89,8 +84,7 @@ class EquationOfState
         virtual double
         getIsobaricPartialInternalEnergyPartialDensity(
             const double* const density,
-            const std::vector<const double*>& momentum,
-            const double* const total_energy,
+            const double* const pressure,
             const std::vector<const double*>& thermo_properties) const = 0;
         
     protected:

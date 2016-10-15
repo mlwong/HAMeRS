@@ -265,6 +265,16 @@ class FlowModelFourEqnConservative: public FlowModel
         
     private:
         /*
+         * Set the number of sub-ghost cells of a variable.
+         * This function can be called recursively if the variables are computed recursively.
+         */
+        void
+        setNumberOfSubGhosts(
+            const hier::IntVector& num_subghosts,
+            const std::string& variable_name,
+            const std::string& parent_variable_name);
+        
+        /*
          * Set the ghost boxes and their dimensions of derived cell variables.
          */
         void
@@ -294,11 +304,6 @@ class FlowModelFourEqnConservative: public FlowModel
         void computeGlobalCellDataDensity();
         
         /*
-         * Compute the global cell data of pressure in the registered patch.
-         */
-        void computeGlobalCellDataPressure();
-        
-        /*
          * Compute the global cell data of mass fraction with density in the registered patch.
          */
         void computeGlobalCellDataMassFractionWithDensity();
@@ -309,10 +314,22 @@ class FlowModelFourEqnConservative: public FlowModel
         void computeGlobalCellDataVelocityWithDensity();
         
         /*
-         * Compute the global cell data of sound speed with density, pressure and velocity in the registered
+         * Compute the global cell data of internal energy with density and velocity in the registered
          * patch.
          */
-        void computeGlobalCellDataSoundSpeedWithDensityPressureAndVelocity();
+        void computeGlobalCellDataInternalEnergyWithDensityAndVelocity();
+        
+        /*
+         * Compute the global cell data of pressure with density, mass fraction and internal energy in
+         * the registered patch.
+         */
+        void computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+        
+        /*
+         * Compute the global cell data of sound speed with density, mass fraction and pressure in the
+         * registered patch.
+         */
+        void computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
         
         /*
          * Compute the global cell data of dilatation with density and velocity in the registered patch.
@@ -325,22 +342,22 @@ class FlowModelFourEqnConservative: public FlowModel
         void computeGlobalCellDataVorticityWithDensityAndVelocity();
         
         /*
-         * Compute the global cell data of enstrophy with density, velocity and vorticity in the registered patch.
+         * Compute the global cell data of enstrophy with vorticity in the registered patch.
          */
-        void computeGlobalCellDataEnstrophyWithDensityVelocityAndVorticity();
+        void computeGlobalCellDataEnstrophyWithVorticity();
         
         /*
-         * Compute the global cell data of convective flux with density, pressure and velocity in the registered
+         * Compute the global cell data of convective flux with velocity and pressure in the registered
          * patch.
          */
-        void computeGlobalCellDataConvectiveFluxWithDensityPressureAndVelocity(
+        void computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
             DIRECTION direction);
         
         /*
-         * Compute the global cell data of maximum wave speed with density, pressure, velocity and sound speed
-         * in the registered patch.
+         * Compute the global cell data of maximum wave speed with velocity and sound speed in the
+         * registered patch.
          */
-        void computeGlobalCellDataMaxWaveSpeedWithDensityPressureVelocityAndSoundSpeed(
+        void computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
             DIRECTION direction);
         
         /*
@@ -354,9 +371,10 @@ class FlowModelFourEqnConservative: public FlowModel
          * Number of sub-ghost cells of derived cell data.
          */
         hier::IntVector d_num_subghosts_density;
-        hier::IntVector d_num_subghosts_pressure;
         hier::IntVector d_num_subghosts_mass_fraction;
         hier::IntVector d_num_subghosts_velocity;
+        hier::IntVector d_num_subghosts_internal_energy;
+        hier::IntVector d_num_subghosts_pressure;
         hier::IntVector d_num_subghosts_sound_speed;
         hier::IntVector d_num_subghosts_dilatation;
         hier::IntVector d_num_subghosts_vorticity;
@@ -372,9 +390,10 @@ class FlowModelFourEqnConservative: public FlowModel
          * Boxes with sub-ghost cells of derived cell data.
          */
         hier::Box d_subghost_box_density;
-        hier::Box d_subghost_box_pressure;
         hier::Box d_subghost_box_mass_fraction;
         hier::Box d_subghost_box_velocity;
+        hier::Box d_subghost_box_internal_energy;
+        hier::Box d_subghost_box_pressure;
         hier::Box d_subghost_box_sound_speed;
         hier::Box d_subghost_box_dilatation;
         hier::Box d_subghost_box_vorticity;
@@ -390,9 +409,10 @@ class FlowModelFourEqnConservative: public FlowModel
          * Dimensions of boxes with sub-ghost cells of derived cell data.
          */
         hier::IntVector d_subghostcell_dims_density;
-        hier::IntVector d_subghostcell_dims_pressure;
         hier::IntVector d_subghostcell_dims_mass_fraction;
         hier::IntVector d_subghostcell_dims_velocity;
+        hier::IntVector d_subghostcell_dims_internal_energy;
+        hier::IntVector d_subghostcell_dims_pressure;
         hier::IntVector d_subghostcell_dims_sound_speed;
         hier::IntVector d_subghostcell_dims_dilatation;
         hier::IntVector d_subghostcell_dims_vorticity;
@@ -408,9 +428,10 @@ class FlowModelFourEqnConservative: public FlowModel
          * boost::shared_ptr to derived cell data.
          */
         boost::shared_ptr<pdat::CellData<double> > d_data_density;
-        boost::shared_ptr<pdat::CellData<double> > d_data_pressure;
         boost::shared_ptr<pdat::CellData<double> > d_data_mass_fraction;
         boost::shared_ptr<pdat::CellData<double> > d_data_velocity;
+        boost::shared_ptr<pdat::CellData<double> > d_data_internal_energy;
+        boost::shared_ptr<pdat::CellData<double> > d_data_pressure;
         boost::shared_ptr<pdat::CellData<double> > d_data_sound_speed;
         boost::shared_ptr<pdat::CellData<double> > d_data_dilatation;
         boost::shared_ptr<pdat::CellData<double> > d_data_vorticity;

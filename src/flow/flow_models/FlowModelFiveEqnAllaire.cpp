@@ -16,9 +16,10 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
             dim.getValue() + 2*num_species,
             flow_model_db),
         d_num_subghosts_density(-hier::IntVector::getOne(d_dim)),
-        d_num_subghosts_pressure(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_mass_fraction(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_velocity(-hier::IntVector::getOne(d_dim)),
+        d_num_subghosts_internal_energy(-hier::IntVector::getOne(d_dim)),
+        d_num_subghosts_pressure(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_sound_speed(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_dilatation(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_vorticity(-hier::IntVector::getOne(d_dim)),
@@ -30,9 +31,10 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
         d_num_subghosts_max_wave_speed_y(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_max_wave_speed_z(-hier::IntVector::getOne(d_dim)),
         d_subghost_box_density(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_pressure(hier::Box::getEmptyBox(dim)),
         d_subghost_box_mass_fraction(hier::Box::getEmptyBox(dim)),
         d_subghost_box_velocity(hier::Box::getEmptyBox(dim)),
+        d_subghost_box_internal_energy(hier::Box::getEmptyBox(dim)),
+        d_subghost_box_pressure(hier::Box::getEmptyBox(dim)),
         d_subghost_box_sound_speed(hier::Box::getEmptyBox(dim)),
         d_subghost_box_dilatation(hier::Box::getEmptyBox(dim)),
         d_subghost_box_vorticity(hier::Box::getEmptyBox(dim)),
@@ -44,9 +46,10 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
         d_subghost_box_max_wave_speed_y(hier::Box::getEmptyBox(dim)),
         d_subghost_box_max_wave_speed_z(hier::Box::getEmptyBox(dim)),
         d_subghostcell_dims_density(hier::IntVector::getZero(d_dim)),
-        d_subghostcell_dims_pressure(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_mass_fraction(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_velocity(hier::IntVector::getZero(d_dim)),
+        d_subghostcell_dims_internal_energy(hier::IntVector::getZero(d_dim)),
+        d_subghostcell_dims_pressure(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_sound_speed(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_dilatation(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_vorticity(hier::IntVector::getZero(d_dim)),
@@ -123,21 +126,21 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
             << std::endl);
     }
     
-    boost::shared_ptr<tbox::Database> species_db;
+    boost::shared_ptr<tbox::Database> equation_of_state_mixing_rules_db;
     
-    if (flow_model_db->keyExists("Species"))
+    if (flow_model_db->keyExists("Equation_of_state_mixing_rules"))
     {
-        species_db = flow_model_db->getDatabase("Species");
+        equation_of_state_mixing_rules_db = flow_model_db->getDatabase("Equation_of_state_mixing_rules");
     }
-    else if (flow_model_db->keyExists("d_species_db"))
+    else if (flow_model_db->keyExists("d_equation_of_state_mixing_rules_db"))
     {
-        species_db = flow_model_db->getDatabase("d_species_db");
+        equation_of_state_mixing_rules_db = flow_model_db->getDatabase("d_equation_of_state_mixing_rules_db");
     }
     else
     {
         TBOX_ERROR(d_object_name
             << ": "
-            << "No key 'Species'/'d_species_db' found in data for flow model"
+            << "No key 'Equation_of_state_mixing_rules'/'d_equation_of_state_mixing_rules_db' found in data for flow model"
             << std::endl);
     }
     
@@ -146,7 +149,7 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
         d_dim,
         d_num_species,
         ISOBARIC,
-        species_db,
+        equation_of_state_mixing_rules_db,
         d_equation_of_state_str));
     
     d_equation_of_state_mixing_rules =
@@ -413,678 +416,130 @@ FlowModelFiveEqnAllaire::registerDerivedCellVariable(
     
     if (num_subghosts_of_data.find("DENSITY") != num_subghosts_of_data.end())
     {
-        d_num_subghosts_density = num_subghosts_of_data.find("DENSITY")->second;
-    }
-    
-    if (num_subghosts_of_data.find("PRESSURE") != num_subghosts_of_data.end())
-    {
-        d_num_subghosts_pressure = num_subghosts_of_data.find("PRESSURE")->second;
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("DENSITY")->second,
+            "DENSITY",
+            "DENSITY");
     }
     
     if (num_subghosts_of_data.find("MASS_FRACTION") != num_subghosts_of_data.end())
     {
-        d_num_subghosts_mass_fraction = num_subghosts_of_data.find("MASS_FRACTION")->second;
-        
-        if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
-        {
-            if (d_num_subghosts_mass_fraction > d_num_subghosts_density)
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                    << "Number of ghosts of 'MASS_FRACTION' exceeds"
-                    << " number of ghosts of 'DENSITY'."
-                    << std::endl);
-            }
-        }
-        else
-        {
-            d_num_subghosts_density = d_num_subghosts_mass_fraction;
-        }
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("MASS_FRACTION")->second,
+            "MASS_FRACTION",
+            "MASS_FRACTION");
     }
     
     if (num_subghosts_of_data.find("VELOCITY") != num_subghosts_of_data.end())
     {
-        d_num_subghosts_velocity = num_subghosts_of_data.find("VELOCITY")->second;
-        
-        if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
-        {
-            if (d_num_subghosts_velocity > d_num_subghosts_density)
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                    << "Number of ghosts of 'VELOCITY' exceeds"
-                    << " number of ghosts of 'DENSITY'."
-                    << std::endl);
-            }
-        }
-        else
-        {
-            d_num_subghosts_density = d_num_subghosts_velocity;
-        }
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("VELOCITY")->second,
+            "VELOCITY",
+            "VELOCITY");
+    }
+    
+    if (num_subghosts_of_data.find("INTERNAL_ENERGY") != num_subghosts_of_data.end())
+    {
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("INTERNAL_ENERGY")->second,
+            "INTERNAL_ENERGY",
+            "INTERNAL_ENERGY");
+    }
+    
+    if (num_subghosts_of_data.find("PRESSURE") != num_subghosts_of_data.end())
+    {
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("PRESSURE")->second,
+            "PRESSURE",
+            "PRESSURE");
     }
     
     if (num_subghosts_of_data.find("SOUND_SPEED") != num_subghosts_of_data.end())
     {
-        d_num_subghosts_sound_speed = num_subghosts_of_data.find("SOUND_SPEED")->second;
-        
-        if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
-        {
-            if (d_num_subghosts_sound_speed > d_num_subghosts_pressure)
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                    << "Number of ghosts of 'SOUND_SPEED' exceeds"
-                    << " number of ghosts of 'PRESSURE'."
-                    << std::endl);
-            }
-        }
-        else
-        {
-            d_num_subghosts_pressure = d_num_subghosts_sound_speed;
-        }
-        
-        if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
-        {
-            if (d_num_subghosts_sound_speed > d_num_subghosts_velocity)
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                    << "Number of ghosts of 'SOUND_SPEED' exceeds"
-                    << " number of ghosts of 'VELOCITY'."
-                    << std::endl);
-            }
-        }
-        else
-        {
-            d_num_subghosts_velocity = d_num_subghosts_sound_speed;
-            
-            if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
-            {
-                if (d_num_subghosts_sound_speed > d_num_subghosts_density)
-                {
-                    TBOX_ERROR(d_object_name
-                        << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                        << "Number of ghosts of 'SOUND_SPEED' exceeds"
-                        << " number of ghosts of 'DENSITY'."
-                        << std::endl);
-                }
-            }
-            else
-            {
-                d_num_subghosts_density = d_num_subghosts_sound_speed;
-            }
-        }
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("SOUND_SPEED")->second,
+            "SOUND_SPEED",
+            "SOUND_SPEED");
     }
     
     if (num_subghosts_of_data.find("DILATATION") != num_subghosts_of_data.end())
     {
-        d_num_subghosts_dilatation = num_subghosts_of_data.find("DILATATION")->second;
-        
-        if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
-        {
-            if (d_num_subghosts_dilatation > d_num_subghosts_velocity)
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                    << "Number of ghosts of 'DILATATION' exceeds"
-                    << " number of ghosts of 'VELOCITY'."
-                    << std::endl);
-            }
-        }
-        else
-        {
-            d_num_subghosts_velocity = d_num_subghosts_dilatation;
-            
-            if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
-            {
-                if (d_num_subghosts_dilatation > d_num_subghosts_density)
-                {
-                    TBOX_ERROR(d_object_name
-                        << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                        << "Number of ghosts of 'DILATATION' exceeds"
-                        << " number of ghosts of 'DENSITY'."
-                        << std::endl);
-                }
-            }
-            else
-            {
-                d_num_subghosts_density = d_num_subghosts_dilatation;
-            }
-        }
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("DILATATION")->second,
+            "DILATATION",
+            "DILATATION");
     }
     
     if (num_subghosts_of_data.find("VORTICITY") != num_subghosts_of_data.end())
     {
-        d_num_subghosts_vorticity = num_subghosts_of_data.find("VORTICITY")->second;
-        
-        if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
-        {
-            if (d_num_subghosts_vorticity > d_num_subghosts_velocity)
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                    << "Number of ghosts of 'VORTICITY' exceeds"
-                    << " number of ghosts of 'VELOCITY'."
-                    << std::endl);
-            }
-        }
-        else
-        {
-            d_num_subghosts_velocity = d_num_subghosts_vorticity;
-            
-            if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
-            {
-                if (d_num_subghosts_vorticity > d_num_subghosts_density)
-                {
-                    TBOX_ERROR(d_object_name
-                        << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                        << "Number of ghosts of 'VORTICITY' exceeds"
-                        << " number of ghosts of 'DENSITY'."
-                        << std::endl);
-                }
-            }
-            else
-            {
-                d_num_subghosts_density = d_num_subghosts_vorticity;
-            }
-        }
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("VORTICITY")->second,
+            "VORTICITY",
+            "VORTICITY");
     }
     
     if (num_subghosts_of_data.find("ENSTROPHY") != num_subghosts_of_data.end())
     {
-        d_num_subghosts_enstrophy = num_subghosts_of_data.find("ENSTROPHY")->second;
-        
-        if (d_num_subghosts_vorticity > -hier::IntVector::getOne(d_dim))
-        {
-            if (d_num_subghosts_enstrophy > d_num_subghosts_vorticity)
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                    << "Number of ghosts of 'ENSTROPHY' exceeds"
-                    << " number of ghosts of 'VORTICITY'."
-                    << std::endl);
-            }
-        }
-        else
-        {
-            d_num_subghosts_vorticity = d_num_subghosts_enstrophy;
-            
-            if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
-            {
-                if (d_num_subghosts_enstrophy > d_num_subghosts_velocity)
-                {
-                    TBOX_ERROR(d_object_name
-                        << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                        << "Number of ghosts of 'ENSTROPHY' exceeds"
-                        << " number of ghosts of 'VELOCITY'."
-                        << std::endl);
-                }
-            }
-            else
-            {
-                d_num_subghosts_velocity = d_num_subghosts_enstrophy;
-                
-                if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
-                {
-                    if (d_num_subghosts_enstrophy > d_num_subghosts_density)
-                    {
-                        TBOX_ERROR(d_object_name
-                            << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                            << "Number of ghosts of 'ENSTROPHY' exceeds"
-                            << " number of ghosts of 'DENSITY'."
-                            << std::endl);
-                    }
-                }
-                else
-                {
-                    d_num_subghosts_density = d_num_subghosts_enstrophy;
-                }
-            }
-        }
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("ENSTROPHY")->second,
+            "ENSTROPHY",
+            "ENSTROPHY");
     }
     
     if (num_subghosts_of_data.find("CONVECTIVE_FLUX_X") != num_subghosts_of_data.end())
     {
-        d_num_subghosts_convective_flux_x = num_subghosts_of_data.find("CONVECTIVE_FLUX_X")->second;
-        
-        if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
-        {
-            if (d_num_subghosts_convective_flux_x > d_num_subghosts_pressure)
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                    << "Number of ghosts of 'CONVECTIVE_FLUX_X' exceeds"
-                    << " number of ghosts of 'PRESSURE'."
-                    << std::endl);
-            }
-        }
-        else
-        {
-            d_num_subghosts_pressure = d_num_subghosts_convective_flux_x;
-        }
-        
-        if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
-        {
-            if (d_num_subghosts_convective_flux_x > d_num_subghosts_velocity)
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                    << "Number of ghosts of 'CONVECTIVE_FLUX_X' exceeds"
-                    << " number of ghosts of 'VELOCITY'."
-                    << std::endl);
-            }
-        }
-        else
-        {
-            d_num_subghosts_velocity = d_num_subghosts_convective_flux_x;
-            
-            if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
-            {
-                if (d_num_subghosts_convective_flux_x > d_num_subghosts_density)
-                {
-                    TBOX_ERROR(d_object_name
-                        << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                        << "Number of ghosts of 'CONVECTIVE_FLUX_X' exceeds"
-                        << " number of ghosts of 'DENSITY'."
-                        << std::endl);
-                }
-            }
-            else
-            {
-                d_num_subghosts_density = d_num_subghosts_convective_flux_x;
-            }
-        }
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("CONVECTIVE_FLUX_X")->second,
+            "CONVECTIVE_FLUX_X",
+            "CONVECTIVE_FLUX_X");
     }
     
     if (num_subghosts_of_data.find("CONVECTIVE_FLUX_Y") != num_subghosts_of_data.end())
     {
-        if (d_dim >= tbox::Dimension(2))
-        {
-            d_num_subghosts_convective_flux_y = num_subghosts_of_data.find("CONVECTIVE_FLUX_Y")->second;
-            
-            if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
-            {
-                if (d_num_subghosts_convective_flux_y > d_num_subghosts_pressure)
-                {
-                    TBOX_ERROR(d_object_name
-                        << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                        << "Number of ghosts of 'CONVECTIVE_FLUX_Y' exceeds"
-                        << " number of ghosts of 'PRESSURE'."
-                        << std::endl);
-                }
-            }
-            else
-            {
-                d_num_subghosts_pressure = d_num_subghosts_convective_flux_y;
-            }
-            
-            if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
-            {
-                if (d_num_subghosts_convective_flux_y > d_num_subghosts_velocity)
-                {
-                    TBOX_ERROR(d_object_name
-                        << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                        << "Number of ghosts of 'CONVECTIVE_FLUX_Y' exceeds"
-                        << " number of ghosts of 'VELOCITY'."
-                        << std::endl);
-                }
-            }
-            else
-            {
-                d_num_subghosts_velocity = d_num_subghosts_convective_flux_y;
-                
-                if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
-                {
-                    if (d_num_subghosts_convective_flux_y > d_num_subghosts_density)
-                    {
-                        TBOX_ERROR(d_object_name
-                            << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                            << "Number of ghosts of 'CONVECTIVE_FLUX_Y' exceeds"
-                            << " number of ghosts of 'DENSITY'."
-                            << std::endl);
-                    }
-                }
-                else
-                {
-                    d_num_subghosts_density = d_num_subghosts_convective_flux_y;
-                }
-            }
-        }
-        else
-        {
-            TBOX_ERROR(d_object_name
-                << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                << "'CONVECTIVE_FLUX_Y' cannot be obtained for problem with dimension less than two."
-                << std::endl);
-        }
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("CONVECTIVE_FLUX_Y")->second,
+            "CONVECTIVE_FLUX_Y",
+            "CONVECTIVE_FLUX_Y");
     }
     
     if (num_subghosts_of_data.find("CONVECTIVE_FLUX_Z") != num_subghosts_of_data.end())
     {
-        if (d_dim == tbox::Dimension(3))
-        {
-            d_num_subghosts_convective_flux_z = num_subghosts_of_data.find("CONVECTIVE_FLUX_Z")->second;
-            
-            if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
-            {
-                if (d_num_subghosts_convective_flux_z > d_num_subghosts_pressure)
-                {
-                    TBOX_ERROR(d_object_name
-                        << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                        << "Number of ghosts of 'CONVECTIVE_FLUX_Z' exceeds"
-                        << " number of ghosts of 'PRESSURE'."
-                        << std::endl);
-                }
-            }
-            else
-            {
-                d_num_subghosts_pressure = d_num_subghosts_convective_flux_z;
-            }
-            
-            if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
-            {
-                if (d_num_subghosts_convective_flux_z > d_num_subghosts_velocity)
-                {
-                    TBOX_ERROR(d_object_name
-                        << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                        << "Number of ghosts of 'CONVECTIVE_FLUX_Z' exceeds"
-                        << " number of ghosts of 'VELOCITY'."
-                        << std::endl);
-                }
-            }
-            else
-            {
-                d_num_subghosts_velocity = d_num_subghosts_convective_flux_z;
-                
-                if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
-                {
-                    if (d_num_subghosts_convective_flux_z > d_num_subghosts_density)
-                    {
-                        TBOX_ERROR(d_object_name
-                            << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                            << "Number of ghosts of 'CONVECTIVE_FLUX_Z' exceeds"
-                            << " number of ghosts of 'DENSITY'."
-                            << std::endl);
-                    }
-                }
-                else
-                {
-                    d_num_subghosts_density = d_num_subghosts_convective_flux_z;
-                }
-            }
-        }
-        else
-        {
-            TBOX_ERROR(d_object_name
-                << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                << "'CONVECTIVE_FLUX_Z' cannot be obtained for problem with dimension less than three."
-                << std::endl);
-        }
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("CONVECTIVE_FLUX_Z")->second,
+            "CONVECTIVE_FLUX_Z",
+            "CONVECTIVE_FLUX_Z");
     }
     
     if (num_subghosts_of_data.find("PRIMITIVE_VARIABLES") != num_subghosts_of_data.end())
     {
-        hier::IntVector d_num_subghosts_primitive_variables =
-            num_subghosts_of_data.find("PRIMITIVE_VARIABLES")->second;;
-        
-        if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
-        {
-            if (d_num_subghosts_pressure != d_num_subghosts_primitive_variables)
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                    << "Number of ghosts of 'PRESSURE' is not equal to"
-                    << " number of ghosts of 'PRIMITIVE_VARIABLES'."
-                    << std::endl);
-            }
-        }
-        else
-        {
-            d_num_subghosts_pressure = d_num_subghosts_primitive_variables;
-        }
-        
-        if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
-        {
-            if (d_num_subghosts_velocity != d_num_subghosts_primitive_variables)
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFourEqnConservative::registerDerivedCellVariable()\n"
-                    << "Number of ghosts of 'VELOCITY' is not equal to"
-                    << " number of ghosts of 'PRIMITIVE_VARIABLES'."
-                    << std::endl);
-            }
-        }
-        else
-        {
-            d_num_subghosts_velocity = d_num_subghosts_primitive_variables;
-        }
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("PRIMITIVE_VARIABLES")->second,
+            "PRIMITIVE_VARIABLES",
+            "PRIMITIVE_VARIABLES");
     }
     
     if (num_subghosts_of_data.find("MAX_WAVE_SPEED_X") != num_subghosts_of_data.end())
     {
-        d_num_subghosts_max_wave_speed_x = num_subghosts_of_data.find("MAX_WAVE_SPEED_X")->second;
-        
-        if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
-        {
-            if (d_num_subghosts_max_wave_speed_x > d_num_subghosts_sound_speed)
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                    << "Number of ghosts of 'MAX_WAVE_SPEED_X' exceeds"
-                    << " number of ghosts of 'SOUND_SPEED'."
-                    << std::endl);
-            }
-        }
-        else
-        {
-            d_num_subghosts_sound_speed = d_num_subghosts_max_wave_speed_x;
-            
-            if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
-            {
-                if (d_num_subghosts_max_wave_speed_x > d_num_subghosts_pressure)
-                {
-                    TBOX_ERROR(d_object_name
-                        << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                        << "Number of ghosts of 'MAX_WAVE_SPEED_X' exceeds"
-                        << " number of ghosts of 'PRESSURE'."
-                        << std::endl);
-                }
-            }
-            else
-            {
-                d_num_subghosts_pressure = d_num_subghosts_max_wave_speed_x;
-            }
-            
-            if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
-            {
-                if (d_num_subghosts_max_wave_speed_x > d_num_subghosts_velocity)
-                {
-                    TBOX_ERROR(d_object_name
-                        << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                        << "Number of ghosts of 'MAX_WAVE_SPEED_X' exceeds"
-                        << " number of ghosts of 'VELOCITY'."
-                        << std::endl);
-                }
-            }
-            else
-            {
-                d_num_subghosts_velocity = d_num_subghosts_max_wave_speed_x;
-                
-                if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
-                {
-                    if (d_num_subghosts_max_wave_speed_x > d_num_subghosts_density)
-                    {
-                        TBOX_ERROR(d_object_name
-                            << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                            << "Number of ghosts of 'MAX_WAVE_SPEED_X' exceeds"
-                            << " number of ghosts of 'DENSITY'."
-                            << std::endl);
-                    }
-                }
-                else
-                {
-                    d_num_subghosts_density = d_num_subghosts_max_wave_speed_x;
-                }
-            }
-        }
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("MAX_WAVE_SPEED_X")->second,
+            "MAX_WAVE_SPEED_X",
+            "MAX_WAVE_SPEED_X");
     }
     
     if (num_subghosts_of_data.find("MAX_WAVE_SPEED_Y") != num_subghosts_of_data.end())
     {
-        if (d_dim >= tbox::Dimension(2))
-        {
-            d_num_subghosts_max_wave_speed_y = num_subghosts_of_data.find("MAX_WAVE_SPEED_Y")->second;
-            
-            if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
-            {
-                if (d_num_subghosts_max_wave_speed_y > d_num_subghosts_sound_speed)
-                {
-                    TBOX_ERROR(d_object_name
-                        << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                        << "Number of ghosts of 'MAX_WAVE_SPEED_Y' exceeds"
-                        << " number of ghosts of 'SOUND_SPEED'."
-                        << std::endl);
-                }
-            }
-            else
-            {
-                d_num_subghosts_sound_speed = d_num_subghosts_max_wave_speed_y;
-                
-                if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
-                {
-                    if (d_num_subghosts_max_wave_speed_y > d_num_subghosts_pressure)
-                    {
-                        TBOX_ERROR(d_object_name
-                            << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                            << "Number of ghosts of 'MAX_WAVE_SPEED_Y' exceeds"
-                            << " number of ghosts of 'PRESSURE'."
-                            << std::endl);
-                    }
-                }
-                else
-                {
-                    d_num_subghosts_pressure = d_num_subghosts_max_wave_speed_y;
-                }
-                
-                if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
-                {
-                    if (d_num_subghosts_max_wave_speed_y > d_num_subghosts_velocity)
-                    {
-                        TBOX_ERROR(d_object_name
-                            << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                            << "Number of ghosts of 'MAX_WAVE_SPEED_Y' exceeds"
-                            << " number of ghosts of 'VELOCITY'."
-                            << std::endl);
-                    }
-                }
-                else
-                {
-                    d_num_subghosts_velocity = d_num_subghosts_max_wave_speed_y;
-                    
-                    if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
-                    {
-                        if (d_num_subghosts_max_wave_speed_y > d_num_subghosts_density)
-                        {
-                            TBOX_ERROR(d_object_name
-                                << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                                << "Number of ghosts of 'MAX_WAVE_SPEED_Y' exceeds"
-                                << " number of ghosts of 'DENSITY'."
-                                << std::endl);
-                        }
-                    }
-                    else
-                    {
-                        d_num_subghosts_density = d_num_subghosts_max_wave_speed_y;
-                    }
-                }
-            }
-        }
-        else
-        {
-            TBOX_ERROR(d_object_name
-                << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                << "'MAX_WAVE_SPEED_Y' cannot be obtained for problem with dimension less than two."
-                << std::endl);
-        }
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("MAX_WAVE_SPEED_Y")->second,
+            "MAX_WAVE_SPEED_Y",
+            "MAX_WAVE_SPEED_Y");
     }
     
     if (num_subghosts_of_data.find("MAX_WAVE_SPEED_Z") != num_subghosts_of_data.end())
     {
-        if (d_dim == tbox::Dimension(3))
-        {
-            d_num_subghosts_max_wave_speed_z = num_subghosts_of_data.find("MAX_WAVE_SPEED_Z")->second;
-            
-            if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
-            {
-                if (d_num_subghosts_max_wave_speed_z > d_num_subghosts_sound_speed)
-                {
-                    TBOX_ERROR(d_object_name
-                        << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                        << "Number of ghosts of 'MAX_WAVE_SPEED_Z' exceeds"
-                        << " number of ghosts of 'SOUND_SPEED'."
-                        << std::endl);
-                }
-            }
-            else
-            {
-                d_num_subghosts_sound_speed = d_num_subghosts_max_wave_speed_z;
-                
-                if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
-                {
-                    if (d_num_subghosts_max_wave_speed_z > d_num_subghosts_pressure)
-                    {
-                        TBOX_ERROR(d_object_name
-                            << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                            << "Number of ghosts of 'MAX_WAVE_SPEED_Z' exceeds"
-                            << " number of ghosts of 'PRESSURE'."
-                            << std::endl);
-                    }
-                }
-                else
-                {
-                    d_num_subghosts_pressure = d_num_subghosts_max_wave_speed_z;
-                }
-                
-                if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
-                {
-                    if (d_num_subghosts_max_wave_speed_z > d_num_subghosts_velocity)
-                    {
-                        TBOX_ERROR(d_object_name
-                            << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                            << "Number of ghosts of 'MAX_WAVE_SPEED_Z' exceeds"
-                            << " number of ghosts of 'VELOCITY'."
-                            << std::endl);
-                    }
-                }
-                else
-                {
-                    d_num_subghosts_velocity = d_num_subghosts_max_wave_speed_z;
-                    
-                    if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
-                    {
-                        if (d_num_subghosts_max_wave_speed_z > d_num_subghosts_density)
-                        {
-                            TBOX_ERROR(d_object_name
-                                << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                                << "Number of ghosts of 'MAX_WAVE_SPEED_Z' exceeds"
-                                << " number of ghosts of 'DENSITY'."
-                                << std::endl);
-                        }
-                    }
-                    else
-                    {
-                        d_num_subghosts_density = d_num_subghosts_max_wave_speed_z;
-                    }
-                }
-            }
-        }
-        else
-        {
-            TBOX_ERROR(d_object_name
-                << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
-                << "'MAX_WAVE_SPEED_Z' cannot be obtained for problem with dimension less than three."
-                << std::endl);
-        }
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("MAX_WAVE_SPEED_Z")->second,
+            "MAX_WAVE_SPEED_Z",
+            "MAX_WAVE_SPEED_Z");
     }
 }
 
@@ -1133,71 +588,10 @@ FlowModelFiveEqnAllaire::registerFaceProjectionMatricesOfPrimitiveVariables(
             << std::endl);
     }
     
-    d_proj_mat_primitive_var_averaging = averaging;
-    
-    if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
-    {
-        if (num_subghosts > d_num_subghosts_sound_speed)
-        {
-            TBOX_ERROR(d_object_name
-                << ": FlowModelFiveEqnAllaire::registerFaceProjectionMatrices()\n"
-                << "Number of ghosts of projection matrices exceeds"
-                << " number of ghosts of 'SOUND_SPEED'."
-                << std::endl);
-        }
-    }
-    else
-    {
-        d_num_subghosts_sound_speed = num_subghosts;
-        
-        if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
-        {
-            if (num_subghosts > d_num_subghosts_pressure)
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFiveEqnAllaire::registerFaceProjectionMatrices()\n"
-                    << "Number of ghosts of projection matrices exceeds"
-                    << " number of ghosts of 'PRESSURE'."
-                    << std::endl);
-            }
-        }
-        else
-        {
-            d_num_subghosts_pressure = num_subghosts;
-        }
-        
-        if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
-        {
-            if (num_subghosts > d_num_subghosts_velocity)
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFiveEqnAllaire::registerFaceProjectionMatrices()\n"
-                    << "Number of ghosts of projection matrices exceeds"
-                    << " number of ghosts of 'VELOCITY'."
-                    << std::endl);
-            }
-        }
-        else
-        {
-            d_num_subghosts_velocity = num_subghosts;
-            
-            if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
-            {
-                if (num_subghosts > d_num_subghosts_density)
-                {
-                    TBOX_ERROR(d_object_name
-                        << ": FlowModelFiveEqnAllaire::registerFaceProjectionMatrices()\n"
-                        << "Number of ghosts of projection matrices exceeds"
-                        << " number of ghosts of 'DENSITY'."
-                        << std::endl);
-                }
-            }
-            else
-            {
-                d_num_subghosts_density = num_subghosts;
-            }
-        }
-    }
+    setNumberOfSubGhosts(
+        num_subghosts,
+        "SOUND_SPEED",
+        "PROJECTION_MATRICES");
     
     d_proj_mat_primitive_var_registered = true;
 }
@@ -1221,9 +615,10 @@ void FlowModelFiveEqnAllaire::unregisterPatch()
     d_patch = nullptr;
     
     d_num_subghosts_density                   = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_pressure                  = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_mass_fraction             = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_velocity                  = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_internal_energy           = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_pressure                  = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_sound_speed               = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_dilatation                = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_vorticity                 = -hier::IntVector::getOne(d_dim);
@@ -1238,9 +633,10 @@ void FlowModelFiveEqnAllaire::unregisterPatch()
     d_interior_box                           = hier::Box::getEmptyBox(d_dim);
     d_ghost_box                              = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_density                   = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_pressure                  = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_mass_fraction             = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_velocity                  = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_internal_energy           = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_pressure                  = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_sound_speed               = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_dilatation                = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_vorticity                 = hier::Box::getEmptyBox(d_dim);
@@ -1256,9 +652,10 @@ void FlowModelFiveEqnAllaire::unregisterPatch()
     d_interior_dims                               = hier::IntVector::getZero(d_dim);
     d_ghostcell_dims                              = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_density                   = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_pressure                  = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_mass_fraction             = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_velocity                  = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_internal_energy           = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_pressure                  = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_sound_speed               = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_dilatation                = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_vorticity                 = hier::IntVector::getZero(d_dim);
@@ -1271,9 +668,10 @@ void FlowModelFiveEqnAllaire::unregisterPatch()
     d_subghostcell_dims_max_wave_speed_z          = hier::IntVector::getZero(d_dim);
     
     d_data_density.reset();
-    d_data_pressure.reset();
     d_data_mass_fraction.reset();
     d_data_velocity.reset();
+    d_data_internal_energy.reset();
+    d_data_pressure.reset();
     d_data_sound_speed.reset();
     d_data_dilatation.reset();
     d_data_vorticity.reset();
@@ -1321,15 +719,6 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
         }
     }
     
-    // Compute the pressure cell data.
-    if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
-    {
-        if (!d_data_pressure)
-        {
-            computeGlobalCellDataPressure();
-        }
-    }
-    
     // Compute the mass fraction cell data.
     if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
     {
@@ -1348,12 +737,30 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
         }
     }
     
+    // Compute the internal energy cell data.
+    if (d_num_subghosts_internal_energy > -hier::IntVector::getOne(d_dim))
+    {
+        if (!d_data_internal_energy)
+        {
+            computeGlobalCellDataInternalEnergyWithDensityAndVelocity();
+        }
+    }
+    
+    // Compute the pressure cell data.
+    if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
+    {
+        if (!d_data_pressure)
+        {
+            computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+        }
+    }
+    
     // Compute the sound speed cell data.
     if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
     {
         if (!d_data_sound_speed)
         {
-            computeGlobalCellDataSoundSpeedWithDensityPressureAndVelocity();
+            computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
         }
     }
     
@@ -1380,7 +787,7 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_enstrophy)
         {
-            computeGlobalCellDataEnstrophyWithDensityVelocityAndVorticity();
+            computeGlobalCellDataEnstrophyWithVorticity();
         }
     }
     
@@ -1389,7 +796,7 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_convective_flux_x)
         {
-            computeGlobalCellDataConvectiveFluxWithDensityPressureAndVelocity(X_DIRECTION);
+            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(X_DIRECTION);
         }
     }
     
@@ -1398,7 +805,7 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_convective_flux_y)
         {
-            computeGlobalCellDataConvectiveFluxWithDensityPressureAndVelocity(Y_DIRECTION);
+            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(Y_DIRECTION);
         }
     }
     
@@ -1407,7 +814,7 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_convective_flux_z)
         {
-            computeGlobalCellDataConvectiveFluxWithDensityPressureAndVelocity(Z_DIRECTION);
+            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(Z_DIRECTION);
         }
     }
     
@@ -1416,7 +823,7 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_max_wave_speed_x)
         {
-            computeGlobalCellDataMaxWaveSpeedWithDensityPressureVelocityAndSoundSpeed(X_DIRECTION);
+            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(X_DIRECTION);
         }
     }
     
@@ -1425,7 +832,7 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_max_wave_speed_y)
         {
-            computeGlobalCellDataMaxWaveSpeedWithDensityPressureVelocityAndSoundSpeed(Y_DIRECTION);
+            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(Y_DIRECTION);
         }
     }
     
@@ -1434,7 +841,7 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_max_wave_speed_z)
         {
-            computeGlobalCellDataMaxWaveSpeedWithDensityPressureVelocityAndSoundSpeed(Z_DIRECTION);
+            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(Z_DIRECTION);
         }
     }
 }
@@ -1485,17 +892,6 @@ FlowModelFiveEqnAllaire::getGlobalCellData(
         }
         cell_data = d_data_density;
     }
-    else if (variable_key == "PRESSURE")
-    {
-        if (!d_data_pressure)
-        {
-            TBOX_ERROR(d_object_name
-                << ": FlowModelFiveEqnAllaire::getGlobalCellData()\n"
-                << "Cell data of 'PRESSURE' is not registered/computed yet."
-                << std::endl);
-        }
-        cell_data = d_data_pressure;
-    }
     else if (variable_key == "MASS_FRACTION")
     {
         if (!d_data_mass_fraction)
@@ -1517,6 +913,28 @@ FlowModelFiveEqnAllaire::getGlobalCellData(
                 << std::endl);
         }
         cell_data = d_data_velocity;
+    }
+    else if (variable_key == "INTERNAL_ENERGY")
+    {
+        if (!d_data_pressure)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelFiveEqnAllaire::getGlobalCellData()\n"
+                << "Cell data of 'INTERNAL_ENERGY' is not registered/computed yet."
+                << std::endl);
+        }
+        cell_data = d_data_pressure;
+    }
+    else if (variable_key == "PRESSURE")
+    {
+        if (!d_data_pressure)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelFiveEqnAllaire::getGlobalCellData()\n"
+                << "Cell data of 'PRESSURE' is not registered/computed yet."
+                << std::endl);
+        }
+        cell_data = d_data_pressure;
     }
     else if (variable_key == "SOUND_SPEED")
     {
@@ -1824,7 +1242,7 @@ FlowModelFiveEqnAllaire::getGlobalCellDataPrimitiveVariables()
     global_cell_data.push_back(d_data_velocity);
     if (!d_data_pressure)
     {
-        computeGlobalCellDataPressure();
+        computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
     }
     global_cell_data.push_back(d_data_pressure);
     global_cell_data.push_back(getGlobalCellDataVolumeFraction());
@@ -1913,7 +1331,7 @@ FlowModelFiveEqnAllaire::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
     }
     if (!d_data_sound_speed)
     {
-        computeGlobalCellDataSoundSpeedWithDensityPressureAndVelocity();
+        computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
     }
     double* rho = d_data_density->getPointer(0);
     double* c = d_data_sound_speed->getPointer(0);
@@ -2340,7 +1758,7 @@ FlowModelFiveEqnAllaire::computeLocalFaceProjectionMatrixInverseOfPrimitiveVaria
     }
     if (!d_data_sound_speed)
     {
-        computeGlobalCellDataSoundSpeedWithDensityPressureAndVelocity();
+        computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
     }
     double* rho = d_data_density->getPointer(0);
     double* c = d_data_sound_speed->getPointer(0);
@@ -2987,6 +2405,48 @@ FlowModelFiveEqnAllaire::convertLocalCellDataPointersConservativeVariablesToPrim
     const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
         Z_rho_ptr);
     
+    /*
+     * Compute the internal energy.
+     */
+    double epsilon = 0.0;
+    if (d_dim == tbox::Dimension(1))
+    {
+        epsilon = ((*Q[d_num_species + d_dim.getValue()]) -
+            0.5*((*Q[d_num_species])*(*Q[d_num_species]))/rho)/rho;
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        epsilon = ((*Q[d_num_species + d_dim.getValue()]) -
+            0.5*((*Q[d_num_species])*(*Q[d_num_species]) +
+            (*Q[d_num_species + 1])*(*Q[d_num_species + 1]))/rho)/rho;
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        epsilon = ((*Q[d_num_species + d_dim.getValue()]) -
+            0.5*((*Q[d_num_species])*(*Q[d_num_species]) +
+            (*Q[d_num_species + 1])*(*Q[d_num_species + 1]) +
+            (*Q[d_num_species + 2])*(*Q[d_num_species + 2]))/rho)/rho;
+    }
+    
+    /*
+     * Compute the mass fractions.
+     */
+    double Y[d_num_species];
+    for (int si = 0; si < d_num_species; si++)
+    {
+        Y[si] = (*Q[si])/rho;
+    }
+    
+    /*
+     * Get the pointers to the mass fractions.
+     */
+    std::vector<const double*> Y_ptr;
+    Y_ptr.reserve(d_num_species);
+    for (int si = 0; si < d_num_species; si++)
+    {
+        Y_ptr.push_back(&Y[si]);
+    }
+    
     // Get the pointers to the volume fractions.
     std::vector<const double*> Z_ptr;
     Z_ptr.reserve(d_num_species - 1);
@@ -2995,19 +2455,11 @@ FlowModelFiveEqnAllaire::convertLocalCellDataPointersConservativeVariablesToPrim
         Z_ptr.push_back(Q[d_num_species + d_dim.getValue() + 1 + si]);
     }
     
-    // Get the pointers to the momentum components.
-    std::vector<const double*> m_ptr;
-    m_ptr.reserve(d_dim.getValue());
-    for (int di = 0; di < d_dim.getValue(); di++)
-    {
-        m_ptr.push_back(Q[d_num_species + di]);
-    }
-    
     // Compute the pressure.
     const double p = d_equation_of_state_mixing_rules->getPressure(
-        Z_rho_ptr,
-        m_ptr,
-        Q[d_num_species + d_dim.getValue()],
+        &rho,
+        &epsilon,
+        Y_ptr,
         Z_ptr);
     
     // Convert the conservative variables to primitive variables.
@@ -3069,6 +2521,25 @@ FlowModelFiveEqnAllaire::convertLocalCellDataPointersPrimitiveVariablesToConserv
     const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
         Z_rho_ptr);
     
+    /*
+     * Compute the mass fractions.
+     */
+    double Y[d_num_species];
+    for (int si = 0; si < d_num_species; si++)
+    {
+        Y[si] = (*V[si])/rho;
+    }
+    
+    /*
+     * Get the pointers to the mass fractions.
+     */
+    std::vector<const double*> Y_ptr;
+    Y_ptr.reserve(d_num_species);
+    for (int si = 0; si < d_num_species; si++)
+    {
+        Y_ptr.push_back(&Y[si]);
+    }
+    
     // Get the pointers to the volume fractions.
     std::vector<const double*> Z_ptr;
     Z_ptr.reserve(d_num_species - 1);
@@ -3077,20 +2548,16 @@ FlowModelFiveEqnAllaire::convertLocalCellDataPointersPrimitiveVariablesToConserv
         Z_ptr.push_back(V[d_num_species + d_dim.getValue() + 1 + si]);
     }
     
-    // Get the pointers to the velocity components.
-    std::vector<const double*> vel_ptr;
-    vel_ptr.reserve(d_dim.getValue());
-    for (int di = 0; di < d_dim.getValue(); di++)
-    {
-        vel_ptr.push_back(V[d_num_species + di]);
-    }
-    
     // Compute the total energy.
-    const double E = d_equation_of_state_mixing_rules->getTotalEnergy(
-        Z_rho_ptr,
-        vel_ptr,
+    const double epsilon = d_equation_of_state_mixing_rules->getInternalEnergy(
+        &rho,
         V[d_num_species + d_dim.getValue()],
+        Y_ptr,
         Z_ptr);
+    
+    const double E = epsilon + 0.5*rho*((*Q[d_num_species])*(*Q[d_num_species]) +
+        (*Q[d_num_species + 1])*(*Q[d_num_species + 1]) +
+        (*Q[d_num_species + 2])*(*Q[d_num_species + 2]));
     
     // Convert the primitive variables to conservative variables.
     for (int si = 0; si < d_num_species; si++)
@@ -3319,10 +2786,50 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                 {
                     Z_rho_ptr.push_back(&Z_rho[si][idx_data]);
                 }
+                const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+                    Z_rho_ptr);
                 
-                std::vector<const double*> m_ptr;
-                m_ptr.reserve(d_dim.getValue());
-                m_ptr.push_back(&rho_u[idx_data]);
+                /*
+                 * Compute the internal energy.
+                 */
+                double epsilon = 0.0;
+                if (d_dim == tbox::Dimension(1))
+                {
+                    epsilon = (E[idx_data] -
+                        0.5*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
+                }
+                else if (d_dim == tbox::Dimension(2))
+                {
+                    epsilon = (E[idx_data] -
+                        0.5*(rho_u[idx_data]*rho_u[idx_data] +
+                        rho_v[idx_data]*rho_v[idx_data])/rho)/rho;
+                }
+                else if (d_dim == tbox::Dimension(3))
+                {
+                    epsilon = (E[idx_data] -
+                        0.5*(rho_u[idx_data]*rho_u[idx_data] +
+                        rho_v[idx_data]*rho_v[idx_data] +
+                        rho_w[idx_data]*rho_w[idx_data])/rho)/rho;
+                }
+                
+                /*
+                 * Compute the mass fractions.
+                 */
+                double Y[d_num_species];
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y[si] = Z_rho[si][idx_data]/rho;
+                }
+                
+                /*
+                 * Get the pointers to the mass fractions.
+                 */
+                std::vector<const double*> Y_ptr;
+                Y_ptr.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y_ptr.push_back(&Y[si]);
+                }
                 
                 std::vector<const double*> Z_ptr;
                 Z_ptr.reserve(d_num_species - 1);
@@ -3333,9 +2840,9 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                 
                 buffer[idx_region] = d_equation_of_state_mixing_rules->
                     getPressure(
-                        Z_rho_ptr,
-                        m_ptr,
-                        &E[idx_data],
+                        &rho,
+                        &epsilon,
+                        Y_ptr,
                         Z_ptr);
             }
         }
@@ -3358,11 +2865,50 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                     {
                         Z_rho_ptr.push_back(&Z_rho[si][idx_data]);
                     }
+                    const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+                        Z_rho_ptr);
                     
-                    std::vector<const double*> m_ptr;
-                    m_ptr.reserve(d_dim.getValue());
-                    m_ptr.push_back(&rho_u[idx_data]);
-                    m_ptr.push_back(&rho_v[idx_data]);
+                    /*
+                     * Compute the internal energy.
+                     */
+                    double epsilon = 0.0;
+                    if (d_dim == tbox::Dimension(1))
+                    {
+                        epsilon = (E[idx_data] -
+                            0.5*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
+                    }
+                    else if (d_dim == tbox::Dimension(2))
+                    {
+                        epsilon = (E[idx_data] -
+                            0.5*(rho_u[idx_data]*rho_u[idx_data] +
+                            rho_v[idx_data]*rho_v[idx_data])/rho)/rho;
+                    }
+                    else if (d_dim == tbox::Dimension(3))
+                    {
+                        epsilon = (E[idx_data] -
+                            0.5*(rho_u[idx_data]*rho_u[idx_data] +
+                            rho_v[idx_data]*rho_v[idx_data] +
+                            rho_w[idx_data]*rho_w[idx_data])/rho)/rho;
+                    }
+                    
+                    /*
+                     * Compute the mass fractions.
+                     */
+                    double Y[d_num_species];
+                    for (int si = 0; si < d_num_species; si++)
+                    {
+                        Y[si] = Z_rho[si][idx_data]/rho;
+                    }
+                    
+                    /*
+                     * Get the pointers to the mass fractions.
+                     */
+                    std::vector<const double*> Y_ptr;
+                    Y_ptr.reserve(d_num_species);
+                    for (int si = 0; si < d_num_species; si++)
+                    {
+                        Y_ptr.push_back(&Y[si]);
+                    }
                     
                     std::vector<const double*> Z_ptr;
                     Z_ptr.reserve(d_num_species - 1);
@@ -3373,9 +2919,9 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                     
                     buffer[idx_region] = d_equation_of_state_mixing_rules->
                         getPressure(
-                            Z_rho_ptr,
-                            m_ptr,
-                            &E[idx_data],
+                            &rho,
+                            &epsilon,
+                            Y_ptr,
                             Z_ptr);
                 }
             }
@@ -3403,12 +2949,50 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                         {
                             Z_rho_ptr.push_back(&Z_rho[si][idx_data]);
                         }
+                        const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
+                            Z_rho_ptr);
                         
-                        std::vector<const double*> m_ptr;
-                        m_ptr.reserve(d_dim.getValue());
-                        m_ptr.push_back(&rho_u[idx_data]);
-                        m_ptr.push_back(&rho_v[idx_data]);
-                        m_ptr.push_back(&rho_w[idx_data]);
+                        /*
+                         * Compute the internal energy.
+                         */
+                        double epsilon = 0.0;
+                        if (d_dim == tbox::Dimension(1))
+                        {
+                            epsilon = (E[idx_data] -
+                                0.5*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
+                        }
+                        else if (d_dim == tbox::Dimension(2))
+                        {
+                            epsilon = (E[idx_data] -
+                                0.5*(rho_u[idx_data]*rho_u[idx_data] +
+                                rho_v[idx_data]*rho_v[idx_data])/rho)/rho;
+                        }
+                        else if (d_dim == tbox::Dimension(3))
+                        {
+                            epsilon = (E[idx_data] -
+                                0.5*(rho_u[idx_data]*rho_u[idx_data] +
+                                rho_v[idx_data]*rho_v[idx_data] +
+                                rho_w[idx_data]*rho_w[idx_data])/rho)/rho;
+                        }
+                        
+                        /*
+                         * Compute the mass fractions.
+                         */
+                        double Y[d_num_species];
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            Y[si] = Z_rho[si][idx_data]/rho;
+                        }
+                        
+                        /*
+                         * Get the pointers to the mass fractions.
+                         */
+                        std::vector<const double*> Y_ptr;
+                        Y_ptr.reserve(d_num_species);
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            Y_ptr.push_back(&Y[si]);
+                        }
                         
                         std::vector<const double*> Z_ptr;
                         Z_ptr.reserve(d_num_species - 1);
@@ -3419,9 +3003,9 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                         
                         buffer[idx_region] = d_equation_of_state_mixing_rules->
                             getPressure(
-                                Z_rho_ptr,
-                                m_ptr,
-                                &E[idx_data],
+                                &rho,
+                                &epsilon,
+                                Y_ptr,
                                 Z_ptr);
                     }
                 }
@@ -3500,9 +3084,47 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                 const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
                     Z_rho_ptr);
                 
-                std::vector<const double*> m_ptr;
-                m_ptr.reserve(d_dim.getValue());
-                m_ptr.push_back(&rho_u[idx_data]);
+                /*
+                 * Compute the internal energy.
+                 */
+                double epsilon = 0.0;
+                if (d_dim == tbox::Dimension(1))
+                {
+                    epsilon = (E[idx_data] -
+                        0.5*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
+                }
+                else if (d_dim == tbox::Dimension(2))
+                {
+                    epsilon = (E[idx_data] -
+                        0.5*(rho_u[idx_data]*rho_u[idx_data] +
+                        rho_v[idx_data]*rho_v[idx_data])/rho)/rho;
+                }
+                else if (d_dim == tbox::Dimension(3))
+                {
+                    epsilon = (E[idx_data] -
+                        0.5*(rho_u[idx_data]*rho_u[idx_data] +
+                        rho_v[idx_data]*rho_v[idx_data] +
+                        rho_w[idx_data]*rho_w[idx_data])/rho)/rho;
+                }
+                
+                /*
+                 * Compute the mass fractions.
+                 */
+                double Y[d_num_species];
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y[si] = Z_rho[si][idx_data]/rho;
+                }
+                
+                /*
+                 * Get the pointers to the mass fractions.
+                 */
+                std::vector<const double*> Y_ptr;
+                Y_ptr.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y_ptr.push_back(&Y[si]);
+                }
                 
                 std::vector<const double*> Z_ptr;
                 Z_ptr.reserve(d_num_species - 1);
@@ -3511,24 +3133,18 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                     Z_ptr.push_back(&Z[si][idx_data]);
                 }
                 
-                const double u = rho_u[idx_data]/rho;
-                
-                std::vector<const double*> vel_ptr;
-                vel_ptr.reserve(d_dim.getValue());
-                vel_ptr.push_back(&u);
-                
                 const double p = d_equation_of_state_mixing_rules->
                     getPressure(
-                        Z_rho_ptr,
-                        m_ptr,
-                        &E[idx_data],
+                        &rho,
+                        &epsilon,
+                        Y_ptr,
                         Z_ptr);
                 
                 buffer[idx_region] = d_equation_of_state_mixing_rules->
                     getSoundSpeed(
-                        Z_rho_ptr,
-                        vel_ptr,
+                        &rho,
                         &p,
+                        Y_ptr,
                         Z_ptr);
             }
         }
@@ -3554,9 +3170,47 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                     const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
                         Z_rho_ptr);
                     
-                    std::vector<const double*> m_ptr;
-                    m_ptr.reserve(d_dim.getValue());
-                    m_ptr.push_back(&rho_u[idx_data]);
+                    /*
+                     * Compute the internal energy.
+                     */
+                    double epsilon = 0.0;
+                    if (d_dim == tbox::Dimension(1))
+                    {
+                        epsilon = (E[idx_data] -
+                            0.5*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
+                    }
+                    else if (d_dim == tbox::Dimension(2))
+                    {
+                        epsilon = (E[idx_data] -
+                            0.5*(rho_u[idx_data]*rho_u[idx_data] +
+                            rho_v[idx_data]*rho_v[idx_data])/rho)/rho;
+                    }
+                    else if (d_dim == tbox::Dimension(3))
+                    {
+                        epsilon = (E[idx_data] -
+                            0.5*(rho_u[idx_data]*rho_u[idx_data] +
+                            rho_v[idx_data]*rho_v[idx_data] +
+                            rho_w[idx_data]*rho_w[idx_data])/rho)/rho;
+                    }
+                    
+                    /*
+                     * Compute the mass fractions.
+                     */
+                    double Y[d_num_species];
+                    for (int si = 0; si < d_num_species; si++)
+                    {
+                        Y[si] = Z_rho[si][idx_data]/rho;
+                    }
+                    
+                    /*
+                     * Get the pointers to the mass fractions.
+                     */
+                    std::vector<const double*> Y_ptr;
+                    Y_ptr.reserve(d_num_species);
+                    for (int si = 0; si < d_num_species; si++)
+                    {
+                        Y_ptr.push_back(&Y[si]);
+                    }
                     
                     std::vector<const double*> Z_ptr;
                     Z_ptr.reserve(d_num_species - 1);
@@ -3565,26 +3219,18 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                         Z_ptr.push_back(&Z[si][idx_data]);
                     }
                     
-                    const double u = rho_u[idx_data]/rho;
-                    const double v = rho_v[idx_data]/rho;
-                    
-                    std::vector<const double*> vel_ptr;
-                    vel_ptr.reserve(d_dim.getValue());
-                    vel_ptr.push_back(&u);
-                    vel_ptr.push_back(&v);
-                    
                     const double p = d_equation_of_state_mixing_rules->
                         getPressure(
-                            Z_rho_ptr,
-                            m_ptr,
-                            &E[idx_data],
+                            &rho,
+                            &epsilon,
+                            Y_ptr,
                             Z_ptr);
                     
                     buffer[idx_region] = d_equation_of_state_mixing_rules->
                         getSoundSpeed(
-                            Z_rho_ptr,
-                            vel_ptr,
+                            &rho,
                             &p,
+                            Y_ptr,
                             Z_ptr);
                 }
             }
@@ -3615,9 +3261,47 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                         const double rho = d_equation_of_state_mixing_rules->getMixtureDensity(
                             Z_rho_ptr);
                         
-                        std::vector<const double*> m_ptr;
-                        m_ptr.reserve(d_dim.getValue());
-                        m_ptr.push_back(&rho_u[idx_data]);
+                        /*
+                         * Compute the internal energy.
+                         */
+                        double epsilon = 0.0;
+                        if (d_dim == tbox::Dimension(1))
+                        {
+                            epsilon = (E[idx_data] -
+                                0.5*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
+                        }
+                        else if (d_dim == tbox::Dimension(2))
+                        {
+                            epsilon = (E[idx_data] -
+                                0.5*(rho_u[idx_data]*rho_u[idx_data] +
+                                rho_v[idx_data]*rho_v[idx_data])/rho)/rho;
+                        }
+                        else if (d_dim == tbox::Dimension(3))
+                        {
+                            epsilon = (E[idx_data] -
+                                0.5*(rho_u[idx_data]*rho_u[idx_data] +
+                                rho_v[idx_data]*rho_v[idx_data] +
+                                rho_w[idx_data]*rho_w[idx_data])/rho)/rho;
+                        }
+                        
+                        /*
+                         * Compute the mass fractions.
+                         */
+                        double Y[d_num_species];
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            Y[si] = Z_rho[si][idx_data]/rho;
+                        }
+                        
+                        /*
+                         * Get the pointers to the mass fractions.
+                         */
+                        std::vector<const double*> Y_ptr;
+                        Y_ptr.reserve(d_num_species);
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            Y_ptr.push_back(&Y[si]);
+                        }
                         
                         std::vector<const double*> Z_ptr;
                         Z_ptr.reserve(d_num_species - 1);
@@ -3626,28 +3310,18 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                             Z_ptr.push_back(&Z[si][idx_data]);
                         }
                         
-                        const double u = rho_u[idx_data]/rho;
-                        const double v = rho_v[idx_data]/rho;
-                        const double w = rho_w[idx_data]/rho;
-                        
-                        std::vector<const double*> vel_ptr;
-                        vel_ptr.reserve(d_dim.getValue());
-                        vel_ptr.push_back(&u);
-                        vel_ptr.push_back(&v);
-                        vel_ptr.push_back(&w);
-                        
                         const double p = d_equation_of_state_mixing_rules->
                             getPressure(
-                                Z_rho_ptr,
-                                m_ptr,
-                                &E[idx_data],
+                                &rho,
+                                &epsilon,
+                                Y_ptr,
                                 Z_ptr);
                         
                         buffer[idx_region] = d_equation_of_state_mixing_rules->
                             getSoundSpeed(
-                                Z_rho_ptr,
-                                vel_ptr,
+                                &rho,
                                 &p,
+                                Y_ptr,
                                 Z_ptr);
                     }
                 }
@@ -3987,6 +3661,395 @@ FlowModelFiveEqnAllaire::registerPlotQuantities(
 
 
 /*
+ * Set the number of sub-ghost cells of a variable.
+ * This function can be called recursively if the variables are computed recursively.
+ */
+void
+FlowModelFiveEqnAllaire::setNumberOfSubGhosts(
+    const hier::IntVector& num_subghosts,
+    const std::string& variable_name,
+    const std::string& parent_variable_name)
+{
+    if (variable_name == "DENSITY")
+    {
+        if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
+        {
+            if (num_subghosts > d_num_subghosts_density)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
+                    << "Number of ghosts of '"
+                    << parent_variable_name
+                    << "' exceeds"
+                    << " number of ghosts of '"
+                    << variable_name
+                    << "'."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            d_num_subghosts_density = num_subghosts;
+        }
+    }
+    else if (variable_name == "MASS_FRACTION")
+    {
+        if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
+        {
+            if (num_subghosts > d_num_subghosts_mass_fraction)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
+                    << "Number of ghosts of '"
+                    << parent_variable_name
+                    << "' exceeds"
+                    << " number of ghosts of '"
+                    << variable_name
+                    << "'."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            d_num_subghosts_mass_fraction = num_subghosts;
+        }
+        
+        setNumberOfSubGhosts(num_subghosts, "DENSITY", parent_variable_name);
+    }
+    else if (variable_name == "VELOCITY")
+    {
+        if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
+        {
+            if (num_subghosts > d_num_subghosts_velocity)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
+                    << "Number of ghosts of '"
+                    << parent_variable_name
+                    << "' exceeds"
+                    << " number of ghosts of '"
+                    << variable_name
+                    << "'."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            d_num_subghosts_velocity = num_subghosts;
+        }
+        
+        setNumberOfSubGhosts(num_subghosts, "DENSITY", parent_variable_name);
+    }
+    else if (variable_name == "INTERNAL_ENERGY")
+    {
+        if (d_num_subghosts_internal_energy > -hier::IntVector::getOne(d_dim))
+        {
+            if (num_subghosts > d_num_subghosts_internal_energy)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
+                    << "Number of ghosts of '"
+                    << parent_variable_name
+                    << "' exceeds"
+                    << " number of ghosts of '"
+                    << variable_name
+                    << "'."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            d_num_subghosts_internal_energy = num_subghosts;
+        }
+        
+        setNumberOfSubGhosts(num_subghosts, "DENSITY", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "VELOCITY", parent_variable_name);
+    }
+    else if (variable_name == "PRESSURE")
+    {
+        if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
+        {
+            if (num_subghosts > d_num_subghosts_pressure)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
+                    << "Number of ghosts of '"
+                    << parent_variable_name
+                    << "' exceeds"
+                    << " number of ghosts of '"
+                    << variable_name
+                    << "'."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            d_num_subghosts_pressure = num_subghosts;
+        }
+        
+        setNumberOfSubGhosts(num_subghosts, "DENSITY", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "MASS_FRACTION", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "INTERNAL_ENERGY", parent_variable_name);
+    }
+    else if (variable_name == "SOUND_SPEED")
+    {
+        if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
+        {
+            if (num_subghosts > d_num_subghosts_sound_speed)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
+                    << "Number of ghosts of '"
+                    << parent_variable_name
+                    << "' exceeds"
+                    << " number of ghosts of '"
+                    << variable_name
+                    << "'."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            d_num_subghosts_sound_speed = num_subghosts;
+        }
+        
+        setNumberOfSubGhosts(num_subghosts, "DENSITY", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "MASS_FRACTION", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "PRESSURE", parent_variable_name);
+    }
+    else if (variable_name == "DILATATION")
+    {
+        if (d_num_subghosts_dilatation > -hier::IntVector::getOne(d_dim))
+        {
+            if (num_subghosts > d_num_subghosts_dilatation)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
+                    << "Number of ghosts of '"
+                    << parent_variable_name
+                    << "' exceeds"
+                    << " number of ghosts of '"
+                    << variable_name
+                    << "'."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            d_num_subghosts_dilatation = num_subghosts;
+        }
+        
+        setNumberOfSubGhosts(num_subghosts, "DENSITY", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "VELOCITY", parent_variable_name);
+    }
+    else if (variable_name == "VORTICITY")
+    {
+        if (d_num_subghosts_vorticity > -hier::IntVector::getOne(d_dim))
+        {
+            if (num_subghosts > d_num_subghosts_vorticity)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
+                    << "Number of ghosts of '"
+                    << parent_variable_name
+                    << "' exceeds"
+                    << " number of ghosts of '"
+                    << variable_name
+                    << "'."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            d_num_subghosts_vorticity = num_subghosts;
+        }
+        
+        setNumberOfSubGhosts(num_subghosts, "DENSITY", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "VELOCITY", parent_variable_name);
+    }
+    else if (variable_name == "ENSTROPHY")
+    {
+        if (d_num_subghosts_enstrophy > -hier::IntVector::getOne(d_dim))
+        {
+            if (num_subghosts > d_num_subghosts_enstrophy)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
+                    << "Number of ghosts of '"
+                    << parent_variable_name
+                    << "' exceeds"
+                    << " number of ghosts of '"
+                    << variable_name
+                    << "'."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            d_num_subghosts_enstrophy = num_subghosts;
+        }
+        
+        setNumberOfSubGhosts(num_subghosts, "VORTICITY", parent_variable_name);
+    }
+    else if (variable_name == "CONVECTIVE_FLUX_X")
+    {
+        if (d_num_subghosts_convective_flux_x > -hier::IntVector::getOne(d_dim))
+        {
+            if (num_subghosts > d_num_subghosts_convective_flux_x)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
+                    << "Number of ghosts of '"
+                    << parent_variable_name
+                    << "' exceeds"
+                    << " number of ghosts of '"
+                    << variable_name
+                    << "'."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            d_num_subghosts_convective_flux_x = num_subghosts;
+        }
+        
+        setNumberOfSubGhosts(num_subghosts, "VELOCITY", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "PRESSURE", parent_variable_name);
+    }
+    else if (variable_name == "CONVECTIVE_FLUX_Y")
+    {
+        if (d_num_subghosts_convective_flux_y > -hier::IntVector::getOne(d_dim))
+        {
+            if (num_subghosts > d_num_subghosts_convective_flux_y)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
+                    << "Number of ghosts of '"
+                    << parent_variable_name
+                    << "' exceeds"
+                    << " number of ghosts of '"
+                    << variable_name
+                    << "'."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            d_num_subghosts_convective_flux_y = num_subghosts;
+        }
+        
+        setNumberOfSubGhosts(num_subghosts, "VELOCITY", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "PRESSURE", parent_variable_name);
+    }
+    else if (variable_name == "CONVECTIVE_FLUX_Z")
+    {
+        if (d_num_subghosts_convective_flux_z > -hier::IntVector::getOne(d_dim))
+        {
+            if (num_subghosts > d_num_subghosts_convective_flux_z)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
+                    << "Number of ghosts of '"
+                    << parent_variable_name
+                    << "' exceeds"
+                    << " number of ghosts of '"
+                    << variable_name
+                    << "'."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            d_num_subghosts_convective_flux_z = num_subghosts;
+        }
+        
+        setNumberOfSubGhosts(num_subghosts, "VELOCITY", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "PRESSURE", parent_variable_name);
+    }
+    else if (variable_name == "PRIMITIVE_VARIABLES")
+    {
+        setNumberOfSubGhosts(num_subghosts, "VELOCITY", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "PRESSURE", parent_variable_name);
+    }
+    else if (variable_name == "MAX_WAVE_SPEED_X")
+    {
+        if (d_num_subghosts_max_wave_speed_x > -hier::IntVector::getOne(d_dim))
+        {
+            if (num_subghosts > d_num_subghosts_max_wave_speed_x)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
+                    << "Number of ghosts of '"
+                    << parent_variable_name
+                    << "' exceeds"
+                    << " number of ghosts of '"
+                    << variable_name
+                    << "'."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            d_num_subghosts_max_wave_speed_x = num_subghosts;
+        }
+        
+        setNumberOfSubGhosts(num_subghosts, "VELOCITY", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "SOUND_SPEED", parent_variable_name);
+    }
+    else if (variable_name == "MAX_WAVE_SPEED_Y")
+    {
+        if (d_num_subghosts_max_wave_speed_y > -hier::IntVector::getOne(d_dim))
+        {
+            if (num_subghosts > d_num_subghosts_max_wave_speed_y)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
+                    << "Number of ghosts of '"
+                    << parent_variable_name
+                    << "' exceeds"
+                    << " number of ghosts of '"
+                    << variable_name
+                    << "'."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            d_num_subghosts_max_wave_speed_y = num_subghosts;
+        }
+        
+        setNumberOfSubGhosts(num_subghosts, "VELOCITY", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "SOUND_SPEED", parent_variable_name);
+    }
+    else if (variable_name == "MAX_WAVE_SPEED_Z")
+    {
+        if (d_num_subghosts_max_wave_speed_z > -hier::IntVector::getOne(d_dim))
+        {
+            if (num_subghosts > d_num_subghosts_max_wave_speed_z)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
+                    << "Number of ghosts of '"
+                    << parent_variable_name
+                    << "' exceeds"
+                    << " number of ghosts of '"
+                    << variable_name
+                    << "'."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            d_num_subghosts_max_wave_speed_z = num_subghosts;
+        }
+        
+        setNumberOfSubGhosts(num_subghosts, "VELOCITY", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "SOUND_SPEED", parent_variable_name);
+    }
+}
+
+
+/*
  * Set the ghost boxes and their dimensions of derived cell variables.
  */
 void
@@ -3997,13 +4060,6 @@ FlowModelFiveEqnAllaire::setGhostBoxesAndDimensionsDerivedCellVariables()
         d_subghost_box_density = d_interior_box;
         d_subghost_box_density.grow(d_num_subghosts_density);
         d_subghostcell_dims_density = d_subghost_box_density.numberCells();
-    }
-    
-    if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
-    {
-        d_subghost_box_pressure = d_interior_box;
-        d_subghost_box_pressure.grow(d_num_subghosts_pressure);
-        d_subghostcell_dims_pressure = d_subghost_box_pressure.numberCells();
     }
     
     if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
@@ -4018,6 +4074,20 @@ FlowModelFiveEqnAllaire::setGhostBoxesAndDimensionsDerivedCellVariables()
         d_subghost_box_velocity = d_interior_box;
         d_subghost_box_velocity.grow(d_num_subghosts_velocity);
         d_subghostcell_dims_velocity = d_subghost_box_velocity.numberCells();
+    }
+    
+    if (d_num_subghosts_internal_energy > -hier::IntVector::getOne(d_dim))
+    {
+        d_subghost_box_internal_energy = d_interior_box;
+        d_subghost_box_internal_energy.grow(d_num_subghosts_internal_energy);
+        d_subghostcell_dims_internal_energy = d_subghost_box_internal_energy.numberCells();
+    }
+    
+    if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
+    {
+        d_subghost_box_pressure = d_interior_box;
+        d_subghost_box_pressure.grow(d_num_subghosts_pressure);
+        d_subghostcell_dims_pressure = d_subghost_box_pressure.numberCells();
     }
     
     if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
@@ -4275,207 +4345,6 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataDensity()
         TBOX_ERROR(d_object_name
             << ": FlowModelFiveEqnAllaire::computeGlobalCellDataDensity()\n"
             << "Cell data of 'DENSITY' is not yet registered."
-            << std::endl);
-    }
-}
-
-
-/*
- * Compute the global cell data of pressure in the registered patch.
- */
-void
-FlowModelFiveEqnAllaire::computeGlobalCellDataPressure()
-{
-    if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
-    {
-        // Create the cell data of pressure.
-        d_data_pressure.reset(
-            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_pressure));
-        
-        // Get the cell data of the variables partial density, momentum, total energy and volume fraction.
-        boost::shared_ptr<pdat::CellData<double> > data_partial_density =
-            getGlobalCellDataPartialDensity();
-        
-        boost::shared_ptr<pdat::CellData<double> > data_momentum =
-            getGlobalCellDataMomentum();
-        
-        boost::shared_ptr<pdat::CellData<double> > data_total_energy =
-            getGlobalCellDataTotalEnergy();
-        
-        boost::shared_ptr<pdat::CellData<double> > data_volume_fraction =
-            getGlobalCellDataVolumeFraction();
-        
-        // Get the pointers to the cell data of pressure, partial density, total energy and volume fraction.
-        double* p   = d_data_pressure->getPointer(0);
-        std::vector<double*> Z_rho;
-        Z_rho.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Z_rho.push_back(data_partial_density->getPointer(si));
-        }
-        double* E   = data_total_energy->getPointer(0);
-        std::vector<double*> Z;
-        Z.reserve(d_num_species - 1);
-        for (int si = 0; si < d_num_species - 1; si++)
-        {
-            Z.push_back(data_volume_fraction->getPointer(si));
-        }
-        
-        if (d_dim == tbox::Dimension(1))
-        {
-            // Get the pointer to cell data of momentum.
-            double* rho_u = data_momentum->getPointer(0);
-            
-            // Compute the pressure field.
-            for (int i = -d_num_subghosts_pressure[0];
-                 i < d_interior_dims[0] + d_num_subghosts_pressure[0];
-                 i++)
-            {
-                // Compute the linear indices.
-                const int idx = i + d_num_ghosts[0];
-                const int idx_pressure = i + d_num_subghosts_pressure[0];
-                
-                std::vector<const double*> Z_rho_ptr;
-                Z_rho_ptr.reserve(d_num_species);
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    Z_rho_ptr.push_back(&Z_rho[si][idx]);
-                }
-                
-                std::vector<const double*> m_ptr;
-                m_ptr.reserve(1);
-                m_ptr.push_back(&rho_u[idx]);
-                
-                std::vector<const double*> Z_ptr;
-                Z_ptr.reserve(d_num_species - 1);
-                for (int si = 0; si < d_num_species - 1; si++)
-                {
-                    Z_ptr.push_back(&Z[si][idx]);
-                }
-                
-                p[idx_pressure] = d_equation_of_state_mixing_rules->
-                    getPressure(
-                        Z_rho_ptr,
-                        m_ptr,
-                        &E[idx],
-                        Z_ptr);
-            }
-        }
-        else if (d_dim == tbox::Dimension(2))
-        {
-            // Get the pointers to the cell data of momentum.
-            double* rho_u = data_momentum->getPointer(0);
-            double* rho_v = data_momentum->getPointer(1);
-            
-            // Compute the pressure field.
-            for (int j = -d_num_subghosts_pressure[1];
-                 j < d_interior_dims[1] + d_num_subghosts_pressure[1];
-                 j++)
-            {
-                for (int i = -d_num_subghosts_pressure[0];
-                     i < d_interior_dims[0] + d_num_subghosts_pressure[0];
-                     i++)
-                {
-                    // Compute the linear indices.
-                    const int idx = (i + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
-                    
-                    const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                        (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
-                    
-                    std::vector<const double*> Z_rho_ptr;
-                    Z_rho_ptr.reserve(d_num_species);
-                    for (int si = 0; si < d_num_species; si++)
-                    {
-                        Z_rho_ptr.push_back(&Z_rho[si][idx]);
-                    }
-                    
-                    std::vector<const double*> m_ptr;
-                    m_ptr.reserve(2);
-                    m_ptr.push_back(&rho_u[idx]);
-                    m_ptr.push_back(&rho_v[idx]);
-                    
-                    std::vector<const double*> Z_ptr;
-                    Z_ptr.reserve(d_num_species - 1);
-                    for (int si = 0; si < d_num_species - 1; si++)
-                    {
-                        Z_ptr.push_back(&Z[si][idx]);
-                    }
-                    
-                    p[idx_pressure] = d_equation_of_state_mixing_rules->
-                        getPressure(
-                            Z_rho_ptr,
-                            m_ptr,
-                            &E[idx],
-                            Z_ptr);
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            // Get the pointers to the cell data of momentum.
-            double* rho_u = data_momentum->getPointer(0);
-            double* rho_v = data_momentum->getPointer(1);
-            double* rho_w = data_momentum->getPointer(2);
-            
-            // Compute the pressure field.
-            for (int k = -d_num_subghosts_pressure[2];
-                 k < d_interior_dims[2] + d_num_subghosts_pressure[2];
-                 k++)
-            {
-                for (int j = -d_num_subghosts_pressure[1];
-                     j < d_interior_dims[1] + d_num_subghosts_pressure[1];
-                     j++)
-                {
-                    for (int i = -d_num_subghosts_pressure[0];
-                         i < d_interior_dims[0] + d_num_subghosts_pressure[0];
-                         i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
-                        
-                        const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                            (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
-                            (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*d_subghostcell_dims_pressure[1];
-                        
-                        std::vector<const double*> Z_rho_ptr;
-                        Z_rho_ptr.reserve(d_num_species);
-                        for (int si = 0; si < d_num_species; si++)
-                        {
-                            Z_rho_ptr.push_back(&Z_rho[si][idx]);
-                        }
-                        
-                        std::vector<const double*> m_ptr;
-                        m_ptr.reserve(3);
-                        m_ptr.push_back(&rho_u[idx]);
-                        m_ptr.push_back(&rho_v[idx]);
-                        m_ptr.push_back(&rho_w[idx]);
-                        
-                        std::vector<const double*> Z_ptr;
-                        Z_ptr.reserve(d_num_species - 1);
-                        for (int si = 0; si < d_num_species - 1; si++)
-                        {
-                            Z_ptr.push_back(&Z[si][idx]);
-                        }
-                        
-                        p[idx_pressure] = d_equation_of_state_mixing_rules->
-                            getPressure(
-                                Z_rho_ptr,
-                                m_ptr,
-                                &E[idx],
-                                Z_ptr);
-                    }
-                }
-            }
-        }
-    }
-    else
-    {
-        TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::computeGlobalCellDataPressure()\n"
-            << "Cell data of 'PRESSURE' is not yet registered."
             << std::endl);
     }
 }
@@ -4746,27 +4615,25 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataVelocityWithDensity()
 
 
 /*
- * Compute the global cell data of sound speed with density, pressure and velocity in the registered patch.
+ * Compute the global cell data of internal energy with density and velocity in the registered
+ * patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityPressureAndVelocity()
+FlowModelFiveEqnAllaire::computeGlobalCellDataInternalEnergyWithDensityAndVelocity()
 {
-    if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
+    if (d_num_subghosts_internal_energy > -hier::IntVector::getOne(d_dim))
     {
-        // Create the cell data of sound speed.
-        d_data_sound_speed.reset(
-            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_sound_speed));
+        // Create the cell data of internal energy.
+        d_data_internal_energy.reset(
+            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_internal_energy));
         
-        // Get the cell data of the variables partial density and volume fraction.
-        boost::shared_ptr<pdat::CellData<double> > data_partial_density =
-            getGlobalCellDataPartialDensity();
+        // Get the cell data of the variables total energy and volume fraction.
+        boost::shared_ptr<pdat::CellData<double> > data_total_energy =
+            getGlobalCellDataTotalEnergy();
         
-        boost::shared_ptr<pdat::CellData<double> > data_volume_fraction =
-            getGlobalCellDataVolumeFraction();
-        
-        if (!d_data_pressure)
+        if (!d_data_density)
         {
-            computeGlobalCellDataPressure();
+            computeGlobalCellDataDensity();
         }
         
         if (!d_data_velocity)
@@ -4774,13 +4641,375 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityPressureAndVe
             computeGlobalCellDataVelocityWithDensity();
         }
         
-        // Get the pointers to the cell data of sound speed, partial density, pressure and volume fraction.
-        double* c   = d_data_sound_speed->getPointer(0);
-        std::vector<double*> Z_rho;
-        Z_rho.reserve(d_num_species);
+        // Get the pointers to the cell data of internal energy, total energy and density.
+        double* epsilon = d_data_internal_energy->getPointer(0);
+        double* E = data_total_energy->getPointer(0);
+        double* rho = d_data_density->getPointer(0);
+        
+        if (d_dim == tbox::Dimension(1))
+        {
+            /// Get the pointer to cell data of velocity.
+            double* u = d_data_velocity->getPointer(0);
+            
+            // Compute the internal energy field.
+            for (int i = -d_num_subghosts_internal_energy[0];
+                 i < d_interior_dims[0] + d_num_subghosts_internal_energy[0];
+                 i++)
+            {
+                // Compute the linear indices.
+                const int idx = i + d_num_ghosts[0];
+                const int idx_density = i + d_num_subghosts_density[0];
+                const int idx_velocity = i + d_num_subghosts_velocity[0];
+                const int idx_internal_energy = i + d_num_subghosts_internal_energy[0];
+                
+                epsilon[idx_internal_energy] = E[idx]/rho[idx_density] -
+                    0.5*u[idx_velocity]*u[idx_velocity];
+            }
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            // Get the pointers to the cell data of velocity.
+            double* u = d_data_velocity->getPointer(0);
+            double* v = d_data_velocity->getPointer(1);
+            
+            // Compute the internal energy field.
+            for (int j = -d_num_subghosts_internal_energy[1];
+                 j < d_interior_dims[1] + d_num_subghosts_internal_energy[1];
+                 j++)
+            {
+                for (int i = -d_num_subghosts_internal_energy[0];
+                     i < d_interior_dims[0] + d_num_subghosts_internal_energy[0];
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx = (i + d_num_ghosts[0]) +
+                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
+                    
+                    const int idx_density = (i + d_num_subghosts_density[0]) +
+                        (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
+                    
+                    const int idx_velocity = (i + d_num_subghosts_velocity[0]) +
+                        (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
+                    
+                    const int idx_internal_energy = (i + d_num_subghosts_internal_energy[0]) +
+                        (j + d_num_subghosts_internal_energy[1])*d_subghostcell_dims_internal_energy[0];
+                    
+                    epsilon[idx_internal_energy] = E[idx]/rho[idx_density] -
+                        0.5*(u[idx_velocity]*u[idx_velocity] + v[idx_velocity]*v[idx_velocity]);
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            // Get the pointers to the cell data of velocity.
+            double* u = d_data_velocity->getPointer(0);
+            double* v = d_data_velocity->getPointer(1);
+            double* w = d_data_velocity->getPointer(2);
+            
+            // Compute the internal energy field.
+            for (int k = -d_num_subghosts_internal_energy[2];
+                 k < d_interior_dims[2] + d_num_subghosts_internal_energy[2];
+                 k++)
+            {
+                for (int j = -d_num_subghosts_internal_energy[1];
+                     j < d_interior_dims[1] + d_num_subghosts_internal_energy[1];
+                     j++)
+                {
+                    for (int i = -d_num_subghosts_internal_energy[0];
+                         i < d_interior_dims[0] + d_num_subghosts_internal_energy[0];
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx = (i + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
+                            (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
+                        
+                        const int idx_density = (i + d_num_subghosts_density[0]) +
+                            (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
+                            (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
+                                d_subghostcell_dims_density[1];
+                        
+                        const int idx_velocity = (i + d_num_subghosts_velocity[0]) +
+                            (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
+                            (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
+                                d_subghostcell_dims_velocity[1];
+                        
+                        const int idx_internal_energy = (i + d_num_subghosts_internal_energy[0]) +
+                            (j + d_num_subghosts_internal_energy[1])*d_subghostcell_dims_internal_energy[0] +
+                            (k + d_num_subghosts_internal_energy[2])*d_subghostcell_dims_internal_energy[0]*
+                                d_subghostcell_dims_internal_energy[1];
+                        
+                        epsilon[idx_internal_energy] = E[idx]/rho[idx_density] -
+                            0.5*(u[idx_velocity]*u[idx_velocity] + v[idx_velocity]*v[idx_velocity] +
+                            w[idx_velocity]*w[idx_velocity]);
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelFiveEqnAllaire::computeGlobalCellDataInternalEnergyWithDensityAndVelocity()\n"
+            << "Cell data of 'INTERNAL_ENERGY' is not yet registered."
+            << std::endl);
+    }
+}
+
+
+/*
+ * Compute the global cell data of pressure with density, mass fraction and internal energy in
+ * the registered patch.
+ */
+void
+FlowModelFiveEqnAllaire::computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy()
+{
+    if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
+    {
+        // Create the cell data of pressure.
+        d_data_pressure.reset(
+            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_pressure));
+        
+        // Get the cell data of the variable volume fraction.
+        boost::shared_ptr<pdat::CellData<double> > data_volume_fraction =
+            getGlobalCellDataVolumeFraction();
+        
+        if (!d_data_density)
+        {
+            computeGlobalCellDataDensity();
+        }
+        
+        if (!d_data_mass_fraction)
+        {
+            computeGlobalCellDataMassFractionWithDensity();
+        }
+        
+        if (!d_data_internal_energy)
+        {
+            computeGlobalCellDataInternalEnergyWithDensityAndVelocity();
+        }
+        
+        // Get the pointers to the cell data of pressure, volume fraction, density, mass fraction
+        // and internal energy.
+        double* p   = d_data_pressure->getPointer(0);
+        std::vector<double*> Z;
+        Z.reserve(d_num_species - 1);
+        for (int si = 0; si < d_num_species - 1; si++)
+        {
+            Z.push_back(data_volume_fraction->getPointer(si));
+        }
+        double* rho = d_data_density->getPointer(0);
+        std::vector<double*> Y;
+        Y.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            Z_rho.push_back(data_partial_density->getPointer(si));
+            Y.push_back(d_data_mass_fraction->getPointer(si));
+        }
+        double* epsilon = d_data_internal_energy->getPointer(0);
+        
+        if (d_dim == tbox::Dimension(1))
+        {
+            // Compute the pressure field.
+            for (int i = -d_num_subghosts_pressure[0];
+                 i < d_interior_dims[0] + d_num_subghosts_pressure[0];
+                 i++)
+            {
+                // Compute the linear indices.
+                const int idx = i + d_num_ghosts[0];
+                const int idx_density = i + d_num_subghosts_density[0];
+                const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
+                const int idx_internal_energy = i + d_num_subghosts_internal_energy[0];
+                const int idx_pressure = i + d_num_subghosts_pressure[0];
+                
+                std::vector<const double*> Y_ptr;
+                Y_ptr.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                }
+                
+                std::vector<const double*> Z_ptr;
+                Z_ptr.reserve(d_num_species - 1);
+                for (int si = 0; si < d_num_species - 1; si++)
+                {
+                    Z_ptr.push_back(&Z[si][idx]);
+                }
+                
+                p[idx_pressure] = d_equation_of_state_mixing_rules->
+                    getPressure(
+                        &rho[idx_density],
+                        &epsilon[idx_internal_energy],
+                        Y_ptr,
+                        Z_ptr);
+            }
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            // Compute the pressure field.
+            for (int j = -d_num_subghosts_pressure[1];
+                 j < d_interior_dims[1] + d_num_subghosts_pressure[1];
+                 j++)
+            {
+                for (int i = -d_num_subghosts_pressure[0];
+                     i < d_interior_dims[0] + d_num_subghosts_pressure[0];
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx = (i + d_num_ghosts[0]) +
+                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
+                    
+                    const int idx_density = (i + d_num_subghosts_density[0]) +
+                        (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
+                    
+                    const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
+                        (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
+                    
+                    const int idx_internal_energy = (i + d_num_subghosts_internal_energy[0]) +
+                        (j + d_num_subghosts_internal_energy[1])*d_subghostcell_dims_internal_energy[0];
+                    
+                    const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
+                        (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
+                    
+                    std::vector<const double*> Y_ptr;
+                    Y_ptr.reserve(d_num_species);
+                    for (int si = 0; si < d_num_species; si++)
+                    {
+                        Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                    }
+                    
+                    std::vector<const double*> Z_ptr;
+                    Z_ptr.reserve(d_num_species - 1);
+                    for (int si = 0; si < d_num_species - 1; si++)
+                    {
+                        Z_ptr.push_back(&Z[si][idx]);
+                    }
+                    
+                    p[idx_pressure] = d_equation_of_state_mixing_rules->
+                        getPressure(
+                            &rho[idx_density],
+                            &epsilon[idx_internal_energy],
+                            Y_ptr,
+                            Z_ptr);
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            // Compute the pressure field.
+            for (int k = -d_num_subghosts_pressure[2];
+                 k < d_interior_dims[2] + d_num_subghosts_pressure[2];
+                 k++)
+            {
+                for (int j = -d_num_subghosts_pressure[1];
+                     j < d_interior_dims[1] + d_num_subghosts_pressure[1];
+                     j++)
+                {
+                    for (int i = -d_num_subghosts_pressure[0];
+                         i < d_interior_dims[0] + d_num_subghosts_pressure[0];
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx = (i + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
+                            (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
+                        
+                        const int idx_density = (i + d_num_subghosts_density[0]) +
+                            (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
+                            (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
+                                d_subghostcell_dims_density[1];
+                        
+                        const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
+                            (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
+                            (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*
+                                d_subghostcell_dims_mass_fraction[1];
+                        
+                        const int idx_internal_energy = (i + d_num_subghosts_internal_energy[0]) +
+                            (j + d_num_subghosts_internal_energy[1])*d_subghostcell_dims_internal_energy[0] +
+                            (k + d_num_subghosts_internal_energy[2])*d_subghostcell_dims_internal_energy[0]*
+                                d_subghostcell_dims_internal_energy[1];
+                        
+                        const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
+                            (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
+                            (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
+                                d_subghostcell_dims_pressure[1];
+                        
+                        std::vector<const double*> Y_ptr;
+                        Y_ptr.reserve(d_num_species);
+                        for (int si = 0; si < d_num_species; si++)
+                        {
+                            Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                        }
+                        
+                        std::vector<const double*> Z_ptr;
+                        Z_ptr.reserve(d_num_species - 1);
+                        for (int si = 0; si < d_num_species - 1; si++)
+                        {
+                            Z_ptr.push_back(&Z[si][idx]);
+                        }
+                        
+                        p[idx_pressure] = d_equation_of_state_mixing_rules->
+                            getPressure(
+                                &rho[idx_density],
+                                &epsilon[idx_internal_energy],
+                                Y_ptr,
+                                Z_ptr);
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelFiveEqnAllaire::"
+            << "computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy()\n"
+            << "Cell data of 'PRESSURE' is not yet registered."
+            << std::endl);
+    }
+}
+
+
+/*
+ * Compute the global cell data of sound speed with density, mass fraction and pressure in the
+ * registered patch.
+ */
+void
+FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure()
+{
+    if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
+    {
+        // Create the cell data of sound speed.
+        d_data_sound_speed.reset(
+            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_sound_speed));
+        
+        // Get the cell data of the variable volume fraction.
+        boost::shared_ptr<pdat::CellData<double> > data_volume_fraction =
+            getGlobalCellDataVolumeFraction();
+        
+        if (!d_data_density)
+        {
+            computeGlobalCellDataDensity();
+        }
+        
+        if (!d_data_mass_fraction)
+        {
+            computeGlobalCellDataMassFractionWithDensity();
+        }
+        
+        if (!d_data_pressure)
+        {
+            computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+        }
+        
+        // Get the pointers to the cell data of sound speed, density, mass fraction, pressure and
+        // volume fraction.
+        double* c   = d_data_sound_speed->getPointer(0);
+        double* rho = d_data_density->getPointer(0);
+        std::vector<double*> Y;
+        Y.reserve(d_num_species);
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Y.push_back(d_data_mass_fraction->getPointer(si));
         }
         double* p   = d_data_pressure->getPointer(0);
         std::vector<double*> Z;
@@ -4792,9 +5021,6 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityPressureAndVe
         
         if (d_dim == tbox::Dimension(1))
         {
-            // Get the pointers to the cell data of velocity.
-            double* u = d_data_velocity->getPointer(0);
-            
             // Compute the sound speed field.
             for (int i = -d_num_subghosts_sound_speed[0];
                  i < d_interior_dims[0] + d_num_subghosts_sound_speed[0];
@@ -4802,20 +5028,17 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityPressureAndVe
             {
                 // Compute the linear indices.
                 const int idx = i + d_num_ghosts[0];
+                const int idx_density = i + d_num_subghosts_density[0];
+                const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
                 const int idx_pressure = i + d_num_subghosts_pressure[0];
-                const int idx_velocity = i + d_num_subghosts_velocity[0];
                 const int idx_sound_speed = i + d_num_subghosts_sound_speed[0];
                 
-                std::vector<const double*> Z_rho_ptr;
-                Z_rho_ptr.reserve(d_num_species);
+                std::vector<const double*> Y_ptr;
+                Y_ptr.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Z_rho_ptr.push_back(&Z_rho[si][idx]);
+                    Y_ptr.push_back(&Y[si][idx_mass_fraction]);
                 }
-                
-                std::vector<const double*> vel_ptr;
-                vel_ptr.reserve(1);
-                vel_ptr.push_back(&u[idx_velocity]);
                 
                 std::vector<const double*> Z_ptr;
                 Z_ptr.reserve(d_num_species - 1);
@@ -4826,18 +5049,14 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityPressureAndVe
                 
                 c[idx_sound_speed] = d_equation_of_state_mixing_rules->
                     getSoundSpeed(
-                        Z_rho_ptr,
-                        vel_ptr,
+                        &rho[idx_density],
                         &p[idx_pressure],
+                        Y_ptr,
                         Z_ptr);
             }
         }
         else if (d_dim == tbox::Dimension(2))
         {
-            // Get the pointers to the cell data of velocity.
-            double* u = d_data_velocity->getPointer(0);
-            double* v = d_data_velocity->getPointer(1);
-            
             // Compute the sound speed field.
             for (int j = -d_num_subghosts_sound_speed[1];
                  j < d_interior_dims[1] + d_num_subghosts_sound_speed[1];
@@ -4851,26 +5070,24 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityPressureAndVe
                     const int idx = (i + d_num_ghosts[0]) +
                         (j + d_num_ghosts[1])*d_ghostcell_dims[0];
                     
+                    const int idx_density = (i + d_num_subghosts_density[0]) +
+                        (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
+                    
+                    const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
+                        (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
+                    
                     const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
                         (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
-                    
-                    const int idx_velocity = (i + d_num_subghosts_velocity[0]) +
-                        (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
                     
                     const int idx_sound_speed = (i + d_num_subghosts_sound_speed[0]) +
                         (j + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
                     
-                    std::vector<const double*> Z_rho_ptr;
-                    Z_rho_ptr.reserve(d_num_species);
+                    std::vector<const double*> Y_ptr;
+                    Y_ptr.reserve(d_num_species);
                     for (int si = 0; si < d_num_species; si++)
                     {
-                        Z_rho_ptr.push_back(&Z_rho[si][idx]);
+                        Y_ptr.push_back(&Y[si][idx_mass_fraction]);
                     }
-                    
-                    std::vector<const double*> vel_ptr;
-                    vel_ptr.reserve(2);
-                    vel_ptr.push_back(&u[idx_velocity]);
-                    vel_ptr.push_back(&v[idx_velocity]);
                     
                     std::vector<const double*> Z_ptr;
                     Z_ptr.reserve(d_num_species - 1);
@@ -4881,20 +5098,15 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityPressureAndVe
                     
                     c[idx_sound_speed] = d_equation_of_state_mixing_rules->
                         getSoundSpeed(
-                            Z_rho_ptr,
-                            vel_ptr,
+                            &rho[idx_density],
                             &p[idx_pressure],
+                            Y_ptr,
                             Z_ptr);
                 }
             }
         }
         else if (d_dim == tbox::Dimension(3))
         {
-            // Get the pointers to the cell data of velocity.
-            double* u = d_data_velocity->getPointer(0);
-            double* v = d_data_velocity->getPointer(1);
-            double* w = d_data_velocity->getPointer(2);
-            
             // Compute the sound speed field.
             for (int k = -d_num_subghosts_sound_speed[2];
                  k < d_interior_dims[2] + d_num_subghosts_sound_speed[2];
@@ -4913,32 +5125,32 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityPressureAndVe
                             (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
                             (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
                         
+                        const int idx_density = (i + d_num_subghosts_density[0]) +
+                            (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
+                            (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
+                                d_subghostcell_dims_density[1];
+                        
+                        const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
+                            (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
+                            (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*
+                                d_subghostcell_dims_mass_fraction[1];
+                        
                         const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
                             (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
                             (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
                                 d_subghostcell_dims_pressure[1];
-                        
-                        const int idx_velocity = (i + d_num_subghosts_velocity[0]) +
-                            (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                            (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*d_subghostcell_dims_velocity[1];
                         
                         const int idx_sound_speed = (i + d_num_subghosts_sound_speed[0]) +
                             (j + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
                             (k + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
                                 d_subghostcell_dims_sound_speed[1];
                         
-                        std::vector<const double*> Z_rho_ptr;
-                        Z_rho_ptr.reserve(d_num_species);
+                        std::vector<const double*> Y_ptr;
+                        Y_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
-                            Z_rho_ptr.push_back(&Z_rho[si][idx]);
+                            Y_ptr.push_back(&Y[si][idx_mass_fraction]);
                         }
-                        
-                        std::vector<const double*> vel_ptr;
-                        vel_ptr.reserve(3);
-                        vel_ptr.push_back(&u[idx_velocity]);
-                        vel_ptr.push_back(&v[idx_velocity]);
-                        vel_ptr.push_back(&w[idx_velocity]);
                         
                         std::vector<const double*> Z_ptr;
                         Z_ptr.reserve(d_num_species - 1);
@@ -4949,9 +5161,9 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityPressureAndVe
                         
                         c[idx_sound_speed] = d_equation_of_state_mixing_rules->
                             getSoundSpeed(
-                                Z_rho_ptr,
-                                vel_ptr,
+                                &rho[idx_density],
                                 &p[idx_pressure],
+                                Y_ptr,
                                 Z_ptr);
                     }
                 }
@@ -4961,7 +5173,8 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityPressureAndVe
     else
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityPressureAndVelocity()\n"
+            << ": FlowModelFiveEqnAllaire::"
+            << "computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure()\n"
             << "Cell data of 'SOUND_SPEED' is not yet registered."
             << std::endl);
     }
@@ -4986,6 +5199,11 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataDilatationWithDensityAndVelocity()
         // Create the cell data of dilatation.
         d_data_dilatation.reset(
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_dilatation));
+        
+        if (!d_data_density)
+        {
+            computeGlobalCellDataDensity();
+        }
         
         if (!d_data_velocity)
         {
@@ -5339,6 +5557,11 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataVorticityWithDensityAndVelocity()
         
         const double* const dx = patch_geom->getDx();
         
+        if (!d_data_density)
+        {
+            computeGlobalCellDataDensity();
+        }
+        
         if (!d_data_velocity)
         {
             computeGlobalCellDataVelocityWithDensity();
@@ -5658,10 +5881,10 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataVorticityWithDensityAndVelocity()
 
 
 /*
- * Compute the global cell data of enstrophy with density, velocity and vorticity in the registered patch.
+ * Compute the global cell data of enstrophy with vorticity in the registered patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataEnstrophyWithDensityVelocityAndVorticity()
+FlowModelFiveEqnAllaire::computeGlobalCellDataEnstrophyWithVorticity()
 {
     if (d_num_subghosts_enstrophy > -hier::IntVector::getOne(d_dim))
     {
@@ -5752,7 +5975,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataEnstrophyWithDensityVelocityAndVor
     else
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::computeGlobalCellDataEnstrophyWithDensityVelocityAndVorticity()\n"
+            << ": FlowModelFiveEqnAllaire::computeGlobalCellDataEnstrophyWithVorticity()\n"
             << "Cell data of 'ENSTROPHY' is not yet registered."
             << std::endl);
     }
@@ -5760,11 +5983,11 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataEnstrophyWithDensityVelocityAndVor
 
 
 /*
- * Compute the global cell data of convective flux with density, pressure and velocity in the registered
+ * Compute the global cell data of convective flux with velocity and pressure in the registered
  * patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithDensityPressureAndVelocity(
+FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
     DIRECTION direction)
 {
     if (direction == X_DIRECTION)
@@ -5795,14 +6018,14 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithDensityPressureA
             boost::shared_ptr<pdat::CellData<double> > data_volume_fraction =
                 getGlobalCellDataVolumeFraction();
             
-            if (!d_data_pressure)
-            {
-                computeGlobalCellDataPressure();
-            }
-            
             if (!d_data_velocity)
             {
                 computeGlobalCellDataVelocityWithDensity();
+            }
+            
+            if (!d_data_pressure)
+            {
+                computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
             }
             
             // Get the pointers to the cell data of partial density, total energy, volume fraction
@@ -5961,7 +6184,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithDensityPressureA
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFiveEqnAllaire::"
-                << "computeGlobalCellDataConvectiveFluxWithDensityPressureAndVelocity()\n"
+                << "computeGlobalCellDataConvectiveFluxWithVelocityAndPressure()\n"
                 << "Cell data of 'CONVECTIVE_FLUX_X' is not yet registered."
                 << std::endl);
         }
@@ -5996,7 +6219,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithDensityPressureA
             
             if (!d_data_pressure)
             {
-                computeGlobalCellDataPressure();
+                computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
             }
             
             if (!d_data_velocity)
@@ -6025,7 +6248,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithDensityPressureA
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelFiveEqnAllaire::"
-                    << "computeGlobalCellDataConvectiveFluxWithDensityPressureAndVelocity()\n"
+                    << "computeGlobalCellDataConvectiveFluxWithVelocityAndPressure()\n"
                     << "'CONVECTIVE_FLUX_Y' cannot be obtained for problem with dimension less than two."
                     << std::endl);
             }
@@ -6138,7 +6361,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithDensityPressureA
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFiveEqnAllaire::"
-                << "computeGlobalCellDataConvectiveFluxWithDensityPressureAndVelocity()\n"
+                << "computeGlobalCellDataConvectiveFluxWithVelocityAndPressure()\n"
                 << "Cell data of 'CONVECTIVE_FLUX_Y' is not yet registered."
                 << std::endl);
         }
@@ -6173,7 +6396,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithDensityPressureA
             
             if (!d_data_pressure)
             {
-                computeGlobalCellDataPressure();
+                computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
             }
             
             if (!d_data_velocity)
@@ -6202,7 +6425,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithDensityPressureA
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelFiveEqnAllaire::"
-                    << "computeGlobalCellDataConvectiveFluxWithDensityPressureAndVelocity()\n"
+                    << "computeGlobalCellDataConvectiveFluxWithVelocityAndPressure()\n"
                     << "'CONVECTIVE_FLUX_Z' cannot be obtained for problem with dimension less than three."
                     << std::endl);
             }
@@ -6270,7 +6493,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithDensityPressureA
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFiveEqnAllaire::"
-                << "computeGlobalCellDataConvectiveFluxWithDensityPressureAndVelocity()\n"
+                << "computeGlobalCellDataConvectiveFluxWithVelocityAndPressure()\n"
                 << "Cell data of 'CONVECTIVE_FLUX_Z' is not yet registered."
                 << std::endl);
         }
@@ -6279,11 +6502,11 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithDensityPressureA
 
 
 /*
- * Compute the global cell data of maximum wave speed with density, pressure, velocity and sound speed
- * in the registered patch.
+ * Compute the global cell data of maximum wave speed with velocity and sound speed in the
+ * registered patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithDensityPressureVelocityAndSoundSpeed(
+FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
     DIRECTION direction)
 {
     if (direction == X_DIRECTION)
@@ -6294,14 +6517,14 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithDensityPressureVel
             d_data_max_wave_speed_x.reset(
                 new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_wave_speed_x));
             
-            if (!d_data_sound_speed)
-            {
-                computeGlobalCellDataSoundSpeedWithDensityPressureAndVelocity();
-            }
-            
             if (!d_data_velocity)
             {
                 computeGlobalCellDataVelocityWithDensity();
+            }
+            
+            if (!d_data_sound_speed)
+            {
+                computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
             }
             
             // Get the pointers to the cell data of maximum wave speed and velocity in x-direction, and sound speed.
@@ -6390,7 +6613,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithDensityPressureVel
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFiveEqnAllaire::"
-                << "computeGlobalCellDataMaxWaveSpeedWithDensityPressureVelocityAndSoundSpeed()\n"
+                << "computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed()\n"
                 << "Cell data of 'MAX_WAVE_SPEED_X' is not yet registered."
                 << std::endl);
         }
@@ -6405,7 +6628,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithDensityPressureVel
             
             if (!d_data_sound_speed)
             {
-                computeGlobalCellDataSoundSpeedWithDensityPressureAndVelocity();
+                computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
             }
             
             if (!d_data_velocity)
@@ -6422,7 +6645,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithDensityPressureVel
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelFiveEqnAllaire::"
-                    << "computeGlobalCellDataMaxWaveSpeedWithDensityPressureVelocityAndSoundSpeed()\n"
+                    << "computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed()\n"
                     << "'MAX_WAVE_SPEED_Y' cannot be obtained for problem with dimension less than two."
                     << std::endl);
             }
@@ -6492,7 +6715,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithDensityPressureVel
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFiveEqnAllaire::"
-                << "computeGlobalCellDataMaxWaveSpeedWithDensityPressureVelocityAndSoundSpeed()\n"
+                << "computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed()\n"
                 << "Cell data of 'MAX_WAVE_SPEED_Y' is not yet registered."
                 << std::endl);
         }
@@ -6507,7 +6730,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithDensityPressureVel
             
             if (!d_data_sound_speed)
             {
-                computeGlobalCellDataSoundSpeedWithDensityPressureAndVelocity();
+                computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
             }
             
             if (!d_data_velocity)
@@ -6524,7 +6747,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithDensityPressureVel
             {
                 TBOX_ERROR(d_object_name
                     << ": FlowModelFiveEqnAllaire::"
-                    << "computeGlobalCellDataMaxWaveSpeedWithDensityPressureVelocityAndSoundSpeed()\n"
+                    << "computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed()\n"
                     << "'MAX_WAVE_SPEED_Z' cannot be obtained for problem with dimension less than three."
                     << std::endl);
             }
@@ -6569,7 +6792,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithDensityPressureVel
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFiveEqnAllaire::"
-                << "computeGlobalCellDataMaxWaveSpeedWithDensityPressureVelocityAndSoundSpeed()\n"
+                << "computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed()\n"
                 << "Cell data of 'MAX_WAVE_SPEED_Z' is not yet registered."
                 << std::endl);
         }

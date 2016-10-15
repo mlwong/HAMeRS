@@ -1,7 +1,7 @@
 #ifndef EQUATION_OF_STATE_IDEAL_GAS_HPP
 #define EQUATION_OF_STATE_IDEAL_GAS_HPP
 
-#include "util/equations_of_state/EquationOfState.hpp"
+#include "util/mixing_rules/equations_of_state/EquationOfState.hpp"
 
 class EquationOfStateIdealGas: public EquationOfState
 {
@@ -26,8 +26,7 @@ class EquationOfStateIdealGas: public EquationOfState
         double
         getPressure(
             const double* const density,
-            const std::vector<const double*>& momentum,
-            const double* const total_energy,
+            const double* const internal_energy,
             const std::vector<const double*>& thermo_properties) const;
         
         /*
@@ -36,28 +35,26 @@ class EquationOfStateIdealGas: public EquationOfState
         double
         getSoundSpeed(
             const double* const density,
-            const std::vector<const double*>& velocity,
             const double* const pressure,
             const std::vector<const double*>& thermo_properties) const;
         
         /*
-         * Compute the total energy per unit volume.
+         * Compute the specific internal energy.
          */
         double
-        getTotalEnergy(
+        getInternalEnergy(
             const double* const density,
-            const std::vector<const double*>& velocity,
             const double* const pressure,
             const std::vector<const double*>& thermo_properties) const;
         
         /*
-         * Compute the specific total enthalpy.
+         * Compute the specific enthalpy.
          */
         double
-        getTotalEnthalpy(
+        getEnthalpy(
             const double* const density,
-            const double* const total_energy,
-            const double* const pressure) const;
+            const double* const pressure,
+            const std::vector<const double*>& thermo_properties) const;
         
         /*
          * Compute the temperature.
@@ -65,8 +62,7 @@ class EquationOfStateIdealGas: public EquationOfState
         double
         getTemperature(
             const double* const density,
-            const std::vector<const double*>& momentum,
-            const double* const total_energy,
+            const double* const pressure,
             const std::vector<const double*>& thermo_properties) const;
         
         /*
@@ -75,8 +71,7 @@ class EquationOfStateIdealGas: public EquationOfState
         double
         getIsochoricPartialInternalEnergyPartialPressure(
             const double* const density,
-            const std::vector<const double*>& momentum,
-            const double* const total_energy,
+            const double* const pressure,
             const std::vector<const double*>& thermo_properties) const;
         
         /*
@@ -85,8 +80,7 @@ class EquationOfStateIdealGas: public EquationOfState
         double
         getIsobaricPartialInternalEnergyPartialDensity(
             const double* const density,
-            const std::vector<const double*>& momentum,
-            const double* const total_energy,
+            const double* const pressure,
             const std::vector<const double*>& thermo_properties) const;
         
     private:

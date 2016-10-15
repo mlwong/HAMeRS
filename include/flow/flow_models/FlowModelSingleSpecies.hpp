@@ -267,6 +267,16 @@ class FlowModelSingleSpecies: public FlowModel
         
     private:
         /*
+         * Set the number of sub-ghost cells of a variable.
+         * This function can be called recursively if the variables are computed recursively.
+         */
+        void
+        setNumberOfSubGhosts(
+            const hier::IntVector& num_subghosts,
+            const std::string& variable_name,
+            const std::string& parent_variable_name);
+        
+        /*
          * Set the ghost boxes and their dimensions of derived cell variables.
          */
         void
@@ -291,19 +301,24 @@ class FlowModelSingleSpecies: public FlowModel
         getGlobalCellDataTotalEnergy();
         
         /*
-         * Compute the global cell data of pressure in the registered patch.
-         */
-        void computeGlobalCellDataPressure();
-        
-        /*
          * Compute the global cell data of velocity in the registered patch.
          */
         void computeGlobalCellDataVelocity();
         
         /*
-         * Compute the global cell data of sound speed with pressure and velocity in the registered patch.
+         * Compute the global cell data of internal energy with velocity in the registered patch.
          */
-        void computeGlobalCellDataSoundSpeedWithPressureAndVelocity();
+        void computeGlobalCellDataInternalEnergyWithVelocity();
+        
+        /*
+         * Compute the global cell data of pressure with internal energy in the registered patch.
+         */
+        void computeGlobalCellDataPressureWithInternalEnergy();
+        
+        /*
+         * Compute the global cell data of sound speed with pressure in the registered patch.
+         */
+        void computeGlobalCellDataSoundSpeedWithPressure();
         
         /*
          * Compute the global cell data of dilatation with velocity in the registered patch.
@@ -316,19 +331,19 @@ class FlowModelSingleSpecies: public FlowModel
         void computeGlobalCellDataVorticityWithVelocity();
         
         /*
-         * Compute the global cell data of enstrophy with velocity and vorticity in the registered patch.
+         * Compute the global cell data of enstrophy with vorticity in the registered patch.
          */
-        void computeGlobalCellDataEnstrophyWithVelocityAndVorticity();
+        void computeGlobalCellDataEnstrophyWithVorticity();
         
         /*
-         * Compute the global cell data of convective flux with pressure and velocity in the registered patch.
+         * Compute the global cell data of convective flux with velocity and pressure in the registered patch.
          */
-        void computeGlobalCellDataConvectiveFluxWithPressureAndVelocity(DIRECTION direction);
+        void computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(DIRECTION direction);
         
         /*
-         * Compute the global cell data of maximum wave speed with pressure, velocity and sound speed in the registered patch.
+         * Compute the global cell data of maximum wave speed with velocity and sound speed in the registered patch.
          */
-        void computeGlobalCellDataMaxWaveSpeedWithPressureVelocityAndSoundSpeed(DIRECTION direction);
+        void computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(DIRECTION direction);
         
         /*
          * boost::shared_ptr to registered conservative variables.
@@ -340,8 +355,9 @@ class FlowModelSingleSpecies: public FlowModel
         /*
          * Number of sub-ghost cells of derived cell data.
          */
-        hier::IntVector d_num_subghosts_pressure;
         hier::IntVector d_num_subghosts_velocity;
+        hier::IntVector d_num_subghosts_internal_energy;
+        hier::IntVector d_num_subghosts_pressure;
         hier::IntVector d_num_subghosts_sound_speed;
         hier::IntVector d_num_subghosts_dilatation;
         hier::IntVector d_num_subghosts_vorticity;
@@ -356,8 +372,9 @@ class FlowModelSingleSpecies: public FlowModel
         /*
          * Boxes with sub-ghost cells of derived cell data.
          */
-        hier::Box d_subghost_box_pressure;
         hier::Box d_subghost_box_velocity;
+        hier::Box d_subghost_box_internal_energy;
+        hier::Box d_subghost_box_pressure;
         hier::Box d_subghost_box_sound_speed;
         hier::Box d_subghost_box_dilatation;
         hier::Box d_subghost_box_vorticity;
@@ -372,8 +389,9 @@ class FlowModelSingleSpecies: public FlowModel
         /*
          * Dimensions of boxes with sub-ghost cells of derived cell data.
          */
-        hier::IntVector d_subghostcell_dims_pressure;
         hier::IntVector d_subghostcell_dims_velocity;
+        hier::IntVector d_subghostcell_dims_internal_energy;
+        hier::IntVector d_subghostcell_dims_pressure;
         hier::IntVector d_subghostcell_dims_sound_speed;
         hier::IntVector d_subghostcell_dims_dilatation;
         hier::IntVector d_subghostcell_dims_vorticity;
@@ -388,8 +406,9 @@ class FlowModelSingleSpecies: public FlowModel
         /*
          * boost::shared_ptr to derived cell data.
          */
-        boost::shared_ptr<pdat::CellData<double> > d_data_pressure;
         boost::shared_ptr<pdat::CellData<double> > d_data_velocity;
+        boost::shared_ptr<pdat::CellData<double> > d_data_internal_energy;
+        boost::shared_ptr<pdat::CellData<double> > d_data_pressure;
         boost::shared_ptr<pdat::CellData<double> > d_data_sound_speed;
         boost::shared_ptr<pdat::CellData<double> > d_data_dilatation;
         boost::shared_ptr<pdat::CellData<double> > d_data_vorticity;

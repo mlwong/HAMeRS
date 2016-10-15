@@ -7,8 +7,8 @@
 #include <string>
 #include <vector>
 
-#include "util/equations_of_state/EquationOfState.hpp"
-#include "util/equations_of_state/MixingClosureModels.hpp"
+#include "util/mixing_rules/equations_of_state/EquationOfState.hpp"
+#include "util/mixing_rules/MixingClosureModels.hpp"
 
 using namespace SAMRAI;
 
@@ -43,54 +43,76 @@ class EquationOfStateMixingRules
             const boost::shared_ptr<tbox::Database>& restart_db) const = 0;
         
         /*
-         * Compute the pressure of the mixture.
+         * Compute the pressure of the mixture with isothermal and isobaric assumptions.
          */
         virtual double
         getPressure(
-            const std::vector<const double*>& partial_density,
-            const std::vector<const double*>& momentum,
-            const double* const total_energy,
+            const double* const density,
+            const double* const internal_energy,
+            const std::vector<const double*>& mass_fraction) const = 0;
+        
+        /*
+         * Compute the pressure of the mixture with isobaric assumption.
+         */
+        virtual double
+        getPressure(
+            const double* const density,
+            const double* const internal_energy,
+            const std::vector<const double*>& mass_fraction,
             const std::vector<const double*>& volume_fraction) const = 0;
         
         /*
-         * Compute the sound speed of the mixture.
+         * Compute the sound speed of the mixture with isothermal and isobaric assumptions.
          */
         virtual double
         getSoundSpeed(
-            const std::vector<const double*>& partial_density,
-            const std::vector<const double*>& velocity,
+            const double* const density,
             const double* const pressure,
-            const std::vector<const double*>& volume_fraction) const = 0;
+            const std::vector<const double*>& mass_fraction) const = 0;
         
         /*
-         * Compute the total energy per unit volume of the mixture.
+         * Compute the sound speed of the mixture with isobaric assumption.
          */
         virtual double
-        getTotalEnergy(
-            const std::vector<const double*>& partial_density,
-            const std::vector<const double*>& velocity,
+        getSoundSpeed(
+            const double* const density,
             const double* const pressure,
+            const std::vector<const double*>& mass_fraction,
             const std::vector<const double*>& volume_fraction) const = 0;
         
         /*
-         * Get the number of thermodynamic properties of the mixture.
+         * Compute the specific internal energy of the mixture with isothermal and isobaric assumptions.
          */
-        virtual int
-        getNumberOfMixtureThermodynamicProperties() const = 0;
+        virtual double
+        getInternalEnergy(
+            const double* const density,
+            const double* const pressure,
+            const std::vector<const double*>& mass_fraction) const = 0;
+        
+        /*
+         * Compute the specific internal energy of the mixture with isobaric assumption.
+         */
+        virtual double
+        getInternalEnergy(
+            const double* const density,
+            const double* const pressure,
+            const std::vector<const double*>& mass_fraction,
+            const std::vector<const double*>& volume_fraction) const = 0;
+        
+        /*
+         * Compute the temperature of the mixture with isothermal and isobaric assumptions.
+         */
+        virtual double
+        getTemperature(
+            const double* const density,
+            const double* const pressure,
+            const std::vector<const double*>& mass_fraction) const = 0;
         
         /*
          * Get the number of thermodynamic properties of a species.
          */
         virtual int
         getNumberOfSpeciesThermodynamicProperties() const = 0;
-        
-        /*
-         * Get the thermodynamic properties of the mixture.
-         */
-        virtual void
-        getMixtureThermodynamicProperties(
-            std::vector<double*>& mixture_thermo_properties,
-            const std::vector<const double*>& species_fraction) const = 0;
         
         /*
          * Get the thermodynamic properties of a species.

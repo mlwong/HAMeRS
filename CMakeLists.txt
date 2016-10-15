@@ -54,7 +54,9 @@ link_directories(${HAMeRS_SOURCE_DIR}/hdf5/lib
 		 ${HAMeRS_BINARY_DIR}/flow/refinement_taggers
 		 ${HAMeRS_BINARY_DIR}/util
 		 ${HAMeRS_BINARY_DIR}/util/basic_boundary_conditions
-		 ${HAMeRS_BINARY_DIR}/util/equations_of_state)
+		 ${HAMeRS_BINARY_DIR}/util/mixing_rules/equations_of_state
+		 ${HAMeRS_BINARY_DIR}/util/mixing_rules/equations_of_shear_viscosity
+		 ${HAMeRS_BINARY_DIR}/util/mixing_rules/equations_of_thermal_conductivity)
 
 add_subdirectory(src/algs/integrator/fortran)
 add_subdirectory(src/algs/patch_strategy)
@@ -69,4 +71,6 @@ add_subdirectory(src/flow/initial_conditions)
 add_subdirectory(src/flow/refinement_taggers)
 add_subdirectory(src/util)
 add_subdirectory(src/util/basic_boundary_conditions)
-add_subdirectory(src/util/equations_of_state)
+add_subdirectory(src/util/mixing_rules/equations_of_state)
+add_subdirectory(src/util/mixing_rules/equations_of_shear_viscosity)
+add_subdirectory(src/util/mixing_rules/equations_of_thermal_conductivity)

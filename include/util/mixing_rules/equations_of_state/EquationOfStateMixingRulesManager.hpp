@@ -5,7 +5,7 @@
 
 #include "SAMRAI/tbox/Dimension.h"
 
-#include "util/equations_of_state/EquationsOfState.hpp"
+#include "util/mixing_rules/equations_of_state/EquationsOfState.hpp"
 
 #include "boost/shared_ptr.hpp"
 #include <string>
@@ -20,7 +20,7 @@ class EquationOfStateMixingRulesManager
             const tbox::Dimension& dim,
             const int& num_species,
             const MIXING_CLOSURE_MODEL& mixing_closure_model,
-            const boost::shared_ptr<tbox::Database>& species_db,
+            const boost::shared_ptr<tbox::Database>& equation_of_state_mixing_rules_db,
             const std::string& equation_of_state_str);
         
         /*

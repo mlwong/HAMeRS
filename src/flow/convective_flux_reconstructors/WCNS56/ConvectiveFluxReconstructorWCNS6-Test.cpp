@@ -2266,14 +2266,18 @@ ConvectiveFluxReconstructorWCNS6_Test::computeSigma(
      * Compute the sigma.
      */
     
-    const double alpha_1 = fabs(W_array[2] - W_array[1]);
-    const double alpha_2 = fabs(W_array[3] - W_array[2]);
-    const double alpha_3 = fabs(W_array[4] - W_array[3]);
+    const double alpha_0 = W_array[1] - W_array[0];
+    const double alpha_1 = W_array[2] - W_array[1];
+    const double alpha_2 = W_array[3] - W_array[2];
+    const double alpha_3 = W_array[4] - W_array[3];
+    const double alpha_4 = W_array[5] - W_array[4];
     
-    const double theta_1 = fabs(alpha_1 - alpha_2)/(alpha_1 + alpha_2 + EPSILON);
-    const double theta_2 = fabs(alpha_2 - alpha_3)/(alpha_2 + alpha_3 + EPSILON);
+    const double theta_0 = fabs(alpha_0 - alpha_1)/(fabs(alpha_0) + fabs(alpha_1) + EPSILON);
+    const double theta_1 = fabs(alpha_1 - alpha_2)/(fabs(alpha_1) + fabs(alpha_2) + EPSILON);
+    const double theta_2 = fabs(alpha_2 - alpha_3)/(fabs(alpha_2) + fabs(alpha_3) + EPSILON);
+    const double theta_3 = fabs(alpha_3 - alpha_4)/(fabs(alpha_3) + fabs(alpha_4) + EPSILON);
     
-    sigma = fmax(theta_1, theta_2);
+    sigma = fmax(fmax(theta_0, theta_1), fmax(theta_2, theta_3));
 }
 
 
@@ -2469,7 +2473,7 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
                 // Compute omega.
                 const double omega_upwind = alpha_upwind[r]/alpha_upwind_sum;
                 const double omega_central = alpha_central[r]/alpha_central_sum;
-                const double omega = (1.0 - sigma)*omega_upwind + sigma*omega_central;
+                const double omega = sigma*omega_upwind + (1.0 - sigma)*omega_central;
                 
                 // Compute the nonlinear interpolated value.
                 W_minus[ei] += omega*W_minus_r;
@@ -2592,7 +2596,7 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
                 // Compute omega_tilde;
                 const double omega_upwind_tilde = alpha_upwind_tilde[r]/alpha_upwind_tilde_sum;
                 const double omega_central_tilde = alpha_central_tilde[r]/alpha_central_tilde_sum;
-                const double omega_tilde = (1.0 - sigma)*omega_upwind_tilde + sigma*omega_central_tilde;
+                const double omega_tilde = sigma*omega_upwind_tilde + (1.0 - sigma)*omega_central_tilde;
                 
                 // Compute the nonlinear interpolated value.
                 W_plus[ei] += omega_tilde*W_plus_r;

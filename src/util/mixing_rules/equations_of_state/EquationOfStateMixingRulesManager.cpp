@@ -1,11 +1,11 @@
-#include "util/equations_of_state/EquationOfStateMixingRulesManager.hpp"
+#include "util/mixing_rules/equations_of_state/EquationOfStateMixingRulesManager.hpp"
 
 EquationOfStateMixingRulesManager::EquationOfStateMixingRulesManager(
     const std::string& object_name,
     const tbox::Dimension& dim,
     const int& num_species,
     const MIXING_CLOSURE_MODEL& mixing_closure_model,
-    const boost::shared_ptr<tbox::Database>& species_db,
+    const boost::shared_ptr<tbox::Database>& equation_of_state_mixing_rules_db,
     const std::string& equation_of_state_str):
         d_object_name(object_name)
 {
@@ -20,7 +20,7 @@ EquationOfStateMixingRulesManager::EquationOfStateMixingRulesManager(
                 dim,
                 num_species,
                 mixing_closure_model,
-                species_db));
+                equation_of_state_mixing_rules_db));
     }
     else
     {

@@ -4,7 +4,7 @@
 #include "SAMRAI/tbox/Dimension.h"
 
 #include "Directions.hpp"
-#include "util/equations_of_state/EquationOfStateMixingRules.hpp"
+#include "util/mixing_rules/equations_of_state/EquationOfStateMixingRules.hpp"
 
 #include "boost/ref.hpp"
 #include "boost/shared_ptr.hpp"
