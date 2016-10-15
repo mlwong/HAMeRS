@@ -3,6 +3,8 @@
 
 #include "util/mixing_rules/equations_of_state/EquationOfState.hpp"
 
+#include <cmath>
+
 class EquationOfStateIdealGas: public EquationOfState
 {
     public:        
