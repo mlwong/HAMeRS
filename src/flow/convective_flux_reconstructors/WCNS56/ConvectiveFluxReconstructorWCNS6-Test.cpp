@@ -2266,18 +2266,14 @@ ConvectiveFluxReconstructorWCNS6_Test::computeSigma(
      * Compute the sigma.
      */
     
-    const double alpha_0 = W_array[1] - W_array[0];
     const double alpha_1 = W_array[2] - W_array[1];
     const double alpha_2 = W_array[3] - W_array[2];
     const double alpha_3 = W_array[4] - W_array[3];
-    const double alpha_4 = W_array[5] - W_array[4];
     
-    const double theta_0 = fabs(alpha_0 - alpha_1)/(fabs(alpha_0) + fabs(alpha_1) + EPSILON);
     const double theta_1 = fabs(alpha_1 - alpha_2)/(fabs(alpha_1) + fabs(alpha_2) + EPSILON);
     const double theta_2 = fabs(alpha_2 - alpha_3)/(fabs(alpha_2) + fabs(alpha_3) + EPSILON);
-    const double theta_3 = fabs(alpha_3 - alpha_4)/(fabs(alpha_3) + fabs(alpha_4) + EPSILON);
     
-    sigma = fmax(fmax(theta_0, theta_1), fmax(theta_2, theta_3));
+    sigma = fmax(theta_1, theta_2);
 }
 
 
