@@ -59,7 +59,7 @@ ConvectiveFluxReconstructorWCNS6_Test::ConvectiveFluxReconstructorWCNS6_Test(
     d_constant_q          = d_convective_flux_reconstructor_db->getIntegerWithDefault("constant_q", 4);
     d_constant_q          = d_convective_flux_reconstructor_db->getIntegerWithDefault("d_constant_q", d_constant_q);
     
-    d_constant_alpha_beta = d_convective_flux_reconstructor_db->getDoubleWithDefault("constant_alpha_beta", 30.0);
+    d_constant_alpha_beta = d_convective_flux_reconstructor_db->getDoubleWithDefault("constant_alpha_beta", 35.0);
     d_constant_alpha_beta = d_convective_flux_reconstructor_db->getDoubleWithDefault("d_constant_alpha_beta", d_constant_alpha_beta);
     
     d_weights_c.resize(boost::extents[4][3]);
