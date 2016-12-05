@@ -1,5 +1,7 @@
 #include "util/mixing_rules/equations_of_bulk_viscosity/Cramer/EquationOfBulkViscosityCramer.hpp"
 
+#include <cmath>
+
 /*
  * Print all characteristics of the equation of bulk viscosity class.
  */
