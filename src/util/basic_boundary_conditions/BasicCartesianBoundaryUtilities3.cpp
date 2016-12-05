@@ -39,6 +39,12 @@
  * Arguments are:
  *    bdry_strategy .... object that reads DIRICHLET or NEUMANN conditions
  *    input_db ......... input database containing all boundary data
+ *    face_locs ........ array of locations of faces for applying
+ *                       boundary conditions.
+ *    edge_locs ........ array of locations of edges for applying
+ *                       boundary conditions.
+ *    node_locs ........ array of locations of nodes for applying
+ *                       boundary conditions.
  *    face_conds ....... array into which integer boundary conditions
  *                       for faces are read
  *    edge_conds ....... array into which integer boundary conditions
@@ -53,6 +59,9 @@ void
 BasicCartesianBoundaryUtilities3::getFromInput(
     BoundaryUtilityStrategy* bdry_strategy,
     const boost::shared_ptr<tbox::Database>& input_db,
+    const std::vector<int>& face_locs,
+    const std::vector<int>& edge_locs,
+    const std::vector<int>& node_locs,
     std::vector<int>& face_conds,
     std::vector<int>& edge_conds,
     std::vector<int>& node_conds,
@@ -61,36 +70,46 @@ BasicCartesianBoundaryUtilities3::getFromInput(
     TBOX_DIM_ASSERT(periodic.getDim() == tbox::Dimension(3));
     
     TBOX_ASSERT(bdry_strategy != 0);
+    TBOX_ASSERT(static_cast<int>(face_locs.size()) <= NUM_3D_FACES);
+    TBOX_ASSERT(static_cast<int>(edge_locs.size()) <= NUM_3D_EDGES);
+    TBOX_ASSERT(static_cast<int>(node_locs.size()) <= NUM_3D_NODES);
+    TBOX_ASSERT(*min_element(face_locs.begin(), face_locs.end()) >= 0);
+    TBOX_ASSERT(*max_element(face_locs.begin(), face_locs.end()) < NUM_3D_FACES);
+    TBOX_ASSERT(*min_element(edge_locs.begin(), edge_locs.end()) >= 0);
+    TBOX_ASSERT(*max_element(edge_locs.begin(), edge_locs.end()) < NUM_3D_EDGES);
+    TBOX_ASSERT(*min_element(node_locs.begin(), node_locs.end()) >= 0);
+    TBOX_ASSERT(*max_element(node_locs.begin(), node_locs.end()) < NUM_3D_NODES);
     TBOX_ASSERT(static_cast<int>(face_conds.size()) == NUM_3D_FACES);
     TBOX_ASSERT(static_cast<int>(edge_conds.size()) == NUM_3D_EDGES);
     TBOX_ASSERT(static_cast<int>(node_conds.size()) == NUM_3D_NODES);
     
     if (!input_db)
     {
-        TBOX_ERROR(
-            ": CartesianBoundaryUtility3::getFromInput()\n"
-            << "no input database supplied"
+        TBOX_ERROR("BasicCartesianBoundaryUtilities3::getFromInput()\n"
+            << "No input database supplied."
             << std::endl);
     }
     
     read3dBdryFaces(
         bdry_strategy,
         input_db,
+        face_locs,
         face_conds,
         periodic);
     
     read3dBdryEdges(
         input_db,
+        edge_locs,
         face_conds,
         edge_conds,
         periodic);
     
     read3dBdryNodes(
         input_db,
+        node_locs,
         face_conds,
         node_conds,
         periodic);
-
 }
 
 
@@ -101,6 +120,8 @@ BasicCartesianBoundaryUtilities3::getFromInput(
  *    var_name ............. name of variable (for error reporting)
  *    var_data ............. cell-centered patch data object to check
  *    patch ................ patch on which data object lives
+ *    bdry_face_locs ....... array of locations of faces for applying
+ *                           boundary conditions.
  *    bdry_face_conds ...... array of boundary conditions for patch faces
  *    bdry_face_values ..... array of boundary values for faces
  *                           (this must be consistent with boundary
@@ -112,12 +133,16 @@ BasicCartesianBoundaryUtilities3::fillFaceBoundaryData(
     const std::string& var_name,
     const boost::shared_ptr<pdat::CellData<double> >& var_data,
     const hier::Patch& patch,
+    const std::vector<int>& bdry_face_locs,
     const std::vector<int>& bdry_face_conds,
     const std::vector<double>& bdry_face_values,
     const hier::IntVector& ghost_width_to_fill)
 {
     TBOX_ASSERT(!var_name.empty());
     TBOX_ASSERT(var_data);
+    TBOX_ASSERT(static_cast<int>(bdry_face_locs.size()) <= NUM_3D_FACES);
+    TBOX_ASSERT(*min_element(bdry_face_locs.begin(), bdry_face_locs.end()) >= 0);
+    TBOX_ASSERT(*max_element(bdry_face_locs.begin(), bdry_face_locs.end()) < NUM_3D_FACES);
     TBOX_ASSERT(static_cast<int>(bdry_face_conds.size()) == NUM_3D_FACES);
     TBOX_ASSERT(static_cast<int>(bdry_face_values.size()) == NUM_3D_FACES*(var_data->getDepth()));
     
@@ -166,255 +191,259 @@ BasicCartesianBoundaryUtilities3::fillFaceBoundaryData(
     const hier::IntVector ghostcell_dims = var_data->getGhostBox().numberCells();
     
     const std::vector<hier::BoundaryBox>& face_bdry =
-        patch_geom->getCodimensionBoundaries(Bdry::FACE3D);
+        patch_geom->getCodimensionBoundaries(BDRY::FACE3D);
     
     const int var_depth = var_data->getDepth();
     
     for (int fi = 0; fi < static_cast<int>(face_bdry.size()); fi++)
     {
-        TBOX_ASSERT(face_bdry[fi].getBoundaryType() == Bdry::FACE3D);
+        TBOX_ASSERT(face_bdry[fi].getBoundaryType() == BDRY::FACE3D);
         
         int face_loc = face_bdry[fi].getLocationIndex();
         
-        hier::Box fill_box(patch_geom->getBoundaryFillBox(
-            face_bdry[fi],
-            interior_box,
-            gcw_to_fill));
-        
-        hier::Index fill_box_lo_idx(fill_box.lower());
-        hier::Index fill_box_hi_idx(fill_box.upper());
-        
-        /*
-         * Offset the indices.
-         */
-        fill_box_lo_idx = fill_box_lo_idx - interior_box.lower();
-        fill_box_hi_idx = fill_box_hi_idx - interior_box.lower();
-        
-        if (bdry_face_conds[face_loc] == BdryCond::Basic::DIRICHLET)
+        if (std::find(bdry_face_locs.begin(), bdry_face_locs.end(), face_loc) !=
+            bdry_face_locs.end())
         {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+            hier::Box fill_box(patch_geom->getBoundaryFillBox(
+                face_bdry[fi],
+                interior_box,
+                gcw_to_fill));
+            
+            hier::Index fill_box_lo_idx(fill_box.lower());
+            hier::Index fill_box_hi_idx(fill_box.upper());
+            
+            /*
+             * Offset the indices.
+             */
+            fill_box_lo_idx = fill_box_lo_idx - interior_box.lower();
+            fill_box_hi_idx = fill_box_hi_idx - interior_box.lower();
+            
+            if (bdry_face_conds[face_loc] == BDRY_COND::BASIC::DIRICHLET)
             {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
                 {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
                     {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        for (int di = 0; di < var_depth; di++)
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
                         {
-                            var_data->getPointer(di)[idx_cell] = bdry_face_values[face_loc*var_depth + di];
+                            const int idx_cell = (i + num_ghosts[0]) +
+                                (j + num_ghosts[1])*ghostcell_dims[0] +
+                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = bdry_face_values[face_loc*var_depth + di];
+                            }
                         }
                     }
                 }
             }
-        }
-        else if (bdry_face_conds[face_loc] == BdryCond::Basic::NEUMANN)
-        {
-            // NOT YET IMPLEMENTED
-        }
-        else if (bdry_face_conds[face_loc] == BdryCond::Basic::FLOW)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+            else if (bdry_face_conds[face_loc] == BDRY_COND::BASIC::NEUMANN)
             {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                // NOT YET IMPLEMENTED
+            }
+            else if (bdry_face_conds[face_loc] == BDRY_COND::BASIC::FLOW)
+            {
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
                 {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
                     {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        int idx_cell_pivot = idx_cell;
-                        
-                        if (face_loc == BdryLoc::XLO)
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
                         {
-                            idx_cell_pivot = (interior_box_lo_idx[0] + num_ghosts[0]) +
+                            const int idx_cell = (i + num_ghosts[0]) +
                                 (j + num_ghosts[1])*ghostcell_dims[0] +
                                 (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        else if (face_loc == BdryLoc::XHI)
-                        {
-                            idx_cell_pivot = (interior_box_hi_idx[0] + num_ghosts[0]) +
-                                (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        else if (face_loc == BdryLoc::YLO)
-                        {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (interior_box_lo_idx[1] + num_ghosts[1])*ghostcell_dims[0] +
-                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        else if (face_loc == BdryLoc::YHI)
-                        {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (interior_box_hi_idx[1] + num_ghosts[1])*ghostcell_dims[0] +
-                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        else if (face_loc == BdryLoc::ZLO)
-                        {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (interior_box_lo_idx[2] + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        else if (face_loc == BdryLoc::ZHI)
-                        {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (interior_box_hi_idx[2] + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            
+                            int idx_cell_pivot = idx_cell;
+                            
+                            if (face_loc == BDRY_LOC::XLO)
+                            {
+                                idx_cell_pivot = (interior_box_lo_idx[0] + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc == BDRY_LOC::XHI)
+                            {
+                                idx_cell_pivot = (interior_box_hi_idx[0] + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc == BDRY_LOC::YLO)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (interior_box_lo_idx[1] + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc == BDRY_LOC::YHI)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (interior_box_hi_idx[1] + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc == BDRY_LOC::ZLO)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (interior_box_lo_idx[2] + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc == BDRY_LOC::ZHI)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (interior_box_hi_idx[2] + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            }
                         }
                     }
                 }
             }
-        }
-        else if (bdry_face_conds[face_loc] == BdryCond::Basic::REFLECT)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+            else if (bdry_face_conds[face_loc] == BDRY_COND::BASIC::REFLECT)
             {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
                 {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
                     {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        int idx_cell_pivot = idx_cell;
-                        
-                        if (face_loc == BdryLoc::XLO)
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
                         {
-                            idx_cell_pivot = (interior_box_lo_idx[0] + (fill_box_hi_idx[0] - i) + num_ghosts[0]) +
+                            const int idx_cell = (i + num_ghosts[0]) +
                                 (j + num_ghosts[1])*ghostcell_dims[0] +
                                 (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        else if (face_loc == BdryLoc::XHI)
-                        {
-                            idx_cell_pivot = (interior_box_hi_idx[0] - (i - fill_box_lo_idx[0]) + num_ghosts[0]) +
-                                (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        else if (face_loc == BdryLoc::YLO)
-                        {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (interior_box_lo_idx[1] + (fill_box_hi_idx[1] - j) + num_ghosts[1])*ghostcell_dims[0] +
-                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        else if (face_loc == BdryLoc::YHI)
-                        {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (interior_box_hi_idx[1] - (j - fill_box_lo_idx[1]) + num_ghosts[1])*ghostcell_dims[0] +
-                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        else if (face_loc == BdryLoc::ZLO)
-                        {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (interior_box_lo_idx[2] + (fill_box_hi_idx[2] - k) + num_ghosts[2])*ghostcell_dims[0]*
-                                    ghostcell_dims[1];
-                        }
-                        else if (face_loc == BdryLoc::ZHI)
-                        {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (interior_box_hi_idx[2] - (k - fill_box_lo_idx[2]) + num_ghosts[2])*ghostcell_dims[0]*
-                                    ghostcell_dims[1];
-                        }
-                        
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
-                        }
-                        
-                        if (face_loc == BdryLoc::XLO || face_loc == BdryLoc::XHI)
-                        {
-                            var_data->getPointer(0)[idx_cell] = -var_data->getPointer(0)[idx_cell_pivot];
-                        }
-                        else if (face_loc == BdryLoc::YLO || face_loc == BdryLoc::YHI)
-                        {
-                            var_data->getPointer(1)[idx_cell] = -var_data->getPointer(1)[idx_cell_pivot];
-                        }
-                        else if (face_loc == BdryLoc::ZLO || face_loc == BdryLoc::ZHI)
-                        {
-                            var_data->getPointer(2)[idx_cell] = -var_data->getPointer(2)[idx_cell_pivot];
+                            
+                            int idx_cell_pivot = idx_cell;
+                            
+                            if (face_loc == BDRY_LOC::XLO)
+                            {
+                                idx_cell_pivot = (interior_box_lo_idx[0] + (fill_box_hi_idx[0] - i) + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc == BDRY_LOC::XHI)
+                            {
+                                idx_cell_pivot = (interior_box_hi_idx[0] - (i - fill_box_lo_idx[0]) + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc == BDRY_LOC::YLO)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (interior_box_lo_idx[1] + (fill_box_hi_idx[1] - j) + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc == BDRY_LOC::YHI)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (interior_box_hi_idx[1] - (j - fill_box_lo_idx[1]) + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc == BDRY_LOC::ZLO)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (interior_box_lo_idx[2] + (fill_box_hi_idx[2] - k) + num_ghosts[2])*ghostcell_dims[0]*
+                                        ghostcell_dims[1];
+                            }
+                            else if (face_loc == BDRY_LOC::ZHI)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (interior_box_hi_idx[2] - (k - fill_box_lo_idx[2]) + num_ghosts[2])*ghostcell_dims[0]*
+                                        ghostcell_dims[1];
+                            }
+                            
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            }
+                            
+                            if (face_loc == BDRY_LOC::XLO || face_loc == BDRY_LOC::XHI)
+                            {
+                                var_data->getPointer(0)[idx_cell] = -var_data->getPointer(0)[idx_cell_pivot];
+                            }
+                            else if (face_loc == BDRY_LOC::YLO || face_loc == BDRY_LOC::YHI)
+                            {
+                                var_data->getPointer(1)[idx_cell] = -var_data->getPointer(1)[idx_cell_pivot];
+                            }
+                            else if (face_loc == BDRY_LOC::ZLO || face_loc == BDRY_LOC::ZHI)
+                            {
+                                var_data->getPointer(2)[idx_cell] = -var_data->getPointer(2)[idx_cell_pivot];
+                            }
                         }
                     }
                 }
             }
-        }
-        else if (bdry_face_conds[face_loc] == BdryCond::Basic::SYMMETRY)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+            else if (bdry_face_conds[face_loc] == BDRY_COND::BASIC::SYMMETRY)
             {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
                 {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
                     {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        int idx_cell_pivot = idx_cell;
-                        
-                        if (face_loc == BdryLoc::XLO)
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
                         {
-                            idx_cell_pivot = (interior_box_lo_idx[0] + (fill_box_hi_idx[0] - i) + num_ghosts[0]) +
+                            const int idx_cell = (i + num_ghosts[0]) +
                                 (j + num_ghosts[1])*ghostcell_dims[0] +
                                 (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        else if (face_loc == BdryLoc::XHI)
-                        {
-                            idx_cell_pivot = (interior_box_hi_idx[0] - (i - fill_box_lo_idx[0]) + num_ghosts[0]) +
-                                (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        else if (face_loc == BdryLoc::YLO)
-                        {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (interior_box_lo_idx[1] + (fill_box_hi_idx[1] - j) + num_ghosts[1])*ghostcell_dims[0] +
-                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        else if (face_loc == BdryLoc::YHI)
-                        {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (interior_box_hi_idx[1] - (j - fill_box_lo_idx[1]) + num_ghosts[1])*ghostcell_dims[0] +
-                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        else if (face_loc == BdryLoc::ZLO)
-                        {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (interior_box_lo_idx[2] + (fill_box_hi_idx[2] - k) + num_ghosts[2])*ghostcell_dims[0]*
-                                    ghostcell_dims[1];
-                        }
-                        else if (face_loc == BdryLoc::ZHI)
-                        {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (interior_box_hi_idx[2] - (k - fill_box_lo_idx[2]) + num_ghosts[2])*ghostcell_dims[0]*
-                                    ghostcell_dims[1];
-                        }
-                        
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            
+                            int idx_cell_pivot = idx_cell;
+                            
+                            if (face_loc == BDRY_LOC::XLO)
+                            {
+                                idx_cell_pivot = (interior_box_lo_idx[0] + (fill_box_hi_idx[0] - i) + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc == BDRY_LOC::XHI)
+                            {
+                                idx_cell_pivot = (interior_box_hi_idx[0] - (i - fill_box_lo_idx[0]) + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc == BDRY_LOC::YLO)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (interior_box_lo_idx[1] + (fill_box_hi_idx[1] - j) + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc == BDRY_LOC::YHI)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (interior_box_hi_idx[1] - (j - fill_box_lo_idx[1]) + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc == BDRY_LOC::ZLO)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (interior_box_lo_idx[2] + (fill_box_hi_idx[2] - k) + num_ghosts[2])*ghostcell_dims[0]*
+                                        ghostcell_dims[1];
+                            }
+                            else if (face_loc == BDRY_LOC::ZHI)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (interior_box_hi_idx[2] - (k - fill_box_lo_idx[2]) + num_ghosts[2])*ghostcell_dims[0]*
+                                        ghostcell_dims[1];
+                            }
+                            
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            }
                         }
                     }
                 }
             }
-        }
-        else
-        {
-            TBOX_ERROR("BasicCartesianBoundaryUtilities3::fillFaceBoundaryData()\n"
-                << "Invalid face boundary condition!\n"
-                << "face_loc = " << face_loc << std::endl
-                << "bdry_face_conds[face_loc] = " << bdry_face_conds[face_loc]
-                << std::endl);
+            else
+            {
+                TBOX_ERROR("BasicCartesianBoundaryUtilities3::fillFaceBoundaryData()\n"
+                    << "Invalid face boundary condition!\n"
+                    << "face_loc = '" << face_loc << "'." << std::endl
+                    << "bdry_face_conds[face_loc] = '" << bdry_face_conds[face_loc] << "'."
+                    << std::endl);
+            }
         }
     }
 }
@@ -427,6 +456,8 @@ BasicCartesianBoundaryUtilities3::fillFaceBoundaryData(
  *    var_name ............. name of variable (for error reporting)
  *    var_data ............. cell-centered patch data object to check
  *    patch ................ patch on which data object lives
+ *    bdry_edge_locs ....... array of locations of edges for applying
+ *                           boundary conditions.
  *    bdry_edge_conds ...... array of boundary conditions for patch edges
  *    bdry_face_values ..... array of boundary values for faces
  *                           (this must be consistent with boundary
@@ -438,12 +469,16 @@ BasicCartesianBoundaryUtilities3::fillEdgeBoundaryData(
     const std::string& var_name,
     const boost::shared_ptr<pdat::CellData<double> >& var_data,
     const hier::Patch& patch,
+    const std::vector<int>& bdry_edge_locs,
     const std::vector<int>& bdry_edge_conds,
     const std::vector<double>& bdry_face_values,
     const hier::IntVector& ghost_width_to_fill)
 {
     TBOX_ASSERT(!var_name.empty());
     TBOX_ASSERT(var_data);
+    TBOX_ASSERT(static_cast<int>(bdry_edge_locs.size()) <= NUM_3D_EDGES);
+    TBOX_ASSERT(*min_element(bdry_edge_locs.begin(), bdry_edge_locs.end()) >= 0);
+    TBOX_ASSERT(*max_element(bdry_edge_locs.begin(), bdry_edge_locs.end()) < NUM_3D_EDGES);
     TBOX_ASSERT(static_cast<int>(bdry_edge_conds.size()) == NUM_3D_EDGES);
     TBOX_ASSERT(static_cast<int>(bdry_face_values.size()) == NUM_3D_FACES*(var_data->getDepth()));
     
@@ -492,526 +527,530 @@ BasicCartesianBoundaryUtilities3::fillEdgeBoundaryData(
     const hier::IntVector ghostcell_dims = var_data->getGhostBox().numberCells();
     
     const std::vector<hier::BoundaryBox>& edge_bdry =
-        patch_geom->getCodimensionBoundaries(Bdry::EDGE3D);
+        patch_geom->getCodimensionBoundaries(BDRY::EDGE3D);
     
     const int var_depth = var_data->getDepth();
     
     for (int ei = 0; ei < static_cast<int>(edge_bdry.size()); ei++)
     {
-        TBOX_ASSERT(edge_bdry[ei].getBoundaryType() == Bdry::EDGE3D);
+        TBOX_ASSERT(edge_bdry[ei].getBoundaryType() == BDRY::EDGE3D);
         
         int edge_loc(edge_bdry[ei].getLocationIndex());
         
-        hier::Box fill_box(patch_geom->getBoundaryFillBox(
-            edge_bdry[ei],
-            interior_box,
-            gcw_to_fill));
-        
-        hier::Index fill_box_lo_idx(fill_box.lower());
-        hier::Index fill_box_hi_idx(fill_box.upper());
-        
-        /*
-         * Offset the indices.
-         */
-        fill_box_lo_idx = fill_box_lo_idx - interior_box.lower();
-        fill_box_hi_idx = fill_box_hi_idx - interior_box.lower();
-        
-        int face_loc_0 = -1;
-        int face_loc_1 = -1;
-        int face_loc_2 = -1;
-        
-        switch (edge_loc)
+        if (std::find(bdry_edge_locs.begin(), bdry_edge_locs.end(), edge_loc) !=
+            bdry_edge_locs.end())
         {
-            case EdgeBdyLoc3D::XLO_YLO:
+            hier::Box fill_box(patch_geom->getBoundaryFillBox(
+                edge_bdry[ei],
+                interior_box,
+                gcw_to_fill));
+            
+            hier::Index fill_box_lo_idx(fill_box.lower());
+            hier::Index fill_box_hi_idx(fill_box.upper());
+            
+            /*
+             * Offset the indices.
+             */
+            fill_box_lo_idx = fill_box_lo_idx - interior_box.lower();
+            fill_box_hi_idx = fill_box_hi_idx - interior_box.lower();
+            
+            int face_loc_0 = -1;
+            int face_loc_1 = -1;
+            int face_loc_2 = -1;
+            
+            switch (edge_loc)
             {
-                face_loc_0 = BdryLoc::XLO;
-                face_loc_1 = BdryLoc::YLO;
-                
-                break;
-            }
-            case EdgeBdyLoc3D::XHI_YLO:
-            {
-                face_loc_0 = BdryLoc::XHI;
-                face_loc_1 = BdryLoc::YLO;
-                
-                break;
-            }
-            case EdgeBdyLoc3D::XLO_YHI:
-            {
-                face_loc_0 = BdryLoc::XLO;
-                face_loc_1 = BdryLoc::YHI;
-                
-                break;
-            }
-            case EdgeBdyLoc3D::XHI_YHI:
-            {
-                face_loc_0 = BdryLoc::XHI;
-                face_loc_1 = BdryLoc::YHI;
-                
-                break;
-            }
-            case EdgeBdyLoc3D::XLO_ZLO:
-            {
-                face_loc_0 = BdryLoc::XLO;
-                face_loc_2 = BdryLoc::ZLO;
-                
-                break;
-            }
-            case EdgeBdyLoc3D::XHI_ZLO:
-            {
-                face_loc_0 = BdryLoc::XHI;
-                face_loc_2 = BdryLoc::ZLO;
-                
-                break;
-            }
-            case EdgeBdyLoc3D::XLO_ZHI:
-            {
-                face_loc_0 = BdryLoc::XLO;
-                face_loc_2 = BdryLoc::ZHI;
-                
-                break;
-            }
-            case EdgeBdyLoc3D::XHI_ZHI:
-            {
-                face_loc_0 = BdryLoc::XHI;
-                face_loc_2 = BdryLoc::ZHI;
-                
-                break;
-            }
-            case EdgeBdyLoc3D::YLO_ZLO:
-            {
-                face_loc_1 = BdryLoc::YLO;
-                face_loc_2 = BdryLoc::ZLO;
-                
-                break;
-            }
-            case EdgeBdyLoc3D::YHI_ZLO:
-            {
-                face_loc_1 = BdryLoc::YHI;
-                face_loc_2 = BdryLoc::ZLO;
-                
-                break;
-            }
-            case EdgeBdyLoc3D::YLO_ZHI:
-            {
-                face_loc_1 = BdryLoc::YLO;
-                face_loc_2 = BdryLoc::ZHI;
-                
-                break;
-            }
-            case EdgeBdyLoc3D::YHI_ZHI:
-            {
-                face_loc_1 = BdryLoc::YHI;
-                face_loc_2 = BdryLoc::ZHI;
-                
-                break;
-            }
-        }
-        
-        if (bdry_edge_conds[edge_loc] == BdryCond::Basic::XDIRICHLET)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
-            {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                case EDGE_BDRY_LOC_3D::XLO_YLO:
                 {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                    face_loc_0 = BDRY_LOC::XLO;
+                    face_loc_1 = BDRY_LOC::YLO;
+                    
+                    break;
+                }
+                case EDGE_BDRY_LOC_3D::XHI_YLO:
+                {
+                    face_loc_0 = BDRY_LOC::XHI;
+                    face_loc_1 = BDRY_LOC::YLO;
+                    
+                    break;
+                }
+                case EDGE_BDRY_LOC_3D::XLO_YHI:
+                {
+                    face_loc_0 = BDRY_LOC::XLO;
+                    face_loc_1 = BDRY_LOC::YHI;
+                    
+                    break;
+                }
+                case EDGE_BDRY_LOC_3D::XHI_YHI:
+                {
+                    face_loc_0 = BDRY_LOC::XHI;
+                    face_loc_1 = BDRY_LOC::YHI;
+                    
+                    break;
+                }
+                case EDGE_BDRY_LOC_3D::XLO_ZLO:
+                {
+                    face_loc_0 = BDRY_LOC::XLO;
+                    face_loc_2 = BDRY_LOC::ZLO;
+                    
+                    break;
+                }
+                case EDGE_BDRY_LOC_3D::XHI_ZLO:
+                {
+                    face_loc_0 = BDRY_LOC::XHI;
+                    face_loc_2 = BDRY_LOC::ZLO;
+                    
+                    break;
+                }
+                case EDGE_BDRY_LOC_3D::XLO_ZHI:
+                {
+                    face_loc_0 = BDRY_LOC::XLO;
+                    face_loc_2 = BDRY_LOC::ZHI;
+                    
+                    break;
+                }
+                case EDGE_BDRY_LOC_3D::XHI_ZHI:
+                {
+                    face_loc_0 = BDRY_LOC::XHI;
+                    face_loc_2 = BDRY_LOC::ZHI;
+                    
+                    break;
+                }
+                case EDGE_BDRY_LOC_3D::YLO_ZLO:
+                {
+                    face_loc_1 = BDRY_LOC::YLO;
+                    face_loc_2 = BDRY_LOC::ZLO;
+                    
+                    break;
+                }
+                case EDGE_BDRY_LOC_3D::YHI_ZLO:
+                {
+                    face_loc_1 = BDRY_LOC::YHI;
+                    face_loc_2 = BDRY_LOC::ZLO;
+                    
+                    break;
+                }
+                case EDGE_BDRY_LOC_3D::YLO_ZHI:
+                {
+                    face_loc_1 = BDRY_LOC::YLO;
+                    face_loc_2 = BDRY_LOC::ZHI;
+                    
+                    break;
+                }
+                case EDGE_BDRY_LOC_3D::YHI_ZHI:
+                {
+                    face_loc_1 = BDRY_LOC::YHI;
+                    face_loc_2 = BDRY_LOC::ZHI;
+                    
+                    break;
+                }
+            }
+            
+            if (bdry_edge_conds[edge_loc] == BDRY_COND::BASIC::XDIRICHLET)
+            {
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+                {
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
                     {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                        {
+                            const int idx_cell = (i + num_ghosts[0]) +
+                                (j + num_ghosts[1])*ghostcell_dims[0] +
+                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = bdry_face_values[face_loc_0*var_depth + di];
+                            }
+                        }
+                    }
+                }
+            }
+            else if (bdry_edge_conds[edge_loc] == BDRY_COND::BASIC::YDIRICHLET)
+            {
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+                {
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                    {
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                        {
+                            const int idx_cell = (i + num_ghosts[0]) +
+                                (j + num_ghosts[1])*ghostcell_dims[0] +
+                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = bdry_face_values[face_loc_1*var_depth + di];
+                            }
+                        }
+                    }
+                }
+            }
+            else if (bdry_edge_conds[edge_loc] == BDRY_COND::BASIC::ZDIRICHLET)
+            {
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+                {
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                    {
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                        {
+                            const int idx_cell = (i + num_ghosts[0]) +
+                                (j + num_ghosts[1])*ghostcell_dims[0] +
+                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = bdry_face_values[face_loc_2*var_depth + di];
+                            }
+                        }
+                    }
+                }
+            }
+            else if (bdry_edge_conds[edge_loc] == BDRY_COND::BASIC::XNEUMANN)
+            {
+                // NOT YET IMPLEMENTED
+            }
+            else if (bdry_edge_conds[edge_loc] == BDRY_COND::BASIC::YNEUMANN)
+            {
+                // NOT YET IMPLEMENTED
+            }
+            else if (bdry_edge_conds[edge_loc] == BDRY_COND::BASIC::ZNEUMANN)
+            {
+                // NOT YET IMPLEMENTED
+            }
+            else if (bdry_edge_conds[edge_loc] == BDRY_COND::BASIC::XFLOW)
+            {
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+                {
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                    {
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                        {
+                            const int idx_cell = (i + num_ghosts[0]) +
+                                (j + num_ghosts[1])*ghostcell_dims[0] +
+                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                             
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = bdry_face_values[face_loc_0*var_depth + di];
-                        }
-                    }
-                }
-            }
-        }
-        else if (bdry_edge_conds[edge_loc] == BdryCond::Basic::YDIRICHLET)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
-            {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
-                {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
-                    {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            int idx_cell_pivot = idx_cell;
                             
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = bdry_face_values[face_loc_1*var_depth + di];
-                        }
-                    }
-                }
-            }
-        }
-        else if (bdry_edge_conds[edge_loc] == BdryCond::Basic::ZDIRICHLET)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
-            {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
-                {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
-                    {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            if (face_loc_0 == BDRY_LOC::XLO)
+                            {
+                                idx_cell_pivot = (interior_box_lo_idx[0] + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc_0 == BDRY_LOC::XHI)
+                            {
+                                idx_cell_pivot = (interior_box_hi_idx[0] + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
                             
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = bdry_face_values[face_loc_2*var_depth + di];
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            }
                         }
                     }
                 }
             }
-        }
-        else if (bdry_edge_conds[edge_loc] == BdryCond::Basic::XNEUMANN)
-        {
-            // NOT YET IMPLEMENTED
-        }
-        else if (bdry_edge_conds[edge_loc] == BdryCond::Basic::YNEUMANN)
-        {
-            // NOT YET IMPLEMENTED
-        }
-        else if (bdry_edge_conds[edge_loc] == BdryCond::Basic::ZNEUMANN)
-        {
-            // NOT YET IMPLEMENTED
-        }
-        else if (bdry_edge_conds[edge_loc] == BdryCond::Basic::XFLOW)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+            else if (bdry_edge_conds[edge_loc] == BDRY_COND::BASIC::YFLOW)
             {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
                 {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
                     {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        int idx_cell_pivot = idx_cell;
-                        
-                        if (face_loc_0 == BdryLoc::XLO)
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
                         {
-                            idx_cell_pivot = (interior_box_lo_idx[0] + num_ghosts[0]) +
+                            const int idx_cell = (i + num_ghosts[0]) +
                                 (j + num_ghosts[1])*ghostcell_dims[0] +
                                 (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        else if (face_loc_0 == BdryLoc::XHI)
-                        {
-                            idx_cell_pivot = (interior_box_hi_idx[0] + num_ghosts[0]) +
-                                (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            
+                            int idx_cell_pivot = idx_cell;
+                            
+                            if (face_loc_1 == BDRY_LOC::YLO)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (interior_box_lo_idx[1] + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc_1 == BDRY_LOC::YHI)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (interior_box_hi_idx[1] + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            }
                         }
                     }
                 }
             }
-        }
-        else if (bdry_edge_conds[edge_loc] == BdryCond::Basic::YFLOW)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+            else if (bdry_edge_conds[edge_loc] == BDRY_COND::BASIC::ZFLOW)
             {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
                 {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
                     {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        int idx_cell_pivot = idx_cell;
-                        
-                        if (face_loc_1 == BdryLoc::YLO)
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
                         {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (interior_box_lo_idx[1] + num_ghosts[1])*ghostcell_dims[0] +
+                            const int idx_cell = (i + num_ghosts[0]) +
+                                (j + num_ghosts[1])*ghostcell_dims[0] +
                                 (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        else if (face_loc_1 == BdryLoc::YHI)
-                        {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (interior_box_hi_idx[1] + num_ghosts[1])*ghostcell_dims[0] +
-                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            
+                            int idx_cell_pivot = idx_cell;
+                            
+                            if (face_loc_2 == BDRY_LOC::ZLO)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (interior_box_lo_idx[2] + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc_2 == BDRY_LOC::ZHI)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (interior_box_hi_idx[2] + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            }
                         }
                     }
                 }
             }
-        }
-        else if (bdry_edge_conds[edge_loc] == BdryCond::Basic::ZFLOW)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+            else if (bdry_edge_conds[edge_loc] == BDRY_COND::BASIC::XREFLECT)
             {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
                 {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
                     {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        int idx_cell_pivot = idx_cell;
-                        
-                        if (face_loc_2 == BdryLoc::ZLO)
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
                         {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
+                            const int idx_cell = (i + num_ghosts[0]) +
                                 (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (interior_box_lo_idx[2] + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        else if (face_loc_2 == BdryLoc::ZHI)
-                        {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (interior_box_hi_idx[2] + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            int idx_cell_pivot = idx_cell;
+                            
+                            if (face_loc_0 == BDRY_LOC::XLO)
+                            {
+                                idx_cell_pivot = (interior_box_lo_idx[0] + (fill_box_hi_idx[0] - i) + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc_0 == BDRY_LOC::XHI)
+                            {
+                                idx_cell_pivot = (interior_box_hi_idx[0] - (i - fill_box_lo_idx[0]) + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            }
+                            
+                            var_data->getPointer(0)[idx_cell] = -var_data->getPointer(0)[idx_cell_pivot];
                         }
                     }
                 }
             }
-        }
-        else if (bdry_edge_conds[edge_loc] == BdryCond::Basic::XREFLECT)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+            else if (bdry_edge_conds[edge_loc] == BDRY_COND::BASIC::YREFLECT)
             {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
                 {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
                     {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        int idx_cell_pivot = idx_cell;
-                        
-                        if (face_loc_0 == BdryLoc::XLO)
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
                         {
-                            idx_cell_pivot = (interior_box_lo_idx[0] + (fill_box_hi_idx[0] - i) + num_ghosts[0]) +
+                            const int idx_cell = (i + num_ghosts[0]) +
                                 (j + num_ghosts[1])*ghostcell_dims[0] +
                                 (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            int idx_cell_pivot = idx_cell;
+                            
+                            if (face_loc_1 == BDRY_LOC::YLO)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (interior_box_lo_idx[1] + (fill_box_hi_idx[1] - j) + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc_1 == BDRY_LOC::YHI)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (interior_box_hi_idx[1] - (j - fill_box_lo_idx[1]) + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            }
+                            
+                            var_data->getPointer(1)[idx_cell] = -var_data->getPointer(1)[idx_cell_pivot];
                         }
-                        else if (face_loc_0 == BdryLoc::XHI)
-                        {
-                            idx_cell_pivot = (interior_box_hi_idx[0] - (i - fill_box_lo_idx[0]) + num_ghosts[0]) +
-                                (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
-                        }
-                        
-                        var_data->getPointer(0)[idx_cell] = -var_data->getPointer(0)[idx_cell_pivot];
                     }
                 }
             }
-        }
-        else if (bdry_edge_conds[edge_loc] == BdryCond::Basic::YREFLECT)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+            else if (bdry_edge_conds[edge_loc] == BDRY_COND::BASIC::ZREFLECT)
             {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
                 {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
                     {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        int idx_cell_pivot = idx_cell;
-                        
-                        if (face_loc_1 == BdryLoc::YLO)
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
                         {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (interior_box_lo_idx[1] + (fill_box_hi_idx[1] - j) + num_ghosts[1])*ghostcell_dims[0] +
+                            const int idx_cell = (i + num_ghosts[0]) +
+                                (j + num_ghosts[1])*ghostcell_dims[0] +
                                 (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            int idx_cell_pivot = idx_cell;
+                            
+                            if (face_loc_2 == BDRY_LOC::ZLO)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (interior_box_lo_idx[2] + (fill_box_hi_idx[2] - k) + num_ghosts[2])
+                                        *ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc_2 == BDRY_LOC::ZHI)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (interior_box_hi_idx[2] - (k - fill_box_lo_idx[2]) + num_ghosts[2])
+                                        *ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            }
+                            
+                            var_data->getPointer(2)[idx_cell] = -var_data->getPointer(2)[idx_cell_pivot];
                         }
-                        else if (face_loc_1 == BdryLoc::YHI)
-                        {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (interior_box_hi_idx[1] - (j - fill_box_lo_idx[1]) + num_ghosts[1])*ghostcell_dims[0] +
-                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
-                        }
-                        
-                        var_data->getPointer(1)[idx_cell] = -var_data->getPointer(1)[idx_cell_pivot];
                     }
                 }
             }
-        }
-        else if (bdry_edge_conds[edge_loc] == BdryCond::Basic::ZREFLECT)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+            else if (bdry_edge_conds[edge_loc] == BDRY_COND::BASIC::XSYMMETRY)
             {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
                 {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
                     {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        int idx_cell_pivot = idx_cell;
-                        
-                        if (face_loc_2 == BdryLoc::ZLO)
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
                         {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
+                            const int idx_cell = (i + num_ghosts[0]) +
                                 (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (interior_box_lo_idx[2] + (fill_box_hi_idx[2] - k) + num_ghosts[2])
-                                    *ghostcell_dims[0]*ghostcell_dims[1];
+                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            int idx_cell_pivot = idx_cell;
+                            
+                            if (face_loc_0 == BDRY_LOC::XLO)
+                            {
+                                idx_cell_pivot = (interior_box_lo_idx[0] + (fill_box_hi_idx[0] - i) + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc_0 == BDRY_LOC::XHI)
+                            {
+                                idx_cell_pivot = (interior_box_hi_idx[0] - (i - fill_box_lo_idx[0]) + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            }
                         }
-                        else if (face_loc_2 == BdryLoc::ZHI)
-                        {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (interior_box_hi_idx[2] - (k - fill_box_lo_idx[2]) + num_ghosts[2])
-                                    *ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
-                        }
-                        
-                        var_data->getPointer(2)[idx_cell] = -var_data->getPointer(2)[idx_cell_pivot];
                     }
                 }
             }
-        }
-        else if (bdry_edge_conds[edge_loc] == BdryCond::Basic::XSYMMETRY)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+            else if (bdry_edge_conds[edge_loc] == BDRY_COND::BASIC::YSYMMETRY)
             {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
                 {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
                     {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        int idx_cell_pivot = idx_cell;
-                        
-                        if (face_loc_0 == BdryLoc::XLO)
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
                         {
-                            idx_cell_pivot = (interior_box_lo_idx[0] + (fill_box_hi_idx[0] - i) + num_ghosts[0]) +
+                            const int idx_cell = (i + num_ghosts[0]) +
                                 (j + num_ghosts[1])*ghostcell_dims[0] +
                                 (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        else if (face_loc_0 == BdryLoc::XHI)
-                        {
-                            idx_cell_pivot = (interior_box_hi_idx[0] - (i - fill_box_lo_idx[0]) + num_ghosts[0]) +
-                                (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            
+                            int idx_cell_pivot = idx_cell;
+                            
+                            if (face_loc_1 == BDRY_LOC::YLO)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (interior_box_lo_idx[1] + (fill_box_hi_idx[1] - j) + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc_1 == BDRY_LOC::YHI)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (interior_box_hi_idx[1] - (j - fill_box_lo_idx[1]) + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            }
                         }
                     }
                 }
             }
-        }
-        else if (bdry_edge_conds[edge_loc] == BdryCond::Basic::YSYMMETRY)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+            else if (bdry_edge_conds[edge_loc] == BDRY_COND::BASIC::ZSYMMETRY)
             {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
                 {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
                     {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        int idx_cell_pivot = idx_cell;
-                        
-                        if (face_loc_1 == BdryLoc::YLO)
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
                         {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (interior_box_lo_idx[1] + (fill_box_hi_idx[1] - j) + num_ghosts[1])*ghostcell_dims[0] +
+                            const int idx_cell = (i + num_ghosts[0]) +
+                                (j + num_ghosts[1])*ghostcell_dims[0] +
                                 (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        else if (face_loc_1 == BdryLoc::YHI)
-                        {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (interior_box_hi_idx[1] - (j - fill_box_lo_idx[1]) + num_ghosts[1])*ghostcell_dims[0] +
-                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            
+                            int idx_cell_pivot = idx_cell;
+                            
+                            if (face_loc_2 == BDRY_LOC::ZLO)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (interior_box_lo_idx[2] + (fill_box_hi_idx[2] - k) + num_ghosts[2])
+                                        *ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc_2 == BDRY_LOC::ZHI)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (interior_box_hi_idx[2] - (k - fill_box_lo_idx[2]) + num_ghosts[2])
+                                        *ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            }
                         }
                     }
                 }
             }
-        }
-        else if (bdry_edge_conds[edge_loc] == BdryCond::Basic::ZSYMMETRY)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+            else
             {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
-                {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
-                    {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        int idx_cell_pivot = idx_cell;
-                        
-                        if (face_loc_2 == BdryLoc::ZLO)
-                        {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (interior_box_lo_idx[2] + (fill_box_hi_idx[2] - k) + num_ghosts[2])
-                                    *ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        else if (face_loc_2 == BdryLoc::ZHI)
-                        {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (interior_box_hi_idx[2] - (k - fill_box_lo_idx[2]) + num_ghosts[2])
-                                    *ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
-                        }
-                    }
-                }
+                TBOX_ERROR("BasicCartesianBoundaryUtilities3::fillEdgeBoundaryData()\n"
+                    << "Invalid edge boundary condition!\n"
+                    << "edge_loc = '" << edge_loc << "'." << std::endl
+                    << "bdry_edge_conds[edge_loc] = '" << bdry_edge_conds[edge_loc] << "'."
+                    << std::endl);
             }
-        }
-        else
-        {
-            TBOX_ERROR("BasicCartesianBoundaryUtilities3::fillEdgeBoundaryData()\n"
-                << "Invalid edge boundary condition!\n"
-                << "edge_loc = " << edge_loc << std::endl
-                << "bdry_edge_conds[edge_loc] = " << bdry_edge_conds[edge_loc]
-                << std::endl);
         }
     }
 }
@@ -1024,6 +1063,8 @@ BasicCartesianBoundaryUtilities3::fillEdgeBoundaryData(
  *    var_name ............. name of variable (for error reporting)
  *    var_data ............. cell-centered patch data object to check
  *    patch ................ patch on which data object lives
+ *    bdry_node_locs ....... array of locations of nodes for applying
+ *                           boundary conditions.
  *    bdry_node_conds ...... array of boundary conditions for patch nodes
  *    bdry_face_values ..... array of boundary values for faces
  *                           (this must be consistent with boundary
@@ -1035,12 +1076,16 @@ BasicCartesianBoundaryUtilities3::fillNodeBoundaryData(
     const std::string& var_name,
     const boost::shared_ptr<pdat::CellData<double> >& var_data,
     const hier::Patch& patch,
+    const std::vector<int>& bdry_node_locs,
     const std::vector<int>& bdry_node_conds,
     const std::vector<double>& bdry_face_values,
     const hier::IntVector& ghost_width_to_fill)
 {
     TBOX_ASSERT(!var_name.empty());
     TBOX_ASSERT(var_data);
+    TBOX_ASSERT(static_cast<int>(bdry_node_locs.size()) <= NUM_3D_NODES);
+    TBOX_ASSERT(*min_element(bdry_node_locs.begin(), bdry_node_locs.end()) >= 0);
+    TBOX_ASSERT(*max_element(bdry_node_locs.begin(), bdry_node_locs.end()) < NUM_3D_NODES);
     TBOX_ASSERT(static_cast<int>(bdry_node_conds.size()) == NUM_3D_NODES);
     TBOX_ASSERT(static_cast<int>(bdry_face_values.size()) == NUM_3D_FACES*(var_data->getDepth()));
     
@@ -1089,506 +1134,510 @@ BasicCartesianBoundaryUtilities3::fillNodeBoundaryData(
     const hier::IntVector ghostcell_dims = var_data->getGhostBox().numberCells();
     
     const std::vector<hier::BoundaryBox>& node_bdry =
-        patch_geom->getCodimensionBoundaries(Bdry::NODE3D);
+        patch_geom->getCodimensionBoundaries(BDRY::NODE3D);
     
     const int var_depth = var_data->getDepth();
     
     for (int ni = 0; ni < static_cast<int>(node_bdry.size()); ni++)
     {
-        TBOX_ASSERT(node_bdry[ni].getBoundaryType() == Bdry::NODE3D);
+        TBOX_ASSERT(node_bdry[ni].getBoundaryType() == BDRY::NODE3D);
         
         int node_loc(node_bdry[ni].getLocationIndex());
         
-        hier::Box fill_box(patch_geom->getBoundaryFillBox(
-            node_bdry[ni],
-            interior_box,
-            gcw_to_fill));
-        
-        hier::Index fill_box_lo_idx(fill_box.lower());
-        hier::Index fill_box_hi_idx(fill_box.upper());
-        
-        /*
-         * Offset the indices.
-         */
-        fill_box_lo_idx = fill_box_lo_idx - interior_box.lower();
-        fill_box_hi_idx = fill_box_hi_idx - interior_box.lower();
-        
-        int face_loc_0 = -1;
-        int face_loc_1 = -1;
-        int face_loc_2 = -1;
-        
-        switch (node_loc)
+        if (std::find(bdry_node_locs.begin(), bdry_node_locs.end(), node_loc) !=
+            bdry_node_locs.end())
         {
-            case NodeBdyLoc3D::XLO_YLO_ZLO:
+            hier::Box fill_box(patch_geom->getBoundaryFillBox(
+                node_bdry[ni],
+                interior_box,
+                gcw_to_fill));
+            
+            hier::Index fill_box_lo_idx(fill_box.lower());
+            hier::Index fill_box_hi_idx(fill_box.upper());
+            
+            /*
+             * Offset the indices.
+             */
+            fill_box_lo_idx = fill_box_lo_idx - interior_box.lower();
+            fill_box_hi_idx = fill_box_hi_idx - interior_box.lower();
+            
+            int face_loc_0 = -1;
+            int face_loc_1 = -1;
+            int face_loc_2 = -1;
+            
+            switch (node_loc)
             {
-                face_loc_0 = BdryLoc::XLO;
-                face_loc_1 = BdryLoc::YLO;
-                face_loc_2 = BdryLoc::ZLO;
-                
-                break;
-            }
-            case NodeBdyLoc3D::XHI_YLO_ZLO:
-            {
-                face_loc_0 = BdryLoc::XHI;
-                face_loc_1 = BdryLoc::YLO;
-                face_loc_2 = BdryLoc::ZLO;
-                
-                break;
-            }
-            case NodeBdyLoc3D::XLO_YHI_ZLO:
-            {
-                face_loc_0 = BdryLoc::XLO;
-                face_loc_1 = BdryLoc::YHI;
-                face_loc_2 = BdryLoc::ZLO;
-                
-                break;
-            }
-            case NodeBdyLoc3D::XHI_YHI_ZLO:
-            {
-                face_loc_0 = BdryLoc::XHI;
-                face_loc_1 = BdryLoc::YHI;
-                face_loc_2 = BdryLoc::ZLO;
-                
-                break;
-            }
-            case NodeBdyLoc3D::XLO_YLO_ZHI:
-            {
-                face_loc_0 = BdryLoc::XLO;
-                face_loc_1 = BdryLoc::YLO;
-                face_loc_2 = BdryLoc::ZHI;
-                
-                break;
-            }
-            case NodeBdyLoc3D::XHI_YLO_ZHI:
-            {
-                face_loc_0 = BdryLoc::XHI;
-                face_loc_1 = BdryLoc::YLO;
-                face_loc_2 = BdryLoc::ZHI;
-                
-                break;
-            }
-            case NodeBdyLoc3D::XLO_YHI_ZHI:
-            {
-                face_loc_0 = BdryLoc::XLO;
-                face_loc_1 = BdryLoc::YHI;
-                face_loc_2 = BdryLoc::ZHI;
-                
-                break;
-            }
-            case NodeBdyLoc3D::XHI_YHI_ZHI:
-            {
-                face_loc_0 = BdryLoc::XHI;
-                face_loc_1 = BdryLoc::YHI;
-                face_loc_2 = BdryLoc::ZHI;
-                
-                break;
-            }
-        }
-        
-        if (bdry_node_conds[node_loc] == BdryCond::Basic::XDIRICHLET)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
-            {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                case NODE_BDRY_LOC_3D::XLO_YLO_ZLO:
                 {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                    face_loc_0 = BDRY_LOC::XLO;
+                    face_loc_1 = BDRY_LOC::YLO;
+                    face_loc_2 = BDRY_LOC::ZLO;
+                    
+                    break;
+                }
+                case NODE_BDRY_LOC_3D::XHI_YLO_ZLO:
+                {
+                    face_loc_0 = BDRY_LOC::XHI;
+                    face_loc_1 = BDRY_LOC::YLO;
+                    face_loc_2 = BDRY_LOC::ZLO;
+                    
+                    break;
+                }
+                case NODE_BDRY_LOC_3D::XLO_YHI_ZLO:
+                {
+                    face_loc_0 = BDRY_LOC::XLO;
+                    face_loc_1 = BDRY_LOC::YHI;
+                    face_loc_2 = BDRY_LOC::ZLO;
+                    
+                    break;
+                }
+                case NODE_BDRY_LOC_3D::XHI_YHI_ZLO:
+                {
+                    face_loc_0 = BDRY_LOC::XHI;
+                    face_loc_1 = BDRY_LOC::YHI;
+                    face_loc_2 = BDRY_LOC::ZLO;
+                    
+                    break;
+                }
+                case NODE_BDRY_LOC_3D::XLO_YLO_ZHI:
+                {
+                    face_loc_0 = BDRY_LOC::XLO;
+                    face_loc_1 = BDRY_LOC::YLO;
+                    face_loc_2 = BDRY_LOC::ZHI;
+                    
+                    break;
+                }
+                case NODE_BDRY_LOC_3D::XHI_YLO_ZHI:
+                {
+                    face_loc_0 = BDRY_LOC::XHI;
+                    face_loc_1 = BDRY_LOC::YLO;
+                    face_loc_2 = BDRY_LOC::ZHI;
+                    
+                    break;
+                }
+                case NODE_BDRY_LOC_3D::XLO_YHI_ZHI:
+                {
+                    face_loc_0 = BDRY_LOC::XLO;
+                    face_loc_1 = BDRY_LOC::YHI;
+                    face_loc_2 = BDRY_LOC::ZHI;
+                    
+                    break;
+                }
+                case NODE_BDRY_LOC_3D::XHI_YHI_ZHI:
+                {
+                    face_loc_0 = BDRY_LOC::XHI;
+                    face_loc_1 = BDRY_LOC::YHI;
+                    face_loc_2 = BDRY_LOC::ZHI;
+                    
+                    break;
+                }
+            }
+            
+            if (bdry_node_conds[node_loc] == BDRY_COND::BASIC::XDIRICHLET)
+            {
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+                {
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
                     {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                        {
+                            const int idx_cell = (i + num_ghosts[0]) +
+                                (j + num_ghosts[1])*ghostcell_dims[0] +
+                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = bdry_face_values[face_loc_0*var_depth + di];
+                            }
+                        }
+                    }
+                }
+            }
+            else if (bdry_node_conds[node_loc] == BDRY_COND::BASIC::YDIRICHLET)
+            {
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+                {
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                    {
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                        {
+                            const int idx_cell = (i + num_ghosts[0]) +
+                                (j + num_ghosts[1])*ghostcell_dims[0] +
+                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = bdry_face_values[face_loc_1*var_depth + di];
+                            }
+                        }
+                    }
+                }
+            }
+            else if (bdry_node_conds[node_loc] == BDRY_COND::BASIC::ZDIRICHLET)
+            {
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+                {
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                    {
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                        {
+                            const int idx_cell = (i + num_ghosts[0]) +
+                                (j + num_ghosts[1])*ghostcell_dims[0] +
+                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                                
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = bdry_face_values[face_loc_2*var_depth + di];
+                            }
+                        }
+                    }
+                }
+            }
+            else if (bdry_node_conds[node_loc] == BDRY_COND::BASIC::XNEUMANN)
+            {
+                // NOT YET IMPLEMENTED
+            }
+            else if (bdry_node_conds[node_loc] == BDRY_COND::BASIC::YNEUMANN)
+            {
+                // NOT YET IMPLEMENTED
+            }
+            else if (bdry_node_conds[node_loc] == BDRY_COND::BASIC::ZNEUMANN)
+            {
+                // NOT YET IMPLEMENTED
+            }
+            else if (bdry_node_conds[node_loc] == BDRY_COND::BASIC::XFLOW)
+            {
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+                {
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                    {
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                        {
+                            const int idx_cell = (i + num_ghosts[0]) +
+                                (j + num_ghosts[1])*ghostcell_dims[0] +
+                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
                             
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = bdry_face_values[face_loc_0*var_depth + di];
-                        }
-                    }
-                }
-            }
-        }
-        else if (bdry_node_conds[node_loc] == BdryCond::Basic::YDIRICHLET)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
-            {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
-                {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
-                    {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            int idx_cell_pivot = idx_cell;
                             
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = bdry_face_values[face_loc_1*var_depth + di];
-                        }
-                    }
-                }
-            }
-        }
-        else if (bdry_node_conds[node_loc] == BdryCond::Basic::ZDIRICHLET)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
-            {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
-                {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
-                    {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            if (face_loc_0 == BDRY_LOC::XLO)
+                            {
+                                idx_cell_pivot = (interior_box_lo_idx[0] + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc_0 == BDRY_LOC::XHI)
+                            {
+                                idx_cell_pivot = (interior_box_hi_idx[0] + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
                             
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = bdry_face_values[face_loc_2*var_depth + di];
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            }
                         }
                     }
                 }
             }
-        }
-        else if (bdry_node_conds[node_loc] == BdryCond::Basic::XNEUMANN)
-        {
-            // NOT YET IMPLEMENTED
-        }
-        else if (bdry_node_conds[node_loc] == BdryCond::Basic::YNEUMANN)
-        {
-            // NOT YET IMPLEMENTED
-        }
-        else if (bdry_node_conds[node_loc] == BdryCond::Basic::ZNEUMANN)
-        {
-            // NOT YET IMPLEMENTED
-        }
-        else if (bdry_node_conds[node_loc] == BdryCond::Basic::XFLOW)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+            else if (bdry_node_conds[node_loc] == BDRY_COND::BASIC::YFLOW)
             {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
                 {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
                     {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        int idx_cell_pivot = idx_cell;
-                        
-                        if (face_loc_0 == BdryLoc::XLO)
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
                         {
-                            idx_cell_pivot = (interior_box_lo_idx[0] + num_ghosts[0]) +
+                            const int idx_cell = (i + num_ghosts[0]) +
                                 (j + num_ghosts[1])*ghostcell_dims[0] +
                                 (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        else if (face_loc_0 == BdryLoc::XHI)
-                        {
-                            idx_cell_pivot = (interior_box_hi_idx[0] + num_ghosts[0]) +
-                                (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            
+                            int idx_cell_pivot = idx_cell;
+                            
+                            if (face_loc_1 == BDRY_LOC::YLO)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (interior_box_lo_idx[1] + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc_1 == BDRY_LOC::YHI)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (interior_box_hi_idx[1] + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            }
                         }
                     }
                 }
             }
-        }
-        else if (bdry_node_conds[node_loc] == BdryCond::Basic::YFLOW)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+            else if (bdry_node_conds[node_loc] == BDRY_COND::BASIC::ZFLOW)
             {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
                 {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
                     {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        int idx_cell_pivot = idx_cell;
-                        
-                        if (face_loc_1 == BdryLoc::YLO)
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
                         {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (interior_box_lo_idx[1] + num_ghosts[1])*ghostcell_dims[0] +
+                            const int idx_cell = (i + num_ghosts[0]) +
+                                (j + num_ghosts[1])*ghostcell_dims[0] +
                                 (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        else if (face_loc_1 == BdryLoc::YHI)
-                        {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (interior_box_hi_idx[1] + num_ghosts[1])*ghostcell_dims[0] +
-                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            
+                            int idx_cell_pivot = idx_cell;
+                            
+                            if (face_loc_2 == BDRY_LOC::ZLO)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (interior_box_lo_idx[2] + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc_2 == BDRY_LOC::ZHI)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (interior_box_hi_idx[2] + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            }
                         }
                     }
                 }
             }
-        }
-        else if (bdry_node_conds[node_loc] == BdryCond::Basic::ZFLOW)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+            else if (bdry_node_conds[node_loc] == BDRY_COND::BASIC::XREFLECT)
             {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
                 {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
                     {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        int idx_cell_pivot = idx_cell;
-                        
-                        if (face_loc_2 == BdryLoc::ZLO)
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
                         {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
+                            const int idx_cell = (i + num_ghosts[0]) +
                                 (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (interior_box_lo_idx[2] + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        else if (face_loc_2 == BdryLoc::ZHI)
-                        {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (interior_box_hi_idx[2] + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            int idx_cell_pivot = idx_cell;
+                            
+                            if (face_loc_0 == BDRY_LOC::XLO)
+                            {
+                                idx_cell_pivot = (interior_box_lo_idx[0] + (fill_box_hi_idx[0] - i) + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc_0 == BDRY_LOC::XHI)
+                            {
+                                idx_cell_pivot = (interior_box_hi_idx[0] - (i - fill_box_lo_idx[0]) + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            }
+                            
+                            var_data->getPointer(0)[idx_cell] = -var_data->getPointer(0)[idx_cell_pivot];
                         }
                     }
                 }
             }
-        }
-        else if (bdry_node_conds[node_loc] == BdryCond::Basic::XREFLECT)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+            else if (bdry_node_conds[node_loc] == BDRY_COND::BASIC::YREFLECT)
             {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
                 {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
                     {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        int idx_cell_pivot = idx_cell;
-                        
-                        if (face_loc_0 == BdryLoc::XLO)
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
                         {
-                            idx_cell_pivot = (interior_box_lo_idx[0] + (fill_box_hi_idx[0] - i) + num_ghosts[0]) +
+                            const int idx_cell = (i + num_ghosts[0]) +
                                 (j + num_ghosts[1])*ghostcell_dims[0] +
                                 (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            int idx_cell_pivot = idx_cell;
+                            
+                            if (face_loc_1 == BDRY_LOC::YLO)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (interior_box_lo_idx[1] + (fill_box_hi_idx[1] - j) + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc_1 == BDRY_LOC::YHI)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (interior_box_hi_idx[1] - (j - fill_box_lo_idx[1]) + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            }
+                            
+                            var_data->getPointer(1)[idx_cell] = -var_data->getPointer(1)[idx_cell_pivot];
                         }
-                        else if (face_loc_0 == BdryLoc::XHI)
-                        {
-                            idx_cell_pivot = (interior_box_hi_idx[0] - (i - fill_box_lo_idx[0]) + num_ghosts[0]) +
-                                (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
-                        }
-                        
-                        var_data->getPointer(0)[idx_cell] = -var_data->getPointer(0)[idx_cell_pivot];
                     }
                 }
             }
-        }
-        else if (bdry_node_conds[node_loc] == BdryCond::Basic::YREFLECT)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+            else if (bdry_node_conds[node_loc] == BDRY_COND::BASIC::ZREFLECT)
             {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
                 {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
                     {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        int idx_cell_pivot = idx_cell;
-                        
-                        if (face_loc_1 == BdryLoc::YLO)
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
                         {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (interior_box_lo_idx[1] + (fill_box_hi_idx[1] - j) + num_ghosts[1])*ghostcell_dims[0] +
+                            const int idx_cell = (i + num_ghosts[0]) +
+                                (j + num_ghosts[1])*ghostcell_dims[0] +
                                 (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            int idx_cell_pivot = idx_cell;
+                            
+                            if (face_loc_2 == BDRY_LOC::ZLO)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (interior_box_lo_idx[2] + (fill_box_hi_idx[2] - k) + num_ghosts[2])
+                                        *ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc_2 == BDRY_LOC::ZHI)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (interior_box_hi_idx[2] - (k - fill_box_lo_idx[2]) + num_ghosts[2])
+                                        *ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            }
+                            
+                            var_data->getPointer(2)[idx_cell] = -var_data->getPointer(2)[idx_cell_pivot];
                         }
-                        else if (face_loc_1 == BdryLoc::YHI)
-                        {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (interior_box_hi_idx[1] - (j - fill_box_lo_idx[1]) + num_ghosts[1])*ghostcell_dims[0] +
-                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
-                        }
-                        
-                        var_data->getPointer(1)[idx_cell] = -var_data->getPointer(1)[idx_cell_pivot];
                     }
                 }
             }
-        }
-        else if (bdry_node_conds[node_loc] == BdryCond::Basic::ZREFLECT)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+            else if (bdry_node_conds[node_loc] == BDRY_COND::BASIC::XSYMMETRY)
             {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
                 {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
                     {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        int idx_cell_pivot = idx_cell;
-                        
-                        if (face_loc_2 == BdryLoc::ZLO)
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
                         {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
+                            const int idx_cell = (i + num_ghosts[0]) +
                                 (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (interior_box_lo_idx[2] + (fill_box_hi_idx[2] - k) + num_ghosts[2])
-                                    *ghostcell_dims[0]*ghostcell_dims[1];
+                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            
+                            int idx_cell_pivot = idx_cell;
+                            
+                            if (face_loc_0 == BDRY_LOC::XLO)
+                            {
+                                idx_cell_pivot = (interior_box_lo_idx[0] + (fill_box_hi_idx[0] - i) + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc_0 == BDRY_LOC::XHI)
+                            {
+                                idx_cell_pivot = (interior_box_hi_idx[0] - (i - fill_box_lo_idx[0]) + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            }
                         }
-                        else if (face_loc_2 == BdryLoc::ZHI)
-                        {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (interior_box_hi_idx[2] - (k - fill_box_lo_idx[2]) + num_ghosts[2])
-                                    *ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
-                        }
-                        
-                        var_data->getPointer(2)[idx_cell] = -var_data->getPointer(2)[idx_cell_pivot];
                     }
                 }
             }
-        }
-        else if (bdry_node_conds[node_loc] == BdryCond::Basic::XSYMMETRY)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+            else if (bdry_node_conds[node_loc] == BDRY_COND::BASIC::YSYMMETRY)
             {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
                 {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
                     {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        int idx_cell_pivot = idx_cell;
-                        
-                        if (face_loc_0 == BdryLoc::XLO)
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
                         {
-                            idx_cell_pivot = (interior_box_lo_idx[0] + (fill_box_hi_idx[0] - i) + num_ghosts[0]) +
+                            const int idx_cell = (i + num_ghosts[0]) +
                                 (j + num_ghosts[1])*ghostcell_dims[0] +
                                 (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        else if (face_loc_0 == BdryLoc::XHI)
-                        {
-                            idx_cell_pivot = (interior_box_hi_idx[0] - (i - fill_box_lo_idx[0]) + num_ghosts[0]) +
-                                (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            
+                            int idx_cell_pivot = idx_cell;
+                            
+                            if (face_loc_1 == BDRY_LOC::YLO)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (interior_box_lo_idx[1] + (fill_box_hi_idx[1] - j) + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc_1 == BDRY_LOC::YHI)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (interior_box_hi_idx[1] - (j - fill_box_lo_idx[1]) + num_ghosts[1])*ghostcell_dims[0] +
+                                    (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            }
                         }
                     }
                 }
             }
-        }
-        else if (bdry_node_conds[node_loc] == BdryCond::Basic::YSYMMETRY)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+            else if (bdry_node_conds[node_loc] == BDRY_COND::BASIC::ZSYMMETRY)
             {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
+                for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
                 {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
+                    for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
                     {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        int idx_cell_pivot = idx_cell;
-                        
-                        if (face_loc_1 == BdryLoc::YLO)
+                        for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
                         {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (interior_box_lo_idx[1] + (fill_box_hi_idx[1] - j) + num_ghosts[1])*ghostcell_dims[0] +
+                            const int idx_cell = (i + num_ghosts[0]) +
+                                (j + num_ghosts[1])*ghostcell_dims[0] +
                                 (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        else if (face_loc_1 == BdryLoc::YHI)
-                        {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (interior_box_hi_idx[1] - (j - fill_box_lo_idx[1]) + num_ghosts[1])*ghostcell_dims[0] +
-                                (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            
+                            int idx_cell_pivot = idx_cell;
+                            
+                            if (face_loc_2 == BDRY_LOC::ZLO)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (interior_box_lo_idx[2] + (fill_box_hi_idx[2] - k) + num_ghosts[2])
+                                        *ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            else if (face_loc_2 == BDRY_LOC::ZHI)
+                            {
+                                idx_cell_pivot = (i + num_ghosts[0]) +
+                                    (j + num_ghosts[1])*ghostcell_dims[0] +
+                                    (interior_box_hi_idx[2] - (k - fill_box_lo_idx[2]) + num_ghosts[2])
+                                        *ghostcell_dims[0]*ghostcell_dims[1];
+                            }
+                            
+                            for (int di = 0; di < var_depth; di++)
+                            {
+                                var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
+                            }
                         }
                     }
                 }
             }
-        }
-        else if (bdry_node_conds[node_loc] == BdryCond::Basic::ZSYMMETRY)
-        {
-            for (int i = fill_box_lo_idx[0]; i <= fill_box_hi_idx[0]; i++)
+            else
             {
-                for (int j = fill_box_lo_idx[1]; j <= fill_box_hi_idx[1]; j++)
-                {
-                    for (int k = fill_box_lo_idx[2]; k <= fill_box_hi_idx[2]; k++)
-                    {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
-                        
-                        int idx_cell_pivot = idx_cell;
-                        
-                        if (face_loc_2 == BdryLoc::ZLO)
-                        {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (interior_box_lo_idx[2] + (fill_box_hi_idx[2] - k) + num_ghosts[2])
-                                    *ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        else if (face_loc_2 == BdryLoc::ZHI)
-                        {
-                            idx_cell_pivot = (i + num_ghosts[0]) +
-                                (j + num_ghosts[1])*ghostcell_dims[0] +
-                                (interior_box_hi_idx[2] - (k - fill_box_lo_idx[2]) + num_ghosts[2])
-                                    *ghostcell_dims[0]*ghostcell_dims[1];
-                        }
-                        
-                        for (int di = 0; di < var_depth; di++)
-                        {
-                            var_data->getPointer(di)[idx_cell] = var_data->getPointer(di)[idx_cell_pivot];
-                        }
-                    }
-                }
+                TBOX_ERROR("BasicCartesianBoundaryUtilities3::fillNodeBoundaryData()\n"
+                    << "Invalid node boundary condition!\n"
+                    << "node_loc = '" << node_loc << "'." << std::endl
+                    << "bdry_node_conds[node_loc] = '" << bdry_node_conds[node_loc] << "'."
+                    << std::endl);
             }
-        }
-        else
-        {
-            TBOX_ERROR("BasicCartesianBoundaryUtilities3::fillNodeBoundaryData()\n"
-                << "Invalid node boundary condition!\n"
-                << "node_loc = " << node_loc << std::endl
-                << "bdry_node_conds[node_loc] = " << bdry_node_conds[node_loc]
-                << std::endl);
         }
     }
 }
@@ -1600,7 +1649,7 @@ BasicCartesianBoundaryUtilities3::fillNodeBoundaryData(
  * condition.
  *
  * If the edge boundary condition type or edge location are unknown,
- * or the boundary condition type is inconsistant with the edge location
+ * or the boundary condition type is inconsistent with the edge location
  * an error results.
  */
 int
@@ -1612,90 +1661,90 @@ BasicCartesianBoundaryUtilities3::getFaceLocationForEdgeBdry(
     
     switch (edge_btype)
     {
-        case BdryCond::Basic::XFLOW:
-        case BdryCond::Basic::XREFLECT:
-        case BdryCond::Basic::XSYMMETRY:
-        case BdryCond::Basic::XDIRICHLET:
-        case BdryCond::Basic::XNEUMANN:
+        case BDRY_COND::BASIC::XFLOW:
+        case BDRY_COND::BASIC::XREFLECT:
+        case BDRY_COND::BASIC::XSYMMETRY:
+        case BDRY_COND::BASIC::XDIRICHLET:
+        case BDRY_COND::BASIC::XNEUMANN:
         {
-            if (edge_loc == EdgeBdyLoc3D::XLO_ZLO ||
-                edge_loc == EdgeBdyLoc3D::XLO_ZHI ||
-                edge_loc == EdgeBdyLoc3D::XLO_YLO ||
-                edge_loc == EdgeBdyLoc3D::XLO_YHI)
+            if (edge_loc == EDGE_BDRY_LOC_3D::XLO_ZLO ||
+                edge_loc == EDGE_BDRY_LOC_3D::XLO_ZHI ||
+                edge_loc == EDGE_BDRY_LOC_3D::XLO_YLO ||
+                edge_loc == EDGE_BDRY_LOC_3D::XLO_YHI)
             {
-                ret_face = BdryLoc::XLO;
+                ret_face = BDRY_LOC::XLO;
             }
-            else if (edge_loc == EdgeBdyLoc3D::XHI_ZLO ||
-                     edge_loc == EdgeBdyLoc3D::XHI_ZHI ||
-                     edge_loc == EdgeBdyLoc3D::XHI_YLO ||
-                     edge_loc == EdgeBdyLoc3D::XHI_YHI)
+            else if (edge_loc == EDGE_BDRY_LOC_3D::XHI_ZLO ||
+                     edge_loc == EDGE_BDRY_LOC_3D::XHI_ZHI ||
+                     edge_loc == EDGE_BDRY_LOC_3D::XHI_YLO ||
+                     edge_loc == EDGE_BDRY_LOC_3D::XHI_YHI)
             {
-                ret_face = BdryLoc::XHI;
+                ret_face = BDRY_LOC::XHI;
             }
             break;
         }
-        case BdryCond::Basic::YFLOW:
-        case BdryCond::Basic::YREFLECT:
-        case BdryCond::Basic::YSYMMETRY:
-        case BdryCond::Basic::YDIRICHLET:
-        case BdryCond::Basic::YNEUMANN:
+        case BDRY_COND::BASIC::YFLOW:
+        case BDRY_COND::BASIC::YREFLECT:
+        case BDRY_COND::BASIC::YSYMMETRY:
+        case BDRY_COND::BASIC::YDIRICHLET:
+        case BDRY_COND::BASIC::YNEUMANN:
         {
-            if (edge_loc == EdgeBdyLoc3D::YLO_ZLO ||
-                edge_loc == EdgeBdyLoc3D::YLO_ZHI ||
-                edge_loc == EdgeBdyLoc3D::XLO_YLO ||
-                edge_loc == EdgeBdyLoc3D::XHI_YLO)
+            if (edge_loc == EDGE_BDRY_LOC_3D::YLO_ZLO ||
+                edge_loc == EDGE_BDRY_LOC_3D::YLO_ZHI ||
+                edge_loc == EDGE_BDRY_LOC_3D::XLO_YLO ||
+                edge_loc == EDGE_BDRY_LOC_3D::XHI_YLO)
             {
-                ret_face = BdryLoc::YLO;
+                ret_face = BDRY_LOC::YLO;
             }
-            else if (edge_loc == EdgeBdyLoc3D::YHI_ZLO ||
-                       edge_loc == EdgeBdyLoc3D::YHI_ZHI ||
-                       edge_loc == EdgeBdyLoc3D::XLO_YHI ||
-                       edge_loc == EdgeBdyLoc3D::XHI_YHI)
+            else if (edge_loc == EDGE_BDRY_LOC_3D::YHI_ZLO ||
+                     edge_loc == EDGE_BDRY_LOC_3D::YHI_ZHI ||
+                     edge_loc == EDGE_BDRY_LOC_3D::XLO_YHI ||
+                     edge_loc == EDGE_BDRY_LOC_3D::XHI_YHI)
             {
-                ret_face = BdryLoc::YHI;
+                ret_face = BDRY_LOC::YHI;
             }
             break;
         }
-        case BdryCond::Basic::ZFLOW:
-        case BdryCond::Basic::ZREFLECT:
-        case BdryCond::Basic::ZSYMMETRY:
-        case BdryCond::Basic::ZDIRICHLET:
-        case BdryCond::Basic::ZNEUMANN:
+        case BDRY_COND::BASIC::ZFLOW:
+        case BDRY_COND::BASIC::ZREFLECT:
+        case BDRY_COND::BASIC::ZSYMMETRY:
+        case BDRY_COND::BASIC::ZDIRICHLET:
+        case BDRY_COND::BASIC::ZNEUMANN:
         {
-           if (edge_loc == EdgeBdyLoc3D::YLO_ZLO ||
-               edge_loc == EdgeBdyLoc3D::YHI_ZLO ||
-               edge_loc == EdgeBdyLoc3D::XLO_ZLO ||
-               edge_loc == EdgeBdyLoc3D::XHI_ZLO)
+           if (edge_loc == EDGE_BDRY_LOC_3D::YLO_ZLO ||
+               edge_loc == EDGE_BDRY_LOC_3D::YHI_ZLO ||
+               edge_loc == EDGE_BDRY_LOC_3D::XLO_ZLO ||
+               edge_loc == EDGE_BDRY_LOC_3D::XHI_ZLO)
             {
-                ret_face = BdryLoc::ZLO;
+                ret_face = BDRY_LOC::ZLO;
             }
-            else if (edge_loc == EdgeBdyLoc3D::YLO_ZHI ||
-                     edge_loc == EdgeBdyLoc3D::YHI_ZHI ||
-                     edge_loc == EdgeBdyLoc3D::XLO_ZHI ||
-                     edge_loc == EdgeBdyLoc3D::XHI_ZHI)
+            else if (edge_loc == EDGE_BDRY_LOC_3D::YLO_ZHI ||
+                     edge_loc == EDGE_BDRY_LOC_3D::YHI_ZHI ||
+                     edge_loc == EDGE_BDRY_LOC_3D::XLO_ZHI ||
+                     edge_loc == EDGE_BDRY_LOC_3D::XHI_ZHI)
             {
-                ret_face = BdryLoc::ZHI;
+                ret_face = BDRY_LOC::ZHI;
             }
             break;
         }
         default:
         {
-            TBOX_ERROR(
-                "Unknown edge boundary condition type = "
-                << edge_btype << " passed to \n"
-                << "BasicCartesianBoundaryUtilities3::getFaceLocationForEdgeBdry()"
+            TBOX_ERROR("BasicCartesianBoundaryUtilities3::getFaceLocationForEdgeBdry()\n"
+                << "Unknown edge boundary condition type = '"
+                << edge_btype
+                << "' passed."
                 << std::endl);
         }
     }
     
     if (ret_face == -1)
     {
-        TBOX_ERROR(
-            "Edge boundary condition type = "
-            << edge_btype << " and edge location = " << edge_loc
-            << "\n passed to "
-            << "BasicCartesianBoundaryUtilities3::getFaceLocationForEdgeBdry()"
-            << " are inconsistant." << std::endl);
+        TBOX_ERROR("BasicCartesianBoundaryUtilities3::getFaceLocationForEdgeBdry()\n"
+            << "Edge boundary condition type = '"
+            << edge_btype << "' and \n"
+            << "edge location = '" << edge_loc
+            << "' passed are inconsistent."
+            << std::endl);
     }
     
     return ret_face;
@@ -1708,7 +1757,7 @@ BasicCartesianBoundaryUtilities3::getFaceLocationForEdgeBdry(
  * condition.
  *
  * If the node boundary condition type or node location are unknown,
- * or the boundary condition type is inconsistant with the node location
+ * or the boundary condition type is inconsistent with the node location
  * an error results.
  */
 int
@@ -1720,81 +1769,88 @@ BasicCartesianBoundaryUtilities3::getFaceLocationForNodeBdry(
     
     switch (node_btype)
     {
-        case BdryCond::Basic::XFLOW:
-        case BdryCond::Basic::XREFLECT:
-        case BdryCond::Basic::XSYMMETRY:
-        case BdryCond::Basic::XDIRICHLET:
-        case BdryCond::Basic::XNEUMANN:
+        case BDRY_COND::BASIC::XFLOW:
+        case BDRY_COND::BASIC::XREFLECT:
+        case BDRY_COND::BASIC::XSYMMETRY:
+        case BDRY_COND::BASIC::XDIRICHLET:
+        case BDRY_COND::BASIC::XNEUMANN:
         {
-            if (node_loc == NodeBdyLoc3D::XLO_YLO_ZLO ||
-                node_loc == NodeBdyLoc3D::XLO_YHI_ZLO ||
-                node_loc == NodeBdyLoc3D::XLO_YLO_ZHI ||
-                node_loc == NodeBdyLoc3D::XLO_YHI_ZHI)
+            if (node_loc == NODE_BDRY_LOC_3D::XLO_YLO_ZLO ||
+                node_loc == NODE_BDRY_LOC_3D::XLO_YHI_ZLO ||
+                node_loc == NODE_BDRY_LOC_3D::XLO_YLO_ZHI ||
+                node_loc == NODE_BDRY_LOC_3D::XLO_YHI_ZHI)
             {
-                ret_face = BdryLoc::XLO;
+                ret_face = BDRY_LOC::XLO;
             }
-            else
+            else if (node_loc == NODE_BDRY_LOC_3D::XHI_YLO_ZLO ||
+                     node_loc == NODE_BDRY_LOC_3D::XHI_YHI_ZLO ||
+                     node_loc == NODE_BDRY_LOC_3D::XHI_YLO_ZHI ||
+                     node_loc == NODE_BDRY_LOC_3D::XHI_YHI_ZHI)
             {
-                ret_face = BdryLoc::XHI;
+                ret_face = BDRY_LOC::XHI;
             }
             break;
         }
-        case BdryCond::Basic::YFLOW:
-        case BdryCond::Basic::YREFLECT:
-        case BdryCond::Basic::YSYMMETRY:
-        case BdryCond::Basic::YDIRICHLET:
-        case BdryCond::Basic::YNEUMANN:
+        case BDRY_COND::BASIC::YFLOW:
+        case BDRY_COND::BASIC::YREFLECT:
+        case BDRY_COND::BASIC::YSYMMETRY:
+        case BDRY_COND::BASIC::YDIRICHLET:
+        case BDRY_COND::BASIC::YNEUMANN:
         {
-            if (node_loc == NodeBdyLoc3D::XLO_YLO_ZLO ||
-                node_loc == NodeBdyLoc3D::XHI_YLO_ZLO ||
-                node_loc == NodeBdyLoc3D::XLO_YLO_ZHI ||
-                node_loc == NodeBdyLoc3D::XHI_YLO_ZHI)
+            if (node_loc == NODE_BDRY_LOC_3D::XLO_YLO_ZLO ||
+                node_loc == NODE_BDRY_LOC_3D::XHI_YLO_ZLO ||
+                node_loc == NODE_BDRY_LOC_3D::XLO_YLO_ZHI ||
+                node_loc == NODE_BDRY_LOC_3D::XHI_YLO_ZHI)
             {
-                ret_face = BdryLoc::YLO;
+                ret_face = BDRY_LOC::YLO;
             }
-            else
+            else if (node_loc == NODE_BDRY_LOC_3D::XLO_YHI_ZLO ||
+                     node_loc == NODE_BDRY_LOC_3D::XHI_YHI_ZLO ||
+                     node_loc == NODE_BDRY_LOC_3D::XLO_YHI_ZHI ||
+                     node_loc == NODE_BDRY_LOC_3D::XHI_YHI_ZHI)
             {
-                ret_face = BdryLoc::YHI;
+                ret_face = BDRY_LOC::YHI;
             }
             break;
         }
-        case BdryCond::Basic::ZFLOW:
-        case BdryCond::Basic::ZREFLECT:
-        case BdryCond::Basic::ZSYMMETRY:
-        case BdryCond::Basic::ZDIRICHLET:
-        case BdryCond::Basic::ZNEUMANN:
+        case BDRY_COND::BASIC::ZFLOW:
+        case BDRY_COND::BASIC::ZREFLECT:
+        case BDRY_COND::BASIC::ZSYMMETRY:
+        case BDRY_COND::BASIC::ZDIRICHLET:
+        case BDRY_COND::BASIC::ZNEUMANN:
         {
-            if (node_loc == NodeBdyLoc3D::XLO_YLO_ZLO ||
-                node_loc == NodeBdyLoc3D::XHI_YLO_ZLO ||
-                node_loc == NodeBdyLoc3D::XLO_YHI_ZLO ||
-                node_loc == NodeBdyLoc3D::XHI_YHI_ZLO)
+            if (node_loc == NODE_BDRY_LOC_3D::XLO_YLO_ZLO ||
+                node_loc == NODE_BDRY_LOC_3D::XHI_YLO_ZLO ||
+                node_loc == NODE_BDRY_LOC_3D::XLO_YHI_ZLO ||
+                node_loc == NODE_BDRY_LOC_3D::XHI_YHI_ZLO)
             {
-                ret_face = BdryLoc::ZLO;
+                ret_face = BDRY_LOC::ZLO;
             }
-            else
+            else if (node_loc == NODE_BDRY_LOC_3D::XLO_YLO_ZHI ||
+                     node_loc == NODE_BDRY_LOC_3D::XHI_YLO_ZHI ||
+                     node_loc == NODE_BDRY_LOC_3D::XLO_YHI_ZHI ||
+                     node_loc == NODE_BDRY_LOC_3D::XHI_YHI_ZHI)
             {
-                ret_face = BdryLoc::ZHI;
+                ret_face = BDRY_LOC::ZHI;
             }
             break;
         }
         default:
         {
-            TBOX_ERROR(
-                "Unknown node boundary condition type = "
-                << node_btype << " passed to \n"
-                << "BasicCartesianBoundaryUtilities3::getFaceLocationForNodeBdry()"
+            TBOX_ERROR("BasicCartesianBoundaryUtilities3::getFaceLocationForNodeBdry()\n"
+                << "Unknown node boundary condition type = '"
+                << node_btype << "' passed."
                 << std::endl);
         }
     }
     
     if (ret_face == -1)
     {
-        TBOX_ERROR(
-            "Node boundary condition type = "
-            << node_btype << " and node location = " << node_loc
-            << "\n passed to "
-            << "BasicCartesianBoundaryUtilities3::getFaceLocationForNodeBdry()"
-            << " are inconsistant." << std::endl);
+        TBOX_ERROR("BasicCartesianBoundaryUtilities3::getFaceLocationForNodeBdry()\n"
+            << "Node boundary condition type = '"
+            << node_btype << "' and \n"
+            << "node location = '" << node_loc
+            << "' passed are inconsistent." << std::endl);
     }
     
     return ret_face;
@@ -1808,6 +1864,7 @@ void
 BasicCartesianBoundaryUtilities3::read3dBdryFaces(
     BoundaryUtilityStrategy* bdry_strategy,
     const boost::shared_ptr<tbox::Database>& input_db,
+    const std::vector<int>& face_locs,
     std::vector<int>& face_conds,
     const hier::IntVector& periodic)
 {
@@ -1815,6 +1872,9 @@ BasicCartesianBoundaryUtilities3::read3dBdryFaces(
     
     TBOX_ASSERT(bdry_strategy != 0);
     TBOX_ASSERT(input_db);
+    TBOX_ASSERT(static_cast<int>(face_locs.size()) <= NUM_3D_FACES);
+    TBOX_ASSERT(*min_element(face_locs.begin(), face_locs.end()) >= 0);
+    TBOX_ASSERT(*max_element(face_locs.begin(), face_locs.end()) < NUM_3D_FACES);
     TBOX_ASSERT(static_cast<int>(face_conds.size()) == NUM_3D_FACES);
     
     int num_per_dirs = 0;
@@ -1827,37 +1887,39 @@ BasicCartesianBoundaryUtilities3::read3dBdryFaces(
     if (num_per_dirs < 3)
     {
         // face boundary input required
-        for (int s = 0; s < NUM_3D_FACES; s++)
+        for (int fi = 0; fi < static_cast<int>(face_locs.size()); fi++)
         {
+            int s = face_locs[fi];
+            
             std::string bdry_loc_str;
             switch (s)
             {
-                case BdryLoc::XLO:
+                case BDRY_LOC::XLO:
                 {
                     bdry_loc_str = "boundary_face_xlo";
                     break;
                 }
-                case BdryLoc::XHI:
+                case BDRY_LOC::XHI:
                 {
                     bdry_loc_str = "boundary_face_xhi";
                     break;
                 }
-                case BdryLoc::YLO:
+                case BDRY_LOC::YLO:
                 {
                     bdry_loc_str = "boundary_face_ylo";
                     break;
                 }
-                case BdryLoc::YHI:
+                case BDRY_LOC::YHI:
                 {
                     bdry_loc_str = "boundary_face_yhi";
                     break;
                 }
-                case BdryLoc::ZLO:
+                case BDRY_LOC::ZLO:
                 {
                     bdry_loc_str = "boundary_face_zlo";
                     break;
                 }
-                case BdryLoc::ZHI:
+                case BDRY_LOC::ZHI:
                 {
                     bdry_loc_str = "boundary_face_zhi";
                     break;
@@ -1868,15 +1930,15 @@ BasicCartesianBoundaryUtilities3::read3dBdryFaces(
             bool need_data_read = true;
             if (num_per_dirs > 0)
             {
-                if (periodic(0) && (s == BdryLoc::XLO || s == BdryLoc::XHI))
+                if (periodic(0) && (s == BDRY_LOC::XLO || s == BDRY_LOC::XHI))
                 {
                     need_data_read = false;
                 }
-                else if (periodic(1) && (s == BdryLoc::YLO || s == BdryLoc::YHI))
+                else if (periodic(1) && (s == BDRY_LOC::YLO || s == BDRY_LOC::YHI))
                 {
                     need_data_read = false;
                 }
-                else if (periodic(2) && (s == BdryLoc::ZLO || s == BdryLoc::ZHI))
+                else if (periodic(2) && (s == BDRY_LOC::ZLO || s == BDRY_LOC::ZHI))
                 {
                     need_data_read = false;
                 }
@@ -1890,19 +1952,19 @@ BasicCartesianBoundaryUtilities3::read3dBdryFaces(
                     bdry_loc_db->getString("boundary_condition");
                 if (bdry_cond_str == "FLOW")
                 {
-                    face_conds[s] = BdryCond::Basic::FLOW;
+                    face_conds[s] = BDRY_COND::BASIC::FLOW;
                 }
                 else if (bdry_cond_str == "REFLECT")
                 {
-                    face_conds[s] = BdryCond::Basic::REFLECT;
+                    face_conds[s] = BDRY_COND::BASIC::REFLECT;
                 }
                 else if (bdry_cond_str == "SYMMETRY")
                 {
-                    face_conds[s] = BdryCond::Basic::SYMMETRY;
+                    face_conds[s] = BDRY_COND::BASIC::SYMMETRY;
                 }
                 else if (bdry_cond_str == "DIRICHLET")
                 {
-                    face_conds[s] = BdryCond::Basic::DIRICHLET;
+                    face_conds[s] = BDRY_COND::BASIC::DIRICHLET;
                     bdry_strategy->readDirichletBoundaryDataEntry(
                         bdry_loc_db,
                         bdry_loc_str,
@@ -1910,7 +1972,7 @@ BasicCartesianBoundaryUtilities3::read3dBdryFaces(
                 }
                 else if (bdry_cond_str == "NEUMANN")
                 {
-                    face_conds[s] = BdryCond::Basic::NEUMANN;
+                    face_conds[s] = BDRY_COND::BASIC::NEUMANN;
                     bdry_strategy->readNeumannBoundaryDataEntry(
                         bdry_loc_db,
                         bdry_loc_str,
@@ -1918,12 +1980,14 @@ BasicCartesianBoundaryUtilities3::read3dBdryFaces(
                 }
                 else
                 {
-                    TBOX_ERROR(
-                        "Unknown face boundary string = "
-                        << bdry_cond_str << " found in input." << std::endl);
+                    TBOX_ERROR("BasicCartesianBoundaryUtilities3::read3dBdryFaces()\n"
+                        << "Unknown face boundary string = '"
+                        << bdry_cond_str
+                        << "' found in input."
+                        << std::endl);
                 }
             } // if (need_data_read)
-        } // for (int s = 0 ...
+        } // for (int fi = 0 ...
     } // if (num_per_dirs < 3)
 }
 
@@ -1934,6 +1998,7 @@ BasicCartesianBoundaryUtilities3::read3dBdryFaces(
 void
 BasicCartesianBoundaryUtilities3::read3dBdryEdges(
     const boost::shared_ptr<tbox::Database>& input_db,
+    const std::vector<int>& edge_locs,
     const std::vector<int>& face_conds,
     std::vector<int>& edge_conds,
     const hier::IntVector& periodic)
@@ -1941,6 +2006,9 @@ BasicCartesianBoundaryUtilities3::read3dBdryEdges(
     TBOX_DIM_ASSERT(periodic.getDim() == tbox::Dimension(3));
     
     TBOX_ASSERT(input_db);
+    TBOX_ASSERT(static_cast<int>(edge_locs.size()) <= NUM_3D_EDGES);
+    TBOX_ASSERT(*min_element(edge_locs.begin(), edge_locs.end()) >= 0);
+    TBOX_ASSERT(*max_element(edge_locs.begin(), edge_locs.end()) < NUM_3D_EDGES);
     TBOX_ASSERT(static_cast<int>(face_conds.size()) == NUM_3D_FACES);
     TBOX_ASSERT(static_cast<int>(edge_conds.size()) == NUM_3D_EDGES);
     
@@ -1954,67 +2022,69 @@ BasicCartesianBoundaryUtilities3::read3dBdryEdges(
     if (num_per_dirs < 2)
     {
         // edge boundary input required
-        for (int s = 0; s < NUM_3D_EDGES; s++)
+        for (int ei = 0; ei < static_cast<int>(edge_locs.size()); ei++)
         {
+            int s = edge_locs[ei];
+            
             std::string bdry_loc_str;
             switch (s)
             {
-                case EdgeBdyLoc3D::YLO_ZLO:
+                case EDGE_BDRY_LOC_3D::YLO_ZLO:
                 {
                     bdry_loc_str = "boundary_edge_ylo_zlo";
                     break;
                 }
-                case EdgeBdyLoc3D::YHI_ZLO:
+                case EDGE_BDRY_LOC_3D::YHI_ZLO:
                 {
                     bdry_loc_str = "boundary_edge_yhi_zlo";
                     break;
                 }
-                case EdgeBdyLoc3D::YLO_ZHI:
+                case EDGE_BDRY_LOC_3D::YLO_ZHI:
                 {
                     bdry_loc_str = "boundary_edge_ylo_zhi";
                     break;
                 }
-                case EdgeBdyLoc3D::YHI_ZHI:
+                case EDGE_BDRY_LOC_3D::YHI_ZHI:
                 {
                     bdry_loc_str = "boundary_edge_yhi_zhi";
                     break;
                 }
-                case EdgeBdyLoc3D::XLO_ZLO:
+                case EDGE_BDRY_LOC_3D::XLO_ZLO:
                 {
                     bdry_loc_str = "boundary_edge_xlo_zlo";
                     break;
                 }
-                case EdgeBdyLoc3D::XLO_ZHI:
+                case EDGE_BDRY_LOC_3D::XLO_ZHI:
                 {
                     bdry_loc_str = "boundary_edge_xlo_zhi";
                     break;
                 }
-                case EdgeBdyLoc3D::XHI_ZLO:
+                case EDGE_BDRY_LOC_3D::XHI_ZLO:
                 {
                     bdry_loc_str = "boundary_edge_xhi_zlo";
                     break;
                 }
-                case EdgeBdyLoc3D::XHI_ZHI:
+                case EDGE_BDRY_LOC_3D::XHI_ZHI:
                 {
                     bdry_loc_str = "boundary_edge_xhi_zhi";
                     break;
                 }
-                case EdgeBdyLoc3D::XLO_YLO:
+                case EDGE_BDRY_LOC_3D::XLO_YLO:
                 {
                     bdry_loc_str = "boundary_edge_xlo_ylo";
                     break;
                 }
-                case EdgeBdyLoc3D::XHI_YLO:
+                case EDGE_BDRY_LOC_3D::XHI_YLO:
                 {
                     bdry_loc_str = "boundary_edge_xhi_ylo";
                     break;
                 }
-                case EdgeBdyLoc3D::XLO_YHI:
+                case EDGE_BDRY_LOC_3D::XLO_YHI:
                 {
                     bdry_loc_str = "boundary_edge_xlo_yhi";
                     break;
                 }
-                case EdgeBdyLoc3D::XHI_YHI:
+                case EDGE_BDRY_LOC_3D::XHI_YHI:
                 {
                     bdry_loc_str = "boundary_edge_xhi_yhi";
                     break;
@@ -2028,26 +2098,26 @@ BasicCartesianBoundaryUtilities3::read3dBdryEdges(
                 need_data_read = true;
             }
             else if (periodic(0) &&
-                     (s == EdgeBdyLoc3D::YLO_ZLO ||
-                      s == EdgeBdyLoc3D::YHI_ZLO ||
-                      s == EdgeBdyLoc3D::YLO_ZHI ||
-                      s == EdgeBdyLoc3D::YHI_ZHI))
+                     (s == EDGE_BDRY_LOC_3D::YLO_ZLO ||
+                      s == EDGE_BDRY_LOC_3D::YHI_ZLO ||
+                      s == EDGE_BDRY_LOC_3D::YLO_ZHI ||
+                      s == EDGE_BDRY_LOC_3D::YHI_ZHI))
             {
                 need_data_read = true;
             }
             else if (periodic(1) &&
-                     (s == EdgeBdyLoc3D::XLO_ZLO ||
-                      s == EdgeBdyLoc3D::XLO_ZHI ||
-                      s == EdgeBdyLoc3D::XHI_ZLO ||
-                      s == EdgeBdyLoc3D::XHI_ZHI))
+                     (s == EDGE_BDRY_LOC_3D::XLO_ZLO ||
+                      s == EDGE_BDRY_LOC_3D::XLO_ZHI ||
+                      s == EDGE_BDRY_LOC_3D::XHI_ZLO ||
+                      s == EDGE_BDRY_LOC_3D::XHI_ZHI))
             {
                 need_data_read = true;
             }
             else if (periodic(2) &&
-                     (s == EdgeBdyLoc3D::XLO_YLO ||
-                      s == EdgeBdyLoc3D::XHI_YLO ||
-                      s == EdgeBdyLoc3D::XLO_YHI ||
-                      s == EdgeBdyLoc3D::XHI_YHI))
+                     (s == EDGE_BDRY_LOC_3D::XLO_YLO ||
+                      s == EDGE_BDRY_LOC_3D::XHI_YLO ||
+                      s == EDGE_BDRY_LOC_3D::XLO_YHI ||
+                      s == EDGE_BDRY_LOC_3D::XHI_YHI))
             {
                 need_data_read = true;
             }
@@ -2061,71 +2131,70 @@ BasicCartesianBoundaryUtilities3::read3dBdryEdges(
                    bdry_loc_db->getString("boundary_condition");
                 if (bdry_cond_str == "XFLOW")
                 {
-                    edge_conds[s] = BdryCond::Basic::XFLOW;
+                    edge_conds[s] = BDRY_COND::BASIC::XFLOW;
                 }
-                else if
-                (bdry_cond_str == "YFLOW")
+                else if (bdry_cond_str == "YFLOW")
                 {
-                    edge_conds[s] = BdryCond::Basic::YFLOW;
+                    edge_conds[s] = BDRY_COND::BASIC::YFLOW;
                 }
                 else if (bdry_cond_str == "ZFLOW")
                 {
-                    edge_conds[s] = BdryCond::Basic::ZFLOW;
+                    edge_conds[s] = BDRY_COND::BASIC::ZFLOW;
                 }
                 else if (bdry_cond_str == "XREFLECT")
                 {
-                    edge_conds[s] = BdryCond::Basic::XREFLECT;
+                    edge_conds[s] = BDRY_COND::BASIC::XREFLECT;
                 }
                 else if (bdry_cond_str == "YREFLECT")
                 {
-                    edge_conds[s] = BdryCond::Basic::YREFLECT;
+                    edge_conds[s] = BDRY_COND::BASIC::YREFLECT;
                 }
                 else if (bdry_cond_str == "ZREFLECT")
                 {
-                    edge_conds[s] = BdryCond::Basic::ZREFLECT;
+                    edge_conds[s] = BDRY_COND::BASIC::ZREFLECT;
                 }
                 else if (bdry_cond_str == "XSYMMETRY")
                 {
-                    edge_conds[s] = BdryCond::Basic::XSYMMETRY;
+                    edge_conds[s] = BDRY_COND::BASIC::XSYMMETRY;
                 }
                 else if (bdry_cond_str == "YSYMMETRY")
                 {
-                    edge_conds[s] = BdryCond::Basic::YSYMMETRY;
+                    edge_conds[s] = BDRY_COND::BASIC::YSYMMETRY;
                 }
                 else if (bdry_cond_str == "ZSYMMETRY")
                 {
-                    edge_conds[s] = BdryCond::Basic::ZSYMMETRY;
+                    edge_conds[s] = BDRY_COND::BASIC::ZSYMMETRY;
                 }
                 else if (bdry_cond_str == "XDIRICHLET")
                 {
-                    edge_conds[s] = BdryCond::Basic::XDIRICHLET;
+                    edge_conds[s] = BDRY_COND::BASIC::XDIRICHLET;
                 }
                 else if (bdry_cond_str == "YDIRICHLET")
                 {
-                    edge_conds[s] = BdryCond::Basic::YDIRICHLET;
+                    edge_conds[s] = BDRY_COND::BASIC::YDIRICHLET;
                 }
                 else if (bdry_cond_str == "ZDIRICHLET")
                 {
-                    edge_conds[s] = BdryCond::Basic::ZDIRICHLET;
+                    edge_conds[s] = BDRY_COND::BASIC::ZDIRICHLET;
                 }
                 else if (bdry_cond_str == "XNEUMANN")
                 {
-                    edge_conds[s] = BdryCond::Basic::XNEUMANN;
+                    edge_conds[s] = BDRY_COND::BASIC::XNEUMANN;
                 }
                 else if (bdry_cond_str == "YNEUMANN")
                 {
-                    edge_conds[s] = BdryCond::Basic::YNEUMANN;
+                    edge_conds[s] = BDRY_COND::BASIC::YNEUMANN;
                 }
                 else if (bdry_cond_str == "ZNEUMANN")
                 {
-                    edge_conds[s] = BdryCond::Basic::ZNEUMANN;
+                    edge_conds[s] = BDRY_COND::BASIC::ZNEUMANN;
                 }
                 else
                 {
-                    TBOX_ERROR(
-                        "Unknown edge boundary string = "
+                    TBOX_ERROR("BasicCartesianBoundaryUtilities3::read3dBdryEdges()\n"
+                        << "Unknown edge boundary string = '"
                         << bdry_cond_str
-                        << " found in input."
+                        << "' found in input."
                         << std::endl);
                 }
                 
@@ -2136,10 +2205,10 @@ BasicCartesianBoundaryUtilities3::read3dBdryEdges(
                     bdry_cond_str == "XDIRICHLET" ||
                     bdry_cond_str == "XNEUMANN")
                 {
-                    if (s == EdgeBdyLoc3D::YLO_ZLO ||
-                        s == EdgeBdyLoc3D::YHI_ZLO ||
-                        s == EdgeBdyLoc3D::YLO_ZHI ||
-                        s == EdgeBdyLoc3D::YHI_ZHI)
+                    if (s == EDGE_BDRY_LOC_3D::YLO_ZLO ||
+                        s == EDGE_BDRY_LOC_3D::YHI_ZLO ||
+                        s == EDGE_BDRY_LOC_3D::YLO_ZHI ||
+                        s == EDGE_BDRY_LOC_3D::YHI_ZHI)
                     {
                         ambiguous_type = true;
                     }
@@ -2150,10 +2219,10 @@ BasicCartesianBoundaryUtilities3::read3dBdryEdges(
                          bdry_cond_str == "YDIRICHLET" ||
                          bdry_cond_str == "YNEUMANN")
                 {
-                    if (s == EdgeBdyLoc3D::XLO_ZLO ||
-                        s == EdgeBdyLoc3D::XLO_ZHI ||
-                        s == EdgeBdyLoc3D::XHI_ZLO ||
-                        s == EdgeBdyLoc3D::XHI_ZHI)
+                    if (s == EDGE_BDRY_LOC_3D::XLO_ZLO ||
+                        s == EDGE_BDRY_LOC_3D::XLO_ZHI ||
+                        s == EDGE_BDRY_LOC_3D::XHI_ZLO ||
+                        s == EDGE_BDRY_LOC_3D::XHI_ZHI)
                     {
                         ambiguous_type = true;
                     }
@@ -2164,21 +2233,22 @@ BasicCartesianBoundaryUtilities3::read3dBdryEdges(
                          bdry_cond_str == "ZDIRICHLET" ||
                          bdry_cond_str == "ZNEUMANN")
                 {
-                    if (s == EdgeBdyLoc3D::XLO_YLO ||
-                        s == EdgeBdyLoc3D::XHI_YLO ||
-                        s == EdgeBdyLoc3D::XLO_YHI ||
-                        s == EdgeBdyLoc3D::XHI_YHI)
+                    if (s == EDGE_BDRY_LOC_3D::XLO_YLO ||
+                        s == EDGE_BDRY_LOC_3D::XHI_YLO ||
+                        s == EDGE_BDRY_LOC_3D::XLO_YHI ||
+                        s == EDGE_BDRY_LOC_3D::XHI_YHI)
                     {
                         ambiguous_type = true;
                     }
                 }
                 if (ambiguous_type)
                 {
-                    TBOX_ERROR(
-                        "Ambiguous bdry condition "
+                    TBOX_ERROR("BasicCartesianBoundaryUtilities3::read3dBdryEdges()\n"
+                        << "Ambiguous bdry condition '"
                         << bdry_cond_str
-                        << " found for "
+                        << "' found for '"
                         << bdry_loc_str
+                        << "'."
                         << std::endl);
                 }
                 
@@ -2191,38 +2261,38 @@ BasicCartesianBoundaryUtilities3::read3dBdryEdges(
                     bdry_cond_str == "XREFLECT" ||
                     bdry_cond_str == "XSYMMETRY")
                 {
-                    if (s == EdgeBdyLoc3D::XLO_ZLO ||
-                        s == EdgeBdyLoc3D::XLO_ZHI ||
-                        s == EdgeBdyLoc3D::XLO_YLO ||
-                        s == EdgeBdyLoc3D::XLO_YHI)
+                    if (s == EDGE_BDRY_LOC_3D::XLO_ZLO ||
+                        s == EDGE_BDRY_LOC_3D::XLO_ZHI ||
+                        s == EDGE_BDRY_LOC_3D::XLO_YLO ||
+                        s == EDGE_BDRY_LOC_3D::XLO_YHI)
                     {
                         proper_face = "XLO";
                         if (bdry_cond_str == "XFLOW" &&
-                            face_conds[BdryLoc::XLO] != BdryCond::Basic::FLOW)
+                            face_conds[BDRY_LOC::XLO] != BDRY_COND::BASIC::FLOW)
                         {
                             no_face_data_found = true;
                             proper_face_data = "FLOW";
                         }
                         if (bdry_cond_str == "XDIRICHLET" &&
-                            face_conds[BdryLoc::XLO] != BdryCond::Basic::DIRICHLET)
+                            face_conds[BDRY_LOC::XLO] != BDRY_COND::BASIC::DIRICHLET)
                         {
                             no_face_data_found = true;
                             proper_face_data = "DIRICHLET";
                         }
                         if (bdry_cond_str == "XNEUMANN" &&
-                            face_conds[BdryLoc::XLO] != BdryCond::Basic::NEUMANN)
+                            face_conds[BDRY_LOC::XLO] != BDRY_COND::BASIC::NEUMANN)
                         {
                             no_face_data_found = true;
                             proper_face_data = "NEUMANN";
                         }
                         if (bdry_cond_str == "XREFLECT" &&
-                            face_conds[BdryLoc::XLO] != BdryCond::Basic::REFLECT)
+                            face_conds[BDRY_LOC::XLO] != BDRY_COND::BASIC::REFLECT)
                         {
                             no_face_data_found = true;
                             proper_face_data = "REFLECT";
                         }
                         if (bdry_cond_str == "XSYMMETRY" &&
-                            face_conds[BdryLoc::XLO] != BdryCond::Basic::SYMMETRY)
+                            face_conds[BDRY_LOC::XLO] != BDRY_COND::BASIC::SYMMETRY)
                         {
                             no_face_data_found = true;
                             proper_face_data = "SYMMETRY";
@@ -2232,31 +2302,31 @@ BasicCartesianBoundaryUtilities3::read3dBdryEdges(
                     {
                         proper_face = "XHI";
                         if (bdry_cond_str == "XFLOW" &&
-                            face_conds[BdryLoc::XHI] != BdryCond::Basic::FLOW)
+                            face_conds[BDRY_LOC::XHI] != BDRY_COND::BASIC::FLOW)
                         {
                             no_face_data_found = true;
                             proper_face_data = "FLOW";
                         }
                         if (bdry_cond_str == "XDIRICHLET" &&
-                            face_conds[BdryLoc::XHI] != BdryCond::Basic::DIRICHLET)
+                            face_conds[BDRY_LOC::XHI] != BDRY_COND::BASIC::DIRICHLET)
                         {
                             no_face_data_found = true;
                             proper_face_data = "DIRICHLET";
                         }
                         if (bdry_cond_str == "XNEUMANN" &&
-                            face_conds[BdryLoc::XHI] != BdryCond::Basic::NEUMANN)
+                            face_conds[BDRY_LOC::XHI] != BDRY_COND::BASIC::NEUMANN)
                         {
                             no_face_data_found = true;
                             proper_face_data = "NEUMANN";
                         }
                         if (bdry_cond_str == "XREFLECT" &&
-                            face_conds[BdryLoc::XHI] != BdryCond::Basic::REFLECT)
+                            face_conds[BDRY_LOC::XHI] != BDRY_COND::BASIC::REFLECT)
                         {
                             no_face_data_found = true;
                             proper_face_data = "REFLECT";
                         }
                         if (bdry_cond_str == "XSYMMETRY" &&
-                            face_conds[BdryLoc::XHI] != BdryCond::Basic::SYMMETRY)
+                            face_conds[BDRY_LOC::XHI] != BDRY_COND::BASIC::SYMMETRY)
                         {
                             no_face_data_found = true;
                             proper_face_data = "SYMMETRY";
@@ -2269,38 +2339,38 @@ BasicCartesianBoundaryUtilities3::read3dBdryEdges(
                          bdry_cond_str == "YREFLECT" ||
                          bdry_cond_str == "YSYMMETRY")
                 {
-                    if (s == EdgeBdyLoc3D::YLO_ZLO ||
-                        s == EdgeBdyLoc3D::YLO_ZHI ||
-                        s == EdgeBdyLoc3D::XLO_YLO ||
-                        s == EdgeBdyLoc3D::XHI_YLO)
+                    if (s == EDGE_BDRY_LOC_3D::YLO_ZLO ||
+                        s == EDGE_BDRY_LOC_3D::YLO_ZHI ||
+                        s == EDGE_BDRY_LOC_3D::XLO_YLO ||
+                        s == EDGE_BDRY_LOC_3D::XHI_YLO)
                     {
                         proper_face = "YLO";
                         if (bdry_cond_str == "YFLOW" &&
-                            face_conds[BdryLoc::YLO] != BdryCond::Basic::FLOW)
+                            face_conds[BDRY_LOC::YLO] != BDRY_COND::BASIC::FLOW)
                         {
                             no_face_data_found = true;
                             proper_face_data = "FLOW";
                         }
                         if (bdry_cond_str == "YDIRICHLET" &&
-                            face_conds[BdryLoc::YLO] != BdryCond::Basic::DIRICHLET)
+                            face_conds[BDRY_LOC::YLO] != BDRY_COND::BASIC::DIRICHLET)
                         {
                             no_face_data_found = true;
                             proper_face_data = "DIRICHLET";
                         }
                         if (bdry_cond_str == "YNEUMANN" &&
-                            face_conds[BdryLoc::YLO] != BdryCond::Basic::NEUMANN)
+                            face_conds[BDRY_LOC::YLO] != BDRY_COND::BASIC::NEUMANN)
                         {
                             no_face_data_found = true;
                             proper_face_data = "NEUMANN";
                         }
                         if (bdry_cond_str == "YREFLECT" &&
-                            face_conds[BdryLoc::YLO] != BdryCond::Basic::REFLECT)
+                            face_conds[BDRY_LOC::YLO] != BDRY_COND::BASIC::REFLECT)
                         {
                             no_face_data_found = true;
                             proper_face_data = "REFLECT";
                         }
                         if (bdry_cond_str == "YSYMMETRY" &&
-                            face_conds[BdryLoc::YLO] != BdryCond::Basic::SYMMETRY)
+                            face_conds[BDRY_LOC::YLO] != BDRY_COND::BASIC::SYMMETRY)
                         {
                             no_face_data_found = true;
                             proper_face_data = "SYMMETRY";
@@ -2310,31 +2380,31 @@ BasicCartesianBoundaryUtilities3::read3dBdryEdges(
                     {
                         proper_face = "YHI";
                         if (bdry_cond_str == "YFLOW" &&
-                            face_conds[BdryLoc::YHI] != BdryCond::Basic::FLOW)
+                            face_conds[BDRY_LOC::YHI] != BDRY_COND::BASIC::FLOW)
                         {
                             no_face_data_found = true;
                             proper_face_data = "FLOW";
                         }
                         if (bdry_cond_str == "YDIRICHLET" &&
-                            face_conds[BdryLoc::YHI] != BdryCond::Basic::DIRICHLET)
+                            face_conds[BDRY_LOC::YHI] != BDRY_COND::BASIC::DIRICHLET)
                         {
                             no_face_data_found = true;
                             proper_face_data = "DIRICHLET";
                         }
                         if (bdry_cond_str == "YNEUMANN" &&
-                            face_conds[BdryLoc::YHI] != BdryCond::Basic::NEUMANN)
+                            face_conds[BDRY_LOC::YHI] != BDRY_COND::BASIC::NEUMANN)
                         {
                             no_face_data_found = true;
                             proper_face_data = "NEUMANN";
                         }
                         if (bdry_cond_str == "YREFLECT" &&
-                            face_conds[BdryLoc::YHI] != BdryCond::Basic::REFLECT)
+                            face_conds[BDRY_LOC::YHI] != BDRY_COND::BASIC::REFLECT)
                         {
                             no_face_data_found = true;
                             proper_face_data = "REFLECT";
                         }
                         if (bdry_cond_str == "YSYMMETRY" &&
-                            face_conds[BdryLoc::YHI] != BdryCond::Basic::SYMMETRY)
+                            face_conds[BDRY_LOC::YHI] != BDRY_COND::BASIC::SYMMETRY)
                         {
                             no_face_data_found = true;
                             proper_face_data = "SYMMETRY";
@@ -2347,38 +2417,38 @@ BasicCartesianBoundaryUtilities3::read3dBdryEdges(
                          bdry_cond_str == "ZREFLECT" ||
                          bdry_cond_str == "ZSYMMETRY")
                 {
-                    if (s == EdgeBdyLoc3D::XLO_ZLO ||
-                        s == EdgeBdyLoc3D::YHI_ZLO ||
-                        s == EdgeBdyLoc3D::YLO_ZLO ||
-                        s == EdgeBdyLoc3D::XHI_ZLO)
+                    if (s == EDGE_BDRY_LOC_3D::XLO_ZLO ||
+                        s == EDGE_BDRY_LOC_3D::YHI_ZLO ||
+                        s == EDGE_BDRY_LOC_3D::YLO_ZLO ||
+                        s == EDGE_BDRY_LOC_3D::XHI_ZLO)
                     {
                         proper_face = "ZLO";
                         if (bdry_cond_str == "ZFLOW" &&
-                            face_conds[BdryLoc::ZLO] != BdryCond::Basic::FLOW)
+                            face_conds[BDRY_LOC::ZLO] != BDRY_COND::BASIC::FLOW)
                         {
                             no_face_data_found = true;
                             proper_face_data = "FLOW";
                         }
                         if (bdry_cond_str == "ZDIRICHLET" &&
-                            face_conds[BdryLoc::ZLO] != BdryCond::Basic::DIRICHLET)
+                            face_conds[BDRY_LOC::ZLO] != BDRY_COND::BASIC::DIRICHLET)
                         {
                             no_face_data_found = true;
                             proper_face_data = "DIRICHLET";
                         }
                         if (bdry_cond_str == "ZNEUMANN" &&
-                            face_conds[BdryLoc::ZLO] != BdryCond::Basic::NEUMANN)
+                            face_conds[BDRY_LOC::ZLO] != BDRY_COND::BASIC::NEUMANN)
                         {
                             no_face_data_found = true;
                             proper_face_data = "NEUMANN";
                         }
                         if (bdry_cond_str == "ZREFLECT" &&
-                            face_conds[BdryLoc::ZLO] != BdryCond::Basic::REFLECT)
+                            face_conds[BDRY_LOC::ZLO] != BDRY_COND::BASIC::REFLECT)
                         {
                             no_face_data_found = true;
                             proper_face_data = "REFLECT";
                         }
                         if (bdry_cond_str == "ZSYMMETRY" &&
-                            face_conds[BdryLoc::ZLO] != BdryCond::Basic::SYMMETRY)
+                            face_conds[BDRY_LOC::ZLO] != BDRY_COND::BASIC::SYMMETRY)
                         {
                             no_face_data_found = true;
                             proper_face_data = "SYMMETRY";
@@ -2388,31 +2458,31 @@ BasicCartesianBoundaryUtilities3::read3dBdryEdges(
                     {
                         proper_face = "ZHI";
                         if (bdry_cond_str == "ZFLOW" &&
-                            face_conds[BdryLoc::ZHI] != BdryCond::Basic::FLOW)
+                            face_conds[BDRY_LOC::ZHI] != BDRY_COND::BASIC::FLOW)
                         {
                             no_face_data_found = true;
                             proper_face_data = "FLOW";
                         }
                         if (bdry_cond_str == "ZDIRICHLET" &&
-                            face_conds[BdryLoc::ZHI] != BdryCond::Basic::DIRICHLET)
+                            face_conds[BDRY_LOC::ZHI] != BDRY_COND::BASIC::DIRICHLET)
                         {
                             no_face_data_found = true;
                             proper_face_data = "DIRICHLET";
                         }
                         if (bdry_cond_str == "ZNEUMANN" &&
-                            face_conds[BdryLoc::ZHI] != BdryCond::Basic::NEUMANN)
+                            face_conds[BDRY_LOC::ZHI] != BDRY_COND::BASIC::NEUMANN)
                         {
                             no_face_data_found = true;
                             proper_face_data = "NEUMANN";
                         }
                         if (bdry_cond_str == "ZREFLECT" &&
-                            face_conds[BdryLoc::ZHI] != BdryCond::Basic::REFLECT)
+                            face_conds[BDRY_LOC::ZHI] != BDRY_COND::BASIC::REFLECT)
                         {
                             no_face_data_found = true;
                             proper_face_data = "REFLECT";
                         }
                         if (bdry_cond_str == "ZSYMMETRY" &&
-                            face_conds[BdryLoc::ZHI] != BdryCond::Basic::SYMMETRY)
+                            face_conds[BDRY_LOC::ZHI] != BDRY_COND::BASIC::SYMMETRY)
                         {
                             no_face_data_found = true;
                             proper_face_data = "SYMMETRY";
@@ -2421,18 +2491,20 @@ BasicCartesianBoundaryUtilities3::read3dBdryEdges(
                 }
                 if (no_face_data_found)
                 {
-                    TBOX_ERROR(
-                        "Bdry condition "
+                    TBOX_ERROR("BasicCartesianBoundaryUtilities3::read3dBdryEdges()\n"
+                        << "Bdry condition '"
                         << bdry_cond_str
-                        << " found for "
+                        << "' found for '"
                         << bdry_loc_str
-                        << "\n but no "
+                        << "' but no '"
                         << proper_face_data
-                        << " data found for face "
-                        << proper_face << std::endl);
+                        << "' data found for face '"
+                        << proper_face
+                        << "'."
+                        << std::endl);
                 }
             } // if (need_data_read)
-        } // for (int s = 0 ...
+        } // for (int ei = 0 ...
     } // if (num_per_dirs < 2)
 }
     
@@ -2443,6 +2515,7 @@ BasicCartesianBoundaryUtilities3::read3dBdryEdges(
 void
 BasicCartesianBoundaryUtilities3::read3dBdryNodes(
     const boost::shared_ptr<tbox::Database>& input_db,
+    const std::vector<int>& node_locs,
     const std::vector<int>& face_conds,
     std::vector<int>& node_conds,
     const hier::IntVector& periodic)
@@ -2450,6 +2523,9 @@ BasicCartesianBoundaryUtilities3::read3dBdryNodes(
     TBOX_DIM_ASSERT(periodic.getDim() == tbox::Dimension(3));
     
     TBOX_ASSERT(input_db);
+    TBOX_ASSERT(static_cast<int>(node_locs.size()) <= NUM_3D_NODES);
+    TBOX_ASSERT(*min_element(node_locs.begin(), node_locs.end()) >= 0);
+    TBOX_ASSERT(*max_element(node_locs.begin(), node_locs.end()) < NUM_3D_NODES);
     TBOX_ASSERT(static_cast<int>(face_conds.size()) == NUM_3D_FACES);
     TBOX_ASSERT(static_cast<int>(node_conds.size()) == NUM_3D_NODES);
     
@@ -2463,47 +2539,49 @@ BasicCartesianBoundaryUtilities3::read3dBdryNodes(
     if (num_per_dirs < 1)
     {
         // node boundary data required
-        for (int s = 0; s < NUM_3D_NODES; s++)
+        for (int ni = 0; ni < static_cast<int>(node_locs.size()); ni++)
         {
+            int s = node_locs[ni];
+            
             std::string bdry_loc_str;
             switch (s)
             {
-                case NodeBdyLoc3D::XLO_YLO_ZLO:
+                case NODE_BDRY_LOC_3D::XLO_YLO_ZLO:
                 {
                     bdry_loc_str = "boundary_node_xlo_ylo_zlo";
                     break;
                 }
-                case NodeBdyLoc3D::XHI_YLO_ZLO:
+                case NODE_BDRY_LOC_3D::XHI_YLO_ZLO:
                 {
                     bdry_loc_str = "boundary_node_xhi_ylo_zlo";
                     break;
                 }
-                case NodeBdyLoc3D::XLO_YHI_ZLO:
+                case NODE_BDRY_LOC_3D::XLO_YHI_ZLO:
                 {
                     bdry_loc_str = "boundary_node_xlo_yhi_zlo";
                     break;
                 }
-                case NodeBdyLoc3D::XHI_YHI_ZLO:
+                case NODE_BDRY_LOC_3D::XHI_YHI_ZLO:
                 {
                     bdry_loc_str = "boundary_node_xhi_yhi_zlo";
                     break;
                 }
-                case NodeBdyLoc3D::XLO_YLO_ZHI:
+                case NODE_BDRY_LOC_3D::XLO_YLO_ZHI:
                 {
                     bdry_loc_str = "boundary_node_xlo_ylo_zhi";
                     break;
                 }
-                case NodeBdyLoc3D::XHI_YLO_ZHI:
+                case NODE_BDRY_LOC_3D::XHI_YLO_ZHI:
                 {
                     bdry_loc_str = "boundary_node_xhi_ylo_zhi";
                     break;
                 }
-                case NodeBdyLoc3D::XLO_YHI_ZHI:
+                case NODE_BDRY_LOC_3D::XLO_YHI_ZHI:
                 {
                     bdry_loc_str = "boundary_node_xlo_yhi_zhi";
                     break;
                 }
-                case NodeBdyLoc3D::XHI_YHI_ZHI:
+                case NODE_BDRY_LOC_3D::XHI_YHI_ZHI:
                 {
                     bdry_loc_str = "boundary_node_xhi_yhi_zhi";
                     break;
@@ -2516,70 +2594,70 @@ BasicCartesianBoundaryUtilities3::read3dBdryNodes(
                 bdry_loc_db->getString("boundary_condition");
             if (bdry_cond_str == "XFLOW")
             {
-                node_conds[s] = BdryCond::Basic::XFLOW;
+                node_conds[s] = BDRY_COND::BASIC::XFLOW;
             }
             else if (bdry_cond_str == "YFLOW")
             {
-                node_conds[s] = BdryCond::Basic::YFLOW;
+                node_conds[s] = BDRY_COND::BASIC::YFLOW;
             }
             else if (bdry_cond_str == "ZFLOW")
             {
-                node_conds[s] = BdryCond::Basic::ZFLOW;
+                node_conds[s] = BDRY_COND::BASIC::ZFLOW;
             }
             else if (bdry_cond_str == "XREFLECT")
             {
-                node_conds[s] = BdryCond::Basic::XREFLECT;
+                node_conds[s] = BDRY_COND::BASIC::XREFLECT;
             }
             else if (bdry_cond_str == "YREFLECT")
             {
-                node_conds[s] = BdryCond::Basic::YREFLECT;
+                node_conds[s] = BDRY_COND::BASIC::YREFLECT;
             }
             else if (bdry_cond_str == "ZREFLECT")
             {
-                node_conds[s] = BdryCond::Basic::ZREFLECT;
+                node_conds[s] = BDRY_COND::BASIC::ZREFLECT;
             }
             else if (bdry_cond_str == "XSYMMETRY")
             {
-                node_conds[s] = BdryCond::Basic::XSYMMETRY;
+                node_conds[s] = BDRY_COND::BASIC::XSYMMETRY;
             }
             else if (bdry_cond_str == "YSYMMETRY")
             {
-                node_conds[s] = BdryCond::Basic::YSYMMETRY;
+                node_conds[s] = BDRY_COND::BASIC::YSYMMETRY;
             }
             else if (bdry_cond_str == "ZSYMMETRY")
             {
-                node_conds[s] = BdryCond::Basic::ZSYMMETRY;
+                node_conds[s] = BDRY_COND::BASIC::ZSYMMETRY;
             }
             else if (bdry_cond_str == "XDIRICHLET")
             {
-                node_conds[s] = BdryCond::Basic::XDIRICHLET;
+                node_conds[s] = BDRY_COND::BASIC::XDIRICHLET;
             }
             else if (bdry_cond_str == "YDIRICHLET")
             {
-                node_conds[s] = BdryCond::Basic::YDIRICHLET;
+                node_conds[s] = BDRY_COND::BASIC::YDIRICHLET;
             }
             else if (bdry_cond_str == "ZDIRICHLET")
             {
-                node_conds[s] = BdryCond::Basic::ZDIRICHLET;
+                node_conds[s] = BDRY_COND::BASIC::ZDIRICHLET;
             }
             else if (bdry_cond_str == "XNEUMANN")
             {
-                node_conds[s] = BdryCond::Basic::XNEUMANN;
+                node_conds[s] = BDRY_COND::BASIC::XNEUMANN;
             }
             else if (bdry_cond_str == "YNEUMANN")
             {
-                node_conds[s] = BdryCond::Basic::YNEUMANN;
+                node_conds[s] = BDRY_COND::BASIC::YNEUMANN;
             }
             else if (bdry_cond_str == "ZNEUMANN")
             {
-                node_conds[s] = BdryCond::Basic::ZNEUMANN;
+                node_conds[s] = BDRY_COND::BASIC::ZNEUMANN;
             }
             else
             {
-                TBOX_ERROR(
-                    "Unknown node boundary string = "
+                TBOX_ERROR("BasicCartesianBoundaryUtilities3::read3dBdryNodes()\n"
+                    << "Unknown node boundary string = '"
                     << bdry_cond_str
-                    << " found in input."
+                    << "' found in input."
                     << std::endl);
             }
             
@@ -2592,38 +2670,38 @@ BasicCartesianBoundaryUtilities3::read3dBdryNodes(
                 bdry_cond_str == "XREFLECT" ||
                 bdry_cond_str == "XSYMMETRY")
             {
-                if (s == NodeBdyLoc3D::XLO_YLO_ZLO ||
-                    s == NodeBdyLoc3D::XLO_YHI_ZLO ||
-                    s == NodeBdyLoc3D::XLO_YLO_ZHI ||
-                    s == NodeBdyLoc3D::XLO_YHI_ZHI)
+                if (s == NODE_BDRY_LOC_3D::XLO_YLO_ZLO ||
+                    s == NODE_BDRY_LOC_3D::XLO_YHI_ZLO ||
+                    s == NODE_BDRY_LOC_3D::XLO_YLO_ZHI ||
+                    s == NODE_BDRY_LOC_3D::XLO_YHI_ZHI)
                 {
                     proper_face = "XLO";
                     if (bdry_cond_str == "XFLOW" &&
-                        face_conds[BdryLoc::XLO] != BdryCond::Basic::FLOW)
+                        face_conds[BDRY_LOC::XLO] != BDRY_COND::BASIC::FLOW)
                     {
                         no_face_data_found = true;
                         proper_face_data = "FLOW";
                     }
                     if (bdry_cond_str == "XDIRICHLET" &&
-                        face_conds[BdryLoc::XLO] != BdryCond::Basic::DIRICHLET)
+                        face_conds[BDRY_LOC::XLO] != BDRY_COND::BASIC::DIRICHLET)
                     {
                         no_face_data_found = true;
                         proper_face_data = "DIRICHLET";
                     }
                     if (bdry_cond_str == "XNEUMANN" &&
-                        face_conds[BdryLoc::XLO] != BdryCond::Basic::NEUMANN)
+                        face_conds[BDRY_LOC::XLO] != BDRY_COND::BASIC::NEUMANN)
                     {
                         no_face_data_found = true;
                         proper_face_data = "NEUMANN";
                     }
                     if (bdry_cond_str == "XREFLECT" &&
-                        face_conds[BdryLoc::XLO] != BdryCond::Basic::REFLECT)
+                        face_conds[BDRY_LOC::XLO] != BDRY_COND::BASIC::REFLECT)
                     {
                         no_face_data_found = true;
                         proper_face_data = "REFLECT";
                     }
                     if (bdry_cond_str == "XSYMMETRY" &&
-                        face_conds[BdryLoc::XLO] != BdryCond::Basic::SYMMETRY)
+                        face_conds[BDRY_LOC::XLO] != BDRY_COND::BASIC::SYMMETRY)
                     {
                         no_face_data_found = true;
                         proper_face_data = "SYMMETRY";
@@ -2633,31 +2711,31 @@ BasicCartesianBoundaryUtilities3::read3dBdryNodes(
                 {
                     proper_face = "XHI";
                     if (bdry_cond_str == "XFLOW" &&
-                        face_conds[BdryLoc::XHI] != BdryCond::Basic::FLOW)
+                        face_conds[BDRY_LOC::XHI] != BDRY_COND::BASIC::FLOW)
                     {
                         no_face_data_found = true;
                         proper_face_data = "FLOW";
                     }
                     if (bdry_cond_str == "XDIRICHLET" &&
-                        face_conds[BdryLoc::XHI] != BdryCond::Basic::DIRICHLET)
+                        face_conds[BDRY_LOC::XHI] != BDRY_COND::BASIC::DIRICHLET)
                     {
                         no_face_data_found = true;
                         proper_face_data = "DIRICHLET";
                     }
                     if (bdry_cond_str == "XNEUMANN" &&
-                        face_conds[BdryLoc::XHI] != BdryCond::Basic::NEUMANN)
+                        face_conds[BDRY_LOC::XHI] != BDRY_COND::BASIC::NEUMANN)
                     {
                         no_face_data_found = true;
                         proper_face_data = "NEUMANN";
                     }
                     if (bdry_cond_str == "XREFLECT" &&
-                        face_conds[BdryLoc::XHI] != BdryCond::Basic::REFLECT)
+                        face_conds[BDRY_LOC::XHI] != BDRY_COND::BASIC::REFLECT)
                     {
                        no_face_data_found = true;
                        proper_face_data = "REFLECT";
                     }
                     if (bdry_cond_str == "XSYMMETRY" &&
-                        face_conds[BdryLoc::XHI] != BdryCond::Basic::SYMMETRY)
+                        face_conds[BDRY_LOC::XHI] != BDRY_COND::BASIC::SYMMETRY)
                     {
                        no_face_data_found = true;
                        proper_face_data = "SYMMETRY";
@@ -2670,38 +2748,38 @@ BasicCartesianBoundaryUtilities3::read3dBdryNodes(
                      bdry_cond_str == "YREFLECT" ||
                      bdry_cond_str == "YSYMMETRY")
             {
-                if (s == NodeBdyLoc3D::XLO_YLO_ZLO ||
-                    s == NodeBdyLoc3D::XHI_YLO_ZLO ||
-                    s == NodeBdyLoc3D::XLO_YLO_ZHI ||
-                    s == NodeBdyLoc3D::XHI_YLO_ZHI)
+                if (s == NODE_BDRY_LOC_3D::XLO_YLO_ZLO ||
+                    s == NODE_BDRY_LOC_3D::XHI_YLO_ZLO ||
+                    s == NODE_BDRY_LOC_3D::XLO_YLO_ZHI ||
+                    s == NODE_BDRY_LOC_3D::XHI_YLO_ZHI)
                 {
                     proper_face = "YLO";
                     if (bdry_cond_str == "YFLOW" &&
-                        face_conds[BdryLoc::YLO] != BdryCond::Basic::FLOW)
+                        face_conds[BDRY_LOC::YLO] != BDRY_COND::BASIC::FLOW)
                     {
                         no_face_data_found = true;
                         proper_face_data = "FLOW";
                     }
                     if (bdry_cond_str == "YDIRICHLET" &&
-                        face_conds[BdryLoc::YLO] != BdryCond::Basic::DIRICHLET)
+                        face_conds[BDRY_LOC::YLO] != BDRY_COND::BASIC::DIRICHLET)
                     {
                         no_face_data_found = true;
                         proper_face_data = "DIRICHLET";
                     }
                     if (bdry_cond_str == "YNEUMANN" &&
-                        face_conds[BdryLoc::YLO] != BdryCond::Basic::NEUMANN)
+                        face_conds[BDRY_LOC::YLO] != BDRY_COND::BASIC::NEUMANN)
                     {
                         no_face_data_found = true;
                         proper_face_data = "NEUMANN";
                     }
                     if (bdry_cond_str == "YREFLECT" &&
-                        face_conds[BdryLoc::YLO] != BdryCond::Basic::REFLECT)
+                        face_conds[BDRY_LOC::YLO] != BDRY_COND::BASIC::REFLECT)
                     {
                         no_face_data_found = true;
                         proper_face_data = "REFLECT";
                     }
                     if (bdry_cond_str == "YSYMMETRY" &&
-                        face_conds[BdryLoc::YLO] != BdryCond::Basic::SYMMETRY)
+                        face_conds[BDRY_LOC::YLO] != BDRY_COND::BASIC::SYMMETRY)
                     {
                         no_face_data_found = true;
                         proper_face_data = "SYMMETRY";
@@ -2711,31 +2789,31 @@ BasicCartesianBoundaryUtilities3::read3dBdryNodes(
                 {
                     proper_face = "YHI";
                     if (bdry_cond_str == "YFLOW" &&
-                        face_conds[BdryLoc::YHI] != BdryCond::Basic::FLOW)
+                        face_conds[BDRY_LOC::YHI] != BDRY_COND::BASIC::FLOW)
                     {
                         no_face_data_found = true;
                         proper_face_data = "FLOW";
                     }
                     if (bdry_cond_str == "YDIRICHLET" &&
-                        face_conds[BdryLoc::YHI] != BdryCond::Basic::DIRICHLET)
+                        face_conds[BDRY_LOC::YHI] != BDRY_COND::BASIC::DIRICHLET)
                     {
                         no_face_data_found = true;
                         proper_face_data = "DIRICHLET";
                     }
                     if (bdry_cond_str == "YNEUMANN" &&
-                        face_conds[BdryLoc::YHI] != BdryCond::Basic::NEUMANN)
+                        face_conds[BDRY_LOC::YHI] != BDRY_COND::BASIC::NEUMANN)
                     {
                         no_face_data_found = true;
                         proper_face_data = "NEUMANN";
                     }
                     if (bdry_cond_str == "YREFLECT" &&
-                        face_conds[BdryLoc::YHI] != BdryCond::Basic::REFLECT)
+                        face_conds[BDRY_LOC::YHI] != BDRY_COND::BASIC::REFLECT)
                     {
                         no_face_data_found = true;
                         proper_face_data = "REFLECT";
                     }
                     if (bdry_cond_str == "YSYMMETRY" &&
-                        face_conds[BdryLoc::YHI] != BdryCond::Basic::SYMMETRY)
+                        face_conds[BDRY_LOC::YHI] != BDRY_COND::BASIC::SYMMETRY)
                     {
                         no_face_data_found = true;
                         proper_face_data = "SYMMETRY";
@@ -2748,34 +2826,39 @@ BasicCartesianBoundaryUtilities3::read3dBdryNodes(
                      bdry_cond_str == "ZREFLECT" ||
                      bdry_cond_str == "ZSYMMETRY")
             {
-                if (s == NodeBdyLoc3D::XLO_YLO_ZLO ||
-                    s == NodeBdyLoc3D::XHI_YLO_ZLO ||
-                    s == NodeBdyLoc3D::XLO_YHI_ZLO ||
-                    s == NodeBdyLoc3D::XHI_YHI_ZLO)
+                if (s == NODE_BDRY_LOC_3D::XLO_YLO_ZLO ||
+                    s == NODE_BDRY_LOC_3D::XHI_YLO_ZLO ||
+                    s == NODE_BDRY_LOC_3D::XLO_YHI_ZLO ||
+                    s == NODE_BDRY_LOC_3D::XHI_YHI_ZLO)
                 {
                     proper_face = "ZLO";
                     if (bdry_cond_str == "ZFLOW" &&
-                        face_conds[BdryLoc::ZLO] != BdryCond::Basic::FLOW) {
+                        face_conds[BDRY_LOC::ZLO] != BDRY_COND::BASIC::FLOW)
+                    {
                         no_face_data_found = true;
                         proper_face_data = "FLOW";
                     }
                     if (bdry_cond_str == "ZDIRICHLET" &&
-                        face_conds[BdryLoc::ZLO] != BdryCond::Basic::DIRICHLET) {
+                        face_conds[BDRY_LOC::ZLO] != BDRY_COND::BASIC::DIRICHLET)
+                    {
                         no_face_data_found = true;
                         proper_face_data = "DIRICHLET";
                     }
                     if (bdry_cond_str == "ZNEUMANN" &&
-                        face_conds[BdryLoc::ZLO] != BdryCond::Basic::NEUMANN) {
+                        face_conds[BDRY_LOC::ZLO] != BDRY_COND::BASIC::NEUMANN)
+                    {
                         no_face_data_found = true;
                         proper_face_data = "NEUMANN";
                     }
                     if (bdry_cond_str == "ZREFLECT" &&
-                        face_conds[BdryLoc::ZLO] != BdryCond::Basic::REFLECT) {
+                        face_conds[BDRY_LOC::ZLO] != BDRY_COND::BASIC::REFLECT)
+                    {
                         no_face_data_found = true;
                         proper_face_data = "REFLECT";
                     }
                     if (bdry_cond_str == "ZSYMMETRY" &&
-                        face_conds[BdryLoc::ZLO] != BdryCond::Basic::SYMMETRY) {
+                        face_conds[BDRY_LOC::ZLO] != BDRY_COND::BASIC::SYMMETRY)
+                    {
                         no_face_data_found = true;
                         proper_face_data = "SYMMETRY";
                     }
@@ -2784,31 +2867,31 @@ BasicCartesianBoundaryUtilities3::read3dBdryNodes(
                 {
                     proper_face = "ZHI";
                     if (bdry_cond_str == "ZFLOW" &&
-                        face_conds[BdryLoc::ZHI] != BdryCond::Basic::FLOW)
+                        face_conds[BDRY_LOC::ZHI] != BDRY_COND::BASIC::FLOW)
                     {
                         no_face_data_found = true;
                         proper_face_data = "FLOW";
                     }
                     if (bdry_cond_str == "ZDIRICHLET" &&
-                        face_conds[BdryLoc::ZHI] != BdryCond::Basic::DIRICHLET)
+                        face_conds[BDRY_LOC::ZHI] != BDRY_COND::BASIC::DIRICHLET)
                     {
                         no_face_data_found = true;
                         proper_face_data = "DIRICHLET";
                     }
                     if (bdry_cond_str == "ZNEUMANN" &&
-                        face_conds[BdryLoc::ZHI] != BdryCond::Basic::NEUMANN)
+                        face_conds[BDRY_LOC::ZHI] != BDRY_COND::BASIC::NEUMANN)
                     {
                         no_face_data_found = true;
                         proper_face_data = "NEUMANN";
                     }
                     if (bdry_cond_str == "ZREFLECT" &&
-                        face_conds[BdryLoc::ZHI] != BdryCond::Basic::REFLECT)
+                        face_conds[BDRY_LOC::ZHI] != BDRY_COND::BASIC::REFLECT)
                     {
                         no_face_data_found = true;
                         proper_face_data = "REFLECT";
                     }
                     if (bdry_cond_str == "ZSYMMETRY" &&
-                        face_conds[BdryLoc::ZHI] != BdryCond::Basic::SYMMETRY)
+                        face_conds[BDRY_LOC::ZHI] != BDRY_COND::BASIC::SYMMETRY)
                     {
                         no_face_data_found = true;
                         proper_face_data = "SYMMETRY";
@@ -2817,16 +2900,18 @@ BasicCartesianBoundaryUtilities3::read3dBdryNodes(
             }
             if (no_face_data_found)
             {
-                TBOX_ERROR(
-                    "Bdry condition "
+                TBOX_ERROR("BasicCartesianBoundaryUtilities3::read3dBdryNodes()\n"
+                    << "Bdry condition '"
                     << bdry_cond_str
-                    << " found for "
+                    << "' found for '"
                     << bdry_loc_str
-                    << "\n but no "
+                    << "' but no '"
                     << proper_face_data
-                    << " data found for face "
-                    << proper_face << std::endl);
+                    << "' data found for face '"
+                    << proper_face
+                    << "'."
+                    << std::endl);
             }
-        } // for (int s = 0 ...
+        } // for (int ni = 0 ...
     } // if (num_per_dirs < 1)
 }

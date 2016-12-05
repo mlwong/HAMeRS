@@ -68,6 +68,15 @@ class EquationOfStateIdealGas: public EquationOfState
             const std::vector<const double*>& thermo_properties) const;
         
         /*
+         * Compute the specific internal energy from temperature.
+         */
+        double
+        getInternalEnergyFromTemperature(
+            const double* const density,
+            const double* const temperature,
+            const std::vector<const double*>& thermo_properties) const;
+        
+        /*
          * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
          */
         double
@@ -83,6 +92,15 @@ class EquationOfStateIdealGas: public EquationOfState
         getIsobaricPartialInternalEnergyPartialDensity(
             const double* const density,
             const double* const pressure,
+            const std::vector<const double*>& thermo_properties) const;
+        
+        /*
+         * Compute the density.
+         */
+        double
+        getDensity(
+            const double* const pressure,
+            const double* const temperature,
             const std::vector<const double*>& thermo_properties) const;
         
     private:

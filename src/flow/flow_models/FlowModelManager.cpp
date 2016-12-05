@@ -17,7 +17,7 @@ FlowModelManager::FlowModelManager(
     
     if (flow_model_str == "SINGLE_SPECIES")
     {
-        d_flow_model_label = SINGLE_SPECIES;
+        d_flow_model_type = FLOW_MODEL::SINGLE_SPECIES;
         
         d_flow_model.reset(new FlowModelSingleSpecies(
             "d_flow_model",
@@ -29,7 +29,7 @@ FlowModelManager::FlowModelManager(
     }
     else if (flow_model_str == "FOUR_EQN_CONSERVATIVE")
     {
-        d_flow_model_label = FOUR_EQN_CONSERVATIVE;
+        d_flow_model_type = FLOW_MODEL::FOUR_EQN_CONSERVATIVE;
         
         d_flow_model.reset(new FlowModelFourEqnConservative(
             "d_flow_model",
@@ -41,7 +41,7 @@ FlowModelManager::FlowModelManager(
     }
     else if (flow_model_str == "FIVE_EQN_ALLAIRE")
     {
-        d_flow_model_label = FIVE_EQN_ALLAIRE;
+        d_flow_model_type = FLOW_MODEL::FIVE_EQN_ALLAIRE;
         
         d_flow_model.reset(new FlowModelFiveEqnAllaire(
             "d_flow_model",
@@ -61,7 +61,7 @@ FlowModelManager::FlowModelManager(
             << std::endl);        
     }
     
-    if (d_num_species > 1 && d_flow_model_label == SINGLE_SPECIES)
+    if (d_num_species > 1 && d_flow_model_type == FLOW_MODEL::SINGLE_SPECIES)
     {
         TBOX_ERROR(d_object_name
             << ": "
@@ -70,32 +70,6 @@ FlowModelManager::FlowModelManager(
             << " shouldn't use single-species model."
             << std::endl); 
     }
-}
-
-
-/*
- * Initialize d_initial_conditions.
- */
-void
-FlowModelManager::initializeInitialConditions(
-    const std::string& project_name,
-    boost::shared_ptr<InitialConditions>& initial_conditions)
-{
-    initial_conditions.reset(new InitialConditions(
-        "initial conditions",
-        project_name,
-        d_dim,
-        d_grid_geometry,
-        d_flow_model_label,
-        d_num_species));
-    
-    d_initial_conditions = initial_conditions;
-    
-    /*
-     * Initialize boost::shared_ptr of the variables
-     * in d_initial_conditions.
-     */
-    setVariablesForInitialConditions();
 }
 
 
@@ -118,55 +92,10 @@ FlowModelManager::printClassData(std::ostream& os) const
        << d_object_name
        << std::endl;
     
-    os << "d_flow_model_label = "
-       << d_flow_model_label
+    os << "d_flow_model_type = "
+       << d_flow_model_type
        << std::endl;
     
     os << "================================================================================";
     d_flow_model->printClassData(os);
 }
-
-
-/*
- * Initialize boost::shared_ptr of the variables
- * in d_initial_conditions.
- */
-void
-FlowModelManager::setVariablesForInitialConditions()
-{
-    std::vector<boost::shared_ptr<pdat::CellVariable<double> > > conservative_variables =
-        d_flow_model->getConservativeVariables();
-    
-    switch (d_flow_model_label)
-    {
-        case SINGLE_SPECIES:
-        {
-            d_initial_conditions->setVariablesForSingleSpecies(
-                conservative_variables[0],
-                conservative_variables[1],
-                conservative_variables[2]);
-            
-            break;
-        }
-        case FOUR_EQN_CONSERVATIVE:
-        {
-            d_initial_conditions->setVariablesForFourEqnConservative(
-                conservative_variables[0],
-                conservative_variables[1],
-                conservative_variables[2]);
-            
-            break;
-        }
-        case FIVE_EQN_ALLAIRE:
-        {
-            d_initial_conditions->setVariablesForFiveEqnAllaire(
-                conservative_variables[0],
-                conservative_variables[1],
-                conservative_variables[2],
-                conservative_variables[3]);
-            
-            break;
-        }
-    }
-}
-    

@@ -35,6 +35,7 @@
 #include "algs/integrator/ExtendedTagAndInitialize.hpp"
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
 #include "apps/Euler/Euler.hpp"
+#include "apps/Navier-Stokes/NavierStokes.hpp"
 
 #include "boost/shared_ptr.hpp"
 #include <fstream>
@@ -149,6 +150,9 @@ using namespace SAMRAI;
  *******************************************************************
  */
 
+
+enum APPLICATION_LABEL { EULER,
+                         NAVIER_STOKES };
 
 int main(int argc, char *argv[])
 {
@@ -395,18 +399,68 @@ int main(int argc, char *argv[])
             grid_geometry,
             input_db->getDatabase("PatchHierarchy")));
     
-    Euler* Euler_model = new Euler(
-        "Euler_model",
-        dim,
-        input_db->getDatabase("Euler"),
-        grid_geometry);
     
-    boost::shared_ptr<RungeKuttaLevelIntegrator> RK_level_integrator(
-        new RungeKuttaLevelIntegrator(
-            "Runge-Kutta level integrator",
-            input_db->getDatabase("RungeKuttaLevelIntegrator"),
-            Euler_model,
-            use_refined_timestepping));
+    APPLICATION_LABEL app_label = EULER;
+    
+    std::string app_string = input_db->getString("Application");
+    
+    if (app_string == "Euler")
+    {
+        app_label = EULER;
+    }
+    else if (app_string == "Navier-Stokes")
+    {
+        app_label = NAVIER_STOKES;
+    }
+    else
+    {
+       TBOX_ERROR("Unkonwn application string = '"
+            << app_string
+            << "' found in input database."
+            << std::endl); 
+    }
+    
+    Euler* Euler_app = nullptr;
+    NavierStokes* Navier_Stokes_app = nullptr;
+    
+    boost::shared_ptr<RungeKuttaLevelIntegrator> RK_level_integrator;
+    
+    switch (app_label)
+    {
+        case EULER:
+        {
+            Euler_app = new Euler(
+                "Euler_app",
+                dim,
+                input_db->getDatabase("Euler"),
+                grid_geometry);
+            
+                RK_level_integrator.reset(new RungeKuttaLevelIntegrator(
+                    "Runge-Kutta level integrator",
+                    input_db->getDatabase("RungeKuttaLevelIntegrator"),
+                    Euler_app,
+                    use_refined_timestepping));
+            
+            break;
+        }
+        case NAVIER_STOKES:
+        {
+            Navier_Stokes_app = new NavierStokes(
+                "Navier_Stokes_app",
+                dim,
+                input_db->getDatabase("NavierStokes"),
+                grid_geometry);
+            
+            RK_level_integrator.reset(
+                new RungeKuttaLevelIntegrator(
+                    "Runge-Kutta level integrator",
+                    input_db->getDatabase("RungeKuttaLevelIntegrator"),
+                    Navier_Stokes_app,
+                    use_refined_timestepping));
+            
+            break;
+        }
+    }
     
     boost::shared_ptr<ExtendedTagAndInitialize> error_detector(
         new ExtendedTagAndInitialize(
@@ -454,14 +508,37 @@ int main(int argc, char *argv[])
      * is not necessary.
      */
 #ifdef HAVE_HDF5
-    boost::shared_ptr<appu::VisItDataWriter> visit_data_writer(
-        new appu::VisItDataWriter(
-            dim,
-            "Euler VisIt Writer",
-            visit_dump_dirname,
-            visit_number_procs_per_file));
+    boost::shared_ptr<appu::VisItDataWriter> visit_data_writer = NULL;
     
-    Euler_model->registerVisItDataWriter(visit_data_writer);
+    switch (app_label)
+    {
+        case EULER:
+        {
+            visit_data_writer.reset(
+                new appu::VisItDataWriter(
+                    dim,
+                    "Euler VisIt Writer",
+                    visit_dump_dirname,
+                    visit_number_procs_per_file));
+            
+            Euler_app->registerVisItDataWriter(visit_data_writer);
+            
+            break;
+        }
+        case NAVIER_STOKES:
+        {
+            visit_data_writer.reset(
+                new appu::VisItDataWriter(
+                    dim,
+                    "Navier-Stokes VisIt Writer",
+                    visit_dump_dirname,
+                    visit_number_procs_per_file));
+            
+            Navier_Stokes_app->registerVisItDataWriter(visit_data_writer);
+            
+            break;
+        }
+    }
 #endif
     
     /*
@@ -480,7 +557,19 @@ int main(int argc, char *argv[])
      */
     
     tbox::pout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
-    Euler_model->printClassData(tbox::pout);
+    switch (app_label)
+    {
+        case EULER:
+        {
+            Euler_app->printClassData(tbox::pout);
+            break;
+        }
+        case NAVIER_STOKES:
+        {
+            Navier_Stokes_app->printClassData(tbox::pout);
+            break;
+        }
+    }
     
     tbox::pout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
     RK_level_integrator->printClassData(tbox::pout);
@@ -551,7 +640,19 @@ int main(int argc, char *argv[])
         
         tbox::pout << "At end of timestep # " << iteration_num - 1 << std::endl;
         tbox::pout << "Simulation time is " << loop_time << std::endl;
-        Euler_model->printDataStatistics(tbox::pout, patch_hierarchy);
+        switch (app_label)
+        {
+            case EULER:
+            {
+                Euler_app->printDataStatistics(tbox::pout, patch_hierarchy);
+                break;
+            }
+            case NAVIER_STOKES:
+            {
+                Navier_Stokes_app->printDataStatistics(tbox::pout, patch_hierarchy);
+                break;
+            }
+        }
         
         /*
          * At specified intervals, write out data files for plotting.
@@ -691,7 +792,19 @@ int main(int argc, char *argv[])
     tbox::plog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
     tbox::plog << std::endl;
     tbox::plog << "Error statistics:\n";
-    Euler_model->printErrorStatistics(tbox::pout, patch_hierarchy);
+    switch (app_label)
+    {
+        case EULER:
+        {
+            Euler_app->printErrorStatistics(tbox::pout, patch_hierarchy);
+            break;
+        }
+        case NAVIER_STOKES:
+        {
+            Navier_Stokes_app->printErrorStatistics(tbox::pout, patch_hierarchy);
+            break;
+        }
+    }
 
     tbox::plog << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
     tbox::plog << std::endl;
@@ -719,8 +832,11 @@ int main(int argc, char *argv[])
     visit_data_writer.reset();
 #endif
     
-    if (Euler_model)
-        delete Euler_model;
+    if (Euler_app)
+        delete Euler_app;
+    
+    if (Navier_Stokes_app)
+        delete Navier_Stokes_app;
     
     tbox::SAMRAIManager::shutdown();
     tbox::SAMRAIManager::finalize();

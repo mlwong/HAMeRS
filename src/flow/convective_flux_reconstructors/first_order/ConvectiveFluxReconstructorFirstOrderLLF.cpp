@@ -70,6 +70,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
     const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
     const boost::shared_ptr<hier::VariableContext>& data_context)
 {
+    NULL_USE(time);
     NULL_USE(RK_step_number);
     
     // Get the dimensions of box that covers the interior of patch.
@@ -111,11 +112,11 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
      * Get the forms of equation and check whether there are advection equations in the system of equations.
      */
     
-    const std::vector<EQUATION_FORM> eqn_form = d_flow_model->getEquationsForm();
+    const std::vector<EQN_FORM::TYPE> eqn_form = d_flow_model->getEquationsForm();
     
     bool has_advection_eqn = false;
     
-    if (std::find(eqn_form.begin(), eqn_form.end(), ADVECTIVE_EQN) != eqn_form.end())
+    if (std::find(eqn_form.begin(), eqn_form.end(), EQN_FORM::ADVECTIVE) != eqn_form.end())
     {
         has_advection_eqn = true;
     }
@@ -310,7 +311,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
         {
             for (int ei = 0; ei < d_num_eqn; ei ++)
             {
-                if (eqn_form[ei] == ADVECTIVE_EQN)
+                if (eqn_form[ei] == EQN_FORM::ADVECTIVE)
                 {
                     double* S = source->getPointer(ei);
                     
@@ -646,7 +647,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                if (eqn_form[ei] == ADVECTIVE_EQN)
+                if (eqn_form[ei] == EQN_FORM::ADVECTIVE)
                 {
                     double* S = source->getPointer(ei);
                     
@@ -1198,7 +1199,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
         {
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                if (eqn_form[ei] == ADVECTIVE_EQN)
+                if (eqn_form[ei] == EQN_FORM::ADVECTIVE)
                 {
                     double* S = source->getPointer(ei);
                     

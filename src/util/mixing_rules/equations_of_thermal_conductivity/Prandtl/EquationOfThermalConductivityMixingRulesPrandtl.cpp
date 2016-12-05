@@ -4,7 +4,7 @@ EquationOfThermalConductivityMixingRulesPrandtl::EquationOfThermalConductivityMi
     const std::string& object_name,
     const tbox::Dimension& dim,
     const int& num_species,
-    const MIXING_CLOSURE_MODEL& mixing_closure_model,
+    const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
     const boost::shared_ptr<tbox::Database>& equation_of_thermal_conductivity_mixing_rules_db):
         EquationOfThermalConductivityMixingRules(
             object_name,
@@ -13,10 +13,6 @@ EquationOfThermalConductivityMixingRulesPrandtl::EquationOfThermalConductivityMi
             mixing_closure_model,
             equation_of_thermal_conductivity_mixing_rules_db)
 {
-    d_equation_of_thermal_conductivity.reset(new EquationOfThermalConductivityPrandtl(
-        "d_equation_of_thermal_conductivity",
-        dim));
-    
     /*
      * Get the specific heat at constant pressure of each species from the database.
      */
@@ -192,6 +188,12 @@ EquationOfThermalConductivityMixingRulesPrandtl::EquationOfThermalConductivityMi
     
     d_equation_of_shear_viscosity_mixing_rules =
         d_equation_of_shear_viscosity_mixing_rules_manager->getEquationOfShearViscosityMixingRules();
+    
+    d_equation_of_thermal_conductivity.reset(new EquationOfThermalConductivityPrandtl(
+        "d_equation_of_thermal_conductivity",
+        dim,
+        d_equation_of_shear_viscosity_mixing_rules->
+            getEquationOfShearViscosity()));
 }
 
 
@@ -270,12 +272,23 @@ void
 EquationOfThermalConductivityMixingRulesPrandtl::putToRestart(
     const boost::shared_ptr<tbox::Database>& restart_db) const
 {
-    restart_db->putDoubleVector("d_species_c_p", d_species_c_p);
-    restart_db->putDoubleVector("d_species_Pr", d_species_Pr);
-    restart_db->putDoubleVector("d_species_M", d_species_M);
-    
     restart_db->putString("d_equation_of_shear_viscosity_str", d_equation_of_shear_viscosity_str);
     d_equation_of_shear_viscosity_mixing_rules->putToRestart(restart_db);
+    
+    if (!restart_db->keyExists("d_species_c_p"))
+    {
+        restart_db->putDoubleVector("d_species_c_p", d_species_c_p);
+    }
+    
+    if (!restart_db->keyExists("d_species_Pr"))
+    {
+        restart_db->putDoubleVector("d_species_Pr", d_species_Pr);
+    }
+    
+    if (!restart_db->keyExists("d_species_M"))
+    {
+        restart_db->putDoubleVector("d_species_M", d_species_M);
+    }
 }
 
 
@@ -289,8 +302,8 @@ EquationOfThermalConductivityMixingRulesPrandtl::getThermalConductivity(
     const std::vector<const double*>& mass_fraction) const
 {
 #ifdef DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT((d_mixing_closure_model == ISOTHERMAL_AND_ISOBARIC) ||
-                (d_mixing_closure_model == NO_MODEL && d_num_species == 1));
+    TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
+                (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
     TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
                 (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
 #endif
@@ -309,7 +322,7 @@ EquationOfThermalConductivityMixingRulesPrandtl::getThermalConductivity(
     std::vector<double*> species_molecular_properties_ptr;
     std::vector<const double*> species_molecular_properties_const_ptr;
     
-    const int num_molecular_properties = getNumberOfSpeciesMolecularProperties() + 1;
+    const int num_molecular_properties = getNumberOfSpeciesMolecularProperties();
     
     species_molecular_properties.resize(num_molecular_properties);
     species_molecular_properties_ptr.reserve(num_molecular_properties);
@@ -321,23 +334,6 @@ EquationOfThermalConductivityMixingRulesPrandtl::getThermalConductivity(
         species_molecular_properties_const_ptr.push_back(&species_molecular_properties[mi]);
     }
     
-    std::vector<double> mu_molecular_properties;
-    std::vector<double*> mu_molecular_properties_ptr;
-    std::vector<const double*> mu_molecular_properties_const_ptr;
-    
-    const int num_mu_molecular_properties = d_equation_of_shear_viscosity_mixing_rules->
-        getNumberOfSpeciesMolecularProperties();
-    
-    mu_molecular_properties.resize(num_mu_molecular_properties);
-    mu_molecular_properties_ptr.reserve(num_mu_molecular_properties);
-    mu_molecular_properties_const_ptr.reserve(num_mu_molecular_properties);
-    
-    for (int mi = 0; mi < num_mu_molecular_properties; mi++)
-    {
-        mu_molecular_properties_ptr.push_back(&mu_molecular_properties[mi]);
-        mu_molecular_properties_const_ptr.push_back(&mu_molecular_properties[mi]);
-    }
-    
     if (static_cast<int>(mass_fraction.size()) == d_num_species - 1)
     {
         double Y_last = 1.0;
@@ -345,17 +341,6 @@ EquationOfThermalConductivityMixingRulesPrandtl::getThermalConductivity(
         for (int si = 0; si < d_num_species - 1; si++)
         {
             getSpeciesMolecularProperties(species_molecular_properties_ptr, si);
-            
-            d_equation_of_shear_viscosity_mixing_rules->
-                getSpeciesMolecularProperties(mu_molecular_properties_ptr, si);
-            
-            species_molecular_properties[num_molecular_properties - 1] =
-                d_equation_of_shear_viscosity_mixing_rules->
-                    d_equation_of_shear_viscosity->
-                        getShearViscosity(
-                            pressure,
-                            temperature,
-                            mu_molecular_properties_const_ptr);
             
             const double kappa_i = d_equation_of_thermal_conductivity->
                 getThermalConductivity(
@@ -373,19 +358,7 @@ EquationOfThermalConductivityMixingRulesPrandtl::getThermalConductivity(
         /*
          * Add the contribution from the last species.
          */
-        
         getSpeciesMolecularProperties(species_molecular_properties_ptr, d_num_species - 1);
-        
-        d_equation_of_shear_viscosity_mixing_rules->
-            getSpeciesMolecularProperties(mu_molecular_properties_ptr, d_num_species - 1);
-        
-        species_molecular_properties[num_molecular_properties - 1] =
-            d_equation_of_shear_viscosity_mixing_rules->
-                d_equation_of_shear_viscosity->
-                    getShearViscosity(
-                        pressure,
-                        temperature,
-                        mu_molecular_properties_const_ptr);
         
         const double kappa_last = d_equation_of_thermal_conductivity->
             getThermalConductivity(
@@ -401,17 +374,6 @@ EquationOfThermalConductivityMixingRulesPrandtl::getThermalConductivity(
         for (int si = 0; si < d_num_species; si++)
         {
             getSpeciesMolecularProperties(species_molecular_properties_ptr, si);
-            
-            d_equation_of_shear_viscosity_mixing_rules->
-                getSpeciesMolecularProperties(mu_molecular_properties_ptr, si);
-            
-            species_molecular_properties[num_molecular_properties - 1] =
-                d_equation_of_shear_viscosity_mixing_rules->
-                    d_equation_of_shear_viscosity->
-                        getShearViscosity(
-                            pressure,
-                            temperature,
-                            mu_molecular_properties_const_ptr);
             
             const double kappa_i = d_equation_of_thermal_conductivity->
                 getThermalConductivity(
@@ -431,152 +393,6 @@ EquationOfThermalConductivityMixingRulesPrandtl::getThermalConductivity(
 
 
 /*
- * Compute the thermal conductivity of the mixture with isobaric assumption.
- */
-double
-EquationOfThermalConductivityMixingRulesPrandtl::getThermalConductivity(
-    const double* const pressure,
-    const std::vector<const double*>& temperature,
-    const std::vector<const double*>& mass_fraction,
-    const std::vector<const double*>& volume_fraction) const
-{
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(d_mixing_closure_model == ISOBARIC);
-    TBOX_ASSERT((static_cast<int>(temperature.size()) == d_num_species);
-    TBOX_ASSERT((static_cast<int>(volume_fraction.size()) == d_num_species) ||
-                (static_cast<int>(volume_fraction.size()) == d_num_species - 1));
-#endif
-    
-    NULL_USE(mass_fraction);
-    
-    double kappa = 0.0;
-    
-    /*
-     * Initialize the container and pointers to the container for the molecular properties
-     * of a species.
-     */
-    
-    std::vector<double> species_molecular_properties;
-    std::vector<double*> species_molecular_properties_ptr;
-    std::vector<const double*> species_molecular_properties_const_ptr;
-    
-    const int num_molecular_properties = getNumberOfSpeciesMolecularProperties() + 1;
-    
-    species_molecular_properties.resize(num_molecular_properties);
-    species_molecular_properties_ptr.reserve(num_molecular_properties);
-    species_molecular_properties_const_ptr.reserve(num_molecular_properties);
-    
-    for (int mi = 0; mi < num_molecular_properties; mi++)
-    {
-        species_molecular_properties_ptr.push_back(&species_molecular_properties[mi]);
-        species_molecular_properties_const_ptr.push_back(&species_molecular_properties[mi]);
-    }
-    
-    std::vector<double> mu_molecular_properties;
-    std::vector<double*> mu_molecular_properties_ptr;
-    std::vector<const double*> mu_molecular_properties_const_ptr;
-    
-    const int num_mu_molecular_properties = d_equation_of_shear_viscosity_mixing_rules->
-        getNumberOfSpeciesMolecularProperties();
-    
-    mu_molecular_properties.resize(num_mu_molecular_properties);
-    mu_molecular_properties_ptr.reserve(num_mu_molecular_properties);
-    mu_molecular_properties_const_ptr.reserve(num_mu_molecular_properties);
-    
-    for (int mi = 0; mi < num_mu_molecular_properties; mi++)
-    {
-        mu_molecular_properties_ptr.push_back(&mu_molecular_properties[mi]);
-        mu_molecular_properties_const_ptr.push_back(&mu_molecular_properties[mi]);
-    }
-    
-    if (static_cast<int>(mass_fraction.size()) == d_num_species - 1)
-    {
-        double Z_last = 1.0;
-        
-        for (int si = 0; si < d_num_species - 1; si++)
-        {
-            getSpeciesMolecularProperties(species_molecular_properties_ptr, si);
-            
-            d_equation_of_shear_viscosity_mixing_rules->
-                getSpeciesMolecularProperties(mu_molecular_properties_ptr, si);
-            
-            species_molecular_properties[num_molecular_properties - 1] =
-                d_equation_of_shear_viscosity_mixing_rules->
-                    d_equation_of_shear_viscosity->
-                        getShearViscosity(
-                            pressure,
-                            temperature[si],
-                            mu_molecular_properties_const_ptr);
-            
-            const double kappa_i = d_equation_of_thermal_conductivity->
-                getThermalConductivity(
-                    pressure,
-                    temperature[si],
-                    species_molecular_properties_const_ptr);
-            
-            kappa += *(volume_fraction[si])*kappa_i;
-            
-            // Compute the volume fraction of the last species.
-            Z_last -= *(volume_fraction[si]);
-        }
-        
-        /*
-         * Add the contribution from the last species.
-         */
-        
-        getSpeciesMolecularProperties(species_molecular_properties_ptr, d_num_species - 1);
-        
-        d_equation_of_shear_viscosity_mixing_rules->
-            getSpeciesMolecularProperties(mu_molecular_properties_ptr, d_num_species - 1);
-        
-        species_molecular_properties[num_molecular_properties - 1] =
-            d_equation_of_shear_viscosity_mixing_rules->
-                d_equation_of_shear_viscosity->
-                    getShearViscosity(
-                        pressure,
-                        temperature[d_num_species - 1],
-                        mu_molecular_properties_const_ptr);
-        
-        const double kappa_last = d_equation_of_thermal_conductivity->
-            getThermalConductivity(
-                pressure,
-                temperature[d_num_species - 1],
-                species_molecular_properties_const_ptr);
-        
-        kappa += Z_last*kappa_last;
-    }
-    else
-    {
-        for (int si = 0; si < d_num_species; si++)
-        {
-            getSpeciesMolecularProperties(species_molecular_properties_ptr, si);
-            
-            d_equation_of_shear_viscosity_mixing_rules->
-                getSpeciesMolecularProperties(mu_molecular_properties_ptr, si);
-            
-            species_molecular_properties[num_molecular_properties - 1] =
-                d_equation_of_shear_viscosity_mixing_rules->
-                    d_equation_of_shear_viscosity->
-                        getShearViscosity(
-                            pressure,
-                            temperature[si],
-                            mu_molecular_properties_const_ptr);
-            
-            const double kappa_i = d_equation_of_thermal_conductivity->
-                getThermalConductivity(
-                    pressure,
-                    temperature[si],
-                    species_molecular_properties_const_ptr);
-            
-            kappa += *(volume_fraction[si])*kappa_i;
-        }
-    }
-    
-    return kappa;
-}
-
-
-/*
  * Get the molecular properties of a species.
  */
 void
@@ -585,7 +401,9 @@ EquationOfThermalConductivityMixingRulesPrandtl::getSpeciesMolecularProperties(
     const int& species_index) const
 {
 #ifdef DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(species_molecular_properties.size()) >= 3);
+    TBOX_ASSERT(static_cast<int>(species_molecular_properties.size()) >=
+                3 + d_equation_of_shear_viscosity_mixing_rules->
+                    getNumberOfSpeciesMolecularProperties());
     TBOX_ASSERT(species_index >= 0);
     TBOX_ASSERT(species_index < d_num_species);
 #endif
@@ -593,4 +411,32 @@ EquationOfThermalConductivityMixingRulesPrandtl::getSpeciesMolecularProperties(
     *(species_molecular_properties[0]) = d_species_c_p[species_index];
     *(species_molecular_properties[1]) = d_species_Pr[species_index];
     *(species_molecular_properties[2]) = d_species_M[species_index];
+    
+    /*
+     * Add the molecular properties of the species in the shear viscosity mixing rule
+     * object.
+     */
+    
+    std::vector<double> mu_molecular_properties;
+    std::vector<double*> mu_molecular_properties_ptr;
+    
+    int num_mu_molecular_properties = d_equation_of_shear_viscosity_mixing_rules->
+        getNumberOfSpeciesMolecularProperties();
+    
+    mu_molecular_properties.resize(num_mu_molecular_properties);
+    mu_molecular_properties_ptr.reserve(num_mu_molecular_properties);
+    
+    for (int mi = 0; mi < num_mu_molecular_properties; mi++)
+    {
+        mu_molecular_properties_ptr.push_back(&mu_molecular_properties[mi]);
+    }
+    
+    d_equation_of_shear_viscosity_mixing_rules->getSpeciesMolecularProperties(
+        mu_molecular_properties_ptr,
+        species_index);
+    
+    for (int mi = 0; mi < num_mu_molecular_properties; mi++)
+    {
+        *(species_molecular_properties[3 + mi]) = mu_molecular_properties[mi];
+    }
 }

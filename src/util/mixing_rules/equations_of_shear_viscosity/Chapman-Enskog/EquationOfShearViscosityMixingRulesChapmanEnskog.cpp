@@ -4,7 +4,7 @@ EquationOfShearViscosityMixingRulesChapmanEnskog::EquationOfShearViscosityMixing
     const std::string& object_name,
     const tbox::Dimension& dim,
     const int& num_species,
-    const MIXING_CLOSURE_MODEL& mixing_closure_model,
+    const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
     const boost::shared_ptr<tbox::Database>& equation_of_shear_viscosity_mixing_rules_db):
         EquationOfShearViscosityMixingRules(
             object_name,
@@ -245,8 +245,8 @@ EquationOfShearViscosityMixingRulesChapmanEnskog::getShearViscosity(
     const std::vector<const double*>& mass_fraction) const
 {
 #ifdef DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT((d_mixing_closure_model == ISOTHERMAL_AND_ISOBARIC) ||
-                (d_mixing_closure_model == NO_MODEL && d_num_species == 1));
+    TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
+                (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
     TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
                 (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
 #endif
@@ -347,7 +347,7 @@ EquationOfShearViscosityMixingRulesChapmanEnskog::getShearViscosity(
     const std::vector<const double*>& volume_fraction) const
 {   
 #ifdef DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(d_mixing_closure_model == ISOBARIC);
+    TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     TBOX_ASSERT((static_cast<int>(temperature.size()) == d_num_species);
     TBOX_ASSERT((static_cast<int>(volume_fraction.size()) == d_num_species) ||
                 (static_cast<int>(volume_fraction.size()) == d_num_species - 1));

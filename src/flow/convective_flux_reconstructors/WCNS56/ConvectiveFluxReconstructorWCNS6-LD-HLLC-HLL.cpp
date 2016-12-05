@@ -210,7 +210,7 @@ ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL::performWENOInterpolation(
     const boost::multi_array<const double*, 2>& U_array,
     const hier::Index& cell_index_minus,
     const hier::Index& cell_index_plus,
-    const DIRECTION& direction)
+    const DIRECTION::TYPE& direction)
 {
 #ifdef DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(U_array.shape()[0]) == 6);

@@ -12,7 +12,7 @@ class EquationOfShearViscosityMixingRulesChapmanEnskog: public EquationOfShearVi
             const std::string& object_name,
             const tbox::Dimension& dim,
             const int& num_species,
-            const MIXING_CLOSURE_MODEL& mixing_closure_model,
+            const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
             const boost::shared_ptr<tbox::Database>& equation_of_shear_viscosity_mixing_rules_db);
         
         /*

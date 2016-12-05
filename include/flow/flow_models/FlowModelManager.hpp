@@ -14,7 +14,6 @@
 #include "SAMRAI/tbox/Dimension.h"
 
 #include "flow/flow_models/FlowModels.hpp"
-#include "flow/initial_conditions/InitialConditions.hpp"
 
 #include "boost/shared_ptr.hpp"
 #include <string>
@@ -34,12 +33,12 @@ class FlowModelManager
             const std::string& flow_model_str);
         
         /*
-         * Get the label of flow model.
+         * Get the type of flow model.
          */
-        const FLOW_MODEL_LABEL&
-        getFlowModelLabel() const
+        const FLOW_MODEL::TYPE&
+        getFlowModelType() const
         {
-            return d_flow_model_label;
+            return d_flow_model_type;
         }
         
         /*
@@ -52,26 +51,12 @@ class FlowModelManager
         }
         
         /*
-         * Initialize d_initial_conditions.
-         */
-        void
-        initializeInitialConditions(
-            const std::string& project_name,
-            boost::shared_ptr<InitialConditions>& initial_conditions);
-        
-        /*
          * Print all characteristics of flow model manager.
          */
         void
         printClassData(std::ostream& os) const;
         
     private:
-        /*
-         * Initialize boost::shared_ptr of the variables in d_initial_conditions.
-         */
-        void
-        setVariablesForInitialConditions();
-        
         /*
          * The object name is used for error/warning reporting.
          */
@@ -88,9 +73,9 @@ class FlowModelManager
         const boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
         
         /*
-         * Label of flow model.
+         * Type of flow model.
          */
-        FLOW_MODEL_LABEL d_flow_model_label;
+        FLOW_MODEL::TYPE d_flow_model_type;
         
         /*
          * Flow model.
@@ -101,11 +86,6 @@ class FlowModelManager
          * Number of species.
          */
         const int d_num_species;
-        
-        /*
-         * boost::shared_ptr to InitialConditions.
-         */
-        boost::shared_ptr<InitialConditions> d_initial_conditions;
         
 };
 

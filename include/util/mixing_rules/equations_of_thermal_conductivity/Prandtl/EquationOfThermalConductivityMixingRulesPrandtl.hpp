@@ -12,7 +12,7 @@ class EquationOfThermalConductivityMixingRulesPrandtl: public EquationOfThermalC
             const std::string& object_name,
             const tbox::Dimension& dim,
             const int& num_species,
-            const MIXING_CLOSURE_MODEL& mixing_closure_model,
+            const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
             const boost::shared_ptr<tbox::Database>& equation_of_thermal_conductivity_mixing_rules_db);
         
         /*
@@ -39,20 +39,15 @@ class EquationOfThermalConductivityMixingRulesPrandtl: public EquationOfThermalC
             const std::vector<const double*>& mass_fraction) const;
         
         /*
-         * Compute the thermal conductivity of the mixture with isobaric assumption.
-         */
-        double
-        getThermalConductivity(
-            const double* const pressure,
-            const std::vector<const double*>& temperature,
-            const std::vector<const double*>& mass_fraction,
-            const std::vector<const double*>& volume_fraction) const;
-        
-        /*
          * Get the number of molecular properties of a species.
          */
         int
-        getNumberOfSpeciesMolecularProperties() const { return 2; }
+        getNumberOfSpeciesMolecularProperties() const
+        {
+            return (3 +
+                d_equation_of_shear_viscosity_mixing_rules->
+                    getNumberOfSpeciesMolecularProperties());
+        }
         
         /*
          * Get the molecular properties of a species.

@@ -41,8 +41,6 @@
 #endif
 #endif
 
-#define EPSILON 1e-40
-
 boost::shared_ptr<tbox::Timer> Euler::t_init;
 boost::shared_ptr<tbox::Timer> Euler::t_compute_dt;
 boost::shared_ptr<tbox::Timer> Euler::t_compute_hyperbolicfluxes;
@@ -83,7 +81,7 @@ Euler::Euler(
         t_advance_steps = tbox::TimerManager::getManager()->
             getTimer("Euler::advanceSingleStep()");
         t_synchronize_hyperbloicfluxes = tbox::TimerManager::getManager()->
-            getTimer("Euler::Euler::synchronizeHyperbolicFluxes()");
+            getTimer("Euler::synchronizeHyperbolicFluxes()");
         t_setphysbcs = tbox::TimerManager::getManager()->
             getTimer("Euler::setPhysicalBoundaryConditions()");
         t_tagvalue = tbox::TimerManager::getManager()->
@@ -136,19 +134,25 @@ Euler::Euler(
     d_convective_flux_reconstructor = d_convective_flux_reconstructor_manager->getConvectiveFluxReconstructor();
     
     /*
-     * Initialize d_initial_conditions.
+     * Initialize d_Euler_initial_conditions.
      */
     
-    d_flow_model_manager->initializeInitialConditions(
+    d_Euler_initial_conditions.reset(new EulerInitialConditions(
+        "d_Euler_initial_conditions",
         d_project_name,
-        d_initial_conditions);
+        d_dim,
+        d_grid_geometry,
+        d_flow_model_manager->getFlowModelType(),
+        d_num_species));
+    
+    d_Euler_initial_conditions->setVariables(d_flow_model->getConservativeVariables());
     
     /*
      * Initialize d_Euler_boundary_conditions.
      */
     
     d_Euler_boundary_conditions.reset(new EulerBoundaryConditions(
-        "d_Euler_boundar_conditions",
+        "d_Euler_boundary_conditions",
         d_project_name,
         d_dim,
         d_grid_geometry,
@@ -428,7 +432,7 @@ Euler::initializeDataOnPatch(
 {   
     t_init->start();
     
-    d_initial_conditions->initializeDataOnPatch(
+    d_Euler_initial_conditions->initializeDataOnPatch(
         patch,
         data_time,
         initial_time,
@@ -802,8 +806,8 @@ Euler::advanceSingleStep(
     
     boost::shared_ptr<pdat::FaceData<double> > convective_flux(
         BOOST_CAST<pdat::FaceData<double>, hier::PatchData>(
-        patch.getPatchData(d_variable_convective_flux, getDataContext())));
-
+            patch.getPatchData(d_variable_convective_flux, getDataContext())));
+    
     boost::shared_ptr<pdat::CellData<double> > source(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
             patch.getPatchData(d_variable_source, getDataContext())));
@@ -823,7 +827,7 @@ Euler::advanceSingleStep(
         boost::shared_ptr<pdat::FaceData<double> > convective_flux_intermediate(
             BOOST_CAST<pdat::FaceData<double>, hier::PatchData>(
                     patch.getPatchData(d_variable_convective_flux, intermediate_context[n])));
-                
+        
         boost::shared_ptr<pdat::CellData<double> > source_intermediate(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(d_variable_source, intermediate_context[n])));
@@ -1296,9 +1300,9 @@ Euler::synchronizeHyperbolicFluxes(
     d_flow_model->unregisterPatch();
     
     boost::shared_ptr<pdat::FaceData<double> > convective_flux(
-    BOOST_CAST<pdat::FaceData<double>, hier::PatchData>(
-        patch.getPatchData(d_variable_convective_flux, getDataContext())));
-
+        BOOST_CAST<pdat::FaceData<double>, hier::PatchData>(
+            patch.getPatchData(d_variable_convective_flux, getDataContext())));
+    
     boost::shared_ptr<pdat::CellData<double> > source(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
             patch.getPatchData(d_variable_source, getDataContext())));
@@ -1762,12 +1766,12 @@ Euler::packDerivedDataIntoDoubleBuffer(
 {
     bool data_on_patch = d_flow_model->
         packDerivedDataIntoDoubleBuffer(
-                buffer,
-                patch,
-                region,
-                variable_name,
-                depth_id,
-                simulation_time);
+            buffer,
+            patch,
+            region,
+            variable_name,
+            depth_id,
+            simulation_time);
     
     return data_on_patch;
 }
@@ -2338,4 +2342,3 @@ void Euler::getFromRestart()
         d_multiresolution_tagger_db = db->getDatabase("d_multiresolution_tagger_db");
     }
 }
-

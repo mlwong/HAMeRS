@@ -37,6 +37,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
     const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
     const boost::shared_ptr<hier::VariableContext>& data_context)
 {
+    NULL_USE(time);
     NULL_USE(RK_step_number);
     
     // Get the dimensions of box that covers the interior of patch.
@@ -102,7 +103,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
         
         d_flow_model->registerFaceProjectionMatricesOfPrimitiveVariables(
             d_num_conv_ghosts,
-            SIMPLE_AVG);
+            AVERAGING::SIMPLE);
         
         d_flow_model->computeGlobalDerivedCellData();
         
@@ -266,7 +267,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
                 V_array,
                 idx_x_L,
                 idx_x_R,
-                X_DIRECTION);
+                DIRECTION::X_DIRECTION);
             
             bool is_constant_interpolation = false;
             
@@ -314,8 +315,8 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
                     vel_x_midpoint_ref,
                     V_x_L_ref,
                     V_x_R_ref,
-                    X_DIRECTION,
-                    HLLC_RIEMANN_SOLVER);
+                    DIRECTION::X_DIRECTION,
+                    RIEMANN_SOLVER::HLLC);
             
             F_x_midpoint_ref.clear();
             vel_x_midpoint_ref.clear();
@@ -348,11 +349,11 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
          * Compute the source.
          */
         
-        const std::vector<EQUATION_FORM> eqn_form = d_flow_model->getEquationsForm();
+        const std::vector<EQN_FORM::TYPE> eqn_form = d_flow_model->getEquationsForm();
         
         for (int ei = 0; ei < d_num_eqn; ei ++)
         {
-            if (eqn_form[ei] == ADVECTIVE_EQN)
+            if (eqn_form[ei] == EQN_FORM::ADVECTIVE)
             {
                 double* S = source->getPointer(ei);
                 
@@ -415,7 +416,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
         
         d_flow_model->registerFaceProjectionMatricesOfPrimitiveVariables(
             d_num_conv_ghosts,
-            SIMPLE_AVG);
+            AVERAGING::SIMPLE);
         
         d_flow_model->computeGlobalDerivedCellData();
         
@@ -629,7 +630,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
                     V_array,
                     idx_x_L,
                     idx_x_R,
-                    X_DIRECTION);
+                    DIRECTION::X_DIRECTION);
                 
                 bool is_constant_interpolation = false;
                 
@@ -701,8 +702,8 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
                             vel_x_midpoint_ref,
                             V_x_L_ref,
                             V_x_R_ref,
-                            X_DIRECTION,
-                            HLLC_HLL_RIEMANN_SOLVER);
+                            DIRECTION::X_DIRECTION,
+                            RIEMANN_SOLVER::HLLC_HLL);
                 }
                 else
                 {
@@ -712,8 +713,8 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
                             vel_x_midpoint_ref,
                             V_x_L_ref,
                             V_x_R_ref,
-                            X_DIRECTION,
-                            HLLC_RIEMANN_SOLVER);
+                            DIRECTION::X_DIRECTION,
+                            RIEMANN_SOLVER::HLLC);
                 }
                 
                 F_x_midpoint_ref.clear();
@@ -785,7 +786,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
                     V_array,
                     idx_y_B,
                     idx_y_T,
-                    Y_DIRECTION);
+                    DIRECTION::Y_DIRECTION);
                 
                 bool is_constant_interpolation = false;
                 
@@ -857,8 +858,8 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
                             vel_y_midpoint_ref,
                             V_y_B_ref,
                             V_y_T_ref,
-                            Y_DIRECTION,
-                            HLLC_HLL_RIEMANN_SOLVER);
+                            DIRECTION::Y_DIRECTION,
+                            RIEMANN_SOLVER::HLLC_HLL);
                 }
                 else
                 {
@@ -868,8 +869,8 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
                             vel_y_midpoint_ref,
                             V_y_B_ref,
                             V_y_T_ref,
-                            Y_DIRECTION,
-                            HLLC_RIEMANN_SOLVER);
+                            DIRECTION::Y_DIRECTION,
+                            RIEMANN_SOLVER::HLLC);
                 }
                 
                 F_y_midpoint_ref.clear();
@@ -949,11 +950,11 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
          * Compute the source.
          */
         
-        const std::vector<EQUATION_FORM> eqn_form = d_flow_model->getEquationsForm();
+        const std::vector<EQN_FORM::TYPE> eqn_form = d_flow_model->getEquationsForm();
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            if (eqn_form[ei] == ADVECTIVE_EQN)
+            if (eqn_form[ei] == EQN_FORM::ADVECTIVE)
             {
                 double* S = source->getPointer(ei);
                 
@@ -1052,7 +1053,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
         
         d_flow_model->registerFaceProjectionMatricesOfPrimitiveVariables(
             d_num_conv_ghosts,
-            SIMPLE_AVG);
+            AVERAGING::SIMPLE);
         
         d_flow_model->computeGlobalDerivedCellData();
         
@@ -1294,7 +1295,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
                         V_array,
                         idx_x_L,
                         idx_x_R,
-                        X_DIRECTION);
+                        DIRECTION::X_DIRECTION);
                     
                     bool is_constant_interpolation = false;
                     
@@ -1376,8 +1377,8 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
                                 vel_x_midpoint_ref,
                                 V_x_L_ref,
                                 V_x_R_ref,
-                                X_DIRECTION,
-                                HLLC_HLL_RIEMANN_SOLVER);
+                                DIRECTION::X_DIRECTION,
+                                RIEMANN_SOLVER::HLLC_HLL);
                     }
                     else
                     {
@@ -1387,8 +1388,8 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
                                 vel_x_midpoint_ref,
                                 V_x_L_ref,
                                 V_x_R_ref,
-                                X_DIRECTION,
-                                HLLC_RIEMANN_SOLVER);
+                                DIRECTION::X_DIRECTION,
+                                RIEMANN_SOLVER::HLLC);
                     }
                     
                     F_x_midpoint_ref.clear();
@@ -1468,7 +1469,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
                         V_array,
                         idx_y_B,
                         idx_y_T,
-                        Y_DIRECTION);
+                        DIRECTION::Y_DIRECTION);
                     
                     bool is_constant_interpolation = false;
                     
@@ -1550,8 +1551,8 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
                                 vel_y_midpoint_ref,
                                 V_y_B_ref,
                                 V_y_T_ref,
-                                Y_DIRECTION,
-                                HLLC_HLL_RIEMANN_SOLVER);
+                                DIRECTION::Y_DIRECTION,
+                                RIEMANN_SOLVER::HLLC_HLL);
                     }
                     else
                     {
@@ -1561,8 +1562,8 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
                                 vel_y_midpoint_ref,
                                 V_y_B_ref,
                                 V_y_T_ref,
-                                Y_DIRECTION,
-                                HLLC_RIEMANN_SOLVER);
+                                DIRECTION::Y_DIRECTION,
+                                RIEMANN_SOLVER::HLLC);
                     }
                     
                     F_y_midpoint_ref.clear();
@@ -1642,7 +1643,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
                         V_array,
                         idx_z_B,
                         idx_z_F,
-                        Z_DIRECTION);
+                        DIRECTION::Z_DIRECTION);
                     
                     bool is_constant_interpolation = false;
                     
@@ -1724,8 +1725,8 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
                                 vel_z_midpoint_ref,
                                 V_z_B_ref,
                                 V_z_F_ref,
-                                Z_DIRECTION,
-                                HLLC_HLL_RIEMANN_SOLVER);
+                                DIRECTION::Z_DIRECTION,
+                                RIEMANN_SOLVER::HLLC_HLL);
                     }
                     else
                     {
@@ -1735,8 +1736,8 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
                                 vel_z_midpoint_ref,
                                 V_z_B_ref,
                                 V_z_F_ref,
-                                Z_DIRECTION,
-                                HLLC_RIEMANN_SOLVER);
+                                DIRECTION::Z_DIRECTION,
+                                RIEMANN_SOLVER::HLLC);
                     }
                     
                     F_z_midpoint_ref.clear();
@@ -1876,11 +1877,11 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
          * Compute the source.
          */
         
-        const std::vector<EQUATION_FORM> eqn_form = d_flow_model->getEquationsForm();
+        const std::vector<EQN_FORM::TYPE> eqn_form = d_flow_model->getEquationsForm();
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            if (eqn_form[ei] == ADVECTIVE_EQN)
+            if (eqn_form[ei] == EQN_FORM::ADVECTIVE)
             {
                 double* S = source->getPointer(ei);
                 

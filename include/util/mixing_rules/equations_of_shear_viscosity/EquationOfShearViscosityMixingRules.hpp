@@ -19,7 +19,7 @@ class EquationOfShearViscosityMixingRules
             const std::string& object_name,
             const tbox::Dimension& dim,
             const int& num_species,
-            const MIXING_CLOSURE_MODEL& mixing_closure_model,
+            const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
             const boost::shared_ptr<tbox::Database>& equation_of_shear_viscosity_mixing_rules_db):
                 d_object_name(object_name),
                 d_dim(dim),
@@ -27,6 +27,15 @@ class EquationOfShearViscosityMixingRules
                 d_mixing_closure_model(mixing_closure_model),
                 d_equation_of_shear_viscosity_mixing_rules_db(equation_of_shear_viscosity_mixing_rules_db)
         {}
+        
+        /*
+         * Return the boost::shared_ptr to the equation of shear viscosity.
+         */
+        const boost::shared_ptr<EquationOfShearViscosity>&
+        getEquationOfShearViscosity() const
+        {
+            return d_equation_of_shear_viscosity;
+        }
         
         /*
          * Print all characteristics of the equation of shear viscosity mixing rules class.
@@ -75,11 +84,6 @@ class EquationOfShearViscosityMixingRules
             std::vector<double*>& species_molecular_properties,
             const int& species_index) const = 0;
         
-        /*
-         * boost::shared_ptr to EquationOfShearViscosity.
-         */
-        boost::shared_ptr<EquationOfShearViscosity> d_equation_of_shear_viscosity;
-        
     protected:
         /*
          * The object name is used for error/warning reporting.
@@ -97,14 +101,19 @@ class EquationOfShearViscosityMixingRules
         const int d_num_species;
         
         /*
-         * Mixing closure model.
+         * Type of mixing closure model.
          */
-        const MIXING_CLOSURE_MODEL d_mixing_closure_model;
+        const MIXING_CLOSURE_MODEL::TYPE d_mixing_closure_model;
         
         /*
          * boost::shared_ptr to the database of equation of shear viscosity mixing rules.
          */
         const boost::shared_ptr<tbox::Database> d_equation_of_shear_viscosity_mixing_rules_db;
+        
+        /*
+         * boost::shared_ptr to EquationOfShearViscosity.
+         */
+        boost::shared_ptr<EquationOfShearViscosity> d_equation_of_shear_viscosity;
         
 };
     

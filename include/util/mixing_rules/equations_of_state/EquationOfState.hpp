@@ -70,6 +70,15 @@ class EquationOfState
             const std::vector<const double*>& thermo_properties) const = 0;
         
         /*
+         * Compute the specific internal energy from temperature.
+         */
+        virtual double
+        getInternalEnergyFromTemperature(
+            const double* const density,
+            const double* const temperature,
+            const std::vector<const double*>& thermo_properties) const = 0;
+        
+        /*
          * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
          */
         virtual double
@@ -85,6 +94,15 @@ class EquationOfState
         getIsobaricPartialInternalEnergyPartialDensity(
             const double* const density,
             const double* const pressure,
+            const std::vector<const double*>& thermo_properties) const = 0;
+        
+        /*
+         * Compute the density.
+         */
+        virtual double
+        getDensity(
+            const double* const pressure,
+            const double* const temperature,
             const std::vector<const double*>& thermo_properties) const = 0;
         
     protected:

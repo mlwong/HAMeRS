@@ -12,8 +12,9 @@
 #include "SAMRAI/pdat/FaceData.h"
 
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
+#include "flow/flow_models/FlowModelBoundaryUtilities.hpp"
+#include "util/Directions.hpp"
 #include "util/mixing_rules/equations_of_state/EquationOfStateMixingRulesManager.hpp"
-#include "Directions.hpp"
 
 #include "boost/multi_array.hpp"
 #include "boost/shared_ptr.hpp"
@@ -23,17 +24,29 @@
 
 using namespace SAMRAI;
 
-enum EQUATION_FORM { CONSERVATIVE_EQN,
-                     ADVECTIVE_EQN };
+namespace EQN_FORM
+{
+    enum TYPE { CONSERVATIVE,
+                ADVECTIVE };
+}
 
-enum VARIABLE_TYPE { CONSERVATIVE_VAR,
-                     PRIMITIVE_VAR };
+namespace VAR
+{
+    enum TYPE { CONSERVATIVE,
+                PRIMITIVE };
+}
 
-enum AVERAGING { SIMPLE_AVG,
-                 ROE_AVG };
+namespace AVERAGING
+{
+    enum TYPE { SIMPLE,
+                ROE };
+}
 
-enum RIEMANN_SOLVER { HLLC_RIEMANN_SOLVER,
-                      HLLC_HLL_RIEMANN_SOLVER };
+namespace RIEMANN_SOLVER
+{
+    enum TYPE { HLLC,
+                HLLC_HLL };
+}
 
 /*
  * The class should at least be able to register, compute and get the following cell data of the single-species/mixture:
@@ -66,8 +79,9 @@ class FlowModel:
                 d_ghostcell_dims(hier::IntVector::getZero(d_dim)),
                 d_proj_mat_conservative_var_registered(false),
                 d_proj_mat_primitive_var_registered(false),
-                d_proj_mat_conservative_var_averaging(SIMPLE_AVG),
-                d_proj_mat_primitive_var_averaging(SIMPLE_AVG)
+                d_proj_mat_conservative_var_averaging(AVERAGING::SIMPLE),
+                d_proj_mat_primitive_var_averaging(AVERAGING::SIMPLE),
+                d_diffusive_flux_var_registered(false)
         {
             NULL_USE(flow_model_db);
         }
@@ -85,9 +99,27 @@ class FlowModel:
         /*
          * Return the form of each equation.
          */
-        const std::vector<EQUATION_FORM>& getEquationsForm() const
+        const std::vector<EQN_FORM::TYPE>& getEquationsForm() const
         {
             return d_eqn_form;
+        }
+        
+        /*
+         * Return the boost::shared_ptr to the equation of state mixing rules.
+         */
+        const boost::shared_ptr<EquationOfStateMixingRules>&
+        getEquationOfStateMixingRules() const
+        {
+            return d_equation_of_state_mixing_rules;
+        }
+        
+        /*
+         * Return the boost::shared_ptr to the boundary utilities object.
+         */
+        const boost::shared_ptr<FlowModelBoundaryUtilities>&
+        getFlowModelBoundaryUtilities() const
+        {
+            return d_flow_model_boundary_utilities;
         }
         
         /*
@@ -98,16 +130,9 @@ class FlowModel:
         /*
          * Put the characteristics of the flow model class into the restart database.
          */
-        void putToRestart(
-            const boost::shared_ptr<tbox::Database>& restart_db) const
-        {
-            restart_db->putString("d_equation_of_state_str", d_equation_of_state_str);
-            
-            // Put the properties of d_equation_of_state_mixing_rules into the restart database.
-            boost::shared_ptr<tbox::Database> restart_equation_of_state_mixing_rules_db =
-                restart_db->putDatabase("d_equation_of_state_mixing_rules_db");
-            d_equation_of_state_mixing_rules->putToRestart(restart_equation_of_state_mixing_rules_db);
-        }
+        virtual void
+        putToRestart(
+            const boost::shared_ptr<tbox::Database>& restart_db) const = 0;
         
         /*
          * Register the conservative variables.
@@ -166,7 +191,7 @@ class FlowModel:
         virtual void
         registerFaceProjectionMatricesOfConservativeVariables(
             const hier::IntVector& num_subghosts,
-            const AVERAGING& averaging) = 0;
+            const AVERAGING::TYPE& averaging) = 0;
         
         /*
          * Register the required derived variables for the computation of projection matrix
@@ -175,7 +200,15 @@ class FlowModel:
         virtual void
         registerFaceProjectionMatricesOfPrimitiveVariables(
             const hier::IntVector& num_subghosts,
-            const AVERAGING& averaging) = 0;
+            const AVERAGING::TYPE& averaging) = 0;
+        
+        /*
+         * Register the required variables for the computation of diffusive flux in the
+         * registered patch.
+         */
+        virtual void
+        registerDiffusiveFlux(
+            const hier::IntVector& num_subghosts);
         
         /*
          * Unregister the registered patch. The registered data context and all global derived
@@ -234,7 +267,7 @@ class FlowModel:
             boost::multi_array<double, 2>& projection_matrix,
             const hier::Index& cell_index_minus,
             const hier::Index& cell_index_plus,
-            const DIRECTION& direction) = 0;
+            const DIRECTION::TYPE& direction) = 0;
         
         /*
          * Compute the local face datum of inverse of projection matrix of conservative variables
@@ -245,7 +278,7 @@ class FlowModel:
             boost::multi_array<double, 2>& projection_matrix_inv,
             const hier::Index& cell_index_minus,
             const hier::Index& cell_index_plus,
-            const DIRECTION& direction) = 0;
+            const DIRECTION::TYPE& direction) = 0;
         
         /*
          * Compute the local face datum of projection matrix of primitive variables in the
@@ -256,7 +289,7 @@ class FlowModel:
             boost::multi_array<double, 2>& projection_matrix,
             const hier::Index& cell_index_minus,
             const hier::Index& cell_index_plus,
-            const DIRECTION& direction) = 0;
+            const DIRECTION::TYPE& direction) = 0;
         
         /*
          * Compute the local face datum of inverse of projection matrix of primitive variables
@@ -267,7 +300,7 @@ class FlowModel:
             boost::multi_array<double, 2>& projection_matrix_inv,
             const hier::Index& cell_index_minus,
             const hier::Index& cell_index_plus,
-            const DIRECTION& direction) = 0;
+            const DIRECTION::TYPE& direction) = 0;
         
         /*
          * Compute the local intercell quantities with conservative variables on each side of the face
@@ -282,8 +315,8 @@ class FlowModel:
             std::vector<boost::reference_wrapper<double> >& velocity_face,
             const std::vector<boost::reference_wrapper<double> >& conservative_variables_minus,
             const std::vector<boost::reference_wrapper<double> >& conservative_variables_plus,
-            const DIRECTION& direction,
-            const RIEMANN_SOLVER& Riemann_solver) = 0;
+            const DIRECTION::TYPE& direction,
+            const RIEMANN_SOLVER::TYPE& Riemann_solver) = 0;
         
         /*
          * Compute the local intercell quantities with primitive variables on each side of the face
@@ -298,8 +331,8 @@ class FlowModel:
             std::vector<boost::reference_wrapper<double> >& velocity_face,
             const std::vector<boost::reference_wrapper<double> >& primitive_variables_minus,
             const std::vector<boost::reference_wrapper<double> >& primitive_variables_plus,
-            const DIRECTION& direction,
-            const RIEMANN_SOLVER& Riemann_solver) = 0;
+            const DIRECTION::TYPE& direction,
+            const RIEMANN_SOLVER::TYPE& Riemann_solver) = 0;
         
         /*
          * Check whether the given conservative variables are within the bounds.
@@ -328,6 +361,26 @@ class FlowModel:
         convertLocalCellDataPointersPrimitiveVariablesToConservativeVariables(
             const std::vector<const double*>& primitive_variables,
             const std::vector<double*>& conservative_variables) = 0;
+        
+        /*
+         * Get the variables for the derivatives in the diffusive fluxes.
+         */
+        virtual void
+        getDiffusiveFluxVariablesForDerivative(
+            std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_var_data,
+            std::vector<std::vector<int> >& derivative_var_component_idx,
+            const DIRECTION::TYPE& flux_direction,
+            const DIRECTION::TYPE& derivative_direction);
+        
+        /*
+         * Get the diffusivities in the diffusive flux.
+         */
+        virtual void
+        getDiffusiveFluxDiffusivities(
+            std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& diffusivities_data,
+            std::vector<std::vector<int> >& diffusivities_component_idx,
+            const DIRECTION::TYPE& flux_direction,
+            const DIRECTION::TYPE& derivative_direction);
         
         /*
          * Set the plotting context.
@@ -446,7 +499,7 @@ class FlowModel:
         /*
          * Form of each equation.
          */
-        std::vector<EQUATION_FORM> d_eqn_form;
+        std::vector<EQN_FORM::TYPE> d_eqn_form;
         
         /*
          * Pointer to registered patch.
@@ -480,13 +533,23 @@ class FlowModel:
          */
         bool d_proj_mat_conservative_var_registered;
         bool d_proj_mat_primitive_var_registered;
-        AVERAGING d_proj_mat_conservative_var_averaging;
-        AVERAGING d_proj_mat_primitive_var_averaging;
+        AVERAGING::TYPE d_proj_mat_conservative_var_averaging;
+        AVERAGING::TYPE d_proj_mat_primitive_var_averaging;
+        
+        /*
+         * Properties of the diffusive fluxes.
+         */
+        bool d_diffusive_flux_var_registered;
         
         /*
          * boost::shared_ptr to the plotting context.
          */
         boost::shared_ptr<hier::VariableContext> d_plot_context;
+        
+        /*
+         * boost::shared_ptr to the boundary utilities object for the flow model.
+         */
+        boost::shared_ptr<FlowModelBoundaryUtilities> d_flow_model_boundary_utilities;
         
 };
 

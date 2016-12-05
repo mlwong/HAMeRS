@@ -58,7 +58,7 @@ class ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL: public ConvectiveFluxReconstr
             const boost::multi_array<const double*, 2>& U_array,
             const hier::Index& cell_index_minus,
             const hier::Index& cell_index_plus,
-            const DIRECTION& direction);
+            const DIRECTION::TYPE& direction);
         
         /*
          * Constants used by the scheme.

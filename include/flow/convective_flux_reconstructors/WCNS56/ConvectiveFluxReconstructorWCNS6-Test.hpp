@@ -3,7 +3,7 @@
 
 #include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructor.hpp"
 
-#include "Directions.hpp"
+#include "util/Directions.hpp"
 
 #include "boost/multi_array.hpp"
 
@@ -108,7 +108,7 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
             const boost::multi_array<const double*, 2>& U_array,
             const hier::Index& cell_index_minus,
             const hier::Index& cell_index_plus,
-            const DIRECTION& direction);
+            const DIRECTION::TYPE& direction);
         
         /*
          * Constants used by the scheme.

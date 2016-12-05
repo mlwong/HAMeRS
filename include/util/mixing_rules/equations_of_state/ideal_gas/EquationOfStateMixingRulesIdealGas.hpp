@@ -12,7 +12,7 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const std::string& object_name,
             const tbox::Dimension& dim,
             const int& num_species,
-            const MIXING_CLOSURE_MODEL& mixing_closure_model,
+            const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
             const boost::shared_ptr<tbox::Database>& equation_of_state_mixing_rules_db);
         
         /*
@@ -93,6 +93,16 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
         getTemperature(
             const double* const density,
             const double* const pressure,
+            const std::vector<const double*>& mass_fraction) const;
+        
+        /*
+         * Compute the specific internal energy of the mixture from temperature with isothermal
+         * and isobaric assumptions.
+         */
+        double
+        getInternalEnergyFromTemperature(
+            const double* const density,
+            const double* const temperature,
             const std::vector<const double*>& mass_fraction) const;
         
         /*

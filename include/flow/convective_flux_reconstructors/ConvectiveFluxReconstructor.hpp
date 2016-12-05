@@ -97,7 +97,7 @@ class ConvectiveFluxReconstructor
         const boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
         
         /*
-         * Number of ghost cells needed by the shock capturing scheme.
+         * Number of ghost cells needed by the convective flux reconstructor.
          */
         hier::IntVector d_num_conv_ghosts;
         

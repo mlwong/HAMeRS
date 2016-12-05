@@ -140,6 +140,12 @@ struct BasicCartesianBoundaryUtilities3
          * @param bdry_strategy user-defined object that reads DIRICHLET or NEUMANN
          *                      conditions
          * @param input_db      input database containing all boundary data
+         * @param face_locs     array of locations of faces for applying
+         *                      boundary conditions.
+         * @param edge_locs     array of locations of edges for applying
+         *                      boundary conditions.
+         * @param node_locs     array of locations of nodes for applying
+         *                      boundary conditions.
          * @param face_conds    array into which integer face boundary condition
          *                      types are read
          * @param edge_conds    array into which integer edge boundary condition
@@ -153,6 +159,9 @@ struct BasicCartesianBoundaryUtilities3
          * @pre input_db
          * @pre periodic.getDim() == tbox::Dimension(3)
          * @pre bdry_strategy != 0
+         * @pre edge_locs.size() > 0 and <= NUM_3D_FACES
+         * @pre edge_locs.size() > 0 and <= NUM_3D_EDGES
+         * @pre node_locs.size() > 0 and <= NUM_3D_NODES
          * @pre face_conds.size() == NUM_3D_FACES
          * @pre edge_conds.size() == NUM_3D_EDGES
          * @pre node_conds.size() == NUM_3D_NODES
@@ -161,6 +170,9 @@ struct BasicCartesianBoundaryUtilities3
         getFromInput(
             BoundaryUtilityStrategy* bdry_strategy,
             const boost::shared_ptr<tbox::Database>& input_db,
+            const std::vector<int>& face_locs,
+            const std::vector<int>& edge_locs,
+            const std::vector<int>& node_locs,
             std::vector<int>& face_conds,
             std::vector<int>& edge_conds,
             std::vector<int>& node_conds,
@@ -176,6 +188,8 @@ struct BasicCartesianBoundaryUtilities3
         * @param var_name            String name of variable (for error reporting).
         * @param var_data            Cell-centered patch data object to fill.
         * @param patch               hier::Patch on which data object lives.
+        * @param bdry_face_locs      tbox::Array of locations of faces for applying
+        *                            boundary conditions.
         * @param bdry_face_conds     tbox::Array of boundary condition types for
         *                            patch faces.
         * @param bdry_face_values    tbox::Array of boundary values for patch
@@ -184,6 +198,7 @@ struct BasicCartesianBoundaryUtilities3
         *
         * @pre !var_name.empty()
         * @pre var_data
+        * @pre bdry_face_locs.size() > 0 and <= NUM_3D_FACES
         * @pre bdry_face_conds.size() == NUM_3D_FACES
         * @pre bdry_face_values.size() == NUM_3D_FACES * (var_data->getDepth())
         * @pre ghost_fill_width.getDim() == tbox::Dimension(3)
@@ -195,6 +210,7 @@ struct BasicCartesianBoundaryUtilities3
             const std::string& var_name,
             const boost::shared_ptr<pdat::CellData<double> >& var_data,
             const hier::Patch& patch,
+            const std::vector<int>& bdry_face_locs,
             const std::vector<int>& bdry_face_conds,
             const std::vector<double>& bdry_face_values,
             const hier::IntVector& ghost_width_to_fill = -hier::IntVector::getOne(tbox::Dimension(3)));
@@ -209,6 +225,8 @@ struct BasicCartesianBoundaryUtilities3
         * @param var_name            String name of variable (for error reporting).
         * @param var_data            Cell-centered patch data object to fill.
         * @param patch               hier::Patch on which data object lives.
+        * @param bdry_edge_locs      tbox::Array of locations of edges for applying
+        *                            boundary conditions.
         * @param bdry_edge_conds     tbox::Array of boundary condition types for
         *                            patch edges.
         * @param bdry_face_values    tbox::Array of boundary values for patch
@@ -217,6 +235,7 @@ struct BasicCartesianBoundaryUtilities3
         *
         * @pre !var_name.empty()
         * @pre var_data
+        * @pre bdry_edge_locs.size() > 0 and <= NUM_3D_EDGES
         * @pre bdry_edge_conds.size() == NUM_3D_EDGES
         * @pre bdry_face_values.size() == NUM_3D_FACES * (var_data->getDepth())
         * @pre ghost_fill_width.getDim() == tbox::Dimension(3)
@@ -228,6 +247,7 @@ struct BasicCartesianBoundaryUtilities3
             const std::string& var_name,
             const boost::shared_ptr<pdat::CellData<double> >& var_data,
             const hier::Patch& patch,
+            const std::vector<int>& bdry_edge_locs,
             const std::vector<int>& bdry_edge_conds,
             const std::vector<double>& bdry_face_values,
             const hier::IntVector& ghost_width_to_fill = -hier::IntVector::getOne(tbox::Dimension(3)));
@@ -242,6 +262,8 @@ struct BasicCartesianBoundaryUtilities3
         * @param var_name            String name of variable (for error reporting).
         * @param var_data            Cell-centered patch data object to fill.
         * @param patch               hier::Patch on which data object lives.
+        * @param bdry_node_locs      tbox::Array of locations of nodes for applying
+        *                            boundary conditions.
         * @param bdry_node_conds     tbox::Array of boundary condition types for
         *                            patch nodes.
         * @param bdry_face_values    tbox::Array of boundary values for patch
@@ -250,6 +272,7 @@ struct BasicCartesianBoundaryUtilities3
         *
         * @pre !var_name.empty()
         * @pre var_data
+        * @pre bdry_node_conds.size() > 0 and <= NUM_3D_NODES
         * @pre bdry_node_conds.size() == NUM_3D_NODES
         * @pre bdry_face_values.size() == NUM_3D_FACES * (var_data->getDepth())
         * @pre ghost_fill_width.getDim() == tbox::Dimension(3)
@@ -261,6 +284,7 @@ struct BasicCartesianBoundaryUtilities3
             const std::string& var_name,
             const boost::shared_ptr<pdat::CellData<double> >& var_data,
             const hier::Patch& patch,
+            const std::vector<int>& bdry_node_locs,
             const std::vector<int>& bdry_node_conds,
             const std::vector<double>& bdry_face_values,
             const hier::IntVector& ghost_width_to_fill = -hier::IntVector::getOne(tbox::Dimension(3)));
@@ -271,7 +295,7 @@ struct BasicCartesianBoundaryUtilities3
         * condition.
         *
         * If the edge boundary condition type or edge location are unknown,
-        * or the boundary condition type is inconsistant with the edge location
+        * or the boundary condition type is inconsistent with the edge location
         * an error results.
         *
         * @return Integer face location for edge location and boundary condition
@@ -307,7 +331,7 @@ struct BasicCartesianBoundaryUtilities3
         * condition.
         *
         * If the node boundary condition type or node location are unknown,
-        * or the boundary condition type is inconsistant with the node location
+        * or the boundary condition type is inconsistent with the node location
         * an error results.
         *
         * @return Integer face location for node location and boundary condition
@@ -342,12 +366,14 @@ struct BasicCartesianBoundaryUtilities3
         read3dBdryFaces(
             BoundaryUtilityStrategy* bdry_strategy,
             const boost::shared_ptr<tbox::Database>& input_db,
+            const std::vector<int>& face_locs,
             std::vector<int>& face_conds,
             const hier::IntVector& periodic);
         
         static void
         read3dBdryEdges(
             const boost::shared_ptr<tbox::Database>& input_db,
+            const std::vector<int>& edge_locs,
             const std::vector<int>& face_conds,
             std::vector<int>& edge_conds,
             const hier::IntVector& periodic);
@@ -355,6 +381,7 @@ struct BasicCartesianBoundaryUtilities3
         static void
         read3dBdryNodes(
             const boost::shared_ptr<tbox::Database>& input_db,
+            const std::vector<int>& node_locs,
             const std::vector<int>& face_conds,
             std::vector<int>& node_conds,
             const hier::IntVector& periodic);

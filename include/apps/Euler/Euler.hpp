@@ -21,13 +21,13 @@
 
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
 #include "algs/patch_strategy/RungeKuttaPatchStrategy.hpp"
-#include "flow/boundary_conditions/Euler/EulerBoundaryConditions.hpp"
+#include "apps/Euler/EulerBoundaryConditions.hpp"
+#include "apps/Euler/EulerInitialConditions.hpp"
 #include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructorManager.hpp"
 #include "flow/flow_models/FlowModelManager.hpp"
 #include "flow/refinement_taggers/GradientTagger.hpp"
 #include "flow/refinement_taggers/MultiresolutionTagger.hpp"
 #include "flow/refinement_taggers/ValueTagger.hpp"
-#include "flow/initial_conditions/InitialConditions.hpp"
 
 #include "boost/shared_ptr.hpp"
 #include <string>
@@ -36,20 +36,16 @@
 using namespace SAMRAI;
 
 /**
- * The Euler class provides routines for a sample application code that
- * solves the Euler equations of gas dynamics.  This code illustrates the
- * manner in which a code employing the standard Berger/Oliger AMR algorithm
- * for explicit hydrodynamics can be used in the SAMRAI framework.
- * This class is derived from the RungeKuttaPatchStrategy abstract base
- * class which defines the bulk of the interface between the hyperbolic
- * Runge-Kutta intergration algorithm modified from SAMRAI's implementation of
- * algs::HyperbolicPatchStrategyand the numerical routines specific to Euler.
- * In particular, this class provides routines which maybe applied to any patch
- * in an AMR patch hierarchy.
+ * The Euler class provides routines for a sample application code that solves
+ * the Euler equations of gas dynamics.  This code illustrates the manner in
+ * which a code employing the standard Berger/Oliger AMR algorithm for explicit
+ * hydrodynamics can be used in the SAMRAI framework.  This class is derived from
+ * the RungeKuttaPatchStrategy abstract base class which defines the bulk of the
+ * interface between the hyperbolic Runge-Kutta intergration algorithm modified
+ * from SAMRAI's implementation of algs::HyperbolicPatchStrategy and the numerical
+ * routines specific to Euler.  In particular, this class provides routines which
+ * maybe applied to any patch in an AMR patch hierarchy.
  *
- * The numerical routines model the Euler equations of gas dynamics with
- * explicit timestepping and a second-order unsplit Godunov method.
- * The primary numerical quantities are density, velocity, and pressure.
  */
 
 class Euler:
@@ -108,10 +104,10 @@ class Euler:
             mesh::GriddingAlgorithm* gridding_algorithm);
         
         /**
-         * Set the data on the patch interior to some initial values,
-         * depending on the input parameters and numerical routines.
-         * If the "initial_time" flag is false, indicating that the
-         * routine is called after a regridding step, the routine does nothing.
+         * Set the data on the patch interior to some initial values, epending
+         * on the input parameters and numerical routines.  If the "initial_time"
+         * flag is false, indicating that the routine is called after a regridding
+         * step, the routine does nothing.
          */
         void
         initializeDataOnPatch(
@@ -120,8 +116,8 @@ class Euler:
             const bool initial_time);
         
         /**
-         * Compute the stable time increment for patch using a CFL
-         * condition and return the computed dt.
+         * Compute the stable time increment for patch using a CFL condition and
+         * return the computed dt.
          */
         double
         computeStableDtOnPatch(
@@ -133,8 +129,9 @@ class Euler:
          * Compute time integral of hyperbolic fluxes to be used in finite
          * difference for patch Runge-Kutta integration.
          * 
-         * If the equations are in non-conservative form, the TIME INTEGRALS of the
-         * correspoinding sources are also computed after the equation is hyperolized.
+         * If the equations are in non-conservative form, the TIME INTEGRALS
+         * of the correspoinding sources are also computed after the equation
+         * is hyperolized.
          *
          * The finite difference used to update the integrated quantities
          * through the Runge-Kutta steps is implemented in the advanceSingleStep()
@@ -376,19 +373,18 @@ class Euler:
         /**
          * This routine is a concrete implementation of the virtual function
          * in the base class appu::VisDerivedDataStrategy.  It computes derived
-         * plot quantities registered with the VisIt data
-         * writers from data  that is maintained on each patch in the
-         * hierarchy.  In particular, it writes the plot quantity
-         * identified by the string variable name to the specified
-         * double buffer on the patch in the given region.  The depth_id
-         * integer argument indicates which entry in the "depth" of the
-         * vector is being written; for a scalar quantity, this may be
-         * ignored.  For a vector quantity, it may be used to compute
-         * the quantity at the particular depth (e.g. mom[depth_id] =
-         * rho * vel[depth_id]).  The boolean return value specifies
-         * whether or not derived data exists on the patch.  Generally,
-         * this will be TRUE.  If the packDerivedDataIntoDoubleBuffer data does NOT exist on
-         * the patch, return FALSE.
+         * plot quantities registered with the VisIt data writers from data
+         * that is maintained on each patch in the hierarchy.  In particular, it
+         * writes the plot quantity identified by the string variable name to
+         * the specified double buffer on the patch in the given region.  The
+         * depth_id integer argument indicates which entry in the "depth" of the
+         * vector is being written; for a scalar quantity, this may be ignored.
+         * For a vector quantity, it may be used to compute the quantity at the
+         * particular depth (e.g. mom[depth_id] = rho * vel[depth_id]).  The
+         * boolean return value specifies whether or not derived data exists on
+         * the patch.  Generally, this will be TRUE.  If the
+         * packDerivedDataIntoDoubleBuffer data does NOT exist on the patch,
+         * return FALSE.
          */
         bool
         packDerivedDataIntoDoubleBuffer(
@@ -516,9 +512,9 @@ class Euler:
         boost::shared_ptr<tbox::Database> d_convective_flux_reconstructor_db;
         
         /*
-         * boost::shared_ptr to InitialConditions.
+         * boost::shared_ptr to EulerInitialConditions.
          */
-        boost::shared_ptr<InitialConditions> d_initial_conditions;
+        boost::shared_ptr<EulerInitialConditions> d_Euler_initial_conditions;
         
         /*
          * boost::shared_ptr to EulerBoundaryConditions and its database.
@@ -585,4 +581,3 @@ class Euler:
 };
 
 #endif /* EULER_HPP */
-

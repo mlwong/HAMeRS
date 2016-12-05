@@ -4,7 +4,7 @@ EquationOfStateMixingRulesIdealGas::EquationOfStateMixingRulesIdealGas(
     const std::string& object_name,
     const tbox::Dimension& dim,
     const int& num_species,
-    const MIXING_CLOSURE_MODEL& mixing_closure_model,
+    const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
     const boost::shared_ptr<tbox::Database>& equation_of_state_mixing_rules_db):
         EquationOfStateMixingRules(
             object_name,
@@ -193,8 +193,8 @@ EquationOfStateMixingRulesIdealGas::getPressure(
     const std::vector<const double*>& mass_fraction) const
 {
 #ifdef DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT((d_mixing_closure_model == ISOTHERMAL_AND_ISOBARIC) ||
-                (d_mixing_closure_model == NO_MODEL && d_num_species == 1));
+    TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
+                (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
     TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
                 (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
 #endif
@@ -238,7 +238,7 @@ EquationOfStateMixingRulesIdealGas::getPressure(
     const std::vector<const double*>& volume_fraction) const
 {
 #ifdef DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(d_mixing_closure_model == ISOBARIC);
+    TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
                 (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
     TBOX_ASSERT((static_cast<int>(volume_fraction.size()) == d_num_species) ||
@@ -285,8 +285,8 @@ EquationOfStateMixingRulesIdealGas::getSoundSpeed(
     const std::vector<const double*>& mass_fraction) const
 {
 #ifdef DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT((d_mixing_closure_model == ISOTHERMAL_AND_ISOBARIC) ||
-                (d_mixing_closure_model == NO_MODEL && d_num_species == 1));
+    TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
+                (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
     TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
                 (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
 #endif
@@ -330,7 +330,7 @@ EquationOfStateMixingRulesIdealGas::getSoundSpeed(
     const std::vector<const double*>& volume_fraction) const
 {
 #ifdef DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(d_mixing_closure_model == ISOBARIC);
+    TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
                 (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
     TBOX_ASSERT((static_cast<int>(volume_fraction.size()) == d_num_species) ||
@@ -377,8 +377,8 @@ EquationOfStateMixingRulesIdealGas::getInternalEnergy(
     const std::vector<const double*>& mass_fraction) const
 {
 #ifdef DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT((d_mixing_closure_model == ISOTHERMAL_AND_ISOBARIC) ||
-                (d_mixing_closure_model == NO_MODEL && d_num_species == 1));
+    TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
+                (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
     TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
                 (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
 #endif
@@ -422,7 +422,7 @@ EquationOfStateMixingRulesIdealGas::getInternalEnergy(
     const std::vector<const double*>& volume_fraction) const
 {
 #ifdef DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(d_mixing_closure_model == ISOBARIC);
+    TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
                 (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
     TBOX_ASSERT((static_cast<int>(volume_fraction.size()) == d_num_species) ||
@@ -469,8 +469,8 @@ EquationOfStateMixingRulesIdealGas::getTemperature(
     const std::vector<const double*>& mass_fraction) const
 {
 #ifdef DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT((d_mixing_closure_model == ISOTHERMAL_AND_ISOBARIC) ||
-                (d_mixing_closure_model == NO_MODEL && d_num_species == 1));
+    TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
+                (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
     TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
                 (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
 #endif
@@ -499,6 +499,51 @@ EquationOfStateMixingRulesIdealGas::getTemperature(
     return d_equation_of_state->getTemperature(
         density,
         pressure,
+        mixture_thermo_properties_const_ptr);
+}
+
+
+/*
+ * Compute the specific internal energy of the mixture from temperature with isothermal
+ * and isobaric assumptions.
+ */
+double
+EquationOfStateMixingRulesIdealGas::getInternalEnergyFromTemperature(
+    const double* const density,
+    const double* const temperature,
+    const std::vector<const double*>& mass_fraction) const
+{
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
+                (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
+    TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
+                (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
+#endif
+    
+    // Get the mixture thermodynamic properties.
+    std::vector<double> mixture_thermo_properties;
+    std::vector<double*> mixture_thermo_properties_ptr;
+    std::vector<const double*> mixture_thermo_properties_const_ptr;
+    
+    const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
+    
+    mixture_thermo_properties.resize(num_thermo_properties);
+    mixture_thermo_properties_ptr.reserve(num_thermo_properties);
+    mixture_thermo_properties_const_ptr.reserve(num_thermo_properties);
+    
+    for (int ti = 0; ti < num_thermo_properties; ti++)
+    {
+        mixture_thermo_properties_ptr.push_back(&mixture_thermo_properties[ti]);
+        mixture_thermo_properties_const_ptr.push_back(&mixture_thermo_properties[ti]);
+    }
+    
+    getMixtureThermodynamicProperties(
+        mixture_thermo_properties_ptr,
+        mass_fraction);
+    
+    return d_equation_of_state->getInternalEnergyFromTemperature(
+        density,
+        temperature,
         mixture_thermo_properties_const_ptr);
 }
 
@@ -543,19 +588,19 @@ EquationOfStateMixingRulesIdealGas::getNumberOfMixtureThermodynamicProperties() 
     
     switch (d_mixing_closure_model)
     {
-        case ISOTHERMAL_AND_ISOBARIC:
+        case MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC:
         {
             num_of_thermo_properties = 4;
             
             break;
         }
-        case ISOBARIC:
+        case MIXING_CLOSURE_MODEL::ISOBARIC:
         {
             num_of_thermo_properties = 1;
             
             break;
         }
-        case NO_MODEL:
+        case MIXING_CLOSURE_MODEL::NO_MODEL:
         {
             num_of_thermo_properties = 0;
             
@@ -577,7 +622,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicProperties(
 {
     switch (d_mixing_closure_model)
     {
-        case ISOTHERMAL_AND_ISOBARIC:
+        case MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC:
         {
             getMixtureThermodynamicPropertiesWithMassFraction(
                 mixture_thermo_properties,
@@ -585,7 +630,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicProperties(
             
             break;
         }
-        case ISOBARIC:
+        case MIXING_CLOSURE_MODEL::ISOBARIC:
         {
             getMixtureThermodynamicPropertiesWithVolumeFraction(
                 mixture_thermo_properties,
@@ -593,7 +638,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicProperties(
             
             break;
         }
-        case NO_MODEL:
+        case MIXING_CLOSURE_MODEL::NO_MODEL:
         {
             TBOX_WARNING(d_object_name
                 << ": "

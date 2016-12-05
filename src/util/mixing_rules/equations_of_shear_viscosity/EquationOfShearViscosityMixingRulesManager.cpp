@@ -4,7 +4,7 @@ EquationOfShearViscosityMixingRulesManager::EquationOfShearViscosityMixingRulesM
     const std::string& object_name,
     const tbox::Dimension& dim,
     const int& num_species,
-    const MIXING_CLOSURE_MODEL& mixing_closure_model,
+    const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
     const boost::shared_ptr<tbox::Database>& equation_of_shear_viscosity_mixing_rules_db,
     const std::string& equation_of_shear_viscosity_str):
         d_object_name(object_name)
@@ -13,7 +13,7 @@ EquationOfShearViscosityMixingRulesManager::EquationOfShearViscosityMixingRulesM
     
     if (equation_of_shear_viscosity_str == "CONSTANT")
     {
-        d_equation_of_shear_viscosity_label = CONSTANT;
+        d_equation_of_shear_viscosity_type = EQN_SHEAR_VISCOSITY::CONSTANT;
         
         d_equation_of_shear_viscosity_mixing_rules.reset(new EquationOfShearViscosityMixingRulesConstant(
                 "d_equation_of_shear_viscosity_mixing_rules",
@@ -24,7 +24,7 @@ EquationOfShearViscosityMixingRulesManager::EquationOfShearViscosityMixingRulesM
     }
     else if (equation_of_shear_viscosity_str == "CHAPMAN_ENSKOG")
     {
-        d_equation_of_shear_viscosity_label = CHAPMAN_ENSKOG;
+        d_equation_of_shear_viscosity_type = EQN_SHEAR_VISCOSITY::CHAPMAN_ENSKOG;
         
         d_equation_of_shear_viscosity_mixing_rules.reset(new EquationOfShearViscosityMixingRulesChapmanEnskog(
                 "d_equation_of_shear_viscosity_mixing_rules",
@@ -64,8 +64,8 @@ EquationOfShearViscosityMixingRulesManager::printClassData(std::ostream& os) con
        << d_object_name
        << std::endl;
     
-    os << "d_equation_of_shear_viscosity_label = "
-       << d_equation_of_shear_viscosity_label
+    os << "d_equation_of_shear_viscosity_type = "
+       << d_equation_of_shear_viscosity_type
        << std::endl;
     
     os << "................................................................................";

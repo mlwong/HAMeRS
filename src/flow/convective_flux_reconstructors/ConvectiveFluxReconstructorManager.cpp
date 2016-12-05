@@ -10,11 +10,10 @@ ConvectiveFluxReconstructorManager::ConvectiveFluxReconstructorManager(
     const boost::shared_ptr<tbox::Database>& convective_flux_reconstructor_db,
     const std::string& convective_flux_reconstructor_str):
         d_object_name(object_name)
-        
 {
     if (convective_flux_reconstructor_str == "FIRST_ORDER_LLF")
     {
-        d_convective_flux_reconstructor_label = FIRST_ORDER_LLF;
+        d_convective_flux_reconstructor_type = CONVECTIVE_FLUX_RECONSTRUCTOR::FIRST_ORDER_LLF;
         
         d_conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorFirstOrderLLF(
             "d_convective_flux_reconstructor",
@@ -27,7 +26,7 @@ ConvectiveFluxReconstructorManager::ConvectiveFluxReconstructorManager(
     }
     else if (convective_flux_reconstructor_str == "FIRST_ORDER_HLLC")
     {
-        d_convective_flux_reconstructor_label = FIRST_ORDER_HLLC;
+        d_convective_flux_reconstructor_type = CONVECTIVE_FLUX_RECONSTRUCTOR::FIRST_ORDER_HLLC;
         
         d_conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorFirstOrderHLLC(
             "d_convective_flux_reconstructor",
@@ -40,7 +39,7 @@ ConvectiveFluxReconstructorManager::ConvectiveFluxReconstructorManager(
     }
     else if (convective_flux_reconstructor_str == "WCNS5_JS_HLLC_HLL")
     {
-        d_convective_flux_reconstructor_label = WCNS5_JS_HLLC_HLL;
+        d_convective_flux_reconstructor_type = CONVECTIVE_FLUX_RECONSTRUCTOR::WCNS5_JS_HLLC_HLL;
         
         d_conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL(
             "d_convective_flux_reconstructor",
@@ -53,7 +52,7 @@ ConvectiveFluxReconstructorManager::ConvectiveFluxReconstructorManager(
     }
     else if (convective_flux_reconstructor_str == "WCNS5_Z_HLLC_HLL")
     {
-        d_convective_flux_reconstructor_label = WCNS5_Z_HLLC_HLL;
+        d_convective_flux_reconstructor_type = CONVECTIVE_FLUX_RECONSTRUCTOR::WCNS5_Z_HLLC_HLL;
         
         d_conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorWCNS5_Z_HLLC_HLL(
             "d_convective_flux_reconstructor",
@@ -66,7 +65,7 @@ ConvectiveFluxReconstructorManager::ConvectiveFluxReconstructorManager(
     }
     else if (convective_flux_reconstructor_str == "WCNS6_CU_M2_HLLC_HLL")
     {
-        d_convective_flux_reconstructor_label = WCNS6_CU_M2_HLLC_HLL;
+        d_convective_flux_reconstructor_type = CONVECTIVE_FLUX_RECONSTRUCTOR::WCNS6_CU_M2_HLLC_HLL;
         
         d_conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL(
             "d_convective_flux_reconstructor",
@@ -79,7 +78,7 @@ ConvectiveFluxReconstructorManager::ConvectiveFluxReconstructorManager(
     }
     else if (convective_flux_reconstructor_str == "WCNS6_HW_HLLC_HLL")
     {
-        d_convective_flux_reconstructor_label = WCNS6_HW_HLLC_HLL;
+        d_convective_flux_reconstructor_type = CONVECTIVE_FLUX_RECONSTRUCTOR::WCNS6_HW_HLLC_HLL;
         
         d_conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorWCNS6_HW_HLLC_HLL(
             "d_convective_flux_reconstructor",
@@ -92,7 +91,7 @@ ConvectiveFluxReconstructorManager::ConvectiveFluxReconstructorManager(
     }
     else if (convective_flux_reconstructor_str == "WCNS6_HW_LD_HLLC_HLL")
     {
-        d_convective_flux_reconstructor_label = WCNS6_HW_LD_HLLC_HLL;
+        d_convective_flux_reconstructor_type = CONVECTIVE_FLUX_RECONSTRUCTOR::WCNS6_HW_LD_HLLC_HLL;
         
         d_conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorWCNS6_HW_LD_HLLC_HLL(
             "d_convective_flux_reconstructor",
@@ -105,7 +104,7 @@ ConvectiveFluxReconstructorManager::ConvectiveFluxReconstructorManager(
     }
     else if (convective_flux_reconstructor_str == "WCNS6_LD_HLLC_HLL")
     {
-        d_convective_flux_reconstructor_label = WCNS6_LD_HLLC_HLL;
+        d_convective_flux_reconstructor_type = CONVECTIVE_FLUX_RECONSTRUCTOR::WCNS6_LD_HLLC_HLL;
         
         d_conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL(
             "d_convective_flux_reconstructor",
@@ -118,7 +117,7 @@ ConvectiveFluxReconstructorManager::ConvectiveFluxReconstructorManager(
     }
     else if (convective_flux_reconstructor_str == "WCNS6_TEST")
     {
-        d_convective_flux_reconstructor_label = WCNS6_TEST;
+        d_convective_flux_reconstructor_type = CONVECTIVE_FLUX_RECONSTRUCTOR::WCNS6_TEST;
         
         d_conv_flux_reconstructor.reset(new ConvectiveFluxReconstructorWCNS6_Test(
             "d_convective_flux_reconstructor",
@@ -160,7 +159,7 @@ ConvectiveFluxReconstructorManager::printClassData(std::ostream& os) const
        << d_object_name
        << std::endl;
     
-    os << "d_convective_flux_reconstructor_label = "
-       << d_convective_flux_reconstructor_label
+    os << "d_convective_flux_reconstructor_type = "
+       << d_convective_flux_reconstructor_type
        << std::endl;
 }

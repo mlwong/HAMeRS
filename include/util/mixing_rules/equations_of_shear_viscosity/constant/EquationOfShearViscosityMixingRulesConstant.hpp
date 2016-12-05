@@ -12,7 +12,7 @@ class EquationOfShearViscosityMixingRulesConstant: public EquationOfShearViscosi
             const std::string& object_name,
             const tbox::Dimension& dim,
             const int& num_species,
-            const MIXING_CLOSURE_MODEL& mixing_closure_model,
+            const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
             const boost::shared_ptr<tbox::Database>& equation_of_shear_viscosity_mixing_rules_db);
         
         /*
@@ -64,16 +64,15 @@ class EquationOfShearViscosityMixingRulesConstant: public EquationOfShearViscosi
         
     private:
         /*
-         * Shear viscosity of different species.
+         * Shear viscosities of different species.
          */
         std::vector<double> d_species_mu;
         
         /*
-         * Molecular weight of different species.
+         * Molecular weights of different species.
          */
         std::vector<double> d_species_M;
         
 };
-    
 
 #endif /* EQUATION_OF_SHEAR_VISCOSITY_MIXING_RULES_CONSTANT_HPP */

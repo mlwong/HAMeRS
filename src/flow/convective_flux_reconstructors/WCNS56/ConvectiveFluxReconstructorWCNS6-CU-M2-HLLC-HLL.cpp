@@ -190,7 +190,7 @@ ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL::performWENOInterpolation(
     const boost::multi_array<const double*, 2>& U_array,
     const hier::Index& cell_index_minus,
     const hier::Index& cell_index_plus,
-    const DIRECTION& direction)
+    const DIRECTION::TYPE& direction)
 {
 #ifdef DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(U_array.shape()[0]) == 6);
@@ -226,18 +226,18 @@ ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL::performWENOInterpolation(
     
     const double* const grid_spacing = d_grid_geometry->getDx();
     double dx = 0.0;
-    if (direction == X_DIRECTION)
+    if (direction == DIRECTION::X_DIRECTION)
     {
         dx = grid_spacing[0];
     }
-    else if (direction == Y_DIRECTION)
+    else if (direction == DIRECTION::Y_DIRECTION)
     {
 #ifdef DEBUG_CHECK_DEV_ASSERTIONS
         TBOX_ASSERT(d_dim.getValue() >= 2);
 #endif
         dx = grid_spacing[1];
     }
-    else if (direction == Z_DIRECTION)
+    else if (direction == DIRECTION::Z_DIRECTION)
     {
 #ifdef DEBUG_CHECK_DEV_ASSERTIONS
         TBOX_ASSERT(d_dim.getValue() >= 3);

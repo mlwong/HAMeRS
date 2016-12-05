@@ -4,16 +4,27 @@ EquationOfThermalConductivityMixingRulesManager::EquationOfThermalConductivityMi
     const std::string& object_name,
     const tbox::Dimension& dim,
     const int& num_species,
-    const MIXING_CLOSURE_MODEL& mixing_closure_model,
+    const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
     const boost::shared_ptr<tbox::Database>& equation_of_thermal_conductivity_mixing_rules_db,
     const std::string& equation_of_thermal_conductivity_str):
         d_object_name(object_name)
 {
     TBOX_ASSERT(!object_name.empty());
     
-    if (equation_of_thermal_conductivity_str == "PRANDTL")
+    if (equation_of_thermal_conductivity_str == "CONSTANT")
     {
-        d_equation_of_thermal_conductivity_label = PRANDTL;
+        d_equation_of_thermal_conductivity_type = EQN_THERMAL_CONDUCTIVITY::CONSTANT;
+        
+        d_equation_of_thermal_conductivity_mixing_rules.reset(new EquationOfThermalConductivityMixingRulesConstant(
+                "d_equation_of_thermal_conductivity_mixing_rules",
+                dim,
+                num_species,
+                mixing_closure_model,
+                equation_of_thermal_conductivity_mixing_rules_db));
+    }
+    else if (equation_of_thermal_conductivity_str == "PRANDTL")
+    {
+        d_equation_of_thermal_conductivity_type = EQN_THERMAL_CONDUCTIVITY::PRANDTL;
         
         d_equation_of_thermal_conductivity_mixing_rules.reset(new EquationOfThermalConductivityMixingRulesPrandtl(
                 "d_equation_of_thermal_conductivity_mixing_rules",
@@ -53,8 +64,8 @@ EquationOfThermalConductivityMixingRulesManager::printClassData(std::ostream& os
        << d_object_name
        << std::endl;
     
-    os << "d_equation_of_thermal_conductivity_label = "
-       << d_equation_of_thermal_conductivity_label
+    os << "d_equation_of_thermal_conductivity_type = "
+       << d_equation_of_thermal_conductivity_type
        << std::endl;
     
     os << "................................................................................";

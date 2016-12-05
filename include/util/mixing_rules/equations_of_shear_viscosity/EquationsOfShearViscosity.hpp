@@ -7,21 +7,24 @@
 #include <map>
 #include <string>
 
-enum EQUATION_OF_SHEAR_VISCOSITY_LABEL { CONSTANT,
-                                         CHAPMAN_ENSKOG };
+namespace EQN_SHEAR_VISCOSITY
+{
+    enum TYPE { CONSTANT,
+                CHAPMAN_ENSKOG };
+}
 
 /*
- * Function to print out enum EQUATION_OF_SHEAR_VISCOSITY_LABEL value as text.
+ * Function to print out enum EQN_SHEAR_VISCOSITY::TYPE value as text.
  */
-inline std::ostream& operator<<(std::ostream& os, const EQUATION_OF_SHEAR_VISCOSITY_LABEL& value)
+inline std::ostream& operator<<(std::ostream& os, const EQN_SHEAR_VISCOSITY::TYPE& value)
 {
-    static std::map<EQUATION_OF_SHEAR_VISCOSITY_LABEL, std::string> strings;
+    static std::map<EQN_SHEAR_VISCOSITY::TYPE, std::string> strings;
     
     if (strings.size() == 0)
     {
 #define INSERT_ELEMENT(p) strings[p] = #p
-        INSERT_ELEMENT(CONSTANT);
-        INSERT_ELEMENT(CHAPMAN_ENSKOG);
+        INSERT_ELEMENT(EQN_SHEAR_VISCOSITY::CONSTANT);
+        INSERT_ELEMENT(EQN_SHEAR_VISCOSITY::CHAPMAN_ENSKOG);
 #undef INSERT_ELEMENT
     }
     

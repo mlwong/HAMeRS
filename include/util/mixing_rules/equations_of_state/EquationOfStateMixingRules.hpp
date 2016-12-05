@@ -19,7 +19,7 @@ class EquationOfStateMixingRules
             const std::string& object_name,
             const tbox::Dimension& dim,
             const int& num_species,
-            const MIXING_CLOSURE_MODEL& mixing_closure_model,
+            const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
             const boost::shared_ptr<tbox::Database>& equation_of_state_mixing_rules_db):
                 d_object_name(object_name),
                 d_dim(dim),
@@ -27,6 +27,15 @@ class EquationOfStateMixingRules
                 d_mixing_closure_model(mixing_closure_model),
                 d_equation_of_state_mixing_rules_db(equation_of_state_mixing_rules_db)
         {}
+        
+        /*
+         * Return the boost::shared_ptr to the equation of state.
+         */
+        const boost::shared_ptr<EquationOfState>&
+        getEquationOfState() const
+        {
+            return d_equation_of_state;
+        }
         
         /*
          * Print all characteristics of the equation of state mixing rules class.
@@ -109,6 +118,16 @@ class EquationOfStateMixingRules
             const std::vector<const double*>& mass_fraction) const = 0;
         
         /*
+         * Compute the specific internal energy of the mixture from temperature with isothermal
+         * and isobaric assumptions.
+         */
+        virtual double
+        getInternalEnergyFromTemperature(
+            const double* const density,
+            const double* const temperature,
+            const std::vector<const double*>& mass_fraction) const = 0;
+        
+        /*
          * Get the number of thermodynamic properties of a species.
          */
         virtual int
@@ -152,11 +171,6 @@ class EquationOfStateMixingRules
             return mixture_density;            
         }
         
-        /*
-         * boost::shared_ptr to EquationOfState.
-         */
-        boost::shared_ptr<EquationOfState> d_equation_of_state;
-        
     protected:
         /*
          * The object name is used for error/warning reporting.
@@ -169,19 +183,24 @@ class EquationOfStateMixingRules
         const tbox::Dimension d_dim;
         
         /*
-         * Number species.
+         * Number of species.
          */
         const int d_num_species;
         
         /*
-         * Mixing closure model.
+         * Type of mixing closure model.
          */
-        const MIXING_CLOSURE_MODEL d_mixing_closure_model;
+        const MIXING_CLOSURE_MODEL::TYPE d_mixing_closure_model;
         
         /*
          * boost::shared_ptr to the database of equation of state mixing rules.
          */
         const boost::shared_ptr<tbox::Database> d_equation_of_state_mixing_rules_db;
+        
+        /*
+         * boost::shared_ptr to EquationOfState.
+         */
+        boost::shared_ptr<EquationOfState> d_equation_of_state;
         
 };
 

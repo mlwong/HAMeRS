@@ -27,12 +27,12 @@ class ConvectiveFluxReconstructorManager
             const std::string& convective_flux_reconstructor_str);
         
         /*
-         * Get the label of equation of state.
+         * Get the type of convective flux reconstuctor.
          */
-        const CONVECTIVE_FLUX_RECONSTRUCTOR_LABEL&
-        getConvectiveFluxReconstructorLabel() const
+        const CONVECTIVE_FLUX_RECONSTRUCTOR::TYPE&
+        getConvectiveFluxReconstructorType() const
         {
-            return d_convective_flux_reconstructor_label;
+            return d_convective_flux_reconstructor_type;
         }
         
         /*
@@ -57,9 +57,9 @@ class ConvectiveFluxReconstructorManager
         const std::string d_object_name;
         
         /*
-         * Label of convective flux reconstructor.
+         * Type of convective flux reconstructor.
          */
-        CONVECTIVE_FLUX_RECONSTRUCTOR_LABEL d_convective_flux_reconstructor_label;
+        CONVECTIVE_FLUX_RECONSTRUCTOR::TYPE d_convective_flux_reconstructor_type;
         
         /*
          * boost::shared_ptr to the convective flux reconstructor.

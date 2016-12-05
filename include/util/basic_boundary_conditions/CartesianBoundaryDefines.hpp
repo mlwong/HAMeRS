@@ -20,9 +20,9 @@
 
 //@{
 //! @name Definitions for boundary types in 1d, 2d, and 3d:
-namespace Bdry
+namespace BDRY
 {
-   enum Type
+   enum TYPE
    {
       UNDEFINED = -1,
       
@@ -62,14 +62,14 @@ const int NUM_3D_NODES = 8;
  * Note that these definitions are used only for:
  * - Node boundary locations in 1d (XLO, XHI only), or
  * - Edge boundary locations in 2d (XLO, XHI, YLO, YHI only), or
- * - Face boundary locations in 3d.
+ * - Face boundary locations in 3d (XLO, XHI, YLO, YHI, ZLO and ZHI).
  */
 
 //@{
 //! @name Definitions for Face, Edge, and Node boundary locations (see source code for more information):
-namespace BdryLoc
+namespace BDRY_LOC
 {
-   enum Type
+   enum TYPE
    {
       XLO = 0,
       XHI = 1,
@@ -88,9 +88,9 @@ namespace BdryLoc
 
 //@{
 //! @name Definitions for Node boundary locations in 2d:
-namespace NodeBdyLoc2D
+namespace NODE_BDRY_LOC_2D
 {
-   enum Type
+   enum TYPE
    {
       XLO_YLO = 0,
       XHI_YLO = 1,
@@ -107,9 +107,9 @@ namespace NodeBdyLoc2D
 
 //@{
 //! @name Definitions for Edge boundary locations in 3d:
-namespace EdgeBdyLoc3D
+namespace EDGE_BDRY_LOC_3D
 {
-   enum Type
+   enum TYPE
    {
       XLO_YLO = 0,
       XHI_YLO = 1,
@@ -134,9 +134,9 @@ namespace EdgeBdyLoc3D
 
 //@{
 //! @name Definitions for Node boundary locations in 3d:
-namespace NodeBdyLoc3D
+namespace NODE_BDRY_LOC_3D
 {
-   enum Type
+   enum TYPE
    {
       XLO_YLO_ZLO = 0,
       XHI_YLO_ZLO = 1,
@@ -152,19 +152,19 @@ namespace NodeBdyLoc3D
 
 
 /*
- * Function to print out enum NodeBdyLoc2D::Type value as text.
+ * Function to print out enum NODE_BDRY_LOC_2D::TYPE value as text.
  */
-inline std::ostream& operator<<(std::ostream& os, const NodeBdyLoc2D::Type& value)
+inline std::ostream& operator<<(std::ostream& os, const NODE_BDRY_LOC_2D::TYPE& value)
 {
-    static std::map<NodeBdyLoc2D::Type, std::string> strings;
+    static std::map<NODE_BDRY_LOC_2D::TYPE, std::string> strings;
     
     if (strings.size() == 0)
     {
 #define INSERT_ELEMENT(p) strings[p] = #p
-        INSERT_ELEMENT(NodeBdyLoc2D::XLO_YLO);
-        INSERT_ELEMENT(NodeBdyLoc2D::XHI_YLO);
-        INSERT_ELEMENT(NodeBdyLoc2D::XLO_YHI);
-        INSERT_ELEMENT(NodeBdyLoc2D::XHI_YHI);
+        INSERT_ELEMENT(NODE_BDRY_LOC_2D::XLO_YLO);
+        INSERT_ELEMENT(NODE_BDRY_LOC_2D::XHI_YLO);
+        INSERT_ELEMENT(NODE_BDRY_LOC_2D::XLO_YHI);
+        INSERT_ELEMENT(NODE_BDRY_LOC_2D::XHI_YHI);
 #undef INSERT_ELEMENT
     }
     
@@ -173,27 +173,27 @@ inline std::ostream& operator<<(std::ostream& os, const NodeBdyLoc2D::Type& valu
 
 
 /*
- * Function to print out enum EdgeBdyLoc3D::Type value as text.
+ * Function to print out enum EDGE_BDRY_LOC_3D::TYPE value as text.
  */
-inline std::ostream& operator<<(std::ostream& output, const EdgeBdyLoc3D::Type value)
+inline std::ostream& operator<<(std::ostream& output, const EDGE_BDRY_LOC_3D::TYPE value)
 {
-    static std::map<EdgeBdyLoc3D::Type, std::string> strings;
+    static std::map<EDGE_BDRY_LOC_3D::TYPE, std::string> strings;
     
     if (strings.size() == 0)
     {
 #define INSERT_ELEMENT(p) strings[p] = #p
-        INSERT_ELEMENT(EdgeBdyLoc3D::XLO_YLO);
-        INSERT_ELEMENT(EdgeBdyLoc3D::XHI_YLO);
-        INSERT_ELEMENT(EdgeBdyLoc3D::XLO_YHI);
-        INSERT_ELEMENT(EdgeBdyLoc3D::XHI_YHI);
-        INSERT_ELEMENT(EdgeBdyLoc3D::XLO_ZLO);
-        INSERT_ELEMENT(EdgeBdyLoc3D::XHI_ZLO);
-        INSERT_ELEMENT(EdgeBdyLoc3D::XLO_ZHI);
-        INSERT_ELEMENT(EdgeBdyLoc3D::XHI_ZHI);
-        INSERT_ELEMENT(EdgeBdyLoc3D::YLO_ZLO);
-        INSERT_ELEMENT(EdgeBdyLoc3D::YHI_ZLO);
-        INSERT_ELEMENT(EdgeBdyLoc3D::YLO_ZHI);
-        INSERT_ELEMENT(EdgeBdyLoc3D::YHI_ZHI);
+        INSERT_ELEMENT(EDGE_BDRY_LOC_3D::XLO_YLO);
+        INSERT_ELEMENT(EDGE_BDRY_LOC_3D::XHI_YLO);
+        INSERT_ELEMENT(EDGE_BDRY_LOC_3D::XLO_YHI);
+        INSERT_ELEMENT(EDGE_BDRY_LOC_3D::XHI_YHI);
+        INSERT_ELEMENT(EDGE_BDRY_LOC_3D::XLO_ZLO);
+        INSERT_ELEMENT(EDGE_BDRY_LOC_3D::XHI_ZLO);
+        INSERT_ELEMENT(EDGE_BDRY_LOC_3D::XLO_ZHI);
+        INSERT_ELEMENT(EDGE_BDRY_LOC_3D::XHI_ZHI);
+        INSERT_ELEMENT(EDGE_BDRY_LOC_3D::YLO_ZLO);
+        INSERT_ELEMENT(EDGE_BDRY_LOC_3D::YHI_ZLO);
+        INSERT_ELEMENT(EDGE_BDRY_LOC_3D::YLO_ZHI);
+        INSERT_ELEMENT(EDGE_BDRY_LOC_3D::YHI_ZHI);
 #undef INSERT_ELEMENT
     }
     
@@ -202,23 +202,23 @@ inline std::ostream& operator<<(std::ostream& output, const EdgeBdyLoc3D::Type v
 
 
 /*
- * Function to print out enum NodeBdyLoc3D::Type value as text.
+ * Function to print out enum NODE_BDRY_LOC_3D::TYPE value as text.
  */
-inline std::ostream& operator<<(std::ostream& output, const NodeBdyLoc3D::Type value)
+inline std::ostream& operator<<(std::ostream& output, const NODE_BDRY_LOC_3D::TYPE value)
 {
-    static std::map<NodeBdyLoc3D::Type, std::string> strings;
+    static std::map<NODE_BDRY_LOC_3D::TYPE, std::string> strings;
     
     if (strings.size() == 0)
     {
 #define INSERT_ELEMENT(p) strings[p] = #p
-        INSERT_ELEMENT(NodeBdyLoc3D::XLO_YLO_ZLO);
-        INSERT_ELEMENT(NodeBdyLoc3D::XHI_YLO_ZLO);
-        INSERT_ELEMENT(NodeBdyLoc3D::XLO_YHI_ZLO);
-        INSERT_ELEMENT(NodeBdyLoc3D::XHI_YHI_ZLO);
-        INSERT_ELEMENT(NodeBdyLoc3D::XLO_YLO_ZHI);
-        INSERT_ELEMENT(NodeBdyLoc3D::XHI_YLO_ZHI);
-        INSERT_ELEMENT(NodeBdyLoc3D::XLO_YHI_ZHI);
-        INSERT_ELEMENT(NodeBdyLoc3D::XHI_YHI_ZHI);
+        INSERT_ELEMENT(NODE_BDRY_LOC_3D::XLO_YLO_ZLO);
+        INSERT_ELEMENT(NODE_BDRY_LOC_3D::XHI_YLO_ZLO);
+        INSERT_ELEMENT(NODE_BDRY_LOC_3D::XLO_YHI_ZLO);
+        INSERT_ELEMENT(NODE_BDRY_LOC_3D::XHI_YHI_ZLO);
+        INSERT_ELEMENT(NODE_BDRY_LOC_3D::XLO_YLO_ZHI);
+        INSERT_ELEMENT(NODE_BDRY_LOC_3D::XHI_YLO_ZHI);
+        INSERT_ELEMENT(NODE_BDRY_LOC_3D::XLO_YHI_ZHI);
+        INSERT_ELEMENT(NODE_BDRY_LOC_3D::XHI_YHI_ZHI);
 #undef INSERT_ELEMENT
     }
     

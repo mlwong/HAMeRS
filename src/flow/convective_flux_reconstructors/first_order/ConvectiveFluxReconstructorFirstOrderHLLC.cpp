@@ -69,6 +69,7 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
     const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
     const boost::shared_ptr<hier::VariableContext>& data_context)
 {
+    NULL_USE(time);
     NULL_USE(RK_step_number);
     
     // Get the dimensions of box that covers the interior of patch.
@@ -220,8 +221,8 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
                     vel_x_face_ref,
                     Q_x_L_ref,
                     Q_x_R_ref,
-                    X_DIRECTION,
-                    HLLC_RIEMANN_SOLVER);
+                    DIRECTION::X_DIRECTION,
+                    RIEMANN_SOLVER::HLLC);
             
             Q_x_L_ref.clear();
             Q_x_R_ref.clear();
@@ -239,11 +240,11 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
          * Compute the source.
          */
         
-        const std::vector<EQUATION_FORM> eqn_form = d_flow_model->getEquationsForm();
+        const std::vector<EQN_FORM::TYPE> eqn_form = d_flow_model->getEquationsForm();
         
         for (int ei = 0; ei < d_num_eqn; ei ++)
         {
-            if (eqn_form[ei] == ADVECTIVE_EQN)
+            if (eqn_form[ei] == EQN_FORM::ADVECTIVE)
             {
                 double* S = source->getPointer(ei);
                 
@@ -391,8 +392,8 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
                         vel_x_face_ref,
                         Q_x_L_ref,
                         Q_x_R_ref,
-                        X_DIRECTION,
-                        HLLC_RIEMANN_SOLVER);
+                        DIRECTION::X_DIRECTION,
+                        RIEMANN_SOLVER::HLLC);
                 
                 Q_x_L_ref.clear();
                 Q_x_R_ref.clear();
@@ -469,8 +470,8 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
                         vel_y_face_ref,
                         Q_y_B_ref,
                         Q_y_T_ref,
-                        Y_DIRECTION,
-                        HLLC_RIEMANN_SOLVER);
+                        DIRECTION::Y_DIRECTION,
+                        RIEMANN_SOLVER::HLLC);
                 
                 Q_y_B_ref.clear();
                 Q_y_T_ref.clear();
@@ -489,11 +490,11 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
          * Compute the source.
          */
         
-        const std::vector<EQUATION_FORM> eqn_form = d_flow_model->getEquationsForm();
+        const std::vector<EQN_FORM::TYPE> eqn_form = d_flow_model->getEquationsForm();
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            if (eqn_form[ei] == ADVECTIVE_EQN)
+            if (eqn_form[ei] == EQN_FORM::ADVECTIVE)
             {
                 double* S = source->getPointer(ei);
                 
@@ -671,8 +672,8 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
                             vel_x_face_ref,
                             Q_x_L_ref,
                             Q_x_R_ref,
-                            X_DIRECTION,
-                            HLLC_RIEMANN_SOLVER);
+                            DIRECTION::X_DIRECTION,
+                            RIEMANN_SOLVER::HLLC);
                     
                     Q_x_L_ref.clear();
                     Q_x_R_ref.clear();
@@ -759,8 +760,8 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
                             vel_y_face_ref,
                             Q_y_B_ref,
                             Q_y_T_ref,
-                            Y_DIRECTION,
-                            HLLC_RIEMANN_SOLVER);
+                            DIRECTION::Y_DIRECTION,
+                            RIEMANN_SOLVER::HLLC);
                     
                     Q_y_B_ref.clear();
                     Q_y_T_ref.clear();
@@ -847,8 +848,8 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
                             vel_z_face_ref,
                             Q_z_B_ref,
                             Q_z_F_ref,
-                            Z_DIRECTION,
-                            HLLC_RIEMANN_SOLVER);
+                            DIRECTION::Z_DIRECTION,
+                            RIEMANN_SOLVER::HLLC);
                     
                     Q_z_B_ref.clear();
                     Q_z_F_ref.clear();
@@ -868,11 +869,11 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
          * Compute the source.
          */
         
-        const std::vector<EQUATION_FORM> eqn_form = d_flow_model->getEquationsForm();
+        const std::vector<EQN_FORM::TYPE> eqn_form = d_flow_model->getEquationsForm();
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            if (eqn_form[ei] == ADVECTIVE_EQN)
+            if (eqn_form[ei] == EQN_FORM::ADVECTIVE)
             {
                 double* S = source->getPointer(ei);
                 

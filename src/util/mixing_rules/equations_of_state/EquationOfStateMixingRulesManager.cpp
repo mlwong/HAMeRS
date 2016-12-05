@@ -4,7 +4,7 @@ EquationOfStateMixingRulesManager::EquationOfStateMixingRulesManager(
     const std::string& object_name,
     const tbox::Dimension& dim,
     const int& num_species,
-    const MIXING_CLOSURE_MODEL& mixing_closure_model,
+    const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
     const boost::shared_ptr<tbox::Database>& equation_of_state_mixing_rules_db,
     const std::string& equation_of_state_str):
         d_object_name(object_name)
@@ -13,7 +13,7 @@ EquationOfStateMixingRulesManager::EquationOfStateMixingRulesManager(
     
     if (equation_of_state_str == "IDEAL_GAS")
     {
-        d_equation_of_state_label = IDEAL_GAS;
+        d_equation_of_state_type = EQN_STATE::IDEAL_GAS;
         
         d_equation_of_state_mixing_rules.reset(new EquationOfStateMixingRulesIdealGas(
                 "d_equation_of_state_mixing_rules",
@@ -53,8 +53,8 @@ EquationOfStateMixingRulesManager::printClassData(std::ostream& os) const
        << d_object_name
        << std::endl;
     
-    os << "d_equation_of_state_label = "
-       << d_equation_of_state_label
+    os << "d_equation_of_state_type = "
+       << d_equation_of_state_type
        << std::endl;
     
     os << "................................................................................";

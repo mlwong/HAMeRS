@@ -19,7 +19,7 @@ class EquationOfThermalConductivityMixingRules
             const std::string& object_name,
             const tbox::Dimension& dim,
             const int& num_species,
-            const MIXING_CLOSURE_MODEL& mixing_closure_model,
+            const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
             const boost::shared_ptr<tbox::Database>& equation_of_thermal_conductivity_mixing_rules_db):
                 d_object_name(object_name),
                 d_dim(dim),
@@ -27,6 +27,15 @@ class EquationOfThermalConductivityMixingRules
                 d_mixing_closure_model(mixing_closure_model),
                 d_equation_of_thermal_conductivity_mixing_rules_db(equation_of_thermal_conductivity_mixing_rules_db)
         {}
+        
+        /*
+         * Return the boost::shared_ptr to the equation of thermal conductivity.
+         */
+        const boost::shared_ptr<EquationOfThermalConductivity>&
+        getEquationOfThermalConductivity() const
+        {
+            return d_equation_of_thermal_conductivity;
+        }
         
         /*
          * Print all characteristics of the equation of thermal conductivity mixing rules class.
@@ -52,16 +61,6 @@ class EquationOfThermalConductivityMixingRules
             const std::vector<const double*>& mass_fraction) const = 0;
         
         /*
-         * Compute the thermal conductivity of the mixture with isobaric assumption.
-         */
-        virtual double
-        getThermalConductivity(
-            const double* const pressure,
-            const std::vector<const double*>& temperature,
-            const std::vector<const double*>& mass_fraction,
-            const std::vector<const double*>& volume_fraction) const = 0;
-        
-        /*
          * Get the number of molecular properties of a species.
          */
         virtual int
@@ -74,11 +73,6 @@ class EquationOfThermalConductivityMixingRules
         getSpeciesMolecularProperties(
             std::vector<double*>& species_molecular_properties,
             const int& species_index) const = 0;
-        
-        /*
-         * boost::shared_ptr to EquationOfThermalConductivity.
-         */
-        boost::shared_ptr<EquationOfThermalConductivity> d_equation_of_thermal_conductivity;
         
     protected:
         /*
@@ -97,14 +91,19 @@ class EquationOfThermalConductivityMixingRules
         const int d_num_species;
         
         /*
-         * Mixing closure model.
+         * Type of mixing closure model.
          */
-        const MIXING_CLOSURE_MODEL d_mixing_closure_model;
+        const MIXING_CLOSURE_MODEL::TYPE d_mixing_closure_model;
         
         /*
          * boost::shared_ptr to the database of equation of thermal conductivity mixing rules.
          */
         const boost::shared_ptr<tbox::Database> d_equation_of_thermal_conductivity_mixing_rules_db;
+        
+        /*
+         * boost::shared_ptr to EquationOfThermalConductivity.
+         */
+        boost::shared_ptr<EquationOfThermalConductivity> d_equation_of_thermal_conductivity;
         
 };
     

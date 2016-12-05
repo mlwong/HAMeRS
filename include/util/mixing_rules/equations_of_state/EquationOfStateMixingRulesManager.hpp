@@ -19,17 +19,17 @@ class EquationOfStateMixingRulesManager
             const std::string& object_name,
             const tbox::Dimension& dim,
             const int& num_species,
-            const MIXING_CLOSURE_MODEL& mixing_closure_model,
+            const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
             const boost::shared_ptr<tbox::Database>& equation_of_state_mixing_rules_db,
             const std::string& equation_of_state_str);
         
         /*
-         * Get the label of equation of state.
+         * Get the type of equation of state.
          */
-        const EQUATION_OF_STATE_LABEL&
-        getEquationOfStateLabel() const
+        const EQN_STATE::TYPE&
+        getEquationOfStateType() const
         {
-            return d_equation_of_state_label;
+            return d_equation_of_state_type;
         }
         
         /*
@@ -54,9 +54,9 @@ class EquationOfStateMixingRulesManager
         const std::string d_object_name;
         
         /*
-         * Label of equation of state.
+         * Type of equation of state.
          */
-        EQUATION_OF_STATE_LABEL d_equation_of_state_label;
+        EQN_STATE::TYPE d_equation_of_state_type;
         
         /*
          * boost::shared_ptr to the equation of state.

@@ -19,17 +19,17 @@ class EquationOfThermalConductivityMixingRulesManager
             const std::string& object_name,
             const tbox::Dimension& dim,
             const int& num_species,
-            const MIXING_CLOSURE_MODEL& mixing_closure_model,
+            const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
             const boost::shared_ptr<tbox::Database>& equation_of_thermal_conductivity_mixing_rules_db,
             const std::string& equation_of_thermal_conductivity_str);
         
         /*
-         * Get the label of equation of thermal conductivity.
+         * Get the type of equation of thermal conductivity.
          */
-        const EQUATION_OF_THERMAL_CONDUCTIVITY_LABEL&
-        getEquationOfThermalConductivityLabel() const
+        const EQN_THERMAL_CONDUCTIVITY::TYPE&
+        getEquationOfThermalConductivityType() const
         {
-            return d_equation_of_thermal_conductivity_label;
+            return d_equation_of_thermal_conductivity_type;
         }
         
         /*
@@ -54,9 +54,9 @@ class EquationOfThermalConductivityMixingRulesManager
         const std::string d_object_name;
         
         /*
-         * Label of equation of thermal conductivity.
+         * Type of equation of thermal conductivity.
          */
-        EQUATION_OF_THERMAL_CONDUCTIVITY_LABEL d_equation_of_thermal_conductivity_label;
+        EQN_THERMAL_CONDUCTIVITY::TYPE d_equation_of_thermal_conductivity_type;
         
         /*
          * boost::shared_ptr to the equation of thermal conductivity.

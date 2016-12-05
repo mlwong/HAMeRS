@@ -19,17 +19,17 @@ class EquationOfShearViscosityMixingRulesManager
             const std::string& object_name,
             const tbox::Dimension& dim,
             const int& num_species,
-            const MIXING_CLOSURE_MODEL& mixing_closure_model,
+            const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
             const boost::shared_ptr<tbox::Database>& equation_of_shear_viscosity_mixing_rules_db,
             const std::string& equation_of_shear_viscosity_str);
         
         /*
-         * Get the label of equation of shear viscosity.
+         * Get the type of equation of shear viscosity.
          */
-        const EQUATION_OF_SHEAR_VISCOSITY_LABEL&
-        getEquationOfShearViscosityLabel() const
+        const EQN_SHEAR_VISCOSITY::TYPE&
+        getEquationOfShearViscosityType() const
         {
-            return d_equation_of_shear_viscosity_label;
+            return d_equation_of_shear_viscosity_type;
         }
         
         /*
@@ -54,9 +54,9 @@ class EquationOfShearViscosityMixingRulesManager
         const std::string d_object_name;
         
         /*
-         * Label of equation of shear viscosity.
+         * Type of equation of shear viscosity.
          */
-        EQUATION_OF_SHEAR_VISCOSITY_LABEL d_equation_of_shear_viscosity_label;
+        EQN_SHEAR_VISCOSITY::TYPE d_equation_of_shear_viscosity_type;
         
         /*
          * boost::shared_ptr to the equation of shear viscosity.

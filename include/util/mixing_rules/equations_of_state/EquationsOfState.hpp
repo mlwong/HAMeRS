@@ -7,19 +7,22 @@
 #include <map>
 #include <string>
 
-enum EQUATION_OF_STATE_LABEL { IDEAL_GAS };
+namespace EQN_STATE
+{
+    enum TYPE { IDEAL_GAS };
+}
 
 /*
- * Function to print out enum EQUATION_OF_STATE_LABEL value as text.
+ * Function to print out enum EQN_STATE::TYPE value as text.
  */
-inline std::ostream& operator<<(std::ostream& os, const EQUATION_OF_STATE_LABEL& value)
+inline std::ostream& operator<<(std::ostream& os, const EQN_STATE::TYPE& value)
 {
-    static std::map<EQUATION_OF_STATE_LABEL, std::string> strings;
+    static std::map<EQN_STATE::TYPE, std::string> strings;
     
     if (strings.size() == 0)
     {
 #define INSERT_ELEMENT(p) strings[p] = #p
-        INSERT_ELEMENT(IDEAL_GAS);
+        INSERT_ELEMENT(EQN_STATE::IDEAL_GAS);
 #undef INSERT_ELEMENT
     }
     

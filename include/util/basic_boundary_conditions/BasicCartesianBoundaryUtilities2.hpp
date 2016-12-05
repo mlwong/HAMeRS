@@ -5,7 +5,8 @@
  * COPYING.LESSER of SAMRAI distribution.
  *
  * Copyright:     (c) 1997-2014 Lawrence Livermore National Security, LLC
- * Description:   Utility routines for manipulating Cartesian 2d boundary data
+ * Description:   Utility routines for manipulating Cartesian 2d boundary
+ *                data
  *
  ************************************************************************/
 
@@ -133,6 +134,10 @@ struct BasicCartesianBoundaryUtilities2
          * @param bdry_strategy user-defined object that reads DIRICHLET or NEUMANN
          *                      conditions
          * @param input_db      input database containing all boundary data
+         * @param edge_locs     array of locations of edges for applying
+         *                      boundary conditions.
+         * @param node_locs     array of locations of nodes for applying
+         *                      boundary conditions.
          * @param edge_conds    array into which integer edge boundary condition
          *                      types are read
          * @param node_conds    array into which integer node boundary condition
@@ -144,6 +149,8 @@ struct BasicCartesianBoundaryUtilities2
          * @pre input_db
          * @pre periodic.getDim() == tbox::Dimension(2)
          * @pre bdry_strategy != 0
+         * @pre edge_locs.size() > 0 and <= NUM_2D_EDGES
+         * @pre node_locs.size() > 0 and <= NUM_2D_NODES
          * @pre edge_conds.size() == NUM_2D_EDGES
          * @pre node_conds.size() == NUM_2D_NODES
          */
@@ -151,6 +158,8 @@ struct BasicCartesianBoundaryUtilities2
         getFromInput(
             BoundaryUtilityStrategy* bdry_strategy,
             const boost::shared_ptr<tbox::Database>& input_db,
+            const std::vector<int>& edge_locs,
+            const std::vector<int>& node_locs,
             std::vector<int>& edge_conds,
             std::vector<int>& node_conds,
             const hier::IntVector& periodic);
@@ -165,6 +174,8 @@ struct BasicCartesianBoundaryUtilities2
          * @param var_name            String name of variable (for error reporting).
          * @param var_data            Cell-centered patch data object to fill.
          * @param patch               hier::Patch on which data object lives.
+         * @param bdry_edge_locs      tbox::Array of locations of edges for applying
+         *                            boundary conditions.
          * @param bdry_edge_conds     tbox::Array of boundary condition types for
          *                            patch edges.
          * @param bdry_edge_values    tbox::Array of boundary values for patch
@@ -173,6 +184,7 @@ struct BasicCartesianBoundaryUtilities2
          *
          * @pre !var_name.empty());
          * @pre var_data
+         * @pre bdry_edge_locs.size() > 0 and <= NUM_2D_EDGES
          * @pre bdry_edge_conds.size() == NUM_2D_EDGES
          * @pre bdry_edge_values.size() == NUM_2D_EDGES * (var_data->getDepth())
          * @pre (var_data->getDim() == patch.getDim()) &&
@@ -184,6 +196,7 @@ struct BasicCartesianBoundaryUtilities2
             const std::string& var_name,
             const boost::shared_ptr<pdat::CellData<double> >& var_data,
             const hier::Patch& patch,
+            const std::vector<int>& bdry_edge_locs,
             const std::vector<int>& bdry_edge_conds,
             const std::vector<double>& bdry_edge_values,
             const hier::IntVector& ghost_width_to_fill = -hier::IntVector::getOne(tbox::Dimension(2)));
@@ -198,6 +211,8 @@ struct BasicCartesianBoundaryUtilities2
          * @param var_name            String name of variable (for error reporting).
          * @param var_data            Cell-centered patch data object to fill.
          * @param patch               hier::Patch on which data object lives.
+         * @param bdry_node_locs      tbox::Array of locations of nodes for applying
+         *                            boundary conditions.
          * @param bdry_node_conds     tbox::Array of boundary condition types for
          *                            patch nodes.
          * @param bdry_edge_values    tbox::Array of boundary values for patch
@@ -206,6 +221,7 @@ struct BasicCartesianBoundaryUtilities2
          *
          * @pre !var_name.empty()
          * @pre var_data
+         * @pre bdry_node_conds.size() > 0 and <= NUM_2D_EDGES
          * @pre bdry_node_conds.size() == NUM_2D_NODES
          * @pre bdry_edge_values.size() == NUM_2D_EDGES * (var_data->getDepth())
          * @pre (var_data->getDim() == patch.getDim()) &&
@@ -217,6 +233,7 @@ struct BasicCartesianBoundaryUtilities2
             const std::string& var_name,
             const boost::shared_ptr<pdat::CellData<double> >& var_data,
             const hier::Patch& patch,
+            const std::vector<int>& bdry_node_locs,
             const std::vector<int>& bdry_node_conds,
             const std::vector<double>& bdry_edge_values,
             const hier::IntVector& ghost_width_to_fill = -hier::IntVector::getOne(tbox::Dimension(2)));
@@ -227,7 +244,7 @@ struct BasicCartesianBoundaryUtilities2
          * condition.
          *
          * If the node boundary condition type or node location are unknown,
-         * or the boundary condition type is inconsistant with the node location
+         * or the boundary condition type is inconsistent with the node location
          * an error results.
          *
          * @return Integer edge location for node location and boundary condition
@@ -255,12 +272,14 @@ private:
         read2dBdryEdges(
             BoundaryUtilityStrategy* bdry_strategy,
             const boost::shared_ptr<tbox::Database>& input_db,
+            const std::vector<int>& edge_locs,
             std::vector<int>& edge_conds,
             const hier::IntVector& periodic);
         
         static void
         read2dBdryNodes(
             const boost::shared_ptr<tbox::Database>& input_db,
+            const std::vector<int>& node_locs,
             const std::vector<int>& edge_conds,
             std::vector<int>& node_conds,
             const hier::IntVector& periodic);

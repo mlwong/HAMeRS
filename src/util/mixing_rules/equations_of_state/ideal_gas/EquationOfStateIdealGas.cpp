@@ -40,9 +40,7 @@ EquationOfStateIdealGas::getPressure(
     const double& rho = *density;
     const double& epsilon = *internal_energy;
     
-    double p = (gamma - 1.0)*rho*epsilon;
-    
-    return p;
+    return (gamma - 1.0)*rho*epsilon; // Return p.
 }
 
 
@@ -64,9 +62,7 @@ EquationOfStateIdealGas::getSoundSpeed(
     const double& rho = *density;
     const double& p = *pressure;
     
-    double c = sqrt(gamma*p/rho);
-    
-    return c;
+    return sqrt(gamma*p/rho); // Return c.
 }
 
 
@@ -88,9 +84,7 @@ EquationOfStateIdealGas::getInternalEnergy(
     const double& rho = *density;
     const double& p = *pressure;
     
-    double epsilon = p/((gamma - 1.0)*rho);
-    
-    return epsilon;
+    return p/((gamma - 1.0)*rho); // Return epsilon.
 }
 
 
@@ -112,9 +106,7 @@ EquationOfStateIdealGas::getEnthalpy(
     const double& rho = *density;
     const double& p = *pressure;
     
-    double h = gamma*p/((gamma - 1.0)*rho);
-    
-    return h;
+    return gamma*p/((gamma - 1.0)*rho); // Return h.
 }
 
 
@@ -137,9 +129,30 @@ EquationOfStateIdealGas::getTemperature(
     const double& rho = *density;
     const double& p = *pressure;
     
-    double T = p/((gamma - 1.0)*c_v*rho);
+    return p/((gamma - 1.0)*c_v*rho); // Return T.
+}
+
+
+/*
+ * Compute the specific internal energy from temperature.
+ */
+double
+EquationOfStateIdealGas::getInternalEnergyFromTemperature(
+    const double* const density,
+    const double* const temperature,
+    const std::vector<const double*>& thermo_properties) const
+{
+    NULL_USE(density);
     
-    return T;
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(static_cast<int>(thermo_properties.size()) == 4);
+#endif
+    
+    const double& c_v = *(thermo_properties[3]);
+    
+    const double& T = *temperature;
+    
+    return c_v*T; // Return epsilon.
 }
 
 
@@ -161,9 +174,7 @@ EquationOfStateIdealGas::getIsochoricPartialInternalEnergyPartialPressure(
     
     const double& gamma = *(thermo_properties[0]);
     
-    double xi = 1.0/(gamma - 1.0);
-    
-    return xi;
+    return 1.0/(gamma - 1.0); // Return xi.
 }
 
 
@@ -180,5 +191,27 @@ EquationOfStateIdealGas::getIsobaricPartialInternalEnergyPartialDensity(
     NULL_USE(pressure);
     NULL_USE(thermo_properties);
     
-    return 0.0;
+    return 0.0; // Return delta.
+}
+
+
+/*
+ * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+ */
+double
+EquationOfStateIdealGas::getDensity(
+    const double* const pressure,
+    const double* const temperature,
+    const std::vector<const double*>& thermo_properties) const
+{
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(static_cast<int>(thermo_properties.size()) >= 2);
+#endif
+    
+    const double& R = *(thermo_properties[1]);
+    
+    const double& p = *pressure;
+    const double& T = *temperature;
+    
+    return p/(R*T); // Return rho.
 }
