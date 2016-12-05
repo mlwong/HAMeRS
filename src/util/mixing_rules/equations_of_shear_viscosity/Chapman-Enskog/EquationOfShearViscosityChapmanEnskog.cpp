@@ -1,5 +1,7 @@
 #include "util/mixing_rules/equations_of_shear_viscosity/Chapman-Enskog/EquationOfShearViscosityChapmanEnskog.hpp"
 
+#include <cmath>
+
 /*
  * Print all characteristics of the equation of shear viscosity class.
  */
