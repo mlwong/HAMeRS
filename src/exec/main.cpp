@@ -508,7 +508,7 @@ int main(int argc, char *argv[])
      * is not necessary.
      */
 #ifdef HAVE_HDF5
-    boost::shared_ptr<appu::VisItDataWriter> visit_data_writer = NULL;
+    boost::shared_ptr<appu::VisItDataWriter> visit_data_writer;
     
     switch (app_label)
     {
