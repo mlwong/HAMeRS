@@ -581,8 +581,8 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                             d_num_multiresolution_ghosts,
                             RungeKuttaLevelIntegrator::TIME_DEP,
                                 d_grid_geometry,
-                                "CONSERVATIVE_COARSEN",
-                                "CONSERVATIVE_LINEAR_REFINE");
+                                "NO_COARSEN",
+                                "NO_REFINE");
                         
                         if (d_Harten_wavelet_uses_local_tol[vi])
                         {
@@ -603,8 +603,8 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                             d_num_multiresolution_ghosts,
                             RungeKuttaLevelIntegrator::TIME_DEP,
                                 d_grid_geometry,
-                                "CONSERVATIVE_COARSEN",
-                                "CONSERVATIVE_LINEAR_REFINE");
+                                "NO_COARSEN",
+                                "NO_REFINE");
                     }
                 }
                 else if (variable_key == "TOTAL_ENERGY")
@@ -616,8 +616,8 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                             d_num_multiresolution_ghosts,
                             RungeKuttaLevelIntegrator::TIME_DEP,
                             d_grid_geometry,
-                            "CONSERVATIVE_COARSEN",
-                            "CONSERVATIVE_LINEAR_REFINE");
+                            "NO_COARSEN",
+                            "NO_REFINE");
                         
                         if (d_Harten_wavelet_uses_local_tol[vi])
                         {
@@ -638,8 +638,8 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                             d_num_multiresolution_ghosts,
                             RungeKuttaLevelIntegrator::TIME_DEP,
                                 d_grid_geometry,
-                                "CONSERVATIVE_COARSEN",
-                                "CONSERVATIVE_LINEAR_REFINE");
+                                "NO_COARSEN",
+                                "NO_REFINE");
                     }
                 }
                 else if (variable_key == "PRESSURE")
@@ -651,8 +651,8 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                             d_num_multiresolution_ghosts,
                             RungeKuttaLevelIntegrator::TIME_DEP,
                             d_grid_geometry,
-                            "CONSERVATIVE_COARSEN",
-                            "CONSERVATIVE_LINEAR_REFINE");
+                            "NO_COARSEN",
+                            "NO_REFINE");
                         
                         if (d_Harten_wavelet_uses_local_tol[vi])
                         {
@@ -673,8 +673,8 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                             d_num_multiresolution_ghosts,
                             RungeKuttaLevelIntegrator::TIME_DEP,
                                 d_grid_geometry,
-                                "CONSERVATIVE_COARSEN",
-                                "CONSERVATIVE_LINEAR_REFINE");
+                                "NO_COARSEN",
+                                "NO_REFINE");
                     }
                 }
                 else

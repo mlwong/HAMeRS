@@ -330,7 +330,7 @@ ValueTagger::registerValueTaggerVariables(
     {
         // Get the key of the current variable.
         std::string variable_key = d_variables[vi];
-
+        
         if (variable_key == "DENSITY")
         {
             d_value_tagger_variable_density = boost::make_shared<pdat::CellVariable<double> >(
@@ -386,6 +386,86 @@ ValueTagger::registerValueTaggerVariables(
                 {
                     d_value_tagger_mass_fraction_max.push_back(0.0);
                 }
+            }
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Unknown/unsupported variable: "
+                << variable_key
+                << "\nin input."
+                << std::endl);
+        }
+    }
+    
+    // Loop over variables chosen.
+    for (int vi = 0; vi < static_cast<int>(d_variables.size()); vi++)
+    {
+        // Get the key of the current variable.
+        std::string variable_key = d_variables[vi];
+        
+        if (variable_key == "DENSITY")
+        {
+            integrator->registerVariable(
+                d_value_tagger_variable_density,
+                d_num_value_ghosts,
+                RungeKuttaLevelIntegrator::TEMPORARY,
+                    d_grid_geometry,
+                    "NO_COARSEN",
+                    "NO_REFINE");
+        }
+        else if (variable_key == "TOTAL_ENERGY")
+        {
+            integrator->registerVariable(
+                d_value_tagger_variable_total_energy,
+                d_num_value_ghosts,
+                RungeKuttaLevelIntegrator::TEMPORARY,
+                    d_grid_geometry,
+                    "NO_COARSEN",
+                    "NO_REFINE");
+        }
+        else if (variable_key == "PRESSURE")
+        {
+            integrator->registerVariable(
+                d_value_tagger_variable_pressure,
+                d_num_value_ghosts,
+                RungeKuttaLevelIntegrator::TEMPORARY,
+                    d_grid_geometry,
+                    "NO_COARSEN",
+                    "NO_REFINE");
+        }
+        else if (variable_key == "DILATATION")
+        {
+            integrator->registerVariable(
+                d_value_tagger_variable_dilatation,
+                d_num_value_ghosts,
+                RungeKuttaLevelIntegrator::TEMPORARY,
+                    d_grid_geometry,
+                    "NO_COARSEN",
+                    "NO_REFINE");
+        }
+        else if (variable_key == "ENSTROPHY")
+        {
+            integrator->registerVariable(
+                d_value_tagger_variable_enstrophy,
+                d_num_value_ghosts,
+                RungeKuttaLevelIntegrator::TEMPORARY,
+                    d_grid_geometry,
+                    "NO_COARSEN",
+                    "NO_REFINE");
+        }
+        else if (variable_key == "MASS_FRACTION")
+        {
+            for (int si = 0; si < d_num_species; si++)
+            {
+                integrator->registerVariable(
+                    d_value_tagger_variable_mass_fraction[si],
+                    d_num_value_ghosts,
+                    RungeKuttaLevelIntegrator::TEMPORARY,
+                        d_grid_geometry,
+                        "NO_COARSEN",
+                        "NO_REFINE");
             }
         }
         else

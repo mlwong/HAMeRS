@@ -198,7 +198,7 @@ Euler::Euler(
     if (d_multiresolution_tagger_db != nullptr)
     {
         d_multiresolution_tagger.reset(new MultiresolutionTagger(
-            "multiresolution tagger",
+            "d_multiresolution_tagger",
             d_dim,
             d_grid_geometry,
             d_num_species,

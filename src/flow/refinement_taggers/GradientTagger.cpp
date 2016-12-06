@@ -260,8 +260,8 @@ GradientTagger::registerGradientTaggerVariables(
                         d_num_gradient_ghosts,
                         RungeKuttaLevelIntegrator::TIME_DEP,
                             d_grid_geometry,
-                            "CONSERVATIVE_COARSEN",
-                            "CONSERVATIVE_LINEAR_REFINE");
+                            "NO_COARSEN",
+                            "NO_REFINE");
                 }
                 else if (variable_key == "TOTAL_ENERGY")
                 {
@@ -270,8 +270,8 @@ GradientTagger::registerGradientTaggerVariables(
                         d_num_gradient_ghosts,
                         RungeKuttaLevelIntegrator::TIME_DEP,
                             d_grid_geometry,
-                            "CONSERVATIVE_COARSEN",
-                            "CONSERVATIVE_LINEAR_REFINE");
+                            "NO_COARSEN",
+                            "NO_REFINE");
                 }
                 else if (variable_key == "PRESSURE")
                 {
@@ -280,8 +280,8 @@ GradientTagger::registerGradientTaggerVariables(
                         d_num_gradient_ghosts,
                         RungeKuttaLevelIntegrator::TIME_DEP,
                             d_grid_geometry,
-                            "CONSERVATIVE_COARSEN",
-                            "CONSERVATIVE_LINEAR_REFINE");
+                            "NO_COARSEN",
+                            "NO_REFINE");
                 }
                 else
                 {
