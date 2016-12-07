@@ -802,6 +802,111 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                             }
                         }
                     }
+                    else if (d_project_name == "2D Poggi's RMI 0")
+                    {
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Please provide only two-species for the problem"
+                                << " '2D Poggi's RMI'."
+                                << std::endl);
+                        }
+                        
+                        // Characteristic length of the initial interface thickness.
+                        const double epsilon_i = 0.001;
+                        
+                        double* rho_Y_0   = partial_density->getPointer(0);
+                        double* rho_Y_1   = partial_density->getPointer(1);
+                        double* rho_u     = momentum->getPointer(0);
+                        double* rho_v     = momentum->getPointer(1);
+                        double* E         = total_energy->getPointer(0);
+                        
+                        // species 0: SF6.
+                        // species 1: air.
+                        const double gamma_0 = 1.09312;
+                        const double gamma_1 = 1.39909;
+                        
+                        const double c_p_SF6 = 668.286;
+                        const double c_p_air = 1040.50;
+                        
+                        const double c_v_SF6 = 611.359;
+                        const double c_v_air = 743.697;
+                        
+                        NULL_USE(gamma_1);
+                        
+                        // Unshocked SF6.
+                        const double rho_unshocked = 5.97286552525647;
+                        const double u_unshocked   = 0.0;
+                        const double v_unshocked   = 0.0;
+                        const double p_unshocked   = 101325.0;
+                        
+                        // Shocked SF6.
+                        const double rho_shocked = 11.9708247309869;
+                        const double u_shocked   = 98.9344103891513;
+                        const double v_shocked   = 0.0;
+                        const double p_shocked   = 218005.430874;
+                        
+                        // Air.
+                        const double rho_air = 1.14560096494103;
+                        const double u_air   = 0.0;
+                        const double v_air   = 0.0;
+                        const double p_air   = 101325.0;
+                        
+                        // Shock hits the interface after 0.1 ms.
+                        const double L_x_shock = 0.180254509478037;
+                        const double L_x_interface = 0.2;
+                        
+                        for (int j = 0; j < patch_dims[1]; j++)
+                        {
+                            for (int i = 0; i < patch_dims[0]; i++)
+                            {
+                                // Compute the linear index.
+                                int idx_cell = i + j*patch_dims[0];
+                                
+                                // Compute the coordinates.
+                                double x[2];
+                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                
+                                double S = 0.0;
+                                
+                                if (x[0] < L_x_shock)
+                                {
+                                    rho_Y_0[idx_cell] = rho_shocked;
+                                    rho_Y_1[idx_cell] = 0.0;
+                                    rho_u[idx_cell] = rho_shocked*u_shocked;
+                                    rho_v[idx_cell] = rho_shocked*v_shocked;
+                                    E[idx_cell]     = p_shocked/(gamma_0 - 1.0) +
+                                        0.5*rho_shocked*(u_shocked*u_shocked + v_shocked*v_shocked);
+                                }
+                                else
+                                {
+                                    const double f_sm = 0.5*(1.0 + erf((x[0] - (L_x_interface + S))/epsilon_i));
+                                    
+                                    // Smooth the primitive variables.
+                                    const double rho_Y_0_i = rho_unshocked*(1.0 - f_sm);
+                                    const double rho_Y_1_i = rho_air*f_sm;
+                                    const double u_i = u_unshocked*(1.0 - f_sm) + u_air*f_sm;
+                                    const double v_i = v_unshocked*(1.0 - f_sm) + v_air*f_sm;
+                                    const double p_i = p_unshocked*(1.0 - f_sm) + p_air*f_sm;
+                                    
+                                    const double rho_i = rho_Y_0_i + rho_Y_1_i;
+                                    const double Y_0_i = rho_Y_0_i/rho_i;
+                                    const double Y_1_i = 1.0 - Y_0_i;
+                                    
+                                    const double gamma_i = (Y_0_i*c_p_SF6 + Y_1_i*c_p_air)/
+                                        (Y_0_i*c_v_SF6 + Y_1_i*c_v_air);
+                                    
+                                    rho_Y_0[idx_cell] = rho_Y_0_i;
+                                    rho_Y_1[idx_cell] = rho_Y_1_i;
+                                    rho_u[idx_cell]   = rho_i*u_i;
+                                    rho_v[idx_cell]   = rho_i*v_i;
+                                    E[idx_cell]       = p_i/(gamma_i - 1.0) + 0.5*rho_i*(u_i*u_i + v_i*v_i);
+                                }
+                            }
+                        }
+                    }
                     else if (d_project_name == "2D Poggi's RMI 1")
                     {
                         if (d_num_species != 2)

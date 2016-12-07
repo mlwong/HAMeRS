@@ -562,8 +562,8 @@ EquationOfBulkViscosityMixingRulesCramer::getBulkViscosity(
                     temperature,
                     species_molecular_properties_const_ptr);
             
-            num += mu_v_i*(*(mass_fraction[si]))/(sqrt(species_molecular_properties[1]));
-            den += *(mass_fraction[si])/(sqrt(species_molecular_properties[1]));
+            num += mu_v_i*(*(mass_fraction[si]))/(sqrt(species_molecular_properties[7]));
+            den += *(mass_fraction[si])/(sqrt(species_molecular_properties[7]));
             
             // Compute the mass fraction of the last species.
             Y_last -= *(mass_fraction[si]);
@@ -581,8 +581,8 @@ EquationOfBulkViscosityMixingRulesCramer::getBulkViscosity(
                 temperature,
                 species_molecular_properties_const_ptr);
         
-        num += mu_v_last*Y_last/(sqrt(species_molecular_properties[1]));
-        den += Y_last/(sqrt(species_molecular_properties[1]));
+        num += mu_v_last*Y_last/(sqrt(species_molecular_properties[7]));
+        den += Y_last/(sqrt(species_molecular_properties[7]));
     }
     else
     {
@@ -596,8 +596,8 @@ EquationOfBulkViscosityMixingRulesCramer::getBulkViscosity(
                     temperature,
                     species_molecular_properties_const_ptr);
             
-            num += mu_v_i*(*(mass_fraction[si]))/(sqrt(species_molecular_properties[1]));
-            den += *(mass_fraction[si])/(sqrt(species_molecular_properties[1]));
+            num += mu_v_i*(*(mass_fraction[si]))/(sqrt(species_molecular_properties[7]));
+            den += *(mass_fraction[si])/(sqrt(species_molecular_properties[7]));
         }
     }
     
