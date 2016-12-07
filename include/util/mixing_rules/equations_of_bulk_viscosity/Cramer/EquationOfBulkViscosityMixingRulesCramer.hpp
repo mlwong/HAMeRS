@@ -51,7 +51,7 @@ class EquationOfBulkViscosityMixingRulesCramer: public EquationOfBulkViscosityMi
          * Get the number of molecular properties of a species.
          */
         int
-        getNumberOfSpeciesMolecularProperties() const { return 2; }
+        getNumberOfSpeciesMolecularProperties() const { return 8; }
         
         /*
          * Get the molecular properties of a species.
