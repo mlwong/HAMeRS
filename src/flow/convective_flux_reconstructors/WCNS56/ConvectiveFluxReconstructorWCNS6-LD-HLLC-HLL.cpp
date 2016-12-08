@@ -40,7 +40,7 @@ ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL::ConvectiveFluxReconstructorWCNS6_L
     d_constant_q          = d_convective_flux_reconstructor_db->getIntegerWithDefault("constant_q", 4);
     d_constant_q          = d_convective_flux_reconstructor_db->getIntegerWithDefault("d_constant_q", d_constant_q);
     
-    d_constant_alpha_tau = d_convective_flux_reconstructor_db->getDoubleWithDefault("constant_alpha_tau", 30.0);
+    d_constant_alpha_tau = d_convective_flux_reconstructor_db->getDoubleWithDefault("constant_alpha_tau", 35.0);
     d_constant_alpha_tau = d_convective_flux_reconstructor_db->getDoubleWithDefault("d_constant_alpha_tau", d_constant_alpha_tau);
     
     d_weights_c.resize(boost::extents[4][3]);
@@ -123,12 +123,12 @@ ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL::computeSigma(
      * Compute the sigma.
      */
     
-    const double alpha_1 = fabs(W_array[2] - W_array[1]);
-    const double alpha_2 = fabs(W_array[3] - W_array[2]);
-    const double alpha_3 = fabs(W_array[4] - W_array[3]);
+    const double alpha_1 = W_array[2] - W_array[1];
+    const double alpha_2 = W_array[3] - W_array[2];
+    const double alpha_3 = W_array[4] - W_array[3];
     
-    const double theta_1 = fabs(alpha_1 - alpha_2)/(alpha_1 + alpha_2 + EPSILON);
-    const double theta_2 = fabs(alpha_2 - alpha_3)/(alpha_2 + alpha_3 + EPSILON);
+    const double theta_1 = fabs(alpha_1 - alpha_2)/(fabs(alpha_1) + fabs(alpha_2) + EPSILON);
+    const double theta_2 = fabs(alpha_2 - alpha_3)/(fabs(alpha_2) + fabs(alpha_3) + EPSILON);
     
     sigma = fmax(theta_1, theta_2);
 }
@@ -326,7 +326,7 @@ ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL::performWENOInterpolation(
                 // Compute omega.
                 const double omega_upwind = alpha_upwind[r]/alpha_upwind_sum;
                 const double omega_central = alpha_central[r]/alpha_central_sum;
-                const double omega = (1.0 - sigma)*omega_upwind + sigma*omega_central;
+                const double omega = sigma*omega_upwind + (1.0 - sigma)*omega_central;
                 
                 // Compute the nonlinear interpolated value.
                 W_minus[ei] += omega*W_minus_r;
@@ -449,7 +449,7 @@ ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL::performWENOInterpolation(
                 // Compute omega_tilde;
                 const double omega_upwind_tilde = alpha_upwind_tilde[r]/alpha_upwind_tilde_sum;
                 const double omega_central_tilde = alpha_central_tilde[r]/alpha_central_tilde_sum;
-                const double omega_tilde = (1.0 - sigma)*omega_upwind_tilde + sigma*omega_central_tilde;
+                const double omega_tilde = sigma*omega_upwind_tilde + (1.0 - sigma)*omega_central_tilde;
                 
                 // Compute the nonlinear interpolated value.
                 W_plus[ei] += omega_tilde*W_plus_r;
