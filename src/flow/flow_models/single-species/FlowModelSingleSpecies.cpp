@@ -318,7 +318,7 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
             equation_of_thermal_conductivity_mixing_rules_db =
                 flow_model_db->getDatabase("Equation_of_thermal_conductivity_mixing_rules");
         }
-        else if (flow_model_db->keyExists("d_equation_of_thermal_conducitivity_mixing_rules_db"))
+        else if (flow_model_db->keyExists("d_equation_of_thermal_conductivity_mixing_rules_db"))
         {
             equation_of_thermal_conductivity_mixing_rules_db =
                 flow_model_db->getDatabase("d_equation_of_thermal_conductivity_mixing_rules_db");
