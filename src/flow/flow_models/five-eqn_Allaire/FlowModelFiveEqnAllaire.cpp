@@ -331,6 +331,8 @@ FlowModelFiveEqnAllaire::putToRestart(
      * Put the properties of d_equation_of_state_mixing_rules into the restart database.
      */
     
+    restart_db->putString("d_equation_of_state_str", d_equation_of_state_str);
+    
     boost::shared_ptr<tbox::Database> restart_equation_of_state_mixing_rules_db =
         restart_db->putDatabase("d_equation_of_state_mixing_rules_db");
     d_equation_of_state_mixing_rules->putToRestart(restart_equation_of_state_mixing_rules_db);
