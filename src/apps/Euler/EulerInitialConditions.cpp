@@ -601,7 +601,7 @@ EulerInitialConditions::initializeDataOnPatch(
                             }
                         }
                     }
-                    else if (d_project_name == "2D Poggi's RMI 1")
+                    else if (d_project_name == "2D Poggi's RMI 1a")
                     {
                         if (d_num_species != 2)
                         {
@@ -657,7 +657,7 @@ EulerInitialConditions::initializeDataOnPatch(
                         const double L_x_interface = 0.2;
                         
                         // Perturbations due to S mode.
-                        const double A = 1.0e-3; // Amplitude.
+                        const double A = 0.4e-3; // Amplitude.
                         
                         for (int j = 0; j < patch_dims[1]; j++)
                         {
