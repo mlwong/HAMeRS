@@ -951,8 +951,8 @@ MultiresolutionTagger::putToRestart(
                     d_Harten_wavelet_global_tol);
             }
             
-            num_true = std::count(d_Harten_wavelet_local_tol.begin(),
-                d_Harten_wavelet_local_tol.end(),
+            num_true = std::count(d_Harten_wavelet_uses_local_tol.begin(),
+                d_Harten_wavelet_uses_local_tol.end(),
                 true);
             if (num_true > 0)
             {
@@ -960,8 +960,8 @@ MultiresolutionTagger::putToRestart(
                     d_Harten_wavelet_local_tol);
             }
             
-            num_true = std::count(d_Harten_wavelet_alpha_tol.begin(),
-                d_Harten_wavelet_alpha_tol.end(),
+            num_true = std::count(d_Harten_wavelet_uses_alpha_tol.begin(),
+                d_Harten_wavelet_uses_alpha_tol.end(),
                 true);
             if (num_true > 0)
             {

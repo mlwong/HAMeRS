@@ -259,7 +259,7 @@ ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL::performWENOInterpolation(
          */
         
         // Compute the reference smoothness indicators tau_6.
-        const double beta_avg = 1.0/8*(beta[0] + beta[2] + 6*beta[1]);
+        const double beta_avg = 1.0/8.0*(beta[0] + beta[2] + 6.0*beta[1]);
         const double tau_6 = fabs(beta[3] - beta_avg);
         
         if(fabs(tau_6/(beta_avg + EPSILON)) > alpha_tau)
@@ -382,7 +382,7 @@ ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL::performWENOInterpolation(
          */
         
         // Compute the reference smoothness indicators tau_6_tilde.
-        const double beta_tilde_avg =  1.0/8*(beta_tilde[0] + beta_tilde[2] + 6*beta_tilde[1]);
+        const double beta_tilde_avg =  1.0/8.0*(beta_tilde[0] + beta_tilde[2] + 6.0*beta_tilde[1]);
         const double tau_6_tilde = fabs(beta_tilde[3] - beta_tilde_avg);
         
         if (fabs(tau_6_tilde/(beta_tilde_avg + EPSILON)) > alpha_tau)
