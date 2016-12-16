@@ -1492,6 +1492,241 @@ FlowModelFiveEqnAllaire::getGlobalCellDataPrimitiveVariables()
 
 
 /*
+ * Get the number of projection variables for transformation between conservative
+ * variables and characteristic variables.
+ */
+int
+FlowModelFiveEqnAllaire::getNumberOfProjectionVariablesForConservativeVariables() const
+{
+    return 0;
+}
+
+/*
+ * Get the number of projection variables for transformation between primitive variables
+ * and characteristic variables.
+ */
+int
+FlowModelFiveEqnAllaire::getNumberOfProjectionVariablesForPrimitiveVariables() const
+{
+    return 0;
+}
+
+
+/*
+ * Compute global side data of the projection variables for transformation between
+ * conservative variables and characteristic variables.
+ */
+void
+FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForConservativeVariables(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
+{
+    
+}
+
+
+/*
+ * Compute global side data of the projection variables for transformation between
+ * primitive variables and characteristic variables.
+ */
+void
+FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVariables(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
+{
+    
+}
+
+
+/*
+ * Compute global side data of characteristic variables from conservative variables.
+ */
+void
+FlowModelFiveEqnAllaire::computeGlobalSideDataCharacteristicVariablesFromConservativeVariables(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
+    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
+    const int& idx_offset)
+{
+    
+}
+
+
+/*
+ * Compute global side data of characteristic variables from primitive variables.
+ */
+void
+FlowModelFiveEqnAllaire::computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
+    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
+    const int& idx_offset)
+{
+    
+}
+
+
+/*
+ * Compute global side data of conservative variables from characteristic variables.
+ */
+void
+FlowModelFiveEqnAllaire::computeGlobalSideDataConservativeVariablesFromCharacteristicVariables(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
+{
+    
+}
+
+
+/*
+ * Compute global side data of primitive variables from characteristic variables.
+ */
+void
+FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
+{
+    
+}
+
+
+
+/*
+ * Compute the local projection data at face for conservative variables.
+ */
+void
+FlowModelFiveEqnAllaire::computeLocalProjectionFaceDataConservativeVariables(
+    std::vector<double>& projection_variables,
+    const hier::Index& cell_index_minus,
+    const hier::Index& cell_index_plus,
+    const DIRECTION::TYPE& direction)
+{
+    NULL_USE(projection_variables);
+    NULL_USE(cell_index_minus);
+    NULL_USE(cell_index_plus);
+    NULL_USE(direction);
+    
+    TBOX_ERROR(d_object_name
+        << ": FlowModelFiveEqnAllaire::computeLocalProjectionFaceDataConservativeVariables()\n"
+        << "Method computeLocalProjectionFaceDataConservativeVariables() is not yet implemented."
+        << std::endl);
+}
+
+
+/*
+ * Compute the local projection data at face for primitive variables.
+ */
+void
+FlowModelFiveEqnAllaire::computeLocalFaceDataPrimitveVariables(
+    std::vector<double>& projection_variables,
+    const hier::Index& cell_index_minus,
+    const hier::Index& cell_index_plus,
+    const DIRECTION::TYPE& direction)
+{
+    NULL_USE(projection_variables);
+    NULL_USE(cell_index_minus);
+    NULL_USE(cell_index_plus);
+    NULL_USE(direction);
+    
+    TBOX_ERROR(d_object_name
+        << ": FlowModelFiveEqnAllaire::computeLocalFaceDataPrimitveVariables()\n"
+        << "Method computeLocalFaceDataPrimitveVariables() is not yet implemented."
+        << std::endl);
+}
+
+
+/*
+ * Convert vector of pointers to conservative cell data to vectors of pointers to characteristic cell data.
+ */
+void
+FlowModelFiveEqnAllaire::convertLocalCellDataPointersConservativeVariablesToCharacteristicVariables(
+    const std::vector<const double*>& conservative_variables,
+    const std::vector<double*>& characteristic_variables,
+    const std::vector<double>& projection_variables,
+    const DIRECTION::TYPE& direction)
+{
+    NULL_USE(conservative_variables);
+    NULL_USE(characteristic_variables);
+    NULL_USE(projection_variables);
+    NULL_USE(direction);
+    
+    TBOX_ERROR(d_object_name
+        << ": FlowModelFiveEqnAllaire::convertLocalCellDataPointersConservativeVariablesToCharacteristicVariables()\n"
+        << "Method convertLocalCellDataPointersConservativeVariablesToCharacteristicVariables() is not yet implemented."
+        << std::endl);
+}
+
+
+/*
+ * Convert vector of pointers to characteristic cell data to vectors of pointers to conservative cell data.
+ */
+void
+FlowModelFiveEqnAllaire::convertLocalCellDataPointersCharacteristicVariablesToConservativeVariables(
+    const std::vector<const double*>& characteristic_variables,
+    const std::vector<double*>& conservative_variables,
+    const std::vector<double>& projection_variables,
+    const DIRECTION::TYPE& direction)
+{
+    NULL_USE(characteristic_variables);
+    NULL_USE(conservative_variables);
+    NULL_USE(projection_variables);
+    NULL_USE(direction);
+    
+    TBOX_ERROR(d_object_name
+        << ": FlowModelFiveEqnAllaire::convertLocalCellDataPointersCharacteristicVariablesToConservativeVariables()\n"
+        << "Method convertLocalCellDataPointersCharacteristicVariablesToConservativeVariables() is not yet implemented."
+        << std::endl);
+}
+
+
+/*
+ * Convert vector of pointers to primitive cell data to vectors of pointers to characteristic cell data.
+ */
+void
+FlowModelFiveEqnAllaire::convertLocalCellDataPointersPrimitiveVariablesToCharacteristicVariables(
+    const std::vector<const double*>& primitive_variables,
+    const std::vector<double*>& characteristic_variables,
+    const std::vector<double>& projection_variables,
+    const DIRECTION::TYPE& direction)
+{
+    NULL_USE(primitive_variables);
+    NULL_USE(characteristic_variables);
+    NULL_USE(projection_variables);
+    NULL_USE(direction);
+    
+    TBOX_ERROR(d_object_name
+        << ": FlowModelFiveEqnAllaire::convertLocalCellDataPointersPrimitiveVariablesToCharacteristicVariables()\n"
+        << "Method convertLocalCellDataPointersPrimitiveVariablesToCharacteristicVariables() is not yet implemented."
+        << std::endl);
+}
+
+
+/*
+ * Convert vector of pointers to characteristic cell data to vectors of pointers to primitive cell data.
+ */
+void
+FlowModelFiveEqnAllaire::convertLocalCellDataPointersCharacteristicVariablesToPrimitiveVariables(
+    const std::vector<const double*>& characteristic_variables,
+    const std::vector<double*>& primitive_variables,
+    const std::vector<double>& projection_variables,
+    const DIRECTION::TYPE& direction)
+{
+    NULL_USE(characteristic_variables);
+    NULL_USE(primitive_variables);
+    NULL_USE(projection_variables);
+    NULL_USE(direction);
+    
+    TBOX_ERROR(d_object_name
+        << ": FlowModelFiveEqnAllaire::convertLocalCellDataPointersCharacteristicVariablesToPrimitiveVariables()\n"
+        << "Method convertLocalCellDataPointersCharacteristicVariablesToPrimitiveVariables() is not yet implemented."
+        << std::endl);
+}
+
+
+
+
+
+/*
  * Compute the local face data of projection matrix of conservative variables in the
  * registered patch.
  */

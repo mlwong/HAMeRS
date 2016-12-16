@@ -1439,6 +1439,1816 @@ FlowModelSingleSpecies::getGlobalCellDataPrimitiveVariables()
 
 
 /*
+ * Get the number of projection variables for transformation between conservative
+ * variables and characteristic variables.
+ */
+int
+FlowModelSingleSpecies::getNumberOfProjectionVariablesForConservativeVariables() const
+{
+    TBOX_ERROR(d_object_name
+        << ": FlowModelSingleSpecies::getNumberOfProjectionVariablesForConservativeVariables()\n"
+        << "Method getNumberOfProjectionVariablesForConservativeVariables() is not yet implemented."
+        << std::endl);
+    
+    return 0;
+}
+
+/*
+ * Get the number of projection variables for transformation between primitive variables
+ * and characteristic variables.
+ */
+int
+FlowModelSingleSpecies::getNumberOfProjectionVariablesForPrimitiveVariables() const
+{
+    return 2;
+}
+
+
+/*
+ * Compute global side data of the projection variables for transformation between
+ * conservative variables and characteristic variables.
+ */
+void
+FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForConservativeVariables(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
+{
+    NULL_USE(projection_variables);
+    
+    TBOX_ERROR(d_object_name
+        << ": FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForConservativeVariables()\n"
+        << "Method computeGlobalSideDataProjectionVariablesForConservativeVariables() is not yet implemented."
+        << std::endl);
+}
+
+
+/*
+ * Compute global side data of the projection variables for transformation between
+ * primitive variables and characteristic variables.
+ */
+void
+FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVariables(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
+{
+    /*
+     * Get the number of ghost cells and ghost cell dimension of projection variables.
+     */
+    
+    const hier::IntVector num_ghosts_projection_var = projection_variables[0]->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_projection_var = projection_variables[0]->getGhostBox().numberCells();
+    
+    /*
+     * Check the number of variables.
+     */
+    
+    if (static_cast<int>(projection_variables.size()) != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+            << "There should be two projection variables."
+            << std::endl);
+    }
+    
+    /*
+     * Check possible failures.
+     */
+    
+    for (int ei = 0; ei < 2; ei++)
+    {
+        const hier::IntVector interior_dims_projection_var = projection_variables[ei]->getBox().numberCells();
+        if (interior_dims_projection_var != d_interior_dims)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+                << "The interior dimension of the projection variables does not match that of patch."
+                << std::endl);
+        }
+    }
+    
+    if (num_ghosts_projection_var != projection_variables[1]->getGhostCellWidth())
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+            << "The projection variables don't have same ghost cell width."
+            << std::endl);
+    }
+    
+    if (num_ghosts_projection_var > d_num_ghosts)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+            << "The projection variables have ghost cell width larger than that of density."
+            << std::endl);
+    }
+    
+    if (num_ghosts_projection_var > d_num_subghosts_sound_speed)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+            << "The projection variables have ghost cell width larger than that of sound speed."
+            << std::endl);
+    }
+    
+    // Get the cell data of the variable density.
+    boost::shared_ptr<pdat::CellData<double> > data_density =
+        getGlobalCellDataDensity();
+    
+    // Get the pointers to the cell data of density and sound speed.
+    double* rho = data_density->getPointer(0);
+    if (!d_data_sound_speed)
+    {
+        computeGlobalCellDataSoundSpeedWithPressure();
+    }
+    double* c = d_data_sound_speed->getPointer(0);
+    
+    /*
+     * Declare pointers to different data.
+     */
+    
+    double* rho_average = nullptr;
+    double* c_average = nullptr;
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        switch (d_proj_mat_primitive_var_averaging)
+        {
+            case AVERAGING::SIMPLE:
+            {
+                /*
+                 * Compute the projection variables in the x-direction.
+                 */
+                
+                rho_average = projection_variables[0]->getPointer(0);
+                c_average = projection_variables[1]->getPointer(0);
+                
+                for (int i = -num_ghosts_projection_var[0]; i < d_interior_dims[0] + 1 + num_ghosts_projection_var[0]; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_face_x = i + num_ghosts_projection_var[0];
+                    const int idx_L = i - 1 + d_num_ghosts[0];
+                    const int idx_R = i + d_num_ghosts[0];
+                    const int idx_sound_speed_L = i - 1 + d_num_subghosts_sound_speed[0];
+                    const int idx_sound_speed_R = i + d_num_subghosts_sound_speed[0];
+                    
+                    rho_average[idx_face_x] = 0.5*(rho[idx_L] + rho[idx_R]);
+                    c_average[idx_face_x] = 0.5*(c[idx_sound_speed_L] + c[idx_sound_speed_R]);
+                }
+                
+                break;
+            }
+            case AVERAGING::ROE:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+                    << "Roe averaging is not yet implemented."
+                    << std::endl);
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+                    << "Unknown d_proj_mat_primitive_var_averaging given."
+                    << std::endl);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        switch (d_proj_mat_primitive_var_averaging)
+        {
+            case AVERAGING::SIMPLE:
+            {
+                /*
+                 * Compute the projection variables in the x-direction.
+                 */
+                
+                rho_average = projection_variables[0]->getPointer(0);
+                c_average = projection_variables[1]->getPointer(0);
+                
+                for (int j = 0; j < d_interior_dims[1]; j++)
+                {
+                    for (int i = -num_ghosts_projection_var[0]; i < d_interior_dims[0] + 1 + num_ghosts_projection_var[0]; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face_x = (i + num_ghosts_projection_var[0]) +
+                            (j + num_ghosts_projection_var[1])*(ghostcell_dims_projection_var[0] + 1);
+                        
+                        const int idx_L = (i - 1 + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*d_ghostcell_dims[0];
+                        
+                        const int idx_R = (i + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*d_ghostcell_dims[0];
+                        
+                        const int idx_sound_speed_L = (i - 1 + d_num_subghosts_sound_speed[0]) +
+                            (j + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
+                        
+                        const int idx_sound_speed_R = (i + d_num_subghosts_sound_speed[0]) +
+                            (j + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
+                        
+                        rho_average[idx_face_x] = 0.5*(rho[idx_L] + rho[idx_R]);
+                        c_average[idx_face_x] = 0.5*(c[idx_sound_speed_L] + c[idx_sound_speed_R]);
+                    }
+                }
+                
+                /*
+                 * Compute the projection variables in the y-direction.
+                 */
+                rho_average = projection_variables[0]->getPointer(1);
+                c_average = projection_variables[1]->getPointer(1);
+                
+                for (int j = -num_ghosts_projection_var[1]; j < d_interior_dims[1] + 1 + num_ghosts_projection_var[1]; j++)
+                {
+                    for (int i = 0; i < d_interior_dims[0]; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face_y = (i + num_ghosts_projection_var[0]) +
+                            (j + num_ghosts_projection_var[1])*ghostcell_dims_projection_var[0];
+                        
+                        const int idx_B = (i + d_num_ghosts[0]) +
+                            (j - 1 + d_num_ghosts[1])*d_ghostcell_dims[0];
+                        
+                        const int idx_T = (i + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*d_ghostcell_dims[0];
+                        
+                        const int idx_sound_speed_B = (i + d_num_subghosts_sound_speed[0]) +
+                            (j - 1 + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
+                        
+                        const int idx_sound_speed_T = (i + d_num_subghosts_sound_speed[0]) +
+                            (j + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
+                        
+                        rho_average[idx_face_y] = 0.5*(rho[idx_B] + rho[idx_T]);
+                        c_average[idx_face_y] = 0.5*(c[idx_sound_speed_B] + c[idx_sound_speed_T]);
+                    }
+                }
+                
+                break;
+            }
+            case AVERAGING::ROE:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+                    << "Roe averaging is not yet implemented."
+                    << std::endl);
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+                    << "Unknown d_proj_mat_primitive_var_averaging given."
+                    << std::endl);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        switch (d_proj_mat_primitive_var_averaging)
+        {
+            case AVERAGING::SIMPLE:
+            {
+                /*
+                 * Compute the projection variables in the x-direction.
+                 */
+                
+                rho_average = projection_variables[0]->getPointer(0);
+                c_average = projection_variables[1]->getPointer(0);
+                
+                for (int k = 0; k < d_interior_dims[2]; k++)
+                {
+                    for (int j = 0; j < d_interior_dims[1]; j++)
+                    {
+                        for (int i = -num_ghosts_projection_var[0]; i < d_interior_dims[0] + 1 + num_ghosts_projection_var[0]; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_x = (i + num_ghosts_projection_var[0]) +
+                                (j + num_ghosts_projection_var[1])*(ghostcell_dims_projection_var[0] + 1) +
+                                (k + num_ghosts_projection_var[2])*(ghostcell_dims_projection_var[0] + 1)*
+                                    ghostcell_dims_projection_var[1];
+                            
+                            const int idx_L = (i - 1 + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*d_ghostcell_dims[0]*
+                                        d_ghostcell_dims[1];
+                            
+                            const int idx_R = (i + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*d_ghostcell_dims[0]*
+                                        d_ghostcell_dims[1];
+                            
+                            const int idx_sound_speed_L = (i - 1 + d_num_subghosts_sound_speed[0]) +
+                                (j + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
+                                    (k + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
+                                        d_subghostcell_dims_sound_speed[1];
+                            
+                            const int idx_sound_speed_R = (i + d_num_subghosts_sound_speed[0]) +
+                                (j + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
+                                    (k + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
+                                        d_subghostcell_dims_sound_speed[1];
+                            
+                            rho_average[idx_face_x] = 0.5*(rho[idx_L] + rho[idx_R]);
+                            c_average[idx_face_x] = 0.5*(c[idx_sound_speed_L] + c[idx_sound_speed_R]);
+                        }
+                    }
+                }
+                
+                /*
+                 * Compute the projection variables in the y-direction.
+                 */
+                
+                rho_average = projection_variables[0]->getPointer(1);
+                c_average = projection_variables[1]->getPointer(1);
+                
+                for (int k = 0; k < d_interior_dims[2]; k++)
+                {
+                    for (int j = -num_ghosts_projection_var[1]; j < d_interior_dims[1] + 1 + num_ghosts_projection_var[1]; j++)
+                    {
+                        for (int i = 0; i < d_interior_dims[0]; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_y = (i + num_ghosts_projection_var[0]) +
+                                (j + num_ghosts_projection_var[1])*ghostcell_dims_projection_var[0] +
+                                (k + num_ghosts_projection_var[2])*ghostcell_dims_projection_var[0]*
+                                    (ghostcell_dims_projection_var[1] + 1);
+                            
+                            const int idx_B = (i + d_num_ghosts[0]) +
+                                (j - 1 + d_num_ghosts[1])*d_ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*d_ghostcell_dims[0]*
+                                        d_ghostcell_dims[1];
+                            
+                            const int idx_T = (i + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*d_ghostcell_dims[0]*
+                                        d_ghostcell_dims[1];
+                            
+                            const int idx_sound_speed_B = (i + d_num_subghosts_sound_speed[0]) +
+                                (j - 1 + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
+                                    (k + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
+                                        d_subghostcell_dims_sound_speed[1];
+                            
+                            const int idx_sound_speed_T = (i + d_num_subghosts_sound_speed[0]) +
+                                (j + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
+                                    (k + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
+                                        d_subghostcell_dims_sound_speed[1];
+                            
+                            rho_average[idx_face_y] = 0.5*(rho[idx_B] + rho[idx_T]);
+                            c_average[idx_face_y] = 0.5*(c[idx_sound_speed_B] + c[idx_sound_speed_T]);
+                        }
+                    }
+                }
+                
+                /*
+                 * Compute the projection variables in the z-direction.
+                 */
+                
+                rho_average = projection_variables[0]->getPointer(2);
+                c_average = projection_variables[1]->getPointer(2);
+                
+                for (int k = -num_ghosts_projection_var[2]; k < d_interior_dims[2] + 1 + num_ghosts_projection_var[2]; k++)
+                {
+                    for (int j = 0; j < d_interior_dims[1]; j++)
+                    {
+                        for (int i = 0; i < d_interior_dims[0]; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_face_z = (i + num_ghosts_projection_var[0]) +
+                                (j + num_ghosts_projection_var[1])*ghostcell_dims_projection_var[0] +
+                                (k + num_ghosts_projection_var[2])*ghostcell_dims_projection_var[0]*
+                                    ghostcell_dims_projection_var[1];
+                            
+                            const int idx_B = (i + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
+                                    (k - 1 + d_num_ghosts[2])*d_ghostcell_dims[0]*
+                                        d_ghostcell_dims[1];
+                            
+                            const int idx_F = (i + d_num_ghosts[0]) +
+                                (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
+                                    (k + d_num_ghosts[2])*d_ghostcell_dims[0]*
+                                        d_ghostcell_dims[1];
+                            
+                            const int idx_sound_speed_B = (i + d_num_subghosts_sound_speed[0]) +
+                                (j + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
+                                    (k - 1 + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
+                                        d_subghostcell_dims_sound_speed[1];
+                            
+                            const int idx_sound_speed_F = (i + d_num_subghosts_sound_speed[0]) +
+                                (j + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
+                                    (k + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
+                                        d_subghostcell_dims_sound_speed[1];
+                            
+                            rho_average[idx_face_z] = 0.5*(rho[idx_B] + rho[idx_F]);
+                            c_average[idx_face_z] = 0.5*(c[idx_sound_speed_B] + c[idx_sound_speed_F]);
+                        }
+                    }
+                }
+                
+                break;
+            }
+            case AVERAGING::ROE:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+                    << "Roe averaging is not yet implemented."
+                    << std::endl);
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
+                    << "Unknown d_proj_mat_primitive_var_averaging given."
+                    << std::endl);
+            }
+        }
+    }
+}
+
+
+/*
+ * Compute global side data of characteristic variables from conservative variables.
+ */
+void
+FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromConservativeVariables(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
+    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
+    const int& idx_offset)
+{
+    NULL_USE(characteristic_variables);
+    NULL_USE(conservative_variables);
+    NULL_USE(projection_variables);
+    NULL_USE(idx_offset);
+    
+    TBOX_ERROR(d_object_name
+        << ": FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromConservativeVariables()\n"
+        << "Method computeGlobalSideDataCharacteristicVariablesFromConservativeVariables() is not yet implemented."
+        << std::endl);
+}
+
+
+/*
+ * Compute global side data of characteristic variables from primitive variables.
+ */
+void
+FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
+    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
+    const int& idx_offset)
+{
+    /*
+     * Get the ghost cell dimension of characteristic and primitive variables.
+     */
+    
+    const hier::IntVector ghostcell_dims_characteristic_var = characteristic_variables[0]->
+        getGhostBox().numberCells();
+    
+    std::vector<hier::IntVector> ghostcell_dims_primitive_var;
+    ghostcell_dims_primitive_var.reserve(static_cast<int>(primitive_variables.size()));
+    for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
+    {
+        ghostcell_dims_primitive_var.push_back(primitive_variables[vi]->
+            getGhostBox().numberCells());
+    }
+    
+    /*
+     * Get the number of ghost cells of each variable.
+     */
+    
+    const hier::IntVector num_ghosts_characteristic_var = characteristic_variables[0]->
+        getGhostCellWidth();
+    
+    std::vector<hier::IntVector> num_ghosts_primitive_var;
+    num_ghosts_primitive_var.reserve(static_cast<int>(primitive_variables.size()));
+    for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
+    {
+        num_ghosts_primitive_var.push_back(primitive_variables[vi]->
+            getGhostCellWidth());
+    }
+    
+    const hier::IntVector num_ghosts_projection_var = projection_variables[0]->getGhostCellWidth();
+    
+    /*
+     * Check the number of variables.
+     */
+    
+    if (static_cast<int>(characteristic_variables.size()) != d_num_eqn)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+            << "The number of characteristic variables are incorrect."
+            << std::endl);
+    }
+    if (static_cast<int>(primitive_variables.size()) != 3)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+            << "The number of primitive variables are incorrect."
+            << std::endl);
+    }
+    if (static_cast<int>(projection_variables.size()) != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+            << "There should be two projection variables."
+            << std::endl);
+    }
+    
+    /*
+     * Check possible failures.
+     */
+    
+    for (int ei = 0; ei < d_num_eqn; ei++)
+    {
+        const hier::IntVector interior_dims_characteristic_var =
+            characteristic_variables[ei]->getBox().numberCells();
+        
+        if (interior_dims_characteristic_var != d_interior_dims)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+                << "The interior dimension of the characteristic variables does not match that of patch."
+                << std::endl);
+        }
+    }
+    for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
+    {
+        const hier::IntVector interior_dims_primitive_var =
+            primitive_variables[vi]->getBox().numberCells();
+        
+        if (interior_dims_primitive_var != d_interior_dims)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+                << "The interior dimension of the primitive variables does not match that of patch."
+                << std::endl);
+        }
+    }
+    for (int ei = 0; ei < 2; ei++)
+    {
+        const hier::IntVector interior_dims_projection_var = projection_variables[ei]->getBox().numberCells();
+        if (interior_dims_projection_var != d_interior_dims)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+                << "The interior dimension of the projection variables does not match that of patch."
+                << std::endl);
+        }
+    }
+    
+    for (int ei = 1; ei < d_num_eqn; ei++)
+    {
+        if (num_ghosts_characteristic_var != characteristic_variables[ei]->getGhostCellWidth())
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+                << "The characteristic variables don't have same ghost cell width."
+                << std::endl);
+        }
+    }
+    if (num_ghosts_projection_var != projection_variables[1]->getGhostCellWidth())
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+            << "The projection variables don't have same ghost cell width."
+            << std::endl);
+    }
+    
+    if (num_ghosts_projection_var != num_ghosts_characteristic_var)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+            << "The ghost cell width of the projection variables does not match that of characteristic variables."
+            << std::endl);
+    }
+    
+    for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
+    {
+        if (num_ghosts_primitive_var[vi] - num_ghosts_characteristic_var
+                + (hier::IntVector::getOne(d_dim))*idx_offset < hier::IntVector::getZero(d_dim) ||
+            num_ghosts_characteristic_var - num_ghosts_primitive_var[vi]
+                + (hier::IntVector::getOne(d_dim))*(idx_offset + 1) > hier::IntVector::getZero(d_dim))
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables()\n"
+                << "The offset index is too large or the number of ghost of characteristic variable is too larger."
+                << std::endl);
+        }
+    }
+    
+    /*
+     * Declare containers to store pointers to different data.
+     */
+    
+    std::vector<double*> V;
+    V.reserve(d_num_eqn);
+    
+    int count_eqn = 0;
+    for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
+    {
+        int depth = primitive_variables[vi]->getDepth();
+        
+        for (int di = 0; di < depth; di++)
+        {
+            // If the last element of the primitive variable vector is not in the system of equations, ignore it.
+            if (count_eqn >= d_num_eqn)
+                break;
+            
+            V.push_back(primitive_variables[vi]->getPointer(di));
+            
+            count_eqn++;
+        }
+    }
+    
+    std::vector<double*> W;
+    W.resize(d_num_eqn);
+    
+    double* rho_average = nullptr;
+    double* c_average = nullptr;
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        /*
+         * Compute the characteristic variables in the x-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            W[ei] = characteristic_variables[ei]->getPointer(0);
+        }
+        
+        rho_average = projection_variables[0]->getPointer(0);
+        c_average = projection_variables[1]->getPointer(0);
+        
+        for (int i = -num_ghosts_characteristic_var[0];
+             i < d_interior_dims[0] + 1 + num_ghosts_characteristic_var[0];
+             i++)
+        {
+            // Compute the linear indices.
+            const int idx_face = i + num_ghosts_characteristic_var[0];
+            const int idx_rho = i + idx_offset + num_ghosts_primitive_var[0][0];
+            const int idx_vel = i + idx_offset + num_ghosts_primitive_var[1][0];
+            const int idx_p = i + idx_offset + num_ghosts_primitive_var[2][0];
+            
+            W[0][idx_face] = -0.5*rho_average[idx_face]*c_average[idx_face]*V[1][idx_vel] + 0.5*V[2][idx_p];
+            W[1][idx_face] = V[0][idx_rho] - 1.0/(c_average[idx_face]*c_average[idx_face])*V[2][idx_p];
+            W[2][idx_face] = 0.5*rho_average[idx_face]*c_average[idx_face]*V[1][idx_vel] + 0.5*V[2][idx_p];
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        /*
+         * Compute the characteristic variables in the x-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            W[ei] = characteristic_variables[ei]->getPointer(0);
+        }
+        
+        rho_average = projection_variables[0]->getPointer(0);
+        c_average = projection_variables[1]->getPointer(0);
+        
+        for (int j = 0; j < d_interior_dims[1]; j++)
+        {
+            for (int i = -num_ghosts_characteristic_var[0];
+                 i < d_interior_dims[0] + 1 + num_ghosts_characteristic_var[0];
+                 i++)
+            {
+                // Compute the linear indices.
+                const int idx_face = (i + num_ghosts_characteristic_var[0]) +
+                    (j + num_ghosts_characteristic_var[1])*(ghostcell_dims_characteristic_var[0] + 1);
+                
+                const int idx_rho = (i + idx_offset + num_ghosts_primitive_var[0][0]) +
+                    (j + num_ghosts_primitive_var[0][1])*ghostcell_dims_primitive_var[0][0];
+                
+                const int idx_vel = (i + idx_offset + num_ghosts_primitive_var[1][0]) +
+                    (j + num_ghosts_primitive_var[1][1])*ghostcell_dims_primitive_var[1][0];
+                
+                const int idx_p = (i + idx_offset + num_ghosts_primitive_var[2][0]) +
+                    (j + num_ghosts_primitive_var[2][1])*ghostcell_dims_primitive_var[2][0];
+                
+                W[0][idx_face] = -0.5*rho_average[idx_face]*c_average[idx_face]*V[1][idx_vel] + 0.5*V[3][idx_p];
+                W[1][idx_face] = V[0][idx_rho] - 1.0/(c_average[idx_face]*c_average[idx_face])*V[3][idx_p];
+                W[2][idx_face] = V[2][idx_vel];
+                W[3][idx_face] = 0.5*rho_average[idx_face]*c_average[idx_face]*V[1][idx_vel] + 0.5*V[3][idx_p];
+            }
+        }
+        
+        /*
+         * Compute the characteristic variables in the y-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            W[ei] = characteristic_variables[ei]->getPointer(1);
+        }
+        
+        rho_average = projection_variables[0]->getPointer(1);
+        c_average = projection_variables[1]->getPointer(1);
+        
+        for (int j = -num_ghosts_characteristic_var[1];
+             j < d_interior_dims[1] + 1 + num_ghosts_characteristic_var[1];
+             j++)
+        {
+            for (int i = 0; i < d_interior_dims[0]; i++)
+            {
+                // Compute the linear indices.
+                const int idx_face = (i + num_ghosts_characteristic_var[0]) +
+                    (j + num_ghosts_characteristic_var[1])*(ghostcell_dims_characteristic_var[0]);
+                
+                const int idx_rho = (i + num_ghosts_primitive_var[0][0]) +
+                    (j + idx_offset + num_ghosts_primitive_var[0][1])*ghostcell_dims_primitive_var[0][0];
+                
+                const int idx_vel = (i + num_ghosts_primitive_var[1][0]) +
+                    (j + idx_offset + num_ghosts_primitive_var[1][1])*ghostcell_dims_primitive_var[1][0];
+                
+                const int idx_p = (i + num_ghosts_primitive_var[2][0]) +
+                    (j + idx_offset + num_ghosts_primitive_var[2][1])*ghostcell_dims_primitive_var[2][0];
+                
+                W[0][idx_face] = -0.5*rho_average[idx_face]*c_average[idx_face]*V[2][idx_vel] + 0.5*V[3][idx_p];
+                W[1][idx_face] = V[0][idx_rho] - 1.0/(c_average[idx_face]*c_average[idx_face])*V[3][idx_p];
+                W[2][idx_face] = V[1][idx_vel];
+                W[3][idx_face] = 0.5*rho_average[idx_face]*c_average[idx_face]*V[2][idx_vel] + 0.5*V[3][idx_p];
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        /*
+         * Compute the characteristic variables in the x-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            W[ei] = characteristic_variables[ei]->getPointer(0);
+        }
+        
+        rho_average = projection_variables[0]->getPointer(0);
+        c_average = projection_variables[1]->getPointer(0);
+        
+        for (int k = 0; k < d_interior_dims[2]; k++)
+        {
+            for (int j = 0; j < d_interior_dims[1]; j++)
+            {
+                for (int i = -num_ghosts_characteristic_var[0];
+                     i < d_interior_dims[0] + 1 + num_ghosts_characteristic_var[0];
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_face = (i + num_ghosts_characteristic_var[0]) +
+                        (j + num_ghosts_characteristic_var[1])*(ghostcell_dims_characteristic_var[0] + 1) +
+                        (k + num_ghosts_characteristic_var[2])*(ghostcell_dims_characteristic_var[0] + 1)*
+                            ghostcell_dims_characteristic_var[1];
+                    
+                    const int idx_rho = (i + idx_offset + num_ghosts_primitive_var[0][0]) +
+                        (j + num_ghosts_primitive_var[0][1])*ghostcell_dims_primitive_var[0][0] +
+                        (k + num_ghosts_primitive_var[0][2])*ghostcell_dims_primitive_var[0][0]*
+                            ghostcell_dims_primitive_var[0][1];
+                    
+                    const int idx_vel = (i + idx_offset + num_ghosts_primitive_var[1][0]) +
+                        (j + num_ghosts_primitive_var[1][1])*ghostcell_dims_primitive_var[1][0] +
+                        (k + num_ghosts_primitive_var[1][2])*ghostcell_dims_primitive_var[1][0]*
+                            ghostcell_dims_primitive_var[1][1];
+                    
+                    const int idx_p = (i + idx_offset + num_ghosts_primitive_var[2][0]) +
+                        (j + num_ghosts_primitive_var[2][1])*ghostcell_dims_primitive_var[2][0] +
+                        (k + num_ghosts_primitive_var[2][2])*ghostcell_dims_primitive_var[2][0]*
+                            ghostcell_dims_primitive_var[2][1];
+                    
+                    W[0][idx_face] = -0.5*rho_average[idx_face]*c_average[idx_face]*V[1][idx_vel] + 0.5*V[4][idx_p];
+                    W[1][idx_face] = V[0][idx_rho] - 1.0/(c_average[idx_face]*c_average[idx_face])*V[4][idx_p];
+                    W[2][idx_face] = V[2][idx_vel];
+                    W[3][idx_face] = V[3][idx_vel];
+                    W[4][idx_face] = 0.5*rho_average[idx_face]*c_average[idx_face]*V[1][idx_vel] + 0.5*V[4][idx_p];
+                }
+            }
+        }
+        
+        /*
+         * Compute the characteristic variables in the y-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            W[ei] = characteristic_variables[ei]->getPointer(1);
+        }
+        
+        rho_average = projection_variables[0]->getPointer(1);
+        c_average = projection_variables[1]->getPointer(1);
+        
+        for (int k = 0; k < d_interior_dims[2]; k++)
+        {
+            for (int j = -num_ghosts_characteristic_var[1];
+                 j < d_interior_dims[1] + 1 + num_ghosts_characteristic_var[1];
+                 j++)
+            {
+                for (int i = 0; i < d_interior_dims[0]; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_face = (i + num_ghosts_characteristic_var[0]) +
+                        (j + num_ghosts_characteristic_var[1])*ghostcell_dims_characteristic_var[0] +
+                        (k + num_ghosts_characteristic_var[2])*ghostcell_dims_characteristic_var[0]*
+                            (ghostcell_dims_characteristic_var[1] + 1);
+                    
+                    const int idx_rho = (i + num_ghosts_primitive_var[0][0]) +
+                        (j + idx_offset + num_ghosts_primitive_var[0][1])*ghostcell_dims_primitive_var[0][0] +
+                        (k + num_ghosts_primitive_var[0][2])*ghostcell_dims_primitive_var[0][0]*
+                            ghostcell_dims_primitive_var[0][1];
+                    
+                    const int idx_vel = (i + num_ghosts_primitive_var[1][0]) +
+                        (j + idx_offset + num_ghosts_primitive_var[1][1])*ghostcell_dims_primitive_var[1][0] +
+                        (k + num_ghosts_primitive_var[1][2])*ghostcell_dims_primitive_var[1][0]*
+                            ghostcell_dims_primitive_var[1][1];
+                    
+                    const int idx_p = (i + num_ghosts_primitive_var[2][0]) +
+                        (j + idx_offset + num_ghosts_primitive_var[2][1])*ghostcell_dims_primitive_var[2][0] +
+                        (k + num_ghosts_primitive_var[2][2])*ghostcell_dims_primitive_var[2][0]*
+                            ghostcell_dims_primitive_var[2][1];
+                    
+                    W[0][idx_face] = -0.5*rho_average[idx_face]*c_average[idx_face]*V[2][idx_vel] + 0.5*V[4][idx_p];
+                    W[1][idx_face] = V[0][idx_rho] - 1.0/(c_average[idx_face]*c_average[idx_face])*V[4][idx_p];
+                    W[2][idx_face] = V[1][idx_vel];
+                    W[3][idx_face] = V[3][idx_vel];
+                    W[4][idx_face] = 0.5*rho_average[idx_face]*c_average[idx_face]*V[2][idx_vel] + 0.5*V[4][idx_p];
+                }
+            }
+        }
+        
+        /*
+         * Compute the characteristic variables in the z-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            W[ei] = characteristic_variables[ei]->getPointer(2);
+        }
+        
+        rho_average = projection_variables[0]->getPointer(2);
+        c_average = projection_variables[1]->getPointer(2);
+        
+        for (int k = -num_ghosts_characteristic_var[2];
+             k < d_interior_dims[2] + 1 + num_ghosts_characteristic_var[2];
+             k++)
+        {
+            for (int j = 0; j < d_interior_dims[1]; j++)
+            {
+                for (int i = 0; i < d_interior_dims[0]; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_face = (i + num_ghosts_characteristic_var[0]) +
+                        (j + num_ghosts_characteristic_var[1])*ghostcell_dims_characteristic_var[0] +
+                        (k + num_ghosts_characteristic_var[2])*ghostcell_dims_characteristic_var[0]*
+                            ghostcell_dims_characteristic_var[1];
+                    
+                    const int idx_rho = (i + num_ghosts_primitive_var[0][0]) +
+                        (j + num_ghosts_primitive_var[0][1])*ghostcell_dims_primitive_var[0][0] +
+                        (k + idx_offset + num_ghosts_primitive_var[0][2])*ghostcell_dims_primitive_var[0][0]*
+                            ghostcell_dims_primitive_var[0][1];
+                    
+                    const int idx_vel = (i + num_ghosts_primitive_var[1][0]) +
+                        (j + num_ghosts_primitive_var[1][1])*ghostcell_dims_primitive_var[1][0] +
+                        (k + idx_offset + num_ghosts_primitive_var[1][2])*ghostcell_dims_primitive_var[1][0]*
+                            ghostcell_dims_primitive_var[1][1];
+                    
+                    const int idx_p = (i + num_ghosts_primitive_var[2][0]) +
+                        (j + num_ghosts_primitive_var[2][1])*ghostcell_dims_primitive_var[2][0] +
+                        (k + idx_offset + num_ghosts_primitive_var[2][2])*ghostcell_dims_primitive_var[2][0]*
+                            ghostcell_dims_primitive_var[2][1];
+                    
+                    W[0][idx_face] = -0.5*rho_average[idx_face]*c_average[idx_face]*V[3][idx_vel] + 0.5*V[4][idx_p];
+                    W[1][idx_face] = V[0][idx_rho] - 1.0/(c_average[idx_face]*c_average[idx_face])*V[4][idx_p];
+                    W[2][idx_face] = V[1][idx_vel];
+                    W[3][idx_face] = V[2][idx_vel];
+                    W[4][idx_face] = 0.5*rho_average[idx_face]*c_average[idx_face]*V[3][idx_vel] + 0.5*V[4][idx_p];
+                }
+            }
+        }
+    }
+}
+
+
+/*
+ * Compute global side data of conservative variables from characteristic variables.
+ */
+void
+FlowModelSingleSpecies::computeGlobalSideDataConservativeVariablesFromCharacteristicVariables(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
+{
+    NULL_USE(conservative_variables);
+    NULL_USE(characteristic_variables);
+    NULL_USE(projection_variables);
+    
+    TBOX_ERROR(d_object_name
+        << ": FlowModelSingleSpecies::computeGlobalSideDataConservativeVariablesFromCharacteristicVariables()\n"
+        << "Method computeGlobalSideDataConservativeVariablesFromCharacteristicVariables() is not yet implemented."
+        << std::endl);
+}
+
+
+/*
+ * Compute global side data of primitive variables from characteristic variables.
+ */
+void
+FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
+{
+    /*
+     * Get the number of ghost cells of each variable.
+     */
+    
+    const hier::IntVector num_ghosts_primitive_var = primitive_variables[0]->
+        getGhostCellWidth();
+    
+    const hier::IntVector num_ghosts_characteristic_var = characteristic_variables[0]->
+        getGhostCellWidth();
+    
+    const hier::IntVector num_ghosts_projection_var = projection_variables[0]->getGhostCellWidth();
+    
+    /*
+     * Get the ghost cell dimension of characteristic variable.
+     */
+    
+    const hier::IntVector ghostcell_dims_characteristic_var = characteristic_variables[0]->
+        getGhostBox().numberCells();
+    
+    /*
+     * Check the number of variables.
+     */
+    
+    if (static_cast<int>(primitive_variables.size()) != d_num_eqn)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+            << "The number of characteristic variables are incorrect."
+            << std::endl);
+    }
+    if (static_cast<int>(characteristic_variables.size()) != d_num_eqn)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+            << "The number of primitive variables are incorrect."
+            << std::endl);
+    }
+    if (static_cast<int>(projection_variables.size()) != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+            << "There should be two projection variables."
+            << std::endl);
+    }
+    
+    /*
+     * Check possible failures.
+     */
+    for (int ei = 0; ei < d_num_eqn; ei++)
+    {
+        const hier::IntVector interior_dims_primitive_var =
+            primitive_variables[ei]->getBox().numberCells();
+        
+        if (interior_dims_primitive_var != d_interior_dims)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+                << "The interior dimension of the primitive variables does not match that of patch."
+                << std::endl);
+        }
+    }
+    for (int ei = 0; ei < d_num_eqn; ei++)
+    {
+        const hier::IntVector interior_dims_characteristic_var =
+            characteristic_variables[ei]->getBox().numberCells();
+        
+        if (interior_dims_characteristic_var != d_interior_dims)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+                << "The interior dimension of the characteristic variables does not match that of patch."
+                << std::endl);
+        }
+    }
+    for (int ei = 0; ei < 2; ei++)
+    {
+        const hier::IntVector interior_dims_projection_var = projection_variables[ei]->getBox().numberCells();
+        if (interior_dims_projection_var != d_interior_dims)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+                << "The interior dimension of the projection variables does not match that of patch."
+                << std::endl);
+        }
+    }
+    
+    for (int ei = 1; ei < d_num_eqn; ei++)
+    {
+        if (num_ghosts_primitive_var != primitive_variables[ei]->getGhostCellWidth())
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+                << "The primitive variables don't have same ghost cell width."
+                << std::endl);
+        }
+    }
+    for (int ei = 1; ei < d_num_eqn; ei++)
+    {
+        if (num_ghosts_characteristic_var != characteristic_variables[ei]->getGhostCellWidth())
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+                << "The characteristic variables don't have same ghost cell width."
+                << std::endl);
+        }
+    }
+    if (num_ghosts_projection_var != projection_variables[1]->getGhostCellWidth())
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+            << "The projection variables don't have same ghost cell width."
+            << std::endl);
+    }
+    
+    if (num_ghosts_projection_var != num_ghosts_primitive_var)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+            << "The ghost cell width of the projection variables does not match that of primitive variables."
+            << std::endl);
+    }
+    if (num_ghosts_projection_var != num_ghosts_characteristic_var)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables()\n"
+            << "The ghost cell width of the projection variables does not match that of characteristic variables."
+            << std::endl);
+    }
+    
+    /*
+     * Declare containers to store pointers to different data.
+     */
+    
+    std::vector<double*> V;
+    std::vector<double*> W;
+    V.resize(d_num_eqn);
+    W.resize(d_num_eqn);
+    
+    double* rho_average = nullptr;
+    double* c_average = nullptr;
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        /*
+         * Compute the primitive variables in the x-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            V[ei] = primitive_variables[ei]->getPointer(0);
+        }
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            W[ei] = characteristic_variables[ei]->getPointer(0);
+        }
+        
+        rho_average = projection_variables[0]->getPointer(0);
+        c_average = projection_variables[1]->getPointer(0);
+        
+        for (int i = -num_ghosts_characteristic_var[0];
+             i < d_interior_dims[0] + 1 + num_ghosts_characteristic_var[0];
+             i++)
+        {
+            // Compute the linear index.
+            const int idx_face = i + num_ghosts_characteristic_var[0];
+            
+            V[0][idx_face] = 1.0/(c_average[idx_face]*c_average[idx_face])*W[0][idx_face] +
+                W[1][idx_face] + 1.0/(c_average[idx_face]*c_average[idx_face])*W[2][idx_face];
+            V[1][idx_face] = -1.0/(rho_average[idx_face]*c_average[idx_face])*W[0][idx_face] +
+                1.0/(rho_average[idx_face]*c_average[idx_face])*W[2][idx_face];
+            V[2][idx_face] = W[0][idx_face] + W[2][idx_face];
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        /*
+         * Compute the primitive variables in the x-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            V[ei] = primitive_variables[ei]->getPointer(0);
+        }
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            W[ei] = characteristic_variables[ei]->getPointer(0);
+        }
+        
+        rho_average = projection_variables[0]->getPointer(0);
+        c_average = projection_variables[1]->getPointer(0);
+        
+        for (int j = 0; j < d_interior_dims[1]; j++)
+        {
+            for (int i = -num_ghosts_characteristic_var[0];
+                 i < d_interior_dims[0] + 1 + num_ghosts_characteristic_var[0];
+                 i++)
+            {
+                // Compute the linear index.
+                const int idx_face = (i + num_ghosts_characteristic_var[0]) +
+                    (j + num_ghosts_characteristic_var[1])*(ghostcell_dims_characteristic_var[0] + 1);
+                
+                V[0][idx_face] = 1.0/(c_average[idx_face]*c_average[idx_face])*W[0][idx_face] +
+                    W[1][idx_face] + 1.0/(c_average[idx_face]*c_average[idx_face])*W[3][idx_face];
+                V[1][idx_face] = -1.0/(rho_average[idx_face]*c_average[idx_face])*W[0][idx_face] +
+                    1.0/(rho_average[idx_face]*c_average[idx_face])*W[3][idx_face];
+                V[2][idx_face] = W[2][idx_face];
+                V[3][idx_face] = W[0][idx_face] + W[3][idx_face];
+            }
+        }
+        
+        /*
+         * Compute the primitive variables in the y-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            V[ei] = primitive_variables[ei]->getPointer(1);
+        }
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            W[ei] = characteristic_variables[ei]->getPointer(1);
+        }
+        
+        rho_average = projection_variables[0]->getPointer(1);
+        c_average = projection_variables[1]->getPointer(1);
+        
+        for (int j = -num_ghosts_characteristic_var[1];
+             j < d_interior_dims[1] + 1 + num_ghosts_characteristic_var[1];
+             j++)
+        {
+            for (int i = 0; i < d_interior_dims[0]; i++)
+            {
+                // Compute the linear index.
+                const int idx_face = (i + num_ghosts_characteristic_var[0]) +
+                    (j + num_ghosts_characteristic_var[1])*(ghostcell_dims_characteristic_var[0]);
+                
+                V[0][idx_face] = 1.0/(c_average[idx_face]*c_average[idx_face])*W[0][idx_face] + W[1][idx_face] +
+                    1.0/(c_average[idx_face]*c_average[idx_face])*W[3][idx_face];
+                V[1][idx_face] = W[2][idx_face];
+                V[2][idx_face] = -1.0/(rho_average[idx_face]*c_average[idx_face])*W[0][idx_face] +
+                    1.0/(rho_average[idx_face]*c_average[idx_face])*W[3][idx_face];
+                V[3][idx_face] = W[0][idx_face] + W[3][idx_face];
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        /*
+         * Compute the primitive variables in the x-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            V[ei] = primitive_variables[ei]->getPointer(0);
+        }
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            W[ei] = characteristic_variables[ei]->getPointer(0);
+        }
+        
+        rho_average = projection_variables[0]->getPointer(0);
+        c_average = projection_variables[1]->getPointer(0);
+        
+        for (int k = 0; k < d_interior_dims[2]; k++)
+        {
+            for (int j = 0; j < d_interior_dims[1]; j++)
+            {
+                for (int i = -num_ghosts_characteristic_var[0];
+                     i < d_interior_dims[0] + 1 + num_ghosts_characteristic_var[0];
+                     i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghosts_characteristic_var[0]) +
+                        (j + num_ghosts_characteristic_var[1])*(ghostcell_dims_characteristic_var[0] + 1) +
+                        (k + num_ghosts_characteristic_var[2])*(ghostcell_dims_characteristic_var[0] + 1)*
+                            ghostcell_dims_characteristic_var[1];
+                    
+                    V[0][idx_face] = 1.0/(c_average[idx_face]*c_average[idx_face])*W[0][idx_face] +
+                        W[1][idx_face] + 1.0/(c_average[idx_face]*c_average[idx_face])*W[4][idx_face];
+                    V[1][idx_face] = -1.0/(rho_average[idx_face]*c_average[idx_face])*W[0][idx_face] +
+                        1.0/(rho_average[idx_face]*c_average[idx_face])*W[4][idx_face];
+                    V[2][idx_face] = W[2][idx_face];
+                    V[3][idx_face] = W[3][idx_face];
+                    V[4][idx_face] = W[0][idx_face] + W[4][idx_face];
+                }
+            }
+        }
+        
+        /*
+         * Compute the primitive variables in the y-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            V[ei] = primitive_variables[ei]->getPointer(1);
+        }
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            W[ei] = characteristic_variables[ei]->getPointer(1);
+        }
+        
+        rho_average = projection_variables[0]->getPointer(1);
+        c_average = projection_variables[1]->getPointer(1);
+        
+        for (int k = 0; k < d_interior_dims[2]; k++)
+        {
+            for (int j = -num_ghosts_characteristic_var[1];
+                 j < d_interior_dims[1] + 1 + num_ghosts_characteristic_var[1];
+                 j++)
+            {
+                for (int i = 0; i < d_interior_dims[0]; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghosts_characteristic_var[0]) +
+                        (j + num_ghosts_characteristic_var[1])*ghostcell_dims_characteristic_var[0] +
+                        (k + num_ghosts_characteristic_var[2])*ghostcell_dims_characteristic_var[0]*
+                            (ghostcell_dims_characteristic_var[1] + 1);
+                    
+                    V[0][idx_face] = 1.0/(c_average[idx_face]*c_average[idx_face])*W[0][idx_face] +
+                        W[1][idx_face] + 1.0/(c_average[idx_face]*c_average[idx_face])*W[4][idx_face];
+                    V[1][idx_face] = W[2][idx_face];
+                    V[2][idx_face] = -1.0/(rho_average[idx_face]*c_average[idx_face])*W[0][idx_face] +
+                        1.0/(rho_average[idx_face]*c_average[idx_face])*W[4][idx_face];
+                    V[3][idx_face] = W[3][idx_face];
+                    V[4][idx_face] = W[0][idx_face] + W[4][idx_face];
+                }
+            }
+        }
+        
+        /*
+         * Compute the primitive variables in the z-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            V[ei] = primitive_variables[ei]->getPointer(2);
+        }
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            W[ei] = characteristic_variables[ei]->getPointer(2);
+        }
+        
+        rho_average = projection_variables[0]->getPointer(2);
+        c_average = projection_variables[1]->getPointer(2);
+        
+        const int num_ghost_0 = num_ghosts_characteristic_var[0];
+        const int num_ghost_1 = num_ghosts_characteristic_var[1];
+        const int num_ghost_2 = num_ghosts_characteristic_var[2];
+        
+        const int ghost_cell_dims_0 = ghostcell_dims_characteristic_var[0];
+        const int ghost_cell_dims_1 = ghostcell_dims_characteristic_var[1];
+        const int ghost_cell_dims_2 = ghostcell_dims_characteristic_var[2];
+        
+        const int interior_dims_0 = d_interior_dims[0];
+        const int interior_dims_1 = d_interior_dims[1];
+        const int interior_dims_2 = d_interior_dims[2];
+        
+        for (int k = -num_ghosts_characteristic_var[2];
+             k < d_interior_dims[2] + 1 + num_ghosts_characteristic_var[2];
+             k++)
+        {
+            for (int j = 0; j < d_interior_dims[1]; j++)
+            {
+                for (int i = 0; i < interior_dims_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghost_0) +
+                        (j + num_ghost_1)*ghost_cell_dims_0 +
+                        (k + num_ghost_2)*ghost_cell_dims_0*
+                            ghost_cell_dims_1;
+                    
+                    V[0][idx_face] = 1.0/(c_average[idx_face]*c_average[idx_face])*W[0][idx_face] +
+                        W[1][idx_face] + 1.0/(c_average[idx_face]*c_average[idx_face])*W[4][idx_face];
+                    V[1][idx_face] = W[2][idx_face];
+                    V[2][idx_face] = W[3][idx_face];
+                    V[3][idx_face] = -1.0/(rho_average[idx_face]*c_average[idx_face])*W[0][idx_face] +
+                        1.0/(rho_average[idx_face]*c_average[idx_face])*W[4][idx_face];
+                    V[4][idx_face] = W[0][idx_face] + W[4][idx_face];
+                }
+            }
+        }
+        
+        /*
+        for (int k = -num_ghosts_characteristic_var[2];
+             k < d_interior_dims[2] + 1 + num_ghosts_characteristic_var[2];
+             k++)
+        {
+            for (int j = 0; j < d_interior_dims[1]; j++)
+            {
+                for (int i = 0; i < d_interior_dims[0]; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghosts_characteristic_var[0]) +
+                        (j + num_ghosts_characteristic_var[1])*ghostcell_dims_characteristic_var[0] +
+                        (k + num_ghosts_characteristic_var[2])*ghostcell_dims_characteristic_var[0]*
+                            ghostcell_dims_characteristic_var[1];
+                    
+                    V[0][idx_face] = 1.0/(c_average[idx_face]*c_average[idx_face])*W[0][idx_face] +
+                        W[1][idx_face] + 1.0/(c_average[idx_face]*c_average[idx_face])*W[4][idx_face];
+                    V[1][idx_face] = W[2][idx_face];
+                    V[2][idx_face] = W[3][idx_face];
+                    V[3][idx_face] = -1.0/(rho_average[idx_face]*c_average[idx_face])*W[0][idx_face] +
+                        1.0/(rho_average[idx_face]*c_average[idx_face])*W[4][idx_face];
+                    V[4][idx_face] = W[0][idx_face] + W[4][idx_face];
+                }
+            }
+        }
+        */
+    }
+}
+
+
+
+
+/*
+ * Compute the local projection data at face for conservative variables.
+ */
+void
+FlowModelSingleSpecies::computeLocalProjectionFaceDataConservativeVariables(
+    std::vector<double>& projection_variables,
+    const hier::Index& cell_index_minus,
+    const hier::Index& cell_index_plus,
+    const DIRECTION::TYPE& direction)
+{
+    NULL_USE(projection_variables);
+    NULL_USE(cell_index_minus);
+    NULL_USE(cell_index_plus);
+    NULL_USE(direction);
+    
+    TBOX_ERROR(d_object_name
+        << ": FlowModelSingleSpecies::computeLocalFaceDataConservativeVariables()\n"
+        << "Method computeLocalFaceDataConservativeVariables() is not yet implemented."
+        << std::endl);
+}
+
+
+/*
+ * Compute the local projection data at face for primitive variables.
+ */
+void
+FlowModelSingleSpecies::computeLocalFaceDataPrimitveVariables(
+    std::vector<double>& projection_variables,
+    const hier::Index& cell_index_minus,
+    const hier::Index& cell_index_plus,
+    const DIRECTION::TYPE& direction)
+{
+    NULL_USE(direction);
+    
+    projection_variables.resize(2);
+    double& rho_average = projection_variables[0];
+    double& c_average = projection_variables[1];
+    
+    // Get the cell data of the variable density.
+    boost::shared_ptr<pdat::CellData<double> > data_density =
+        getGlobalCellDataDensity();
+    
+    // Get the pointers to the cell data of density and sound speed.
+    double* rho = data_density->getPointer(0);
+    if (!d_data_sound_speed)
+    {
+        computeGlobalCellDataSoundSpeedWithPressure();
+    }
+    double* c = d_data_sound_speed->getPointer(0);
+    
+    // Compute the projection variables.
+    if (d_dim == tbox::Dimension(1))
+    {
+        // Compute the linear indices.
+        const int idx_minus = cell_index_minus[0] + d_num_ghosts[0];
+        const int idx_plus = cell_index_plus[0] + d_num_ghosts[0];
+        const int idx_sound_speed_minus = cell_index_minus[0] + d_num_subghosts_sound_speed[0];
+        const int idx_sound_speed_plus = cell_index_plus[0] + d_num_subghosts_sound_speed[0];
+        
+        // Compute the average values.
+        switch (d_proj_mat_primitive_var_averaging)
+        {
+            case AVERAGING::SIMPLE:
+            {
+                rho_average = 0.5*(rho[idx_minus] + rho[idx_plus]);
+                c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
+                
+                break;
+            }
+            case AVERAGING::ROE:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
+                    << "Roe averaging is not yet implemented."
+                    << std::endl);
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
+                    << "Unknown d_proj_mat_primitive_var_averaging given."
+                    << std::endl);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        const int idx_minus = (cell_index_minus[0] + d_num_ghosts[0]) +
+            (cell_index_minus[1] + d_num_ghosts[1])*d_ghostcell_dims[0];
+        
+        const int idx_plus = (cell_index_plus[0] + d_num_ghosts[0]) +
+            (cell_index_plus[1] + d_num_ghosts[1])*d_ghostcell_dims[0];
+        
+        const int idx_sound_speed_minus = (cell_index_minus[0] + d_num_subghosts_sound_speed[0]) +
+            (cell_index_minus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
+        
+        const int idx_sound_speed_plus = (cell_index_plus[0] + d_num_subghosts_sound_speed[0]) +
+            (cell_index_plus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
+        
+        // Compute the average values.
+        switch (d_proj_mat_primitive_var_averaging)
+        {
+            case AVERAGING::SIMPLE:
+            {
+                rho_average = 0.5*(rho[idx_minus] + rho[idx_plus]);
+                c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
+                
+                break;
+            }
+            case AVERAGING::ROE:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
+                    << "Roe averaging is not yet implemented."
+                    << std::endl);
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
+                    << "Unknown d_proj_mat_primitive_var_averaging given."
+                    << std::endl);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const int idx_minus = (cell_index_minus[0] + d_num_ghosts[0]) +
+            (cell_index_minus[1] + d_num_ghosts[1])*d_ghostcell_dims[0] +
+            (cell_index_minus[2] + d_num_ghosts[2])*d_ghostcell_dims[0]*
+                d_ghostcell_dims[1];
+        
+        const int idx_plus = (cell_index_plus[0] + d_num_ghosts[0]) +
+            (cell_index_plus[1] + d_num_ghosts[1])*d_ghostcell_dims[0] +
+            (cell_index_plus[2] + d_num_ghosts[2])*d_ghostcell_dims[0]*
+                d_ghostcell_dims[1];
+        
+        const int idx_sound_speed_minus = (cell_index_minus[0] + d_num_subghosts_sound_speed[0]) +
+            (cell_index_minus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
+            (cell_index_minus[2] + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
+                d_subghostcell_dims_sound_speed[1];
+        
+        const int idx_sound_speed_plus = (cell_index_plus[0] + d_num_subghosts_sound_speed[0]) +
+            (cell_index_plus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
+            (cell_index_plus[2] + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
+                d_subghostcell_dims_sound_speed[1];
+        
+        // Compute the average values.
+        switch (d_proj_mat_primitive_var_averaging)
+        {
+            case AVERAGING::SIMPLE:
+            {
+                rho_average = 0.5*(rho[idx_minus] + rho[idx_plus]);
+                c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
+                
+                break;
+            }
+            case AVERAGING::ROE:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
+                    << "Roe averaging is not yet implemented."
+                    << std::endl);
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
+                    << "Unknown d_proj_mat_primitive_var_averaging given."
+                    << std::endl);
+            }
+        }
+    }
+}
+
+
+/*
+ * Convert vector of pointers to conservative cell data to vectors of pointers to characteristic cell data.
+ */
+void
+FlowModelSingleSpecies::convertLocalCellDataPointersConservativeVariablesToCharacteristicVariables(
+    const std::vector<const double*>& conservative_variables,
+    const std::vector<double*>& characteristic_variables,
+    const std::vector<double>& projection_variables,
+    const DIRECTION::TYPE& direction)
+{
+    NULL_USE(conservative_variables);
+    NULL_USE(characteristic_variables);
+    NULL_USE(projection_variables);
+    NULL_USE(direction);
+    
+    TBOX_ERROR(d_object_name
+        << ": FlowModelSingleSpecies::convertLocalCellDataPointersConservativeVariablesToCharacteristicVariables()\n"
+        << "Method convertLocalCellDataPointersConservativeVariablesToCharacteristicVariables() is not yet implemented."
+        << std::endl);
+}
+
+
+/*
+ * Convert vector of pointers to characteristic cell data to vectors of pointers to conservative cell data.
+ */
+void
+FlowModelSingleSpecies::convertLocalCellDataPointersCharacteristicVariablesToConservativeVariables(
+    const std::vector<const double*>& characteristic_variables,
+    const std::vector<double*>& conservative_variables,
+    const std::vector<double>& projection_variables,
+    const DIRECTION::TYPE& direction)
+{
+    NULL_USE(characteristic_variables);
+    NULL_USE(conservative_variables);
+    NULL_USE(projection_variables);
+    NULL_USE(direction);
+    
+    TBOX_ERROR(d_object_name
+        << ": FlowModelSingleSpecies::convertLocalCellDataPointersCharacteristicVariablesToConservativeVariables()\n"
+        << "Method convertLocalCellDataPointersCharacteristicVariablesToConservativeVariables() is not yet implemented."
+        << std::endl);
+}
+
+
+/*
+ * Convert vector of pointers to primitive cell data to vectors of pointers to characteristic cell data.
+ */
+void
+FlowModelSingleSpecies::convertLocalCellDataPointersPrimitiveVariablesToCharacteristicVariables(
+    const std::vector<const double*>& primitive_variables,
+    const std::vector<double*>& characteristic_variables,
+    const std::vector<double>& projection_variables,
+    const DIRECTION::TYPE& direction)
+{
+    const std::vector<const double*>& V = primitive_variables;
+    const std::vector<double*>& W = characteristic_variables;
+    
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(V.size() == d_num_eqn);
+    TBOX_ASSERT(W.size() == d_num_eqn);
+    TBOX_ASSERT(projection_variables.size() == 2);
+#endif
+    
+    const double& rho_average = projection_variables[0];
+    const double& c_average = projection_variables[1];
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        switch (direction)
+        {
+            case DIRECTION::X_DIRECTION:
+            {
+                *W[0] = -0.5*rho_average*c_average*(*V[1]) + 0.5*(*V[2]);
+                *W[1] = (*V[0]) - 1.0/(c_average*c_average)*(*V[2]);
+                *W[2] = 0.5*rho_average*c_average*(*V[1]) + 0.5*(*V[2]);
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::convertLocalCellDataPointersPrimitiveVariablesToCharacteristicVariables()\n"
+                    << "There is only x-direction for one-dimensional problem."
+                    << std::endl);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        switch (direction)
+        {
+            case DIRECTION::X_DIRECTION:
+            {
+                *W[0] = -0.5*rho_average*c_average*(*V[1]) + 0.5*(*V[3]);
+                *W[1] = (*V[0]) - 1.0/(c_average*c_average)*(*V[3]);
+                *W[2] = (*V[2]);
+                *W[3] = 0.5*rho_average*c_average*(*V[1]) + 0.5*(*V[3]);
+                
+                break;
+            }
+            case DIRECTION::Y_DIRECTION:
+            {
+                *W[0] = -0.5*rho_average*c_average*(*V[2]) + 0.5*(*V[3]);
+                *W[1] = (*V[0]) - 1.0/(c_average*c_average)*(*V[3]);
+                *W[2] = (*V[1]);
+                *W[3] = 0.5*rho_average*c_average*(*V[2]) + 0.5*(*V[3]);
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::convertLocalCellDataPointersPrimitiveVariablesToCharacteristicVariables()\n"
+                    << "There are only x-direction and y-direction for two-dimensional problem."
+                    << std::endl);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        switch (direction)
+        {
+            case DIRECTION::X_DIRECTION:
+            {
+                *W[0] = -0.5*rho_average*c_average*(*V[1]) + 0.5*(*V[4]);
+                *W[1] = (*V[0]) - 1.0/(c_average*c_average)*(*V[4]);
+                *W[2] = (*V[2]);
+                *W[3] = (*V[3]);
+                *W[4] = 0.5*rho_average*c_average*(*V[1]) + 0.5*(*V[4]);
+                
+                break;
+            }
+            case DIRECTION::Y_DIRECTION:
+            {
+                *W[0] = -0.5*rho_average*c_average*(*V[2]) + 0.5*(*V[4]);
+                *W[1] = (*V[0]) - 1.0/(c_average*c_average)*(*V[4]);
+                *W[2] = (*V[1]);
+                *W[3] = (*V[3]);
+                *W[4] = 0.5*rho_average*c_average*(*V[2]) + 0.5*(*V[4]);
+                
+                break;
+            }
+            case DIRECTION::Z_DIRECTION:
+            {
+                *W[0] = -0.5*rho_average*c_average*(*V[3]) + 0.5*(*V[4]);
+                *W[1] = (*V[0]) - 1.0/(c_average*c_average)*(*V[4]);
+                *W[2] = (*V[1]);
+                *W[3] = (*V[2]);
+                *W[4] = 0.5*rho_average*c_average*(*V[3]) + 0.5*(*V[4]);
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::convertLocalCellDataPointersPrimitiveVariablesToCharacteristicVariables()\n"
+                    << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
+                    << std::endl);
+            }
+        }
+    }
+}
+
+
+/*
+ * Convert vector of pointers to characteristic cell data to vectors of pointers to primitive cell data.
+ */
+void
+FlowModelSingleSpecies::convertLocalCellDataPointersCharacteristicVariablesToPrimitiveVariables(
+    const std::vector<const double*>& characteristic_variables,
+    const std::vector<double*>& primitive_variables,
+    const std::vector<double>& projection_variables,
+    const DIRECTION::TYPE& direction)
+{
+    const std::vector<const double*>& W = characteristic_variables;
+    const std::vector<double*>& V = primitive_variables;
+    
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(W.size() == d_num_eqn);
+    TBOX_ASSERT(V.size() == d_num_eqn);
+    TBOX_ASSERT(projection_variables.size() == 2);
+#endif
+    
+    const double& rho_average = projection_variables[0];
+    const double& c_average = projection_variables[1];
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        switch (direction)
+        {
+            case DIRECTION::X_DIRECTION:
+            {
+                *V[0] = 1.0/(c_average*c_average)*(*W[0]) + (*W[1]) + 1.0/(c_average*c_average)*(*W[2]);
+                *V[1] = -1.0/(rho_average*c_average)*(*W[0]) + 1.0/(rho_average*c_average)*(*W[2]);
+                *V[2] = (*W[0]) + (*W[2]);
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::convertLocalCellDataPointersCharacteristicVariablesToPrimitiveVariables()\n"
+                    << "There is only x-direction for one-dimensional problem."
+                    << std::endl);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        switch (direction)
+        {
+            case DIRECTION::X_DIRECTION:
+            {
+                *V[0] = 1.0/(c_average*c_average)*(*W[0]) + (*W[1]) + 1.0/(c_average*c_average)*(*W[3]);
+                *V[1] = -1.0/(rho_average*c_average)*(*W[0]) + 1.0/(rho_average*c_average)*(*W[3]);
+                *V[2] = (*W[2]);
+                *V[3] = (*W[0]) + (*W[3]);
+                
+                break;
+            }
+            case DIRECTION::Y_DIRECTION:
+            {
+                *V[0] = 1.0/(c_average*c_average)*(*W[0]) + (*W[1]) + 1.0/(c_average*c_average)*(*W[3]);
+                *V[1] = (*W[2]);
+                *V[2] = -1.0/(rho_average*c_average)*(*W[0]) + 1.0/(rho_average*c_average)*(*W[3]);
+                *V[3] = (*W[0]) + (*W[3]);
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::convertLocalCellDataPointersCharacteristicVariablesToPrimitiveVariables()\n"
+                    << "There are only x-direction and y-direction for two-dimensional problem."
+                    << std::endl);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        switch (direction)
+        {
+            case DIRECTION::X_DIRECTION:
+            {
+                *V[0] = 1.0/(c_average*c_average)*(*W[0]) + (*W[1]) + 1.0/(c_average*c_average)*(*W[4]);
+                *V[1] = -1.0/(rho_average*c_average)*(*W[0]) + 1.0/(rho_average*c_average)*(*W[4]);
+                *V[2] = (*W[2]);
+                *V[3] = (*W[3]);
+                *V[4] = (*W[0]) + (*W[4]);
+                
+                break;
+            }
+            case DIRECTION::Y_DIRECTION:
+            {
+                *V[0] = 1.0/(c_average*c_average)*(*W[0]) + (*W[1]) + 1.0/(c_average*c_average)*(*W[4]);
+                *V[1] = (*W[2]);
+                *V[2] = -1.0/(rho_average*c_average)*(*W[0]) + 1.0/(rho_average*c_average)*(*W[4]);
+                *V[3] = (*W[3]);
+                *V[4] = (*W[0]) + (*W[4]);
+                
+                break;
+            }
+            case DIRECTION::Z_DIRECTION:
+            {
+                *V[0] = 1.0/(c_average*c_average)*(*W[0]) + (*W[1]) + 1.0/(c_average*c_average)*(*W[4]);
+                *V[1] = (*W[2]);
+                *V[2] = (*W[3]);
+                *V[3] = -1.0/(rho_average*c_average)*(*W[0]) + 1.0/(rho_average*c_average)*(*W[4]);
+                *V[4] = (*W[0]) + (*W[4]);
+                
+                break;
+            }
+            default:
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::convertLocalCellDataPointersCharacteristicVariablesToPrimitiveVariables()\n"
+                    << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
+                    << std::endl);
+            }
+        }
+    }
+}
+
+
+
+
+
+/*
  * Compute the local face data of projection matrix of conservative variables in the
  * registered patch.
  */

@@ -10,6 +10,7 @@
 #include "SAMRAI/pdat/CellData.h"
 #include "SAMRAI/pdat/CellVariable.h"
 #include "SAMRAI/pdat/FaceData.h"
+#include "SAMRAI/pdat/SideData.h"
 
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
 #include "flow/flow_models/FlowModelBoundaryUtilities.hpp"
@@ -257,6 +258,135 @@ class FlowModel:
          */
         virtual std::vector<boost::shared_ptr<pdat::CellData<double> > >
         getGlobalCellDataPrimitiveVariables() = 0;
+        
+/*
+ * Get the number of projection variables for transformation between conservative
+ * variables and characteristic variables.
+ */
+virtual int
+getNumberOfProjectionVariablesForConservativeVariables() const = 0;
+
+/*
+ * Get the number of projection variables for transformation between primitive variables
+ * and characteristic variables.
+ */
+virtual int
+getNumberOfProjectionVariablesForPrimitiveVariables() const = 0;
+
+/*
+ * Compute global side data of the projection variables for transformation between
+ * conservative variables and characteristic variables.
+ */
+virtual void
+computeGlobalSideDataProjectionVariablesForConservativeVariables(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
+
+/*
+ * Compute global side data of the projection variables for transformation between
+ * primitive variables and characteristic variables.
+ */
+virtual void
+computeGlobalSideDataProjectionVariablesForPrimitiveVariables(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
+
+/*
+ * Compute global side data of characteristic variables from conservative variables.
+ */
+virtual void
+computeGlobalSideDataCharacteristicVariablesFromConservativeVariables(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
+    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
+    const int& idx_offset) = 0;
+
+/*
+ * Compute global side data of characteristic variables from primitive variables.
+ */
+virtual void
+computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
+    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
+    const int& idx_offset) = 0;
+
+/*
+ * Compute global side data of conservative variables from characteristic variables.
+ */
+virtual void
+computeGlobalSideDataConservativeVariablesFromCharacteristicVariables(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
+
+/*
+ * Compute global side data of primitive variables from characteristic variables.
+ */
+virtual void
+computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
+
+
+/*
+ * Compute the local projection data at face for conservative variables.
+ */
+virtual void
+computeLocalProjectionFaceDataConservativeVariables(
+    std::vector<double>& projection_variables,
+    const hier::Index& cell_index_minus,
+    const hier::Index& cell_index_plus,
+    const DIRECTION::TYPE& direction) = 0;
+
+/*
+ * Compute the local projection data at face for primitive variables.
+ */
+virtual void
+computeLocalFaceDataPrimitveVariables(
+    std::vector<double>& projection_variables,
+    const hier::Index& cell_index_minus,
+    const hier::Index& cell_index_plus,
+    const DIRECTION::TYPE& direction) = 0;
+
+/*
+ * Convert vector of pointers to conservative cell data to vectors of pointers to characteristic cell data.
+ */
+virtual void
+convertLocalCellDataPointersConservativeVariablesToCharacteristicVariables(
+    const std::vector<const double*>& conservative_variables,
+    const std::vector<double*>& characteristic_variables,
+    const std::vector<double>& projection_variables,
+    const DIRECTION::TYPE& direction) = 0;
+
+/*
+ * Convert vector of pointers to characteristic cell data to vectors of pointers to conservative cell data.
+ */
+virtual void
+convertLocalCellDataPointersCharacteristicVariablesToConservativeVariables(
+    const std::vector<const double*>& characteristic_variables,
+    const std::vector<double*>& conservative_variables,
+    const std::vector<double>& projection_variables,
+    const DIRECTION::TYPE& direction) = 0;
+
+/*
+ * Convert vector of pointers to primitive cell data to vectors of pointers to characteristic cell data.
+ */
+virtual void
+convertLocalCellDataPointersPrimitiveVariablesToCharacteristicVariables(
+    const std::vector<const double*>& primitive_variables,
+    const std::vector<double*>& characteristic_variables,
+    const std::vector<double>& projection_variables,
+    const DIRECTION::TYPE& direction) = 0;
+
+/*
+ * Convert vector of pointers to characteristic cell data to vectors of pointers to primitive cell data.
+ */
+virtual void
+convertLocalCellDataPointersCharacteristicVariablesToPrimitiveVariables(
+    const std::vector<const double*>& characteristic_variables,
+    const std::vector<double*>& primitive_variables,
+    const std::vector<double>& projection_variables,
+    const DIRECTION::TYPE& direction) = 0;
         
         /*
          * Compute the local face datum of projection matrix of conservative variables in the

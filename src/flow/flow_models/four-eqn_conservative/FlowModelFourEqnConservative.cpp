@@ -1543,6 +1543,240 @@ FlowModelFourEqnConservative::getGlobalCellDataPrimitiveVariables()
 
 
 /*
+ * Get the number of projection variables for transformation between conservative
+ * variables and characteristic variables.
+ */
+int
+FlowModelFourEqnConservative::getNumberOfProjectionVariablesForConservativeVariables() const
+{
+    return 0;
+}
+
+/*
+ * Get the number of projection variables for transformation between primitive variables
+ * and characteristic variables.
+ */
+int
+FlowModelFourEqnConservative::getNumberOfProjectionVariablesForPrimitiveVariables() const
+{
+    return 0;
+}
+
+
+/*
+ * Compute global side data of the projection variables for transformation between
+ * conservative variables and characteristic variables.
+ */
+void
+FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForConservativeVariables(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
+{
+    
+}
+
+
+/*
+ * Compute global side data of the projection variables for transformation between
+ * primitive variables and characteristic variables.
+ */
+void
+FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimitiveVariables(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
+{
+    
+}
+
+
+/*
+ * Compute global side data of characteristic variables from conservative variables.
+ */
+void
+FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromConservativeVariables(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
+    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
+    const int& idx_offset)
+{
+    
+}
+
+
+/*
+ * Compute global side data of characteristic variables from primitive variables.
+ */
+void
+FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
+    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
+    const int& idx_offset)
+{
+    
+}
+
+
+/*
+ * Compute global side data of conservative variables from characteristic variables.
+ */
+void
+FlowModelFourEqnConservative::computeGlobalSideDataConservativeVariablesFromCharacteristicVariables(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
+{
+    
+}
+
+
+/*
+ * Compute global side data of primitive variables from characteristic variables.
+ */
+void
+FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
+{
+    
+}
+
+
+
+/*
+ * Compute the local projection data at face for conservative variables.
+ */
+void
+FlowModelFourEqnConservative::computeLocalProjectionFaceDataConservativeVariables(
+    std::vector<double>& projection_variables,
+    const hier::Index& cell_index_minus,
+    const hier::Index& cell_index_plus,
+    const DIRECTION::TYPE& direction)
+{
+    NULL_USE(projection_variables);
+    NULL_USE(cell_index_minus);
+    NULL_USE(cell_index_plus);
+    NULL_USE(direction);
+    
+    TBOX_ERROR(d_object_name
+        << ": FlowModelFourEqnConservative::computeLocalProjectionFaceDataConservativeVariables()\n"
+        << "Method computeLocalProjectionFaceDataConservativeVariables() is not yet implemented."
+        << std::endl);
+}
+
+
+/*
+ * Compute the local projection data at face for primitive variables.
+ */
+void
+FlowModelFourEqnConservative::computeLocalFaceDataPrimitveVariables(
+    std::vector<double>& projection_variables,
+    const hier::Index& cell_index_minus,
+    const hier::Index& cell_index_plus,
+    const DIRECTION::TYPE& direction)
+{
+    NULL_USE(projection_variables);
+    NULL_USE(cell_index_minus);
+    NULL_USE(cell_index_plus);
+    NULL_USE(direction);
+    
+    TBOX_ERROR(d_object_name
+        << ": FlowModelFourEqnConservative::computeLocalFaceDataPrimitveVariables()\n"
+        << "Method computeLocalFaceDataPrimitveVariables() is not yet implemented."
+        << std::endl);
+}
+
+
+/*
+ * Convert vector of pointers to conservative cell data to vectors of pointers to characteristic cell data.
+ */
+void
+FlowModelFourEqnConservative::convertLocalCellDataPointersConservativeVariablesToCharacteristicVariables(
+    const std::vector<const double*>& conservative_variables,
+    const std::vector<double*>& characteristic_variables,
+    const std::vector<double>& projection_variables,
+    const DIRECTION::TYPE& direction)
+{
+    NULL_USE(conservative_variables);
+    NULL_USE(characteristic_variables);
+    NULL_USE(projection_variables);
+    NULL_USE(direction);
+    
+    TBOX_ERROR(d_object_name
+        << ": FlowModelFourEqnConservative::convertLocalCellDataPointersConservativeVariablesToCharacteristicVariables()\n"
+        << "Method convertLocalCellDataPointersConservativeVariablesToCharacteristicVariables() is not yet implemented."
+        << std::endl);
+}
+
+
+/*
+ * Convert vector of pointers to characteristic cell data to vectors of pointers to conservative cell data.
+ */
+void
+FlowModelFourEqnConservative::convertLocalCellDataPointersCharacteristicVariablesToConservativeVariables(
+    const std::vector<const double*>& characteristic_variables,
+    const std::vector<double*>& conservative_variables,
+    const std::vector<double>& projection_variables,
+    const DIRECTION::TYPE& direction)
+{
+    NULL_USE(characteristic_variables);
+    NULL_USE(conservative_variables);
+    NULL_USE(projection_variables);
+    NULL_USE(direction);
+    
+    TBOX_ERROR(d_object_name
+        << ": FlowModelFourEqnConservative::convertLocalCellDataPointersCharacteristicVariablesToConservativeVariables()\n"
+        << "Method convertLocalCellDataPointersCharacteristicVariablesToConservativeVariables() is not yet implemented."
+        << std::endl);
+}
+
+
+/*
+ * Convert vector of pointers to primitive cell data to vectors of pointers to characteristic cell data.
+ */
+void
+FlowModelFourEqnConservative::convertLocalCellDataPointersPrimitiveVariablesToCharacteristicVariables(
+    const std::vector<const double*>& primitive_variables,
+    const std::vector<double*>& characteristic_variables,
+    const std::vector<double>& projection_variables,
+    const DIRECTION::TYPE& direction)
+{
+    NULL_USE(primitive_variables);
+    NULL_USE(characteristic_variables);
+    NULL_USE(projection_variables);
+    NULL_USE(direction);
+    
+    TBOX_ERROR(d_object_name
+        << ": FlowModelFourEqnConservative::convertLocalCellDataPointersPrimitiveVariablesToCharacteristicVariables()\n"
+        << "Method convertLocalCellDataPointersPrimitiveVariablesToCharacteristicVariables() is not yet implemented."
+        << std::endl);
+}
+
+
+/*
+ * Convert vector of pointers to characteristic cell data to vectors of pointers to primitive cell data.
+ */
+void
+FlowModelFourEqnConservative::convertLocalCellDataPointersCharacteristicVariablesToPrimitiveVariables(
+    const std::vector<const double*>& characteristic_variables,
+    const std::vector<double*>& primitive_variables,
+    const std::vector<double>& projection_variables,
+    const DIRECTION::TYPE& direction)
+{
+    NULL_USE(characteristic_variables);
+    NULL_USE(primitive_variables);
+    NULL_USE(projection_variables);
+    NULL_USE(direction);
+    
+    TBOX_ERROR(d_object_name
+        << ": FlowModelFourEqnConservative::convertLocalCellDataPointersCharacteristicVariablesToPrimitiveVariables()\n"
+        << "Method convertLocalCellDataPointersCharacteristicVariablesToPrimitiveVariables() is not yet implemented."
+        << std::endl);
+}
+
+
+
+
+/*
  * Compute the local face data of projection matrix of conservative variables in the
  * registered patch.
  */

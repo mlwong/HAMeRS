@@ -1,8 +1,9 @@
 #ifndef CONVECTIVE_FLUX_RECONSTRUCTOR_WCNS6_TEST_HPP
 #define CONVECTIVE_FLUX_RECONSTRUCTOR_WCNS6_TEST_HPP
 
-#include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructor.hpp"
+#include "SAMRAI/pdat/SideVariable.h"
 
+#include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructor.hpp"
 #include "util/Directions.hpp"
 
 #include "boost/multi_array.hpp"
@@ -99,10 +100,83 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
             const boost::multi_array_ref<double, 2>::const_array_view<1>::type& W_array);
         
         /*
+         * Compute sigma's.
+         */
+        void
+        computeSigma(
+            double& sigma,
+            const boost::multi_array_ref<const double*, 2>::const_array_view<1>::type& U_array);
+        
+        /*
+         * Compute beta's.
+         */
+        void
+        computeBeta(
+            std::vector<double>& beta,
+            const boost::multi_array_ref<const double*, 2>::const_array_view<1>::type& U_array);
+        
+        /*
+         * Compute beta_tilde's.
+         */
+        void
+        computeBetaTilde(   
+            std::vector<double>& beta_tilde,
+            const boost::multi_array_ref<const double*, 2>::const_array_view<1>::type& U_array);
+        
+        /*
+         * Compute sigma's.
+         */
+        void
+        computeSigma(
+            double& sigma,
+            const std::vector<double*>& U_array,
+            const int& idx_face);
+        
+        /*
+         * Compute beta's.
+         */
+        void
+        computeBeta(
+            std::vector<double>& beta,
+            const std::vector<double*>& U_array,
+            const int& idx_face);
+        
+        /*
+         * Compute beta_tilde's.
+         */
+        void
+        computeBetaTilde(
+            std::vector<double>& beta_tilde,
+            const std::vector<double*>& U_array,
+            const int& idx_face);
+        
+        /*
+         * Perform WENO interpolation.
+         */
+        void
+        performWENOInterpolation_new(
+            double* U_minus,
+            double* U_plus,
+            const std::vector<double*>& U_array,
+            const int& idx_face);
+        
+        /*
          * Perform WENO interpolation.
          */
         void
         performWENOInterpolation(
+            std::vector<double>& U_minus,
+            std::vector<double>& U_plus,
+            const boost::multi_array<const double*, 2>& U_array,
+            const hier::Index& cell_index_minus,
+            const hier::Index& cell_index_plus,
+            const DIRECTION::TYPE& direction);
+        
+        /*
+         * Perform WENO interpolation.
+         */
+        void
+        performWENOInterpolation_old(
             std::vector<double>& U_minus,
             std::vector<double>& U_plus,
             const boost::multi_array<const double*, 2>& U_array,
