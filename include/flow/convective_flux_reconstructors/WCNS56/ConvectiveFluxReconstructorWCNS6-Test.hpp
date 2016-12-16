@@ -172,18 +172,11 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
             const hier::Index& cell_index_plus,
             const DIRECTION::TYPE& direction);
         
-        /*
-         * Perform WENO interpolation.
-         */
         void
-        performWENOInterpolation_old(
-            std::vector<double>& U_minus,
-            std::vector<double>& U_plus,
-            const boost::multi_array<const double*, 2>& U_array,
-            const hier::Index& cell_index_minus,
-            const hier::Index& cell_index_plus,
-            const DIRECTION::TYPE& direction);
-        
+        computeSigma(
+            std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_sigma,
+            const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_array);
+
         /*
          * Constants used by the scheme.
          */
@@ -217,30 +210,17 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
         /*
          * Containers used in WENO interpolation.
          */
-        std::vector<double> TV;
         std::vector<double> beta;
         std::vector<double> beta_tilde;
         
         /*
          * Timers interspersed throughout the class.
          */
-        static boost::shared_ptr<tbox::Timer> t_compute_v_p_f;
-        static boost::shared_ptr<tbox::Timer> t_compute_theta_omega;
-        static boost::shared_ptr<tbox::Timer> t_compute_projection_matrices;
-        static boost::shared_ptr<tbox::Timer> t_compute_midpoint_fluxes;
-        static boost::shared_ptr<tbox::Timer> t_compute_fluxes;
-        static boost::shared_ptr<tbox::Timer> t_miscellaneous;
-        static boost::shared_ptr<tbox::Timer> t_allocate_memory;
         
-        static boost::shared_ptr<tbox::Timer> t_projection;
+        static boost::shared_ptr<tbox::Timer> t_characteristic_decomposition;
         static boost::shared_ptr<tbox::Timer> t_WENO_interpolation;
         static boost::shared_ptr<tbox::Timer> t_Riemann_solver;
-        
-        static boost::shared_ptr<tbox::Timer> t_WENO_interpolation_compute_sigma_TV;
-        static boost::shared_ptr<tbox::Timer> t_WENO_interpolation_compute_beta;
-        static boost::shared_ptr<tbox::Timer> t_WENO_interpolation_compute_interpolated_values;
-        static boost::shared_ptr<tbox::Timer> t_WENO_interpolation_compute_alpha;
-        static boost::shared_ptr<tbox::Timer> t_WENO_interpolation_compute_omega;
+        static boost::shared_ptr<tbox::Timer> t_reconstruct_flux;
         
 };
 

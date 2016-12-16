@@ -5,23 +5,11 @@
 /*
  * Timers interspersed throughout the class.
  */
-boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_compute_v_p_f;
-boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_compute_theta_omega;
-boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_compute_projection_matrices;
-boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_compute_midpoint_fluxes;
-boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_compute_fluxes;
-boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_miscellaneous;
-boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_allocate_memory;
 
-boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_projection;
+boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_characteristic_decomposition;
 boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_WENO_interpolation;
 boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_Riemann_solver;
-
-boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_WENO_interpolation_compute_sigma_TV;
-boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_WENO_interpolation_compute_beta;
-boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_WENO_interpolation_compute_interpolated_values;
-boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_WENO_interpolation_compute_alpha;
-boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_WENO_interpolation_compute_omega;
+boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_reconstruct_flux;
 
 ConvectiveFluxReconstructorWCNS6_Test::ConvectiveFluxReconstructorWCNS6_Test(
     const std::string& object_name,
@@ -44,20 +32,19 @@ ConvectiveFluxReconstructorWCNS6_Test::ConvectiveFluxReconstructorWCNS6_Test(
             boost::fortran_storage_order()),
         W_minus(d_num_eqn),
         W_plus(d_num_eqn),
-        TV(4),
         beta(4),
         beta_tilde(4)
 {
     d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*4;
     
-    d_constant_C          = d_convective_flux_reconstructor_db->getDoubleWithDefault("constant_C", 1.0e9);
-    d_constant_C          = d_convective_flux_reconstructor_db->getDoubleWithDefault("d_constant_C", d_constant_C);
+    d_constant_C = d_convective_flux_reconstructor_db->getDoubleWithDefault("constant_C", 1.0e9);
+    d_constant_C = d_convective_flux_reconstructor_db->getDoubleWithDefault("d_constant_C", d_constant_C);
     
-    d_constant_p          = d_convective_flux_reconstructor_db->getIntegerWithDefault("constant_p", 2);
-    d_constant_p          = d_convective_flux_reconstructor_db->getIntegerWithDefault("d_constant_p", d_constant_p);
+    d_constant_p = d_convective_flux_reconstructor_db->getIntegerWithDefault("constant_p", 2);
+    d_constant_p = d_convective_flux_reconstructor_db->getIntegerWithDefault("d_constant_p", d_constant_p);
     
-    d_constant_q          = d_convective_flux_reconstructor_db->getIntegerWithDefault("constant_q", 4);
-    d_constant_q          = d_convective_flux_reconstructor_db->getIntegerWithDefault("d_constant_q", d_constant_q);
+    d_constant_q = d_convective_flux_reconstructor_db->getIntegerWithDefault("constant_q", 4);
+    d_constant_q = d_convective_flux_reconstructor_db->getIntegerWithDefault("d_constant_q", d_constant_q);
     
     d_constant_alpha_beta = d_convective_flux_reconstructor_db->getDoubleWithDefault("constant_alpha_beta", 35.0);
     d_constant_alpha_beta = d_convective_flux_reconstructor_db->getDoubleWithDefault("d_constant_alpha_beta", d_constant_alpha_beta);
@@ -76,23 +63,8 @@ ConvectiveFluxReconstructorWCNS6_Test::ConvectiveFluxReconstructorWCNS6_Test(
     d_weights_c[3][1] = -5.0/4;
     d_weights_c[3][2] = 3.0/8;
     
-    t_compute_v_p_f = tbox::TimerManager::getManager()->
-        getTimer("ConvectiveFluxReconstructorWCNS6_Test::t_compute_v_p_f");
-    
-    t_compute_theta_omega = tbox::TimerManager::getManager()->
-        getTimer("ConvectiveFluxReconstructorWCNS6_Test::t_compute_theta_omega");
-    
-    t_compute_projection_matrices = tbox::TimerManager::getManager()->
-        getTimer("ConvectiveFluxReconstructorWCNS6_Test::t_compute_projection_matrices");
-    
-    t_compute_midpoint_fluxes = tbox::TimerManager::getManager()->
-        getTimer("ConvectiveFluxReconstructorWCNS6_Test::t_compute_midpoint_fluxes");
-    
-    t_compute_fluxes = tbox::TimerManager::getManager()->
-        getTimer("ConvectiveFluxReconstructorWCNS6_Test::t_compute_fluxes");
-    
-    t_projection = tbox::TimerManager::getManager()->
-        getTimer("ConvectiveFluxReconstructorWCNS6_Test::t_projection");
+    t_characteristic_decomposition = tbox::TimerManager::getManager()->
+        getTimer("ConvectiveFluxReconstructorWCNS6_Test::t_characteristic_decomposition");
     
     t_WENO_interpolation = tbox::TimerManager::getManager()->
         getTimer("ConvectiveFluxReconstructorWCNS6_Test::t_WENO_interpolation");
@@ -100,49 +72,18 @@ ConvectiveFluxReconstructorWCNS6_Test::ConvectiveFluxReconstructorWCNS6_Test(
     t_Riemann_solver = tbox::TimerManager::getManager()->
         getTimer("ConvectiveFluxReconstructorWCNS6_Test::t_Riemann_solver");
     
-    t_WENO_interpolation_compute_sigma_TV = tbox::TimerManager::getManager()->
-        getTimer("ConvectiveFluxReconstructorWCNS6_Test::t_WENO_interpolation_compute_sigma_TV");
+    t_reconstruct_flux = tbox::TimerManager::getManager()->
+        getTimer("ConvectiveFluxReconstructorWCNS6_Test::t_reconstruct_flux");
     
-    t_WENO_interpolation_compute_beta = tbox::TimerManager::getManager()->
-        getTimer("ConvectiveFluxReconstructorWCNS6_Test::t_WENO_interpolation_compute_beta");
-    
-    t_WENO_interpolation_compute_interpolated_values = tbox::TimerManager::getManager()->
-        getTimer("ConvectiveFluxReconstructorWCNS6_Test::t_WENO_interpolation_compute_interpolated_values");
-    
-    t_WENO_interpolation_compute_alpha = tbox::TimerManager::getManager()->
-        getTimer("ConvectiveFluxReconstructorWCNS6_Test::t_WENO_interpolation_compute_alpha");
-    
-    t_WENO_interpolation_compute_omega = tbox::TimerManager::getManager()->
-        getTimer("ConvectiveFluxReconstructorWCNS6_Test::t_WENO_interpolation_compute_omega");
-        
-    t_miscellaneous = tbox::TimerManager::getManager()->
-        getTimer("ConvectiveFluxReconstructorWCNS6_Test::t_miscellaneous");
-    
-    t_allocate_memory = tbox::TimerManager::getManager()->
-        getTimer("ConvectiveFluxReconstructorWCNS6_Test::t_allocate_memory");
 }
 
 
 ConvectiveFluxReconstructorWCNS6_Test::~ConvectiveFluxReconstructorWCNS6_Test()
 {
-    t_compute_v_p_f.reset();
-    t_compute_v_p_f.reset();;
-    t_compute_theta_omega.reset();
-    t_compute_projection_matrices.reset();
-    t_compute_midpoint_fluxes.reset();
-    t_compute_fluxes.reset();
-    t_miscellaneous.reset();
-    t_allocate_memory.reset();
-    
-    t_projection.reset();
+    t_characteristic_decomposition.reset();
     t_WENO_interpolation.reset();
     t_Riemann_solver.reset();
-    
-    t_WENO_interpolation_compute_sigma_TV.reset();
-    t_WENO_interpolation_compute_beta.reset();
-    t_WENO_interpolation_compute_interpolated_values.reset();
-    t_WENO_interpolation_compute_alpha.reset();
-    t_WENO_interpolation_compute_omega.reset();
+    t_reconstruct_flux.reset();
 }
 
 
@@ -761,18 +702,18 @@ for (int ei = 0; ei < d_num_eqn; ei++)
  * Compute global side data of the projection variables for transformation between
  * primitive variables and characteristic variables.
  */
-t_compute_projection_matrices->start();
+t_characteristic_decomposition->start();
 
 d_flow_model->computeGlobalSideDataProjectionVariablesForPrimitiveVariables(
     projection_variables);
 
-t_compute_projection_matrices->stop();
+t_characteristic_decomposition->stop();
 
 /*
  * Transform primitive variables to characteristic variables.
  */
 
-t_compute_projection_matrices->start();
+t_characteristic_decomposition->start();
 
 for (int m = 0; m < 6; m++)
 {
@@ -783,7 +724,7 @@ for (int m = 0; m < 6; m++)
         m - 3);
 }
 
-t_compute_projection_matrices->stop();
+t_characteristic_decomposition->stop();
 
 /*
  * Peform WENO interpolation in the x-direction.
@@ -865,7 +806,7 @@ t_WENO_interpolation->stop();
  * Transform characteristic variables back to primitive variables.
  */
 
-t_compute_projection_matrices->start();
+t_characteristic_decomposition->start();
 
 d_flow_model->computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
     primitive_variables_minus,
@@ -877,10 +818,10 @@ d_flow_model->computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables
     characteristic_variables_plus,
     projection_variables);
 
-t_compute_projection_matrices->stop();
+t_characteristic_decomposition->stop();
 
 /*
- * Apply the Riemann solver in the x-direction.
+ * Compute mid-point flux in the x-direction.
  */
 
 t_Riemann_solver->start();
@@ -991,7 +932,7 @@ for (int j = 0; j < interior_dims[1]; j++)
 t_Riemann_solver->stop();
 
 /*
- * Apply the Riemann solver in the y-direction.
+ * Compute mid-point flux in the y-direction.
  */
 
 t_Riemann_solver->start();
@@ -1102,8 +1043,10 @@ for (int j = -1; j < interior_dims[1] + 2; j++)
 t_Riemann_solver->stop();
 
         /*
-         * Compute the fluxes in the x direction.
+         * Reconstruct the flux in the x direction.
          */
+        
+t_reconstruct_flux->start();
         
         for (int j = 0; j < interior_dims[1]; j++)
         {
@@ -1141,9 +1084,13 @@ const int idx_midpoint_x_R = (i + 2) +
             }
         }
         
+t_reconstruct_flux->stop();
+        
         /*
-         * Compute the fluxes in the y direction.
+         * Reconstruct the flux in the y direction.
          */
+        
+t_reconstruct_flux->start();
         
         for (int i = 0; i < interior_dims[0]; i++)
         {
@@ -1184,6 +1131,8 @@ const int idx_midpoint_y_T = (i + 1) +
                 }
             }
         }
+        
+t_reconstruct_flux->stop();
         
         /*
          * Compute the source.
@@ -2616,6 +2565,124 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBetaTilde(
 
 
 /*
+ * Compute sigma's.
+ */
+void
+ConvectiveFluxReconstructorWCNS6_Test::computeSigma(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_sigma,
+    const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_array)
+{
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(static_cast<int>(variables_sigma.size()) == d_num_eqn);
+    TBOX_ASSERT(variables_sigma[0]->getGhostCellWidth == hier::IntVector::getOne(d_dim));
+#endif
+    
+    /*
+     * Get the dimensions of interior box and box including ghost cells.
+     */
+    
+    const hier::IntVector interior_dims = variables_sigma[0]->getBox().numberCells();
+    const hier::IntVector ghostcell_dims = variables_sigma[0]->getGhostBox().numberCells();
+    const hier::IntVector num_ghosts = variables_sigma[0]->getGhostCellWidth();
+    
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(static_cast<int>(variables_array.size()) == 6);
+    
+    for (int m = 0; m < 6; m++)
+    {
+        TBOX_ASSERT(static_cast<int>(variables_array[m].size()) == d_num_eqn);
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            TBOX_ERROR(variables_array[m][ei]->getBox().numberCells() == interior_dims);
+            TBOX_ERROR(variables_array[m][ei]->getGhostBox().numberCells() == ghostcell_dims);
+        }
+    }
+    
+    for (int ei = 0; ei < d_num_eqn; ei++)
+    {
+        TBOX_ERROR(variables_sigma[ei]->getBox().numberCells() == interior_dims);
+        TBOX_ERROR(variables_sigma[ei]->getGhostBox().numberCells() == ghostcell_dims);
+    }
+#endif
+    
+    /*
+     * Get the pointers to the sigma's.
+     */
+    
+    std::vector<double*> sigma;
+    sigma.reserve(d_num_eqn);
+    for (int ei = 0; ei < d_num_eqn; ei++)
+    {
+        sigma.push_back(variables_sigma[ei]->getPointer(0));
+    }
+    
+    /*
+     * Declare the pointers to the array of variables.
+     */
+    
+    std::vector<double*> U_array;
+    U_array.resize(6);
+    
+    /*
+     * Compute the sigma's.
+     */
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        const int interior_dim_0 = interior_dims[0];
+        const int num_ghosts_0 = num_ghosts[0];
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            for (int m = 0; m < 6; m++)
+            {
+                U_array[m] = variables_array[m][ei]->getPointer(0);
+            }
+            
+            for (int i = -num_ghosts_0;
+                 i < interior_dim_0 + 1 + num_ghosts_0;
+                 i++)
+            {
+                // Compute the linear index.
+                const int idx_side = i + num_ghosts_0;
+                
+                double alpha_1 = U_array[2][idx_side] - U_array[1][idx_side];
+                double alpha_2 = U_array[3][idx_side] - U_array[2][idx_side];
+                double alpha_3 = U_array[4][idx_side] - U_array[3][idx_side];
+                
+                double theta_1 = fabs(alpha_1 - alpha_2)/(fabs(alpha_1) + fabs(alpha_2) + EPSILON);
+                double theta_2 = fabs(alpha_2 - alpha_3)/(fabs(alpha_2) + fabs(alpha_3) + EPSILON);
+                
+                sigma[ei][idx_side] = fmax(theta_1, theta_2);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        
+    }
+}
+
+/*
+ * Perform WENO interpolation.
+ */
+/*
+void
+ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_minus,
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_plus,
+    const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_array)
+{
+    
+}
+*/
+
+/*
  * Perform WENO interpolation.
  */
 inline void
@@ -2944,365 +3011,6 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation_new(
  */
 void
 ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
-    std::vector<double>& U_minus,
-    std::vector<double>& U_plus,
-    const boost::multi_array<const double*, 2>& U_array,
-    const hier::Index& cell_index_minus,
-    const hier::Index& cell_index_plus,
-    const DIRECTION::TYPE& direction)
-{
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(U_array.shape()[0]) == 6);
-    TBOX_ASSERT(static_cast<int>(U_array.shape()[1]) == d_num_eqn);
-    TBOX_ASSERT(static_cast<int>(U_minus.size()) == d_num_eqn);
-    TBOX_ASSERT(static_cast<int>(U_plus.size()) == d_num_eqn);
-#endif
-    
-    /*
-     * Transform the physical variables into the characteristic variables.
-     */
-    
-    std::vector<double> projection_variables;
-    d_flow_model->computeLocalFaceDataPrimitveVariables(
-        projection_variables,
-        cell_index_minus,
-        cell_index_plus,
-        direction);
-    
-    std::vector<double*> primitive_variables;
-    std::vector<double*> characteristic_variables;
-    
-    std::vector<const double*> primitive_variables_const;
-    std::vector<const double*> characteristic_variables_const;
-    
-    primitive_variables.resize(d_num_eqn);
-    characteristic_variables.resize(d_num_eqn);
-    primitive_variables_const.resize(d_num_eqn);
-    characteristic_variables_const.resize(d_num_eqn);
-    
-    /*
-     * Transform the physical variables into the characteristic variables.
-     */
-    
-    for (int m = 0; m < 6; m++)
-    {
-        for (int ei = 0; ei < d_num_eqn; ei++)
-        {
-            primitive_variables_const[ei] = U_array[m][ei];
-            characteristic_variables[ei] = &W_array[m][ei];
-        }
-        
-        d_flow_model->convertLocalCellDataPointersPrimitiveVariablesToCharacteristicVariables(
-            primitive_variables_const,
-            characteristic_variables,
-            projection_variables,
-            direction);
-    }
-    
-    /*
-     * Perform the WENO interpolation.
-     */
-    
-    const double& C = d_constant_C;
-    const int& p = d_constant_p;
-    const int& q = d_constant_q;
-    const double& alpha_beta = d_constant_alpha_beta;
-    
-    for (int ei = 0; ei < d_num_eqn; ei++)
-    {
-        boost::multi_array_ref<double, 2>::const_array_view<1>::type W_array_ei =
-            W_array[boost::indices[boost::multi_array_ref<double, 2>::index_range()][ei]];
-        
-        // Compute sigma.
-        double sigma;
-        computeSigma(sigma, W_array_ei);
-        
-        // Compute beta's.
-        computeBeta(beta, W_array_ei);
-        computeBetaTilde(beta_tilde, W_array_ei);
-        
-        /*
-         * Compute W_minus of the current characteristic variable.
-         */
-        
-        // Compute the reference smoothness indicators tau_6.
-        const double beta_avg = 1.0/8*(beta[0] + beta[2] + 6*beta[1]);
-        const double tau_6 = fabs(beta[3] - beta_avg);
-        
-        if(fabs(tau_6/(beta_avg + EPSILON)) > alpha_beta)
-        {
-            /*
-             * Compute the weights alpha_upwind.
-             */
-            
-            double alpha_upwind[4];
-            double alpha_upwind_sum = 0.0;
-            
-            // Define linear weights d.
-            double d[4];
-            d[0] = 1.0/16.0;
-            d[1] = 5.0/8.0;
-            d[2] = 5.0/16.0;
-            
-            const double tau_5 = fabs(beta[0] - beta[2]);
-            
-            for (int r = 0; r < 3; r++)
-            {
-                // Compute the weights alpha_upwind.
-                alpha_upwind[r] = d[r]*(1.0 + pow(tau_5/(beta[r] + EPSILON), p));
-                
-                // Sum up the weights alpha_upwind.
-                alpha_upwind_sum += alpha_upwind[r];
-            }
-            alpha_upwind[3] = 0.0;
-            
-            /*
-             * Compute the weights alpha_central.
-             */
-            
-            double alpha_central[4];
-            double alpha_central_sum = 0.0;
-            
-            // Define linear weights d.
-            d[0] = 1.0/32.0;
-            d[1] = 15.0/32.0;
-            d[2] = 15.0/32.0;
-            d[3] = 1.0/32.0;
-            
-            for (int r = 0; r < 4; r++)
-            {
-                // Compute the weights alpha.
-                alpha_central[r] = d[r]*(C + pow(tau_6/(beta[r] + EPSILON), q));
-                
-                // Sum up the weights alpha.
-                alpha_central_sum += alpha_central[r];
-            }
-            
-            // Compute the W_minus.
-            W_minus[ei] = 0.0;
-            
-            for (int r = 0; r < 4; r++)
-            {
-                // Compute the linear interpolated value.
-                double W_minus_r = 0.0;
-                for (int m = r; m < 3 + r; m++)
-                {
-                    W_minus_r += d_weights_c[r][m - r]*W_array[m][ei];
-                }
-                
-                // Compute omega.
-                const double omega_upwind = alpha_upwind[r]/alpha_upwind_sum;
-                const double omega_central = alpha_central[r]/alpha_central_sum;
-                const double omega = sigma*omega_upwind + (1.0 - sigma)*omega_central;
-                
-                // Compute the nonlinear interpolated value.
-                W_minus[ei] += omega*W_minus_r;
-            }
-        }
-        else
-        {
-            // Define linear weights d.
-            double d[4];
-            d[0] = 1.0/32.0;
-            d[1] = 15.0/32.0;
-            d[2] = 15.0/32.0;
-            d[3] = 1.0/32.0;
-            
-            /*
-             * Compute the weights alpha.
-             */
-            
-            double alpha[4];
-            double alpha_sum = 0.0;
-            
-            for (int r = 0; r < 4; r++)
-            {
-                // Compute the weights alpha.
-                alpha[r] = d[r]*(C + pow(tau_6/(beta[r] + EPSILON), q));
-                
-                // Sum up the weights alpha.
-                alpha_sum += alpha[r];
-            }
-            
-            // Compute the W_minus.
-            W_minus[ei] = 0.0;
-            
-            for (int r = 0; r < 4; r++)
-            {
-                // Compute the linear interpolated value.
-                double W_minus_r = 0.0;
-                for (int m = r; m < 3 + r; m++)
-                {
-                    W_minus_r += d_weights_c[r][m - r]*W_array[m][ei];
-                }
-                
-                // Compute omega.
-                const double omega = alpha[r]/alpha_sum;
-                
-                // Compute the nonlinear interpolated value.
-                W_minus[ei] += omega*W_minus_r;
-            }
-        }
-        
-        /*
-         * Compute W_plus of the current characteristic variable.
-         */
-        
-        // Compute the reference smoothness indicators tau_6_tilde.
-        const double beta_tilde_avg =  1.0/8*(beta_tilde[0] + beta_tilde[2] + 6*beta_tilde[1]);
-        const double tau_6_tilde = fabs(beta_tilde[3] - beta_tilde_avg);
-        
-        if (fabs(tau_6_tilde/(beta_tilde_avg + EPSILON)) > alpha_beta)
-        {
-            /*
-             * Compute the weights alpha_upwind_tilde.
-             */
-            
-            double alpha_upwind_tilde[4];
-            double alpha_upwind_tilde_sum = 0.0;
-            
-            // Define linear weights d.
-            double d[4];
-            d[0] = 1.0/16.0;
-            d[1] = 5.0/8.0;
-            d[2] = 5.0/16.0;
-            
-            const double tau_5_tilde = fabs(beta_tilde[0] - beta_tilde[2]);
-            
-            for (int r = 0; r < 3; r++)
-            {
-                // Compute the weights alpha_upwind_tilde.
-                alpha_upwind_tilde[r] = d[r]*(1.0 + pow(tau_5_tilde/(beta_tilde[r] + EPSILON), p));
-                
-                // Sum up the weights alpha_upwind_tilde.
-                alpha_upwind_tilde_sum += alpha_upwind_tilde[r];
-            }
-            alpha_upwind_tilde[3] = 0.0;
-            
-            /*
-             * Compute the weights alpha_central_tilde.
-             */
-            
-            double alpha_central_tilde[4];
-            double alpha_central_tilde_sum = 0.0;
-            
-            // Define linear weights d.
-            d[0] = 1.0/32.0;
-            d[1] = 15.0/32.0;
-            d[2] = 15.0/32.0;
-            d[3] = 1.0/32.0;
-            
-            for (int r = 0; r < 4; r++)
-            {
-                // Compute the weights alpha_tilde.
-                alpha_central_tilde[r] = d[r]*(C + pow(tau_6_tilde/(beta_tilde[r] + EPSILON), q));
-                
-                // Sum up the weights alpha.
-                alpha_central_tilde_sum += alpha_central_tilde[r];
-            }
-            
-            // Compute the W_plus.
-            W_plus[ei] = 0.0;
-            
-            for (int r = 0; r < 4; r++)
-            {
-                // Compute the linear interpolated value.
-                double W_plus_r = 0.0;
-                for (int m = r; m < 3 + r; m++)
-                {
-                    W_plus_r += d_weights_c[r][m - r]*W_array[6 - m - 1][ei];
-                }
-                
-                // Compute omega_tilde;
-                const double omega_upwind_tilde = alpha_upwind_tilde[r]/alpha_upwind_tilde_sum;
-                const double omega_central_tilde = alpha_central_tilde[r]/alpha_central_tilde_sum;
-                const double omega_tilde = sigma*omega_upwind_tilde + (1.0 - sigma)*omega_central_tilde;
-                
-                // Compute the nonlinear interpolated value.
-                W_plus[ei] += omega_tilde*W_plus_r;
-            }
-        }
-        else
-        {
-            // Define linear weights d.
-            double d[4];
-            d[0] = 1.0/32.0;
-            d[1] = 15.0/32.0;
-            d[2] = 15.0/32.0;
-            d[3] = 1.0/32.0;
-            
-            /*
-             * Compute the weights alpha_tilde.
-             */
-            
-            double alpha_tilde[4];
-            double alpha_tilde_sum = 0.0;
-            
-            for (int r = 0; r < 4; r++)
-            {
-                // Compute the weights alpha_tilde.
-                alpha_tilde[r] = d[r]*(C + pow(tau_6_tilde/(beta_tilde[r] + EPSILON), q));
-                
-                // Sum up the weights alpha.
-                alpha_tilde_sum += alpha_tilde[r];
-            }
-            
-            // Compute the W_plus.
-            W_plus[ei] = 0.0;
-            
-            for (int r = 0; r < 4; r++)
-            {
-                // Compute the linear interpolated value.
-                double W_plus_r = 0.0;
-                for (int m = r; m < 3 + r; m++)
-                {
-                    W_plus_r += d_weights_c[r][m - r]*W_array[6 - m - 1][ei];
-                }
-                
-                // Compute omega_tilde;
-                const double omega_tilde = alpha_tilde[r]/alpha_tilde_sum;
-                
-                // Compute the nonlinear interpolated value.
-                W_plus[ei] += omega_tilde*W_plus_r;
-            }
-        }
-    }
-    
-    /*
-     * Transform the characteristic variables back to physcial variables.
-     */
-    
-    for (int ei = 0; ei < d_num_eqn; ei++)
-    {
-        characteristic_variables_const[ei] = &W_minus[ei];
-        primitive_variables[ei] = &U_minus[ei];
-    }
-    
-    d_flow_model->convertLocalCellDataPointersCharacteristicVariablesToPrimitiveVariables(
-        characteristic_variables_const,
-        primitive_variables,
-        projection_variables,
-        direction);
-    
-    for (int ei = 0; ei < d_num_eqn; ei++)
-    {
-        characteristic_variables_const[ei] = &W_plus[ei];
-        primitive_variables[ei] = &U_plus[ei];
-    }
-    
-    d_flow_model->convertLocalCellDataPointersCharacteristicVariablesToPrimitiveVariables(
-        characteristic_variables_const,
-        primitive_variables,
-        projection_variables,
-        direction);
-}
-
-
-/*
- * Perform WENO interpolation.
- */
-void
-ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation_old(
     std::vector<double>& U_minus,
     std::vector<double>& U_plus,
     const boost::multi_array<const double*, 2>& U_array,

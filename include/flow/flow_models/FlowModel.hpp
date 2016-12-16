@@ -326,67 +326,6 @@ computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
     std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
     const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
-
-
-/*
- * Compute the local projection data at face for conservative variables.
- */
-virtual void
-computeLocalProjectionFaceDataConservativeVariables(
-    std::vector<double>& projection_variables,
-    const hier::Index& cell_index_minus,
-    const hier::Index& cell_index_plus,
-    const DIRECTION::TYPE& direction) = 0;
-
-/*
- * Compute the local projection data at face for primitive variables.
- */
-virtual void
-computeLocalFaceDataPrimitveVariables(
-    std::vector<double>& projection_variables,
-    const hier::Index& cell_index_minus,
-    const hier::Index& cell_index_plus,
-    const DIRECTION::TYPE& direction) = 0;
-
-/*
- * Convert vector of pointers to conservative cell data to vectors of pointers to characteristic cell data.
- */
-virtual void
-convertLocalCellDataPointersConservativeVariablesToCharacteristicVariables(
-    const std::vector<const double*>& conservative_variables,
-    const std::vector<double*>& characteristic_variables,
-    const std::vector<double>& projection_variables,
-    const DIRECTION::TYPE& direction) = 0;
-
-/*
- * Convert vector of pointers to characteristic cell data to vectors of pointers to conservative cell data.
- */
-virtual void
-convertLocalCellDataPointersCharacteristicVariablesToConservativeVariables(
-    const std::vector<const double*>& characteristic_variables,
-    const std::vector<double*>& conservative_variables,
-    const std::vector<double>& projection_variables,
-    const DIRECTION::TYPE& direction) = 0;
-
-/*
- * Convert vector of pointers to primitive cell data to vectors of pointers to characteristic cell data.
- */
-virtual void
-convertLocalCellDataPointersPrimitiveVariablesToCharacteristicVariables(
-    const std::vector<const double*>& primitive_variables,
-    const std::vector<double*>& characteristic_variables,
-    const std::vector<double>& projection_variables,
-    const DIRECTION::TYPE& direction) = 0;
-
-/*
- * Convert vector of pointers to characteristic cell data to vectors of pointers to primitive cell data.
- */
-virtual void
-convertLocalCellDataPointersCharacteristicVariablesToPrimitiveVariables(
-    const std::vector<const double*>& characteristic_variables,
-    const std::vector<double*>& primitive_variables,
-    const std::vector<double>& projection_variables,
-    const DIRECTION::TYPE& direction) = 0;
         
         /*
          * Compute the local face datum of projection matrix of conservative variables in the
