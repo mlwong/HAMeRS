@@ -2646,6 +2646,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
                 U_array[m] = variables_array[m][ei]->getPointer(0);
             }
             
+            #pragma ivdep
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + 1 + num_ghosts_0;
                  i++)
@@ -2713,6 +2714,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
             
             for (int j = 0; j < interior_dim_1; j++)
             {
+                #pragma ivdep
                 for (int i = -num_ghosts_0;
                      i < interior_dim_1 + 1 + num_ghosts_0;
                      i++)
@@ -2774,6 +2776,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
                  j < interior_dim_1 + 1 + num_ghosts_1;
                  j++)
             {
+                #pragma ivdep
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -2846,6 +2849,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
+                    #pragma ivdep
                     for (int i = -num_ghosts_0;
                          i < interior_dim_1 + 1 + num_ghosts_0;
                          i++)
@@ -2912,6 +2916,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
                      j < interior_dim_1 + 1 + num_ghosts_1;
                      j++)
                 {
+                    #pragma ivdep
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -2976,6 +2981,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
+                    #pragma ivdep
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -3103,6 +3109,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBetaTilde(
                 U_array[m] = variables_array[m][ei]->getPointer(0);
             }
             
+            #pragma ivdep
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + 1 + num_ghosts_0;
                  i++)
@@ -3170,6 +3177,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBetaTilde(
             
             for (int j = 0; j < interior_dim_1; j++)
             {
+                #pragma ivdep
                 for (int i = -num_ghosts_0;
                      i < interior_dim_1 + 1 + num_ghosts_0;
                      i++)
@@ -3231,6 +3239,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBetaTilde(
                  j < interior_dim_1 + 1 + num_ghosts_1;
                  j++)
             {
+                #pragma ivdep
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -3303,6 +3312,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBetaTilde(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
+                    #pragma ivdep
                     for (int i = -num_ghosts_0;
                          i < interior_dim_1 + 1 + num_ghosts_0;
                          i++)
@@ -3369,6 +3379,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBetaTilde(
                      j < interior_dim_1 + 1 + num_ghosts_1;
                      j++)
                 {
+                    #pragma ivdep
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -3433,6 +3444,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBetaTilde(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
+                    #pragma ivdep
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
