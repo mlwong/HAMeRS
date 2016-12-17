@@ -3037,6 +3037,8 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation_new(
     #pragma forceinline
     computeBetaTilde(beta_tilde, U_array, idx_side);
     
+    U_minus[idx_side] = beta[0] + beta[1] + beta[2] + beta[3];
+    U_plus[idx_side] = beta_tilde[0] + beta_tilde[1] + beta_tilde[2] + beta_tilde[3];
 }
 
 
