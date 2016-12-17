@@ -748,9 +748,9 @@ for (int ei = 0; ei < d_num_eqn; ei++)
     const int interior_dim_0 = interior_dims[0];
     const int interior_dim_1 = interior_dims[1];
     
-    #pragma ivdep
     for (int j = 0; j < interior_dim_1; j++)
     {
+        #pragma ivdep
         for (int i = -1; i < interior_dim_0 + 2; i++)
         {
             // Compute the linear index of the side.
@@ -791,9 +791,9 @@ for (int ei = 0; ei < d_num_eqn; ei++)
     const int interior_dim_0 = interior_dims[0];
     const int interior_dim_1 = interior_dims[1];
     
-    #pragma ivdep
     for (int j = -1; j < interior_dim_1 + 2; j++)
     {
+        #pragma ivdep
         for (int i = 0; i < interior_dim_0; i++)
         {
             // Compute the linear index of the side.
