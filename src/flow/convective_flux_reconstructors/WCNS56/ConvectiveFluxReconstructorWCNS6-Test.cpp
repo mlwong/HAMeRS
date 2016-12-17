@@ -3029,7 +3029,6 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
             std::vector<double> beta_test;
             beta_test.resize(4);
             
-            #pragma simd
             #pragma ivdep
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + 1 + num_ghosts_0;
