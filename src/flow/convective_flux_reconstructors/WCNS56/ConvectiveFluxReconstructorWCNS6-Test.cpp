@@ -3031,6 +3031,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
                     263126407.0*U_array[5][idx_side]*U_array[5][idx_side]);
             }
             
+            #pragma simd
             #pragma ivdep
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + 1 + num_ghosts_0;
