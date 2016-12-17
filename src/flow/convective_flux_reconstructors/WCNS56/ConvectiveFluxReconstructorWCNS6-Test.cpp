@@ -3030,16 +3030,17 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
             std::vector<double*> U_array_test;
             U_array_test.resize(6);
             
+            std::vector<double> beta_test;
+            beta_test.resize(4);
+            
             #pragma ivdep
+            #pragma forceinline recursive
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + 1 + num_ghosts_0;
                  i++)
             {
                 // Compute the linear index.
                 const int idx_side = i + num_ghosts_0;
-                
-                std::vector<double> beta_test;
-                beta_test.resize(4);
                 
                 U_array_test[0] = &U_array[0][idx_side];
                 U_array_test[1] = &U_array[1][idx_side];
@@ -3048,7 +3049,6 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
                 U_array_test[4] = &U_array[4][idx_side];
                 U_array_test[5] = &U_array[5][idx_side];
                 
-                #pragma forceinline recursive
                 computeBeta(beta_test, U_array_test);
             }
         }
