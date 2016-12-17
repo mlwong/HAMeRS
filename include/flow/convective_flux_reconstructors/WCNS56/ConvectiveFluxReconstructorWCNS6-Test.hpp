@@ -154,16 +154,6 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
          * Perform WENO interpolation.
          */
         void
-        performWENOInterpolation_new(
-            double* U_minus,
-            double* U_plus,
-            const std::vector<double*>& U_array,
-            const int& idx_face);
-        
-        /*
-         * Perform WENO interpolation.
-         */
-        void
         performWENOInterpolation(
             std::vector<double>& U_minus,
             std::vector<double>& U_plus,
@@ -178,11 +168,39 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
             const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_array);
         
 /*
+ * Compute sigma's.
+ */
+void
+computeSigma(
+    double* sigma,
+    const std::vector<double*>& U_array,
+    const int& idx_side);
+
+/*
  * Compute beta's.
  */
 void
 computeBeta(
     double* beta,
+    const std::vector<double*>& U_array,
+    const int& idx_side);
+        
+/*
+ * Compute beta_tilde's.
+ */
+void
+computeBetaTilde(
+    double* beta_tilde,
+    const std::vector<double*>& U_array,
+    const int& idx_side);
+
+/*
+ * Perform WENO interpolation.
+ */
+void
+performWENOInterpolation_new(
+    double* U_minus,
+    double* U_plus,
     const std::vector<double*>& U_array,
     const int& idx_side);
         

@@ -745,14 +745,19 @@ for (int ei = 0; ei < d_num_eqn; ei++)
     double* W_L_ptr = characteristic_variables_minus[ei]->getPointer(0);
     double* W_R_ptr = characteristic_variables_plus[ei]->getPointer(0);
     
-    for (int j = 0; j < interior_dims[1]; j++)
+    const int interior_dim_0 = interior_dims[0];
+    const int interior_dim_1 = interior_dims[1];
+    
+    #pragma ivdep
+    for (int j = 0; j < interior_dim_1; j++)
     {
-        for (int i = -1; i < interior_dims[0] + 2; i++)
+        for (int i = -1; i < interior_dim_0 + 2; i++)
         {
             // Compute the linear index of the side.
             const int idx_side_x = (i + 1) +
-                (j + 1)*(interior_dims[0] + 3);
+                (j + 1)*(interior_dim_0 + 3);
             
+            #pragma forceinline
             performWENOInterpolation_new(
                 W_L_ptr,
                 W_R_ptr,
@@ -783,14 +788,19 @@ for (int ei = 0; ei < d_num_eqn; ei++)
     double* W_B_ptr = characteristic_variables_minus[ei]->getPointer(1);
     double* W_T_ptr = characteristic_variables_plus[ei]->getPointer(1);
     
-    for (int j = -1; j < interior_dims[1] + 2; j++)
+    const int interior_dim_0 = interior_dims[0];
+    const int interior_dim_1 = interior_dims[1];
+    
+    #pragma ivdep
+    for (int j = -1; j < interior_dim_1 + 2; j++)
     {
-        for (int i = 0; i < interior_dims[0]; i++)
+        for (int i = 0; i < interior_dim_0; i++)
         {
             // Compute the linear index of the side.
             const int idx_side_y = (i + 1) +
-                (j + 1)*(interior_dims[0] + 2);
+                (j + 1)*(interior_dim_0 + 2);
             
+            #pragma forceinline
             performWENOInterpolation_new(
                 W_B_ptr,
                 W_T_ptr,
@@ -2877,6 +2887,34 @@ ConvectiveFluxReconstructorWCNS6_Test::computeSigma(
 
 
 /*
+ * Compute sigma's.
+ */
+void
+ConvectiveFluxReconstructorWCNS6_Test::computeSigma(
+    double* sigma,
+    const std::vector<double*>& U_array,
+    const int& idx_side)
+{
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(static_cast<int>(U_array.size()) == 6);
+#endif
+    
+    /*
+     * Compute the sigma.
+     */
+    
+    const double alpha_1 = U_array[2][idx_side] - U_array[1][idx_side];
+    const double alpha_2 = U_array[3][idx_side] - U_array[2][idx_side];
+    const double alpha_3 = U_array[4][idx_side] - U_array[3][idx_side];
+    
+    const double theta_1 = fabs(alpha_1 - alpha_2)/(fabs(alpha_1) + fabs(alpha_2) + EPSILON);
+    const double theta_2 = fabs(alpha_2 - alpha_3)/(fabs(alpha_2) + fabs(alpha_3) + EPSILON);
+    
+    *sigma = fmax(theta_1, theta_2);
+}
+
+
+/*
  * Compute beta's.
  */
 void
@@ -2889,23 +2927,116 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
     TBOX_ASSERT(static_cast<int>(U_array.size()) == 6);
 #endif
     
-    beta[0] = 1.0/3*(U_array[0][idx_side]*(4*U_array[0][idx_side] - 19*U_array[1][idx_side] + 11*U_array[2][idx_side]) +
-        U_array[1][idx_side]*(25*U_array[1][idx_side] - 31*U_array[2][idx_side]) + 10*U_array[2][idx_side]*U_array[2][idx_side]);
+    beta[0] = 1.0/3.0*(U_array[0][idx_side]*(4.0*U_array[0][idx_side] - 19.0*U_array[1][idx_side] +
+         11.0*U_array[2][idx_side]) + U_array[1][idx_side]*(25.0*U_array[1][idx_side] -
+         31.0*U_array[2][idx_side]) + 10.0*U_array[2][idx_side]*U_array[2][idx_side]);
     
-    beta[1] = 1.0/3*(U_array[1][idx_side]*(4*U_array[1][idx_side] - 13*U_array[2][idx_side] + 5*U_array[3][idx_side]) +
-        13*U_array[2][idx_side]*(U_array[2][idx_side] - U_array[3][idx_side]) + 4*U_array[3][idx_side]*U_array[3][idx_side]);
+    beta[1] = 1.0/3.0*(U_array[1][idx_side]*(4.0*U_array[1][idx_side] - 13.0*U_array[2][idx_side] +
+         5.0*U_array[3][idx_side]) + 13.0*U_array[2][idx_side]*(U_array[2][idx_side] -
+         U_array[3][idx_side]) + 4.0*U_array[3][idx_side]*U_array[3][idx_side]);
     
-    beta[2] = 1.0/3*(U_array[2][idx_side]*(10*U_array[2][idx_side] - 31*U_array[3][idx_side] + 11*U_array[4][idx_side]) +
-        U_array[3][idx_side]*(25*U_array[3][idx_side] - 19*U_array[4][idx_side]) + 4*U_array[4][idx_side]*U_array[4][idx_side]);
+    beta[2] = 1.0/3.0*(U_array[2][idx_side]*(10.0*U_array[2][idx_side] - 31.0*U_array[3][idx_side] +
+         11.0*U_array[4][idx_side]) + U_array[3][idx_side]*(25.0*U_array[3][idx_side] -
+         19.0*U_array[4][idx_side]) + 4.0*U_array[4][idx_side]*U_array[4][idx_side]);
     
-    beta[3] = 1.0/232243200*(U_array[0][idx_side]*(525910327*U_array[0][idx_side] - 4562164630*U_array[1][idx_side] +
-        7799501420*U_array[2][idx_side] - 6610694540*U_array[3][idx_side] + 2794296070*U_array[4][idx_side] -
-        472758974*U_array[5][idx_side]) + 5*U_array[1][idx_side]*(2146987907*U_array[1][idx_side] - 7722406988*U_array[2][idx_side] +
-        6763559276*U_array[3][idx_side] - 2926461814*U_array[4][idx_side] + 503766638*U_array[5][idx_side]) +
-        20*U_array[2][idx_side]*(1833221603*U_array[2][idx_side] - 3358664662*U_array[3][idx_side] + 1495974539*U_array[4][idx_side] -
-        263126407*U_array[5][idx_side]) + 20*U_array[3][idx_side]*(1607794163*U_array[3][idx_side] - 1486026707*U_array[4][idx_side] +
-        268747951*U_array[5][idx_side]) +  5*U_array[4][idx_side]*(1432381427*U_array[4][idx_side] - 536951582*U_array[5][idx_side]) +
-        263126407*U_array[5][idx_side]*U_array[5][idx_side]);
+    beta[3] = 1.0/232243200.0*(U_array[0][idx_side]*(525910327.0*U_array[0][idx_side] -
+         4562164630.0*U_array[1][idx_side] + 7799501420.0*U_array[2][idx_side] -
+         6610694540.0*U_array[3][idx_side] + 2794296070.0*U_array[4][idx_side] -
+         472758974.0*U_array[5][idx_side]) + 5.0*U_array[1][idx_side]*
+        (2146987907.0*U_array[1][idx_side] - 7722406988.0*U_array[2][idx_side] +
+         6763559276.0*U_array[3][idx_side] - 2926461814.0*U_array[4][idx_side] +
+         503766638.0*U_array[5][idx_side]) + 20.0*U_array[2][idx_side]*
+        (1833221603.0*U_array[2][idx_side] - 3358664662.0*U_array[3][idx_side] +
+         1495974539.0*U_array[4][idx_side] - 263126407.0*U_array[5][idx_side]) +
+        20.0*U_array[3][idx_side]*(1607794163.0*U_array[3][idx_side] -
+         1486026707.0*U_array[4][idx_side] + 268747951.0*U_array[5][idx_side]) +
+        5.0*U_array[4][idx_side]*(1432381427.0*U_array[4][idx_side] -
+         536951582.0*U_array[5][idx_side]) +
+        263126407.0*U_array[5][idx_side]*U_array[5][idx_side]);
+}
+
+
+/*
+ * Compute beta_tilde's.
+ */
+void
+ConvectiveFluxReconstructorWCNS6_Test::computeBetaTilde(
+    double* beta_tilde,
+    const std::vector<double*>& U_array,
+    const int& idx_side)
+{
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(static_cast<int>(U_array.size()) == 6);
+#endif
+    
+    beta_tilde[0] = 1.0/3.0*(U_array[5][idx_side]*(4.0*U_array[5][idx_side] - 19.0*U_array[4][idx_side] +
+         11.0*U_array[3][idx_side]) + U_array[4][idx_side]*(25.0*U_array[4][idx_side] -
+         31.0*U_array[3][idx_side]) + 10.0*U_array[3][idx_side]*U_array[3][idx_side]);
+    
+    beta_tilde[1] = 1.0/3.0*(U_array[4][idx_side]*(4.0*U_array[4][idx_side] - 13.0*U_array[3][idx_side] +
+         5.0*U_array[2][idx_side]) + 13.0*U_array[3][idx_side]*(U_array[3][idx_side] -
+         U_array[2][idx_side]) + 4.0*U_array[2][idx_side]*U_array[2][idx_side]);
+    
+    beta_tilde[2] = 1.0/3.0*(U_array[3][idx_side]*(10.0*U_array[3][idx_side] - 31.0*U_array[2][idx_side] +
+         11.0*U_array[1][idx_side]) + U_array[2][idx_side]*(25.0*U_array[2][idx_side] -
+         19.0*U_array[1][idx_side]) + 4.0*U_array[1][idx_side]*U_array[1][idx_side]);
+    
+    beta_tilde[3] = 1.0/232243200.0*(U_array[5][idx_side]*(525910327.0*U_array[5][idx_side] -
+         4562164630.0*U_array[4][idx_side] + 7799501420.0*U_array[3][idx_side] -
+         6610694540.0*U_array[2][idx_side] + 2794296070.0*U_array[1][idx_side] -
+         472758974.0*U_array[0][idx_side]) + 5.0*U_array[4][idx_side]*
+        (2146987907.0*U_array[4][idx_side] - 7722406988.0*U_array[3][idx_side] +
+         6763559276.0*U_array[2][idx_side] - 2926461814.0*U_array[1][idx_side] +
+         503766638.0*U_array[0][idx_side]) + 20.0*U_array[3][idx_side]*
+        (1833221603.0*U_array[3][idx_side] - 3358664662.0*U_array[2][idx_side] +
+         1495974539.0*U_array[1][idx_side] - 263126407.0*U_array[0][idx_side]) +
+        20.0*U_array[2][idx_side]*(1607794163.0*U_array[2][idx_side] -
+         1486026707.0*U_array[1][idx_side] + 268747951.0*U_array[0][idx_side]) +
+        5.0*U_array[1][idx_side]*(1432381427.0*U_array[1][idx_side] -
+         536951582.0*U_array[0][idx_side]) +
+        263126407.0*U_array[0][idx_side]*U_array[0][idx_side]);
+}
+
+
+/*
+ * Perform WENO interpolation.
+ */
+void
+ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation_new(
+    double* U_minus,
+    double* U_plus,
+    const std::vector<double*>& U_array,
+    const int& idx_side)
+{
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(static_cast<int>(U_array.size()) == 6);
+#endif
+    
+    /*
+     * Perform the WENO interpolation.
+     */
+    
+    const double& C          = d_constant_C;
+    const int& p             = d_constant_p;
+    const int& q             = d_constant_q;
+    const double& alpha_beta = d_constant_alpha_beta;
+    
+    // Compute sigma.
+    double sigma;
+    
+    #pragma forceinline
+    computeSigma(&sigma, U_array, idx_side);
+    
+    // Compute beta's and beta_tilde's.
+    double beta[4];
+    double beta_tilde[4];
+    
+    #pragma forceinline
+    computeBeta(beta, U_array, idx_side);
+    
+    #pragma forceinline
+    computeBetaTilde(beta_tilde, U_array, idx_side);
+    
 }
 
 
@@ -3866,330 +3997,6 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
     const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_array)
 {
     
-}
-
-
-/*
- * Perform WENO interpolation.
- */
-inline void
-ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation_new(
-    double* U_minus,
-    double* U_plus,
-    const std::vector<double*>& U_array,
-    const int& idx_face)
-{
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(U_array.size()) == 6);
-#endif
-    
-    /*
-     * Perform the WENO interpolation.
-     */
-    
-    const double& C          = d_constant_C;
-    const int& p             = d_constant_p;
-    const int& q             = d_constant_q;
-    const double& alpha_beta = d_constant_alpha_beta;
-    
-    // Compute sigma.
-    double sigma;
-    
-    const double alpha_1 = U_array[2][idx_face] - U_array[1][idx_face];
-    const double alpha_2 = U_array[3][idx_face] - U_array[2][idx_face];
-    const double alpha_3 = U_array[4][idx_face] - U_array[3][idx_face];
-    
-    const double theta_1 = fabs(alpha_1 - alpha_2)/(fabs(alpha_1) + fabs(alpha_2) + EPSILON);
-    const double theta_2 = fabs(alpha_2 - alpha_3)/(fabs(alpha_2) + fabs(alpha_3) + EPSILON);
-    
-    sigma = fmax(theta_1, theta_2);
-    
-    // Compute beta's.
-    double beta[4];
-    
-    beta[0] = 1.0/3*(U_array[0][idx_face]*(4*U_array[0][idx_face] - 19*U_array[1][idx_face] + 11*U_array[2][idx_face]) +
-        U_array[1][idx_face]*(25*U_array[1][idx_face] - 31*U_array[2][idx_face]) + 10*U_array[2][idx_face]*U_array[2][idx_face]);
-    
-    beta[1] = 1.0/3*(U_array[1][idx_face]*(4*U_array[1][idx_face] - 13*U_array[2][idx_face] + 5*U_array[3][idx_face]) +
-        13*U_array[2][idx_face]*(U_array[2][idx_face] - U_array[3][idx_face]) + 4*U_array[3][idx_face]*U_array[3][idx_face]);
-    
-    beta[2] = 1.0/3*(U_array[2][idx_face]*(10*U_array[2][idx_face] - 31*U_array[3][idx_face] + 11*U_array[4][idx_face]) +
-        U_array[3][idx_face]*(25*U_array[3][idx_face] - 19*U_array[4][idx_face]) + 4*U_array[4][idx_face]*U_array[4][idx_face]);
-    
-    beta[3] = 1.0/232243200*(U_array[0][idx_face]*(525910327*U_array[0][idx_face] - 4562164630*U_array[1][idx_face] +
-        7799501420*U_array[2][idx_face] - 6610694540*U_array[3][idx_face] + 2794296070*U_array[4][idx_face] -
-        472758974*U_array[5][idx_face]) + 5*U_array[1][idx_face]*(2146987907*U_array[1][idx_face] - 7722406988*U_array[2][idx_face] +
-        6763559276*U_array[3][idx_face] - 2926461814*U_array[4][idx_face] + 503766638*U_array[5][idx_face]) +
-        20*U_array[2][idx_face]*(1833221603*U_array[2][idx_face] - 3358664662*U_array[3][idx_face] + 1495974539*U_array[4][idx_face] -
-        263126407*U_array[5][idx_face]) + 20*U_array[3][idx_face]*(1607794163*U_array[3][idx_face] - 1486026707*U_array[4][idx_face] +
-        268747951*U_array[5][idx_face]) +  5*U_array[4][idx_face]*(1432381427*U_array[4][idx_face] - 536951582*U_array[5][idx_face]) +
-        263126407*U_array[5][idx_face]*U_array[5][idx_face]);
-    
-    double beta_tilde[4];
-    
-    beta_tilde[0] = 1.0/3*(U_array[5][idx_face]*(4*U_array[5][idx_face] - 19*U_array[4][idx_face] + 11*U_array[3][idx_face]) +
-        U_array[4][idx_face]*(25*U_array[4][idx_face] - 31*U_array[3][idx_face]) + 10*U_array[3][idx_face]*U_array[3][idx_face]);
-    
-    beta_tilde[1] = 1.0/3*(U_array[4][idx_face]*(4*U_array[4][idx_face] - 13*U_array[3][idx_face] + 5*U_array[2][idx_face]) +
-        13*U_array[3][idx_face]*(U_array[3][idx_face] - U_array[2][idx_face]) + 4*U_array[2][idx_face]*U_array[2][idx_face]);
-    
-    beta_tilde[2] = 1.0/3*(U_array[3][idx_face]*(10*U_array[3][idx_face] - 31*U_array[2][idx_face] + 11*U_array[1][idx_face]) +
-        U_array[2][idx_face]*(25*U_array[2][idx_face] - 19*U_array[1][idx_face]) + 4*U_array[1][idx_face]*U_array[1][idx_face]);
-    
-    beta_tilde[3] = 1.0/232243200*(U_array[5][idx_face]*(525910327*U_array[5][idx_face] - 4562164630*U_array[4][idx_face] +
-        7799501420*U_array[3][idx_face] - 6610694540*U_array[2][idx_face] + 2794296070*U_array[1][idx_face] -
-        472758974*U_array[0][idx_face]) + 5*U_array[4][idx_face]*(2146987907*U_array[4][idx_face] - 7722406988*U_array[3][idx_face] +
-        6763559276*U_array[2][idx_face] - 2926461814*U_array[1][idx_face] + 503766638*U_array[0][idx_face]) +
-        20*U_array[3][idx_face]*(1833221603*U_array[3][idx_face] - 3358664662*U_array[2][idx_face] + 1495974539*U_array[1][idx_face] -
-        263126407*U_array[0][idx_face]) + 20*U_array[2][idx_face]*(1607794163*U_array[2][idx_face] -
-        1486026707*U_array[1][idx_face] + 268747951*U_array[0][idx_face]) + 5*U_array[1][idx_face]*(1432381427*U_array[1][idx_face] -
-        536951582*U_array[0][idx_face])+263126407*U_array[0][idx_face]*U_array[0][idx_face]);
-    
-    /*
-     * Compute U_minus.
-     */
-    
-    // Compute the reference smoothness indicators tau_6.
-    const double beta_avg = 1.0/8*(beta[0] + beta[2] + 6*beta[1]);
-    const double tau_6 = fabs(beta[3] - beta_avg);
-    
-    // if(fabs(tau_6/(beta_avg + EPSILON)) > alpha_beta)
-    {
-        /*
-         * Compute the weights alpha_upwind.
-         */
-        
-        double alpha_upwind[4];
-        double alpha_upwind_sum = 0.0;
-        
-        // Define linear weights d.
-        double d[4];
-        d[0] = 1.0/16.0;
-        d[1] = 5.0/8.0;
-        d[2] = 5.0/16.0;
-        
-        const double tau_5 = fabs(beta[0] - beta[2]);
-        
-        for (int r = 0; r < 3; r++)
-        {
-            // Compute the weights alpha_upwind.
-            alpha_upwind[r] = d[r]*(1.0 + pow(tau_5/(beta[r] + EPSILON), p));
-            
-            // Sum up the weights alpha_upwind.
-            alpha_upwind_sum += alpha_upwind[r];
-        }
-        alpha_upwind[3] = 0.0;
-        
-        /*
-         * Compute the weights alpha_central.
-         */
-        
-        double alpha_central[4];
-        double alpha_central_sum = 0.0;
-        
-        // Define linear weights d.
-        d[0] = 1.0/32.0;
-        d[1] = 15.0/32.0;
-        d[2] = 15.0/32.0;
-        d[3] = 1.0/32.0;
-        
-        for (int r = 0; r < 4; r++)
-        {
-            // Compute the weights alpha.
-            alpha_central[r] = d[r]*(C + pow(tau_6/(beta[r] + EPSILON), q));
-            
-            // Sum up the weights alpha.
-            alpha_central_sum += alpha_central[r];
-        }
-        
-        // Compute U_minus.
-        U_minus[idx_face] = 0.0;
-        for (int r = 0; r < 4; r++)
-        {
-            // Compute the linear interpolated value.
-            double U_minus_r = 0.0;
-            for (int m = r; m < 3 + r; m++)
-            {
-                U_minus_r += d_weights_c[r][m - r]*(U_array[m][idx_face]);
-            }
-            
-            // Compute omega.
-            const double omega_upwind = alpha_upwind[r]/alpha_upwind_sum;
-            const double omega_central = alpha_central[r]/alpha_central_sum;
-            const double omega = sigma*omega_upwind + (1.0 - sigma)*omega_central;
-            
-            // Compute the nonlinear interpolated value.
-            U_minus[idx_face] += omega*U_minus_r;
-        }
-    }
-    /*
-    else
-    {
-        // Define linear weights d.
-        double d[4];
-        d[0] = 1.0/32.0;
-        d[1] = 15.0/32.0;
-        d[2] = 15.0/32.0;
-        d[3] = 1.0/32.0;
-        
-        //
-        // Compute the weights alpha.
-        //
-        
-        double alpha[4];
-        double alpha_sum = 0.0;
-        
-        for (int r = 0; r < 4; r++)
-        {
-            // Compute the weights alpha.
-            alpha[r] = d[r]*(C + pow(tau_6/(beta[r] + EPSILON), q));
-            
-            // Sum up the weights alpha.
-            alpha_sum += alpha[r];
-        }
-        
-        // Compute the U_minus.
-        U_minus[idx_face] = 0.0;
-        for (int r = 0; r < 4; r++)
-        {
-            // Compute the linear interpolated value.
-            double U_minus_r = 0.0;
-            for (int m = r; m < 3 + r; m++)
-            {
-                U_minus_r += d_weights_c[r][m - r]*(U_array[m][idx_face]);
-            }
-            
-            // Compute omega.
-            const double omega = alpha[r]/alpha_sum;
-            
-            // Compute the nonlinear interpolated value.
-            U_minus[idx_face] += omega*U_minus_r;
-        }
-    }
-    */
-    
-    /*
-     * Compute U_plus.
-     */
-    
-    // Compute the reference smoothness indicators tau_6_tilde.
-    const double beta_tilde_avg =  1.0/8*(beta_tilde[0] + beta_tilde[2] + 6*beta_tilde[1]);
-    const double tau_6_tilde = fabs(beta_tilde[3] - beta_tilde_avg);
-    
-    // if (fabs(tau_6_tilde/(beta_tilde_avg + EPSILON)) > alpha_beta)
-    {
-        /*
-         * Compute the weights alpha_upwind_tilde.
-         */
-        
-        double alpha_upwind_tilde[4];
-        double alpha_upwind_tilde_sum = 0.0;
-        
-        // Define linear weights d.
-        double d[4];
-        d[0] = 1.0/16.0;
-        d[1] = 5.0/8.0;
-        d[2] = 5.0/16.0;
-        
-        const double tau_5_tilde = fabs(beta_tilde[0] - beta_tilde[2]);
-        
-        for (int r = 0; r < 3; r++)
-        {
-            // Compute the weights alpha_upwind_tilde.
-            alpha_upwind_tilde[r] = d[r]*(1.0 + pow(tau_5_tilde/(beta_tilde[r] + EPSILON), p));
-            
-            // Sum up the weights alpha_upwind_tilde.
-            alpha_upwind_tilde_sum += alpha_upwind_tilde[r];
-        }
-        alpha_upwind_tilde[3] = 0.0;
-        
-        /*
-         * Compute the weights alpha_central_tilde.
-         */
-        
-        double alpha_central_tilde[4];
-        double alpha_central_tilde_sum = 0.0;
-        
-        // Define linear weights d.
-        d[0] = 1.0/32.0;
-        d[1] = 15.0/32.0;
-        d[2] = 15.0/32.0;
-        d[3] = 1.0/32.0;
-        
-        for (int r = 0; r < 4; r++)
-        {
-            // Compute the weights alpha_tilde.
-            alpha_central_tilde[r] = d[r]*(C + pow(tau_6_tilde/(beta_tilde[r] + EPSILON), q));
-            
-            // Sum up the weights alpha.
-            alpha_central_tilde_sum += alpha_central_tilde[r];
-        }
-        
-        // Compute U_plus.
-        U_plus[idx_face] = 0.0;
-        for (int r = 0; r < 4; r++)
-        {
-            // Compute the linear interpolated value.
-            double U_plus_r = 0.0;
-            for (int m = r; m < 3 + r; m++)
-            {
-                U_plus_r += d_weights_c[r][m - r]*(U_array[6 - m - 1][idx_face]);
-            }
-            
-            // Compute omega_tilde;
-            const double omega_upwind_tilde = alpha_upwind_tilde[r]/alpha_upwind_tilde_sum;
-            const double omega_central_tilde = alpha_central_tilde[r]/alpha_central_tilde_sum;
-            const double omega_tilde = sigma*omega_upwind_tilde + (1.0 - sigma)*omega_central_tilde;
-            
-            // Compute the nonlinear interpolated value.
-            U_plus[idx_face] += omega_tilde*U_plus_r;
-        }
-    }
-    /*
-    else
-    {
-        // Define linear weights d.
-        double d[4];
-        d[0] = 1.0/32.0;
-        d[1] = 15.0/32.0;
-        d[2] = 15.0/32.0;
-        d[3] = 1.0/32.0;
-        
-        //
-        // Compute the weights alpha_tilde.
-        //
-        
-        double alpha_tilde[4];
-        double alpha_tilde_sum = 0.0;
-        
-        for (int r = 0; r < 4; r++)
-        {
-            // Compute the weights alpha_tilde.
-            alpha_tilde[r] = d[r]*(C + pow(tau_6_tilde/(beta_tilde[r] + EPSILON), q));
-            
-            // Sum up the weights alpha.
-            alpha_tilde_sum += alpha_tilde[r];
-        }
-        
-        // Compute U_plus.
-        U_plus[idx_face] = 0.0;
-        for (int r = 0; r < 4; r++)
-        {
-            // Compute the linear interpolated value.
-            double U_plus_r = 0.0;
-            for (int m = r; m < 3 + r; m++)
-            {
-                U_plus_r += d_weights_c[r][m - r]*(U_array[6 - m - 1][idx_face]);
-            }
-            
-            // Compute omega_tilde;
-            const double omega_tilde = alpha_tilde[r]/alpha_tilde_sum;
-            
-            // Compute the nonlinear interpolated value.
-            U_plus[idx_face] += omega_tilde*U_plus_r;
-        }
-    }
-    */
 }
 
 
