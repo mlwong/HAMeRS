@@ -229,7 +229,7 @@ performWENOInterpolation_new(
         double d_constant_C;
         int    d_constant_p;
         int    d_constant_q;
-        double d_constant_alpha_beta;
+        double d_constant_alpha_tau;
         
         /*
          * Weights used in WENO interpolations.

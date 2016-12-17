@@ -46,8 +46,8 @@ ConvectiveFluxReconstructorWCNS6_Test::ConvectiveFluxReconstructorWCNS6_Test(
     d_constant_q = d_convective_flux_reconstructor_db->getIntegerWithDefault("constant_q", 4);
     d_constant_q = d_convective_flux_reconstructor_db->getIntegerWithDefault("d_constant_q", d_constant_q);
     
-    d_constant_alpha_beta = d_convective_flux_reconstructor_db->getDoubleWithDefault("constant_alpha_beta", 35.0);
-    d_constant_alpha_beta = d_convective_flux_reconstructor_db->getDoubleWithDefault("d_constant_alpha_beta", d_constant_alpha_beta);
+    d_constant_alpha_tau = d_convective_flux_reconstructor_db->getDoubleWithDefault("constant_alpha_tau", 35.0);
+    d_constant_alpha_tau = d_convective_flux_reconstructor_db->getDoubleWithDefault("d_constant_alpha_tau", d_constant_alpha_tau);
     
     d_weights_c.resize(boost::extents[4][3]);
     d_weights_c[0][0] = 3.0/8;
@@ -114,8 +114,8 @@ ConvectiveFluxReconstructorWCNS6_Test::printClassData(
     os << "d_constant_q = "
        << d_constant_q
        << std::endl;
-    os << "d_constant_alpha_beta = "
-       << d_constant_alpha_beta
+    os << "d_constant_alpha_tau = "
+       << d_constant_alpha_tau
        << std::endl;
 }
 
@@ -131,7 +131,7 @@ ConvectiveFluxReconstructorWCNS6_Test::putToRestart(
     restart_db->putDouble("d_constant_C", d_constant_C);
     restart_db->putInteger("d_constant_p", d_constant_p);
     restart_db->putInteger("d_constant_q", d_constant_q);
-    restart_db->putDouble("d_constant_alpha_beta", d_constant_alpha_beta);
+    restart_db->putDouble("d_constant_alpha_tau", d_constant_alpha_tau);
 }
 
 
@@ -569,23 +569,23 @@ boost::shared_ptr<pdat::SideData<double> > convective_flux_midpoint(
         double* theta = dilatation->getPointer(0);
         double* omega = vorticity->getPointer(0);
         double* Omega = vorticity_magnitude->getPointer(0);
-        std::vector<double*> F_x_node;
-        std::vector<double*> F_y_node;
-        F_x_node.reserve(d_num_eqn);
-        F_y_node.reserve(d_num_eqn);
+        std::vector<double*> F_node_x;
+        std::vector<double*> F_node_y;
+        F_node_x.reserve(d_num_eqn);
+        F_node_y.reserve(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            F_x_node.push_back(convective_flux_node[0]->getPointer(ei));
-            F_y_node.push_back(convective_flux_node[1]->getPointer(ei));
+            F_node_x.push_back(convective_flux_node[0]->getPointer(ei));
+            F_node_x.push_back(convective_flux_node[1]->getPointer(ei));
         }
-        std::vector<double*> F_x_midpoint;
-        std::vector<double*> F_y_midpoint;
-        F_x_midpoint.reserve(d_num_eqn);
-        F_y_midpoint.reserve(d_num_eqn);
+        std::vector<double*> F_midpoint_x;
+        std::vector<double*> F_midpoint_y;
+        F_midpoint_x.reserve(d_num_eqn);
+        F_midpoint_y.reserve(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            F_x_midpoint.push_back(convective_flux_midpoint->getPointer(0, ei));
-            F_y_midpoint.push_back(convective_flux_midpoint->getPointer(1, ei));
+            F_midpoint_x.push_back(convective_flux_midpoint->getPointer(0, ei));
+            F_midpoint_y.push_back(convective_flux_midpoint->getPointer(1, ei));
         }
         
         // Compute the magnitude of vorticity.
@@ -732,18 +732,18 @@ t_characteristic_decomposition->stop();
 
 t_WENO_interpolation->start();
 
-std::vector<double*> W_array_x;
-W_array_x.resize(6);
-
 for (int ei = 0; ei < d_num_eqn; ei++)
 {
+    std::vector<double*> W_array;
+    W_array.resize(6);
+    
     for (int m = 0; m < 6; m++)
     {
-        W_array_x[m] = characteristic_variables[m][ei]->getPointer(0);
+        W_array[m] = characteristic_variables[m][ei]->getPointer(0);
     }
     
-    double* W_L_ptr = characteristic_variables_minus[ei]->getPointer(0);
-    double* W_R_ptr = characteristic_variables_plus[ei]->getPointer(0);
+    double* W_L = characteristic_variables_minus[ei]->getPointer(0);
+    double* W_R = characteristic_variables_plus[ei]->getPointer(0);
     
     const int interior_dim_0 = interior_dims[0];
     const int interior_dim_1 = interior_dims[1];
@@ -753,16 +753,16 @@ for (int ei = 0; ei < d_num_eqn; ei++)
         #pragma ivdep
         for (int i = -1; i < interior_dim_0 + 2; i++)
         {
-            // Compute the linear index of the side.
-            const int idx_side_x = (i + 1) +
+            // Compute the linear index of the mid-point.
+            const int idx_midpoint_x = (i + 1) +
                 (j + 1)*(interior_dim_0 + 3);
             
             #pragma forceinline
             performWENOInterpolation_new(
-                W_L_ptr,
-                W_R_ptr,
-                W_array_x,
-                idx_side_x);
+                W_L,
+                W_R,
+                W_array,
+                idx_midpoint_x);
         }
     }
 }
@@ -775,18 +775,18 @@ t_WENO_interpolation->stop();
 
 t_WENO_interpolation->start();
 
-std::vector<double*> W_array_y;
-W_array_y.resize(6);
-
 for (int ei = 0; ei < d_num_eqn; ei++)
 {
+    std::vector<double*> W_array;
+    W_array.resize(6);
+    
     for (int m = 0; m < 6; m++)
     {
-        W_array_y[m] = characteristic_variables[m][ei]->getPointer(1);
+        W_array[m] = characteristic_variables[m][ei]->getPointer(1);
     }
     
-    double* W_B_ptr = characteristic_variables_minus[ei]->getPointer(1);
-    double* W_T_ptr = characteristic_variables_plus[ei]->getPointer(1);
+    double* W_B = characteristic_variables_minus[ei]->getPointer(1);
+    double* W_T = characteristic_variables_plus[ei]->getPointer(1);
     
     const int interior_dim_0 = interior_dims[0];
     const int interior_dim_1 = interior_dims[1];
@@ -796,16 +796,16 @@ for (int ei = 0; ei < d_num_eqn; ei++)
         #pragma ivdep
         for (int i = 0; i < interior_dim_0; i++)
         {
-            // Compute the linear index of the side.
-            const int idx_side_y = (i + 1) +
+            // Compute the linear index of the mid-point.
+            const int idx_midpoint_y = (i + 1) +
                 (j + 1)*(interior_dim_0 + 2);
             
             #pragma forceinline
             performWENOInterpolation_new(
-                W_B_ptr,
-                W_T_ptr,
-                W_array_y,
-                idx_side_y);
+                W_B,
+                W_T,
+                W_array,
+                idx_midpoint_y);
         }
     }
 }
@@ -855,19 +855,19 @@ V_x_L_ref.reserve(d_num_eqn);
 V_x_R_ref.reserve(d_num_eqn);
 
 // Declare container to store the references to the mid-point flux.
-std::vector<boost::reference_wrapper<double> > F_x_midpoint_ref;
-F_x_midpoint_ref.reserve(d_num_eqn);
+std::vector<boost::reference_wrapper<double> > F_midpoint_x_ref;
+F_midpoint_x_ref.reserve(d_num_eqn);
 
 // Declare container to store the references to the mid-point velocity.
-std::vector<boost::reference_wrapper<double> > vel_x_midpoint_ref;
-vel_x_midpoint_ref.reserve(d_dim.getValue());
+std::vector<boost::reference_wrapper<double> > vel_midpoint_x_ref;
+vel_midpoint_x_ref.reserve(d_dim.getValue());
 
 for (int j = 0; j < interior_dims[1]; j++)
 {
     for (int i = -1; i < interior_dims[0] + 2; i++)
     {
         // Compute the linear index of the side.
-        const int idx_side_x = (i + 1) +
+        const int idx_midpoint_x = (i + 1) +
             (j + 1)*(interior_dims[0] + 3);
             
         // Compute the average dilatation and magnitude of vorticity.
@@ -892,20 +892,20 @@ for (int j = 0; j < interior_dims[1]; j++)
         // Initialize container that stores the references to the mid-point flux.
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            F_x_midpoint_ref.push_back(boost::ref(F_x_midpoint[ei][idx_side_x]));
+            F_midpoint_x_ref.push_back(boost::ref(F_midpoint_x[ei][idx_midpoint_x]));
         }
         
         // Initialize container that stores the references to the mid-point velocity.
         for (int di = 0; di < d_dim.getValue(); di++)
         {
-            vel_x_midpoint_ref.push_back(
-                boost::ref(velocity_intercell->getPointer(0, di)[idx_side_x]));
+            vel_midpoint_x_ref.push_back(
+                boost::ref(velocity_intercell->getPointer(0, di)[idx_midpoint_x]));
         }
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            V_x_L_ref.push_back(boost::ref(V_x_L[ei][idx_side_x]));
-            V_x_R_ref.push_back(boost::ref(V_x_R[ei][idx_side_x]));
+            V_x_L_ref.push_back(boost::ref(V_x_L[ei][idx_midpoint_x]));
+            V_x_R_ref.push_back(boost::ref(V_x_R[ei][idx_midpoint_x]));
         }
         
         // Apply the Riemann solver.
@@ -913,8 +913,8 @@ for (int j = 0; j < interior_dims[1]; j++)
         {
             d_flow_model->
                 computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
-                    F_x_midpoint_ref,
-                    vel_x_midpoint_ref,
+                    F_midpoint_x_ref,
+                    vel_midpoint_x_ref,
                     V_x_L_ref,
                     V_x_R_ref,
                     DIRECTION::X_DIRECTION,
@@ -924,16 +924,16 @@ for (int j = 0; j < interior_dims[1]; j++)
         {
             d_flow_model->
                 computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
-                    F_x_midpoint_ref,
-                    vel_x_midpoint_ref,
+                    F_midpoint_x_ref,
+                    vel_midpoint_x_ref,
                     V_x_L_ref,
                     V_x_R_ref,
                     DIRECTION::X_DIRECTION,
                     RIEMANN_SOLVER::HLLC);
         }
         
-        F_x_midpoint_ref.clear();
-        vel_x_midpoint_ref.clear();
+        F_midpoint_x_ref.clear();
+        vel_midpoint_x_ref.clear();
         V_x_L_ref.clear();
         V_x_R_ref.clear();
     }
@@ -966,19 +966,19 @@ V_y_B_ref.reserve(d_num_eqn);
 V_y_T_ref.reserve(d_num_eqn);
 
 // Declare container to store the references to the mid-point flux.
-std::vector<boost::reference_wrapper<double> > F_y_midpoint_ref;
-F_y_midpoint_ref.reserve(d_num_eqn);
+std::vector<boost::reference_wrapper<double> > F_midpoint_y_ref;
+F_midpoint_y_ref.reserve(d_num_eqn);
 
 // Declare container to store the references to the mid-point velocity.
-std::vector<boost::reference_wrapper<double> > vel_y_midpoint_ref;
-vel_y_midpoint_ref.reserve(d_dim.getValue());
+std::vector<boost::reference_wrapper<double> > vel_midpoint_y_ref;
+vel_midpoint_y_ref.reserve(d_dim.getValue());
 
 for (int j = -1; j < interior_dims[1] + 2; j++)
 {
     for (int i = 0; i < interior_dims[0]; i++)
     {
         // Compute the linear index of the side.
-        const int idx_side_y = (i + 1) +
+        const int idx_midpoint_y = (i + 1) +
             (j + 1)*(interior_dims[0] + 2);
         
         // Compute the average dilatation and magnitude of vorticity.
@@ -1003,20 +1003,20 @@ for (int j = -1; j < interior_dims[1] + 2; j++)
         // Initialize container that stores the references to the mid-point flux.
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            F_y_midpoint_ref.push_back(boost::ref(F_y_midpoint[ei][idx_side_y]));
+            F_midpoint_y_ref.push_back(boost::ref(F_midpoint_y[ei][idx_midpoint_y]));
         }
         
         // Initialize container that stores the references to the mid-point velocity.
         for (int di = 0; di < d_dim.getValue(); di++)
         {
-            vel_y_midpoint_ref.push_back(
-                boost::ref(velocity_intercell->getPointer(1, di)[idx_side_y]));
+            vel_midpoint_y_ref.push_back(
+                boost::ref(velocity_intercell->getPointer(1, di)[idx_midpoint_y]));
         }
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            V_y_B_ref.push_back(boost::ref(V_y_B[ei][idx_side_y]));
-            V_y_T_ref.push_back(boost::ref(V_y_T[ei][idx_side_y]));
+            V_y_B_ref.push_back(boost::ref(V_y_B[ei][idx_midpoint_y]));
+            V_y_T_ref.push_back(boost::ref(V_y_T[ei][idx_midpoint_y]));
         }
         
         // Apply the Riemann solver.
@@ -1024,8 +1024,8 @@ for (int j = -1; j < interior_dims[1] + 2; j++)
         {
             d_flow_model->
                 computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
-                    F_y_midpoint_ref,
-                    vel_y_midpoint_ref,
+                    F_midpoint_y_ref,
+                    vel_midpoint_y_ref,
                     V_y_B_ref,
                     V_y_T_ref,
                     DIRECTION::Y_DIRECTION,
@@ -1035,16 +1035,16 @@ for (int j = -1; j < interior_dims[1] + 2; j++)
         {
             d_flow_model->
                 computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
-                    F_y_midpoint_ref,
-                    vel_y_midpoint_ref,
+                    F_midpoint_y_ref,
+                    vel_midpoint_y_ref,
                     V_y_B_ref,
                     V_y_T_ref,
                     DIRECTION::Y_DIRECTION,
                     RIEMANN_SOLVER::HLLC);
         }
         
-        F_y_midpoint_ref.clear();
-        vel_y_midpoint_ref.clear();
+        F_midpoint_y_ref.clear();
+        vel_midpoint_y_ref.clear();
         V_y_B_ref.clear();
         V_y_T_ref.clear();
     }
@@ -1085,11 +1085,11 @@ const int idx_midpoint_x_R = (i + 2) +
                 for (int ei = 0; ei < d_num_eqn; ei++)
                 {
                     convective_flux->getPointer(0, ei)[idx_face_x] =
-                        dt*(1.0/30*(F_x_midpoint[ei][idx_midpoint_x_R] +
-                        F_x_midpoint[ei][idx_midpoint_x_L]) -
-                        3.0/10*(F_x_node[ei][idx_node_R] +
-                        F_x_node[ei][idx_node_L]) +
-                        23.0/15*F_x_midpoint[ei][idx_midpoint_x]);
+                        dt*(1.0/30*(F_midpoint_x[ei][idx_midpoint_x_R] +
+                        F_midpoint_x[ei][idx_midpoint_x_L]) -
+                        3.0/10*(F_node_x[ei][idx_node_R] +
+                        F_node_x[ei][idx_node_L]) +
+                        23.0/15*F_midpoint_x[ei][idx_midpoint_x]);
                 }
             }
         }
@@ -1133,11 +1133,11 @@ const int idx_midpoint_y_T = (i + 1) +
                 for (int ei = 0; ei < d_num_eqn; ei++)
                 {
                     convective_flux->getPointer(1, ei)[idx_face_y] =
-                        dt*(1.0/30*(F_y_midpoint[ei][idx_midpoint_y_T] +
-                        F_y_midpoint[ei][idx_midpoint_y_B]) -
-                        3.0/10*(F_y_node[ei][idx_node_T] +
-                        F_y_node[ei][idx_node_B]) +
-                        23.0/15*F_y_midpoint[ei][idx_midpoint_y]);
+                        dt*(1.0/30*(F_midpoint_y[ei][idx_midpoint_y_T] +
+                        F_midpoint_y[ei][idx_midpoint_y_B]) -
+                        3.0/10*(F_node_y[ei][idx_node_T] +
+                        F_node_y[ei][idx_node_B]) +
+                        23.0/15*F_midpoint_y[ei][idx_midpoint_y]);
                 }
             }
         }
@@ -1178,16 +1178,16 @@ t_reconstruct_flux->stop();
                         
                         const int idx_cell_nghost = i + j*interior_dims[0];
                         
-                        const int idx_side_x_LL = i + 
+                        const int idx_midpoint_x_LL = i + 
                             (j + 1)*(interior_dims[0] + 3);
                         
-                        const int idx_side_x_L = (i + 1) +
+                        const int idx_midpoint_x_L = (i + 1) +
                             (j + 1)*(interior_dims[0] + 3);
                         
-                        const int idx_side_x_R = (i + 2) +
+                        const int idx_midpoint_x_R = (i + 2) +
                             (j + 1)*(interior_dims[0] + 3);
                         
-                        const int idx_side_x_RR = (i + 3) +
+                        const int idx_midpoint_x_RR = (i + 3) +
                             (j + 1)*(interior_dims[0] + 3);
                         
 /*
@@ -1204,27 +1204,27 @@ const int idx_face_y_TT = (j + 3) +
     (i + 1)*(interior_dims[1] + 3);
 */
 
-const int idx_side_y_BB = (i + 1) +
+const int idx_midpoint_y_BB = (i + 1) +
     j*(interior_dims[0] + 2);
 
-const int idx_side_y_B = (i + 1) +
+const int idx_midpoint_y_B = (i + 1) +
     (j + 1)*(interior_dims[0] + 2);
 
-const int idx_side_y_T = (i + 1) +
+const int idx_midpoint_y_T = (i + 1) +
     (j + 2)*(interior_dims[0] + 2);
 
-const int idx_side_y_TT = (i + 1) +
+const int idx_midpoint_y_TT = (i + 1) +
     (j + 3)*(interior_dims[0] + 2);
                         
-                        const double& u_LL = velocity_intercell->getPointer(0, 0)[idx_side_x_LL];
-                        const double& u_L = velocity_intercell->getPointer(0, 0)[idx_side_x_L];
-                        const double& u_R = velocity_intercell->getPointer(0, 0)[idx_side_x_R];
-                        const double& u_RR = velocity_intercell->getPointer(0, 0)[idx_side_x_RR];
+                        const double& u_LL = velocity_intercell->getPointer(0, 0)[idx_midpoint_x_LL];
+                        const double& u_L = velocity_intercell->getPointer(0, 0)[idx_midpoint_x_L];
+                        const double& u_R = velocity_intercell->getPointer(0, 0)[idx_midpoint_x_R];
+                        const double& u_RR = velocity_intercell->getPointer(0, 0)[idx_midpoint_x_RR];
                         
-                        const double& v_BB = velocity_intercell->getPointer(1, 1)[idx_side_y_BB];
-                        const double& v_B = velocity_intercell->getPointer(1, 1)[idx_side_y_B];
-                        const double& v_T = velocity_intercell->getPointer(1, 1)[idx_side_y_T];
-                        const double& v_TT = velocity_intercell->getPointer(1, 1)[idx_side_y_TT];
+                        const double& v_BB = velocity_intercell->getPointer(1, 1)[idx_midpoint_y_BB];
+                        const double& v_B = velocity_intercell->getPointer(1, 1)[idx_midpoint_y_B];
+                        const double& v_T = velocity_intercell->getPointer(1, 1)[idx_midpoint_y_T];
+                        const double& v_TT = velocity_intercell->getPointer(1, 1)[idx_midpoint_y_TT];
                         
                         S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
                             (3.0/2*(u_R - u_L) - 3.0/10*(u[idx_cell_wghost_x_R] - u[idx_cell_wghost_x_L]) +
@@ -3019,15 +3019,21 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation_new(
     const double& C          = d_constant_C;
     const int& p             = d_constant_p;
     const int& q             = d_constant_q;
-    const double& alpha_beta = d_constant_alpha_beta;
+    const double& alpha_tau  = d_constant_alpha_tau;
     
-    // Compute sigma.
+    /*
+     * Compute sigma.
+     */
+    
     double sigma;
     
     #pragma forceinline
     computeSigma(&sigma, U_array, idx_side);
     
-    // Compute beta's and beta_tilde's.
+    /*
+     * Compute beta's and beta_tilde's.
+     */
+    
     double beta[4];
     double beta_tilde[4];
     
@@ -3037,7 +3043,75 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation_new(
     #pragma forceinline
     computeBetaTilde(beta_tilde, U_array, idx_side);
     
-    U_minus[idx_side] = beta[0] + beta[1] + beta[2] + beta[3];
+    /*
+     * Compute the weights omega_upwind.
+     */
+    
+    double omega_upwind[3];
+    
+    double tau_5 = fabs(beta[0] - beta[2]);
+    
+    double alpha_upwind[3];
+    
+    alpha_upwind[0] = 1.0/16.0*(1.0 + pow(tau_5/(beta[0] + EPSILON), p));
+    alpha_upwind[1] = 5.0/8.0*(1.0 + pow(tau_5/(beta[1] + EPSILON), p));
+    alpha_upwind[2] = 5.0/16.0*(1.0 + pow(tau_5/(beta[2] + EPSILON), p));
+    
+    double alpha_upwind_sum = alpha_upwind[0] +
+        alpha_upwind[1] + alpha_upwind[2];
+    
+    omega_upwind[0] = alpha_upwind[0]/alpha_upwind_sum;
+    omega_upwind[1] = alpha_upwind[1]/alpha_upwind_sum;
+    omega_upwind[2] = alpha_upwind[2]/alpha_upwind_sum;
+    
+    /*
+     * Compute the weights omega_central.
+     */
+    
+    double omega_central[4];
+    
+    double beta_avg = 1.0/8*(beta[0] + beta[2] + 6*beta[1]);
+    double tau_6 = fabs(beta[3] - beta_avg);
+    
+    double alpha_central[4];
+    
+    alpha_central[0] = 1.0/32.0*(C + pow(tau_6/(beta[0] + EPSILON), q));
+    alpha_central[1] = 15.0/32.0*(C + pow(tau_6/(beta[1] + EPSILON), q));
+    alpha_central[2] = 15.0/32.0*(C + pow(tau_6/(beta[2] + EPSILON), q));
+    alpha_central[3] = 1.0/32.0*(C + pow(tau_6/(beta[3] + EPSILON), q));
+    
+    double alpha_central_sum = alpha_central[0] + alpha_central[1] +
+        alpha_central[2] + alpha_central[3];
+    
+    omega_central[0] = alpha_central[0]/alpha_central_sum;
+    omega_central[1] = alpha_central[1]/alpha_central_sum;
+    omega_central[2] = alpha_central[2]/alpha_central_sum;
+    omega_central[3] = alpha_central[3]/alpha_central_sum;
+    
+    /*
+     * Compute the weights omega.
+     */
+    
+    double omega[4];
+    
+    double R_tau = fabs(tau_6/(beta_avg + EPSILON));
+    
+    if (R_tau > alpha_tau)
+    {
+        omega[0] = sigma*omega_upwind[0] + (1.0 - sigma)*omega_central[0];
+        omega[1] = sigma*omega_upwind[1] + (1.0 - sigma)*omega_central[1];
+        omega[2] = sigma*omega_upwind[2] + (1.0 - sigma)*omega_central[2];
+        omega[3] = (1.0 - sigma)*omega_central[3];
+    }
+    else
+    {
+        omega[0] = omega_central[0];
+        omega[1] = omega_central[1];
+        omega[2] = omega_central[2];
+        omega[3] = omega_central[3];
+    }
+    
+    U_minus[idx_side] = omega[0] + omega[1] + omega[2] + omega[3];
     U_plus[idx_side] = beta_tilde[0] + beta_tilde[1] + beta_tilde[2] + beta_tilde[3];
 }
 
@@ -4041,7 +4115,7 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
     const double& C = d_constant_C;
     const int& p = d_constant_p;
     const int& q = d_constant_q;
-    const double& alpha_beta = d_constant_alpha_beta;
+    const double& alpha_tau = d_constant_alpha_tau;
     
     for (int ei = 0; ei < d_num_eqn; ei++)
     {
@@ -4064,7 +4138,7 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
         const double beta_avg = 1.0/8*(beta[0] + beta[2] + 6*beta[1]);
         const double tau_6 = fabs(beta[3] - beta_avg);
         
-        if(fabs(tau_6/(beta_avg + EPSILON)) > alpha_beta)
+        if(fabs(tau_6/(beta_avg + EPSILON)) > alpha_tau)
         {
             /*
              * Compute the weights alpha_upwind.
@@ -4187,7 +4261,7 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
         const double beta_tilde_avg =  1.0/8*(beta_tilde[0] + beta_tilde[2] + 6*beta_tilde[1]);
         const double tau_6_tilde = fabs(beta_tilde[3] - beta_tilde_avg);
         
-        if (fabs(tau_6_tilde/(beta_tilde_avg + EPSILON)) > alpha_beta)
+        if (fabs(tau_6_tilde/(beta_tilde_avg + EPSILON)) > alpha_tau)
         {
             /*
              * Compute the weights alpha_upwind_tilde.
