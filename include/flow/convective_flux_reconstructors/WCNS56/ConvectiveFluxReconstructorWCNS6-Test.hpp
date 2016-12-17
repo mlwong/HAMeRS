@@ -182,8 +182,9 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
  */
 void
 computeBeta(
-    std::vector<double>& beta,
-    const std::vector<double*>& U_array);
+    double* beta,
+    const std::vector<double*>& U_array,
+    const int& idx_side);
         
         void
         computeBeta(

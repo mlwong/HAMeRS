@@ -2881,26 +2881,31 @@ ConvectiveFluxReconstructorWCNS6_Test::computeSigma(
  */
 void
 ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
-    std::vector<double>& beta,
-    const std::vector<double*>& U_array)
+    double* beta,
+    const std::vector<double*>& U_array,
+    const int& idx_side)
 {
-    beta[0] = 1.0/3*((*U_array[0])*(4*(*U_array[0]) - 19*(*U_array[1]) + 11*(*U_array[2])) +
-        (*U_array[1])*(25*(*U_array[1]) - 31*(*U_array[2])) + 10*(*U_array[2])*(*U_array[2]));
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(static_cast<int>(U_array.size()) == 6);
+#endif
     
-    beta[1] = 1.0/3*((*U_array[1])*(4*(*U_array[1]) - 13*(*U_array[2]) + 5*(*U_array[3])) +
-        13*(*U_array[2])*((*U_array[2]) - (*U_array[3])) + 4*(*U_array[3])*(*U_array[3]));
+    beta[0] = 1.0/3*(U_array[0][idx_side]*(4*U_array[0][idx_side] - 19*U_array[1][idx_side] + 11*U_array[2][idx_side]) +
+        U_array[1][idx_side]*(25*U_array[1][idx_side] - 31*U_array[2][idx_side]) + 10*U_array[2][idx_side]*U_array[2][idx_side]);
     
-    beta[2] = 1.0/3*((*U_array[2])*(10*(*U_array[2]) - 31*(*U_array[3]) + 11*(*U_array[4])) +
-        (*U_array[3])*(25*(*U_array[3]) - 19*(*U_array[4])) + 4*(*U_array[4])*(*U_array[4]));
+    beta[1] = 1.0/3*(U_array[1][idx_side]*(4*U_array[1][idx_side] - 13*U_array[2][idx_side] + 5*U_array[3][idx_side]) +
+        13*U_array[2][idx_side]*(U_array[2][idx_side] - U_array[3][idx_side]) + 4*U_array[3][idx_side]*U_array[3][idx_side]);
     
-    beta[3] = 1.0/232243200*((*U_array[0])*(525910327*(*U_array[0]) - 4562164630*(*U_array[1]) +
-        7799501420*(*U_array[2]) - 6610694540*(*U_array[3]) + 2794296070*(*U_array[4]) -
-        472758974*(*U_array[5])) + 5*(*U_array[1])*(2146987907*(*U_array[1]) - 7722406988*(*U_array[2]) +
-        6763559276*(*U_array[3]) - 2926461814*(*U_array[4]) + 503766638*(*U_array[5])) +
-        20*(*U_array[2])*(1833221603*(*U_array[2]) - 3358664662*(*U_array[3]) + 1495974539*(*U_array[4]) -
-        263126407*(*U_array[5])) + 20*(*U_array[3])*(1607794163*(*U_array[3]) - 1486026707*(*U_array[4]) +
-        268747951*(*U_array[5])) +  5*(*U_array[4])*(1432381427*(*U_array[4]) - 536951582*(*U_array[5])) +
-        263126407*(*U_array[5])*(*U_array[5]));
+    beta[2] = 1.0/3*(U_array[2][idx_side]*(10*U_array[2][idx_side] - 31*U_array[3][idx_side] + 11*U_array[4][idx_side]) +
+        U_array[3][idx_side]*(25*U_array[3][idx_side] - 19*U_array[4][idx_side]) + 4*U_array[4][idx_side]*U_array[4][idx_side]);
+    
+    beta[3] = 1.0/232243200*(U_array[0][idx_side]*(525910327*U_array[0][idx_side] - 4562164630*U_array[1][idx_side] +
+        7799501420*U_array[2][idx_side] - 6610694540*U_array[3][idx_side] + 2794296070*U_array[4][idx_side] -
+        472758974*U_array[5][idx_side]) + 5*U_array[1][idx_side]*(2146987907*U_array[1][idx_side] - 7722406988*U_array[2][idx_side] +
+        6763559276*U_array[3][idx_side] - 2926461814*U_array[4][idx_side] + 503766638*U_array[5][idx_side]) +
+        20*U_array[2][idx_side]*(1833221603*U_array[2][idx_side] - 3358664662*U_array[3][idx_side] + 1495974539*U_array[4][idx_side] -
+        263126407*U_array[5][idx_side]) + 20*U_array[3][idx_side]*(1607794163*U_array[3][idx_side] - 1486026707*U_array[4][idx_side] +
+        268747951*U_array[5][idx_side]) +  5*U_array[4][idx_side]*(1432381427*U_array[4][idx_side] - 536951582*U_array[5][idx_side]) +
+        263126407*U_array[5][idx_side]*U_array[5][idx_side]);
 }
 
 
@@ -3026,9 +3031,6 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
                     263126407.0*U_array[5][idx_side]*U_array[5][idx_side]);
             }
             
-            std::vector<double> beta_test;
-            beta_test.resize(4);
-            
             #pragma ivdep
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + 1 + num_ghosts_0;
@@ -3036,6 +3038,8 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
             {
                 // Compute the linear index.
                 const int idx_side = i + num_ghosts_0;
+                
+                double beta_test[4];
                 
                 #pragma forceinline
                 computeBeta(beta_test, U_array, idx_side);
