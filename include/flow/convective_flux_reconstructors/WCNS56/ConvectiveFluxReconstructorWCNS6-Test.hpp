@@ -177,6 +177,14 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
             std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_sigma,
             const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_array);
         
+/*
+ * Compute beta's.
+ */
+void
+computeBeta(
+    std::vector<double>& beta,
+    const std::vector<double*>& U_array);
+        
         void
         computeBeta(
             std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_beta,
@@ -188,11 +196,20 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
             const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_array);
         
         /*
+         * Perform WENO interpolation.
+         */
+        void
+        performWENOInterpolation(
+            std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_minus,
+            std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_plus,
+            const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_array);
+        
+        /*
          * Constants used by the scheme.
          */
         double d_constant_C;
-        int d_constant_p;
-        int d_constant_q;
+        int    d_constant_p;
+        int    d_constant_q;
         double d_constant_alpha_beta;
         
         /*

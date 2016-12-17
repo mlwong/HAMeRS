@@ -2564,6 +2564,346 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBetaTilde(
 }
 
 
+/*
+ * Compute sigma's.
+ */
+void
+ConvectiveFluxReconstructorWCNS6_Test::computeSigma(
+    std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_sigma,
+    const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_array)
+{
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(static_cast<int>(variables_sigma.size()) == d_num_eqn);
+    TBOX_ASSERT(variables_sigma[0]->getGhostCellWidth == hier::IntVector::getOne(d_dim));
+#endif
+    
+    /*
+     * Get the dimensions of interior box, box including ghost cells and number of ghost cells.
+     */
+    
+    const hier::IntVector interior_dims = variables_sigma[0]->getBox().numberCells();
+    const hier::IntVector ghostcell_dims = variables_sigma[0]->getGhostBox().numberCells();
+    const hier::IntVector num_ghosts = variables_sigma[0]->getGhostCellWidth();
+    
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+    for (int ei = 0; ei < d_num_eqn; ei++)
+    {
+        TBOX_ERROR(variables_sigma[ei]->getBox().numberCells() == interior_dims);
+        TBOX_ERROR(variables_sigma[ei]->getGhostBox().numberCells() == ghostcell_dims);
+    }
+    
+    TBOX_ASSERT(static_cast<int>(variables_array.size()) == 6);
+    
+    for (int m = 0; m < 6; m++)
+    {
+        TBOX_ASSERT(static_cast<int>(variables_array[m].size()) == d_num_eqn);
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            TBOX_ERROR(variables_array[m][ei]->getBox().numberCells() == interior_dims);
+            TBOX_ERROR(variables_array[m][ei]->getGhostBox().numberCells() == ghostcell_dims);
+        }
+    }
+#endif
+    
+    /*
+     * Declare the pointers to the sigma's.
+     */
+    
+    std::vector<double*> sigma;
+    sigma.resize(d_num_eqn);
+    
+    /*
+     * Declare the pointers to the array of variables.
+     */
+    
+    std::vector<double*> U_array;
+    U_array.resize(6);
+    
+    /*
+     * Compute the sigma's.
+     */
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        const int interior_dim_0 = interior_dims[0];
+        const int num_ghosts_0 = num_ghosts[0];
+        
+        /*
+         * Compute sigma in the x-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            sigma[ei] = variables_sigma[ei]->getPointer(0);
+            
+            for (int m = 0; m < 6; m++)
+            {
+                U_array[m] = variables_array[m][ei]->getPointer(0);
+            }
+            
+            for (int i = -num_ghosts_0;
+                 i < interior_dim_0 + 1 + num_ghosts_0;
+                 i++)
+            {
+                // Compute the linear index.
+                const int idx_side = i + num_ghosts_0;
+                
+                double alpha_1 = U_array[2][idx_side] - U_array[1][idx_side];
+                double alpha_2 = U_array[3][idx_side] - U_array[2][idx_side];
+                double alpha_3 = U_array[4][idx_side] - U_array[3][idx_side];
+                
+                double theta_1 = fabs(alpha_1 - alpha_2)/(fabs(alpha_1) + fabs(alpha_2) + EPSILON);
+                double theta_2 = fabs(alpha_2 - alpha_3)/(fabs(alpha_2) + fabs(alpha_3) + EPSILON);
+                
+                sigma[ei][idx_side] = fmax(theta_1, theta_2);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        
+        const int ghostcell_dim_0 = ghostcell_dims[0];
+        
+        const int num_ghosts_0 = num_ghosts[0];
+        const int num_ghosts_1 = num_ghosts[1];
+        
+        /*
+         * Compute sigma in the x-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            sigma[ei] = variables_sigma[ei]->getPointer(0);
+            
+            for (int m = 0; m < 6; m++)
+            {
+                U_array[m] = variables_array[m][ei]->getPointer(0);
+            }
+            
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+                for (int i = -num_ghosts_0;
+                     i < interior_dim_1 + 1 + num_ghosts_0;
+                     i++)
+                {
+                    // Compute the linear index.
+                    const int idx_side = (i + num_ghosts_0) +
+                        (j + num_ghosts_1)*(ghostcell_dim_0 + 1);
+                    
+                    double alpha_1 = U_array[2][idx_side] - U_array[1][idx_side];
+                    double alpha_2 = U_array[3][idx_side] - U_array[2][idx_side];
+                    double alpha_3 = U_array[4][idx_side] - U_array[3][idx_side];
+                    
+                    double theta_1 = fabs(alpha_1 - alpha_2)/(fabs(alpha_1) + fabs(alpha_2) + EPSILON);
+                    double theta_2 = fabs(alpha_2 - alpha_3)/(fabs(alpha_2) + fabs(alpha_3) + EPSILON);
+                    
+                    sigma[ei][idx_side] = fmax(theta_1, theta_2);
+                }
+            }
+        }
+        
+        /*
+         * Compute sigma in the y-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            sigma[ei] = variables_sigma[ei]->getPointer(1);
+            
+            for (int m = 0; m < 6; m++)
+            {
+                U_array[m] = variables_array[m][ei]->getPointer(1);
+            }
+            
+            for (int j = -num_ghosts_1;
+                 j < interior_dim_1 + 1 + num_ghosts_1;
+                 j++)
+            {
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_side = (i + num_ghosts_0) +
+                        (j + num_ghosts_1)*ghostcell_dim_0;
+                    
+                    double alpha_1 = U_array[2][idx_side] - U_array[1][idx_side];
+                    double alpha_2 = U_array[3][idx_side] - U_array[2][idx_side];
+                    double alpha_3 = U_array[4][idx_side] - U_array[3][idx_side];
+                    
+                    double theta_1 = fabs(alpha_1 - alpha_2)/(fabs(alpha_1) + fabs(alpha_2) + EPSILON);
+                    double theta_2 = fabs(alpha_2 - alpha_3)/(fabs(alpha_2) + fabs(alpha_3) + EPSILON);
+                    
+                    sigma[ei][idx_side] = fmax(theta_1, theta_2);
+                }
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        const int interior_dim_2 = interior_dims[2];
+        
+        const int ghostcell_dim_0 = ghostcell_dims[0];
+        const int ghostcell_dim_1 = ghostcell_dims[1];
+        
+        const int num_ghosts_0 = num_ghosts[0];
+        const int num_ghosts_1 = num_ghosts[1];
+        const int num_ghosts_2 = num_ghosts[2];
+        
+        /*
+         * Compute sigma in the x-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            sigma[ei] = variables_sigma[ei]->getPointer(0);
+            
+            for (int m = 0; m < 6; m++)
+            {
+                U_array[m] = variables_array[m][ei]->getPointer(0);
+            }
+            
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+                    for (int i = -num_ghosts_0;
+                         i < interior_dim_1 + 1 + num_ghosts_0;
+                         i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_side = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*(ghostcell_dim_0 + 1) +
+                            (k + num_ghosts_2)*(ghostcell_dim_0 + 1)*
+                                ghostcell_dim_1;
+                        
+                        double alpha_1 = U_array[2][idx_side] - U_array[1][idx_side];
+                        double alpha_2 = U_array[3][idx_side] - U_array[2][idx_side];
+                        double alpha_3 = U_array[4][idx_side] - U_array[3][idx_side];
+                        
+                        double theta_1 = fabs(alpha_1 - alpha_2)/(fabs(alpha_1) + fabs(alpha_2) + EPSILON);
+                        double theta_2 = fabs(alpha_2 - alpha_3)/(fabs(alpha_2) + fabs(alpha_3) + EPSILON);
+                        
+                        sigma[ei][idx_side] = fmax(theta_1, theta_2);
+                    }
+                }
+            }
+        }
+        
+        /*
+         * Compute sigma in the y-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            sigma[ei] = variables_sigma[ei]->getPointer(1);
+            
+            for (int m = 0; m < 6; m++)
+            {
+                U_array[m] = variables_array[m][ei]->getPointer(1);
+            }
+            
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = -num_ghosts_1;
+                     j < interior_dim_1 + 1 + num_ghosts_1;
+                     j++)
+                {
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_side = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0 +
+                            (k + num_ghosts_2)*ghostcell_dim_0*
+                                (ghostcell_dim_1 + 1);
+                        
+                        double alpha_1 = U_array[2][idx_side] - U_array[1][idx_side];
+                        double alpha_2 = U_array[3][idx_side] - U_array[2][idx_side];
+                        double alpha_3 = U_array[4][idx_side] - U_array[3][idx_side];
+                        
+                        double theta_1 = fabs(alpha_1 - alpha_2)/(fabs(alpha_1) + fabs(alpha_2) + EPSILON);
+                        double theta_2 = fabs(alpha_2 - alpha_3)/(fabs(alpha_2) + fabs(alpha_3) + EPSILON);
+                        
+                        sigma[ei][idx_side] = fmax(theta_1, theta_2);
+                    }
+                }
+            }
+        }
+        
+        /*
+         * Compute sigma in the z-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            sigma[ei] = variables_sigma[ei]->getPointer(2);
+            
+            for (int m = 0; m < 6; m++)
+            {
+                U_array[m] = variables_array[m][ei]->getPointer(2);
+            }
+            
+            for (int k = -num_ghosts_2;
+                 k < interior_dim_2 + 1 + num_ghosts_2;
+                 k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_side = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0 +
+                            (k + num_ghosts_2)*ghostcell_dim_0*
+                                ghostcell_dim_1;
+                        
+                        double alpha_1 = U_array[2][idx_side] - U_array[1][idx_side];
+                        double alpha_2 = U_array[3][idx_side] - U_array[2][idx_side];
+                        double alpha_3 = U_array[4][idx_side] - U_array[3][idx_side];
+                        
+                        double theta_1 = fabs(alpha_1 - alpha_2)/(fabs(alpha_1) + fabs(alpha_2) + EPSILON);
+                        double theta_2 = fabs(alpha_2 - alpha_3)/(fabs(alpha_2) + fabs(alpha_3) + EPSILON);
+                        
+                        sigma[ei][idx_side] = fmax(theta_1, theta_2);
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+/*
+ * Compute beta's.
+ */
+void
+ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
+    std::vector<double>& beta,
+    const std::vector<double*>& U_array)
+{
+    beta[0] = 1.0/3*((*U_array[0])*(4*(*U_array[0]) - 19*(*U_array[1]) + 11*(*U_array[2])) +
+        (*U_array[1])*(25*(*U_array[1]) - 31*(*U_array[2])) + 10*(*U_array[2])*(*U_array[2]));
+    
+    beta[1] = 1.0/3*((*U_array[1])*(4*(*U_array[1]) - 13*(*U_array[2]) + 5*(*U_array[3])) +
+        13*(*U_array[2])*((*U_array[2]) - (*U_array[3])) + 4*(*U_array[3])*(*U_array[3]));
+    
+    beta[2] = 1.0/3*((*U_array[2])*(10*(*U_array[2]) - 31*(*U_array[3]) + 11*(*U_array[4])) +
+        (*U_array[3])*(25*(*U_array[3]) - 19*(*U_array[4])) + 4*(*U_array[4])*(*U_array[4]));
+    
+    beta[3] = 1.0/232243200*((*U_array[0])*(525910327*(*U_array[0]) - 4562164630*(*U_array[1]) +
+        7799501420*(*U_array[2]) - 6610694540*(*U_array[3]) + 2794296070*(*U_array[4]) -
+        472758974*(*U_array[5])) + 5*(*U_array[1])*(2146987907*(*U_array[1]) - 7722406988*(*U_array[2]) +
+        6763559276*(*U_array[3]) - 2926461814*(*U_array[4]) + 503766638*(*U_array[5])) +
+        20*(*U_array[2])*(1833221603*(*U_array[2]) - 3358664662*(*U_array[3]) + 1495974539*(*U_array[4]) -
+        263126407*(*U_array[5])) + 20*(*U_array[3])*(1607794163*(*U_array[3]) - 1486026707*(*U_array[4]) +
+        268747951*(*U_array[5])) +  5*(*U_array[4])*(1432381427*(*U_array[4]) - 536951582*(*U_array[5])) +
+        263126407*(*U_array[5])*(*U_array[5]));
+}
+
+
 void
 ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
     std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_beta,
@@ -2601,6 +2941,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
         TBOX_ASSERT(static_cast<int>(variables_array[m].size()) == d_num_eqn);
         
         for (int ei = 0; ei < d_num_eqn; ei++)
+        {
             TBOX_ERROR(variables_array[m][ei]->getBox().numberCells() == interior_dims);
             TBOX_ERROR(variables_array[m][ei]->getGhostBox().numberCells() == ghostcell_dims);
         }
@@ -2683,6 +3024,31 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
                     268747951.0*U_array[5][idx_side]) + 5.0*U_array[4][idx_side]*
                     (1432381427.0*U_array[4][idx_side] - 536951582.0*U_array[5][idx_side]) +
                     263126407.0*U_array[5][idx_side]*U_array[5][idx_side]);
+            }
+            
+            
+            std::vector<double*> U_array_test;
+            U_array_test.resize(6);
+            
+            #pragma ivdep
+            for (int i = -num_ghosts_0;
+                 i < interior_dim_0 + 1 + num_ghosts_0;
+                 i++)
+            {
+                // Compute the linear index.
+                const int idx_side = i + num_ghosts_0;
+                
+                std::vector<double> beta_test;
+                beta_test.resize(4);
+                
+                U_array_test[0] = &U_array[0][idx_side];
+                U_array_test[1] = &U_array[1][idx_side];
+                U_array_test[2] = &U_array[2][idx_side];
+                U_array_test[3] = &U_array[3][idx_side];
+                U_array_test[4] = &U_array[4][idx_side];
+                U_array_test[5] = &U_array[5][idx_side];
+                
+                computeBeta(beta_test, U_array_test);
             }
         }
     }
@@ -3064,6 +3430,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBetaTilde(
         TBOX_ASSERT(static_cast<int>(variables_array[m].size()) == d_num_eqn);
         
         for (int ei = 0; ei < d_num_eqn; ei++)
+        {
             TBOX_ERROR(variables_array[m][ei]->getBox().numberCells() == interior_dims);
             TBOX_ERROR(variables_array[m][ei]->getGhostBox().numberCells() == ghostcell_dims);
         }
@@ -3491,320 +3858,8 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBetaTilde(
 
 
 /*
- * Compute sigma's.
- */
-void
-ConvectiveFluxReconstructorWCNS6_Test::computeSigma(
-    std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_sigma,
-    const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_array)
-{
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(variables_sigma.size()) == d_num_eqn);
-    TBOX_ASSERT(variables_sigma[0]->getGhostCellWidth == hier::IntVector::getOne(d_dim));
-#endif
-    
-    /*
-     * Get the dimensions of interior box, box including ghost cells and number of ghost cells.
-     */
-    
-    const hier::IntVector interior_dims = variables_sigma[0]->getBox().numberCells();
-    const hier::IntVector ghostcell_dims = variables_sigma[0]->getGhostBox().numberCells();
-    const hier::IntVector num_ghosts = variables_sigma[0]->getGhostCellWidth();
-    
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
-    for (int ei = 0; ei < d_num_eqn; ei++)
-    {
-        TBOX_ERROR(variables_sigma[ei]->getBox().numberCells() == interior_dims);
-        TBOX_ERROR(variables_sigma[ei]->getGhostBox().numberCells() == ghostcell_dims);
-    }
-    
-    TBOX_ASSERT(static_cast<int>(variables_array.size()) == 6);
-    
-    for (int m = 0; m < 6; m++)
-    {
-        TBOX_ASSERT(static_cast<int>(variables_array[m].size()) == d_num_eqn);
-        
-        for (int ei = 0; ei < d_num_eqn; ei++)
-        {
-            TBOX_ERROR(variables_array[m][ei]->getBox().numberCells() == interior_dims);
-            TBOX_ERROR(variables_array[m][ei]->getGhostBox().numberCells() == ghostcell_dims);
-        }
-    }
-#endif
-    
-    /*
-     * Declare the pointers to the sigma's.
-     */
-    
-    std::vector<double*> sigma;
-    sigma.resize(d_num_eqn);
-    
-    /*
-     * Declare the pointers to the array of variables.
-     */
-    
-    std::vector<double*> U_array;
-    U_array.resize(6);
-    
-    /*
-     * Compute the sigma's.
-     */
-    
-    if (d_dim == tbox::Dimension(1))
-    {
-        const int interior_dim_0 = interior_dims[0];
-        const int num_ghosts_0 = num_ghosts[0];
-        
-        /*
-         * Compute sigma in the x-direction.
-         */
-        
-        for (int ei = 0; ei < d_num_eqn; ei++)
-        {
-            sigma[ei] = variables_sigma[ei]->getPointer(0);
-            
-            for (int m = 0; m < 6; m++)
-            {
-                U_array[m] = variables_array[m][ei]->getPointer(0);
-            }
-            
-            for (int i = -num_ghosts_0;
-                 i < interior_dim_0 + 1 + num_ghosts_0;
-                 i++)
-            {
-                // Compute the linear index.
-                const int idx_side = i + num_ghosts_0;
-                
-                double alpha_1 = U_array[2][idx_side] - U_array[1][idx_side];
-                double alpha_2 = U_array[3][idx_side] - U_array[2][idx_side];
-                double alpha_3 = U_array[4][idx_side] - U_array[3][idx_side];
-                
-                double theta_1 = fabs(alpha_1 - alpha_2)/(fabs(alpha_1) + fabs(alpha_2) + EPSILON);
-                double theta_2 = fabs(alpha_2 - alpha_3)/(fabs(alpha_2) + fabs(alpha_3) + EPSILON);
-                
-                sigma[ei][idx_side] = fmax(theta_1, theta_2);
-            }
-        }
-    }
-    else if (d_dim == tbox::Dimension(2))
-    {
-        const int interior_dim_0 = interior_dims[0];
-        const int interior_dim_1 = interior_dims[1];
-        
-        const int ghostcell_dim_0 = ghostcell_dims[0];
-        
-        const int num_ghosts_0 = num_ghosts[0];
-        const int num_ghosts_1 = num_ghosts[1];
-        
-        /*
-         * Compute sigma in the x-direction.
-         */
-        
-        for (int ei = 0; ei < d_num_eqn; ei++)
-        {
-            sigma[ei] = variables_sigma[ei]->getPointer(0);
-            
-            for (int m = 0; m < 6; m++)
-            {
-                U_array[m] = variables_array[m][ei]->getPointer(0);
-            }
-            
-            for (int j = 0; j < interior_dim_1; j++)
-            {
-                for (int i = -num_ghosts_0;
-                     i < interior_dim_1 + 1 + num_ghosts_0;
-                     i++)
-                {
-                    // Compute the linear index.
-                    const int idx_side = (i + num_ghosts_0) +
-                        (j + num_ghosts_1)*(ghostcell_dim_0 + 1);
-                    
-                    double alpha_1 = U_array[2][idx_side] - U_array[1][idx_side];
-                    double alpha_2 = U_array[3][idx_side] - U_array[2][idx_side];
-                    double alpha_3 = U_array[4][idx_side] - U_array[3][idx_side];
-                    
-                    double theta_1 = fabs(alpha_1 - alpha_2)/(fabs(alpha_1) + fabs(alpha_2) + EPSILON);
-                    double theta_2 = fabs(alpha_2 - alpha_3)/(fabs(alpha_2) + fabs(alpha_3) + EPSILON);
-                    
-                    sigma[ei][idx_side] = fmax(theta_1, theta_2);
-                }
-            }
-        }
-        
-        /*
-         * Compute sigma in the y-direction.
-         */
-        
-        for (int ei = 0; ei < d_num_eqn; ei++)
-        {
-            sigma[ei] = variables_sigma[ei]->getPointer(1);
-            
-            for (int m = 0; m < 6; m++)
-            {
-                U_array[m] = variables_array[m][ei]->getPointer(1);
-            }
-            
-            for (int j = -num_ghosts_1;
-                 j < interior_dim_1 + 1 + num_ghosts_1;
-                 j++)
-            {
-                for (int i = 0; i < interior_dim_0; i++)
-                {
-                    // Compute the linear index.
-                    const int idx_side = (i + num_ghosts_0) +
-                        (j + num_ghosts_1)*ghostcell_dim_0;
-                    
-                    double alpha_1 = U_array[2][idx_side] - U_array[1][idx_side];
-                    double alpha_2 = U_array[3][idx_side] - U_array[2][idx_side];
-                    double alpha_3 = U_array[4][idx_side] - U_array[3][idx_side];
-                    
-                    double theta_1 = fabs(alpha_1 - alpha_2)/(fabs(alpha_1) + fabs(alpha_2) + EPSILON);
-                    double theta_2 = fabs(alpha_2 - alpha_3)/(fabs(alpha_2) + fabs(alpha_3) + EPSILON);
-                    
-                    sigma[ei][idx_side] = fmax(theta_1, theta_2);
-                }
-            }
-        }
-    }
-    else if (d_dim == tbox::Dimension(3))
-    {
-        const int interior_dim_0 = interior_dims[0];
-        const int interior_dim_1 = interior_dims[1];
-        const int interior_dim_2 = interior_dims[2];
-        
-        const int ghostcell_dim_0 = ghostcell_dims[0];
-        const int ghostcell_dim_1 = ghostcell_dims[1];
-        
-        const int num_ghosts_0 = num_ghosts[0];
-        const int num_ghosts_1 = num_ghosts[1];
-        const int num_ghosts_2 = num_ghosts[2];
-        
-        /*
-         * Compute sigma in the x-direction.
-         */
-        
-        for (int ei = 0; ei < d_num_eqn; ei++)
-        {
-            sigma[ei] = variables_sigma[ei]->getPointer(0);
-            
-            for (int m = 0; m < 6; m++)
-            {
-                U_array[m] = variables_array[m][ei]->getPointer(0);
-            }
-            
-            for (int k = 0; k < interior_dim_2; k++)
-            {
-                for (int j = 0; j < interior_dim_1; j++)
-                {
-                    for (int i = -num_ghosts_0;
-                         i < interior_dim_1 + 1 + num_ghosts_0;
-                         i++)
-                    {
-                        // Compute the linear index.
-                        const int idx_side = (i + num_ghosts_0) +
-                            (j + num_ghosts_1)*(ghostcell_dim_0 + 1) +
-                            (k + num_ghosts_2)*(ghostcell_dim_0 + 1)*
-                                ghostcell_dim_1;
-                        
-                        double alpha_1 = U_array[2][idx_side] - U_array[1][idx_side];
-                        double alpha_2 = U_array[3][idx_side] - U_array[2][idx_side];
-                        double alpha_3 = U_array[4][idx_side] - U_array[3][idx_side];
-                        
-                        double theta_1 = fabs(alpha_1 - alpha_2)/(fabs(alpha_1) + fabs(alpha_2) + EPSILON);
-                        double theta_2 = fabs(alpha_2 - alpha_3)/(fabs(alpha_2) + fabs(alpha_3) + EPSILON);
-                        
-                        sigma[ei][idx_side] = fmax(theta_1, theta_2);
-                    }
-                }
-            }
-        }
-        
-        /*
-         * Compute sigma in the y-direction.
-         */
-        
-        for (int ei = 0; ei < d_num_eqn; ei++)
-        {
-            sigma[ei] = variables_sigma[ei]->getPointer(1);
-            
-            for (int m = 0; m < 6; m++)
-            {
-                U_array[m] = variables_array[m][ei]->getPointer(1);
-            }
-            
-            for (int k = 0; k < interior_dim_2; k++)
-            {
-                for (int j = -num_ghosts_1;
-                     j < interior_dim_1 + 1 + num_ghosts_1;
-                     j++)
-                {
-                    for (int i = 0; i < interior_dim_0; i++)
-                    {
-                        // Compute the linear index.
-                        const int idx_side = (i + num_ghosts_0) +
-                            (j + num_ghosts_1)*ghostcell_dim_0 +
-                            (k + num_ghosts_2)*ghostcell_dim_0*
-                                (ghostcell_dim_1 + 1);
-                        
-                        double alpha_1 = U_array[2][idx_side] - U_array[1][idx_side];
-                        double alpha_2 = U_array[3][idx_side] - U_array[2][idx_side];
-                        double alpha_3 = U_array[4][idx_side] - U_array[3][idx_side];
-                        
-                        double theta_1 = fabs(alpha_1 - alpha_2)/(fabs(alpha_1) + fabs(alpha_2) + EPSILON);
-                        double theta_2 = fabs(alpha_2 - alpha_3)/(fabs(alpha_2) + fabs(alpha_3) + EPSILON);
-                        
-                        sigma[ei][idx_side] = fmax(theta_1, theta_2);
-                    }
-                }
-            }
-        }
-        
-        /*
-         * Compute sigma in the z-direction.
-         */
-        
-        for (int ei = 0; ei < d_num_eqn; ei++)
-        {
-            sigma[ei] = variables_sigma[ei]->getPointer(2);
-            
-            for (int m = 0; m < 6; m++)
-            {
-                U_array[m] = variables_array[m][ei]->getPointer(2);
-            }
-            
-            for (int k = -num_ghosts_2;
-                 k < interior_dim_2 + 1 + num_ghosts_2;
-                 k++)
-            {
-                for (int j = 0; j < interior_dim_1; j++)
-                {
-                    for (int i = 0; i < interior_dim_0; i++)
-                    {
-                        // Compute the linear index.
-                        const int idx_side = (i + num_ghosts_0) +
-                            (j + num_ghosts_1)*ghostcell_dim_0 +
-                            (k + num_ghosts_2)*ghostcell_dim_0*
-                                ghostcell_dim_1;
-                        
-                        double alpha_1 = U_array[2][idx_side] - U_array[1][idx_side];
-                        double alpha_2 = U_array[3][idx_side] - U_array[2][idx_side];
-                        double alpha_3 = U_array[4][idx_side] - U_array[3][idx_side];
-                        
-                        double theta_1 = fabs(alpha_1 - alpha_2)/(fabs(alpha_1) + fabs(alpha_2) + EPSILON);
-                        double theta_2 = fabs(alpha_2 - alpha_3)/(fabs(alpha_2) + fabs(alpha_3) + EPSILON);
-                        
-                        sigma[ei][idx_side] = fmax(theta_1, theta_2);
-                    }
-                }
-            }
-        }
-    }
-}
-
-/*
  * Perform WENO interpolation.
  */
-/*
 void
 ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
     std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_minus,
@@ -3813,7 +3868,7 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
 {
     
 }
-*/
+
 
 /*
  * Perform WENO interpolation.
