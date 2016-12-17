@@ -576,7 +576,7 @@ boost::shared_ptr<pdat::SideData<double> > convective_flux_midpoint(
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
             F_node_x.push_back(convective_flux_node[0]->getPointer(ei));
-            F_node_x.push_back(convective_flux_node[1]->getPointer(ei));
+            F_node_y.push_back(convective_flux_node[1]->getPointer(ei));
         }
         std::vector<double*> F_midpoint_x;
         std::vector<double*> F_midpoint_y;
