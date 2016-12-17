@@ -3026,6 +3026,9 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
                     263126407.0*U_array[5][idx_side]*U_array[5][idx_side]);
             }
             
+            std::vector<double> beta_test;
+            beta_test.resize(4);
+            
             #pragma simd
             #pragma ivdep
             for (int i = -num_ghosts_0;
@@ -3034,9 +3037,6 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
             {
                 // Compute the linear index.
                 const int idx_side = i + num_ghosts_0;
-                
-                std::vector<double> beta_test;
-                beta_test.resize(4);
                 
                 #pragma forceinline
                 computeBeta(beta_test, U_array, idx_side);
