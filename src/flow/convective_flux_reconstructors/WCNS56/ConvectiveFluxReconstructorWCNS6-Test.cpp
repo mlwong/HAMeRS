@@ -3049,6 +3049,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
                 U_array_test[5] = &U_array[5][idx_side];
                 
                 #pragma forceinline
+                #pragma ivdep
                 computeBeta(beta_test, U_array_test);
             }
         }
