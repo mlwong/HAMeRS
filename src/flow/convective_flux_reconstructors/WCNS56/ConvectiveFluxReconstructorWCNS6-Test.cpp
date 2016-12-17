@@ -3031,6 +3031,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
             U_array_test.resize(6);
             
             #pragma ivdep
+            #pragma forceinline recursive
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + 1 + num_ghosts_0;
                  i++)
