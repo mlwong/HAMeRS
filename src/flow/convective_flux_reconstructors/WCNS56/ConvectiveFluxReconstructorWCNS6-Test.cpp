@@ -3026,13 +3026,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
                     263126407.0*U_array[5][idx_side]*U_array[5][idx_side]);
             }
             
-            
-            std::vector<double*> U_array_test;
-            U_array_test.resize(6);
-            
-            std::vector<double> beta_test;
-            beta_test.resize(4);
-            
+            #pragma simd
             #pragma ivdep
             for (int i = -num_ghosts_0;
                  i < interior_dim_0 + 1 + num_ghosts_0;
@@ -3041,16 +3035,11 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
                 // Compute the linear index.
                 const int idx_side = i + num_ghosts_0;
                 
-                U_array_test[0] = &U_array[0][idx_side];
-                U_array_test[1] = &U_array[1][idx_side];
-                U_array_test[2] = &U_array[2][idx_side];
-                U_array_test[3] = &U_array[3][idx_side];
-                U_array_test[4] = &U_array[4][idx_side];
-                U_array_test[5] = &U_array[5][idx_side];
+                std::vector<double> beta_test;
+                beta_test.resize(4);
                 
                 #pragma forceinline
-                #pragma ivdep
-                computeBeta(beta_test, U_array_test);
+                computeBeta(beta_test, U_array, idx_side);
             }
         }
     }
