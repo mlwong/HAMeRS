@@ -749,15 +749,15 @@ for (int ei = 0; ei < d_num_eqn; ei++)
     {
         for (int i = -1; i < interior_dims[0] + 2; i++)
         {
-            // Compute the linear index of the face.
-            const int idx_face_x = (i + 1) +
+            // Compute the linear index of the side.
+            const int idx_side_x = (i + 1) +
                 (j + 1)*(interior_dims[0] + 3);
             
             performWENOInterpolation_new(
                 W_L_ptr,
                 W_R_ptr,
                 W_array_x,
-                idx_face_x);
+                idx_side_x);
         }
     }
 }
@@ -787,15 +787,15 @@ for (int ei = 0; ei < d_num_eqn; ei++)
     {
         for (int i = 0; i < interior_dims[0]; i++)
         {
-            // Compute the linear index of the face.
-            const int idx_face_y = (i + 1) +
+            // Compute the linear index of the side.
+            const int idx_side_y = (i + 1) +
                 (j + 1)*(interior_dims[0] + 2);
             
             performWENOInterpolation_new(
                 W_B_ptr,
                 W_T_ptr,
                 W_array_y,
-                idx_face_y);
+                idx_side_y);
         }
     }
 }
@@ -856,8 +856,8 @@ for (int j = 0; j < interior_dims[1]; j++)
 {
     for (int i = -1; i < interior_dims[0] + 2; i++)
     {
-        // Compute the linear index of the face.
-        const int idx_face_x = (i + 1) +
+        // Compute the linear index of the side.
+        const int idx_side_x = (i + 1) +
             (j + 1)*(interior_dims[0] + 3);
             
         // Compute the average dilatation and magnitude of vorticity.
@@ -882,20 +882,20 @@ for (int j = 0; j < interior_dims[1]; j++)
         // Initialize container that stores the references to the mid-point flux.
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            F_x_midpoint_ref.push_back(boost::ref(F_x_midpoint[ei][idx_face_x]));
+            F_x_midpoint_ref.push_back(boost::ref(F_x_midpoint[ei][idx_side_x]));
         }
         
         // Initialize container that stores the references to the mid-point velocity.
         for (int di = 0; di < d_dim.getValue(); di++)
         {
             vel_x_midpoint_ref.push_back(
-                boost::ref(velocity_intercell->getPointer(0, di)[idx_face_x]));
+                boost::ref(velocity_intercell->getPointer(0, di)[idx_side_x]));
         }
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            V_x_L_ref.push_back(boost::ref(V_x_L[ei][idx_face_x]));
-            V_x_R_ref.push_back(boost::ref(V_x_R[ei][idx_face_x]));
+            V_x_L_ref.push_back(boost::ref(V_x_L[ei][idx_side_x]));
+            V_x_R_ref.push_back(boost::ref(V_x_R[ei][idx_side_x]));
         }
         
         // Apply the Riemann solver.
@@ -967,8 +967,8 @@ for (int j = -1; j < interior_dims[1] + 2; j++)
 {
     for (int i = 0; i < interior_dims[0]; i++)
     {
-        // Compute the linear index of the face.
-        const int idx_face_y = (i + 1) +
+        // Compute the linear index of the side.
+        const int idx_side_y = (i + 1) +
             (j + 1)*(interior_dims[0] + 2);
         
         // Compute the average dilatation and magnitude of vorticity.
@@ -993,20 +993,20 @@ for (int j = -1; j < interior_dims[1] + 2; j++)
         // Initialize container that stores the references to the mid-point flux.
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            F_y_midpoint_ref.push_back(boost::ref(F_y_midpoint[ei][idx_face_y]));
+            F_y_midpoint_ref.push_back(boost::ref(F_y_midpoint[ei][idx_side_y]));
         }
         
         // Initialize container that stores the references to the mid-point velocity.
         for (int di = 0; di < d_dim.getValue(); di++)
         {
             vel_y_midpoint_ref.push_back(
-                boost::ref(velocity_intercell->getPointer(1, di)[idx_face_y]));
+                boost::ref(velocity_intercell->getPointer(1, di)[idx_side_y]));
         }
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            V_y_B_ref.push_back(boost::ref(V_y_B[ei][idx_face_y]));
-            V_y_T_ref.push_back(boost::ref(V_y_T[ei][idx_face_y]));
+            V_y_B_ref.push_back(boost::ref(V_y_B[ei][idx_side_y]));
+            V_y_T_ref.push_back(boost::ref(V_y_T[ei][idx_side_y]));
         }
         
         // Apply the Riemann solver.
@@ -1168,16 +1168,16 @@ t_reconstruct_flux->stop();
                         
                         const int idx_cell_nghost = i + j*interior_dims[0];
                         
-                        const int idx_face_x_LL = i + 
+                        const int idx_side_x_LL = i + 
                             (j + 1)*(interior_dims[0] + 3);
                         
-                        const int idx_face_x_L = (i + 1) +
+                        const int idx_side_x_L = (i + 1) +
                             (j + 1)*(interior_dims[0] + 3);
                         
-                        const int idx_face_x_R = (i + 2) +
+                        const int idx_side_x_R = (i + 2) +
                             (j + 1)*(interior_dims[0] + 3);
                         
-                        const int idx_face_x_RR = (i + 3) +
+                        const int idx_side_x_RR = (i + 3) +
                             (j + 1)*(interior_dims[0] + 3);
                         
 /*
@@ -1194,27 +1194,27 @@ const int idx_face_y_TT = (j + 3) +
     (i + 1)*(interior_dims[1] + 3);
 */
 
-const int idx_face_y_BB = (i + 1) +
+const int idx_side_y_BB = (i + 1) +
     j*(interior_dims[0] + 2);
 
-const int idx_face_y_B = (i + 1) +
+const int idx_side_y_B = (i + 1) +
     (j + 1)*(interior_dims[0] + 2);
 
-const int idx_face_y_T = (i + 1) +
+const int idx_side_y_T = (i + 1) +
     (j + 2)*(interior_dims[0] + 2);
 
-const int idx_face_y_TT = (i + 1) +
+const int idx_side_y_TT = (i + 1) +
     (j + 3)*(interior_dims[0] + 2);
                         
-                        const double& u_LL = velocity_intercell->getPointer(0, 0)[idx_face_x_LL];
-                        const double& u_L = velocity_intercell->getPointer(0, 0)[idx_face_x_L];
-                        const double& u_R = velocity_intercell->getPointer(0, 0)[idx_face_x_R];
-                        const double& u_RR = velocity_intercell->getPointer(0, 0)[idx_face_x_RR];
+                        const double& u_LL = velocity_intercell->getPointer(0, 0)[idx_side_x_LL];
+                        const double& u_L = velocity_intercell->getPointer(0, 0)[idx_side_x_L];
+                        const double& u_R = velocity_intercell->getPointer(0, 0)[idx_side_x_R];
+                        const double& u_RR = velocity_intercell->getPointer(0, 0)[idx_side_x_RR];
                         
-                        const double& v_BB = velocity_intercell->getPointer(1, 1)[idx_face_y_BB];
-                        const double& v_B = velocity_intercell->getPointer(1, 1)[idx_face_y_B];
-                        const double& v_T = velocity_intercell->getPointer(1, 1)[idx_face_y_T];
-                        const double& v_TT = velocity_intercell->getPointer(1, 1)[idx_face_y_TT];
+                        const double& v_BB = velocity_intercell->getPointer(1, 1)[idx_side_y_BB];
+                        const double& v_B = velocity_intercell->getPointer(1, 1)[idx_side_y_B];
+                        const double& v_T = velocity_intercell->getPointer(1, 1)[idx_side_y_T];
+                        const double& v_TT = velocity_intercell->getPointer(1, 1)[idx_side_y_TT];
                         
                         S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
                             (3.0/2*(u_R - u_L) - 3.0/10*(u[idx_cell_wghost_x_R] - u[idx_cell_wghost_x_L]) +
@@ -2564,6 +2564,920 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBetaTilde(
 }
 
 
+void
+ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
+    std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_beta,
+    const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_array)
+{
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(static_cast<int>(variables_beta.size()) == 4);
+    TBOX_ASSERT(static_cast<int>(variables_beta[0].size()) == d_num_eqn);
+#endif
+    
+    /*
+     * Get the dimensions of interior box, box including ghost cells and number of ghost cells.
+     */
+    
+    const hier::IntVector interior_dims = variables_beta[0][0]->getBox().numberCells();
+    const hier::IntVector ghostcell_dims = variables_beta[0][0]->getGhostBox().numberCells();
+    const hier::IntVector num_ghosts = variables_beta[0][0]->getGhostCellWidth();
+    
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+    for (int m = 0; m < 4; m++)
+    {
+        TBOX_ASSERT(static_cast<int>(variables_beta[m].size()) == d_num_eqn);
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            TBOX_ERROR(variables_beta[m][ei]->getBox().numberCells() == interior_dims);
+            TBOX_ERROR(variables_beta[m][ei]->getGhostBox().numberCells() == ghostcell_dims);
+        }
+    }
+    
+    TBOX_ASSERT(static_cast<int>(variables_array.size()) == 6);
+    
+    for (int m = 0; m < 6; m++)
+    {
+        TBOX_ASSERT(static_cast<int>(variables_array[m].size()) == d_num_eqn);
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+            TBOX_ERROR(variables_array[m][ei]->getBox().numberCells() == interior_dims);
+            TBOX_ERROR(variables_array[m][ei]->getGhostBox().numberCells() == ghostcell_dims);
+        }
+    }
+#endif
+    
+    /*
+     * Declare the pointers to the beta's.
+     */
+    
+    std::vector<double*> beta;
+    beta.resize(4);
+    
+    /*
+     * Declare the pointers to the array of variables.
+     */
+    
+    std::vector<double*> U_array;
+    U_array.resize(6);
+    
+    /*
+     * Compute the beta's.
+     */
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        const int interior_dim_0 = interior_dims[0];
+        const int num_ghosts_0 = num_ghosts[0];
+        
+        /*
+         * Compute beta in the x-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            for (int m = 0; m < 4; m++)
+            {
+                beta[m] = variables_beta[m][ei]->getPointer(0);
+            }
+            
+            for (int m = 0; m < 6; m++)
+            {
+                U_array[m] = variables_array[m][ei]->getPointer(0);
+            }
+            
+            for (int i = -num_ghosts_0;
+                 i < interior_dim_0 + 1 + num_ghosts_0;
+                 i++)
+            {
+                // Compute the linear index.
+                const int idx_side = i + num_ghosts_0;
+                
+                beta[0][idx_side] = 1.0/3.0*(U_array[0][idx_side]*(4.0*U_array[0][idx_side] -
+                    19.0*U_array[1][idx_side] + 11.0*U_array[2][idx_side]) +
+                    U_array[1][idx_side]*(25.0*U_array[1][idx_side] - 31.0*U_array[2][idx_side]) +
+                    10.0*U_array[2][idx_side]*U_array[2][idx_side]);
+                
+                beta[1][idx_side] = 1.0/3.0*(U_array[1][idx_side]*(4.0*U_array[1][idx_side] -
+                    13.0*U_array[2][idx_side] + 5.0*U_array[3][idx_side]) +
+                    13.0*U_array[2][idx_side]*(U_array[2][idx_side] - U_array[3][idx_side]) +
+                    4.0*U_array[3][idx_side]*U_array[3][idx_side]);
+                
+                beta[2][idx_side] = 1.0/3.0*(U_array[2][idx_side]*(10.0*U_array[2][idx_side] -
+                    31.0*U_array[3][idx_side] + 11.0*U_array[4][idx_side]) +
+                    U_array[3][idx_side]*(25.0*U_array[3][idx_side] - 19.0*U_array[4][idx_side]) +
+                    4.0*U_array[4][idx_side]*U_array[4][idx_side]);
+                
+                beta[3][idx_side] = 1.0/232243200.0*(U_array[0][idx_side]*
+                    (525910327.0*U_array[0][idx_side] - 4562164630.0*U_array[1][idx_side] +
+                    7799501420.0*U_array[2][idx_side] - 6610694540.0*U_array[3][idx_side] +
+                    2794296070.0*U_array[4][idx_side] - 472758974.0*U_array[5][idx_side]) +
+                    5.0*U_array[1][idx_side]* (2146987907.0*U_array[1][idx_side] -
+                    7722406988.0*U_array[2][idx_side] + 6763559276.0*U_array[3][idx_side] -
+                    2926461814.0*U_array[4][idx_side] + 503766638.0*U_array[5][idx_side]) +
+                    20.0*U_array[2][idx_side]*(1833221603.0*U_array[2][idx_side] -
+                    3358664662.0*U_array[3][idx_side] + 1495974539.0*U_array[4][idx_side] -
+                    263126407.0*U_array[5][idx_side]) + 20.0*U_array[3][idx_side]*
+                    (1607794163.0*U_array[3][idx_side] - 1486026707.0*U_array[4][idx_side] +
+                    268747951.0*U_array[5][idx_side]) + 5.0*U_array[4][idx_side]*
+                    (1432381427.0*U_array[4][idx_side] - 536951582.0*U_array[5][idx_side]) +
+                    263126407.0*U_array[5][idx_side]*U_array[5][idx_side]);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        
+        const int ghostcell_dim_0 = ghostcell_dims[0];
+        
+        const int num_ghosts_0 = num_ghosts[0];
+        const int num_ghosts_1 = num_ghosts[1];
+        
+        /*
+         * Compute beta in the x-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            for (int m = 0; m < 4; m++)
+            {
+                beta[m] = variables_beta[m][ei]->getPointer(0);
+            }
+            
+            for (int m = 0; m < 6; m++)
+            {
+                U_array[m] = variables_array[m][ei]->getPointer(0);
+            }
+            
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+                for (int i = -num_ghosts_0;
+                     i < interior_dim_1 + 1 + num_ghosts_0;
+                     i++)
+                {
+                    // Compute the linear index.
+                    const int idx_side = (i + num_ghosts_0) +
+                        (j + num_ghosts_1)*(ghostcell_dim_0 + 1);
+                    
+                    beta[0][idx_side] = 1.0/3.0*(U_array[0][idx_side]*(4.0*U_array[0][idx_side] -
+                        19.0*U_array[1][idx_side] + 11.0*U_array[2][idx_side]) +
+                        U_array[1][idx_side]*(25.0*U_array[1][idx_side] - 31.0*U_array[2][idx_side]) +
+                        10.0*U_array[2][idx_side]*U_array[2][idx_side]);
+                    
+                    beta[1][idx_side] = 1.0/3.0*(U_array[1][idx_side]*(4.0*U_array[1][idx_side] -
+                        13.0*U_array[2][idx_side] + 5.0*U_array[3][idx_side]) +
+                        13.0*U_array[2][idx_side]*(U_array[2][idx_side] - U_array[3][idx_side]) +
+                        4.0*U_array[3][idx_side]*U_array[3][idx_side]);
+                    
+                    beta[2][idx_side] = 1.0/3.0*(U_array[2][idx_side]*(10.0*U_array[2][idx_side] -
+                        31.0*U_array[3][idx_side] + 11.0*U_array[4][idx_side]) +
+                        U_array[3][idx_side]*(25.0*U_array[3][idx_side] - 19.0*U_array[4][idx_side]) +
+                        4.0*U_array[4][idx_side]*U_array[4][idx_side]);
+                    
+                    beta[3][idx_side] = 1.0/232243200.0*(U_array[0][idx_side]*
+                        (525910327.0*U_array[0][idx_side] - 4562164630.0*U_array[1][idx_side] +
+                        7799501420.0*U_array[2][idx_side] - 6610694540.0*U_array[3][idx_side] +
+                        2794296070.0*U_array[4][idx_side] - 472758974.0*U_array[5][idx_side]) +
+                        5.0*U_array[1][idx_side]* (2146987907.0*U_array[1][idx_side] -
+                        7722406988.0*U_array[2][idx_side] + 6763559276.0*U_array[3][idx_side] -
+                        2926461814.0*U_array[4][idx_side] + 503766638.0*U_array[5][idx_side]) +
+                        20.0*U_array[2][idx_side]*(1833221603.0*U_array[2][idx_side] -
+                        3358664662.0*U_array[3][idx_side] + 1495974539.0*U_array[4][idx_side] -
+                        263126407.0*U_array[5][idx_side]) + 20.0*U_array[3][idx_side]*
+                        (1607794163.0*U_array[3][idx_side] - 1486026707.0*U_array[4][idx_side] +
+                        268747951.0*U_array[5][idx_side]) + 5.0*U_array[4][idx_side]*
+                        (1432381427.0*U_array[4][idx_side] - 536951582.0*U_array[5][idx_side]) +
+                        263126407.0*U_array[5][idx_side]*U_array[5][idx_side]);
+                }
+            }
+        }
+        
+        /*
+         * Compute beta in the y-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            for (int m = 0; m < 4; m++)
+            {
+                beta[m] = variables_beta[m][ei]->getPointer(1);
+            }
+            
+            for (int m = 0; m < 6; m++)
+            {
+                U_array[m] = variables_array[m][ei]->getPointer(1);
+            }
+            
+            for (int j = -num_ghosts_1;
+                 j < interior_dim_1 + 1 + num_ghosts_1;
+                 j++)
+            {
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_side = (i + num_ghosts_0) +
+                        (j + num_ghosts_1)*ghostcell_dim_0;
+                    
+                    beta[0][idx_side] = 1.0/3.0*(U_array[0][idx_side]*(4.0*U_array[0][idx_side] -
+                        19.0*U_array[1][idx_side] + 11.0*U_array[2][idx_side]) +
+                        U_array[1][idx_side]*(25.0*U_array[1][idx_side] - 31.0*U_array[2][idx_side]) +
+                        10.0*U_array[2][idx_side]*U_array[2][idx_side]);
+                    
+                    beta[1][idx_side] = 1.0/3.0*(U_array[1][idx_side]*(4.0*U_array[1][idx_side] -
+                        13.0*U_array[2][idx_side] + 5.0*U_array[3][idx_side]) +
+                        13.0*U_array[2][idx_side]*(U_array[2][idx_side] - U_array[3][idx_side]) +
+                        4.0*U_array[3][idx_side]*U_array[3][idx_side]);
+                    
+                    beta[2][idx_side] = 1.0/3.0*(U_array[2][idx_side]*(10.0*U_array[2][idx_side] -
+                        31.0*U_array[3][idx_side] + 11.0*U_array[4][idx_side]) +
+                        U_array[3][idx_side]*(25.0*U_array[3][idx_side] - 19.0*U_array[4][idx_side]) +
+                        4.0*U_array[4][idx_side]*U_array[4][idx_side]);
+                    
+                    beta[3][idx_side] = 1.0/232243200.0*(U_array[0][idx_side]*
+                        (525910327.0*U_array[0][idx_side] - 4562164630.0*U_array[1][idx_side] +
+                        7799501420.0*U_array[2][idx_side] - 6610694540.0*U_array[3][idx_side] +
+                        2794296070.0*U_array[4][idx_side] - 472758974.0*U_array[5][idx_side]) +
+                        5.0*U_array[1][idx_side]* (2146987907.0*U_array[1][idx_side] -
+                        7722406988.0*U_array[2][idx_side] + 6763559276.0*U_array[3][idx_side] -
+                        2926461814.0*U_array[4][idx_side] + 503766638.0*U_array[5][idx_side]) +
+                        20.0*U_array[2][idx_side]*(1833221603.0*U_array[2][idx_side] -
+                        3358664662.0*U_array[3][idx_side] + 1495974539.0*U_array[4][idx_side] -
+                        263126407.0*U_array[5][idx_side]) + 20.0*U_array[3][idx_side]*
+                        (1607794163.0*U_array[3][idx_side] - 1486026707.0*U_array[4][idx_side] +
+                        268747951.0*U_array[5][idx_side]) + 5.0*U_array[4][idx_side]*
+                        (1432381427.0*U_array[4][idx_side] - 536951582.0*U_array[5][idx_side]) +
+                        263126407.0*U_array[5][idx_side]*U_array[5][idx_side]);
+                }
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        const int interior_dim_2 = interior_dims[2];
+        
+        const int ghostcell_dim_0 = ghostcell_dims[0];
+        const int ghostcell_dim_1 = ghostcell_dims[1];
+        
+        const int num_ghosts_0 = num_ghosts[0];
+        const int num_ghosts_1 = num_ghosts[1];
+        const int num_ghosts_2 = num_ghosts[2];
+        
+        /*
+         * Compute beta in the x-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            for (int m = 0; m < 4; m++)
+            {
+                beta[m] = variables_beta[m][ei]->getPointer(0);
+            }
+            
+            for (int m = 0; m < 6; m++)
+            {
+                U_array[m] = variables_array[m][ei]->getPointer(0);
+            }
+            
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+                    for (int i = -num_ghosts_0;
+                         i < interior_dim_1 + 1 + num_ghosts_0;
+                         i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_side = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*(ghostcell_dim_0 + 1) +
+                            (k + num_ghosts_2)*(ghostcell_dim_0 + 1)*
+                                ghostcell_dim_1;
+                        
+                        beta[0][idx_side] = 1.0/3.0*(U_array[0][idx_side]*(4.0*U_array[0][idx_side] -
+                            19.0*U_array[1][idx_side] + 11.0*U_array[2][idx_side]) +
+                            U_array[1][idx_side]*(25.0*U_array[1][idx_side] - 31.0*U_array[2][idx_side]) +
+                            10.0*U_array[2][idx_side]*U_array[2][idx_side]);
+                        
+                        beta[1][idx_side] = 1.0/3.0*(U_array[1][idx_side]*(4.0*U_array[1][idx_side] -
+                            13.0*U_array[2][idx_side] + 5.0*U_array[3][idx_side]) +
+                            13.0*U_array[2][idx_side]*(U_array[2][idx_side] - U_array[3][idx_side]) +
+                            4.0*U_array[3][idx_side]*U_array[3][idx_side]);
+                        
+                        beta[2][idx_side] = 1.0/3.0*(U_array[2][idx_side]*(10.0*U_array[2][idx_side] -
+                            31.0*U_array[3][idx_side] + 11.0*U_array[4][idx_side]) +
+                            U_array[3][idx_side]*(25.0*U_array[3][idx_side] - 19.0*U_array[4][idx_side]) +
+                            4.0*U_array[4][idx_side]*U_array[4][idx_side]);
+                        
+                        beta[3][idx_side] = 1.0/232243200.0*(U_array[0][idx_side]*
+                            (525910327.0*U_array[0][idx_side] - 4562164630.0*U_array[1][idx_side] +
+                            7799501420.0*U_array[2][idx_side] - 6610694540.0*U_array[3][idx_side] +
+                            2794296070.0*U_array[4][idx_side] - 472758974.0*U_array[5][idx_side]) +
+                            5.0*U_array[1][idx_side]* (2146987907.0*U_array[1][idx_side] -
+                            7722406988.0*U_array[2][idx_side] + 6763559276.0*U_array[3][idx_side] -
+                            2926461814.0*U_array[4][idx_side] + 503766638.0*U_array[5][idx_side]) +
+                            20.0*U_array[2][idx_side]*(1833221603.0*U_array[2][idx_side] -
+                            3358664662.0*U_array[3][idx_side] + 1495974539.0*U_array[4][idx_side] -
+                            263126407.0*U_array[5][idx_side]) + 20.0*U_array[3][idx_side]*
+                            (1607794163.0*U_array[3][idx_side] - 1486026707.0*U_array[4][idx_side] +
+                            268747951.0*U_array[5][idx_side]) + 5.0*U_array[4][idx_side]*
+                            (1432381427.0*U_array[4][idx_side] - 536951582.0*U_array[5][idx_side]) +
+                            263126407.0*U_array[5][idx_side]*U_array[5][idx_side]);
+                    }
+                }
+            }
+        }
+        
+        /*
+         * Compute beta in the y-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            for (int m = 0; m < 4; m++)
+            {
+                beta[m] = variables_beta[m][ei]->getPointer(1);
+            }
+            
+            for (int m = 0; m < 6; m++)
+            {
+                U_array[m] = variables_array[m][ei]->getPointer(1);
+            }
+            
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = -num_ghosts_1;
+                     j < interior_dim_1 + 1 + num_ghosts_1;
+                     j++)
+                {
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_side = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0 +
+                            (k + num_ghosts_2)*ghostcell_dim_0*
+                                (ghostcell_dim_1 + 1);
+                        
+                        beta[0][idx_side] = 1.0/3.0*(U_array[0][idx_side]*(4.0*U_array[0][idx_side] -
+                            19.0*U_array[1][idx_side] + 11.0*U_array[2][idx_side]) +
+                            U_array[1][idx_side]*(25.0*U_array[1][idx_side] - 31.0*U_array[2][idx_side]) +
+                            10.0*U_array[2][idx_side]*U_array[2][idx_side]);
+                        
+                        beta[1][idx_side] = 1.0/3.0*(U_array[1][idx_side]*(4.0*U_array[1][idx_side] -
+                            13.0*U_array[2][idx_side] + 5.0*U_array[3][idx_side]) +
+                            13.0*U_array[2][idx_side]*(U_array[2][idx_side] - U_array[3][idx_side]) +
+                            4.0*U_array[3][idx_side]*U_array[3][idx_side]);
+                        
+                        beta[2][idx_side] = 1.0/3.0*(U_array[2][idx_side]*(10.0*U_array[2][idx_side] -
+                            31.0*U_array[3][idx_side] + 11.0*U_array[4][idx_side]) +
+                            U_array[3][idx_side]*(25.0*U_array[3][idx_side] - 19.0*U_array[4][idx_side]) +
+                            4.0*U_array[4][idx_side]*U_array[4][idx_side]);
+                        
+                        beta[3][idx_side] = 1.0/232243200.0*(U_array[0][idx_side]*
+                            (525910327.0*U_array[0][idx_side] - 4562164630.0*U_array[1][idx_side] +
+                            7799501420.0*U_array[2][idx_side] - 6610694540.0*U_array[3][idx_side] +
+                            2794296070.0*U_array[4][idx_side] - 472758974.0*U_array[5][idx_side]) +
+                            5.0*U_array[1][idx_side]* (2146987907.0*U_array[1][idx_side] -
+                            7722406988.0*U_array[2][idx_side] + 6763559276.0*U_array[3][idx_side] -
+                            2926461814.0*U_array[4][idx_side] + 503766638.0*U_array[5][idx_side]) +
+                            20.0*U_array[2][idx_side]*(1833221603.0*U_array[2][idx_side] -
+                            3358664662.0*U_array[3][idx_side] + 1495974539.0*U_array[4][idx_side] -
+                            263126407.0*U_array[5][idx_side]) + 20.0*U_array[3][idx_side]*
+                            (1607794163.0*U_array[3][idx_side] - 1486026707.0*U_array[4][idx_side] +
+                            268747951.0*U_array[5][idx_side]) + 5.0*U_array[4][idx_side]*
+                            (1432381427.0*U_array[4][idx_side] - 536951582.0*U_array[5][idx_side]) +
+                            263126407.0*U_array[5][idx_side]*U_array[5][idx_side]);
+                    }
+                }
+            }
+        }
+        
+        /*
+         * Compute beta in the z-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            for (int m = 0; m < 4; m++)
+            {
+                beta[m] = variables_beta[m][ei]->getPointer(2);
+            }
+            
+            for (int m = 0; m < 6; m++)
+            {
+                U_array[m] = variables_array[m][ei]->getPointer(2);
+            }
+            
+            for (int k = -num_ghosts_2;
+                 k < interior_dim_2 + 1 + num_ghosts_2;
+                 k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_side = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0 +
+                            (k + num_ghosts_2)*ghostcell_dim_0*
+                                ghostcell_dim_1;
+                        
+                        beta[0][idx_side] = 1.0/3.0*(U_array[0][idx_side]*(4.0*U_array[0][idx_side] -
+                            19.0*U_array[1][idx_side] + 11.0*U_array[2][idx_side]) +
+                            U_array[1][idx_side]*(25.0*U_array[1][idx_side] - 31.0*U_array[2][idx_side]) +
+                            10.0*U_array[2][idx_side]*U_array[2][idx_side]);
+                        
+                        beta[1][idx_side] = 1.0/3.0*(U_array[1][idx_side]*(4.0*U_array[1][idx_side] -
+                            13.0*U_array[2][idx_side] + 5.0*U_array[3][idx_side]) +
+                            13.0*U_array[2][idx_side]*(U_array[2][idx_side] - U_array[3][idx_side]) +
+                            4.0*U_array[3][idx_side]*U_array[3][idx_side]);
+                        
+                        beta[2][idx_side] = 1.0/3.0*(U_array[2][idx_side]*(10.0*U_array[2][idx_side] -
+                            31.0*U_array[3][idx_side] + 11.0*U_array[4][idx_side]) +
+                            U_array[3][idx_side]*(25.0*U_array[3][idx_side] - 19.0*U_array[4][idx_side]) +
+                            4.0*U_array[4][idx_side]*U_array[4][idx_side]);
+                        
+                        beta[3][idx_side] = 1.0/232243200.0*(U_array[0][idx_side]*
+                            (525910327.0*U_array[0][idx_side] - 4562164630.0*U_array[1][idx_side] +
+                            7799501420.0*U_array[2][idx_side] - 6610694540.0*U_array[3][idx_side] +
+                            2794296070.0*U_array[4][idx_side] - 472758974.0*U_array[5][idx_side]) +
+                            5.0*U_array[1][idx_side]* (2146987907.0*U_array[1][idx_side] -
+                            7722406988.0*U_array[2][idx_side] + 6763559276.0*U_array[3][idx_side] -
+                            2926461814.0*U_array[4][idx_side] + 503766638.0*U_array[5][idx_side]) +
+                            20.0*U_array[2][idx_side]*(1833221603.0*U_array[2][idx_side] -
+                            3358664662.0*U_array[3][idx_side] + 1495974539.0*U_array[4][idx_side] -
+                            263126407.0*U_array[5][idx_side]) + 20.0*U_array[3][idx_side]*
+                            (1607794163.0*U_array[3][idx_side] - 1486026707.0*U_array[4][idx_side] +
+                            268747951.0*U_array[5][idx_side]) + 5.0*U_array[4][idx_side]*
+                            (1432381427.0*U_array[4][idx_side] - 536951582.0*U_array[5][idx_side]) +
+                            263126407.0*U_array[5][idx_side]*U_array[5][idx_side]);
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+void
+ConvectiveFluxReconstructorWCNS6_Test::computeBetaTilde(
+    std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_beta_tilde,
+    const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_array)
+{
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(static_cast<int>(variables_beta_tilde.size()) == 4);
+    TBOX_ASSERT(static_cast<int>(variables_beta_tilde[0].size()) == d_num_eqn);
+#endif
+    
+    /*
+     * Get the dimensions of interior box and box including ghost cells.
+     */
+    
+    const hier::IntVector interior_dims = variables_beta_tilde[0][0]->getBox().numberCells();
+    const hier::IntVector ghostcell_dims = variables_beta_tilde[0][0]->getGhostBox().numberCells();
+    const hier::IntVector num_ghosts = variables_beta_tilde[0][0]->getGhostCellWidth();
+    
+#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+    for (int m = 0; m < 4; m++)
+    {
+        TBOX_ASSERT(static_cast<int>(variables_beta_tilde[m].size()) == d_num_eqn);
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            TBOX_ERROR(variables_beta_tilde[m][ei]->getBox().numberCells() == interior_dims);
+            TBOX_ERROR(variables_beta_tilde[m][ei]->getGhostBox().numberCells() == ghostcell_dims);
+        }
+    }
+    
+    TBOX_ASSERT(static_cast<int>(variables_array.size()) == 6);
+    
+    for (int m = 0; m < 6; m++)
+    {
+        TBOX_ASSERT(static_cast<int>(variables_array[m].size()) == d_num_eqn);
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+            TBOX_ERROR(variables_array[m][ei]->getBox().numberCells() == interior_dims);
+            TBOX_ERROR(variables_array[m][ei]->getGhostBox().numberCells() == ghostcell_dims);
+        }
+    }
+#endif
+    
+    /*
+     * Declare the pointers to the beta_tilde's.
+     */
+    
+    std::vector<double*> beta_tilde;
+    beta_tilde.resize(4);
+    
+    /*
+     * Declare the pointers to the array of variables.
+     */
+    
+    std::vector<double*> U_array;
+    U_array.resize(6);
+    
+    /*
+     * Compute the beta_tilde's.
+     */
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        const int interior_dim_0 = interior_dims[0];
+        const int num_ghosts_0 = num_ghosts[0];
+        
+        /*
+         * Compute beta_tilde in the x-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            for (int m = 0; m < 4; m++)
+            {
+                beta_tilde[m] = variables_beta_tilde[m][ei]->getPointer(0);
+            }
+            
+            for (int m = 0; m < 6; m++)
+            {
+                U_array[m] = variables_array[m][ei]->getPointer(0);
+            }
+            
+            for (int i = -num_ghosts_0;
+                 i < interior_dim_0 + 1 + num_ghosts_0;
+                 i++)
+            {
+                // Compute the linear index.
+                const int idx_side = i + num_ghosts_0;
+                
+                beta_tilde[0][idx_side] = 1.0/3.0*(U_array[5][idx_side]*(4.0*U_array[5][idx_side] -
+                    19.0*U_array[4][idx_side] + 11.0*U_array[3][idx_side]) +
+                    U_array[4][idx_side]*(25.0*U_array[4][idx_side] - 31.0*U_array[3][idx_side]) +
+                    10.0*U_array[3][idx_side]*U_array[3][idx_side]);
+                
+                beta_tilde[1][idx_side] = 1.0/3.0*(U_array[4][idx_side]*(4.0*U_array[4][idx_side] -
+                    13.0*U_array[3][idx_side] + 5.0*U_array[2][idx_side]) +
+                    13.0*U_array[3][idx_side]*(U_array[3][idx_side] - U_array[2][idx_side]) +
+                    4.0*U_array[2][idx_side]*U_array[2][idx_side]);
+                
+                beta_tilde[2][idx_side] = 1.0/3.0*(U_array[3][idx_side]*(10.0*U_array[3][idx_side] -
+                    31.0*U_array[2][idx_side] + 11.0*U_array[1][idx_side]) +
+                    U_array[2][idx_side]*(25.0*U_array[2][idx_side] - 19.0*U_array[1][idx_side]) +
+                    4.0*U_array[1][idx_side]*U_array[1][idx_side]);
+                
+                beta_tilde[3][idx_side] = 1.0/232243200.0*(U_array[5][idx_side]*
+                    (525910327.0*U_array[5][idx_side] - 4562164630.0*U_array[4][idx_side] +
+                    7799501420.0*U_array[3][idx_side] - 6610694540.0*U_array[2][idx_side] +
+                    2794296070.0*U_array[1][idx_side] - 472758974.0*U_array[0][idx_side]) +
+                    5.0*U_array[4][idx_side]*(2146987907.0*U_array[4][idx_side] -
+                    7722406988.0*U_array[3][idx_side] + 6763559276.0*U_array[2][idx_side] -
+                    2926461814.0*U_array[1][idx_side] + 503766638.0*U_array[0][idx_side]) +
+                    20.0*U_array[3][idx_side]*(1833221603.0*U_array[3][idx_side] -
+                    3358664662.0*U_array[2][idx_side] + 1495974539.0*U_array[1][idx_side] -
+                    263126407.0*U_array[0][idx_side]) + 20.0*U_array[2][idx_side]*
+                    (1607794163.0*U_array[2][idx_side] - 1486026707.0*U_array[1][idx_side] +
+                    268747951.0*U_array[0][idx_side]) + 5.0*U_array[1][idx_side]*
+                    (1432381427.0*U_array[1][idx_side] - 536951582.0*U_array[0][idx_side]) +
+                    263126407.0*U_array[0][idx_side]*U_array[0][idx_side]);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        
+        const int ghostcell_dim_0 = ghostcell_dims[0];
+        
+        const int num_ghosts_0 = num_ghosts[0];
+        const int num_ghosts_1 = num_ghosts[1];
+        
+        /*
+         * Compute beta_tilde in the x-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            for (int m = 0; m < 4; m++)
+            {
+                beta_tilde[m] = variables_beta_tilde[m][ei]->getPointer(0);
+            }
+            
+            for (int m = 0; m < 6; m++)
+            {
+                U_array[m] = variables_array[m][ei]->getPointer(0);
+            }
+            
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+                for (int i = -num_ghosts_0;
+                     i < interior_dim_1 + 1 + num_ghosts_0;
+                     i++)
+                {
+                    // Compute the linear index.
+                    const int idx_side = (i + num_ghosts_0) +
+                        (j + num_ghosts_1)*(ghostcell_dim_0 + 1);
+                    
+                    beta_tilde[0][idx_side] = 1.0/3.0*(U_array[5][idx_side]*(4.0*U_array[5][idx_side] -
+                        19.0*U_array[4][idx_side] + 11.0*U_array[3][idx_side]) +
+                        U_array[4][idx_side]*(25.0*U_array[4][idx_side] - 31.0*U_array[3][idx_side]) +
+                        10.0*U_array[3][idx_side]*U_array[3][idx_side]);
+                    
+                    beta_tilde[1][idx_side] = 1.0/3.0*(U_array[4][idx_side]*(4.0*U_array[4][idx_side] -
+                        13.0*U_array[3][idx_side] + 5.0*U_array[2][idx_side]) +
+                        13.0*U_array[3][idx_side]*(U_array[3][idx_side] - U_array[2][idx_side]) +
+                        4.0*U_array[2][idx_side]*U_array[2][idx_side]);
+                    
+                    beta_tilde[2][idx_side] = 1.0/3.0*(U_array[3][idx_side]*(10.0*U_array[3][idx_side] -
+                        31.0*U_array[2][idx_side] + 11.0*U_array[1][idx_side]) +
+                        U_array[2][idx_side]*(25.0*U_array[2][idx_side] - 19.0*U_array[1][idx_side]) +
+                        4.0*U_array[1][idx_side]*U_array[1][idx_side]);
+                    
+                    beta_tilde[3][idx_side] = 1.0/232243200.0*(U_array[5][idx_side]*
+                        (525910327.0*U_array[5][idx_side] - 4562164630.0*U_array[4][idx_side] +
+                        7799501420.0*U_array[3][idx_side] - 6610694540.0*U_array[2][idx_side] +
+                        2794296070.0*U_array[1][idx_side] - 472758974.0*U_array[0][idx_side]) +
+                        5.0*U_array[4][idx_side]*(2146987907.0*U_array[4][idx_side] -
+                        7722406988.0*U_array[3][idx_side] + 6763559276.0*U_array[2][idx_side] -
+                        2926461814.0*U_array[1][idx_side] + 503766638.0*U_array[0][idx_side]) +
+                        20.0*U_array[3][idx_side]*(1833221603.0*U_array[3][idx_side] -
+                        3358664662.0*U_array[2][idx_side] + 1495974539.0*U_array[1][idx_side] -
+                        263126407.0*U_array[0][idx_side]) + 20.0*U_array[2][idx_side]*
+                        (1607794163.0*U_array[2][idx_side] - 1486026707.0*U_array[1][idx_side] +
+                        268747951.0*U_array[0][idx_side]) + 5.0*U_array[1][idx_side]*
+                        (1432381427.0*U_array[1][idx_side] - 536951582.0*U_array[0][idx_side]) +
+                        263126407.0*U_array[0][idx_side]*U_array[0][idx_side]);
+                }
+            }
+        }
+        
+        /*
+         * Compute beta_tilde in the y-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            for (int m = 0; m < 4; m++)
+            {
+                beta_tilde[m] = variables_beta_tilde[m][ei]->getPointer(1);
+            }
+            
+            for (int m = 0; m < 6; m++)
+            {
+                U_array[m] = variables_array[m][ei]->getPointer(1);
+            }
+            
+            for (int j = -num_ghosts_1;
+                 j < interior_dim_1 + 1 + num_ghosts_1;
+                 j++)
+            {
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_side = (i + num_ghosts_0) +
+                        (j + num_ghosts_1)*ghostcell_dim_0;
+                    
+                    beta_tilde[0][idx_side] = 1.0/3.0*(U_array[5][idx_side]*(4.0*U_array[5][idx_side] -
+                        19.0*U_array[4][idx_side] + 11.0*U_array[3][idx_side]) +
+                        U_array[4][idx_side]*(25.0*U_array[4][idx_side] - 31.0*U_array[3][idx_side]) +
+                        10.0*U_array[3][idx_side]*U_array[3][idx_side]);
+                    
+                    beta_tilde[1][idx_side] = 1.0/3.0*(U_array[4][idx_side]*(4.0*U_array[4][idx_side] -
+                        13.0*U_array[3][idx_side] + 5.0*U_array[2][idx_side]) +
+                        13.0*U_array[3][idx_side]*(U_array[3][idx_side] - U_array[2][idx_side]) +
+                        4.0*U_array[2][idx_side]*U_array[2][idx_side]);
+                    
+                    beta_tilde[2][idx_side] = 1.0/3.0*(U_array[3][idx_side]*(10.0*U_array[3][idx_side] -
+                        31.0*U_array[2][idx_side] + 11.0*U_array[1][idx_side]) +
+                        U_array[2][idx_side]*(25.0*U_array[2][idx_side] - 19.0*U_array[1][idx_side]) +
+                        4.0*U_array[1][idx_side]*U_array[1][idx_side]);
+                    
+                    beta_tilde[3][idx_side] = 1.0/232243200.0*(U_array[5][idx_side]*
+                        (525910327.0*U_array[5][idx_side] - 4562164630.0*U_array[4][idx_side] +
+                        7799501420.0*U_array[3][idx_side] - 6610694540.0*U_array[2][idx_side] +
+                        2794296070.0*U_array[1][idx_side] - 472758974.0*U_array[0][idx_side]) +
+                        5.0*U_array[4][idx_side]*(2146987907.0*U_array[4][idx_side] -
+                        7722406988.0*U_array[3][idx_side] + 6763559276.0*U_array[2][idx_side] -
+                        2926461814.0*U_array[1][idx_side] + 503766638.0*U_array[0][idx_side]) +
+                        20.0*U_array[3][idx_side]*(1833221603.0*U_array[3][idx_side] -
+                        3358664662.0*U_array[2][idx_side] + 1495974539.0*U_array[1][idx_side] -
+                        263126407.0*U_array[0][idx_side]) + 20.0*U_array[2][idx_side]*
+                        (1607794163.0*U_array[2][idx_side] - 1486026707.0*U_array[1][idx_side] +
+                        268747951.0*U_array[0][idx_side]) + 5.0*U_array[1][idx_side]*
+                        (1432381427.0*U_array[1][idx_side] - 536951582.0*U_array[0][idx_side]) +
+                        263126407.0*U_array[0][idx_side]*U_array[0][idx_side]);
+                }
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        const int interior_dim_2 = interior_dims[2];
+        
+        const int ghostcell_dim_0 = ghostcell_dims[0];
+        const int ghostcell_dim_1 = ghostcell_dims[1];
+        
+        const int num_ghosts_0 = num_ghosts[0];
+        const int num_ghosts_1 = num_ghosts[1];
+        const int num_ghosts_2 = num_ghosts[2];
+        
+        /*
+         * Compute beta_tilde in the x-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            for (int m = 0; m < 4; m++)
+            {
+                beta_tilde[m] = variables_beta_tilde[m][ei]->getPointer(0);
+            }
+            
+            for (int m = 0; m < 6; m++)
+            {
+                U_array[m] = variables_array[m][ei]->getPointer(0);
+            }
+            
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+                    for (int i = -num_ghosts_0;
+                         i < interior_dim_1 + 1 + num_ghosts_0;
+                         i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_side = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*(ghostcell_dim_0 + 1) +
+                            (k + num_ghosts_2)*(ghostcell_dim_0 + 1)*
+                                ghostcell_dim_1;
+                        
+                        beta_tilde[0][idx_side] = 1.0/3.0*(U_array[5][idx_side]*(4.0*U_array[5][idx_side] -
+                            19.0*U_array[4][idx_side] + 11.0*U_array[3][idx_side]) +
+                            U_array[4][idx_side]*(25.0*U_array[4][idx_side] - 31.0*U_array[3][idx_side]) +
+                            10.0*U_array[3][idx_side]*U_array[3][idx_side]);
+                        
+                        beta_tilde[1][idx_side] = 1.0/3.0*(U_array[4][idx_side]*(4.0*U_array[4][idx_side] -
+                            13.0*U_array[3][idx_side] + 5.0*U_array[2][idx_side]) +
+                            13.0*U_array[3][idx_side]*(U_array[3][idx_side] - U_array[2][idx_side]) +
+                            4.0*U_array[2][idx_side]*U_array[2][idx_side]);
+                        
+                        beta_tilde[2][idx_side] = 1.0/3.0*(U_array[3][idx_side]*(10.0*U_array[3][idx_side] -
+                            31.0*U_array[2][idx_side] + 11.0*U_array[1][idx_side]) +
+                            U_array[2][idx_side]*(25.0*U_array[2][idx_side] - 19.0*U_array[1][idx_side]) +
+                            4.0*U_array[1][idx_side]*U_array[1][idx_side]);
+                        
+                        beta_tilde[3][idx_side] = 1.0/232243200.0*(U_array[5][idx_side]*
+                            (525910327.0*U_array[5][idx_side] - 4562164630.0*U_array[4][idx_side] +
+                            7799501420.0*U_array[3][idx_side] - 6610694540.0*U_array[2][idx_side] +
+                            2794296070.0*U_array[1][idx_side] - 472758974.0*U_array[0][idx_side]) +
+                            5.0*U_array[4][idx_side]*(2146987907.0*U_array[4][idx_side] -
+                            7722406988.0*U_array[3][idx_side] + 6763559276.0*U_array[2][idx_side] -
+                            2926461814.0*U_array[1][idx_side] + 503766638.0*U_array[0][idx_side]) +
+                            20.0*U_array[3][idx_side]*(1833221603.0*U_array[3][idx_side] -
+                            3358664662.0*U_array[2][idx_side] + 1495974539.0*U_array[1][idx_side] -
+                            263126407.0*U_array[0][idx_side]) + 20.0*U_array[2][idx_side]*
+                            (1607794163.0*U_array[2][idx_side] - 1486026707.0*U_array[1][idx_side] +
+                            268747951.0*U_array[0][idx_side]) + 5.0*U_array[1][idx_side]*
+                            (1432381427.0*U_array[1][idx_side] - 536951582.0*U_array[0][idx_side]) +
+                            263126407.0*U_array[0][idx_side]*U_array[0][idx_side]);
+                    }
+                }
+            }
+        }
+        
+        /*
+         * Compute beta_tilde in the y-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            for (int m = 0; m < 4; m++)
+            {
+                beta_tilde[m] = variables_beta_tilde[m][ei]->getPointer(1);
+            }
+            
+            for (int m = 0; m < 6; m++)
+            {
+                U_array[m] = variables_array[m][ei]->getPointer(1);
+            }
+            
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = -num_ghosts_1;
+                     j < interior_dim_1 + 1 + num_ghosts_1;
+                     j++)
+                {
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_side = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0 +
+                            (k + num_ghosts_2)*ghostcell_dim_0*
+                                (ghostcell_dim_1 + 1);
+                        
+                        beta_tilde[0][idx_side] = 1.0/3.0*(U_array[5][idx_side]*(4.0*U_array[5][idx_side] -
+                            19.0*U_array[4][idx_side] + 11.0*U_array[3][idx_side]) +
+                            U_array[4][idx_side]*(25.0*U_array[4][idx_side] - 31.0*U_array[3][idx_side]) +
+                            10.0*U_array[3][idx_side]*U_array[3][idx_side]);
+                        
+                        beta_tilde[1][idx_side] = 1.0/3.0*(U_array[4][idx_side]*(4.0*U_array[4][idx_side] -
+                            13.0*U_array[3][idx_side] + 5.0*U_array[2][idx_side]) +
+                            13.0*U_array[3][idx_side]*(U_array[3][idx_side] - U_array[2][idx_side]) +
+                            4.0*U_array[2][idx_side]*U_array[2][idx_side]);
+                        
+                        beta_tilde[2][idx_side] = 1.0/3.0*(U_array[3][idx_side]*(10.0*U_array[3][idx_side] -
+                            31.0*U_array[2][idx_side] + 11.0*U_array[1][idx_side]) +
+                            U_array[2][idx_side]*(25.0*U_array[2][idx_side] - 19.0*U_array[1][idx_side]) +
+                            4.0*U_array[1][idx_side]*U_array[1][idx_side]);
+                        
+                        beta_tilde[3][idx_side] = 1.0/232243200.0*(U_array[5][idx_side]*
+                            (525910327.0*U_array[5][idx_side] - 4562164630.0*U_array[4][idx_side] +
+                            7799501420.0*U_array[3][idx_side] - 6610694540.0*U_array[2][idx_side] +
+                            2794296070.0*U_array[1][idx_side] - 472758974.0*U_array[0][idx_side]) +
+                            5.0*U_array[4][idx_side]*(2146987907.0*U_array[4][idx_side] -
+                            7722406988.0*U_array[3][idx_side] + 6763559276.0*U_array[2][idx_side] -
+                            2926461814.0*U_array[1][idx_side] + 503766638.0*U_array[0][idx_side]) +
+                            20.0*U_array[3][idx_side]*(1833221603.0*U_array[3][idx_side] -
+                            3358664662.0*U_array[2][idx_side] + 1495974539.0*U_array[1][idx_side] -
+                            263126407.0*U_array[0][idx_side]) + 20.0*U_array[2][idx_side]*
+                            (1607794163.0*U_array[2][idx_side] - 1486026707.0*U_array[1][idx_side] +
+                            268747951.0*U_array[0][idx_side]) + 5.0*U_array[1][idx_side]*
+                            (1432381427.0*U_array[1][idx_side] - 536951582.0*U_array[0][idx_side]) +
+                            263126407.0*U_array[0][idx_side]*U_array[0][idx_side]);
+                    }
+                }
+            }
+        }
+        
+        /*
+         * Compute beta_tilde in the z-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            for (int m = 0; m < 4; m++)
+            {
+                beta_tilde[m] = variables_beta_tilde[m][ei]->getPointer(2);
+            }
+            
+            for (int m = 0; m < 6; m++)
+            {
+                U_array[m] = variables_array[m][ei]->getPointer(2);
+            }
+            
+            for (int k = -num_ghosts_2;
+                 k < interior_dim_2 + 1 + num_ghosts_2;
+                 k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_side = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0 +
+                            (k + num_ghosts_2)*ghostcell_dim_0*
+                                ghostcell_dim_1;
+                        
+                        beta_tilde[0][idx_side] = 1.0/3.0*(U_array[5][idx_side]*(4.0*U_array[5][idx_side] -
+                            19.0*U_array[4][idx_side] + 11.0*U_array[3][idx_side]) +
+                            U_array[4][idx_side]*(25.0*U_array[4][idx_side] - 31.0*U_array[3][idx_side]) +
+                            10.0*U_array[3][idx_side]*U_array[3][idx_side]);
+                        
+                        beta_tilde[1][idx_side] = 1.0/3.0*(U_array[4][idx_side]*(4.0*U_array[4][idx_side] -
+                            13.0*U_array[3][idx_side] + 5.0*U_array[2][idx_side]) +
+                            13.0*U_array[3][idx_side]*(U_array[3][idx_side] - U_array[2][idx_side]) +
+                            4.0*U_array[2][idx_side]*U_array[2][idx_side]);
+                        
+                        beta_tilde[2][idx_side] = 1.0/3.0*(U_array[3][idx_side]*(10.0*U_array[3][idx_side] -
+                            31.0*U_array[2][idx_side] + 11.0*U_array[1][idx_side]) +
+                            U_array[2][idx_side]*(25.0*U_array[2][idx_side] - 19.0*U_array[1][idx_side]) +
+                            4.0*U_array[1][idx_side]*U_array[1][idx_side]);
+                        
+                        beta_tilde[3][idx_side] = 1.0/232243200.0*(U_array[5][idx_side]*
+                            (525910327.0*U_array[5][idx_side] - 4562164630.0*U_array[4][idx_side] +
+                            7799501420.0*U_array[3][idx_side] - 6610694540.0*U_array[2][idx_side] +
+                            2794296070.0*U_array[1][idx_side] - 472758974.0*U_array[0][idx_side]) +
+                            5.0*U_array[4][idx_side]*(2146987907.0*U_array[4][idx_side] -
+                            7722406988.0*U_array[3][idx_side] + 6763559276.0*U_array[2][idx_side] -
+                            2926461814.0*U_array[1][idx_side] + 503766638.0*U_array[0][idx_side]) +
+                            20.0*U_array[3][idx_side]*(1833221603.0*U_array[3][idx_side] -
+                            3358664662.0*U_array[2][idx_side] + 1495974539.0*U_array[1][idx_side] -
+                            263126407.0*U_array[0][idx_side]) + 20.0*U_array[2][idx_side]*
+                            (1607794163.0*U_array[2][idx_side] - 1486026707.0*U_array[1][idx_side] +
+                            268747951.0*U_array[0][idx_side]) + 5.0*U_array[1][idx_side]*
+                            (1432381427.0*U_array[1][idx_side] - 536951582.0*U_array[0][idx_side]) +
+                            263126407.0*U_array[0][idx_side]*U_array[0][idx_side]);
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 /*
  * Compute sigma's.
  */
@@ -2578,7 +3492,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeSigma(
 #endif
     
     /*
-     * Get the dimensions of interior box and box including ghost cells.
+     * Get the dimensions of interior box, box including ghost cells and number of ghost cells.
      */
     
     const hier::IntVector interior_dims = variables_sigma[0]->getBox().numberCells();
@@ -2586,6 +3500,12 @@ ConvectiveFluxReconstructorWCNS6_Test::computeSigma(
     const hier::IntVector num_ghosts = variables_sigma[0]->getGhostCellWidth();
     
 #ifdef DEBUG_CHECK_DEV_ASSERTIONS
+    for (int ei = 0; ei < d_num_eqn; ei++)
+    {
+        TBOX_ERROR(variables_sigma[ei]->getBox().numberCells() == interior_dims);
+        TBOX_ERROR(variables_sigma[ei]->getGhostBox().numberCells() == ghostcell_dims);
+    }
+    
     TBOX_ASSERT(static_cast<int>(variables_array.size()) == 6);
     
     for (int m = 0; m < 6; m++)
@@ -2598,24 +3518,14 @@ ConvectiveFluxReconstructorWCNS6_Test::computeSigma(
             TBOX_ERROR(variables_array[m][ei]->getGhostBox().numberCells() == ghostcell_dims);
         }
     }
-    
-    for (int ei = 0; ei < d_num_eqn; ei++)
-    {
-        TBOX_ERROR(variables_sigma[ei]->getBox().numberCells() == interior_dims);
-        TBOX_ERROR(variables_sigma[ei]->getGhostBox().numberCells() == ghostcell_dims);
-    }
 #endif
     
     /*
-     * Get the pointers to the sigma's.
+     * Declare the pointers to the sigma's.
      */
     
     std::vector<double*> sigma;
-    sigma.reserve(d_num_eqn);
-    for (int ei = 0; ei < d_num_eqn; ei++)
-    {
-        sigma.push_back(variables_sigma[ei]->getPointer(0));
-    }
+    sigma.resize(d_num_eqn);
     
     /*
      * Declare the pointers to the array of variables.
@@ -2633,8 +3543,14 @@ ConvectiveFluxReconstructorWCNS6_Test::computeSigma(
         const int interior_dim_0 = interior_dims[0];
         const int num_ghosts_0 = num_ghosts[0];
         
+        /*
+         * Compute sigma in the x-direction.
+         */
+        
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
+            sigma[ei] = variables_sigma[ei]->getPointer(0);
+            
             for (int m = 0; m < 6; m++)
             {
                 U_array[m] = variables_array[m][ei]->getPointer(0);
@@ -2660,11 +3576,216 @@ ConvectiveFluxReconstructorWCNS6_Test::computeSigma(
     }
     else if (d_dim == tbox::Dimension(2))
     {
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
         
+        const int ghostcell_dim_0 = ghostcell_dims[0];
+        
+        const int num_ghosts_0 = num_ghosts[0];
+        const int num_ghosts_1 = num_ghosts[1];
+        
+        /*
+         * Compute sigma in the x-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            sigma[ei] = variables_sigma[ei]->getPointer(0);
+            
+            for (int m = 0; m < 6; m++)
+            {
+                U_array[m] = variables_array[m][ei]->getPointer(0);
+            }
+            
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+                for (int i = -num_ghosts_0;
+                     i < interior_dim_1 + 1 + num_ghosts_0;
+                     i++)
+                {
+                    // Compute the linear index.
+                    const int idx_side = (i + num_ghosts_0) +
+                        (j + num_ghosts_1)*(ghostcell_dim_0 + 1);
+                    
+                    double alpha_1 = U_array[2][idx_side] - U_array[1][idx_side];
+                    double alpha_2 = U_array[3][idx_side] - U_array[2][idx_side];
+                    double alpha_3 = U_array[4][idx_side] - U_array[3][idx_side];
+                    
+                    double theta_1 = fabs(alpha_1 - alpha_2)/(fabs(alpha_1) + fabs(alpha_2) + EPSILON);
+                    double theta_2 = fabs(alpha_2 - alpha_3)/(fabs(alpha_2) + fabs(alpha_3) + EPSILON);
+                    
+                    sigma[ei][idx_side] = fmax(theta_1, theta_2);
+                }
+            }
+        }
+        
+        /*
+         * Compute sigma in the y-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            sigma[ei] = variables_sigma[ei]->getPointer(1);
+            
+            for (int m = 0; m < 6; m++)
+            {
+                U_array[m] = variables_array[m][ei]->getPointer(1);
+            }
+            
+            for (int j = -num_ghosts_1;
+                 j < interior_dim_1 + 1 + num_ghosts_1;
+                 j++)
+            {
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_side = (i + num_ghosts_0) +
+                        (j + num_ghosts_1)*ghostcell_dim_0;
+                    
+                    double alpha_1 = U_array[2][idx_side] - U_array[1][idx_side];
+                    double alpha_2 = U_array[3][idx_side] - U_array[2][idx_side];
+                    double alpha_3 = U_array[4][idx_side] - U_array[3][idx_side];
+                    
+                    double theta_1 = fabs(alpha_1 - alpha_2)/(fabs(alpha_1) + fabs(alpha_2) + EPSILON);
+                    double theta_2 = fabs(alpha_2 - alpha_3)/(fabs(alpha_2) + fabs(alpha_3) + EPSILON);
+                    
+                    sigma[ei][idx_side] = fmax(theta_1, theta_2);
+                }
+            }
+        }
     }
     else if (d_dim == tbox::Dimension(3))
     {
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        const int interior_dim_2 = interior_dims[2];
         
+        const int ghostcell_dim_0 = ghostcell_dims[0];
+        const int ghostcell_dim_1 = ghostcell_dims[1];
+        
+        const int num_ghosts_0 = num_ghosts[0];
+        const int num_ghosts_1 = num_ghosts[1];
+        const int num_ghosts_2 = num_ghosts[2];
+        
+        /*
+         * Compute sigma in the x-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            sigma[ei] = variables_sigma[ei]->getPointer(0);
+            
+            for (int m = 0; m < 6; m++)
+            {
+                U_array[m] = variables_array[m][ei]->getPointer(0);
+            }
+            
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+                    for (int i = -num_ghosts_0;
+                         i < interior_dim_1 + 1 + num_ghosts_0;
+                         i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_side = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*(ghostcell_dim_0 + 1) +
+                            (k + num_ghosts_2)*(ghostcell_dim_0 + 1)*
+                                ghostcell_dim_1;
+                        
+                        double alpha_1 = U_array[2][idx_side] - U_array[1][idx_side];
+                        double alpha_2 = U_array[3][idx_side] - U_array[2][idx_side];
+                        double alpha_3 = U_array[4][idx_side] - U_array[3][idx_side];
+                        
+                        double theta_1 = fabs(alpha_1 - alpha_2)/(fabs(alpha_1) + fabs(alpha_2) + EPSILON);
+                        double theta_2 = fabs(alpha_2 - alpha_3)/(fabs(alpha_2) + fabs(alpha_3) + EPSILON);
+                        
+                        sigma[ei][idx_side] = fmax(theta_1, theta_2);
+                    }
+                }
+            }
+        }
+        
+        /*
+         * Compute sigma in the y-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            sigma[ei] = variables_sigma[ei]->getPointer(1);
+            
+            for (int m = 0; m < 6; m++)
+            {
+                U_array[m] = variables_array[m][ei]->getPointer(1);
+            }
+            
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = -num_ghosts_1;
+                     j < interior_dim_1 + 1 + num_ghosts_1;
+                     j++)
+                {
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_side = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0 +
+                            (k + num_ghosts_2)*ghostcell_dim_0*
+                                (ghostcell_dim_1 + 1);
+                        
+                        double alpha_1 = U_array[2][idx_side] - U_array[1][idx_side];
+                        double alpha_2 = U_array[3][idx_side] - U_array[2][idx_side];
+                        double alpha_3 = U_array[4][idx_side] - U_array[3][idx_side];
+                        
+                        double theta_1 = fabs(alpha_1 - alpha_2)/(fabs(alpha_1) + fabs(alpha_2) + EPSILON);
+                        double theta_2 = fabs(alpha_2 - alpha_3)/(fabs(alpha_2) + fabs(alpha_3) + EPSILON);
+                        
+                        sigma[ei][idx_side] = fmax(theta_1, theta_2);
+                    }
+                }
+            }
+        }
+        
+        /*
+         * Compute sigma in the z-direction.
+         */
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            sigma[ei] = variables_sigma[ei]->getPointer(2);
+            
+            for (int m = 0; m < 6; m++)
+            {
+                U_array[m] = variables_array[m][ei]->getPointer(2);
+            }
+            
+            for (int k = -num_ghosts_2;
+                 k < interior_dim_2 + 1 + num_ghosts_2;
+                 k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_side = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0 +
+                            (k + num_ghosts_2)*ghostcell_dim_0*
+                                ghostcell_dim_1;
+                        
+                        double alpha_1 = U_array[2][idx_side] - U_array[1][idx_side];
+                        double alpha_2 = U_array[3][idx_side] - U_array[2][idx_side];
+                        double alpha_3 = U_array[4][idx_side] - U_array[3][idx_side];
+                        
+                        double theta_1 = fabs(alpha_1 - alpha_2)/(fabs(alpha_1) + fabs(alpha_2) + EPSILON);
+                        double theta_2 = fabs(alpha_2 - alpha_3)/(fabs(alpha_2) + fabs(alpha_3) + EPSILON);
+                        
+                        sigma[ei][idx_side] = fmax(theta_1, theta_2);
+                    }
+                }
+            }
+        }
     }
 }
 

@@ -176,7 +176,17 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
         computeSigma(
             std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_sigma,
             const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_array);
-
+        
+        void
+        computeBeta(
+            std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_beta,
+            const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_array);
+        
+        void
+        computeBetaTilde(
+            std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_beta_tilde,
+            const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_array);
+        
         /*
          * Constants used by the scheme.
          */
