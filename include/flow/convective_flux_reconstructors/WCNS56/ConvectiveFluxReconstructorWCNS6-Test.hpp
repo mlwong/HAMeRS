@@ -148,8 +148,16 @@ computeBetaTilde(
  * Perform WENO interpolation.
  */
 void
-performWENOInterpolation_new(
+performWENOInterpolation_minus(
     double* U_minus,
+    const std::vector<double*>& U_array,
+    const int& idx_side);
+
+/*
+ * Perform WENO interpolation.
+ */
+void
+performWENOInterpolation_plus(
     double* U_plus,
     const std::vector<double*>& U_array,
     const int& idx_side);
