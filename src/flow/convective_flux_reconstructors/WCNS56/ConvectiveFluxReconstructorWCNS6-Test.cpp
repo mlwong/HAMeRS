@@ -802,6 +802,19 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
                         W_L,
                         W_array,
                         idx_midpoint_x);
+                }
+            }
+            
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+                #ifdef __INTEL_COMPILER
+                #pragma ivdep
+                #endif
+                for (int i = -1; i < interior_dim_0 + 2; i++)
+                {
+                    // Compute the linear index of the mid-point.
+                    const int idx_midpoint_x = (i + 1) +
+                        (j + 1)*(interior_dim_0 + 3);
                     
                     #ifdef __INTEL_COMPILER
                     #pragma forceinline
@@ -853,6 +866,19 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
                         W_B,
                         W_array,
                         idx_midpoint_y);
+                }
+            }
+            
+            for (int j = -1; j < interior_dim_1 + 2; j++)
+            {
+                #ifdef __INTEL_COMPILER
+                #pragma ivdep
+                #endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index of the mid-point.
+                    const int idx_midpoint_y = (i + 1) +
+                        (j + 1)*(interior_dim_0 + 2);
                     
                     #ifdef __INTEL_COMPILER
                     #pragma forceinline
