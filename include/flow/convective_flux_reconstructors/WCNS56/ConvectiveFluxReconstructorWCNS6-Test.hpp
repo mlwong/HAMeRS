@@ -100,57 +100,6 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
             const boost::multi_array_ref<double, 2>::const_array_view<1>::type& W_array);
         
         /*
-         * Compute sigma's.
-         */
-        void
-        computeSigma(
-            double& sigma,
-            const boost::multi_array_ref<const double*, 2>::const_array_view<1>::type& U_array);
-        
-        /*
-         * Compute beta's.
-         */
-        void
-        computeBeta(
-            std::vector<double>& beta,
-            const boost::multi_array_ref<const double*, 2>::const_array_view<1>::type& U_array);
-        
-        /*
-         * Compute beta_tilde's.
-         */
-        void
-        computeBetaTilde(   
-            std::vector<double>& beta_tilde,
-            const boost::multi_array_ref<const double*, 2>::const_array_view<1>::type& U_array);
-        
-        /*
-         * Compute sigma's.
-         */
-        void
-        computeSigma(
-            double& sigma,
-            const std::vector<double*>& U_array,
-            const int& idx_face);
-        
-        /*
-         * Compute beta's.
-         */
-        void
-        computeBeta(
-            std::vector<double>& beta,
-            const std::vector<double*>& U_array,
-            const int& idx_face);
-        
-        /*
-         * Compute beta_tilde's.
-         */
-        void
-        computeBetaTilde(
-            std::vector<double>& beta_tilde,
-            const std::vector<double*>& U_array,
-            const int& idx_face);
-        
-        /*
          * Perform WENO interpolation.
          */
         void
@@ -161,11 +110,6 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
             const hier::Index& cell_index_minus,
             const hier::Index& cell_index_plus,
             const DIRECTION::TYPE& direction);
-        
-        void
-        computeSigma(
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_sigma,
-            const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_array);
         
 /*
  * Compute sigma's.
@@ -203,25 +147,6 @@ performWENOInterpolation_new(
     double* U_plus,
     const std::vector<double*>& U_array,
     const int& idx_side);
-        
-        void
-        computeBeta(
-            std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_beta,
-            const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_array);
-        
-        void
-        computeBetaTilde(
-            std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_beta_tilde,
-            const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_array);
-        
-        /*
-         * Perform WENO interpolation.
-         */
-        void
-        performWENOInterpolation(
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_minus,
-            std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_plus,
-            const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables_array);
         
         /*
          * Constants used by the scheme.
