@@ -787,7 +787,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
             for (int j = 0; j < interior_dim_1; j++)
             {
                 #ifdef __INTEL_COMPILER
-                #pragma simd
+                #pragma ivdep
                 #endif
                 for (int i = -1; i < interior_dim_0 + 2; i++)
                 {
@@ -831,7 +831,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
             for (int j = -1; j < interior_dim_1 + 2; j++)
             {
                 #ifdef __INTEL_COMPILER
-                #pragma simd
+                #pragma ivdep
                 #endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
