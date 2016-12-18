@@ -125,7 +125,10 @@ computeSigma(
  */
 void
 computeBeta(
-    double* beta,
+    double* beta_0,
+    double* beta_1,
+    double* beta_2,
+    double* beta_3,
     const std::vector<double*>& U_array,
     const int& idx_side);
         
@@ -134,7 +137,10 @@ computeBeta(
  */
 void
 computeBetaTilde(
-    double* beta_tilde,
+    double* beta_tilde_0,
+    double* beta_tilde_1,
+    double* beta_tilde_2,
+    double* beta_tilde_3,
     const std::vector<double*>& U_array,
     const int& idx_side);
 

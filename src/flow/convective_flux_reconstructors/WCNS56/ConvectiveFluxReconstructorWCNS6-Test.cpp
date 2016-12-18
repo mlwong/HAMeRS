@@ -2771,7 +2771,10 @@ ConvectiveFluxReconstructorWCNS6_Test::computeSigma(
  */
 void
 ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
-    double* beta,
+    double* beta_0,
+    double* beta_1,
+    double* beta_2,
+    double* beta_3,
     const std::vector<double*>& U_array,
     const int& idx_side)
 {
@@ -2779,19 +2782,19 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
     TBOX_ASSERT(static_cast<int>(U_array.size()) == 6);
 #endif
     
-    beta[0] = 1.0/3.0*(U_array[0][idx_side]*(4.0*U_array[0][idx_side] - 19.0*U_array[1][idx_side] +
+    *beta_0 = 1.0/3.0*(U_array[0][idx_side]*(4.0*U_array[0][idx_side] - 19.0*U_array[1][idx_side] +
          11.0*U_array[2][idx_side]) + U_array[1][idx_side]*(25.0*U_array[1][idx_side] -
          31.0*U_array[2][idx_side]) + 10.0*U_array[2][idx_side]*U_array[2][idx_side]);
     
-    beta[1] = 1.0/3.0*(U_array[1][idx_side]*(4.0*U_array[1][idx_side] - 13.0*U_array[2][idx_side] +
+    *beta_1 = 1.0/3.0*(U_array[1][idx_side]*(4.0*U_array[1][idx_side] - 13.0*U_array[2][idx_side] +
          5.0*U_array[3][idx_side]) + 13.0*U_array[2][idx_side]*(U_array[2][idx_side] -
          U_array[3][idx_side]) + 4.0*U_array[3][idx_side]*U_array[3][idx_side]);
     
-    beta[2] = 1.0/3.0*(U_array[2][idx_side]*(10.0*U_array[2][idx_side] - 31.0*U_array[3][idx_side] +
+    *beta_2 = 1.0/3.0*(U_array[2][idx_side]*(10.0*U_array[2][idx_side] - 31.0*U_array[3][idx_side] +
          11.0*U_array[4][idx_side]) + U_array[3][idx_side]*(25.0*U_array[3][idx_side] -
          19.0*U_array[4][idx_side]) + 4.0*U_array[4][idx_side]*U_array[4][idx_side]);
     
-    beta[3] = 1.0/232243200.0*(U_array[0][idx_side]*(525910327.0*U_array[0][idx_side] -
+    *beta_3 = 1.0/232243200.0*(U_array[0][idx_side]*(525910327.0*U_array[0][idx_side] -
          4562164630.0*U_array[1][idx_side] + 7799501420.0*U_array[2][idx_side] -
          6610694540.0*U_array[3][idx_side] + 2794296070.0*U_array[4][idx_side] -
          472758974.0*U_array[5][idx_side]) + 5.0*U_array[1][idx_side]*
@@ -2813,7 +2816,10 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBeta(
  */
 void
 ConvectiveFluxReconstructorWCNS6_Test::computeBetaTilde(
-    double* beta_tilde,
+    double* beta_tilde_0,
+    double* beta_tilde_1,
+    double* beta_tilde_2,
+    double* beta_tilde_3,
     const std::vector<double*>& U_array,
     const int& idx_side)
 {
@@ -2821,19 +2827,19 @@ ConvectiveFluxReconstructorWCNS6_Test::computeBetaTilde(
     TBOX_ASSERT(static_cast<int>(U_array.size()) == 6);
 #endif
     
-    beta_tilde[0] = 1.0/3.0*(U_array[5][idx_side]*(4.0*U_array[5][idx_side] - 19.0*U_array[4][idx_side] +
+    *beta_tilde_0 = 1.0/3.0*(U_array[5][idx_side]*(4.0*U_array[5][idx_side] - 19.0*U_array[4][idx_side] +
          11.0*U_array[3][idx_side]) + U_array[4][idx_side]*(25.0*U_array[4][idx_side] -
          31.0*U_array[3][idx_side]) + 10.0*U_array[3][idx_side]*U_array[3][idx_side]);
     
-    beta_tilde[1] = 1.0/3.0*(U_array[4][idx_side]*(4.0*U_array[4][idx_side] - 13.0*U_array[3][idx_side] +
+    *beta_tilde_1 = 1.0/3.0*(U_array[4][idx_side]*(4.0*U_array[4][idx_side] - 13.0*U_array[3][idx_side] +
          5.0*U_array[2][idx_side]) + 13.0*U_array[3][idx_side]*(U_array[3][idx_side] -
          U_array[2][idx_side]) + 4.0*U_array[2][idx_side]*U_array[2][idx_side]);
     
-    beta_tilde[2] = 1.0/3.0*(U_array[3][idx_side]*(10.0*U_array[3][idx_side] - 31.0*U_array[2][idx_side] +
+    *beta_tilde_2 = 1.0/3.0*(U_array[3][idx_side]*(10.0*U_array[3][idx_side] - 31.0*U_array[2][idx_side] +
          11.0*U_array[1][idx_side]) + U_array[2][idx_side]*(25.0*U_array[2][idx_side] -
          19.0*U_array[1][idx_side]) + 4.0*U_array[1][idx_side]*U_array[1][idx_side]);
     
-    beta_tilde[3] = 1.0/232243200.0*(U_array[5][idx_side]*(525910327.0*U_array[5][idx_side] -
+    *beta_tilde_3 = 1.0/232243200.0*(U_array[5][idx_side]*(525910327.0*U_array[5][idx_side] -
          4562164630.0*U_array[4][idx_side] + 7799501420.0*U_array[3][idx_side] -
          6610694540.0*U_array[2][idx_side] + 2794296070.0*U_array[1][idx_side] -
          472758974.0*U_array[0][idx_side]) + 5.0*U_array[4][idx_side]*
@@ -2888,57 +2894,57 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation_new(
      * Compute beta's and beta_tilde's.
      */
     
-    double beta[4];
-    double beta_tilde[4];
+    double beta_0, beta_1, beta_2, beta_3;
+    double beta_tilde_0, beta_tilde_1, beta_tilde_2, beta_tilde_3;
     
     #ifdef __INTEL_COMPILER
     #pragma forceinline
     #endif
-    computeBeta(beta, U_array, idx_side);
+    computeBeta(&beta_0, &beta_1, &beta_2, &beta_3, U_array, idx_side);
     
     #ifdef __INTEL_COMPILER
     #pragma forceinline
     #endif
-    computeBetaTilde(beta_tilde, U_array, idx_side);
+    computeBetaTilde(&beta_tilde_0, &beta_tilde_1, &beta_tilde_2, &beta_tilde_3, U_array, idx_side);
     
     /*
      * Compute the weights omega_upwind.
      */
     
-    double omega_upwind[3];
+    double omega_upwind_0, omega_upwind_1, omega_upwind_2;
     
-    double tau_5 = fabs(beta[0] - beta[2]);
+    double tau_5 = fabs(beta_0 - beta_2);
     
-    omega_upwind[0] = 1.0/16.0*(1.0 + pow(tau_5/(beta[0] + EPSILON), p));
-    omega_upwind[1] = 5.0/8.0*(1.0 + pow(tau_5/(beta[1] + EPSILON), p));
-    omega_upwind[2] = 5.0/16.0*(1.0 + pow(tau_5/(beta[2] + EPSILON), p));
+    omega_upwind_0 = 1.0/16.0*(1.0 + pow(tau_5/(beta_0 + EPSILON), p));
+    omega_upwind_1 = 5.0/8.0*(1.0 + pow(tau_5/(beta_1 + EPSILON), p));
+    omega_upwind_2 = 5.0/16.0*(1.0 + pow(tau_5/(beta_2 + EPSILON), p));
     
-    double omega_upwind_sum = omega_upwind[0] + omega_upwind[1] + omega_upwind[2];
+    double omega_upwind_sum = omega_upwind_0 + omega_upwind_1 + omega_upwind_2;
     
-    omega_upwind[0] = omega_upwind[0]/omega_upwind_sum;
-    omega_upwind[1] = omega_upwind[1]/omega_upwind_sum;
-    omega_upwind[2] = omega_upwind[2]/omega_upwind_sum;
+    omega_upwind_0 = omega_upwind_0/omega_upwind_sum;
+    omega_upwind_1 = omega_upwind_1/omega_upwind_sum;
+    omega_upwind_2 = omega_upwind_2/omega_upwind_sum;
     
     /*
-     * Compute the weights omega_central (stored in omega first).
+     * Compute the weights omega_central (store in omega first).
      */
     
-    double omega[4];
+    double omega_0, omega_1, omega_2, omega_3;
     
-    double beta_avg = 1.0/8*(beta[0] + beta[2] + 6*beta[1]);
-    double tau_6 = fabs(beta[3] - beta_avg);
+    double beta_avg = 1.0/8*(beta_0 + beta_2 + 6*beta_1);
+    double tau_6 = fabs(beta_3 - beta_avg);
     
-    omega[0] = 1.0/32.0*(C + pow(tau_6/(beta[0] + EPSILON), q));
-    omega[1] = 15.0/32.0*(C + pow(tau_6/(beta[1] + EPSILON), q));
-    omega[2] = 15.0/32.0*(C + pow(tau_6/(beta[2] + EPSILON), q));
-    omega[3] = 1.0/32.0*(C + pow(tau_6/(beta[3] + EPSILON), q));
+    omega_0 = 1.0/32.0*(C + pow(tau_6/(beta_0 + EPSILON), q));
+    omega_1 = 15.0/32.0*(C + pow(tau_6/(beta_1 + EPSILON), q));
+    omega_2 = 15.0/32.0*(C + pow(tau_6/(beta_2 + EPSILON), q));
+    omega_3 = 1.0/32.0*(C + pow(tau_6/(beta_3 + EPSILON), q));
     
-    double omega_sum = omega[0] + omega[1] + omega[2] + omega[3];
+    double omega_sum = omega_0 + omega_1 + omega_2 + omega_3;
     
-    omega[0] = omega[0]/omega_sum;
-    omega[1] = omega[1]/omega_sum;
-    omega[2] = omega[2]/omega_sum;
-    omega[3] = omega[3]/omega_sum;
+    omega_0 = omega_0/omega_sum;
+    omega_1 = omega_1/omega_sum;
+    omega_2 = omega_2/omega_sum;
+    omega_3 = omega_3/omega_sum;
     
     /*
      * Compute the weights omega.
@@ -2948,57 +2954,57 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation_new(
     
     if (R_tau > alpha_tau)
     {
-        omega[0] = sigma*omega_upwind[0] + (1.0 - sigma)*omega[0];
-        omega[1] = sigma*omega_upwind[1] + (1.0 - sigma)*omega[1];
-        omega[2] = sigma*omega_upwind[2] + (1.0 - sigma)*omega[2];
-        omega[3] = (1.0 - sigma)*omega[3];
+        omega_0 = sigma*omega_upwind_0 + (1.0 - sigma)*omega_0;
+        omega_1 = sigma*omega_upwind_1 + (1.0 - sigma)*omega_1;
+        omega_2 = sigma*omega_upwind_2 + (1.0 - sigma)*omega_2;
+        omega_3 = (1.0 - sigma)*omega_3;
     }
     
     /*
      * Compute U_minus.
      */
     
-    U_minus[idx_side] = 3.0/8.0*omega[0]*U_array[0][idx_side] +
-        (-10.0/8.0*omega[0] - 1.0/8.0*omega[1])*U_array[1][idx_side] +
-        (15.0/8.0*omega[0] + 6.0/8.0*omega[1] + 3.0/8.0*omega[2])*U_array[2][idx_side] +
-        (3.0/8.0*omega[1] + 6.0/8.0*omega[2] + 15.0/8.0*omega[3])*U_array[3][idx_side] +
-        (-1.0/8.0*omega[2] - 10.0/8.0*omega[3])*U_array[4][idx_side] +
-        3.0/8.0*omega[3]*U_array[5][idx_side];
+    U_minus[idx_side] = 3.0/8.0*omega_0*U_array[0][idx_side] +
+        (-10.0/8.0*omega_0 - 1.0/8.0*omega_1)*U_array[1][idx_side] +
+        (15.0/8.0*omega_0 + 6.0/8.0*omega_1 + 3.0/8.0*omega_2)*U_array[2][idx_side] +
+        (3.0/8.0*omega_1 + 6.0/8.0*omega_2 + 15.0/8.0*omega_3)*U_array[3][idx_side] +
+        (-1.0/8.0*omega_2 - 10.0/8.0*omega_3)*U_array[4][idx_side] +
+        3.0/8.0*omega_3*U_array[5][idx_side];
     
     /*
      * Compute the weights omega_upwind_tilde (reuse non-tilde variables).
      */
     
-    tau_5 = fabs(beta_tilde[0] - beta_tilde[2]);
+    tau_5 = fabs(beta_tilde_0 - beta_tilde_2);
     
-    omega_upwind[0] = 1.0/16.0*(1.0 + pow(tau_5/(beta_tilde[0] + EPSILON), p));
-    omega_upwind[1] = 5.0/8.0*(1.0 + pow(tau_5/(beta_tilde[1] + EPSILON), p));
-    omega_upwind[2] = 5.0/16.0*(1.0 + pow(tau_5/(beta_tilde[2] + EPSILON), p));
+    omega_upwind_0 = 1.0/16.0*(1.0 + pow(tau_5/(beta_tilde_0 + EPSILON), p));
+    omega_upwind_1 = 5.0/8.0*(1.0 + pow(tau_5/(beta_tilde_1 + EPSILON), p));
+    omega_upwind_2 = 5.0/16.0*(1.0 + pow(tau_5/(beta_tilde_2 + EPSILON), p));
     
-    omega_upwind_sum = omega_upwind[0] + omega_upwind[1] + omega_upwind[2];
+    omega_upwind_sum = omega_upwind_0 + omega_upwind_1 + omega_upwind_2;
     
-    omega_upwind[0] = omega_upwind[0]/omega_upwind_sum;
-    omega_upwind[1] = omega_upwind[1]/omega_upwind_sum;
-    omega_upwind[2] = omega_upwind[2]/omega_upwind_sum;
+    omega_upwind_0 = omega_upwind_0/omega_upwind_sum;
+    omega_upwind_1 = omega_upwind_1/omega_upwind_sum;
+    omega_upwind_2 = omega_upwind_2/omega_upwind_sum;
     
     /*
      * Compute the weights omega_central_tilde (reuse non-tilde variables).
      */
     
-    beta_avg = 1.0/8*(beta_tilde[0] + beta_tilde[2] + 6*beta_tilde[1]);
-    tau_6 = fabs(beta_tilde[3] - beta_avg);
+    beta_avg = 1.0/8*(beta_tilde_0 + beta_tilde_2 + 6*beta_tilde_1);
+    tau_6 = fabs(beta_tilde_3 - beta_avg);
     
-    omega[0] = 1.0/32.0*(C + pow(tau_6/(beta_tilde[0] + EPSILON), q));
-    omega[1] = 15.0/32.0*(C + pow(tau_6/(beta_tilde[1] + EPSILON), q));
-    omega[2] = 15.0/32.0*(C + pow(tau_6/(beta_tilde[2] + EPSILON), q));
-    omega[3] = 1.0/32.0*(C + pow(tau_6/(beta_tilde[3] + EPSILON), q));
+    omega_0 = 1.0/32.0*(C + pow(tau_6/(beta_tilde_0 + EPSILON), q));
+    omega_1 = 15.0/32.0*(C + pow(tau_6/(beta_tilde_1 + EPSILON), q));
+    omega_2 = 15.0/32.0*(C + pow(tau_6/(beta_tilde_2 + EPSILON), q));
+    omega_3 = 1.0/32.0*(C + pow(tau_6/(beta_tilde_3 + EPSILON), q));
     
-    omega_sum = omega[0] + omega[1] + omega[2] + omega[3];
+    omega_sum = omega_0 + omega_1 + omega_2 + omega_3;
     
-    omega[0] = omega[0]/omega_sum;
-    omega[1] = omega[1]/omega_sum;
-    omega[2] = omega[2]/omega_sum;
-    omega[3] = omega[3]/omega_sum;
+    omega_0 = omega_0/omega_sum;
+    omega_1 = omega_1/omega_sum;
+    omega_2 = omega_2/omega_sum;
+    omega_3 = omega_3/omega_sum;
     
     /*
      * Compute the weights omega_tilde (reuse non-tilde variables).
@@ -3008,16 +3014,16 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation_new(
     
     if (R_tau > alpha_tau)
     {
-        omega[0] = sigma*omega_upwind[0] + (1.0 - sigma)*omega[0];
-        omega[1] = sigma*omega_upwind[1] + (1.0 - sigma)*omega[1];
-        omega[2] = sigma*omega_upwind[2] + (1.0 - sigma)*omega[2];
-        omega[3] = (1.0 - sigma)*omega[3];
+        omega_0 = sigma*omega_upwind_0 + (1.0 - sigma)*omega_0;
+        omega_1 = sigma*omega_upwind_1 + (1.0 - sigma)*omega_1;
+        omega_2 = sigma*omega_upwind_2 + (1.0 - sigma)*omega_2;
+        omega_3 = (1.0 - sigma)*omega_3;
     }
     
-    U_plus[idx_side] = 3.0/8.0*omega[0]*U_array[5][idx_side] +
-        (-10.0/8.0*omega[0] - 1.0/8.0*omega[1])*U_array[4][idx_side] +
-        (15.0/8.0*omega[0] + 6.0/8.0*omega[1] + 3.0/8.0*omega[2])*U_array[3][idx_side] +
-        (3.0/8.0*omega[1] + 6.0/8.0*omega[2] + 15.0/8.0*omega[3])*U_array[2][idx_side] +
-        (-1.0/8.0*omega[2] - 10.0/8.0*omega[3])*U_array[1][idx_side] +
-        3.0/8.0*omega[3]*U_array[0][idx_side];
+    U_plus[idx_side] = 3.0/8.0*omega_0*U_array[5][idx_side] +
+        (-10.0/8.0*omega_0 - 1.0/8.0*omega_1)*U_array[4][idx_side] +
+        (15.0/8.0*omega_0 + 6.0/8.0*omega_1 + 3.0/8.0*omega_2)*U_array[3][idx_side] +
+        (3.0/8.0*omega_1 + 6.0/8.0*omega_2 + 15.0/8.0*omega_3)*U_array[2][idx_side] +
+        (-1.0/8.0*omega_2 - 10.0/8.0*omega_3)*U_array[1][idx_side] +
+        3.0/8.0*omega_3*U_array[0][idx_side];
 }
