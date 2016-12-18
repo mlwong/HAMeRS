@@ -2909,64 +2909,49 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation_new(
     
     double tau_5 = fabs(beta[0] - beta[2]);
     
-    double alpha_upwind[3];
+    omega_upwind[0] = 1.0/16.0*(1.0 + pow(tau_5/(beta[0] + EPSILON), p));
+    omega_upwind[1] = 5.0/8.0*(1.0 + pow(tau_5/(beta[1] + EPSILON), p));
+    omega_upwind[2] = 5.0/16.0*(1.0 + pow(tau_5/(beta[2] + EPSILON), p));
     
-    alpha_upwind[0] = 1.0/16.0*(1.0 + pow(tau_5/(beta[0] + EPSILON), p));
-    alpha_upwind[1] = 5.0/8.0*(1.0 + pow(tau_5/(beta[1] + EPSILON), p));
-    alpha_upwind[2] = 5.0/16.0*(1.0 + pow(tau_5/(beta[2] + EPSILON), p));
+    double omega_upwind_sum = omega_upwind[0] + omega_upwind[1] + omega_upwind[2];
     
-    double alpha_upwind_sum = alpha_upwind[0] +
-        alpha_upwind[1] + alpha_upwind[2];
-    
-    omega_upwind[0] = alpha_upwind[0]/alpha_upwind_sum;
-    omega_upwind[1] = alpha_upwind[1]/alpha_upwind_sum;
-    omega_upwind[2] = alpha_upwind[2]/alpha_upwind_sum;
+    omega_upwind[0] = omega_upwind[0]/omega_upwind_sum;
+    omega_upwind[1] = omega_upwind[1]/omega_upwind_sum;
+    omega_upwind[2] = omega_upwind[2]/omega_upwind_sum;
     
     /*
-     * Compute the weights omega_central.
+     * Compute the weights omega_central (stored in omega first).
      */
     
-    double omega_central[4];
+    double omega[4];
     
     double beta_avg = 1.0/8*(beta[0] + beta[2] + 6*beta[1]);
     double tau_6 = fabs(beta[3] - beta_avg);
     
-    double alpha_central[4];
+    omega[0] = 1.0/32.0*(C + pow(tau_6/(beta[0] + EPSILON), q));
+    omega[1] = 15.0/32.0*(C + pow(tau_6/(beta[1] + EPSILON), q));
+    omega[2] = 15.0/32.0*(C + pow(tau_6/(beta[2] + EPSILON), q));
+    omega[3] = 1.0/32.0*(C + pow(tau_6/(beta[3] + EPSILON), q));
     
-    alpha_central[0] = 1.0/32.0*(C + pow(tau_6/(beta[0] + EPSILON), q));
-    alpha_central[1] = 15.0/32.0*(C + pow(tau_6/(beta[1] + EPSILON), q));
-    alpha_central[2] = 15.0/32.0*(C + pow(tau_6/(beta[2] + EPSILON), q));
-    alpha_central[3] = 1.0/32.0*(C + pow(tau_6/(beta[3] + EPSILON), q));
+    double omega_sum = omega[0] + omega[1] + omega[2] + omega[3];
     
-    double alpha_central_sum = alpha_central[0] + alpha_central[1] +
-        alpha_central[2] + alpha_central[3];
-    
-    omega_central[0] = alpha_central[0]/alpha_central_sum;
-    omega_central[1] = alpha_central[1]/alpha_central_sum;
-    omega_central[2] = alpha_central[2]/alpha_central_sum;
-    omega_central[3] = alpha_central[3]/alpha_central_sum;
+    omega[0] = omega[0]/omega_sum;
+    omega[1] = omega[1]/omega_sum;
+    omega[2] = omega[2]/omega_sum;
+    omega[3] = omega[3]/omega_sum;
     
     /*
      * Compute the weights omega.
      */
     
-    double omega[4];
-    
     double R_tau = fabs(tau_6/(beta_avg + EPSILON));
     
     if (R_tau > alpha_tau)
     {
-        omega[0] = sigma*omega_upwind[0] + (1.0 - sigma)*omega_central[0];
-        omega[1] = sigma*omega_upwind[1] + (1.0 - sigma)*omega_central[1];
-        omega[2] = sigma*omega_upwind[2] + (1.0 - sigma)*omega_central[2];
-        omega[3] = (1.0 - sigma)*omega_central[3];
-    }
-    else
-    {
-        omega[0] = omega_central[0];
-        omega[1] = omega_central[1];
-        omega[2] = omega_central[2];
-        omega[3] = omega_central[3];
+        omega[0] = sigma*omega_upwind[0] + (1.0 - sigma)*omega[0];
+        omega[1] = sigma*omega_upwind[1] + (1.0 - sigma)*omega[1];
+        omega[2] = sigma*omega_upwind[2] + (1.0 - sigma)*omega[2];
+        omega[3] = (1.0 - sigma)*omega[3];
     }
     
     /*
@@ -2981,77 +2966,58 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation_new(
         3.0/8.0*omega[3]*U_array[5][idx_side];
     
     /*
-     * Compute the weights omega_upwind_tilde.
+     * Compute the weights omega_upwind_tilde (reuse non-tilde variables).
      */
     
-    double omega_upwind_tilde[3];
+    tau_5 = fabs(beta_tilde[0] - beta_tilde[2]);
     
-    double tau_5_tilde = fabs(beta_tilde[0] - beta_tilde[2]);
+    omega_upwind[0] = 1.0/16.0*(1.0 + pow(tau_5/(beta_tilde[0] + EPSILON), p));
+    omega_upwind[1] = 5.0/8.0*(1.0 + pow(tau_5/(beta_tilde[1] + EPSILON), p));
+    omega_upwind[2] = 5.0/16.0*(1.0 + pow(tau_5/(beta_tilde[2] + EPSILON), p));
     
-    double alpha_upwind_tilde[3];
+    omega_upwind_sum = omega_upwind[0] + omega_upwind[1] + omega_upwind[2];
     
-    alpha_upwind_tilde[0] = 1.0/16.0*(1.0 + pow(tau_5_tilde/(beta_tilde[0] + EPSILON), p));
-    alpha_upwind_tilde[1] = 5.0/8.0*(1.0 + pow(tau_5_tilde/(beta_tilde[1] + EPSILON), p));
-    alpha_upwind_tilde[2] = 5.0/16.0*(1.0 + pow(tau_5_tilde/(beta_tilde[2] + EPSILON), p));
-    
-    double alpha_upwind_tilde_sum = alpha_upwind_tilde[0] +
-        alpha_upwind_tilde[1] + alpha_upwind_tilde[2];
-    
-    omega_upwind_tilde[0] = alpha_upwind_tilde[0]/alpha_upwind_tilde_sum;
-    omega_upwind_tilde[1] = alpha_upwind_tilde[1]/alpha_upwind_tilde_sum;
-    omega_upwind_tilde[2] = alpha_upwind_tilde[2]/alpha_upwind_tilde_sum;
+    omega_upwind[0] = omega_upwind[0]/omega_upwind_sum;
+    omega_upwind[1] = omega_upwind[1]/omega_upwind_sum;
+    omega_upwind[2] = omega_upwind[2]/omega_upwind_sum;
     
     /*
-     * Compute the weights omega_central_tilde.
+     * Compute the weights omega_central_tilde (reuse non-tilde variables).
      */
     
-    double omega_central_tilde[4];
+    beta_avg = 1.0/8*(beta_tilde[0] + beta_tilde[2] + 6*beta_tilde[1]);
+    tau_6 = fabs(beta_tilde[3] - beta_avg);
     
-    double beta_tilde_avg = 1.0/8*(beta_tilde[0] + beta_tilde[2] + 6*beta_tilde[1]);
-    double tau_6_tilde = fabs(beta_tilde[3] - beta_tilde_avg);
+    omega[0] = 1.0/32.0*(C + pow(tau_6/(beta_tilde[0] + EPSILON), q));
+    omega[1] = 15.0/32.0*(C + pow(tau_6/(beta_tilde[1] + EPSILON), q));
+    omega[2] = 15.0/32.0*(C + pow(tau_6/(beta_tilde[2] + EPSILON), q));
+    omega[3] = 1.0/32.0*(C + pow(tau_6/(beta_tilde[3] + EPSILON), q));
     
-    double alpha_central_tilde[4];
+    omega_sum = omega[0] + omega[1] + omega[2] + omega[3];
     
-    alpha_central_tilde[0] = 1.0/32.0*(C + pow(tau_6_tilde/(beta_tilde[0] + EPSILON), q));
-    alpha_central_tilde[1] = 15.0/32.0*(C + pow(tau_6_tilde/(beta_tilde[1] + EPSILON), q));
-    alpha_central_tilde[2] = 15.0/32.0*(C + pow(tau_6_tilde/(beta_tilde[2] + EPSILON), q));
-    alpha_central_tilde[3] = 1.0/32.0*(C + pow(tau_6_tilde/(beta_tilde[3] + EPSILON), q));
-    
-    double alpha_central_tilde_sum = alpha_central_tilde[0] + alpha_central_tilde[1] +
-        alpha_central_tilde[2] + alpha_central_tilde[3];
-    
-    omega_central_tilde[0] = alpha_central_tilde[0]/alpha_central_tilde_sum;
-    omega_central_tilde[1] = alpha_central_tilde[1]/alpha_central_tilde_sum;
-    omega_central_tilde[2] = alpha_central_tilde[2]/alpha_central_tilde_sum;
-    omega_central_tilde[3] = alpha_central_tilde[3]/alpha_central_tilde_sum;
+    omega[0] = omega[0]/omega_sum;
+    omega[1] = omega[1]/omega_sum;
+    omega[2] = omega[2]/omega_sum;
+    omega[3] = omega[3]/omega_sum;
     
     /*
-     * Compute the weights omega_tilde.
+     * Compute the weights omega_tilde (reuse non-tilde variables).
      */
     
-    double omega_tilde[4];
+    R_tau = fabs(tau_6/(beta_avg + EPSILON));
     
-    double R_tau_tilde = fabs(tau_6_tilde/(beta_tilde_avg + EPSILON));
-    
-    if (R_tau_tilde > alpha_tau)
+    if (R_tau > alpha_tau)
     {
-        omega_tilde[0] = sigma*omega_upwind_tilde[0] + (1.0 - sigma)*omega_central_tilde[0];
-        omega_tilde[1] = sigma*omega_upwind_tilde[1] + (1.0 - sigma)*omega_central_tilde[1];
-        omega_tilde[2] = sigma*omega_upwind_tilde[2] + (1.0 - sigma)*omega_central_tilde[2];
-        omega_tilde[3] = (1.0 - sigma)*omega_central_tilde[3];
-    }
-    else
-    {
-        omega_tilde[0] = omega_central_tilde[0];
-        omega_tilde[1] = omega_central_tilde[1];
-        omega_tilde[2] = omega_central_tilde[2];
-        omega_tilde[3] = omega_central_tilde[3];
+        omega[0] = sigma*omega_upwind[0] + (1.0 - sigma)*omega[0];
+        omega[1] = sigma*omega_upwind[1] + (1.0 - sigma)*omega[1];
+        omega[2] = sigma*omega_upwind[2] + (1.0 - sigma)*omega[2];
+        omega[3] = (1.0 - sigma)*omega[3];
     }
     
-    U_plus[idx_side] = 3.0/8.0*omega_tilde[0]*U_array[5][idx_side] +
-        (-10.0/8.0*omega_tilde[0] - 1.0/8.0*omega_tilde[1])*U_array[4][idx_side] +
-        (15.0/8.0*omega_tilde[0] + 6.0/8.0*omega_tilde[1] + 3.0/8.0*omega_tilde[2])*U_array[3][idx_side] +
-        (3.0/8.0*omega_tilde[1] + 6.0/8.0*omega_tilde[2] + 15.0/8.0*omega_tilde[3])*U_array[2][idx_side] +
-        (-1.0/8.0*omega_tilde[2] - 10.0/8.0*omega_tilde[3])*U_array[1][idx_side] +
-        3.0/8.0*omega_tilde[3]*U_array[0][idx_side];
+    U_plus[idx_side] = 3.0/8.0*omega[0]*U_array[5][idx_side] +
+        (-10.0/8.0*omega[0] - 1.0/8.0*omega[1])*U_array[4][idx_side] +
+        (15.0/8.0*omega[0] + 6.0/8.0*omega[1] + 3.0/8.0*omega[2])*U_array[3][idx_side] +
+        (3.0/8.0*omega[1] + 6.0/8.0*omega[2] + 15.0/8.0*omega[3])*U_array[2][idx_side] +
+        (-1.0/8.0*omega[2] - 10.0/8.0*omega[3])*U_array[1][idx_side] +
+        3.0/8.0*omega[3]*U_array[0][idx_side];
 }
