@@ -1212,11 +1212,11 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
                 
                 for (int j = 0; j < interior_dim_1; j++)
                 {
+                    #ifdef __INTEL_COMPILER
+                    #pragma ivdep
+                    #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
-                        #ifdef __INTEL_COMPILER
-                        #pragma ivdep
-                        #endif
                         // Compute the linear indices.
                         const int idx_cell_wghost = (i + num_subghosts_0_conservative_var) +
                             (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var;
