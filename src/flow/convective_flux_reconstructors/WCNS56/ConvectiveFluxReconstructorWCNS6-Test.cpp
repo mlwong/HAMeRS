@@ -515,10 +515,10 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
         const int interior_dim_0 = interior_dims[0];
         const int interior_dim_1 = interior_dims[1];
         
-        const int conv_ghostcell_dim_0 = conv_ghostcell_dims[0];
-        
         const int num_conv_ghosts_0 = d_num_conv_ghosts[0];
         const int num_conv_ghosts_1 = d_num_conv_ghosts[1];
+        
+        const int conv_ghostcell_dim_0 = conv_ghostcell_dims[0];
         
         /*
          * Register the patch and derived cell variables in the flow model and compute the corresponding cell data.
