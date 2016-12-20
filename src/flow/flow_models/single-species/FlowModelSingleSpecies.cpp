@@ -2190,6 +2190,10 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
         const int num_ghosts_0_vel = num_ghosts_primitive_var[1][0];
         const int num_ghosts_0_p = num_ghosts_primitive_var[2][0];
         
+        const int idx_offset_rho = idx_offset;
+        const int idx_offset_vel = idx_offset;
+        const int idx_offset_p = idx_offset;
+        
         /*
          * Compute the characteristic variables in the x-direction.
          */
@@ -2202,8 +2206,6 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
         rho_average = projection_variables[0]->getPointer(0);
         c_average = projection_variables[1]->getPointer(0);
         
-        const int idx_offset = 1;
-        
         #ifdef __INTEL_COMPILER
         #pragma ivdep
         #endif
@@ -2213,9 +2215,9 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
         {
             // Compute the linear indices.
             const int idx_face = i + num_ghosts_0_characteristic_var;
-            const int idx_rho = i + idx_offset + num_ghosts_0_rho;
-            const int idx_vel = i + idx_offset + num_ghosts_0_vel;
-            const int idx_p = i + idx_offset + num_ghosts_0_p;
+            const int idx_rho = i + idx_offset_rho + num_ghosts_0_rho;
+            const int idx_vel = i + idx_offset_vel + num_ghosts_0_vel;
+            const int idx_p = i + idx_offset_p + num_ghosts_0_p;
             
             W[0][idx_face] = -0.5*rho_average[idx_face]*c_average[idx_face]*V[1][idx_vel] + 0.5*V[2][idx_p];
             W[1][idx_face] = V[0][idx_rho] - 1.0/(c_average[idx_face]*c_average[idx_face])*V[2][idx_p];
@@ -2243,6 +2245,10 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
         const int num_ghosts_1_p = num_ghosts_primitive_var[2][1];
         const int ghostcell_dim_0_p = ghostcell_dims_primitive_var[2][0];
         
+        const int idx_offset_rho = idx_offset;
+        const int idx_offset_vel = idx_offset;
+        const int idx_offset_p = idx_offset;
+        
         /*
          * Compute the characteristic variables in the x-direction.
          */
@@ -2268,13 +2274,13 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
                 const int idx_face = (i + num_ghosts_0_characteristic_var) +
                     (j + num_ghosts_1_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1);
                 
-                const int idx_rho = (i + idx_offset + num_ghosts_0_rho) +
+                const int idx_rho = (i + idx_offset_rho + num_ghosts_0_rho) +
                     (j + num_ghosts_1_rho)*ghostcell_dim_0_rho;
                 
-                const int idx_vel = (i + idx_offset + num_ghosts_0_vel) +
+                const int idx_vel = (i + idx_offset_vel + num_ghosts_0_vel) +
                     (j + num_ghosts_1_vel)*ghostcell_dim_0_vel;
                 
-                const int idx_p = (i + idx_offset + num_ghosts_0_p) +
+                const int idx_p = (i + idx_offset_p + num_ghosts_0_p) +
                     (j + num_ghosts_1_p)*ghostcell_dim_0_p;
                 
                 W[0][idx_face] = -0.5*rho_average[idx_face]*c_average[idx_face]*V[1][idx_vel] + 0.5*V[3][idx_p];
@@ -2310,13 +2316,13 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
                     (j + num_ghosts_1_characteristic_var)*ghostcell_dim_0_characteristic_var;
                 
                 const int idx_rho = (i + num_ghosts_0_rho) +
-                    (j + idx_offset + num_ghosts_1_rho)*ghostcell_dim_0_rho;
+                    (j + idx_offset_rho + num_ghosts_1_rho)*ghostcell_dim_0_rho;
                 
                 const int idx_vel = (i + num_ghosts_0_vel) +
-                    (j + idx_offset + num_ghosts_1_vel)*ghostcell_dim_0_vel;
+                    (j + idx_offset_vel + num_ghosts_1_vel)*ghostcell_dim_0_vel;
                 
                 const int idx_p = (i + num_ghosts_0_p) +
-                    (j + idx_offset + num_ghosts_1_p)*ghostcell_dim_0_p;
+                    (j + idx_offset_p + num_ghosts_1_p)*ghostcell_dim_0_p;
                 
                 W[0][idx_face] = -0.5*rho_average[idx_face]*c_average[idx_face]*V[2][idx_vel] + 0.5*V[3][idx_p];
                 W[1][idx_face] = V[0][idx_rho] - 1.0/(c_average[idx_face]*c_average[idx_face])*V[3][idx_p];
@@ -2355,6 +2361,10 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
         const int ghostcell_dim_0_p = ghostcell_dims_primitive_var[2][0];
         const int ghostcell_dim_1_p = ghostcell_dims_primitive_var[2][1];
         
+        const int idx_offset_rho = idx_offset;
+        const int idx_offset_vel = idx_offset;
+        const int idx_offset_p = idx_offset;
+        
         /*
          * Compute the characteristic variables in the x-direction.
          */
@@ -2384,17 +2394,17 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
                         (k + num_ghosts_2_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1)*
                             ghostcell_dim_1_characteristic_var;
                     
-                    const int idx_rho = (i + idx_offset + num_ghosts_0_rho) +
+                    const int idx_rho = (i + idx_offset_rho + num_ghosts_0_rho) +
                         (j + num_ghosts_1_rho)*ghostcell_dim_0_rho +
                         (k + num_ghosts_2_rho)*ghostcell_dim_0_rho*
                             ghostcell_dim_1_rho;
                     
-                    const int idx_vel = (i + idx_offset + num_ghosts_0_vel) +
+                    const int idx_vel = (i + idx_offset_vel + num_ghosts_0_vel) +
                         (j + num_ghosts_1_vel)*ghostcell_dim_0_vel +
                         (k + num_ghosts_2_vel)*ghostcell_dim_0_vel*
                             ghostcell_dim_1_vel;
                     
-                    const int idx_p = (i + idx_offset + num_ghosts_0_p) +
+                    const int idx_p = (i + idx_offset_p + num_ghosts_0_p) +
                         (j + num_ghosts_1_p)*ghostcell_dim_0_p +
                         (k + num_ghosts_2_p)*ghostcell_dim_0_p*
                             ghostcell_dim_1_p;
@@ -2438,17 +2448,17 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
                             (ghostcell_dim_1_characteristic_var + 1);
                     
                     const int idx_rho = (i + num_ghosts_0_rho) +
-                        (j + idx_offset + num_ghosts_1_rho)*ghostcell_dim_0_rho +
+                        (j + idx_offset_rho + num_ghosts_1_rho)*ghostcell_dim_0_rho +
                         (k + num_ghosts_2_rho)*ghostcell_dim_0_rho*
                             ghostcell_dim_1_rho;
                     
                     const int idx_vel = (i + num_ghosts_0_vel) +
-                        (j + idx_offset + num_ghosts_1_vel)*ghostcell_dim_0_vel +
+                        (j + idx_offset_vel + num_ghosts_1_vel)*ghostcell_dim_0_vel +
                         (k + num_ghosts_2_vel)*ghostcell_dim_0_vel*
                             ghostcell_dim_1_vel;
                     
                     const int idx_p = (i + num_ghosts_0_p) +
-                        (j + idx_offset + num_ghosts_1_p)*ghostcell_dim_0_p +
+                        (j + idx_offset_p + num_ghosts_1_p)*ghostcell_dim_0_p +
                         (k + num_ghosts_2_p)*ghostcell_dim_0_p*
                             ghostcell_dim_1_p;
                     
@@ -2492,17 +2502,17 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
                     
                     const int idx_rho = (i + num_ghosts_0_rho) +
                         (j + num_ghosts_1_rho)*ghostcell_dim_0_rho +
-                        (k + idx_offset + num_ghosts_2_rho)*ghostcell_dim_0_rho*
+                        (k + idx_offset_rho + num_ghosts_2_rho)*ghostcell_dim_0_rho*
                             ghostcell_dim_1_rho;
                     
                     const int idx_vel = (i + num_ghosts_0_vel) +
                         (j + num_ghosts_1_vel)*ghostcell_dim_0_vel +
-                        (k + idx_offset + num_ghosts_2_vel)*ghostcell_dim_0_vel*
+                        (k + idx_offset_vel + num_ghosts_2_vel)*ghostcell_dim_0_vel*
                             ghostcell_dim_1_vel;
                     
                     const int idx_p = (i + num_ghosts_0_p) +
                         (j + num_ghosts_1_p)*ghostcell_dim_0_p +
-                        (k + num_ghosts_2_p)*ghostcell_dim_0_p*
+                        (k + idx_offset_p + num_ghosts_2_p)*ghostcell_dim_0_p*
                             ghostcell_dim_1_p;
                     
                     W[0][idx_face] = -0.5*rho_average[idx_face]*c_average[idx_face]*V[3][idx_vel] + 0.5*V[4][idx_p];
