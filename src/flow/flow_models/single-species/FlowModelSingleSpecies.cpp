@@ -2202,6 +2202,8 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
         rho_average = projection_variables[0]->getPointer(0);
         c_average = projection_variables[1]->getPointer(0);
         
+        const int idx_offset = 1;
+        
         #ifdef __INTEL_COMPILER
         #pragma ivdep
         #endif
