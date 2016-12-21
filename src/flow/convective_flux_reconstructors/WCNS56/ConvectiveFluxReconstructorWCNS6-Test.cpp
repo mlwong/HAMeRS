@@ -10,6 +10,7 @@ boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_characte
 boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_WENO_interpolation;
 boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_Riemann_solver;
 boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_reconstruct_flux;
+boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_compute_source;
 
 ConvectiveFluxReconstructorWCNS6_Test::ConvectiveFluxReconstructorWCNS6_Test(
     const std::string& object_name,
@@ -75,6 +76,9 @@ ConvectiveFluxReconstructorWCNS6_Test::ConvectiveFluxReconstructorWCNS6_Test(
     t_reconstruct_flux = tbox::TimerManager::getManager()->
         getTimer("ConvectiveFluxReconstructorWCNS6_Test::t_reconstruct_flux");
     
+    t_compute_source = tbox::TimerManager::getManager()->
+        getTimer("ConvectiveFluxReconstructorWCNS6_Test::t_compute_source");
+    
 }
 
 
@@ -84,6 +88,7 @@ ConvectiveFluxReconstructorWCNS6_Test::~ConvectiveFluxReconstructorWCNS6_Test()
     t_WENO_interpolation.reset();
     t_Riemann_solver.reset();
     t_reconstruct_flux.reset();
+    t_compute_source.reset();
 }
 
 
@@ -199,6 +204,12 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
     if (d_dim == tbox::Dimension(1))
     {
         /*
+         * Get the dimension..
+         */
+        
+        const int interior_dim_0 = interior_dims[0];
+        
+        /*
          * Register the patch and derived cell variables in the flow model and compute the corresponding cell data.
          */
         
@@ -230,23 +241,23 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
         convective_flux_node[0] = d_flow_model->getGlobalCellData("CONVECTIVE_FLUX_X");
         
         hier::IntVector num_subghosts_velocity = velocity->getGhostCellWidth();
-        hier::IntVector subghostcell_dims_velocity = velocity->getGhostBox().numberCells();
-        
         hier::IntVector num_subghosts_convective_flux_x = convective_flux_node[0]->getGhostCellWidth();
-        hier::IntVector subghostcell_dims_convective_flux_x = convective_flux_node[0]->getGhostBox().numberCells();
+        
+        const int num_subghosts_0_velocity = num_subghosts_velocity[0];
+        const int num_subghosts_0_convective_flux_x = num_subghosts_convective_flux_x[0];
         
         double* u = velocity->getPointer(0);
-        std::vector<double*> F_x_node;
-        F_x_node.reserve(d_num_eqn);
+        std::vector<double*> F_node_x;
+        F_node_x.reserve(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            F_x_node.push_back(convective_flux_node[0]->getPointer(ei));
+            F_node_x.push_back(convective_flux_node[0]->getPointer(ei));
         }
-        std::vector<double*> F_x_midpoint;
-        F_x_midpoint.reserve(d_num_eqn);
+        std::vector<double*> F_midpoint_x;
+        F_midpoint_x.reserve(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            F_x_midpoint.push_back(convective_flux_midpoint->getPointer(0, ei));
+            F_midpoint_x.push_back(convective_flux_midpoint->getPointer(0, ei));
         }
         
         /*
@@ -260,22 +271,10 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
             d_flow_model->getGlobalCellDataPrimitiveVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
-        std::vector<hier::IntVector> num_subghosts_primitive_var;
-        
         num_subghosts_conservative_var.reserve(d_num_eqn);
-        num_subghosts_primitive_var.reserve(d_num_eqn);
-        
-        std::vector<hier::IntVector> subghostcell_dims_conservative_var;
-        std::vector<hier::IntVector> subghostcell_dims_primitive_var;
-        
-        subghostcell_dims_conservative_var.reserve(d_num_eqn);
-        subghostcell_dims_primitive_var.reserve(d_num_eqn);
         
         std::vector<double*> Q;
-        std::vector<double*> V;
-        
         Q.reserve(d_num_eqn);
-        V.reserve(d_num_eqn);
         
         int count_eqn = 0;
         
@@ -291,176 +290,290 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
                 
                 Q.push_back(conservative_variables[vi]->getPointer(di));
                 num_subghosts_conservative_var.push_back(conservative_variables[vi]->getGhostCellWidth());
-                subghostcell_dims_conservative_var.push_back(conservative_variables[vi]->getGhostBox().numberCells());
                 
                 count_eqn++;
             }
         }
-        
-        count_eqn = 0;
-        
-        for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
-        {
-            int depth = primitive_variables[vi]->getDepth();
-            
-            for (int di = 0; di < depth; di++)
-            {
-                // If the last element of the primitive variable vector is not in the system of equations, ignore it.
-                if (count_eqn >= d_num_eqn)
-                    break;
-                
-                V.push_back(primitive_variables[vi]->getPointer(di));
-                num_subghosts_primitive_var.push_back(primitive_variables[vi]->getGhostCellWidth());
-                subghostcell_dims_primitive_var.push_back(primitive_variables[vi]->getGhostBox().numberCells());
-                
-                count_eqn++;
-            }
-        }
-        
-        // Declare container to store primitive variables used in WENO interpolation.
-        boost::multi_array<const double*, 2> V_array(
-            boost::extents[6][d_num_eqn],
-            boost::fortran_storage_order());
         
         /*
-         * Compute the mid-point fluxes in the x direction.
+         * Declare temporary data containers for WENO interpolation.
          */
         
-        // Declare indices used in WENO interpolation.
-        hier::Index idx_x_L(d_dim);
-        hier::Index idx_x_R(d_dim);
+        std::vector<boost::shared_ptr<pdat::SideData<double> > > projection_variables;
         
-        // Declare containers to store the WENO interpolated values.
-        std::vector<double> V_x_L(d_num_eqn);
-        std::vector<double> V_x_R(d_num_eqn);
+        std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > > characteristic_variables;
         
-        // Declare and initialize containers to store the references to the
-        // WENO interpolate values.
-        std::vector<boost::reference_wrapper<double> > V_x_L_ref;
-        std::vector<boost::reference_wrapper<double> > V_x_R_ref;
-        V_x_L_ref.reserve(d_num_eqn);
-        V_x_R_ref.reserve(d_num_eqn);
-        for (int ei = 0; ei < d_num_eqn; ei++)
+        std::vector<boost::shared_ptr<pdat::SideData<double> > > characteristic_variables_minus;
+        std::vector<boost::shared_ptr<pdat::SideData<double> > > characteristic_variables_plus;
+        
+        std::vector<boost::shared_ptr<pdat::SideData<double> > > primitive_variables_minus;
+        std::vector<boost::shared_ptr<pdat::SideData<double> > > primitive_variables_plus;
+        
+        /*
+         * Initialize temporary data containers for WENO interpolation.
+         */
+        
+        int num_projection_var = d_flow_model->getNumberOfProjectionVariablesForPrimitiveVariables();
+        projection_variables.reserve(num_projection_var);
+        
+        for (int vi = 0; vi < num_projection_var; vi++)
         {
-            V_x_L_ref.push_back(boost::ref(V_x_L[ei]));
-            V_x_R_ref.push_back(boost::ref(V_x_R[ei]));
+            projection_variables.push_back(boost::make_shared<pdat::SideData<double> >(
+                interior_box, 1, hier::IntVector::getOne(d_dim)));
         }
         
-        // Declare container to store the references to the mid-point flux.
-        std::vector<boost::reference_wrapper<double> > F_x_midpoint_ref;
-        F_x_midpoint_ref.reserve(d_num_eqn);
+        characteristic_variables.resize(6);
         
-        // Declare container to store the references to the mid-point velocity.
-        std::vector<boost::reference_wrapper<double> > vel_x_midpoint_ref;
-        vel_x_midpoint_ref.reserve(d_dim.getValue());
-        
-        for (int i = -1; i < interior_dims[0] + 2; i++)
+        for (int m = 0; m < 6; m++)
         {
-            // Compute the linear index of the face.
-            const int idx_face_x = i + 1;
+            characteristic_variables[m].reserve(d_num_eqn);
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                characteristic_variables[m].push_back(boost::make_shared<pdat::SideData<double> >(
+                    interior_box, 1, hier::IntVector::getOne(d_dim)));
+            }
+        }
+        
+        characteristic_variables_minus.reserve(d_num_eqn);
+        characteristic_variables_plus.reserve(d_num_eqn);
+        primitive_variables_minus.reserve(d_num_eqn);
+        primitive_variables_plus.reserve(d_num_eqn);
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            characteristic_variables_minus.push_back(boost::make_shared<pdat::SideData<double> >(
+                interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            // Compute the indices of left and right cells.
-            idx_x_L[0] = i - 1;
-            idx_x_R[0] = i;
+            characteristic_variables_plus.push_back(boost::make_shared<pdat::SideData<double> >(
+                interior_box, 1, hier::IntVector::getOne(d_dim)));
+            
+            primitive_variables_minus.push_back(boost::make_shared<pdat::SideData<double> >(
+                interior_box, 1, hier::IntVector::getOne(d_dim)));
+            
+            primitive_variables_plus.push_back(boost::make_shared<pdat::SideData<double> >(
+                interior_box, 1, hier::IntVector::getOne(d_dim)));
+        }
+        
+        /*
+         * Compute global side data of the projection variables for transformation between
+         * primitive variables and characteristic variables.
+         */
+        
+        t_characteristic_decomposition->start();
+        
+        d_flow_model->computeGlobalSideDataProjectionVariablesForPrimitiveVariables(
+            projection_variables);
+        
+        t_characteristic_decomposition->stop();
+        
+        /*
+         * Transform primitive variables to characteristic variables.
+         */
+        
+        t_characteristic_decomposition->start();
+        
+        for (int m = 0; m < 6; m++)
+        {
+            d_flow_model->computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables(
+                characteristic_variables[m],
+                primitive_variables,
+                projection_variables,
+                m - 3);
+        }
+        
+        t_characteristic_decomposition->stop();
+        
+        /*
+         * Peform WENO interpolation in the x-direction.
+         */
+        
+        t_WENO_interpolation->start();
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            std::vector<double*> W_array;
+            W_array.resize(6);
             
             for (int m = 0; m < 6; m++)
             {
-                for (int ei = 0; ei < d_num_eqn; ei++)
-                {
-                    const int idx_cell = i - 3 + m + num_subghosts_primitive_var[ei][0];
-                    V_array[m][ei] = &V[ei][idx_cell];
-                }
+                W_array[m] = characteristic_variables[m][ei]->getPointer(0);
             }
             
-            performWENOInterpolation(
-                V_x_L,
-                V_x_R,
-                V_array,
-                idx_x_L,
-                idx_x_R,
-                DIRECTION::X_DIRECTION);
+            double* W_L = characteristic_variables_minus[ei]->getPointer(0);
+            double* W_R = characteristic_variables_plus[ei]->getPointer(0);
             
-            bool is_constant_interpolation = false;
-            
-            // If the WENO interpolated values are out of bound, use constant interpolation.
-            if (!d_flow_model->havePrimitiveVariablesBounded(V_x_L))
+            #ifdef __INTEL_COMPILER
+            #pragma ivdep
+            #endif
+            for (int i = -1; i < interior_dim_0 + 2; i++)
             {
-                is_constant_interpolation = true;
+                // Compute the linear index of the mid-point.
+                const int idx_midpoint_x = i + 1;
+                
+                #ifdef __INTEL_COMPILER
+                #pragma forceinline
+                #endif
+                performWENOInterpolation_minus(
+                    W_L,
+                    W_array,
+                    idx_midpoint_x);
             }
             
-            if (!d_flow_model->havePrimitiveVariablesBounded(V_x_R))
+            #ifdef __INTEL_COMPILER
+            #pragma ivdep
+            #endif
+            for (int i = -1; i < interior_dim_0 + 2; i++)
             {
-                is_constant_interpolation = true;
+                // Compute the linear index of the mid-point.
+                const int idx_midpoint_x = i + 1;
+                
+                #ifdef __INTEL_COMPILER
+                #pragma forceinline
+                #endif
+                performWENOInterpolation_plus(
+                    W_R,
+                    W_array,
+                    idx_midpoint_x);
             }
-            
-            if (is_constant_interpolation)
-            {
-                for (int ei = 0; ei < d_num_eqn; ei++)
-                {
-                    // Compute the linear indices of left and right cells.
-                    const int idx_x_L = i - 1 + num_subghosts_primitive_var[ei][0];
-                    const int idx_x_R = i + num_subghosts_primitive_var[ei][0];
-                    
-                    V_x_L[ei] = V[ei][idx_x_L];
-                    V_x_R[ei] = V[ei][idx_x_R];
-                }
-            }
-            
-            // Initialize container that stores the references to the mid-point flux.
-            for (int ei = 0; ei < d_num_eqn; ei++)
-            {
-                F_x_midpoint_ref.push_back(boost::ref(F_x_midpoint[ei][idx_face_x]));
-            }
-            
-            // Initialize container that stores the references to the mid-point velocity.
-            for (int di = 0; di < d_dim.getValue(); di++)
-            {
-                vel_x_midpoint_ref.push_back(
-                    boost::ref(velocity_intercell->getPointer(0, di)[idx_face_x]));
-            }
-            
-            // Apply the Riemann solver.
-            d_flow_model->
-                computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
-                    F_x_midpoint_ref,
-                    vel_x_midpoint_ref,
-                    V_x_L_ref,
-                    V_x_R_ref,
-                    DIRECTION::X_DIRECTION,
-                    RIEMANN_SOLVER::HLLC);
-            
-            F_x_midpoint_ref.clear();
-            vel_x_midpoint_ref.clear();
         }
+        
+        t_WENO_interpolation->stop();
         
         /*
-         * Compute the fluxes in the x direction.
+         * Transform characteristic variables back to primitive variables.
          */
         
-        for (int i = 0; i < interior_dims[0] + 1; i++)
+        t_characteristic_decomposition->start();
+        
+        d_flow_model->computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
+            primitive_variables_minus,
+            characteristic_variables_minus,
+            projection_variables);
+        
+        d_flow_model->computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
+            primitive_variables_plus,
+            characteristic_variables_plus,
+            projection_variables);
+        
+        t_characteristic_decomposition->stop();
+        
+        /*
+         * Compute mid-point flux in the x-direction.
+         */
+        
+        t_Riemann_solver->start();
+        
         {
-            // Compute the linear indices.
-            const int idx_face_x = i;
-            const int idx_midpoint_x = i + 1;
-            const int idx_node_L = i - 1 + num_subghosts_convective_flux_x[0];
-            const int idx_node_R = i + num_subghosts_convective_flux_x[0];
+            std::vector<double*> V_L;
+            std::vector<double*> V_R;
+            V_L.resize(d_num_eqn);
+            V_R.resize(d_num_eqn);
             
-            // Compute the fluxes.
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                convective_flux->getPointer(0, ei)[idx_face_x] = dt*(1.0/30*(F_x_midpoint[ei][idx_midpoint_x + 1] +
-                    F_x_midpoint[ei][idx_midpoint_x - 1]) -
-                    3.0/10*(F_x_node[ei][idx_node_R] +
-                    F_x_node[ei][idx_node_L]) +
-                    23.0/15*F_x_midpoint[ei][idx_midpoint_x]);
+                V_L[ei] = primitive_variables_minus[ei]->getPointer(0);
+                V_R[ei] = primitive_variables_plus[ei]->getPointer(0);
+            }
+            
+            // Declare and initialize containers to store the references to the
+            // WENO interpolated values.
+            std::vector<boost::reference_wrapper<double> > V_L_ref;
+            std::vector<boost::reference_wrapper<double> > V_R_ref;
+            V_L_ref.reserve(d_num_eqn);
+            V_R_ref.reserve(d_num_eqn);
+            
+            // Declare container to store the references to the mid-point flux.
+            std::vector<boost::reference_wrapper<double> > F_midpoint_x_ref;
+            F_midpoint_x_ref.reserve(d_num_eqn);
+            
+            // Declare container to store the references to the mid-point velocity.
+            std::vector<boost::reference_wrapper<double> > vel_midpoint_x_ref;
+            vel_midpoint_x_ref.reserve(d_dim.getValue());
+            
+            for (int i = -1; i < interior_dim_0 + 2; i++)
+            {
+                // Compute the linear index of the side.
+                const int idx_midpoint_x = i + 1;
+                
+                // Initialize container that stores the references to the mid-point flux.
+                for (int ei = 0; ei < d_num_eqn; ei++)
+                {
+                    F_midpoint_x_ref.push_back(boost::ref(F_midpoint_x[ei][idx_midpoint_x]));
+                }
+                
+                // Initialize container that stores the references to the mid-point velocity.
+                for (int di = 0; di < d_dim.getValue(); di++)
+                {
+                    vel_midpoint_x_ref.push_back(
+                        boost::ref(velocity_intercell->getPointer(0, di)[idx_midpoint_x]));
+                }
+                
+                for (int ei = 0; ei < d_num_eqn; ei++)
+                {
+                    V_L_ref.push_back(boost::ref(V_L[ei][idx_midpoint_x]));
+                    V_R_ref.push_back(boost::ref(V_R[ei][idx_midpoint_x]));
+                }
+                
+                d_flow_model->
+                    computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
+                        F_midpoint_x_ref,
+                        vel_midpoint_x_ref,
+                        V_L_ref,
+                        V_R_ref,
+                        DIRECTION::X_DIRECTION,
+                        RIEMANN_SOLVER::HLLC);
+                
+                F_midpoint_x_ref.clear();
+                vel_midpoint_x_ref.clear();
+                V_L_ref.clear();
+                V_R_ref.clear();
             }
         }
+        
+        t_Riemann_solver->stop();
+        
+        /*
+         * Reconstruct the flux in the x-direction.
+         */
+        
+        t_reconstruct_flux->start();
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            double* F_face_x = convective_flux->getPointer(0, ei);
+            
+            #ifdef __INTEL_COMPILER
+            #pragma ivdep
+            #endif
+            for (int i = 0; i < interior_dim_0 + 1; i++)
+            {
+                // Compute the linear indices.
+                const int idx_face_x = i;
+                const int idx_midpoint_x = i + 1;
+                const int idx_midpoint_x_L = i;
+                const int idx_midpoint_x_R = i + 2;
+                const int idx_node_L = i - 1 + num_subghosts_0_convective_flux_x;
+                const int idx_node_R = i + num_subghosts_0_convective_flux_x;
+                
+                F_face_x[idx_face_x] = dt*(1.0/30.0*(F_midpoint_x[ei][idx_midpoint_x_R] +
+                     F_midpoint_x[ei][idx_midpoint_x_L]) -
+                    3.0/10.0*(F_node_x[ei][idx_node_R] +
+                     F_node_x[ei][idx_node_L]) +
+                    23.0/15.0*F_midpoint_x[ei][idx_midpoint_x]);
+            }
+        }
+        
+        t_reconstruct_flux->stop();
         
         /*
          * Compute the source.
          */
         
+        t_compute_source->start();
+        
         const std::vector<EQN_FORM::TYPE> eqn_form = d_flow_model->getEquationsForm();
+        
+        double* u_midpoint_x = velocity_intercell->getPointer(0, 0);
         
         for (int ei = 0; ei < d_num_eqn; ei ++)
         {
@@ -468,36 +581,39 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
             {
                 double* S = source->getPointer(ei);
                 
-                for (int i = 0; i < interior_dims[0]; i++)
+                const int num_subghosts_0_conservative_var = num_subghosts_conservative_var[ei][0];
+                
+                #ifdef __INTEL_COMPILER
+                #pragma ivdep
+                #endif
+                for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices. 
-                    const int idx_cell_wghost = i + num_subghosts_conservative_var[ei][0];
+                    const int idx_cell_wghost = i + num_subghosts_0_conservative_var;
                     
-                    const int idx_cell_wghost_x_L = i - 1 + num_subghosts_velocity[0];
+                    const int idx_cell_wghost_x_L = i - 1 + num_subghosts_0_velocity;
                     
-                    const int idx_cell_wghost_x_R = i + 1 + num_subghosts_velocity[0];
+                    const int idx_cell_wghost_x_R = i + 1 +num_subghosts_0_velocity;
                     
                     const int idx_cell_nghost = i;
                     
-                    const int idx_face_x_LL = i;
+                    const int idx_midpoint_x_LL = i;
                     
-                    const int idx_face_x_L = i + 1;
+                    const int idx_midpoint_x_L = i + 1;
                     
-                    const int idx_face_x_R = i + 2;
+                    const int idx_midpoint_x_R = i + 2;
                     
-                    const int idx_face_x_RR = i + 3;
-                    
-                    const double& u_LL = velocity_intercell->getPointer(0, 0)[idx_face_x_LL];
-                    const double& u_L = velocity_intercell->getPointer(0, 0)[idx_face_x_L];
-                    const double& u_R = velocity_intercell->getPointer(0, 0)[idx_face_x_R];
-                    const double& u_RR = velocity_intercell->getPointer(0, 0)[idx_face_x_RR];
+                    const int idx_midpoint_x_RR = i + 3;
                     
                     S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
-                        (3.0/2*(u_R - u_L) - 3.0/10*(u[idx_cell_wghost_x_R] - u[idx_cell_wghost_x_L]) +
-                         1.0/30*(u_RR - u_LL))/dx[0]);
+                        (3.0/2.0*(u_midpoint_x[idx_midpoint_x_R] - u_midpoint_x[idx_midpoint_x_L]) -
+                         3.0/10.0*(u[idx_cell_wghost_x_R] - u[idx_cell_wghost_x_L]) +
+                         1.0/30.0*(u_midpoint_x[idx_midpoint_x_RR] - u_midpoint_x[idx_midpoint_x_LL]))/dx[0]);
                 }
             }
         }
+        
+        t_compute_source->stop();
         
         /*
          * Unregister the patch and data of all registered derived cell variables in the flow model.
@@ -741,6 +857,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
          * Compute global side data of the projection variables for transformation between
          * primitive variables and characteristic variables.
          */
+        
         t_characteristic_decomposition->start();
         
         d_flow_model->computeGlobalSideDataProjectionVariablesForPrimitiveVariables(
@@ -954,16 +1071,16 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
                         
                     // Compute the average dilatation and magnitude of vorticity.
                     const int idx_L = (i - 1 + num_conv_ghosts_0) +
-                            (j + num_conv_ghosts_1)*conv_ghostcell_dim_0;
+                        (j + num_conv_ghosts_1)*conv_ghostcell_dim_0;
                     
                     const int idx_R = (i + num_conv_ghosts_0) +
-                            (j + num_conv_ghosts_1)*conv_ghostcell_dim_0;
+                        (j + num_conv_ghosts_1)*conv_ghostcell_dim_0;
                     
                     const int idx_dilatation_L = (i - 1 + num_subghosts_0_dilatation) +
-                            (j + num_subghosts_1_dilatation)*subghostcell_dim_0_dilatation;
+                        (j + num_subghosts_1_dilatation)*subghostcell_dim_0_dilatation;
                     
                     const int idx_dilatation_R = (i + num_subghosts_0_dilatation) +
-                            (j + num_subghosts_1_dilatation)*subghostcell_dim_0_dilatation;
+                        (j + num_subghosts_1_dilatation)*subghostcell_dim_0_dilatation;
                     
                     double theta_avg = 0.5*(theta[idx_dilatation_L] + theta[idx_dilatation_R]);
                     double Omega_avg = 0.5*(Omega[idx_L] + Omega[idx_R]);
@@ -1067,16 +1184,16 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
                     
                     // Compute the average dilatation and magnitude of vorticity.
                     const int idx_B = (i + num_conv_ghosts_0) +
-                            (j - 1 + num_conv_ghosts_1)*conv_ghostcell_dim_0;
+                        (j - 1 + num_conv_ghosts_1)*conv_ghostcell_dim_0;
                     
                     const int idx_T = (i + num_conv_ghosts_0) +
-                            (j + num_conv_ghosts_1)*conv_ghostcell_dim_0;
+                        (j + num_conv_ghosts_1)*conv_ghostcell_dim_0;
                     
                     const int idx_dilatation_B = (i + num_subghosts_0_dilatation) +
-                            (j - 1 + num_subghosts_1_dilatation)*subghostcell_dim_0_dilatation;
+                        (j - 1 + num_subghosts_1_dilatation)*subghostcell_dim_0_dilatation;
                     
                     const int idx_dilatation_T = (i + num_subghosts_0_dilatation) +
-                            (j + num_subghosts_1_dilatation)*subghostcell_dim_0_dilatation;
+                        (j + num_subghosts_1_dilatation)*subghostcell_dim_0_dilatation;
                     
                     double theta_avg = 0.5*(theta[idx_dilatation_B] + theta[idx_dilatation_T]);
                     double Omega_avg = 0.5*(Omega[idx_B] + Omega[idx_T]);
@@ -1138,7 +1255,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
         t_Riemann_solver->stop();
         
         /*
-         * Reconstruct the flux in the x direction.
+         * Reconstruct the flux in the x-direction.
          */
         
         t_reconstruct_flux->start();
@@ -1173,11 +1290,11 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
                     const int idx_node_R = (i + num_subghosts_0_convective_flux_x) +
                         (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x;
                     
-                    F_face_x[idx_face_x] = dt*(1.0/30*(F_midpoint_x[ei][idx_midpoint_x_R] +
-                        F_midpoint_x[ei][idx_midpoint_x_L]) -
-                        3.0/10*(F_node_x[ei][idx_node_R] +
-                        F_node_x[ei][idx_node_L]) +
-                        23.0/15*F_midpoint_x[ei][idx_midpoint_x]);
+                    F_face_x[idx_face_x] = dt*(1.0/30.0*(F_midpoint_x[ei][idx_midpoint_x_R] +
+                         F_midpoint_x[ei][idx_midpoint_x_L]) -
+                        3.0/10.0*(F_node_x[ei][idx_node_R] +
+                         F_node_x[ei][idx_node_L]) +
+                        23.0/15.0*F_midpoint_x[ei][idx_midpoint_x]);
                 }
             }
         }
@@ -1185,7 +1302,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
         t_reconstruct_flux->stop();
         
         /*
-         * Reconstruct the flux in the y direction.
+         * Reconstruct the flux in the y-direction.
          */
         
         t_reconstruct_flux->start();
@@ -1220,11 +1337,11 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
                     const int idx_node_T = (i + num_subghosts_0_convective_flux_y) +
                         (j + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y;
                     
-                    F_face_y[idx_face_y] = dt*(1.0/30*(F_midpoint_y[ei][idx_midpoint_y_T] +
-                        F_midpoint_y[ei][idx_midpoint_y_B]) -
-                        3.0/10*(F_node_y[ei][idx_node_T] +
-                        F_node_y[ei][idx_node_B]) +
-                        23.0/15*F_midpoint_y[ei][idx_midpoint_y]);
+                    F_face_y[idx_face_y] = dt*(1.0/30.0*(F_midpoint_y[ei][idx_midpoint_y_T] +
+                         F_midpoint_y[ei][idx_midpoint_y_B]) -
+                        3.0/10.0*(F_node_y[ei][idx_node_T] +
+                         F_node_y[ei][idx_node_B]) +
+                        23.0/15.0*F_midpoint_y[ei][idx_midpoint_y]);
                 }
             }
         }
@@ -1234,6 +1351,8 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
         /*
          * Compute the source.
          */
+        
+        t_compute_source->start();
         
         const std::vector<EQN_FORM::TYPE> eqn_form = d_flow_model->getEquationsForm();
         
@@ -1300,16 +1419,18 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
                             (j + 3)*(interior_dim_0 + 2);
                         
                         S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
-                            (3.0/2*(u_midpoint_x[idx_midpoint_x_R] - u_midpoint_x[idx_midpoint_x_L]) -
-                             3.0/10*(u[idx_cell_wghost_x_R] - u[idx_cell_wghost_x_L]) +
-                             1.0/30*(u_midpoint_x[idx_midpoint_x_RR] - u_midpoint_x[idx_midpoint_x_LL]))/dx[0] +
-                            (3.0/2*(v_midpoint_y[idx_midpoint_y_T] - v_midpoint_y[idx_midpoint_y_B]) -
-                             3.0/10*(v[idx_cell_wghost_y_T] - v[idx_cell_wghost_y_B]) +
-                             1.0/30*(v_midpoint_y[idx_midpoint_y_TT] - v_midpoint_y[idx_midpoint_y_BB]))/dx[1]);
+                            (3.0/2.0*(u_midpoint_x[idx_midpoint_x_R] - u_midpoint_x[idx_midpoint_x_L]) -
+                             3.0/10.0*(u[idx_cell_wghost_x_R] - u[idx_cell_wghost_x_L]) +
+                             1.0/30.0*(u_midpoint_x[idx_midpoint_x_RR] - u_midpoint_x[idx_midpoint_x_LL]))/dx[0] +
+                            (3.0/2.0*(v_midpoint_y[idx_midpoint_y_T] - v_midpoint_y[idx_midpoint_y_B]) -
+                             3.0/10.0*(v[idx_cell_wghost_y_T] - v[idx_cell_wghost_y_B]) +
+                             1.0/30.0*(v_midpoint_y[idx_midpoint_y_TT] - v_midpoint_y[idx_midpoint_y_BB]))/dx[1]);
                     }
                 }
             }
         }
+        
+        t_compute_source->stop();
         
         /*
          * Unregister the patch and data of all registered derived cell variables in the flow model.
@@ -1320,6 +1441,21 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
     } // if (d_dim == tbox::Dimension(2))
     else if (d_dim == tbox::Dimension(3))
     {
+        /*
+         * Get the dimensions and number of ghost cells.
+         */
+        
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        const int interior_dim_2 = interior_dims[2];
+        
+        const int num_conv_ghosts_0 = d_num_conv_ghosts[0];
+        const int num_conv_ghosts_1 = d_num_conv_ghosts[1];
+        const int num_conv_ghosts_2 = d_num_conv_ghosts[2];
+        
+        const int conv_ghostcell_dim_0 = conv_ghostcell_dims[0];
+        const int conv_ghostcell_dim_1 = conv_ghostcell_dims[1];
+        
         /*
          * Register the patch and derived cell variables in the flow model and compute the corresponding cell data.
          */
@@ -1381,6 +1517,42 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
         hier::IntVector num_subghosts_convective_flux_z = convective_flux_node[2]->getGhostCellWidth();
         hier::IntVector subghostcell_dims_convective_flux_z = convective_flux_node[2]->getGhostBox().numberCells();
         
+        const int num_subghosts_0_velocity = num_subghosts_velocity[0];
+        const int num_subghosts_1_velocity = num_subghosts_velocity[1];
+        const int num_subghosts_2_velocity = num_subghosts_velocity[2];
+        const int subghostcell_dim_0_velocity = subghostcell_dims_velocity[0];
+        const int subghostcell_dim_1_velocity = subghostcell_dims_velocity[1];
+        
+        const int num_subghosts_0_dilatation = num_subghosts_dilatation[0];
+        const int num_subghosts_1_dilatation = num_subghosts_dilatation[1];
+        const int num_subghosts_2_dilatation = num_subghosts_dilatation[2];
+        const int subghostcell_dim_0_dilatation = subghostcell_dims_dilatation[0];
+        const int subghostcell_dim_1_dilatation = subghostcell_dims_dilatation[1];
+        
+        const int num_subghosts_0_vorticity = num_subghosts_vorticity[0];
+        const int num_subghosts_1_vorticity = num_subghosts_vorticity[1];
+        const int num_subghosts_2_vorticity = num_subghosts_vorticity[2];
+        const int subghostcell_dim_0_vorticity = subghostcell_dims_vorticity[0];
+        const int subghostcell_dim_1_vorticity = subghostcell_dims_vorticity[1];
+        
+        const int num_subghosts_0_convective_flux_x = num_subghosts_convective_flux_x[0];
+        const int num_subghosts_1_convective_flux_x = num_subghosts_convective_flux_x[1];
+        const int num_subghosts_2_convective_flux_x = num_subghosts_convective_flux_x[2];
+        const int subghostcell_dim_0_convective_flux_x = subghostcell_dims_convective_flux_x[0];
+        const int subghostcell_dim_1_convective_flux_x = subghostcell_dims_convective_flux_x[1];
+        
+        const int num_subghosts_0_convective_flux_y = num_subghosts_convective_flux_y[0];
+        const int num_subghosts_1_convective_flux_y = num_subghosts_convective_flux_y[1];
+        const int num_subghosts_2_convective_flux_y = num_subghosts_convective_flux_y[2];
+        const int subghostcell_dim_0_convective_flux_y = subghostcell_dims_convective_flux_y[0];
+        const int subghostcell_dim_1_convective_flux_y = subghostcell_dims_convective_flux_y[1];
+        
+        const int num_subghosts_0_convective_flux_z = num_subghosts_convective_flux_z[0];
+        const int num_subghosts_1_convective_flux_z = num_subghosts_convective_flux_z[1];
+        const int num_subghosts_2_convective_flux_z = num_subghosts_convective_flux_z[2];
+        const int subghostcell_dim_0_convective_flux_z = subghostcell_dims_convective_flux_z[0];
+        const int subghostcell_dim_1_convective_flux_z = subghostcell_dims_convective_flux_z[1];
+        
         double* u     = velocity->getPointer(0);
         double* v     = velocity->getPointer(1);
         double* w     = velocity->getPointer(2);
@@ -1389,47 +1561,51 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
         double* omega_y = vorticity->getPointer(1);
         double* omega_z = vorticity->getPointer(2);
         double* Omega = vorticity_magnitude->getPointer(0);
-        std::vector<double*> F_x_node;
-        std::vector<double*> F_y_node;
-        std::vector<double*> F_z_node;
-        F_x_node.reserve(d_num_eqn);
-        F_y_node.reserve(d_num_eqn);
-        F_z_node.reserve(d_num_eqn);
+        std::vector<double*> F_node_x;
+        std::vector<double*> F_node_y;
+        std::vector<double*> F_node_z;
+        F_node_x.reserve(d_num_eqn);
+        F_node_y.reserve(d_num_eqn);
+        F_node_z.reserve(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            F_x_node.push_back(convective_flux_node[0]->getPointer(ei));
-            F_y_node.push_back(convective_flux_node[1]->getPointer(ei));
-            F_z_node.push_back(convective_flux_node[2]->getPointer(ei));
+            F_node_x.push_back(convective_flux_node[0]->getPointer(ei));
+            F_node_y.push_back(convective_flux_node[1]->getPointer(ei));
+            F_node_z.push_back(convective_flux_node[2]->getPointer(ei));
         }
-        std::vector<double*> F_x_midpoint;
-        std::vector<double*> F_y_midpoint;
-        std::vector<double*> F_z_midpoint;
-        F_x_midpoint.reserve(d_num_eqn);
-        F_y_midpoint.reserve(d_num_eqn);
-        F_z_midpoint.reserve(d_num_eqn);
+        std::vector<double*> F_midpoint_x;
+        std::vector<double*> F_midpoint_y;
+        std::vector<double*> F_midpoint_z;
+        F_midpoint_x.reserve(d_num_eqn);
+        F_midpoint_y.reserve(d_num_eqn);
+        F_midpoint_z.reserve(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            F_x_midpoint.push_back(convective_flux_midpoint->getPointer(0, ei));
-            F_y_midpoint.push_back(convective_flux_midpoint->getPointer(1, ei));
-            F_z_midpoint.push_back(convective_flux_midpoint->getPointer(2, ei));
+            F_midpoint_x.push_back(convective_flux_midpoint->getPointer(0, ei));
+            F_midpoint_y.push_back(convective_flux_midpoint->getPointer(1, ei));
+            F_midpoint_z.push_back(convective_flux_midpoint->getPointer(2, ei));
         }
         
         // Compute the magnitude of vorticity.
-        for (int k = -d_num_conv_ghosts[2] + 1; k < interior_dims[2] + d_num_conv_ghosts[2] - 1; k++)
+        for (int k = -num_conv_ghosts_2 + 1; k < interior_dim_2 + num_conv_ghosts_2 - 1; k++)
         {
-            for (int j = -d_num_conv_ghosts[1] + 1; j < interior_dims[1] + d_num_conv_ghosts[1] - 1; j++)
+            for (int j = -num_conv_ghosts_1 + 1; j < interior_dim_1 + num_conv_ghosts_1 - 1; j++)
             {
-                for (int i = -d_num_conv_ghosts[0] + 1; i < interior_dims[0] + d_num_conv_ghosts[0] - 1; i++)
+                #ifdef __INTEL_COMPILER
+                #pragma ivdep
+                #endif
+                for (int i = -num_conv_ghosts_0 + 1; i < interior_dim_0 + num_conv_ghosts_0 - 1; i++)
                 {
                     // Compute the linear indices
-                    const int idx = (i + d_num_conv_ghosts[0]) +
-                        (j + d_num_conv_ghosts[1])*conv_ghostcell_dims[0] +
-                        (k + d_num_conv_ghosts[2])*conv_ghostcell_dims[0]*conv_ghostcell_dims[1];
+                    const int idx = (i + num_conv_ghosts_0) +
+                        (j + num_conv_ghosts_1)*conv_ghostcell_dim_0 +
+                        (k + num_conv_ghosts_2)*conv_ghostcell_dim_0*
+                            conv_ghostcell_dim_1;
                     
-                    const int idx_vorticity = (i + num_subghosts_vorticity[0]) +
-                        (j + num_subghosts_vorticity[1])*subghostcell_dims_vorticity[0] +
-                        (k + num_subghosts_vorticity[2])*subghostcell_dims_vorticity[0]*
-                            subghostcell_dims_vorticity[1];
+                    const int idx_vorticity = (i + num_subghosts_0_vorticity) +
+                        (j + num_subghosts_1_vorticity)*subghostcell_dim_0_vorticity +
+                        (k + num_subghosts_2_vorticity)*subghostcell_dim_0_vorticity*
+                            subghostcell_dim_1_vorticity;
                     
                     Omega[idx] = sqrt(omega_x[idx_vorticity]*omega_x[idx_vorticity] +
                         omega_y[idx_vorticity]*omega_y[idx_vorticity] +
@@ -1449,22 +1625,13 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
             d_flow_model->getGlobalCellDataPrimitiveVariables();
         
         std::vector<hier::IntVector> num_subghosts_conservative_var;
-        std::vector<hier::IntVector> num_subghosts_primitive_var;
-        
         num_subghosts_conservative_var.reserve(d_num_eqn);
-        num_subghosts_primitive_var.reserve(d_num_eqn);
         
         std::vector<hier::IntVector> subghostcell_dims_conservative_var;
-        std::vector<hier::IntVector> subghostcell_dims_primitive_var;
-        
         subghostcell_dims_conservative_var.reserve(d_num_eqn);
-        subghostcell_dims_primitive_var.reserve(d_num_eqn);
         
         std::vector<double*> Q;
-        std::vector<double*> V;
-        
         Q.reserve(d_num_eqn);
-        V.reserve(d_num_eqn);
         
         int count_eqn = 0;
         
@@ -1486,685 +1653,909 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
             }
         }
         
-        count_eqn = 0;
+        /*
+         * Declare temporary data containers for WENO interpolation.
+         */
         
-        for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
+        std::vector<boost::shared_ptr<pdat::SideData<double> > > projection_variables;
+        
+        std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > > characteristic_variables;
+        
+        std::vector<boost::shared_ptr<pdat::SideData<double> > > characteristic_variables_minus;
+        std::vector<boost::shared_ptr<pdat::SideData<double> > > characteristic_variables_plus;
+        
+        std::vector<boost::shared_ptr<pdat::SideData<double> > > primitive_variables_minus;
+        std::vector<boost::shared_ptr<pdat::SideData<double> > > primitive_variables_plus;
+        
+        /*
+         * Initialize temporary data containers for WENO interpolation.
+         */
+        
+        int num_projection_var = d_flow_model->getNumberOfProjectionVariablesForPrimitiveVariables();
+        projection_variables.reserve(num_projection_var);
+        
+        for (int vi = 0; vi < num_projection_var; vi++)
         {
-            int depth = primitive_variables[vi]->getDepth();
+            projection_variables.push_back(boost::make_shared<pdat::SideData<double> >(
+                interior_box, 1, hier::IntVector::getOne(d_dim)));
+        }
+        
+        characteristic_variables.resize(6);
+        
+        for (int m = 0; m < 6; m++)
+        {
+            characteristic_variables[m].reserve(d_num_eqn);
+            for (int ei = 0; ei < d_num_eqn; ei++)
+            {
+                characteristic_variables[m].push_back(boost::make_shared<pdat::SideData<double> >(
+                    interior_box, 1, hier::IntVector::getOne(d_dim)));
+            }
+        }
+        
+        characteristic_variables_minus.reserve(d_num_eqn);
+        characteristic_variables_plus.reserve(d_num_eqn);
+        primitive_variables_minus.reserve(d_num_eqn);
+        primitive_variables_plus.reserve(d_num_eqn);
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            characteristic_variables_minus.push_back(boost::make_shared<pdat::SideData<double> >(
+                interior_box, 1, hier::IntVector::getOne(d_dim)));
             
-            for (int di = 0; di < depth; di++)
-            {
-                // If the last element of the primitive variable vector is not in the system of equations, ignore it.
-                if (count_eqn >= d_num_eqn)
-                    break;
-                
-                V.push_back(primitive_variables[vi]->getPointer(di));
-                num_subghosts_primitive_var.push_back(primitive_variables[vi]->getGhostCellWidth());
-                subghostcell_dims_primitive_var.push_back(primitive_variables[vi]->getGhostBox().numberCells());
-                
-                count_eqn++;
-            }
+            characteristic_variables_plus.push_back(boost::make_shared<pdat::SideData<double> >(
+                interior_box, 1, hier::IntVector::getOne(d_dim)));
+            
+            primitive_variables_minus.push_back(boost::make_shared<pdat::SideData<double> >(
+                interior_box, 1, hier::IntVector::getOne(d_dim)));
+            
+            primitive_variables_plus.push_back(boost::make_shared<pdat::SideData<double> >(
+                interior_box, 1, hier::IntVector::getOne(d_dim)));
         }
         
-        // Declare container to store primitive variables used in WENO interpolation.
-        boost::multi_array<const double*, 2> V_array(
-            boost::extents[6][d_num_eqn],
-            boost::fortran_storage_order());
-        
         /*
-         * Compute the mid-point fluxes in the x direction.
+         * Compute global side data of the projection variables for transformation between
+         * primitive variables and characteristic variables.
          */
         
-        // Declare indices used in WENO interpolation.
-        hier::Index idx_x_L(d_dim);
-        hier::Index idx_x_R(d_dim);
+        t_characteristic_decomposition->start();
         
-        // Declare containers to store the WENO interpolated values.
-        std::vector<double> V_x_L(d_num_eqn);
-        std::vector<double> V_x_R(d_num_eqn);
+        d_flow_model->computeGlobalSideDataProjectionVariablesForPrimitiveVariables(
+            projection_variables);
         
-        // Declare and initialize containers to store the references to the
-        // WENO interpolate values.
-        std::vector<boost::reference_wrapper<double> > V_x_L_ref;
-        std::vector<boost::reference_wrapper<double> > V_x_R_ref;
-        V_x_L_ref.reserve(d_num_eqn);
-        V_x_R_ref.reserve(d_num_eqn);
+        t_characteristic_decomposition->stop();
+        
+        /*
+         * Transform primitive variables to characteristic variables.
+         */
+        
+        t_characteristic_decomposition->start();
+        
+        for (int m = 0; m < 6; m++)
+        {
+            d_flow_model->computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables(
+                characteristic_variables[m],
+                primitive_variables,
+                projection_variables,
+                m - 3);
+        }
+        
+        t_characteristic_decomposition->stop();
+        
+        /*
+         * Peform WENO interpolation in the x-direction.
+         */
+        
+        t_WENO_interpolation->start();
+        
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            V_x_L_ref.push_back(boost::ref(V_x_L[ei]));
-            V_x_R_ref.push_back(boost::ref(V_x_R[ei]));
-        }
-        
-        // Declare container to store the references to the mid-point flux.
-        std::vector<boost::reference_wrapper<double> > F_x_midpoint_ref;
-        F_x_midpoint_ref.reserve(d_num_eqn);
-        
-        // Declare container to store the references to the mid-point velocity.
-        std::vector<boost::reference_wrapper<double> > vel_x_midpoint_ref;
-        vel_x_midpoint_ref.reserve(d_dim.getValue());
-        
-        for (int k = 0; k < interior_dims[2]; k++)
-        {
-            for (int j = 0; j < interior_dims[1]; j++)
+            std::vector<double*> W_array;
+            W_array.resize(6);
+            
+            for (int m = 0; m < 6; m++)
             {
-                for (int i = -1; i < interior_dims[0] + 2; i++)
+                W_array[m] = characteristic_variables[m][ei]->getPointer(0);
+            }
+            
+            double* W_L = characteristic_variables_minus[ei]->getPointer(0);
+            double* W_R = characteristic_variables_plus[ei]->getPointer(0);
+            
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
                 {
-                    // Compute the linear index of the face.
-                    const int idx_face_x = (i + 1) +
-                        (j + 1)*(interior_dims[0] + 3) +
-                        (k + 1)*(interior_dims[0] + 3)*(interior_dims[1] + 2);
-                    
-                    // Compute the indices of left and right cells.
-                    idx_x_L[0] = i - 1;
-                    idx_x_L[1] = j;
-                    idx_x_L[2] = k;
-                    
-                    idx_x_R[0] = i;
-                    idx_x_R[1] = j;
-                    idx_x_R[2] = k;
-                    
-                    for (int m = 0; m < 6; m++)
+                    #ifdef __INTEL_COMPILER
+                    #pragma ivdep
+                    #endif
+                    for (int i = -1; i < interior_dim_0 + 2; i++)
                     {
-                        for (int ei = 0; ei < d_num_eqn; ei++)
-                        {
-                            const int idx_cell = (i - 3 + m + num_subghosts_primitive_var[ei][0]) +
-                                (j + num_subghosts_primitive_var[ei][1])*subghostcell_dims_primitive_var[ei][0] +
-                                (k + num_subghosts_primitive_var[ei][2])*subghostcell_dims_primitive_var[ei][0]*
-                                    subghostcell_dims_primitive_var[ei][1];
-                            
-                            V_array[m][ei] = &V[ei][idx_cell];
-                        }
+                        // Compute the linear index of the mid-point.
+                        const int idx_midpoint_x = (i + 1) +
+                            (j + 1)*(interior_dim_0 + 3) +
+                            (k + 1)*(interior_dim_0 + 3)*
+                                (interior_dim_1 + 2);
+                        
+                        #ifdef __INTEL_COMPILER
+                        #pragma forceinline
+                        #endif
+                        performWENOInterpolation_minus(
+                            W_L,
+                            W_array,
+                            idx_midpoint_x);
                     }
-                    
-                    performWENOInterpolation(
-                        V_x_L,
-                        V_x_R,
-                        V_array,
-                        idx_x_L,
-                        idx_x_R,
-                        DIRECTION::X_DIRECTION);
-                    
-                    bool is_constant_interpolation = false;
-                    
-                    // If the WENO interpolated values are out of bound, use constant interpolation.
-                    if (!d_flow_model->havePrimitiveVariablesBounded(V_x_L))
+                }
+            }
+            
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+                    #ifdef __INTEL_COMPILER
+                    #pragma ivdep
+                    #endif
+                    for (int i = -1; i < interior_dim_0 + 2; i++)
                     {
-                        is_constant_interpolation = true;
+                        // Compute the linear index of the mid-point.
+                        const int idx_midpoint_x = (i + 1) +
+                            (j + 1)*(interior_dim_0 + 3) +
+                            (k + 1)*(interior_dim_0 + 3)*
+                                (interior_dim_1 + 2);
+                        
+                        #ifdef __INTEL_COMPILER
+                        #pragma forceinline
+                        #endif
+                        performWENOInterpolation_plus(
+                            W_R,
+                            W_array,
+                            idx_midpoint_x);
                     }
-                    
-                    if (!d_flow_model->havePrimitiveVariablesBounded(V_x_R))
-                    {
-                        is_constant_interpolation = true;
-                    }
-                    
-                    if (is_constant_interpolation)
-                    {
-                        for (int ei = 0; ei < d_num_eqn; ei++)
-                        {
-                            // Compute the linear indices of left cell and right cell.
-                            const int idx_x_L = (i - 1 + num_subghosts_primitive_var[ei][0]) +
-                                (j + num_subghosts_primitive_var[ei][1])*subghostcell_dims_primitive_var[ei][0] +
-                                (k + num_subghosts_primitive_var[ei][2])*subghostcell_dims_primitive_var[ei][0]*
-                                    subghostcell_dims_primitive_var[ei][1];
-                            
-                            const int idx_x_R = (i + num_subghosts_primitive_var[ei][0]) +
-                                (j + num_subghosts_primitive_var[ei][1])*subghostcell_dims_primitive_var[ei][0] +
-                                (k + num_subghosts_primitive_var[ei][2])*subghostcell_dims_primitive_var[ei][0]*
-                                    subghostcell_dims_primitive_var[ei][1];
-                            
-                            V_x_L[ei] = V[ei][idx_x_L];
-                            V_x_R[ei] = V[ei][idx_x_R];
-                        }
-                    }
-                    
-                    // Compute the average dilatation and magnitude of vorticity.
-                    const int idx_L = (i - 1 + d_num_conv_ghosts[0]) +
-                        (j + d_num_conv_ghosts[1])*conv_ghostcell_dims[0] +
-                        (k + d_num_conv_ghosts[2])*conv_ghostcell_dims[0]*conv_ghostcell_dims[1];
-                    
-                    const int idx_R = (i + d_num_conv_ghosts[0]) +
-                        (j + d_num_conv_ghosts[1])*conv_ghostcell_dims[0] +
-                        (k + d_num_conv_ghosts[2])*conv_ghostcell_dims[0]*conv_ghostcell_dims[1];
-                    
-                    const int idx_L_dilatation = (i - 1 + num_subghosts_dilatation[0]) +
-                        (j + num_subghosts_dilatation[1])*subghostcell_dims_dilatation[0] +
-                        (k + num_subghosts_dilatation[2])*subghostcell_dims_dilatation[0]*
-                            subghostcell_dims_dilatation[1];
-                    
-                    const int idx_R_dilatation = (i + num_subghosts_dilatation[0]) +
-                        (j + num_subghosts_dilatation[1])*subghostcell_dims_dilatation[0] +
-                        (k + num_subghosts_dilatation[2])*subghostcell_dims_dilatation[0]*
-                            subghostcell_dims_dilatation[1];
-                    
-                    const double theta_avg = 0.5*(theta[idx_L_dilatation] + theta[idx_R_dilatation]);
-                    const double Omega_avg = 0.5*(Omega[idx_L] + Omega[idx_R]);
-                    
-                    // Compute the Ducros-like shock sensor.
-                    const double s = -theta_avg/(fabs(theta_avg) + Omega_avg + EPSILON);
-                    
-                    // Initialize container that stores the references to the mid-point flux.
-                    for (int ei = 0; ei < d_num_eqn; ei++)
-                    {
-                        F_x_midpoint_ref.push_back(boost::ref(F_x_midpoint[ei][idx_face_x]));
-                    }
-                    
-                    // Initialize container that stores the references to the mid-point velocity.
-                    for (int di = 0; di < d_dim.getValue(); di++)
-                    {
-                        vel_x_midpoint_ref.push_back(
-                            boost::ref(velocity_intercell->getPointer(0, di)[idx_face_x]));
-                    }
-                    
-                    // Apply the Riemann solver.
-                    if (s > 0.65)
-                    {
-                        d_flow_model->
-                            computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
-                                F_x_midpoint_ref,
-                                vel_x_midpoint_ref,
-                                V_x_L_ref,
-                                V_x_R_ref,
-                                DIRECTION::X_DIRECTION,
-                                RIEMANN_SOLVER::HLLC_HLL);
-                    }
-                    else
-                    {
-                        d_flow_model->
-                            computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
-                                F_x_midpoint_ref,
-                                vel_x_midpoint_ref,
-                                V_x_L_ref,
-                                V_x_R_ref,
-                                DIRECTION::X_DIRECTION,
-                                RIEMANN_SOLVER::HLLC);
-                    }
-                    
-                    F_x_midpoint_ref.clear();
-                    vel_x_midpoint_ref.clear();
                 }
             }
         }
         
+        t_WENO_interpolation->stop();
+        
         /*
-         * Compute the mid-point fluxes in the y direction.
+         * Peform WENO interpolation in the y-direction.
          */
         
-        // Declare indices used in WENO interpolation.
-        hier::Index idx_y_B(d_dim);
-        hier::Index idx_y_T(d_dim);
+        t_WENO_interpolation->start();
         
-        // Declare containers to store the WENO interpolated values.
-        std::vector<double> V_y_B(d_num_eqn);
-        std::vector<double> V_y_T(d_num_eqn);
-        
-        // Declare and initialize containers to store the references to the
-        // WENO interpolate values.
-        std::vector<boost::reference_wrapper<double> > V_y_B_ref;
-        std::vector<boost::reference_wrapper<double> > V_y_T_ref;
-        V_y_B_ref.reserve(d_num_eqn);
-        V_y_T_ref.reserve(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            V_y_B_ref.push_back(boost::ref(V_y_B[ei]));
-            V_y_T_ref.push_back(boost::ref(V_y_T[ei]));
-        }
-        
-        // Declare container to store the references to the mid-point flux.
-        std::vector<boost::reference_wrapper<double> > F_y_midpoint_ref;
-        F_y_midpoint_ref.reserve(d_num_eqn);
-        
-        // Declare container to store the references to the mid-point velocity.
-        std::vector<boost::reference_wrapper<double> > vel_y_midpoint_ref;
-        vel_y_midpoint_ref.reserve(d_dim.getValue());
-        
-        for (int i = 0; i < interior_dims[0]; i++)
-        {
-            for (int k = 0; k < interior_dims[2]; k++)
+            std::vector<double*> W_array;
+            W_array.resize(6);
+            
+            for (int m = 0; m < 6; m++)
             {
-                for (int j = -1; j < interior_dims[1] + 2; j++)
+                W_array[m] = characteristic_variables[m][ei]->getPointer(1);
+            }
+            
+            double* W_B = characteristic_variables_minus[ei]->getPointer(1);
+            double* W_T = characteristic_variables_plus[ei]->getPointer(1);
+            
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = -1; j < interior_dim_1 + 2; j++)
                 {
-                    // Compute the linear index of the face.
-                    const int idx_face_y = (j + 1) +
-                        (k + 1)*(interior_dims[1] + 3) +
-                        (i + 1)*(interior_dims[1] + 3)*(interior_dims[2] + 2);
-                    
-                    // Compute the indices of bottom and top cells.
-                    idx_y_B[0] = i;
-                    idx_y_B[1] = j - 1;
-                    idx_y_B[2] = k;
-                    
-                    idx_y_T[0] = i;
-                    idx_y_T[1] = j;
-                    idx_y_T[2] = k;
-                    
-                    for (int m = 0; m < 6; m++)
+                    #ifdef __INTEL_COMPILER
+                    #pragma ivdep
+                    #endif
+                    for (int i = 0; i < interior_dim_0; i++)
                     {
-                        for (int ei = 0; ei < d_num_eqn; ei++)
-                        {
-                            const int idx_cell = (i + num_subghosts_primitive_var[ei][0]) +
-                                (j - 3 + m + num_subghosts_primitive_var[ei][1])*subghostcell_dims_primitive_var[ei][0] +
-                                (k + num_subghosts_primitive_var[ei][2])*subghostcell_dims_primitive_var[ei][0]*
-                                    subghostcell_dims_primitive_var[ei][1];
-                            
-                            V_array[m][ei] = &V[ei][idx_cell];
-                        }
+                        // Compute the linear index of the mid-point.
+                        const int idx_midpoint_y = (i + 1) +
+                            (j + 1)*(interior_dim_0 + 2) +
+                            (k + 1)*(interior_dim_0 + 2)*
+                                (interior_dim_1 + 3);
+                        
+                        #ifdef __INTEL_COMPILER
+                        #pragma forceinline
+                        #endif
+                        performWENOInterpolation_minus(
+                            W_B,
+                            W_array,
+                            idx_midpoint_y);
                     }
-                    
-                    performWENOInterpolation(
-                        V_y_B,
-                        V_y_T,
-                        V_array,
-                        idx_y_B,
-                        idx_y_T,
-                        DIRECTION::Y_DIRECTION);
-                    
-                    bool is_constant_interpolation = false;
-                    
-                    // If the WENO interpolated values are out of bound, use constant interpolation.
-                    if (!d_flow_model->havePrimitiveVariablesBounded(V_y_B))
+                }
+            }
+            
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = -1; j < interior_dim_1 + 2; j++)
+                {
+                    #ifdef __INTEL_COMPILER
+                    #pragma ivdep
+                    #endif
+                    for (int i = 0; i < interior_dim_0; i++)
                     {
-                        is_constant_interpolation = true;
+                        // Compute the linear index of the mid-point.
+                        const int idx_midpoint_y = (i + 1) +
+                            (j + 1)*(interior_dim_0 + 2) +
+                            (k + 1)*(interior_dim_0 + 2)*
+                                (interior_dim_1 + 3);
+                        
+                        #ifdef __INTEL_COMPILER
+                        #pragma forceinline
+                        #endif
+                        performWENOInterpolation_plus(
+                            W_T,
+                            W_array,
+                            idx_midpoint_y);
                     }
-                    
-                    if (!d_flow_model->havePrimitiveVariablesBounded(V_y_T))
-                    {
-                        is_constant_interpolation = true;
-                    }
-                    
-                    if (is_constant_interpolation)
-                    {
-                        for (int ei = 0; ei < d_num_eqn; ei++)
-                        {
-                            // Compute the indices of bottom cell and top cell.
-                            const int idx_y_B = (i + num_subghosts_primitive_var[ei][0]) +
-                                (j - 1 + num_subghosts_primitive_var[ei][1])*subghostcell_dims_primitive_var[ei][0] +
-                                (k + num_subghosts_primitive_var[ei][2])*subghostcell_dims_primitive_var[ei][0]*
-                                    subghostcell_dims_primitive_var[ei][1];
-                            
-                            const int idx_y_T = (i + num_subghosts_primitive_var[ei][0]) +
-                                (j + num_subghosts_primitive_var[ei][1])*subghostcell_dims_primitive_var[ei][0] +
-                                (k + num_subghosts_primitive_var[ei][2])*subghostcell_dims_primitive_var[ei][0]*
-                                    subghostcell_dims_primitive_var[ei][1];
-                            
-                            V_y_B[ei] = V[ei][idx_y_B];
-                            V_y_T[ei] = V[ei][idx_y_T];
-                        }
-                    }
-                    
-                    // Compute the average dilatation and magnitude of vorticity.
-                    const int idx_B = (i + d_num_conv_ghosts[0]) +
-                        (j - 1 + d_num_conv_ghosts[1])*conv_ghostcell_dims[0] +
-                        (k + d_num_conv_ghosts[2])*conv_ghostcell_dims[0]*conv_ghostcell_dims[1];
-                    
-                    const int idx_T = (i + d_num_conv_ghosts[0]) +
-                        (j + d_num_conv_ghosts[1])*conv_ghostcell_dims[0] +
-                        (k + d_num_conv_ghosts[2])*conv_ghostcell_dims[0]*conv_ghostcell_dims[1];
-                    
-                    const int idx_B_dilatation = (i + num_subghosts_dilatation[0]) +
-                        (j - 1 + num_subghosts_dilatation[1])*subghostcell_dims_dilatation[0] +
-                        (k + num_subghosts_dilatation[2])*subghostcell_dims_dilatation[0]*
-                            subghostcell_dims_dilatation[1];
-                    
-                    const int idx_T_dilatation = (i + num_subghosts_dilatation[0]) +
-                        (j + num_subghosts_dilatation[1])*subghostcell_dims_dilatation[0] +
-                        (k + num_subghosts_dilatation[2])*subghostcell_dims_dilatation[0]*
-                            subghostcell_dims_dilatation[1];
-                    
-                    const double theta_avg = 0.5*(theta[idx_B_dilatation] + theta[idx_T_dilatation]);
-                    const double Omega_avg = 0.5*(Omega[idx_B] + Omega[idx_T]);
-                    
-                    // Compute the Ducros-like shock sensor.
-                    const double s = -theta_avg/(fabs(theta_avg) + Omega_avg + EPSILON);
-                    
-                    // Initialize container that stores the references to the mid-point flux.
-                    for (int ei = 0; ei < d_num_eqn; ei++)
-                    {
-                        F_y_midpoint_ref.push_back(boost::ref(F_y_midpoint[ei][idx_face_y]));
-                    }
-                    
-                    // Initialize container that stores the references to the mid-point velocity.
-                    for (int di = 0; di < d_dim.getValue(); di++)
-                    {
-                        vel_y_midpoint_ref.push_back(
-                            boost::ref(velocity_intercell->getPointer(1, di)[idx_face_y]));
-                    }
-                    
-                    // Apply the Riemann solver.
-                    if (s > 0.65)
-                    {
-                        d_flow_model->
-                            computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
-                                F_y_midpoint_ref,
-                                vel_y_midpoint_ref,
-                                V_y_B_ref,
-                                V_y_T_ref,
-                                DIRECTION::Y_DIRECTION,
-                                RIEMANN_SOLVER::HLLC_HLL);
-                    }
-                    else
-                    {
-                        d_flow_model->
-                            computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
-                                F_y_midpoint_ref,
-                                vel_y_midpoint_ref,
-                                V_y_B_ref,
-                                V_y_T_ref,
-                                DIRECTION::Y_DIRECTION,
-                                RIEMANN_SOLVER::HLLC);
-                    }
-                    
-                    F_y_midpoint_ref.clear();
-                    vel_y_midpoint_ref.clear();
                 }
             }
         }
         
+        t_WENO_interpolation->stop();
+        
         /*
-         * Compute the mid-point fluxes in the z direction.
+         * Peform WENO interpolation in the z-direction.
          */
         
-        // Declare indices used in WENO interpolation.
-        hier::Index idx_z_B(d_dim);
-        hier::Index idx_z_F(d_dim);
+        t_WENO_interpolation->start();
         
-        // Declare containers to store the WENO interpolated values.
-        std::vector<double> V_z_B(d_num_eqn);
-        std::vector<double> V_z_F(d_num_eqn);
-        
-        // Declare and initialize containers to store the references to the
-        // WENO interpolate values.
-        std::vector<boost::reference_wrapper<double> > V_z_B_ref;
-        std::vector<boost::reference_wrapper<double> > V_z_F_ref;
-        V_z_B_ref.reserve(d_num_eqn);
-        V_z_F_ref.reserve(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            V_z_B_ref.push_back(boost::ref(V_z_B[ei]));
-            V_z_F_ref.push_back(boost::ref(V_z_F[ei]));
+            std::vector<double*> W_array;
+            W_array.resize(6);
+            
+            for (int m = 0; m < 6; m++)
+            {
+                W_array[m] = characteristic_variables[m][ei]->getPointer(2);
+            }
+            
+            double* W_B = characteristic_variables_minus[ei]->getPointer(2);
+            double* W_F = characteristic_variables_plus[ei]->getPointer(2);
+            
+            for (int k = -1; k < interior_dim_2 + 2; k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+                    #ifdef __INTEL_COMPILER
+                    #pragma ivdep
+                    #endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear index of the mid-point.
+                        const int idx_midpoint_z = (i + 1) +
+                            (j + 1)*(interior_dim_0 + 2) +
+                            (k + 1)*(interior_dim_0 + 2)*
+                                (interior_dim_1 + 2);
+                        
+                        #ifdef __INTEL_COMPILER
+                        #pragma forceinline
+                        #endif
+                        performWENOInterpolation_minus(
+                            W_B,
+                            W_array,
+                            idx_midpoint_z);
+                    }
+                }
+            }
+            
+            for (int k = -1; k < interior_dim_2 + 2; k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+                    #ifdef __INTEL_COMPILER
+                    #pragma ivdep
+                    #endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear index of the mid-point.
+                        const int idx_midpoint_z = (i + 1) +
+                            (j + 1)*(interior_dim_0 + 2) +
+                            (k + 1)*(interior_dim_0 + 2)*
+                                (interior_dim_1 + 2);
+                        
+                        #ifdef __INTEL_COMPILER
+                        #pragma forceinline
+                        #endif
+                        performWENOInterpolation_plus(
+                            W_F,
+                            W_array,
+                            idx_midpoint_z);
+                    }
+                }
+            }
         }
         
-        // Declare container to store the references to the mid-point flux.
-        std::vector<boost::reference_wrapper<double> > F_z_midpoint_ref;
-        F_z_midpoint_ref.reserve(d_num_eqn);
+        t_WENO_interpolation->stop();
         
-        // Declare container to store the references to the mid-point velocity.
-        std::vector<boost::reference_wrapper<double> > vel_z_midpoint_ref;
-        vel_z_midpoint_ref.reserve(d_dim.getValue());
+        /*
+         * Transform characteristic variables back to primitive variables.
+         */
         
-        for (int j = 0; j < interior_dims[1]; j++)
+        t_characteristic_decomposition->start();
+        
+        d_flow_model->computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
+            primitive_variables_minus,
+            characteristic_variables_minus,
+            projection_variables);
+        
+        d_flow_model->computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
+            primitive_variables_plus,
+            characteristic_variables_plus,
+            projection_variables);
+        
+        t_characteristic_decomposition->stop();
+        
+        /*
+         * Compute mid-point flux in the x-direction.
+         */
+        
+        t_Riemann_solver->start();
+        
         {
-            for (int i = 0; i < interior_dims[0]; i++)
+            std::vector<double*> V_L;
+            std::vector<double*> V_R;
+            V_L.resize(d_num_eqn);
+            V_R.resize(d_num_eqn);
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                for (int k = -1; k < interior_dims[2] + 2; k++)
+                V_L[ei] = primitive_variables_minus[ei]->getPointer(0);
+                V_R[ei] = primitive_variables_plus[ei]->getPointer(0);
+            }
+            
+            // Declare and initialize containers to store the references to the
+            // WENO interpolated values.
+            std::vector<boost::reference_wrapper<double> > V_L_ref;
+            std::vector<boost::reference_wrapper<double> > V_R_ref;
+            V_L_ref.reserve(d_num_eqn);
+            V_R_ref.reserve(d_num_eqn);
+            
+            // Declare container to store the references to the mid-point flux.
+            std::vector<boost::reference_wrapper<double> > F_midpoint_x_ref;
+            F_midpoint_x_ref.reserve(d_num_eqn);
+            
+            // Declare container to store the references to the mid-point velocity.
+            std::vector<boost::reference_wrapper<double> > vel_midpoint_x_ref;
+            vel_midpoint_x_ref.reserve(d_dim.getValue());
+            
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
                 {
-                    // Compute the linear index of the face.
-                    const int idx_face_z = (k + 1) +
-                        (i + 1)*(interior_dims[2] + 3) +
-                        (j + 1)*(interior_dims[2] + 3)*(interior_dims[0] + 2);
-                    
-                    // Compute the indices of back and front cells.
-                    idx_z_B[0] = i;
-                    idx_z_B[1] = j;
-                    idx_z_B[2] = k - 1;
-                    
-                    idx_z_F[0] = i;
-                    idx_z_F[1] = j;
-                    idx_z_F[2] = k;
-                    
-                    for (int m = 0; m < 6; m++)
+                    for (int i = -1; i < interior_dim_0 + 2; i++)
                     {
+                        // Compute the linear index of the side.
+                        const int idx_midpoint_x = (i + 1) +
+                            (j + 1)*(interior_dim_0 + 3) +
+                            (k + 1)*(interior_dim_0 + 3)*
+                                (interior_dim_1 + 2);
+                        
+                        // Compute the average dilatation and magnitude of vorticity.
+                        const int idx_L = (i - 1 + num_conv_ghosts_0) +
+                            (j + num_conv_ghosts_1)*conv_ghostcell_dim_0 +
+                            (k + num_conv_ghosts_2)*conv_ghostcell_dim_0*
+                                conv_ghostcell_dim_1;
+                            
+                        
+                        const int idx_R = (i + num_conv_ghosts_0) +
+                            (j + num_conv_ghosts_1)*conv_ghostcell_dim_0 +
+                            (k + num_conv_ghosts_2)*conv_ghostcell_dim_0*
+                                conv_ghostcell_dim_1;
+                        
+                        const int idx_dilatation_L = (i - 1 + num_subghosts_0_dilatation) +
+                            (j + num_subghosts_1_dilatation)*subghostcell_dim_0_dilatation +
+                            (k + num_subghosts_2_dilatation)*subghostcell_dim_0_dilatation*
+                                subghostcell_dim_1_dilatation;
+                        
+                        const int idx_dilatation_R = (i + num_subghosts_0_dilatation) +
+                            (j + num_subghosts_1_dilatation)*subghostcell_dim_0_dilatation +
+                            (k + num_subghosts_2_dilatation)*subghostcell_dim_0_dilatation*
+                                subghostcell_dim_1_dilatation;
+                        
+                        double theta_avg = 0.5*(theta[idx_dilatation_L] + theta[idx_dilatation_R]);
+                        double Omega_avg = 0.5*(Omega[idx_L] + Omega[idx_R]);
+                        
+                        // Compute the Ducros-like shock sensor.
+                        double s = -theta_avg/(fabs(theta_avg) + Omega_avg + EPSILON);
+                        
+                        // Initialize container that stores the references to the mid-point flux.
                         for (int ei = 0; ei < d_num_eqn; ei++)
                         {
-                            const int idx_cell = (i + num_subghosts_primitive_var[ei][0]) +
-                                (j + num_subghosts_primitive_var[ei][1])*subghostcell_dims_primitive_var[ei][0] +
-                                (k - 3 + m + num_subghosts_primitive_var[ei][2])*subghostcell_dims_primitive_var[ei][0]*
-                                    subghostcell_dims_primitive_var[ei][1];
-                            
-                            V_array[m][ei] = &V[ei][idx_cell];
+                            F_midpoint_x_ref.push_back(boost::ref(F_midpoint_x[ei][idx_midpoint_x]));
                         }
-                    }
-                    
-                    performWENOInterpolation(
-                        V_z_B,
-                        V_z_F,
-                        V_array,
-                        idx_z_B,
-                        idx_z_F,
-                        DIRECTION::Z_DIRECTION);
-                    
-                    bool is_constant_interpolation = false;
-                    
-                    // If the WENO interpolated values are out of bound, use constant interpolation.
-                    if (!d_flow_model->havePrimitiveVariablesBounded(V_z_B))
-                    {
-                        is_constant_interpolation = true;
-                    }
-                    
-                    if (!d_flow_model->havePrimitiveVariablesBounded(V_z_F))
-                    {
-                        is_constant_interpolation = true;
-                    }
-                    
-                    if (is_constant_interpolation)
-                    {
+                        
+                        // Initialize container that stores the references to the mid-point velocity.
+                        for (int di = 0; di < d_dim.getValue(); di++)
+                        {
+                            vel_midpoint_x_ref.push_back(
+                                boost::ref(velocity_intercell->getPointer(0, di)[idx_midpoint_x]));
+                        }
+                        
                         for (int ei = 0; ei < d_num_eqn; ei++)
                         {
-                            // Compute the indices of back and front cells.
-                            const int idx_z_B = (i + num_subghosts_primitive_var[ei][0]) +
-                                (j + num_subghosts_primitive_var[ei][1])*subghostcell_dims_primitive_var[ei][0] +
-                                (k - 1 + num_subghosts_primitive_var[ei][2])*subghostcell_dims_primitive_var[ei][0]*
-                                    subghostcell_dims_primitive_var[ei][1];
-                            
-                            const int idx_z_F = (i + num_subghosts_primitive_var[ei][0]) +
-                                (j + num_subghosts_primitive_var[ei][1])*subghostcell_dims_primitive_var[ei][0] +
-                                (k + num_subghosts_primitive_var[ei][2])*subghostcell_dims_primitive_var[ei][0]*
-                                    subghostcell_dims_primitive_var[ei][1];
-                            
-                            V_z_B[ei] = V[ei][idx_z_B];
-                            V_z_F[ei] = V[ei][idx_z_F];
+                            V_L_ref.push_back(boost::ref(V_L[ei][idx_midpoint_x]));
+                            V_R_ref.push_back(boost::ref(V_R[ei][idx_midpoint_x]));
                         }
+                        
+                        // Apply the Riemann solver.
+                        if (s > 0.65)
+                        {
+                            d_flow_model->
+                                computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
+                                    F_midpoint_x_ref,
+                                    vel_midpoint_x_ref,
+                                    V_L_ref,
+                                    V_R_ref,
+                                    DIRECTION::X_DIRECTION,
+                                    RIEMANN_SOLVER::HLLC_HLL);
+                        }
+                        else
+                        {
+                            d_flow_model->
+                                computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
+                                    F_midpoint_x_ref,
+                                    vel_midpoint_x_ref,
+                                    V_L_ref,
+                                    V_R_ref,
+                                    DIRECTION::X_DIRECTION,
+                                    RIEMANN_SOLVER::HLLC);
+                        }
+                        
+                        F_midpoint_x_ref.clear();
+                        vel_midpoint_x_ref.clear();
+                        V_L_ref.clear();
+                        V_R_ref.clear();
                     }
-                    
-                    // Compute the average dilatation and magnitude of vorticity.
-                    const int idx_B = (i + d_num_conv_ghosts[0]) +
-                        (j + d_num_conv_ghosts[1])*conv_ghostcell_dims[0] +
-                        (k - 1 + d_num_conv_ghosts[2])*conv_ghostcell_dims[0]*conv_ghostcell_dims[1];
-                    
-                    const int idx_F = (i + d_num_conv_ghosts[0]) +
-                        (j + d_num_conv_ghosts[1])*conv_ghostcell_dims[0] +
-                        (k + d_num_conv_ghosts[2])*conv_ghostcell_dims[0]*conv_ghostcell_dims[1];
-                    
-                    const int idx_B_dilatation = (i + num_subghosts_dilatation[0]) +
-                        (j + num_subghosts_dilatation[1])*subghostcell_dims_dilatation[0] +
-                        (k - 1 + num_subghosts_dilatation[2])*subghostcell_dims_dilatation[0]*
-                            subghostcell_dims_dilatation[1];
-                    
-                    const int idx_F_dilatation = (i + num_subghosts_dilatation[0]) +
-                        (j + num_subghosts_dilatation[1])*subghostcell_dims_dilatation[0] +
-                        (k + num_subghosts_dilatation[2])*subghostcell_dims_dilatation[0]*
-                            subghostcell_dims_dilatation[1];
-                    
-                    const double theta_avg = 0.5*(theta[idx_B_dilatation] + theta[idx_F_dilatation]);
-                    const double Omega_avg = 0.5*(Omega[idx_B] + Omega[idx_F]);
-                    
-                    // Compute the Ducros-like shock sensor.
-                    const double s = -theta_avg/(fabs(theta_avg) + Omega_avg + EPSILON);
-                    
-                    // Initialize container that stores the references to the mid-point flux.
-                    for (int ei = 0; ei < d_num_eqn; ei++)
-                    {
-                        F_z_midpoint_ref.push_back(boost::ref(F_z_midpoint[ei][idx_face_z]));
-                    }
-                    
-                    // Initialize container that stores the references to the mid-point velocity.
-                    for (int di = 0; di < d_dim.getValue(); di++)
-                    {
-                        vel_z_midpoint_ref.push_back(
-                            boost::ref(velocity_intercell->getPointer(2, di)[idx_face_z]));
-                    }
-                    
-                    // Apply the Riemann solver.
-                    if (s > 0.65)
-                    {
-                        d_flow_model->
-                            computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
-                                F_z_midpoint_ref,
-                                vel_z_midpoint_ref,
-                                V_z_B_ref,
-                                V_z_F_ref,
-                                DIRECTION::Z_DIRECTION,
-                                RIEMANN_SOLVER::HLLC_HLL);
-                    }
-                    else
-                    {
-                        d_flow_model->
-                            computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
-                                F_z_midpoint_ref,
-                                vel_z_midpoint_ref,
-                                V_z_B_ref,
-                                V_z_F_ref,
-                                DIRECTION::Z_DIRECTION,
-                                RIEMANN_SOLVER::HLLC);
-                    }
-                    
-                    F_z_midpoint_ref.clear();
-                    vel_z_midpoint_ref.clear();
                 }
             }
         }
+        
+        t_Riemann_solver->stop();
         
         /*
-         * Compute the fluxes in the x direction.
+         * Compute mid-point flux in the y-direction.
          */
-        for (int k = 0; k < interior_dims[2]; k++)
+        
+        t_Riemann_solver->start();
+        
         {
-            for (int j = 0; j < interior_dims[1]; j++)
+            std::vector<double*> V_B;
+            std::vector<double*> V_T;
+            V_B.resize(d_num_eqn);
+            V_T.resize(d_num_eqn);
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                for (int i = 0; i < interior_dims[0] + 1; i++)
+                V_B[ei] = primitive_variables_minus[ei]->getPointer(1);
+                V_T[ei] = primitive_variables_plus[ei]->getPointer(1);
+            }
+            
+            // Declare and initialize containers to store the references to the
+            // WENO interpolated values.
+            std::vector<boost::reference_wrapper<double> > V_B_ref;
+            std::vector<boost::reference_wrapper<double> > V_T_ref;
+            V_B_ref.reserve(d_num_eqn);
+            V_T_ref.reserve(d_num_eqn);
+            
+            // Declare container to store the references to the mid-point flux.
+            std::vector<boost::reference_wrapper<double> > F_midpoint_y_ref;
+            F_midpoint_y_ref.reserve(d_num_eqn);
+            
+            // Declare container to store the references to the mid-point velocity.
+            std::vector<boost::reference_wrapper<double> > vel_midpoint_y_ref;
+            vel_midpoint_y_ref.reserve(d_dim.getValue());
+            
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = -1; j < interior_dim_1 + 2; j++)
                 {
-                    // Compute the indices.
-                    const int idx_face_x = i +
-                        j*(interior_dims[0] + 1) +
-                        k*(interior_dims[0] + 1)*interior_dims[1];
-                    
-                    const int idx_midpoint_x = (i + 1) +
-                        (j + 1)*(interior_dims[0] + 3) +
-                        (k + 1)*(interior_dims[0] + 3)*(interior_dims[1] + 2);
-                    
-                    const int idx_node_L = (i - 1 + num_subghosts_convective_flux_x[0]) +
-                        (j + num_subghosts_convective_flux_x[1])*subghostcell_dims_convective_flux_x[0] +
-                        (k + num_subghosts_convective_flux_x[2])*subghostcell_dims_convective_flux_x[0]*
-                            subghostcell_dims_convective_flux_x[1];
-                    
-                    const int idx_node_R = (i + num_subghosts_convective_flux_x[0]) +
-                        (j + num_subghosts_convective_flux_x[1])*subghostcell_dims_convective_flux_x[0] +
-                        (k + num_subghosts_convective_flux_x[2])*subghostcell_dims_convective_flux_x[0]*
-                            subghostcell_dims_convective_flux_x[1];
-                    
-                    // Compute the fluxes.
-                    for (int ei = 0; ei < d_num_eqn; ei++)
+                    for (int i = 0; i < interior_dim_0; i++)
                     {
-                        convective_flux->getPointer(0, ei)[idx_face_x] = dt*(1.0/30*(F_x_midpoint[ei][idx_midpoint_x + 1] +
-                            F_x_midpoint[ei][idx_midpoint_x - 1]) -
-                            3.0/10*(F_x_node[ei][idx_node_R] +
-                            F_x_node[ei][idx_node_L]) +
-                            23.0/15*F_x_midpoint[ei][idx_midpoint_x]);
+                        // Compute the linear index of the side.
+                        const int idx_midpoint_y = (i + 1) +
+                            (j + 1)*(interior_dim_0 + 2) +
+                            (k + 1)*(interior_dim_0 + 2)*
+                                (interior_dim_1 + 3);
+                        
+                        // Compute the average dilatation and magnitude of vorticity.
+                        const int idx_B = (i + num_conv_ghosts_0) +
+                            (j - 1 + num_conv_ghosts_1)*conv_ghostcell_dim_0 +
+                            (k + num_conv_ghosts_2)*conv_ghostcell_dim_0*
+                                conv_ghostcell_dim_1;
+                        
+                        const int idx_T = (i + num_conv_ghosts_0) +
+                            (j + num_conv_ghosts_1)*conv_ghostcell_dim_0 +
+                            (k + num_conv_ghosts_2)*conv_ghostcell_dim_0*
+                                conv_ghostcell_dim_1;
+                        
+                        const int idx_dilatation_B = (i + num_subghosts_0_dilatation) +
+                            (j - 1 + num_subghosts_1_dilatation)*subghostcell_dim_0_dilatation +
+                            (k + num_subghosts_2_dilatation)*subghostcell_dim_0_dilatation*
+                                subghostcell_dim_1_dilatation;
+                        
+                        const int idx_dilatation_T = (i + num_subghosts_0_dilatation) +
+                            (j + num_subghosts_1_dilatation)*subghostcell_dim_0_dilatation +
+                            (k + num_subghosts_2_dilatation)*subghostcell_dim_0_dilatation*
+                                subghostcell_dim_1_dilatation;
+                        
+                        double theta_avg = 0.5*(theta[idx_dilatation_B] + theta[idx_dilatation_T]);
+                        double Omega_avg = 0.5*(Omega[idx_B] + Omega[idx_T]);
+                        
+                        // Compute the Ducros-like shock sensor.
+                        double s = -theta_avg/(fabs(theta_avg) + Omega_avg + EPSILON);
+                        
+                        // Initialize container that stores the references to the mid-point flux.
+                        for (int ei = 0; ei < d_num_eqn; ei++)
+                        {
+                            F_midpoint_y_ref.push_back(boost::ref(F_midpoint_y[ei][idx_midpoint_y]));
+                        }
+                        
+                        // Initialize container that stores the references to the mid-point velocity.
+                        for (int di = 0; di < d_dim.getValue(); di++)
+                        {
+                            vel_midpoint_y_ref.push_back(
+                                boost::ref(velocity_intercell->getPointer(1, di)[idx_midpoint_y]));
+                        }
+                        
+                        for (int ei = 0; ei < d_num_eqn; ei++)
+                        {
+                            V_B_ref.push_back(boost::ref(V_B[ei][idx_midpoint_y]));
+                            V_T_ref.push_back(boost::ref(V_T[ei][idx_midpoint_y]));
+                        }
+                        
+                        // Apply the Riemann solver.
+                        if (s > 0.65)
+                        {
+                            d_flow_model->
+                                computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
+                                    F_midpoint_y_ref,
+                                    vel_midpoint_y_ref,
+                                    V_B_ref,
+                                    V_T_ref,
+                                    DIRECTION::Y_DIRECTION,
+                                    RIEMANN_SOLVER::HLLC_HLL);
+                        }
+                        else
+                        {
+                            d_flow_model->
+                                computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
+                                    F_midpoint_y_ref,
+                                    vel_midpoint_y_ref,
+                                    V_B_ref,
+                                    V_T_ref,
+                                    DIRECTION::Y_DIRECTION,
+                                    RIEMANN_SOLVER::HLLC);
+                        }
+                        
+                        F_midpoint_y_ref.clear();
+                        vel_midpoint_y_ref.clear();
+                        V_B_ref.clear();
+                        V_T_ref.clear();
                     }
                 }
             }
         }
+        
+        t_Riemann_solver->stop();
         
         /*
-         * Compute the fluxes in the y direction.
+         * Compute mid-point flux in the z-direction.
          */
         
-        for (int i = 0; i < interior_dims[0]; i++)
+        t_Riemann_solver->start();
+        
         {
-            for (int k = 0; k < interior_dims[2]; k++)
+            std::vector<double*> V_B;
+            std::vector<double*> V_F;
+            V_B.resize(d_num_eqn);
+            V_F.resize(d_num_eqn);
+            
+            for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                for (int j = 0; j < interior_dims[1] + 1; j++)
+                V_B[ei] = primitive_variables_minus[ei]->getPointer(2);
+                V_F[ei] = primitive_variables_plus[ei]->getPointer(2);
+            }
+            
+            // Declare and initialize containers to store the references to the
+            // WENO interpolated values.
+            std::vector<boost::reference_wrapper<double> > V_B_ref;
+            std::vector<boost::reference_wrapper<double> > V_F_ref;
+            V_B_ref.reserve(d_num_eqn);
+            V_F_ref.reserve(d_num_eqn);
+            
+            // Declare container to store the references to the mid-point flux.
+            std::vector<boost::reference_wrapper<double> > F_midpoint_z_ref;
+            F_midpoint_z_ref.reserve(d_num_eqn);
+            
+            // Declare container to store the references to the mid-point velocity.
+            std::vector<boost::reference_wrapper<double> > vel_midpoint_z_ref;
+            vel_midpoint_z_ref.reserve(d_dim.getValue());
+            
+            for (int k = -1; k < interior_dim_2 + 2; k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
                 {
-                    // Compute the indices.
-                    const int idx_face_y = j +
-                        k*(interior_dims[1] + 1) +
-                        i*(interior_dims[1] + 1)*interior_dims[2];
-                    
-                    const int idx_midpoint_y = (j + 1) +
-                        (k + 1)*(interior_dims[1] + 3) +
-                        (i + 1)*(interior_dims[1] + 3)*(interior_dims[2] + 2);
-                    
-                    const int idx_node_B = (i + num_subghosts_convective_flux_y[0]) +
-                        (j - 1 + num_subghosts_convective_flux_y[1])*subghostcell_dims_convective_flux_y[0] +
-                        (k + num_subghosts_convective_flux_y[2])*subghostcell_dims_convective_flux_y[0]*
-                            subghostcell_dims_convective_flux_y[1];
-                    
-                    const int idx_node_T = (i + num_subghosts_convective_flux_y[0]) +
-                        (j + num_subghosts_convective_flux_y[1])*subghostcell_dims_convective_flux_y[0] +
-                        (k + num_subghosts_convective_flux_y[2])*subghostcell_dims_convective_flux_y[0]*
-                            subghostcell_dims_convective_flux_y[1];
-                    
-                    // Compute the fluxes.
-                    for (int ei = 0; ei < d_num_eqn; ei++)
+                    for (int i = 0; i < interior_dim_0; i++)
                     {
-                        convective_flux->getPointer(1, ei)[idx_face_y] = 
-                            dt*(1.0/30*(F_y_midpoint[ei][idx_midpoint_y + 1] +
-                            F_y_midpoint[ei][idx_midpoint_y - 1]) -
-                            3.0/10*(F_y_node[ei][idx_node_T] +
-                            F_y_node[ei][idx_node_B]) +
-                            23.0/15*F_y_midpoint[ei][idx_midpoint_y]);
+                        // Compute the linear index of the side.
+                        const int idx_midpoint_z = (i + 1) +
+                            (j + 1)*(interior_dim_0 + 2) +
+                            (k + 1)*(interior_dim_0 + 2)*
+                                (interior_dim_1 + 2);
+                        
+                        // Compute the average dilatation and magnitude of vorticity.
+                        const int idx_B = (i + num_conv_ghosts_0) +
+                            (j + num_conv_ghosts_1)*conv_ghostcell_dim_0 +
+                            (k - 1 + num_conv_ghosts_2)*conv_ghostcell_dim_0*
+                                conv_ghostcell_dim_1;
+                        
+                        const int idx_F = (i + num_conv_ghosts_0) +
+                            (j + num_conv_ghosts_1)*conv_ghostcell_dim_0 +
+                            (k + num_conv_ghosts_2)*conv_ghostcell_dim_0*
+                                conv_ghostcell_dim_1;
+                        
+                        const int idx_dilatation_B = (i + num_subghosts_0_dilatation) +
+                            (j + num_subghosts_1_dilatation)*subghostcell_dim_0_dilatation +
+                            (k - 1 + num_subghosts_2_dilatation)*subghostcell_dim_0_dilatation*
+                                subghostcell_dim_1_dilatation;
+                        
+                        const int idx_dilatation_F = (i + num_subghosts_0_dilatation) +
+                            (j + num_subghosts_1_dilatation)*subghostcell_dim_0_dilatation +
+                            (k + num_subghosts_2_dilatation)*subghostcell_dim_0_dilatation*
+                                subghostcell_dim_1_dilatation;
+                        
+                        double theta_avg = 0.5*(theta[idx_dilatation_B] + theta[idx_dilatation_F]);
+                        double Omega_avg = 0.5*(Omega[idx_B] + Omega[idx_F]);
+                        
+                        // Compute the Ducros-like shock sensor.
+                        double s = -theta_avg/(fabs(theta_avg) + Omega_avg + EPSILON);
+                        
+                        // Initialize container that stores the references to the mid-point flux.
+                        for (int ei = 0; ei < d_num_eqn; ei++)
+                        {
+                            F_midpoint_z_ref.push_back(boost::ref(F_midpoint_z[ei][idx_midpoint_z]));
+                        }
+                        
+                        // Initialize container that stores the references to the mid-point velocity.
+                        for (int di = 0; di < d_dim.getValue(); di++)
+                        {
+                            vel_midpoint_z_ref.push_back(
+                                boost::ref(velocity_intercell->getPointer(2, di)[idx_midpoint_z]));
+                        }
+                        
+                        for (int ei = 0; ei < d_num_eqn; ei++)
+                        {
+                            V_B_ref.push_back(boost::ref(V_B[ei][idx_midpoint_z]));
+                            V_F_ref.push_back(boost::ref(V_F[ei][idx_midpoint_z]));
+                        }
+                        
+                        // Apply the Riemann solver.
+                        if (s > 0.65)
+                        {
+                            d_flow_model->
+                                computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
+                                    F_midpoint_z_ref,
+                                    vel_midpoint_z_ref,
+                                    V_B_ref,
+                                    V_F_ref,
+                                    DIRECTION::Z_DIRECTION,
+                                    RIEMANN_SOLVER::HLLC_HLL);
+                        }
+                        else
+                        {
+                            d_flow_model->
+                                computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
+                                    F_midpoint_z_ref,
+                                    vel_midpoint_z_ref,
+                                    V_B_ref,
+                                    V_F_ref,
+                                    DIRECTION::Z_DIRECTION,
+                                    RIEMANN_SOLVER::HLLC);
+                        }
+                        
+                        F_midpoint_z_ref.clear();
+                        vel_midpoint_z_ref.clear();
+                        V_B_ref.clear();
+                        V_F_ref.clear();
                     }
                 }
             }
         }
+        
+        t_Riemann_solver->stop();
         
         /*
-         * Compute the fluxes in the z direction.
+         * Reconstruct the flux in the x-direction.
          */
         
-        for (int j = 0; j < interior_dims[1]; j++)
+        t_reconstruct_flux->start();
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            for (int i = 0; i < interior_dims[0]; i++)
+            double* F_face_x = convective_flux->getPointer(0, ei);
+            
+            for (int k = 0; k < interior_dim_2; k++)
             {
-                for (int k = 0; k < interior_dims[2] + 1; k++)
+                for (int j = 0; j < interior_dim_1; j++)
                 {
-                    // Compute the indices.
-                    const int idx_face_z = k +
-                        i*(interior_dims[2] + 1) +
-                        j*(interior_dims[2] + 1)*interior_dims[0];
-                    
-                    const int idx_midpoint_z = (k + 1) +
-                        (i + 1)*(interior_dims[2] + 3) +
-                        (j + 1)*(interior_dims[2] + 3)*(interior_dims[0] + 2);
-                    
-                    const int idx_node_B = (i + num_subghosts_convective_flux_z[0]) +
-                        (j + num_subghosts_convective_flux_z[1])*subghostcell_dims_convective_flux_z[0] +
-                        (k - 1 + num_subghosts_convective_flux_z[2])*subghostcell_dims_convective_flux_z[0]*
-                            subghostcell_dims_convective_flux_z[1];
-                    
-                    const int idx_node_F = (i + num_subghosts_convective_flux_z[0]) +
-                        (j + num_subghosts_convective_flux_z[1])*subghostcell_dims_convective_flux_z[0] +
-                        (k + num_subghosts_convective_flux_z[2])*subghostcell_dims_convective_flux_z[0]*
-                            subghostcell_dims_convective_flux_z[1];
-                    
-                    // Compute the fluxes.
-                    for (int ei = 0; ei < d_num_eqn; ei++)
+                    #ifdef __INTEL_COMPILER
+                    #pragma ivdep
+                    #endif
+                    for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
-                        convective_flux->getPointer(2, ei)[idx_face_z] = 
-                            dt*(1.0/30*(F_z_midpoint[ei][idx_midpoint_z + 1] +
-                            F_z_midpoint[ei][idx_midpoint_z - 1]) -
-                            3.0/10*(F_z_node[ei][idx_node_F] +
-                            F_z_node[ei][idx_node_B]) +
-                            23.0/15*F_z_midpoint[ei][idx_midpoint_z]);
+                        // Compute the linear indices.
+                        const int idx_face_x = i +
+                            j*(interior_dim_0 + 1) +
+                            k*(interior_dim_0 + 1)*
+                                interior_dim_1;
+                        
+                        const int idx_midpoint_x = (i + 1) +
+                            (j + 1)*(interior_dim_0 + 3) +
+                            (k + 1)*(interior_dim_0 + 3)*
+                                (interior_dim_1 + 2);
+                        
+                        const int idx_midpoint_x_L = i +
+                            (j + 1)*(interior_dim_0 + 3) +
+                            (k + 1)*(interior_dim_0 + 3)*
+                                (interior_dim_1 + 2);
+                        
+                        const int idx_midpoint_x_R = (i + 2) +
+                            (j + 1)*(interior_dim_0 + 3) +
+                            (k + 1)*(interior_dim_0 + 3)*
+                                (interior_dim_1 + 2);
+                        
+                        const int idx_node_L = (i - 1 + num_subghosts_0_convective_flux_x) +
+                            (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x +
+                            (k + num_subghosts_2_convective_flux_x)*subghostcell_dim_0_convective_flux_x*
+                                subghostcell_dim_1_convective_flux_x;
+                        
+                        const int idx_node_R = (i + num_subghosts_0_convective_flux_x) +
+                            (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x +
+                            (k + num_subghosts_2_convective_flux_x)*subghostcell_dim_0_convective_flux_x*
+                                subghostcell_dim_1_convective_flux_x;
+                        
+                        F_face_x[idx_face_x] = dt*(1.0/30.0*(F_midpoint_x[ei][idx_midpoint_x_R] +
+                             F_midpoint_x[ei][idx_midpoint_x_L]) -
+                            3.0/10.0*(F_node_x[ei][idx_node_R] +
+                             F_node_x[ei][idx_node_L]) +
+                            23.0/15.0*F_midpoint_x[ei][idx_midpoint_x]);
                     }
                 }
             }
         }
+        
+        t_reconstruct_flux->stop();
+        
+        /*
+         * Reconstruct the flux in the y-direction.
+         */
+        
+        t_reconstruct_flux->start();
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            double* F_face_y = convective_flux->getPointer(1, ei);
+            
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = 0; j < interior_dim_1 + 1; j++)
+                {
+                    #ifdef __INTEL_COMPILER
+                    #pragma ivdep
+                    #endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face_y = j +
+                            k*(interior_dim_1 + 1) +
+                            i*(interior_dim_1 + 1)*
+                                interior_dim_2;
+                        
+                        const int idx_midpoint_y = (i + 1) +
+                            (j + 1)*(interior_dim_0 + 2) +
+                            (k + 1)*(interior_dim_0 + 2)*
+                                (interior_dim_1 + 3);
+                        
+                        const int idx_midpoint_y_B = (i + 1) +
+                            j*(interior_dim_0 + 2) +
+                            (k + 1)*(interior_dim_0 + 2)*
+                                (interior_dim_1 + 3);
+                        
+                        const int idx_midpoint_y_T = (i + 1) +
+                            (j + 2)*(interior_dim_0 + 2) +
+                            (k + 1)*(interior_dim_0 + 2)*
+                                (interior_dim_1 + 3);
+                        
+                        const int idx_node_B = (i + num_subghosts_0_convective_flux_y) +
+                            (j - 1 + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y +
+                            (k + num_subghosts_2_convective_flux_y)*subghostcell_dim_0_convective_flux_y*
+                                subghostcell_dim_1_convective_flux_y;
+                        
+                        const int idx_node_T = (i + num_subghosts_0_convective_flux_y) +
+                            (j + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y +
+                            (k + num_subghosts_2_convective_flux_y)*subghostcell_dim_0_convective_flux_y*
+                                subghostcell_dim_1_convective_flux_y;
+                        
+                        F_face_y[idx_face_y] = dt*(1.0/30.0*(F_midpoint_y[ei][idx_midpoint_y_T] +
+                             F_midpoint_y[ei][idx_midpoint_y_B]) -
+                            3.0/10.0*(F_node_y[ei][idx_node_T] +
+                             F_node_y[ei][idx_node_B]) +
+                            23.0/15.0*F_midpoint_y[ei][idx_midpoint_y]);
+                    }
+                }
+            }
+        }
+        
+        t_reconstruct_flux->stop();
+        
+        /*
+         * Reconstruct the flux in the z-direction.
+         */
+        
+        t_reconstruct_flux->start();
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            double* F_face_z = convective_flux->getPointer(2, ei);
+            
+            for (int k = 0; k < interior_dim_2 + 1; k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+                    #ifdef __INTEL_COMPILER
+                    #pragma ivdep
+                    #endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_face_z = k +
+                            i*(interior_dims[2] + 1) +
+                            j*(interior_dims[2] + 1)*interior_dims[0];
+                        
+                        const int idx_midpoint_z = (i + 1) +
+                            (j + 1)*(interior_dim_0 + 2) +
+                            (k + 1)*(interior_dim_0 + 2)*
+                                (interior_dim_1 + 2);
+                        
+                        const int idx_midpoint_z_B = (i + 1) +
+                            (j + 1)*(interior_dim_0 + 2) +
+                            k*(interior_dim_0 + 2)*
+                                (interior_dim_1 + 2);
+                        
+                        const int idx_midpoint_z_F = (i + 1) +
+                            (j + 1)*(interior_dim_0 + 2) +
+                            (k + 2)*(interior_dim_0 + 2)*
+                                (interior_dim_1 + 2);
+                        
+                        const int idx_node_B = (i + num_subghosts_0_convective_flux_z) +
+                            (j + num_subghosts_1_convective_flux_z)*subghostcell_dim_0_convective_flux_z +
+                            (k - 1 + num_subghosts_2_convective_flux_z)*subghostcell_dim_0_convective_flux_z*
+                                subghostcell_dim_1_convective_flux_z;
+                        
+                        const int idx_node_F = (i + num_subghosts_0_convective_flux_z) +
+                            (j + num_subghosts_1_convective_flux_z)*subghostcell_dim_0_convective_flux_z +
+                            (k + num_subghosts_2_convective_flux_z)*subghostcell_dim_0_convective_flux_z*
+                                subghostcell_dim_1_convective_flux_z;
+                        
+                        F_face_z[idx_face_z] = dt*(1.0/30.0*(F_midpoint_z[ei][idx_midpoint_z_F] +
+                             F_midpoint_z[ei][idx_midpoint_z_B]) -
+                            3.0/10.0*(F_node_z[ei][idx_node_F] +
+                             F_node_z[ei][idx_node_B]) +
+                            23.0/15.0*F_midpoint_z[ei][idx_midpoint_z]);
+                    }
+                }
+            }
+        }
+        
+        t_reconstruct_flux->stop();
         
         /*
          * Compute the source.
          */
         
+        t_compute_source->start();
+        
         const std::vector<EQN_FORM::TYPE> eqn_form = d_flow_model->getEquationsForm();
+        
+        double* u_midpoint_x = velocity_intercell->getPointer(0, 0);
+        double* v_midpoint_y = velocity_intercell->getPointer(1, 1);
+        double* w_midpoint_z = velocity_intercell->getPointer(2, 2);
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
@@ -2172,127 +2563,139 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
             {
                 double* S = source->getPointer(ei);
                 
-                for (int k = 0; k < interior_dims[2]; k++)
+                const int num_subghosts_0_conservative_var = num_subghosts_conservative_var[ei][0];
+                const int num_subghosts_1_conservative_var = num_subghosts_conservative_var[ei][1];
+                const int num_subghosts_2_conservative_var = num_subghosts_conservative_var[ei][2];
+                const int subghostcell_dim_0_conservative_var = subghostcell_dims_conservative_var[ei][0];
+                const int subghostcell_dim_1_conservative_var = subghostcell_dims_conservative_var[ei][1];
+                
+                for (int k = 0; k < interior_dim_2; k++)
                 {
-                    for (int j = 0; j < interior_dims[1]; j++)
+                    for (int j = 0; j < interior_dim_1; j++)
                     {
-                        for (int i = 0; i < interior_dims[0]; i++)
+                        #ifdef __INTEL_COMPILER
+                        #pragma ivdep
+                        #endif
+                        for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices. 
-                            const int idx_cell_wghost = (i + num_subghosts_conservative_var[ei][0]) +
-                                (j + num_subghosts_conservative_var[ei][1])*subghostcell_dims_conservative_var[ei][0] +
-                                (k + num_subghosts_conservative_var[ei][2])*subghostcell_dims_conservative_var[ei][0]*
-                                    subghostcell_dims_conservative_var[ei][1];
+                            const int idx_cell_wghost = (i + num_subghosts_0_conservative_var) +
+                                (j + num_subghosts_1_conservative_var)*subghostcell_dim_0_conservative_var +
+                                (k + num_subghosts_2_conservative_var)*subghostcell_dim_0_conservative_var*
+                                    subghostcell_dim_1_conservative_var;
                             
-                            const int idx_cell_wghost_x_L = (i - 1 + num_subghosts_velocity[0]) +
-                                (j + num_subghosts_velocity[1])*subghostcell_dims_velocity[0] +
-                                (k + num_subghosts_velocity[2])*subghostcell_dims_velocity[0]*
-                                    subghostcell_dims_velocity[1];
+                            const int idx_cell_wghost_x_L = (i - 1 + num_subghosts_0_velocity) +
+                                (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                    subghostcell_dim_1_velocity;
                             
-                            const int idx_cell_wghost_x_R = (i + 1 + num_subghosts_velocity[0]) +
-                                (j + num_subghosts_velocity[1])*subghostcell_dims_velocity[0] +
-                                (k + num_subghosts_velocity[2])*subghostcell_dims_velocity[0]*
-                                    subghostcell_dims_velocity[1];
+                            const int idx_cell_wghost_x_R = (i + 1 + num_subghosts_0_velocity) +
+                                (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                    subghostcell_dim_1_velocity;
                             
-                            const int idx_cell_wghost_y_B = (i + num_subghosts_velocity[0]) +
-                                (j - 1 + num_subghosts_velocity[1])*subghostcell_dims_velocity[0] +
-                                (k + num_subghosts_velocity[2])*subghostcell_dims_velocity[0]*
-                                    subghostcell_dims_velocity[1];
+                            const int idx_cell_wghost_y_B = (i + num_subghosts_0_velocity) +
+                                (j - 1 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                    subghostcell_dim_1_velocity;
                             
-                            const int idx_cell_wghost_y_T = (i + num_subghosts_velocity[0]) +
-                                (j + 1 + num_subghosts_velocity[1])*subghostcell_dims_velocity[0] +
-                                (k + num_subghosts_velocity[2])*subghostcell_dims_velocity[0]*
-                                    subghostcell_dims_velocity[1];
+                            const int idx_cell_wghost_y_T = (i + num_subghosts_0_velocity) +
+                                (j + 1 + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                    subghostcell_dim_1_velocity;
                             
-                            const int idx_cell_wghost_z_B = (i + num_subghosts_velocity[0]) +
-                                (j + num_subghosts_velocity[1])*subghostcell_dims_velocity[0] +
-                                (k - 1 + num_subghosts_velocity[2])*subghostcell_dims_velocity[0]*
-                                    subghostcell_dims_velocity[1];
+                            const int idx_cell_wghost_z_B = (i + num_subghosts_0_velocity) +
+                                (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                (k - 1 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                    subghostcell_dim_1_velocity;
                             
-                            const int idx_cell_wghost_z_F = (i + num_subghosts_velocity[0]) +
-                                (j + num_subghosts_velocity[1])*subghostcell_dims_velocity[0] +
-                                (k + 1 + num_subghosts_velocity[2])*subghostcell_dims_velocity[0]*
-                                    subghostcell_dims_velocity[1];
+                            const int idx_cell_wghost_z_F = (i + num_subghosts_0_velocity) +
+                                (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                (k + 1 + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                    subghostcell_dim_1_velocity;
                             
                             const int idx_cell_nghost = i +
-                                j*interior_dims[0] +
-                                k*interior_dims[0]*interior_dims[1];
+                                j*interior_dim_0 +
+                                k*interior_dim_0*
+                                    interior_dim_1;
                             
-                            const int idx_face_x_LL = i +
-                                (j + 1)*(interior_dims[0] + 3) +
-                                (k + 1)*(interior_dims[0] + 3)*(interior_dims[1] + 2);
+                            const int idx_midpoint_x_LL = i +
+                                (j + 1)*(interior_dim_0 + 3) +
+                                (k + 1)*(interior_dim_0 + 3)*
+                                    (interior_dim_1 + 2);
                             
-                            const int idx_face_x_L = (i + 1) +
-                                (j + 1)*(interior_dims[0] + 3) +
-                                (k + 1)*(interior_dims[0] + 3)*(interior_dims[1] + 2);
+                            const int idx_midpoint_x_L = (i + 1) +
+                                (j + 1)*(interior_dim_0 + 3) +
+                                (k + 1)*(interior_dim_0 + 3)*
+                                    (interior_dim_1 + 2);
                             
-                            const int idx_face_x_R = (i + 2) +
-                                (j + 1)*(interior_dims[0] + 3) +
-                                (k + 1)*(interior_dims[0] + 3)*(interior_dims[1] + 2);
+                            const int idx_midpoint_x_R = (i + 2) +
+                                (j + 1)*(interior_dim_0 + 3) +
+                                (k + 1)*(interior_dim_0 + 3)*
+                                    (interior_dim_1 + 2);
                             
-                            const int idx_face_x_RR = (i + 3) +
-                                (j + 1)*(interior_dims[0] + 3) +
-                                (k + 1)*(interior_dims[0] + 3)*(interior_dims[1] + 2);
+                            const int idx_midpoint_x_RR = (i + 3) +
+                                (j + 1)*(interior_dim_0 + 3) +
+                                (k + 1)*(interior_dim_0 + 3)*
+                                    (interior_dim_1 + 2);
                             
-                            const int idx_face_y_BB = j +
-                                (k + 1)*(interior_dims[1] + 3) +
-                                (i + 1)*(interior_dims[1] + 3)*(interior_dims[2] + 2);
+                            const int idx_midpoint_y_BB = (i + 1) +
+                                j*(interior_dim_0 + 2) +
+                                (k + 1)*(interior_dim_0 + 2)*
+                                    (interior_dim_1 + 3);
                             
-                            const int idx_face_y_B = (j + 1) +
-                                (k + 1)*(interior_dims[1] + 3) +
-                                (i + 1)*(interior_dims[1] + 3)*(interior_dims[2] + 2);
+                            const int idx_midpoint_y_B = (i + 1) +
+                                (j + 1)*(interior_dim_0 + 2) +
+                                (k + 1)*(interior_dim_0 + 2)*
+                                    (interior_dim_1 + 3);
                             
-                            const int idx_face_y_T = (j + 2) +
-                                (k + 1)*(interior_dims[1] + 3) +
-                                (i + 1)*(interior_dims[1] + 3)*(interior_dims[2] + 2);
+                            const int idx_midpoint_y_T = (i + 1) +
+                                (j + 2)*(interior_dim_0 + 2) +
+                                (k + 1)*(interior_dim_0 + 2)*
+                                    (interior_dim_1 + 3);
                             
-                            const int idx_face_y_TT = (j + 3) +
-                                (k + 1)*(interior_dims[1] + 3) +
-                                (i + 1)*(interior_dims[1] + 3)*(interior_dims[2] + 2);
+                            const int idx_midpoint_y_TT = (i + 1) +
+                                (j + 3)*(interior_dim_0 + 2) +
+                                (k + 1)*(interior_dim_0 + 2)*
+                                    (interior_dim_1 + 3);
                             
-                            const int idx_face_z_BB = k +
-                                (i + 1)*(interior_dims[2] + 3) +
-                                (j + 1)*(interior_dims[2] + 3)*(interior_dims[0] + 2);
+                            const int idx_midpoint_z_BB = (i + 1) +
+                                (j + 1)*(interior_dim_0 + 2) +
+                                k*(interior_dim_0 + 2)*
+                                    (interior_dim_1 + 2);
                             
-                            const int idx_face_z_B = (k + 1) +
-                                (i + 1)*(interior_dims[2] + 3) +
-                                (j + 1)*(interior_dims[2] + 3)*(interior_dims[0] + 2);
+                            const int idx_midpoint_z_B = (i + 1) +
+                                (j + 1)*(interior_dim_0 + 2) +
+                                (k + 1)*(interior_dim_0 + 2)*
+                                    (interior_dim_1 + 2);
                             
-                            const int idx_face_z_F = (k + 2) +
-                                (i + 1)*(interior_dims[2] + 3) +
-                                (j + 1)*(interior_dims[2] + 3)*(interior_dims[0] + 2);
+                            const int idx_midpoint_z_F = (i + 1) +
+                                (j + 1)*(interior_dim_0 + 2) +
+                                (k + 2)*(interior_dim_0 + 2)*
+                                    (interior_dim_1 + 2);
                             
-                            const int idx_face_z_FF = (k + 3) +
-                                (i + 1)*(interior_dims[2] + 3) +
-                                (j + 1)*(interior_dims[2] + 3)*(interior_dims[0] + 2);
-                            
-                            const double& u_LL = velocity_intercell->getPointer(0, 0)[idx_face_x_LL];
-                            const double& u_L = velocity_intercell->getPointer(0, 0)[idx_face_x_L];
-                            const double& u_R = velocity_intercell->getPointer(0, 0)[idx_face_x_R];
-                            const double& u_RR = velocity_intercell->getPointer(0, 0)[idx_face_x_RR];
-                            
-                            const double& v_BB = velocity_intercell->getPointer(1, 1)[idx_face_y_BB];
-                            const double& v_B = velocity_intercell->getPointer(1, 1)[idx_face_y_B];
-                            const double& v_T = velocity_intercell->getPointer(1, 1)[idx_face_y_T];
-                            const double& v_TT = velocity_intercell->getPointer(1, 1)[idx_face_y_TT];
-                            
-                            const double& w_BB = velocity_intercell->getPointer(2, 2)[idx_face_z_BB];
-                            const double& w_B = velocity_intercell->getPointer(2, 2)[idx_face_z_B];
-                            const double& w_F = velocity_intercell->getPointer(2, 2)[idx_face_z_F];
-                            const double& w_FF = velocity_intercell->getPointer(2, 2)[idx_face_z_FF];
+                            const int idx_midpoint_z_FF = (i + 1) +
+                                (j + 1)*(interior_dim_0 + 2) +
+                                (k + 3)*(interior_dim_0 + 2)*
+                                    (interior_dim_1 + 2);
                             
                             S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
-                                (3.0/2*(u_R - u_L) - 3.0/10*(u[idx_cell_wghost_x_R] - u[idx_cell_wghost_x_L]) +
-                                 1.0/30*(u_RR - u_LL))/dx[0] +
-                                (3.0/2*(v_T - v_B) - 3.0/10*(v[idx_cell_wghost_y_T] - v[idx_cell_wghost_y_B]) +
-                                 1.0/30*(v_TT - v_BB))/dx[1] +
-                                (3.0/2*(w_F - w_B) - 3.0/10*(w[idx_cell_wghost_z_F] - w[idx_cell_wghost_z_B]) +
-                                 1.0/30*(w_FF - w_BB))/dx[2]);
+                                (3.0/2.0*(u_midpoint_x[idx_midpoint_x_R] - u_midpoint_x[idx_midpoint_x_L]) -
+                                 3.0/10.0*(u[idx_cell_wghost_x_R] - u[idx_cell_wghost_x_L]) +
+                                 1.0/30.0*(u_midpoint_x[idx_midpoint_x_RR] - u_midpoint_x[idx_midpoint_x_LL]))/dx[0] +
+                                (3.0/2.0*(v_midpoint_y[idx_midpoint_y_T] - v_midpoint_y[idx_midpoint_y_B]) -
+                                 3.0/10.0*(v[idx_cell_wghost_y_T] - v[idx_cell_wghost_y_B]) +
+                                 1.0/30.0*(v_midpoint_y[idx_midpoint_y_TT] - v_midpoint_y[idx_midpoint_y_BB]))/dx[1] +
+                                (3.0/2.0*(w_midpoint_z[idx_midpoint_z_F] - w_midpoint_z[idx_midpoint_z_B]) -
+                                 3.0/10.0*(w[idx_cell_wghost_z_F] - w[idx_cell_wghost_z_B]) +
+                                 1.0/30.0*(w_midpoint_z[idx_midpoint_z_FF] - w_midpoint_z[idx_midpoint_z_BB]))/dx[2]);
                         }
                     }
                 }
             }
         }
+        
+        t_compute_source->stop();
         
         /*
          * Unregister the patch and data of all registered derived cell variables in the flow model.

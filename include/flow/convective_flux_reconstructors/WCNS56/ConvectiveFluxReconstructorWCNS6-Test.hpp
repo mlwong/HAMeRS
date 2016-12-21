@@ -206,6 +206,7 @@ performWENOInterpolation_plus(
         static boost::shared_ptr<tbox::Timer> t_WENO_interpolation;
         static boost::shared_ptr<tbox::Timer> t_Riemann_solver;
         static boost::shared_ptr<tbox::Timer> t_reconstruct_flux;
+        static boost::shared_ptr<tbox::Timer> t_compute_source;
         
 };
 
