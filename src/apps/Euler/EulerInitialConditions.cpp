@@ -1,6 +1,9 @@
 #include "apps/Euler/EulerInitialConditions.hpp"
 
 #include <boost/math/constants/constants.hpp>
+#include <boost/math/special_functions/prime.hpp>
+
+#include <sstream>
 
 /*
  * Set the data on the patch interior to some initial values,
@@ -496,7 +499,7 @@ EulerInitialConditions::initializeDataOnPatch(
                             }
                         }
                     }
-                    else if (d_project_name == "2D Poggi's RMI 0")
+                    else if (d_project_name == "2D Poggi's RMI 0-0-0")
                     {
                         if (d_num_species != 2)
                         {
@@ -601,7 +604,7 @@ EulerInitialConditions::initializeDataOnPatch(
                             }
                         }
                     }
-                    else if (d_project_name == "2D Poggi's RMI 1a")
+                    else if (d_project_name.find("2D Poggi's RMI") != std::string::npos)
                     {
                         if (d_num_species != 2)
                         {
@@ -611,6 +614,37 @@ EulerInitialConditions::initializeDataOnPatch(
                                 << " '2D Poggi's RMI'."
                                 << std::endl);
                         }
+                        
+                        /*
+                         * Get the settings.
+                         */
+                        
+                        std::string settings = d_project_name.substr(15);
+                        
+                        std::stringstream ss(settings);
+                        
+                        std::string A_idx_str;
+                        std::string m_idx_str;
+                        std::string prime_idx_str;
+                        
+                        std::getline(ss, A_idx_str, '-');
+                        std::getline(ss, m_idx_str, '-');
+                        std::getline(ss, prime_idx_str);
+                        
+                        double A_candidates[] = {1.0e-3, 0.70710678118e-3, 0.5e-3};
+                        int m_min_candidates[] = {40, 30, 20};
+                        int m_max_candidates[] = {60, 60, 60};
+                        
+                        // Prime number for "random" phase shifts.
+                        double prime_num = static_cast<double> (
+                            boost::math::prime(std::stoi(prime_idx_str) + 2));
+                        
+                        // Amplitude.
+                        double A = A_candidates[std::stoi(A_idx_str) - 1];
+                        
+                        // Bounds of wavenumbers for initial perturbations.
+                        int m_min = m_min_candidates[std::stoi(m_idx_str) - 1];
+                        int m_max = m_max_candidates[std::stoi(m_idx_str) - 1];
                         
                         // Characteristic length of the initial interface thickness.
                         const double epsilon_i = 0.001;
@@ -656,9 +690,6 @@ EulerInitialConditions::initializeDataOnPatch(
                         const double L_x_shock = 0.180254509478037;
                         const double L_x_interface = 0.2;
                         
-                        // Perturbations due to S mode.
-                        const double A = 0.4e-3; // Amplitude.
-                        
                         for (int j = 0; j < patch_dims[1]; j++)
                         {
                             for (int i = 0; i < patch_dims[0]; i++)
@@ -672,18 +703,19 @@ EulerInitialConditions::initializeDataOnPatch(
                                 x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
                                 
                                 double S = 0.0;
-                                for (int m = 40; m <= 60; m++)
+                                for (int m = m_min; m <= m_max; m++)
                                 {
-                                    S += A*cos(2.0*M_PI*m/0.05*x[1] + tan(7.0*m));
+                                    S += A*cos(2.0*M_PI*m/0.05*x[1] +
+                                        tan(prime_num*(double)m));
                                 }
                                 
                                 if (x[0] < L_x_shock)
                                 {
                                     rho_Y_0[idx_cell] = rho_shocked;
                                     rho_Y_1[idx_cell] = 0.0;
-                                    rho_u[idx_cell] = rho_shocked*u_shocked;
-                                    rho_v[idx_cell] = rho_shocked*v_shocked;
-                                    E[idx_cell]     = p_shocked/(gamma_0 - 1.0) +
+                                    rho_u[idx_cell]   = rho_shocked*u_shocked;
+                                    rho_v[idx_cell]   = rho_shocked*v_shocked;
+                                    E[idx_cell]       = p_shocked/(gamma_0 - 1.0) +
                                         0.5*rho_shocked*(u_shocked*u_shocked + v_shocked*v_shocked);
                                 }
                                 else
