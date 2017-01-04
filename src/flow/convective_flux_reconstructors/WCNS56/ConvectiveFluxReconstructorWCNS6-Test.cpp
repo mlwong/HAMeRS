@@ -204,7 +204,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the dimension..
+         * Get the dimension.
          */
         
         const int interior_dim_0 = interior_dims[0];
@@ -392,11 +392,11 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
             std::vector<double*> W_array;
-            W_array.resize(6);
+            W_array.reserve(6);
             
             for (int m = 0; m < 6; m++)
             {
-                W_array[m] = characteristic_variables[m][ei]->getPointer(0);
+                W_array.push_back(characteristic_variables[m][ei]->getPointer(0));
             }
             
             double* W_L = characteristic_variables_minus[ei]->getPointer(0);
@@ -466,13 +466,13 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
         {
             std::vector<double*> V_L;
             std::vector<double*> V_R;
-            V_L.resize(d_num_eqn);
-            V_R.resize(d_num_eqn);
+            V_L.reserve(d_num_eqn);
+            V_R.reserve(d_num_eqn);
             
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                V_L[ei] = primitive_variables_minus[ei]->getPointer(0);
-                V_R[ei] = primitive_variables_plus[ei]->getPointer(0);
+                V_L.push_back(primitive_variables_minus[ei]->getPointer(0));
+                V_R.push_back(primitive_variables_plus[ei]->getPointer(0));
             }
             
             // Declare and initialize containers to store the references to the
@@ -891,11 +891,11 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
             std::vector<double*> W_array;
-            W_array.resize(6);
+            W_array.reserve(6);
             
             for (int m = 0; m < 6; m++)
             {
-                W_array[m] = characteristic_variables[m][ei]->getPointer(0);
+                W_array.push_back(characteristic_variables[m][ei]->getPointer(0));
             }
             
             double* W_L = characteristic_variables_minus[ei]->getPointer(0);
@@ -955,11 +955,11 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
             std::vector<double*> W_array;
-            W_array.resize(6);
+            W_array.reserve(6);
             
             for (int m = 0; m < 6; m++)
             {
-                W_array[m] = characteristic_variables[m][ei]->getPointer(1);
+                W_array.push_back(characteristic_variables[m][ei]->getPointer(1));
             }
             
             double* W_B = characteristic_variables_minus[ei]->getPointer(1);
@@ -1037,13 +1037,13 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
         {
             std::vector<double*> V_L;
             std::vector<double*> V_R;
-            V_L.resize(d_num_eqn);
-            V_R.resize(d_num_eqn);
+            V_L.reserve(d_num_eqn);
+            V_R.reserve(d_num_eqn);
             
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                V_L[ei] = primitive_variables_minus[ei]->getPointer(0);
-                V_R[ei] = primitive_variables_plus[ei]->getPointer(0);
+                V_L.push_back(primitive_variables_minus[ei]->getPointer(0));
+                V_R.push_back(primitive_variables_plus[ei]->getPointer(0));
             }
             
             // Declare and initialize containers to store the references to the
@@ -1150,13 +1150,13 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
         {
             std::vector<double*> V_B;
             std::vector<double*> V_T;
-            V_B.resize(d_num_eqn);
-            V_T.resize(d_num_eqn);
+            V_B.reserve(d_num_eqn);
+            V_T.reserve(d_num_eqn);
             
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                V_B[ei] = primitive_variables_minus[ei]->getPointer(1);
-                V_T[ei] = primitive_variables_plus[ei]->getPointer(1);
+                V_B.push_back(primitive_variables_minus[ei]->getPointer(1));
+                V_T.push_back(primitive_variables_plus[ei]->getPointer(1));
             }
             
             // Declare and initialize containers to store the references to the
@@ -1750,11 +1750,11 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
             std::vector<double*> W_array;
-            W_array.resize(6);
+            W_array.reserve(6);
             
             for (int m = 0; m < 6; m++)
             {
-                W_array[m] = characteristic_variables[m][ei]->getPointer(0);
+                W_array.push_back(characteristic_variables[m][ei]->getPointer(0));
             }
             
             double* W_L = characteristic_variables_minus[ei]->getPointer(0);
@@ -1824,11 +1824,11 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
             std::vector<double*> W_array;
-            W_array.resize(6);
+            W_array.reserve(6);
             
             for (int m = 0; m < 6; m++)
             {
-                W_array[m] = characteristic_variables[m][ei]->getPointer(1);
+                W_array.push_back(characteristic_variables[m][ei]->getPointer(1));
             }
             
             double* W_B = characteristic_variables_minus[ei]->getPointer(1);
@@ -1898,11 +1898,11 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
             std::vector<double*> W_array;
-            W_array.resize(6);
+            W_array.reserve(6);
             
             for (int m = 0; m < 6; m++)
             {
-                W_array[m] = characteristic_variables[m][ei]->getPointer(2);
+                W_array.push_back(characteristic_variables[m][ei]->getPointer(2));
             }
             
             double* W_B = characteristic_variables_minus[ei]->getPointer(2);
@@ -1990,13 +1990,13 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
         {
             std::vector<double*> V_L;
             std::vector<double*> V_R;
-            V_L.resize(d_num_eqn);
-            V_R.resize(d_num_eqn);
+            V_L.reserve(d_num_eqn);
+            V_R.reserve(d_num_eqn);
             
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                V_L[ei] = primitive_variables_minus[ei]->getPointer(0);
-                V_R[ei] = primitive_variables_plus[ei]->getPointer(0);
+                V_L.push_back(primitive_variables_minus[ei]->getPointer(0));
+                V_R.push_back(primitive_variables_plus[ei]->getPointer(0));
             }
             
             // Declare and initialize containers to store the references to the
@@ -2117,13 +2117,13 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
         {
             std::vector<double*> V_B;
             std::vector<double*> V_T;
-            V_B.resize(d_num_eqn);
-            V_T.resize(d_num_eqn);
+            V_B.reserve(d_num_eqn);
+            V_T.reserve(d_num_eqn);
             
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                V_B[ei] = primitive_variables_minus[ei]->getPointer(1);
-                V_T[ei] = primitive_variables_plus[ei]->getPointer(1);
+                V_B.push_back(primitive_variables_minus[ei]->getPointer(1));
+                V_T.push_back(primitive_variables_plus[ei]->getPointer(1));
             }
             
             // Declare and initialize containers to store the references to the
@@ -2243,13 +2243,13 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
         {
             std::vector<double*> V_B;
             std::vector<double*> V_F;
-            V_B.resize(d_num_eqn);
-            V_F.resize(d_num_eqn);
+            V_B.reserve(d_num_eqn);
+            V_F.reserve(d_num_eqn);
             
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                V_B[ei] = primitive_variables_minus[ei]->getPointer(2);
-                V_F[ei] = primitive_variables_plus[ei]->getPointer(2);
+                V_B.push_back(primitive_variables_minus[ei]->getPointer(2));
+                V_F.push_back(primitive_variables_plus[ei]->getPointer(2));
             }
             
             // Declare and initialize containers to store the references to the
@@ -3493,7 +3493,7 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation_plus(
     omega_tilde_3 = omega_tilde_3/omega_tilde_sum;
     
     /*
-     * Compute the weights omega_tilde_tilde.
+     * Compute the weights omega_tilde.
      */
     
     double R_tau = fabs(tau_6_tilde/(beta_avg_tilde + EPSILON));
