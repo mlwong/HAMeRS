@@ -925,7 +925,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                          * Get the settings.
                          */
                         
-                        std::string settings = d_project_name.substr(15);
+                        std::string settings = d_project_name.substr(31);
                         
                         std::stringstream ss(settings);
                         
