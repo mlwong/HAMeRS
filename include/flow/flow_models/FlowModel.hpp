@@ -403,6 +403,22 @@ computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
             const DIRECTION::TYPE& direction,
             const RIEMANN_SOLVER::TYPE& Riemann_solver) = 0;
         
+/*
+ * Check whether the given side conservative variables are within the bounds.
+ */
+virtual void
+checkGlobalSideDataConservativeVariablesBounded(
+    boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables) = 0;
+
+/*
+ * Check whether the given side primitive variables are within the bounds.
+ */
+virtual void
+checkGlobalSideDataPrimitiveVariablesBounded(
+    boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables) = 0;
+        
         /*
          * Check whether the given conservative variables are within the bounds.
          */

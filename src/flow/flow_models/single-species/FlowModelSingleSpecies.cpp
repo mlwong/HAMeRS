@@ -2157,21 +2157,13 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
     std::vector<double*> V;
     V.reserve(d_num_eqn);
     
-    int count_eqn = 0;
     for (int vi = 0; vi < static_cast<int>(primitive_variables.size()); vi++)
     {
         int depth = primitive_variables[vi]->getDepth();
         
         for (int di = 0; di < depth; di++)
         {
-            // If the last element of the primitive variable vector is not in the system of equations,
-            // ignore it.
-            if (count_eqn >= d_num_eqn)
-                break;
-            
             V.push_back(primitive_variables[vi]->getPointer(di));
-            
-            count_eqn++;
         }
     }
     
@@ -2609,6 +2601,7 @@ FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristi
     /*
      * Check potential failures.
      */
+    
     for (int ei = 0; ei < d_num_eqn; ei++)
     {
         const hier::IntVector interior_dims_primitive_var =
@@ -2826,7 +2819,7 @@ FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristi
             #endif
             for (int i = 0; i < interior_dim_0; i++)
             {
-                // Compute the linear indices.
+                // Compute the linear index.
                 const int idx_face = (i + num_ghosts_0_characteristic_var) +
                     (j + num_ghosts_1_characteristic_var)*ghostcell_dim_0_characteristic_var;
                 
@@ -2879,7 +2872,7 @@ FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristi
                      i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
                      i++)
                 {
-                    // Compute the linear indices.
+                    // Compute the linear index.
                     const int idx_face = (i + num_ghosts_0_characteristic_var) +
                         (j + num_ghosts_1_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1) +
                         (k + num_ghosts_2_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1)*
@@ -2924,7 +2917,7 @@ FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristi
                 #endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
-                    // Compute the linear indices.
+                    // Compute the linear index.
                     const int idx_face = (i + num_ghosts_0_characteristic_var) +
                         (j + num_ghosts_1_characteristic_var)*ghostcell_dim_0_characteristic_var +
                         (k + num_ghosts_2_characteristic_var)*ghostcell_dim_0_characteristic_var*
@@ -2969,7 +2962,7 @@ FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristi
                 #endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
-                    // Compute the linear indices.
+                    // Compute the linear index.
                     const int idx_face = (i + num_ghosts_0_characteristic_var) +
                         (j + num_ghosts_1_characteristic_var)*ghostcell_dim_0_characteristic_var +
                         (k + num_ghosts_2_characteristic_var)*ghostcell_dim_0_characteristic_var*
@@ -3866,6 +3859,822 @@ FlowModelSingleSpecies::computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrim
             << "computeLocalIntercellQuantitiesFromRiemannSolverWithPrimitiveVariables()\n"
             << "Unknown Riemann solver required."
             << std::endl);
+        }
+    }
+}
+
+
+/*
+ * Check whether the given side conservative variables are within the bounds.
+ */
+void
+FlowModelSingleSpecies::checkGlobalSideDataConservativeVariablesBounded(
+    boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables)
+{
+    /*
+     * Get the numbers of ghost cells of the variables.
+     */
+    
+    const hier::IntVector num_ghosts_flag = bounded_flag->getGhostCellWidth();
+    
+    const hier::IntVector num_ghosts_conservative_var = conservative_variables[0]->
+        getGhostCellWidth();
+    
+    /*
+     * Get the ghost cell dimensions of conservative variables.
+     */
+    
+    const hier::IntVector ghostcell_dims_conservative_var = conservative_variables[0]->
+        getGhostBox().numberCells();
+    
+    /*
+     * Check the size of variables.
+     */
+    
+    if (static_cast<int>(conservative_variables.size()) != d_num_eqn)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::"
+            << "checkGlobalSideDataConservativeVariablesBounded()\n"
+            << "The number of conservative variables are incorrect."
+            << std::endl);
+    }
+    
+    /*
+     * Check potential failures.
+     */
+    
+    for (int ei = 0; ei < d_num_eqn; ei++)
+    {
+        const hier::IntVector interior_dims_conservative_var =
+            conservative_variables[ei]->getBox().numberCells();
+        
+        if (interior_dims_conservative_var != d_interior_dims)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelSingleSpecies::"
+                << "checkGlobalSideDataConservativeVariablesBounded()\n"
+                << "The interior dimension of the conservative variables does not match that of patch."
+                << std::endl);
+        }
+    }
+    const hier::IntVector interior_dims_flag = bounded_flag->getBox().numberCells();
+    if (interior_dims_flag != d_interior_dims)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::"
+            << "checkGlobalSideDataConservativeVariablesBounded()\n"
+            << "The interior dimension of the flag does not match that of patch."
+            << std::endl);
+    }
+    
+    for (int ei = 1; ei < d_num_eqn; ei++)
+    {
+        if (num_ghosts_conservative_var != conservative_variables[ei]->getGhostCellWidth())
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelSingleSpecies::"
+                << "checkGlobalSideDataConservativeVariablesBounded()\n"
+                << "The conservative variables don't have same ghost cell width."
+                << std::endl);
+        }
+    }
+    
+    if (num_ghosts_flag != num_ghosts_conservative_var)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::"
+            << "checkGlobalSideDataConservativeVariablesBounded()\n"
+            << "The ghost cell width of the flag does not match that of conservative variables."
+            << std::endl);
+    }
+    
+    bounded_flag->fillAll(1);
+    
+    /*
+     * Declare containers to store pointers to different data.
+     */
+    
+    std::vector<double*> Q;
+    Q.resize(d_num_eqn);
+    
+    int* are_bounded = nullptr;
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        const int interior_dim_0 = d_interior_dims[0];
+        
+        const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[0];
+        
+        /*
+         * Check if conservative variables in the x-direction are bounded.
+         */
+        
+        are_bounded = bounded_flag->getPointer(0);
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            Q[ei] = conservative_variables[ei]->getPointer(0);
+        }
+        
+        // Check if density and total energy are bounded.
+        #ifdef __INTEL_COMPILER
+        #pragma ivdep
+        #endif
+        for (int i = -num_ghosts_0_conservative_var;
+             i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
+             i++)
+        {
+            // Compute the linear index.
+            const int idx_face = i + num_ghosts_0_conservative_var;
+            
+            if (Q[0][idx_face] > 0.0)
+            {
+                are_bounded[idx_face] &= 1;
+            }
+            else
+            {
+                are_bounded[idx_face] &= 0;
+            }
+            
+            if (Q[d_num_eqn - 1][idx_face] > 0.0)
+            {
+                are_bounded[idx_face] &= 1;
+            }
+            else
+            {
+                are_bounded[idx_face] &= 0;
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        const int interior_dim_0 = d_interior_dims[0];
+        const int interior_dim_1 = d_interior_dims[1];
+        
+        const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[0];
+        const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[1];
+        const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[0];
+        
+        /*
+         * Check if conservative variables in the x-direction are bounded.
+         */
+        
+        are_bounded = bounded_flag->getPointer(0);
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            Q[ei] = conservative_variables[ei]->getPointer(0);
+        }
+        
+        // Check if density and total energy are bounded.
+        for (int j = 0; j < interior_dim_1; j++)
+        {
+            #ifdef __INTEL_COMPILER
+            #pragma ivdep
+            #endif
+            for (int i = -num_ghosts_0_conservative_var;
+                 i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
+                 i++)
+            {
+                // Compute the linear index.
+                const int idx_face = (i + num_ghosts_0_conservative_var) +
+                    (j + num_ghosts_1_conservative_var)*(ghostcell_dim_0_conservative_var + 1);
+                
+                if (Q[0][idx_face] > 0.0)
+                {
+                    are_bounded[idx_face] &= 1;
+                }
+                else
+                {
+                    are_bounded[idx_face] &= 0;
+                }
+                
+                if (Q[d_num_eqn - 1][idx_face] > 0.0)
+                {
+                    are_bounded[idx_face] &= 1;
+                }
+                else
+                {
+                    are_bounded[idx_face] &= 0;
+                }
+            }
+        }
+        
+        /*
+         * Check if conservative variables in the y-direction are bounded.
+         */
+        
+        are_bounded = bounded_flag->getPointer(1);
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            Q[ei] = conservative_variables[ei]->getPointer(1);
+        }
+        
+        // Check if density and total energy are bounded.
+        for (int j = -num_ghosts_1_conservative_var;
+             j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
+             j++)
+        {
+            #ifdef __INTEL_COMPILER
+            #pragma ivdep
+            #endif
+            for (int i = 0; i < interior_dim_0; i++)
+            {
+                // Compute the linear index.
+                const int idx_face = (i + num_ghosts_0_conservative_var) +
+                    (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
+                
+                if (Q[0][idx_face] > 0.0)
+                {
+                    are_bounded[idx_face] &= 1;
+                }
+                else
+                {
+                    are_bounded[idx_face] &= 0;
+                }
+                
+                if (Q[d_num_eqn - 1][idx_face] > 0.0)
+                {
+                    are_bounded[idx_face] &= 1;
+                }
+                else
+                {
+                    are_bounded[idx_face] &= 0;
+                }
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const int interior_dim_0 = d_interior_dims[0];
+        const int interior_dim_1 = d_interior_dims[1];
+        const int interior_dim_2 = d_interior_dims[2];
+        
+        const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[0];
+        const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[1];
+        const int num_ghosts_2_conservative_var = num_ghosts_conservative_var[2];
+        const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[0];
+        const int ghostcell_dim_1_conservative_var = ghostcell_dims_conservative_var[1];
+        
+        /*
+         * Check if conservative variables in the x-direction are bounded.
+         */
+        
+        are_bounded = bounded_flag->getPointer(0);
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            Q[ei] = conservative_variables[ei]->getPointer(0);
+        }
+        
+        // Check if density and total energy are bounded.
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+                #ifdef __INTEL_COMPILER
+                #pragma ivdep
+                #endif
+                for (int i = -num_ghosts_0_conservative_var;
+                     i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
+                     i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*(ghostcell_dim_0_conservative_var + 1) +
+                        (k + num_ghosts_2_conservative_var)*(ghostcell_dim_0_conservative_var + 1)*
+                            ghostcell_dim_1_conservative_var;
+                    
+                    if (Q[0][idx_face] > 0.0)
+                    {
+                        are_bounded[idx_face] &= 1;
+                    }
+                    else
+                    {
+                        are_bounded[idx_face] &= 0;
+                    }
+                    
+                    if (Q[d_num_eqn - 1][idx_face] > 0.0)
+                    {
+                        are_bounded[idx_face] &= 1;
+                    }
+                    else
+                    {
+                        are_bounded[idx_face] &= 0;
+                    }
+                }
+            }
+        }
+        
+        /*
+         * Check if conservative variables in the y-direction are bounded.
+         */
+        
+        are_bounded = bounded_flag->getPointer(1);
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            Q[ei] = conservative_variables[ei]->getPointer(1);
+        }
+        
+        // Check if density and total energy are bounded.
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = -num_ghosts_1_conservative_var;
+                 j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
+                 j++)
+            {
+                #ifdef __INTEL_COMPILER
+                #pragma ivdep
+                #endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                        (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                            (ghostcell_dim_1_conservative_var + 1);
+                    
+                    if (Q[0][idx_face] > 0.0)
+                    {
+                        are_bounded[idx_face] &= 1;
+                    }
+                    else
+                    {
+                        are_bounded[idx_face] &= 0;
+                    }
+                    
+                    if (Q[d_num_eqn - 1][idx_face] > 0.0)
+                    {
+                        are_bounded[idx_face] &= 1;
+                    }
+                    else
+                    {
+                        are_bounded[idx_face] &= 0;
+                    }
+                }
+            }
+        }
+        
+        /*
+         * Check if conservative variables in the z-direction are bounded.
+         */
+        
+        are_bounded = bounded_flag->getPointer(2);
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            Q[ei] = conservative_variables[ei]->getPointer(2);
+        }
+        
+        // Check if density and total energy are bounded.
+        for (int k = -num_ghosts_2_conservative_var;
+             k < interior_dim_2 + 1 + num_ghosts_2_conservative_var;
+             k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+                #ifdef __INTEL_COMPILER
+                #pragma ivdep
+                #endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                        (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                            ghostcell_dim_1_conservative_var;
+                    
+                    if (Q[0][idx_face] > 0.0)
+                    {
+                        are_bounded[idx_face] &= 1;
+                    }
+                    else
+                    {
+                        are_bounded[idx_face] &= 0;
+                    }
+                    
+                    if (Q[d_num_eqn - 1][idx_face] > 0.0)
+                    {
+                        are_bounded[idx_face] &= 1;
+                    }
+                    else
+                    {
+                        are_bounded[idx_face] &= 0;
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+/*
+ * Check whether the given side primitive variables are within the bounds.
+ */
+void
+FlowModelSingleSpecies::checkGlobalSideDataPrimitiveVariablesBounded(
+    boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
+    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables)
+{
+    /*
+     * Get the numbers of ghost cells of the variables.
+     */
+    
+    const hier::IntVector num_ghosts_flag = bounded_flag->getGhostCellWidth();
+    
+    const hier::IntVector num_ghosts_primitive_var = primitive_variables[0]->
+        getGhostCellWidth();
+    
+    /*
+     * Get the ghost cell dimensions of primitive variables.
+     */
+    
+    const hier::IntVector ghostcell_dims_primitive_var = primitive_variables[0]->
+        getGhostBox().numberCells();
+    
+    /*
+     * Check the size of variables.
+     */
+    
+    if (static_cast<int>(primitive_variables.size()) != d_num_eqn)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::"
+            << "checkGlobalSideDataPrimitiveVariablesBounded()\n"
+            << "The number of primitive variables are incorrect."
+            << std::endl);
+    }
+    
+    /*
+     * Check potential failures.
+     */
+    
+    for (int ei = 0; ei < d_num_eqn; ei++)
+    {
+        const hier::IntVector interior_dims_primitive_var =
+            primitive_variables[ei]->getBox().numberCells();
+        
+        if (interior_dims_primitive_var != d_interior_dims)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelSingleSpecies::"
+                << "checkGlobalSideDataPrimitiveVariablesBounded()\n"
+                << "The interior dimension of the primitive variables does not match that of patch."
+                << std::endl);
+        }
+    }
+    const hier::IntVector interior_dims_flag = bounded_flag->getBox().numberCells();
+    if (interior_dims_flag != d_interior_dims)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::"
+            << "checkGlobalSideDataPrimitiveVariablesBounded()\n"
+            << "The interior dimension of the flag does not match that of patch."
+            << std::endl);
+    }
+    
+    for (int ei = 1; ei < d_num_eqn; ei++)
+    {
+        if (num_ghosts_primitive_var != primitive_variables[ei]->getGhostCellWidth())
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelSingleSpecies::"
+                << "checkGlobalSideDataPrimitiveVariablesBounded()\n"
+                << "The primitive variables don't have same ghost cell width."
+                << std::endl);
+        }
+    }
+    
+    if (num_ghosts_flag != num_ghosts_primitive_var)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::"
+            << "checkGlobalSideDataPrimitiveVariablesBounded()\n"
+            << "The ghost cell width of the flag does not match that of primitive variables."
+            << std::endl);
+    }
+    
+    bounded_flag->fillAll(1);
+    
+    /*
+     * Declare containers to store pointers to different data.
+     */
+    
+    std::vector<double*> V;
+    V.resize(d_num_eqn);
+    
+    int* are_bounded = nullptr;
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        const int interior_dim_0 = d_interior_dims[0];
+        
+        const int num_ghosts_0_primitive_var = num_ghosts_primitive_var[0];
+        
+        /*
+         * Check if primitive variables in the x-direction are bounded.
+         */
+        
+        are_bounded = bounded_flag->getPointer(0);
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            V[ei] = primitive_variables[ei]->getPointer(0);
+        }
+        
+        // Check if density and pressure are bounded.
+        #ifdef __INTEL_COMPILER
+        #pragma ivdep
+        #endif
+        for (int i = -num_ghosts_0_primitive_var;
+             i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+             i++)
+        {
+            // Compute the linear index.
+            const int idx_face = i + num_ghosts_0_primitive_var;
+            
+            if (V[0][idx_face] > 0.0)
+            {
+                are_bounded[idx_face] &= 1;
+            }
+            else
+            {
+                are_bounded[idx_face] &= 0;
+            }
+            
+            if (V[d_num_eqn - 1][idx_face] > 0.0)
+            {
+                are_bounded[idx_face] &= 1;
+            }
+            else
+            {
+                are_bounded[idx_face] &= 0;
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        const int interior_dim_0 = d_interior_dims[0];
+        const int interior_dim_1 = d_interior_dims[1];
+        
+        const int num_ghosts_0_primitive_var = num_ghosts_primitive_var[0];
+        const int num_ghosts_1_primitive_var = num_ghosts_primitive_var[1];
+        const int ghostcell_dim_0_primitive_var = ghostcell_dims_primitive_var[0];
+        
+        /*
+         * Check if primitive variables in the x-direction are bounded.
+         */
+        
+        are_bounded = bounded_flag->getPointer(0);
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            V[ei] = primitive_variables[ei]->getPointer(0);
+        }
+        
+        // Check if density and pressure are bounded.
+        for (int j = 0; j < interior_dim_1; j++)
+        {
+            #ifdef __INTEL_COMPILER
+            #pragma ivdep
+            #endif
+            for (int i = -num_ghosts_0_primitive_var;
+                 i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                 i++)
+            {
+                // Compute the linear index.
+                const int idx_face = (i + num_ghosts_0_primitive_var) +
+                    (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1);
+                
+                if (V[0][idx_face] > 0.0)
+                {
+                    are_bounded[idx_face] &= 1;
+                }
+                else
+                {
+                    are_bounded[idx_face] &= 0;
+                }
+                
+                if (V[d_num_eqn - 1][idx_face] > 0.0)
+                {
+                    are_bounded[idx_face] &= 1;
+                }
+                else
+                {
+                    are_bounded[idx_face] &= 0;
+                }
+            }
+        }
+        
+        /*
+         * Check if primitive variables in the y-direction are bounded.
+         */
+        
+        are_bounded = bounded_flag->getPointer(1);
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            V[ei] = primitive_variables[ei]->getPointer(1);
+        }
+        
+        // Check if density and pressure are bounded.
+        for (int j = -num_ghosts_1_primitive_var;
+             j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
+             j++)
+        {
+            #ifdef __INTEL_COMPILER
+            #pragma ivdep
+            #endif
+            for (int i = 0; i < interior_dim_0; i++)
+            {
+                // Compute the linear index.
+                const int idx_face = (i + num_ghosts_0_primitive_var) +
+                    (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var;
+                
+                if (V[0][idx_face] > 0.0)
+                {
+                    are_bounded[idx_face] &= 1;
+                }
+                else
+                {
+                    are_bounded[idx_face] &= 0;
+                }
+                
+                if (V[d_num_eqn - 1][idx_face] > 0.0)
+                {
+                    are_bounded[idx_face] &= 1;
+                }
+                else
+                {
+                    are_bounded[idx_face] &= 0;
+                }
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const int interior_dim_0 = d_interior_dims[0];
+        const int interior_dim_1 = d_interior_dims[1];
+        const int interior_dim_2 = d_interior_dims[2];
+        
+        const int num_ghosts_0_primitive_var = num_ghosts_primitive_var[0];
+        const int num_ghosts_1_primitive_var = num_ghosts_primitive_var[1];
+        const int num_ghosts_2_primitive_var = num_ghosts_primitive_var[2];
+        const int ghostcell_dim_0_primitive_var = ghostcell_dims_primitive_var[0];
+        const int ghostcell_dim_1_primitive_var = ghostcell_dims_primitive_var[1];
+        
+        /*
+         * Check if primitive variables in the x-direction are bounded.
+         */
+        
+        are_bounded = bounded_flag->getPointer(0);
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            V[ei] = primitive_variables[ei]->getPointer(0);
+        }
+        
+        // Check if density and pressure are bounded.
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+                #ifdef __INTEL_COMPILER
+                #pragma ivdep
+                #endif
+                for (int i = -num_ghosts_0_primitive_var;
+                     i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
+                     i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1) +
+                        (k + num_ghosts_2_primitive_var)*(ghostcell_dim_0_primitive_var + 1)*
+                            ghostcell_dim_1_primitive_var;
+                    
+                    if (V[0][idx_face] > 0.0)
+                    {
+                        are_bounded[idx_face] &= 1;
+                    }
+                    else
+                    {
+                        are_bounded[idx_face] &= 0;
+                    }
+                    
+                    if (V[d_num_eqn - 1][idx_face] > 0.0)
+                    {
+                        are_bounded[idx_face] &= 1;
+                    }
+                    else
+                    {
+                        are_bounded[idx_face] &= 0;
+                    }
+                }
+            }
+        }
+        
+        /*
+         * Check if primitive variables in the y-direction are bounded.
+         */
+        
+        are_bounded = bounded_flag->getPointer(1);
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            V[ei] = primitive_variables[ei]->getPointer(1);
+        }
+        
+        // Check if density and pressure are bounded.
+        for (int k = 0; k < interior_dim_2; k++)
+        {
+            for (int j = -num_ghosts_1_primitive_var;
+                 j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
+                 j++)
+            {
+                #ifdef __INTEL_COMPILER
+                #pragma ivdep
+                #endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var +
+                        (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
+                            (ghostcell_dim_1_primitive_var + 1);
+                    
+                    if (V[0][idx_face] > 0.0)
+                    {
+                        are_bounded[idx_face] &= 1;
+                    }
+                    else
+                    {
+                        are_bounded[idx_face] &= 0;
+                    }
+                    
+                    if (V[d_num_eqn - 1][idx_face] > 0.0)
+                    {
+                        are_bounded[idx_face] &= 1;
+                    }
+                    else
+                    {
+                        are_bounded[idx_face] &= 0;
+                    }
+                }
+            }
+        }
+        
+        /*
+         * Check if primitive variables in the z-direction are bounded.
+         */
+        
+        are_bounded = bounded_flag->getPointer(2);
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            V[ei] = primitive_variables[ei]->getPointer(2);
+        }
+        
+        // Check if density and pressure are bounded.
+        for (int k = -num_ghosts_2_primitive_var;
+             k < interior_dim_2 + 1 + num_ghosts_2_primitive_var;
+             k++)
+        {
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+                #ifdef __INTEL_COMPILER
+                #pragma ivdep
+                #endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_face = (i + num_ghosts_0_primitive_var) +
+                        (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var +
+                        (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
+                            ghostcell_dim_1_primitive_var;
+                    
+                    if (V[0][idx_face] > 0.0)
+                    {
+                        are_bounded[idx_face] &= 1;
+                    }
+                    else
+                    {
+                        are_bounded[idx_face] &= 0;
+                    }
+                    
+                    if (V[d_num_eqn - 1][idx_face] > 0.0)
+                    {
+                        are_bounded[idx_face] &= 1;
+                    }
+                    else
+                    {
+                        are_bounded[idx_face] &= 0;
+                    }
+                }
+            }
         }
     }
 }

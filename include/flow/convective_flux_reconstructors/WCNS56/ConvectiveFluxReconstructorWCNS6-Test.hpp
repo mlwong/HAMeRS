@@ -52,115 +52,56 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
     
     private:
         /*
-         * Transform physcial variables into characteristic variables.
-         * W_array: Characteristic variables.
-         * U_array: Physical variables.
-         * R_inv_intercell: Projection matrix.
+         * Compute local sigma's.
          */
         void
-        projectPhysicalVariablesToCharacteristicFields(
-            boost::multi_array<double, 2>& W_array,
-            const boost::multi_array<const double*, 2>& U_array,
-            const boost::multi_array<double, 2>& R_inv_intercell);
+        computeLocalSigma(
+            double* sigma,
+            const std::vector<double*>& U_array,
+            const int& idx_side);
         
         /*
-         * Transform characteristic variables into primitive variables.
-         * U: Physcial variables.
-         * W: Characteristic variables.
-         * R_intercell: Inverse of projection matrix.
+         * Compute local beta's.
          */
         void
-        projectCharacteristicVariablesToPhysicalFields(
-            std::vector<double>& U,
-            const std::vector<double>& W,
-            const boost::multi_array<double, 2>& R_intercell);
+        computeLocalBeta(
+            double* beta_0,
+            double* beta_1,
+            double* beta_2,
+            double* beta_3,
+            const std::vector<double*>& U_array,
+            const int& idx_side);
         
         /*
-         * Compute sigma's.
+         * Compute local beta_tilde's.
          */
         void
-        computeSigma(
-            double& sigma,
-            const boost::multi_array_ref<double, 2>::const_array_view<1>::type& W_array);
+        computeLocalBetaTilde(
+            double* beta_tilde_0,
+            double* beta_tilde_1,
+            double* beta_tilde_2,
+            double* beta_tilde_3,
+            const std::vector<double*>& U_array,
+            const int& idx_side);
         
         /*
-         * Compute beta's.
+         * Perform local WENO interpolation.
          */
         void
-        computeBeta(
-            std::vector<double>& beta,
-            const boost::multi_array_ref<double, 2>::const_array_view<1>::type& W_array);
-        
-        /*
-         * Compute beta_tilde's.
-         */
-        void
-        computeBetaTilde(
-            std::vector<double>& beta_tilde,
-            const boost::multi_array_ref<double, 2>::const_array_view<1>::type& W_array);
+        performLocalWENOInterpolation(
+            double* U_minus,
+            double* U_plus,
+            const std::vector<double*>& U_array,
+            const int& idx_side);
         
         /*
          * Perform WENO interpolation.
          */
         void
         performWENOInterpolation(
-            std::vector<double>& U_minus,
-            std::vector<double>& U_plus,
-            const boost::multi_array<const double*, 2>& U_array,
-            const hier::Index& cell_index_minus,
-            const hier::Index& cell_index_plus,
-            const DIRECTION::TYPE& direction);
-        
-/*
- * Compute sigma's.
- */
-void
-computeSigma(
-    double* sigma,
-    const std::vector<double*>& U_array,
-    const int& idx_side);
-
-/*
- * Compute beta's.
- */
-void
-computeBeta(
-    double* beta_0,
-    double* beta_1,
-    double* beta_2,
-    double* beta_3,
-    const std::vector<double*>& U_array,
-    const int& idx_side);
-        
-/*
- * Compute beta_tilde's.
- */
-void
-computeBetaTilde(
-    double* beta_tilde_0,
-    double* beta_tilde_1,
-    double* beta_tilde_2,
-    double* beta_tilde_3,
-    const std::vector<double*>& U_array,
-    const int& idx_side);
-
-/*
- * Perform WENO interpolation.
- */
-void
-performWENOInterpolation_minus(
-    double* U_minus,
-    const std::vector<double*>& U_array,
-    const int& idx_side);
-
-/*
- * Perform WENO interpolation.
- */
-void
-performWENOInterpolation_plus(
-    double* U_plus,
-    const std::vector<double*>& U_array,
-    const int& idx_side);
+            std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_minus,
+            std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_plus,
+            const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables);
         
         /*
          * Constants used by the scheme.
