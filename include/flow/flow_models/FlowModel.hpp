@@ -25,10 +25,6 @@
 #include <unordered_map>
 #include <vector>
 
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
 using namespace SAMRAI;
 
 namespace EQN_FORM

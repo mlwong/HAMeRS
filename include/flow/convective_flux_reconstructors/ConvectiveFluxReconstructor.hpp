@@ -19,10 +19,6 @@
 #include <string>
 #include <vector>
 
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
 using namespace SAMRAI;
 
 class ConvectiveFluxReconstructor
