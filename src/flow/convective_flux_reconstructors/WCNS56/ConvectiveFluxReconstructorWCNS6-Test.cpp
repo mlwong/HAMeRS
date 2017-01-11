@@ -2774,6 +2774,9 @@ ConvectiveFluxReconstructorWCNS6_Test::performLocalWENOInterpolation(
     
     double sigma;
     
+    #ifdef HAMERS_ENABLE_SIMD
+    #pragma forceinline
+    #endif
     computeLocalSigma(&sigma, U_array, idx_side);
     
     /*
@@ -2782,6 +2785,9 @@ ConvectiveFluxReconstructorWCNS6_Test::performLocalWENOInterpolation(
     
     double beta_0, beta_1, beta_2, beta_3;
     
+    #ifdef HAMERS_ENABLE_SIMD
+    #pragma forceinline
+    #endif
     computeLocalBeta(&beta_0, &beta_1, &beta_2, &beta_3, U_array, idx_side);
     
     /*
@@ -2854,6 +2860,9 @@ ConvectiveFluxReconstructorWCNS6_Test::performLocalWENOInterpolation(
     
     double beta_tilde_0, beta_tilde_1, beta_tilde_2, beta_tilde_3;
     
+    #ifdef HAMERS_ENABLE_SIMD
+    #pragma forceinline
+    #endif
     computeLocalBetaTilde(&beta_tilde_0, &beta_tilde_1, &beta_tilde_2, &beta_tilde_3, U_array, idx_side);
     
     /*
