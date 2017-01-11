@@ -12,6 +12,8 @@
 #include "SAMRAI/pdat/FaceData.h"
 #include "SAMRAI/pdat/SideData.h"
 
+#include "HAMeRS_config.hpp"
+
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
 #include "flow/flow_models/FlowModelBoundaryUtilities.hpp"
 #include "util/Directions.hpp"

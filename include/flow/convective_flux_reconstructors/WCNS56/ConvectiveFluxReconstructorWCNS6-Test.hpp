@@ -8,6 +8,8 @@
 
 #include "boost/multi_array.hpp"
 
+#define EPSILON 1e-40
+
 class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
 {
     public:
@@ -51,39 +53,6 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
             const boost::shared_ptr<hier::VariableContext>& data_context);
     
     private:
-        /*
-         * Compute local sigma's.
-         */
-        void
-        computeLocalSigma(
-            double* sigma,
-            const std::vector<double*>& U_array,
-            const int& idx_side);
-        
-        /*
-         * Compute local beta's.
-         */
-        void
-        computeLocalBeta(
-            double* beta_0,
-            double* beta_1,
-            double* beta_2,
-            double* beta_3,
-            const std::vector<double*>& U_array,
-            const int& idx_side);
-        
-        /*
-         * Compute local beta_tilde's.
-         */
-        void
-        computeLocalBetaTilde(
-            double* beta_tilde_0,
-            double* beta_tilde_1,
-            double* beta_tilde_2,
-            double* beta_tilde_3,
-            const std::vector<double*>& U_array,
-            const int& idx_side);
-        
         /*
          * Perform local WENO interpolation.
          */
@@ -150,5 +119,120 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
         static boost::shared_ptr<tbox::Timer> t_compute_source;
         
 };
+
+
+/*
+ * Compute local sigma's.
+ */
+inline void computeLocalSigma(
+    double* sigma,
+    const std::vector<double*>& U_array,
+    const int& idx_side)
+{
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(static_cast<int>(U_array.size()) == 6);
+#endif
+    
+    /*
+     * Compute the sigma.
+     */
+    
+    const double alpha_1 = U_array[2][idx_side] - U_array[1][idx_side];
+    const double alpha_2 = U_array[3][idx_side] - U_array[2][idx_side];
+    const double alpha_3 = U_array[4][idx_side] - U_array[3][idx_side];
+    
+    const double theta_1 = fabs(alpha_1 - alpha_2)/(fabs(alpha_1) + fabs(alpha_2) + EPSILON);
+    const double theta_2 = fabs(alpha_2 - alpha_3)/(fabs(alpha_2) + fabs(alpha_3) + EPSILON);
+    
+    *sigma = fmax(theta_1, theta_2);
+}
+
+
+/*
+ * Compute local beta's.
+ */
+inline void computeLocalBeta(
+    double* beta_0,
+    double* beta_1,
+    double* beta_2,
+    double* beta_3,
+    const std::vector<double*>& U_array,
+    const int& idx_side)
+{
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(static_cast<int>(U_array.size()) == 6);
+#endif
+    
+    *beta_0 = 1.0/3.0*(U_array[0][idx_side]*(4.0*U_array[0][idx_side] - 19.0*U_array[1][idx_side] +
+         11.0*U_array[2][idx_side]) + U_array[1][idx_side]*(25.0*U_array[1][idx_side] -
+         31.0*U_array[2][idx_side]) + 10.0*U_array[2][idx_side]*U_array[2][idx_side]);
+    
+    *beta_1 = 1.0/3.0*(U_array[1][idx_side]*(4.0*U_array[1][idx_side] - 13.0*U_array[2][idx_side] +
+         5.0*U_array[3][idx_side]) + 13.0*U_array[2][idx_side]*(U_array[2][idx_side] -
+         U_array[3][idx_side]) + 4.0*U_array[3][idx_side]*U_array[3][idx_side]);
+    
+    *beta_2 = 1.0/3.0*(U_array[2][idx_side]*(10.0*U_array[2][idx_side] - 31.0*U_array[3][idx_side] +
+         11.0*U_array[4][idx_side]) + U_array[3][idx_side]*(25.0*U_array[3][idx_side] -
+         19.0*U_array[4][idx_side]) + 4.0*U_array[4][idx_side]*U_array[4][idx_side]);
+    
+    *beta_3 = 1.0/232243200.0*(U_array[0][idx_side]*(525910327.0*U_array[0][idx_side] -
+         4562164630.0*U_array[1][idx_side] + 7799501420.0*U_array[2][idx_side] -
+         6610694540.0*U_array[3][idx_side] + 2794296070.0*U_array[4][idx_side] -
+         472758974.0*U_array[5][idx_side]) + 5.0*U_array[1][idx_side]*
+        (2146987907.0*U_array[1][idx_side] - 7722406988.0*U_array[2][idx_side] +
+         6763559276.0*U_array[3][idx_side] - 2926461814.0*U_array[4][idx_side] +
+         503766638.0*U_array[5][idx_side]) + 20.0*U_array[2][idx_side]*
+        (1833221603.0*U_array[2][idx_side] - 3358664662.0*U_array[3][idx_side] +
+         1495974539.0*U_array[4][idx_side] - 263126407.0*U_array[5][idx_side]) +
+        20.0*U_array[3][idx_side]*(1607794163.0*U_array[3][idx_side] -
+         1486026707.0*U_array[4][idx_side] + 268747951.0*U_array[5][idx_side]) +
+        5.0*U_array[4][idx_side]*(1432381427.0*U_array[4][idx_side] -
+         536951582.0*U_array[5][idx_side]) +
+        263126407.0*U_array[5][idx_side]*U_array[5][idx_side]);
+}
+
+
+/*
+ * Compute local beta_tilde's.
+ */
+inline void computeLocalBetaTilde(
+    double* beta_tilde_0,
+    double* beta_tilde_1,
+    double* beta_tilde_2,
+    double* beta_tilde_3,
+    const std::vector<double*>& U_array,
+    const int& idx_side)
+{
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(static_cast<int>(U_array.size()) == 6);
+#endif
+    
+    *beta_tilde_0 = 1.0/3.0*(U_array[5][idx_side]*(4.0*U_array[5][idx_side] - 19.0*U_array[4][idx_side] +
+         11.0*U_array[3][idx_side]) + U_array[4][idx_side]*(25.0*U_array[4][idx_side] -
+         31.0*U_array[3][idx_side]) + 10.0*U_array[3][idx_side]*U_array[3][idx_side]);
+    
+    *beta_tilde_1 = 1.0/3.0*(U_array[4][idx_side]*(4.0*U_array[4][idx_side] - 13.0*U_array[3][idx_side] +
+         5.0*U_array[2][idx_side]) + 13.0*U_array[3][idx_side]*(U_array[3][idx_side] -
+         U_array[2][idx_side]) + 4.0*U_array[2][idx_side]*U_array[2][idx_side]);
+    
+    *beta_tilde_2 = 1.0/3.0*(U_array[3][idx_side]*(10.0*U_array[3][idx_side] - 31.0*U_array[2][idx_side] +
+         11.0*U_array[1][idx_side]) + U_array[2][idx_side]*(25.0*U_array[2][idx_side] -
+         19.0*U_array[1][idx_side]) + 4.0*U_array[1][idx_side]*U_array[1][idx_side]);
+    
+    *beta_tilde_3 = 1.0/232243200.0*(U_array[5][idx_side]*(525910327.0*U_array[5][idx_side] -
+         4562164630.0*U_array[4][idx_side] + 7799501420.0*U_array[3][idx_side] -
+         6610694540.0*U_array[2][idx_side] + 2794296070.0*U_array[1][idx_side] -
+         472758974.0*U_array[0][idx_side]) + 5.0*U_array[4][idx_side]*
+        (2146987907.0*U_array[4][idx_side] - 7722406988.0*U_array[3][idx_side] +
+         6763559276.0*U_array[2][idx_side] - 2926461814.0*U_array[1][idx_side] +
+         503766638.0*U_array[0][idx_side]) + 20.0*U_array[3][idx_side]*
+        (1833221603.0*U_array[3][idx_side] - 3358664662.0*U_array[2][idx_side] +
+         1495974539.0*U_array[1][idx_side] - 263126407.0*U_array[0][idx_side]) +
+        20.0*U_array[2][idx_side]*(1607794163.0*U_array[2][idx_side] -
+         1486026707.0*U_array[1][idx_side] + 268747951.0*U_array[0][idx_side]) +
+        5.0*U_array[1][idx_side]*(1432381427.0*U_array[1][idx_side] -
+         536951582.0*U_array[0][idx_side]) +
+        263126407.0*U_array[0][idx_side]*U_array[0][idx_side]);
+}
 
 #endif /* CONVECTIVE_FLUX_RECONSTRUCTOR_WCNS6_TEST_HPP */

@@ -1,7 +1,5 @@
 #include "flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS6-Test.hpp"
 
-#define EPSILON 1e-40
-
 /*
  * Timers interspersed throughout the class.
  */
@@ -183,7 +181,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
             patch.getPatchData(variable_source, data_context)));
     
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(convective_flux);
     TBOX_ASSERT(convective_flux->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
     
@@ -508,8 +506,8 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
         {
             const int num_subghosts_0_primitive_var = num_subghosts_primitive_var[ei][0];
             
-            #ifdef __INTEL_COMPILER
-            #pragma ivdep
+            #ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
             #endif
             for (int i = -1; i < interior_dim_0 + 2; i++)
             {
@@ -589,8 +587,8 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
         {
             double* F_face_x = convective_flux->getPointer(0, ei);
             
-            #ifdef __INTEL_COMPILER
-            #pragma ivdep
+            #ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
             #endif
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
@@ -630,8 +628,8 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
                 
                 const int num_subghosts_0_conservative_var = num_subghosts_conservative_var[ei][0];
                 
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
@@ -786,8 +784,8 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
         // Compute the magnitude of vorticity.
         for (int j = -num_conv_ghosts_1 + 1; j < interior_dim_1 + num_conv_ghosts_1 - 1; j++)
         {
-            #ifdef __INTEL_COMPILER
-            #pragma ivdep
+            #ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
             #endif
             for (int i = -num_conv_ghosts_0 + 1; i < interior_dim_0 + num_conv_ghosts_0 - 1; i++)
             {
@@ -1064,8 +1062,8 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
             
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = -1; i < interior_dim_0 + 2; i++)
                 {
@@ -1110,8 +1108,8 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
             
             for (int j = -1; j < interior_dim_1 + 2; j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
@@ -1328,8 +1326,8 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
             
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = 0; i < interior_dim_0 + 1; i++)
                 {
@@ -1375,8 +1373,8 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
             
             for (int j = 0; j < interior_dim_1 + 1; j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
@@ -1433,8 +1431,8 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
                 
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
@@ -1653,8 +1651,8 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
         {
             for (int j = -num_conv_ghosts_1 + 1; j < interior_dim_1 + num_conv_ghosts_1 - 1; j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = -num_conv_ghosts_0 + 1; i < interior_dim_0 + num_conv_ghosts_0 - 1; i++)
                 {
@@ -1942,8 +1940,8 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = -1; i < interior_dim_0 + 2; i++)
                     {
@@ -1999,8 +1997,8 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
             {
                 for (int j = -1; j < interior_dim_1 + 2; j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
@@ -2056,8 +2054,8 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
@@ -2414,8 +2412,8 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
@@ -2476,8 +2474,8 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
             {
                 for (int j = 0; j < interior_dim_1 + 1; j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
@@ -2538,8 +2536,8 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
@@ -2613,8 +2611,8 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-                        #ifdef __INTEL_COMPILER
-                        #pragma ivdep
+                        #ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
                         #endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
@@ -2748,124 +2746,6 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
 
 
 /*
- * Compute local sigma's.
- */
-void
-ConvectiveFluxReconstructorWCNS6_Test::computeLocalSigma(
-    double* sigma,
-    const std::vector<double*>& U_array,
-    const int& idx_side)
-{
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(U_array.size()) == 6);
-#endif
-    
-    /*
-     * Compute the sigma.
-     */
-    
-    const double alpha_1 = U_array[2][idx_side] - U_array[1][idx_side];
-    const double alpha_2 = U_array[3][idx_side] - U_array[2][idx_side];
-    const double alpha_3 = U_array[4][idx_side] - U_array[3][idx_side];
-    
-    const double theta_1 = fabs(alpha_1 - alpha_2)/(fabs(alpha_1) + fabs(alpha_2) + EPSILON);
-    const double theta_2 = fabs(alpha_2 - alpha_3)/(fabs(alpha_2) + fabs(alpha_3) + EPSILON);
-    
-    *sigma = fmax(theta_1, theta_2);
-}
-
-
-/*
- * Compute local beta's.
- */
-void
-ConvectiveFluxReconstructorWCNS6_Test::computeLocalBeta(
-    double* beta_0,
-    double* beta_1,
-    double* beta_2,
-    double* beta_3,
-    const std::vector<double*>& U_array,
-    const int& idx_side)
-{
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(U_array.size()) == 6);
-#endif
-    
-    *beta_0 = 1.0/3.0*(U_array[0][idx_side]*(4.0*U_array[0][idx_side] - 19.0*U_array[1][idx_side] +
-         11.0*U_array[2][idx_side]) + U_array[1][idx_side]*(25.0*U_array[1][idx_side] -
-         31.0*U_array[2][idx_side]) + 10.0*U_array[2][idx_side]*U_array[2][idx_side]);
-    
-    *beta_1 = 1.0/3.0*(U_array[1][idx_side]*(4.0*U_array[1][idx_side] - 13.0*U_array[2][idx_side] +
-         5.0*U_array[3][idx_side]) + 13.0*U_array[2][idx_side]*(U_array[2][idx_side] -
-         U_array[3][idx_side]) + 4.0*U_array[3][idx_side]*U_array[3][idx_side]);
-    
-    *beta_2 = 1.0/3.0*(U_array[2][idx_side]*(10.0*U_array[2][idx_side] - 31.0*U_array[3][idx_side] +
-         11.0*U_array[4][idx_side]) + U_array[3][idx_side]*(25.0*U_array[3][idx_side] -
-         19.0*U_array[4][idx_side]) + 4.0*U_array[4][idx_side]*U_array[4][idx_side]);
-    
-    *beta_3 = 1.0/232243200.0*(U_array[0][idx_side]*(525910327.0*U_array[0][idx_side] -
-         4562164630.0*U_array[1][idx_side] + 7799501420.0*U_array[2][idx_side] -
-         6610694540.0*U_array[3][idx_side] + 2794296070.0*U_array[4][idx_side] -
-         472758974.0*U_array[5][idx_side]) + 5.0*U_array[1][idx_side]*
-        (2146987907.0*U_array[1][idx_side] - 7722406988.0*U_array[2][idx_side] +
-         6763559276.0*U_array[3][idx_side] - 2926461814.0*U_array[4][idx_side] +
-         503766638.0*U_array[5][idx_side]) + 20.0*U_array[2][idx_side]*
-        (1833221603.0*U_array[2][idx_side] - 3358664662.0*U_array[3][idx_side] +
-         1495974539.0*U_array[4][idx_side] - 263126407.0*U_array[5][idx_side]) +
-        20.0*U_array[3][idx_side]*(1607794163.0*U_array[3][idx_side] -
-         1486026707.0*U_array[4][idx_side] + 268747951.0*U_array[5][idx_side]) +
-        5.0*U_array[4][idx_side]*(1432381427.0*U_array[4][idx_side] -
-         536951582.0*U_array[5][idx_side]) +
-        263126407.0*U_array[5][idx_side]*U_array[5][idx_side]);
-}
-
-
-/*
- * Compute local beta_tilde's.
- */
-void
-ConvectiveFluxReconstructorWCNS6_Test::computeLocalBetaTilde(
-    double* beta_tilde_0,
-    double* beta_tilde_1,
-    double* beta_tilde_2,
-    double* beta_tilde_3,
-    const std::vector<double*>& U_array,
-    const int& idx_side)
-{
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(U_array.size()) == 6);
-#endif
-    
-    *beta_tilde_0 = 1.0/3.0*(U_array[5][idx_side]*(4.0*U_array[5][idx_side] - 19.0*U_array[4][idx_side] +
-         11.0*U_array[3][idx_side]) + U_array[4][idx_side]*(25.0*U_array[4][idx_side] -
-         31.0*U_array[3][idx_side]) + 10.0*U_array[3][idx_side]*U_array[3][idx_side]);
-    
-    *beta_tilde_1 = 1.0/3.0*(U_array[4][idx_side]*(4.0*U_array[4][idx_side] - 13.0*U_array[3][idx_side] +
-         5.0*U_array[2][idx_side]) + 13.0*U_array[3][idx_side]*(U_array[3][idx_side] -
-         U_array[2][idx_side]) + 4.0*U_array[2][idx_side]*U_array[2][idx_side]);
-    
-    *beta_tilde_2 = 1.0/3.0*(U_array[3][idx_side]*(10.0*U_array[3][idx_side] - 31.0*U_array[2][idx_side] +
-         11.0*U_array[1][idx_side]) + U_array[2][idx_side]*(25.0*U_array[2][idx_side] -
-         19.0*U_array[1][idx_side]) + 4.0*U_array[1][idx_side]*U_array[1][idx_side]);
-    
-    *beta_tilde_3 = 1.0/232243200.0*(U_array[5][idx_side]*(525910327.0*U_array[5][idx_side] -
-         4562164630.0*U_array[4][idx_side] + 7799501420.0*U_array[3][idx_side] -
-         6610694540.0*U_array[2][idx_side] + 2794296070.0*U_array[1][idx_side] -
-         472758974.0*U_array[0][idx_side]) + 5.0*U_array[4][idx_side]*
-        (2146987907.0*U_array[4][idx_side] - 7722406988.0*U_array[3][idx_side] +
-         6763559276.0*U_array[2][idx_side] - 2926461814.0*U_array[1][idx_side] +
-         503766638.0*U_array[0][idx_side]) + 20.0*U_array[3][idx_side]*
-        (1833221603.0*U_array[3][idx_side] - 3358664662.0*U_array[2][idx_side] +
-         1495974539.0*U_array[1][idx_side] - 263126407.0*U_array[0][idx_side]) +
-        20.0*U_array[2][idx_side]*(1607794163.0*U_array[2][idx_side] -
-         1486026707.0*U_array[1][idx_side] + 268747951.0*U_array[0][idx_side]) +
-        5.0*U_array[1][idx_side]*(1432381427.0*U_array[1][idx_side] -
-         536951582.0*U_array[0][idx_side]) +
-        263126407.0*U_array[0][idx_side]*U_array[0][idx_side]);
-}
-
-
-/*
  * Perform local WENO interpolation.
  */
 void
@@ -2875,7 +2755,7 @@ ConvectiveFluxReconstructorWCNS6_Test::performLocalWENOInterpolation(
     const std::vector<double*>& U_array,
     const int& idx_side)
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(U_array.size()) == 6);
 #endif
     
@@ -2894,9 +2774,6 @@ ConvectiveFluxReconstructorWCNS6_Test::performLocalWENOInterpolation(
     
     double sigma;
     
-    #ifdef __INTEL_COMPILER
-    #pragma forceinline
-    #endif
     computeLocalSigma(&sigma, U_array, idx_side);
     
     /*
@@ -2905,9 +2782,6 @@ ConvectiveFluxReconstructorWCNS6_Test::performLocalWENOInterpolation(
     
     double beta_0, beta_1, beta_2, beta_3;
     
-    #ifdef __INTEL_COMPILER
-    #pragma forceinline
-    #endif
     computeLocalBeta(&beta_0, &beta_1, &beta_2, &beta_3, U_array, idx_side);
     
     /*
@@ -2980,9 +2854,6 @@ ConvectiveFluxReconstructorWCNS6_Test::performLocalWENOInterpolation(
     
     double beta_tilde_0, beta_tilde_1, beta_tilde_2, beta_tilde_3;
     
-    #ifdef __INTEL_COMPILER
-    #pragma forceinline
-    #endif
     computeLocalBetaTilde(&beta_tilde_0, &beta_tilde_1, &beta_tilde_2, &beta_tilde_3, U_array, idx_side);
     
     /*
@@ -3096,15 +2967,15 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
             double* U_L = variables_minus[ei]->getPointer(0);
             double* U_R = variables_plus[ei]->getPointer(0);
             
-            #ifdef __INTEL_COMPILER
-            #pragma ivdep
+            #ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
             #endif
             for (int i = -1; i < interior_dim_0 + 2; i++)
             {
                 // Compute the linear index of the mid-point.
                 const int idx_midpoint_x = i + 1;
                 
-                #ifdef __INTEL_COMPILER
+                #ifdef HAMERS_ENABLE_SIMD
                 #pragma forceinline
                 #endif
                 performLocalWENOInterpolation(
@@ -3144,8 +3015,8 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
             
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = -1; i < interior_dim_0 + 2; i++)
                 {
@@ -3153,7 +3024,7 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
                     const int idx_midpoint_x = (i + 1) +
                         (j + 1)*(interior_dim_0 + 3);
                     
-                    #ifdef __INTEL_COMPILER
+                    #ifdef HAMERS_ENABLE_SIMD
                     #pragma forceinline
                     #endif
                     performLocalWENOInterpolation(
@@ -3184,8 +3055,8 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
             
             for (int j = -1; j < interior_dim_1 + 2; j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
@@ -3193,7 +3064,7 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
                     const int idx_midpoint_y = (i + 1) +
                         (j + 1)*(interior_dim_0 + 2);
                     
-                    #ifdef __INTEL_COMPILER
+                    #ifdef HAMERS_ENABLE_SIMD
                     #pragma forceinline
                     #endif
                     performLocalWENOInterpolation(
@@ -3237,8 +3108,8 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = -1; i < interior_dim_0 + 2; i++)
                     {
@@ -3248,7 +3119,7 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
                             (k + 1)*(interior_dim_0 + 3)*
                                 (interior_dim_1 + 2);
                         
-                        #ifdef __INTEL_COMPILER
+                        #ifdef HAMERS_ENABLE_SIMD
                         #pragma forceinline
                         #endif
                         performLocalWENOInterpolation(
@@ -3282,8 +3153,8 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
             {
                 for (int j = -1; j < interior_dim_1 + 2; j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
@@ -3293,7 +3164,7 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
                             (k + 1)*(interior_dim_0 + 2)*
                                 (interior_dim_1 + 3);
                         
-                        #ifdef __INTEL_COMPILER
+                        #ifdef HAMERS_ENABLE_SIMD
                         #pragma forceinline
                         #endif
                         performLocalWENOInterpolation(
@@ -3327,8 +3198,8 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
@@ -3338,7 +3209,7 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
                             (k + 1)*(interior_dim_0 + 2)*
                                 (interior_dim_1 + 2);
                         
-                        #ifdef __INTEL_COMPILER
+                        #ifdef HAMERS_ENABLE_SIMD
                         #pragma forceinline
                         #endif
                         performLocalWENOInterpolation(

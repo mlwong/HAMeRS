@@ -11,6 +11,8 @@
 #include "SAMRAI/tbox/Dimension.h"
 #include "SAMRAI/tbox/Utilities.h"
 
+#include "HAMeRS_config.hpp"
+
 #include "flow/flow_models/FlowModels.hpp"
 
 #include "boost/shared_ptr.hpp"

@@ -1723,8 +1723,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
                 
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = -num_ghosts_0_projection_var;
                          i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
@@ -1739,8 +1739,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
                     }
                 }
                 
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = -num_ghosts_0_projection_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
@@ -1819,8 +1819,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-                        #ifdef __INTEL_COMPILER
-                        #pragma ivdep
+                        #ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
                         #endif
                         for (int i = -num_ghosts_0_projection_var;
                              i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
@@ -1843,8 +1843,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
                 
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = -num_ghosts_0_projection_var;
                          i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
@@ -1888,8 +1888,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
                          j < interior_dim_1 + 1 + num_ghosts_1_projection_var;
                          j++)
                     {
-                        #ifdef __INTEL_COMPILER
-                        #pragma ivdep
+                        #ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
                         #endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
@@ -1912,8 +1912,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
                      j < interior_dim_1 + 1 + num_ghosts_1_projection_var;
                      j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
@@ -2011,8 +2011,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-                            #ifdef __INTEL_COMPILER
-                            #pragma ivdep
+                            #ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
                             #endif
                             for (int i = -num_ghosts_0_projection_var;
                                  i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
@@ -2044,8 +2044,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-                        #ifdef __INTEL_COMPILER
-                        #pragma ivdep
+                        #ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
                         #endif
                         for (int i = -num_ghosts_0_projection_var;
                              i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
@@ -2102,8 +2102,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
                              j < interior_dim_1 + 1 + num_ghosts_1_projection_var;
                              j++)
                         {
-                            #ifdef __INTEL_COMPILER
-                            #pragma ivdep
+                            #ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
                             #endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
@@ -2135,8 +2135,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
                          j < interior_dim_1 + 1 + num_ghosts_1_projection_var;
                          j++)
                     {
-                        #ifdef __INTEL_COMPILER
-                        #pragma ivdep
+                        #ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
                         #endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
@@ -2191,8 +2191,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-                            #ifdef __INTEL_COMPILER
-                            #pragma ivdep
+                            #ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
                             #endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
@@ -2224,8 +2224,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-                        #ifdef __INTEL_COMPILER
-                        #pragma ivdep
+                        #ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
                         #endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
@@ -2541,8 +2541,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromPr
         
         for (int si = 0; si < d_num_species; si++)
         {
-            #ifdef __INTEL_COMPILER
-            #pragma ivdep
+            #ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
             #endif
             for (int i = -num_ghosts_0_characteristic_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
@@ -2559,8 +2559,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromPr
             }
         }
         
-        #ifdef __INTEL_COMPILER
-        #pragma ivdep
+        #ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
         #endif
         for (int i = -num_ghosts_0_characteristic_var;
              i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
@@ -2623,8 +2623,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromPr
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = -num_ghosts_0_characteristic_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
@@ -2649,8 +2649,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromPr
         
         for (int j = 0; j < interior_dim_1; j++)
         {
-            #ifdef __INTEL_COMPILER
-            #pragma ivdep
+            #ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
             #endif
             for (int i = -num_ghosts_0_characteristic_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
@@ -2698,8 +2698,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromPr
                  j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
                  j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
@@ -2724,8 +2724,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromPr
              j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
              j++)
         {
-            #ifdef __INTEL_COMPILER
-            #pragma ivdep
+            #ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
             #endif
             for (int i = 0; i < interior_dim_0; i++)
             {
@@ -2805,8 +2805,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromPr
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = -num_ghosts_0_characteristic_var;
                          i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
@@ -2840,8 +2840,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromPr
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = -num_ghosts_0_characteristic_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
@@ -2900,8 +2900,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromPr
                      j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
                      j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
@@ -2935,8 +2935,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromPr
                  j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
                  j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
@@ -2993,8 +2993,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromPr
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
@@ -3028,8 +3028,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataCharacteristicVariablesFromPr
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
@@ -3285,8 +3285,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharact
         
         for (int si = 0; si < d_num_species; si++)
         {
-            #ifdef __INTEL_COMPILER
-            #pragma ivdep
+            #ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
             #endif
             for (int i = -num_ghosts_0_characteristic_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
@@ -3301,8 +3301,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharact
             }
         }
         
-        #ifdef __INTEL_COMPILER
-        #pragma ivdep
+        #ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
         #endif
         for (int i = -num_ghosts_0_characteristic_var;
              i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
@@ -3352,8 +3352,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharact
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = -num_ghosts_0_characteristic_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
@@ -3372,8 +3372,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharact
         
         for (int j = 0; j < interior_dim_1; j++)
         {
-            #ifdef __INTEL_COMPILER
-            #pragma ivdep
+            #ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
             #endif
             for (int i = -num_ghosts_0_characteristic_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
@@ -3420,8 +3420,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharact
                  j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
                  j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
@@ -3440,8 +3440,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharact
              j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
              j++)
         {
-            #ifdef __INTEL_COMPILER
-            #pragma ivdep
+            #ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
             #endif
             for (int i = 0; i < interior_dim_0; i++)
             {
@@ -3498,8 +3498,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharact
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = -num_ghosts_0_characteristic_var;
                          i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
@@ -3523,8 +3523,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharact
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = -num_ghosts_0_characteristic_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
@@ -3578,8 +3578,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharact
                      j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
                      j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
@@ -3603,8 +3603,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharact
                  j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
                  j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
@@ -3656,8 +3656,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharact
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
@@ -3681,8 +3681,8 @@ FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharact
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
@@ -4772,8 +4772,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataConservativeVariablesBounded(
         // Compute density.
         for (int si = 0; si < d_num_species; si++)
         {
-            #ifdef __INTEL_COMPILER
-            #pragma ivdep
+            #ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
             #endif
             for (int i = -num_ghosts_0_conservative_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
@@ -4789,8 +4789,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataConservativeVariablesBounded(
         // Check if mass fractions are bounded.
         for (int si = 0; si < d_num_species; si++)
         {
-            #ifdef __INTEL_COMPILER
-            #pragma ivdep
+            #ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
             #endif
             for (int i = -num_ghosts_0_conservative_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
@@ -4813,8 +4813,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataConservativeVariablesBounded(
         }
         
         // Check if density and total energy are bounded.
-        #ifdef __INTEL_COMPILER
-        #pragma ivdep
+        #ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
         #endif
         for (int i = -num_ghosts_0_conservative_var;
              i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
@@ -4869,8 +4869,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataConservativeVariablesBounded(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = -num_ghosts_0_conservative_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
@@ -4890,8 +4890,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataConservativeVariablesBounded(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = -num_ghosts_0_conservative_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
@@ -4918,8 +4918,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataConservativeVariablesBounded(
         // Check if density and total energy are bounded.
         for (int j = 0; j < interior_dim_1; j++)
         {
-            #ifdef __INTEL_COMPILER
-            #pragma ivdep
+            #ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
             #endif
             for (int i = -num_ghosts_0_conservative_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
@@ -4969,8 +4969,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataConservativeVariablesBounded(
                  j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
                  j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
@@ -4990,8 +4990,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataConservativeVariablesBounded(
                  j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
                  j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
@@ -5018,8 +5018,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataConservativeVariablesBounded(
              j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
              j++)
         {
-            #ifdef __INTEL_COMPILER
-            #pragma ivdep
+            #ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
             #endif
             for (int i = 0; i < interior_dim_0; i++)
             {
@@ -5079,8 +5079,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataConservativeVariablesBounded(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = -num_ghosts_0_conservative_var;
                          i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
@@ -5105,8 +5105,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataConservativeVariablesBounded(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = -num_ghosts_0_conservative_var;
                          i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
@@ -5138,8 +5138,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataConservativeVariablesBounded(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = -num_ghosts_0_conservative_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
@@ -5194,8 +5194,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataConservativeVariablesBounded(
                      j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
                      j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
@@ -5220,8 +5220,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataConservativeVariablesBounded(
                      j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
                      j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
@@ -5253,8 +5253,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataConservativeVariablesBounded(
                  j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
                  j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
@@ -5307,8 +5307,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataConservativeVariablesBounded(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
@@ -5333,8 +5333,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataConservativeVariablesBounded(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
@@ -5366,8 +5366,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataConservativeVariablesBounded(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
@@ -5528,8 +5528,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
         // Compute density.
         for (int si = 0; si < d_num_species; si++)
         {
-            #ifdef __INTEL_COMPILER
-            #pragma ivdep
+            #ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
             #endif
             for (int i = -num_ghosts_0_primitive_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
@@ -5545,8 +5545,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
         // Check if mass fractions are bounded.
         for (int si = 0; si < d_num_species; si++)
         {
-            #ifdef __INTEL_COMPILER
-            #pragma ivdep
+            #ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
             #endif
             for (int i = -num_ghosts_0_primitive_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
@@ -5569,8 +5569,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
         }
         
         // Check if density and total energy are bounded.
-        #ifdef __INTEL_COMPILER
-        #pragma ivdep
+        #ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
         #endif
         for (int i = -num_ghosts_0_primitive_var;
              i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
@@ -5625,8 +5625,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = -num_ghosts_0_primitive_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
@@ -5646,8 +5646,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = -num_ghosts_0_primitive_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
@@ -5674,8 +5674,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
         // Check if density and total energy are bounded.
         for (int j = 0; j < interior_dim_1; j++)
         {
-            #ifdef __INTEL_COMPILER
-            #pragma ivdep
+            #ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
             #endif
             for (int i = -num_ghosts_0_primitive_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
@@ -5725,8 +5725,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
                  j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
                  j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
@@ -5746,8 +5746,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
                  j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
                  j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
@@ -5774,8 +5774,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
              j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
              j++)
         {
-            #ifdef __INTEL_COMPILER
-            #pragma ivdep
+            #ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
             #endif
             for (int i = 0; i < interior_dim_0; i++)
             {
@@ -5835,8 +5835,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = -num_ghosts_0_primitive_var;
                          i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
@@ -5861,8 +5861,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = -num_ghosts_0_primitive_var;
                          i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
@@ -5894,8 +5894,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = -num_ghosts_0_primitive_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
@@ -5950,8 +5950,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
                      j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
                      j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
@@ -5976,8 +5976,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
                      j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
                      j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
@@ -6009,8 +6009,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
                  j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
                  j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
@@ -6063,8 +6063,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
@@ -6089,8 +6089,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef __INTEL_COMPILER
-                    #pragma ivdep
+                    #ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
                     #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
@@ -6122,8 +6122,8 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef __INTEL_COMPILER
-                #pragma ivdep
+                #ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
                 #endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
@@ -6163,7 +6163,7 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
 bool
 FlowModelFourEqnConservative::haveConservativeVariablesBounded(const std::vector<double>& conservative_variables)
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(conservative_variables.size()) == d_num_eqn);
 #endif
     
@@ -6207,7 +6207,7 @@ FlowModelFourEqnConservative::haveConservativeVariablesBounded(const std::vector
 bool
 FlowModelFourEqnConservative::havePrimitiveVariablesBounded(const std::vector<double>& primitive_variables)
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(primitive_variables.size()) == d_num_eqn);
 #endif
     
@@ -9874,7 +9874,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
     
     NULL_USE(simulation_time);
     
-#ifdef DEBUG_CHECK_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT((region * patch.getBox()).isSpatiallyEqual(region));
 #endif
     
@@ -9889,7 +9889,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(d_variable_partial_density, d_plot_context)));
         
-#ifdef DEBUG_CHECK_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_partial_density);
         TBOX_ASSERT(data_partial_density->getGhostBox().isSpatiallyEqual(patch.getBox()));
 #endif
@@ -9996,7 +9996,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(d_variable_total_energy, d_plot_context)));
         
-#ifdef DEBUG_CHECK_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_partial_density);
         TBOX_ASSERT(data_momentum);
         TBOX_ASSERT(data_total_energy);
@@ -10258,7 +10258,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(d_variable_total_energy, d_plot_context)));
         
-#ifdef DEBUG_CHECK_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_partial_density);
         TBOX_ASSERT(data_momentum);
         TBOX_ASSERT(data_total_energy);
@@ -10534,7 +10534,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(d_variable_momentum, d_plot_context)));
         
-#ifdef DEBUG_CHECK_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_partial_density);
         TBOX_ASSERT(data_momentum);
         TBOX_ASSERT(data_partial_density->getGhostBox().isSpatiallyEqual(patch.getBox()));
@@ -10644,7 +10644,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(d_variable_partial_density, d_plot_context)));
         
-#ifdef DEBUG_CHECK_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_partial_density);
         TBOX_ASSERT(data_partial_density->getGhostBox().isSpatiallyEqual(patch.getBox()));
 #endif
