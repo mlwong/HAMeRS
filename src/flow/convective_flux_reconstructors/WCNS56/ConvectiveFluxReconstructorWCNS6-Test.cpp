@@ -2544,7 +2544,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxesAndSources(
                         // Compute the linear indices.
                         const int idx_face_z = k +
                             i*(interior_dims[2] + 1) +
-                            j*(interior_dims[2] + 1)*interior_dims[0];
+                            j*(interior_dims[2] + 1)*interior_dims_0;
                         
                         const int idx_midpoint_z = (i + 1) +
                             (j + 1)*(interior_dim_0 + 2) +
