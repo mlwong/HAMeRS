@@ -238,7 +238,7 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
 /*
  * Perform local WENO interpolation.
  */
-inline void performLocalWENOInterpolation(
+static inline __attribute__((always_inline)) void performLocalWENOInterpolation(
    double* U_minus,
    double* U_plus,
    const std::vector<double*> U_array,
