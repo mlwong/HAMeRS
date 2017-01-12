@@ -3049,7 +3049,7 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
                             d_constant_C,
                             d_constant_p,
                             d_constant_q,
-                            d_constant_alpha_tau););
+                            d_constant_alpha_tau);
                     }
                 }
             }
