@@ -189,10 +189,12 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
         /*
          * Perform local WENO interpolation.
          */
+        /*
         #ifdef HAMERS_ENABLE_SIMD
         #pragma omp declare simd
         #endif
-        inline void performLocalWENOInterpolation(
+        */
+        __attribute__((always_inline)) void performLocalWENOInterpolation(
            double* U_minus,
            double* U_plus,
            const std::vector<double*>& U_array,
