@@ -236,7 +236,7 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
 
 
 /*
- * Compute local sigma's.
+ * Compute local sigma.
  */
 static inline __attribute__((always_inline)) void computeLocalSigma(
     double* sigma,
@@ -351,10 +351,6 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolation(
    int q,
    double alpha_tau)
 {
-    /*
-     * Perform the WENO interpolation.
-     */
-    
     /*
      * Compute sigma.
      */

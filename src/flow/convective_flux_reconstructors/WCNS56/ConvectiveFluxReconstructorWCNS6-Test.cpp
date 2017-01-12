@@ -2754,20 +2754,42 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
     std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_plus,
     const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables)
 {
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(static_cast<int>(variables_minus.size()) == d_num_eqn);
+    TBOX_ASSERT(static_cast<int>(variables_plus.size()) == d_num_eqn);
+    
+    TBOX_ASSERT(static_cast<int>(variables.size()) == 6);
+#endif
+    
     /*
      * Get the interior dimensions.
      */
     
-    const hier::IntVector interior_dims = variables[0][0]->getBox().numberCells();
+    const hier::IntVector interior_dims = variables_minus[0]->getBox().numberCells();
     
-    /*
-     * Check potential failures.
-     */
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    for (int ei = 0; ei < d_num_eqn; ei++)
+    {
+        TBOX_ASSERT(variables_minus[ei]->getBox().numberCells() == interior_dims);
+        TBOX_ASSERT(variables_plus[ei]->getBox().numberCells() == interior_dims);
+        
+        TBOX_ASSERT(variables_minus[ei]->getGhostCellWidth() == hier::IntVector::getOne(d_dim));
+        TBOX_ASSERT(variables_plus[ei]->getGhostCellWidth() == hier::IntVector::getOne(d_dim));
+    }
     
+    TBOX_ASSERT(static_cast<int>(variables.size()) == 6);
     
-    
-    
-    
+    for (int m = 0; m < 6; m++)
+    {
+        TBOX_ASSERT(static_cast<int>(variables[m].size()) == d_num_eqn);
+        
+        for (int ei = 0; ei < d_num_eqn; ei++)
+        {
+            TBOX_ASSERT(variables[m][ei]->getBox().numberCells() == interior_dims);
+            TBOX_ASSERT(variables[m][ei]->getGhostCellWidth() == hier::IntVector::getOne(d_dim));
+        }
+    }
+#endif
     
     if (d_dim == tbox::Dimension(1))
     {
