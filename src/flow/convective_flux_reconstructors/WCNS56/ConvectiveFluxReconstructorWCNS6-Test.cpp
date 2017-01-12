@@ -3074,7 +3074,7 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
                     performLocalWENOInterpolation(
                         U_L,
                         U_R,
-                        U_array,
+                        U_array.data(),
                         idx_midpoint_x);
                 }
             }
@@ -3111,7 +3111,7 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
                     performLocalWENOInterpolation(
                         U_B,
                         U_T,
-                        U_array,
+                        U_array.data(),
                         idx_midpoint_y);
                 }
             }
@@ -3163,7 +3163,7 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
                         performLocalWENOInterpolation(
                             U_L,
                             U_R,
-                            U_array,
+                            U_array.data(),
                             idx_midpoint_x);
                     }
                 }
@@ -3205,7 +3205,7 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
                         performLocalWENOInterpolation(
                             U_B,
                             U_T,
-                            U_array,
+                            U_array.data(),
                             idx_midpoint_y);
                     }
                 }
@@ -3247,7 +3247,7 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
                         performLocalWENOInterpolation(
                             U_B,
                             U_F,
-                            U_array,
+                            U_array.data(),
                             idx_midpoint_z);
                     }
                 }
