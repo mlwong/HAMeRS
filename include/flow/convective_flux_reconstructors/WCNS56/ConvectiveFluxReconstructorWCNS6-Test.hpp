@@ -238,7 +238,6 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
 /*
  * Perform local WENO interpolation.
  */
-#pragma omp declare simd
 inline void performLocalWENOInterpolation(
    double* U_minus,
    double* U_plus,
