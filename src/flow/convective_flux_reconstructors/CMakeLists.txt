@@ -8,8 +8,6 @@ set(convective_flux_reconstructors_source_files
     ./WCNS56/ConvectiveFluxReconstructorWCNS5-JS-HLLC-HLL.cpp
     ./WCNS56/ConvectiveFluxReconstructorWCNS5-Z-HLLC-HLL.cpp
     ./WCNS56/ConvectiveFluxReconstructorWCNS6-CU-M2-HLLC-HLL.cpp
-    ./WCNS56/ConvectiveFluxReconstructorWCNS6-HW-HLLC-HLL.cpp
-    ./WCNS56/ConvectiveFluxReconstructorWCNS6-HW-LD-HLLC-HLL.cpp
     ./WCNS56/ConvectiveFluxReconstructorWCNS6-LD-HLLC-HLL.cpp
     ./WCNS56/ConvectiveFluxReconstructorWCNS6-Test.cpp
 )

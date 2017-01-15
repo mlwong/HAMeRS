@@ -2,7 +2,6 @@
 #define CONVECTIVE_FLUX_RECONSTRUCTOR_56_HLLC_HLL_HPP
 
 #include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructor.hpp"
-
 #include "util/Directions.hpp"
 
 #include "boost/multi_array.hpp"
@@ -22,6 +21,20 @@ class ConvectiveFluxReconstructorWCNS56: public ConvectiveFluxReconstructor
         virtual ~ConvectiveFluxReconstructorWCNS56() {}
         
         /*
+         * Print all characteristics of the convective flux reconstruction class.
+         */
+        virtual void
+        printClassData(std::ostream& os) const = 0;
+        
+        /*
+         * Put the characteristics of the convective flux reconstruction class
+         * into the restart database.
+         */
+        virtual void
+        putToRestart(
+            const boost::shared_ptr<tbox::Database>& restart_db) const = 0;
+        
+        /*
          * Compute the convective fluxes and sources due to hyperbolization
          * of the equations.
          */
@@ -35,56 +48,15 @@ class ConvectiveFluxReconstructorWCNS56: public ConvectiveFluxReconstructor
             const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
-        /*
-         * Print all characteristics of the convective flux reconstruction class.
-         */
-        virtual void
-        printClassData(std::ostream& os) const = 0;
-        
-        /*
-         * Put the characteristics of the convective flux reconstruction class
-         * into the restart database.
-         */
-        virtual void
-        putToRestart(
-            const boost::shared_ptr<tbox::Database>& restart_db) const = 0;
-    
     protected:
-        /*
-         * Transform physcial variables into characteristic variables.
-         * W_array: Characteristic variables.
-         * U_array: Physical variables.
-         * R_inv_intercell: Projection matrix.
-         */
-        void
-        projectPhysicalVariablesToCharacteristicFields(
-            boost::multi_array<double, 2>& W_array,
-            const boost::multi_array<const double*, 2>& U_array,
-            const boost::multi_array<double, 2>& R_inv_intercell);
-        
-        /*
-         * Transform characteristic variables into primitive variables.
-         * U: Physcial variables.
-         * W: Characteristic variables.
-         * R_intercell: Inverse of projection matrix.
-         */
-        void
-        projectCharacteristicVariablesToPhysicalFields(
-            std::vector<double>& U,
-            const std::vector<double>& W,
-            const boost::multi_array<double, 2>& R_intercell);
-        
         /*
          * Perform WENO interpolation.
          */
         virtual void
         performWENOInterpolation(
-            std::vector<double>& U_minus,
-            std::vector<double>& U_plus,
-            const boost::multi_array<const double*, 2>& U_array,
-            const hier::Index& cell_index_minus,
-            const hier::Index& cell_index_plus,
-            const DIRECTION::TYPE& direction) = 0;
+            std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_minus,
+            std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_plus,
+            const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables) = 0;
         
 };
 

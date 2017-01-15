@@ -5568,7 +5568,7 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
             }
         }
         
-        // Check if density and total energy are bounded.
+        // Check if density and pressure are bounded.
         #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
         #endif
@@ -5671,7 +5671,7 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
             }
         }
         
-        // Check if density and total energy are bounded.
+        // Check if density and pressure are bounded.
         for (int j = 0; j < interior_dim_1; j++)
         {
             #ifdef HAMERS_ENABLE_SIMD
@@ -5769,7 +5769,7 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
             }
         }
         
-        // Check if density and total energy are bounded.
+        // Check if density and pressure are bounded.
         for (int j = -num_ghosts_1_primitive_var;
              j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
              j++)
@@ -5889,7 +5889,7 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
             }
         }
         
-        // Check if density and total energy are bounded.
+        // Check if density and pressure are bounded.
         for (int k = 0; k < interior_dim_2; k++)
         {
             for (int j = 0; j < interior_dim_1; j++)
@@ -6002,7 +6002,7 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
             }
         }
         
-        // Check if density and total energy are bounded.
+        // Check if density and pressure are bounded.
         for (int k = 0; k < interior_dim_2; k++)
         {
             for (int j = -num_ghosts_1_primitive_var;
@@ -6115,7 +6115,7 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
             }
         }
         
-        // Check if density and total energy are bounded.
+        // Check if density and pressure are bounded.
         for (int k = -num_ghosts_2_primitive_var;
              k < interior_dim_2 + 1 + num_ghosts_2_primitive_var;
              k++)
