@@ -834,11 +834,11 @@ FlowModelFourEqnConservative::registerDerivedCellVariable(
 
 
 /*
- * Register the required variables for the computation of projection matrix
- * of conservative variables and its inverse at faces in the registered patch.
+ * Register the required derived variables for transformation between conservative
+ * variables and characteristic variables.
  */
 void
-FlowModelFourEqnConservative::registerFaceProjectionMatricesOfConservativeVariables(
+FlowModelFourEqnConservative::registerDerivedVariablesForCharacteristicProjectionOfConservativeVariables(
     const hier::IntVector& num_subghosts,
     const AVERAGING::TYPE& averaging)
 {
@@ -846,25 +846,24 @@ FlowModelFourEqnConservative::registerFaceProjectionMatricesOfConservativeVariab
     if (!d_patch)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::registerFaceProjectionMatricesOfConservativeVariables()\n"
+            << ": FlowModelFourEqnConservative::"
+            << "registerDerivedVariablesForCharacteristicProjectionOfConservativeVariables()\n"
             << "No patch is registered yet."
             << std::endl);
     }
     
     NULL_USE(num_subghosts);
     
-    d_proj_mat_conservative_var_averaging = averaging;
-    
-    d_proj_mat_conservative_var_registered = true;
+    d_proj_var_conservative_averaging = averaging;
 }
 
 
 /*
- * Register the required variables for the computation of projection matrix
- * of primitive variables and its inverse at faces in the registered patch.
+ * Register the required derived variables for transformation between primitive variables
+ * and characteristic variables.
  */
 void
-FlowModelFourEqnConservative::registerFaceProjectionMatricesOfPrimitiveVariables(
+FlowModelFourEqnConservative::registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
     const hier::IntVector& num_subghosts,
     const AVERAGING::TYPE& averaging)
 {
@@ -872,19 +871,18 @@ FlowModelFourEqnConservative::registerFaceProjectionMatricesOfPrimitiveVariables
     if (!d_patch)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::registerFaceProjectionMatricesOfPrimitiveVariables()\n"
+            << ": FlowModelFourEqnConservative::"
+            << "registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables()\n"
             << "No patch is registered yet."
             << std::endl);
     }
     
-    d_proj_mat_primitive_var_averaging = averaging;
+    d_proj_var_primitive_averaging = averaging;
     
     setNumberOfSubGhosts(
         num_subghosts,
         "SOUND_SPEED",
         "PROJECTION_MATRICES");
-    
-    d_proj_mat_primitive_var_registered = true;
 }
 
 
@@ -1029,9 +1027,6 @@ FlowModelFourEqnConservative::unregisterPatch()
     d_data_max_wave_speed_y.reset();
     d_data_max_wave_speed_z.reset();
     d_data_diffusivities.reset();
-    
-    d_proj_mat_conservative_var_registered = false;
-    d_proj_mat_primitive_var_registered    = false;
     
     clearDataContext();
 }
@@ -1706,7 +1701,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
         const int num_subghosts_0_density = d_num_subghosts_density[0];
         const int num_subghosts_0_sound_speed = d_num_subghosts_sound_speed[0];
         
-        switch (d_proj_mat_primitive_var_averaging)
+        switch (d_proj_var_primitive_averaging)
         {
             case AVERAGING::SIMPLE:
             {
@@ -1774,7 +1769,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
                 TBOX_ERROR(d_object_name
                     << ": FlowModelFourEqnConservative::"
                     << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
-                    << "Unknown d_proj_mat_primitive_var_averaging given."
+                    << "Unknown d_proj_var_primitive_averaging given."
                     << std::endl);
             }
         }
@@ -1800,7 +1795,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
         const int num_subghosts_1_sound_speed = d_num_subghosts_sound_speed[1];
         const int subghostcell_dim_0_sound_speed = d_subghostcell_dims_sound_speed[0];
         
-        switch (d_proj_mat_primitive_var_averaging)
+        switch (d_proj_var_primitive_averaging)
         {
             case AVERAGING::SIMPLE:
             {
@@ -1955,7 +1950,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
                 TBOX_ERROR(d_object_name
                     << ": FlowModelFourEqnConservative::"
                     << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
-                    << "Unknown d_proj_mat_primitive_var_averaging given."
+                    << "Unknown d_proj_var_primitive_averaging given."
                     << std::endl);
             }
         }
@@ -1990,7 +1985,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
         const int subghostcell_dim_0_sound_speed = d_subghostcell_dims_sound_speed[0];
         const int subghostcell_dim_1_sound_speed = d_subghostcell_dims_sound_speed[1];
         
-        switch (d_proj_mat_primitive_var_averaging)
+        switch (d_proj_var_primitive_averaging)
         {
             case AVERAGING::SIMPLE:
             {
@@ -2278,7 +2273,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
                 TBOX_ERROR(d_object_name
                     << ": FlowModelFourEqnConservative::"
                     << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
-                    << "Unknown d_proj_mat_primitive_var_averaging given."
+                    << "Unknown d_proj_var_primitive_averaging given."
                     << std::endl);
             }
         }
@@ -3701,846 +3696,6 @@ FlowModelFourEqnConservative::computeGlobalSideDataPrimitiveVariablesFromCharact
                     V[d_num_species + 3][idx_face] = -0.5*rho_average[idx_face]*c_average[idx_face]*W[0][idx_face] +
                         0.5*rho_average[idx_face]*c_average[idx_face]*W[d_num_eqn - 1][idx_face];
                 }
-            }
-        }
-    }
-}
-
-
-/*
- * Compute the local face data of projection matrix of conservative variables in the
- * registered patch.
- */
-void
-FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixOfConservativeVariables(
-    boost::multi_array<double, 2>& projection_matrix,
-    const hier::Index& cell_index_minus,
-    const hier::Index& cell_index_plus,
-    const DIRECTION::TYPE& direction)
-{
-    NULL_USE(projection_matrix);
-    NULL_USE(cell_index_minus);
-    NULL_USE(cell_index_plus);
-    NULL_USE(direction);
-    
-    TBOX_ERROR(d_object_name
-        << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixOfConservativeVariables()\n"
-        << "Method computeLocalFaceProjectionMatrixOfConservativeVariables() is not yet implemented."
-        << std::endl);
-}
-
-
-/*
- * Compute the local face data of inverse of projection matrix of conservative variables
- * in the registered patch.
- */
-void
-FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixInverseOfConservativeVariables(
-    boost::multi_array<double, 2>& projection_matrix_inv,
-    const hier::Index& cell_index_minus,
-    const hier::Index& cell_index_plus,
-    const DIRECTION::TYPE& direction)
-{
-    NULL_USE(projection_matrix_inv);
-    NULL_USE(cell_index_minus);
-    NULL_USE(cell_index_plus);
-    NULL_USE(direction);
-    
-    TBOX_ERROR(d_object_name
-        << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixInverseOfConservativeVariables()\n"
-        << "Method computeLocalFaceProjectionMatrixInverseOfConservativeVariables() is not yet implemented."
-        << std::endl);
-}
-
-
-/*
- * Compute the local face data of projection matrix of primitive variables in the
- * registered patch.
- */
-void
-FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
-    boost::multi_array<double, 2>& projection_matrix,
-    const hier::Index& cell_index_minus,
-    const hier::Index& cell_index_plus,
-    const DIRECTION::TYPE& direction)
-{
-    if (!d_proj_mat_primitive_var_registered)
-    {
-        TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
-            << "Projection matrices is not yet registered."
-            << std::endl);
-    }
-    
-    projection_matrix.resize(boost::extents[d_num_eqn][d_num_eqn]);
-    
-    // Get the cell data of the variable partial density.
-    boost::shared_ptr<pdat::CellData<double> > data_partial_density =
-        getGlobalCellDataPartialDensity();
-    
-    // Get the pointers to the cell data of partial density, total density and sound speed.
-    std::vector<double*> rho_Y;
-    rho_Y.reserve(d_num_species);
-    for (int si = 0; si < d_num_species; si++)
-    {
-        rho_Y.push_back(data_partial_density->getPointer(si));
-    }
-    if (!d_data_sound_speed)
-    {
-        computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
-    }
-    double* rho = d_data_density->getPointer(0);
-    double* c = d_data_sound_speed->getPointer(0);
-    
-    /*
-     * Fill the projection matrix with zeros.
-     */
-    for (int ei = 0; ei < d_num_eqn; ei++)
-    {
-        for (int ej = 0; ej < d_num_eqn; ej++)
-        {
-            projection_matrix[ei][ej] = 0.0;
-        }
-    }
-    
-    // Compute the projection matrix.
-    if (d_dim == tbox::Dimension(1))
-    {
-        // Compute the linear indices.
-        const int idx_minus = cell_index_minus[0] + d_num_ghosts[0];
-        const int idx_plus = cell_index_plus[0] + d_num_ghosts[0];
-        const int idx_density_minus = cell_index_minus[0] + d_num_subghosts_density[0];
-        const int idx_density_plus = cell_index_plus[0] + d_num_subghosts_density[0];
-        const int idx_sound_speed_minus = cell_index_minus[0] + d_num_subghosts_sound_speed[0];
-        const int idx_sound_speed_plus = cell_index_plus[0] + d_num_subghosts_sound_speed[0];
-        
-        // Compute the average values.
-        double rho_average, c_average;
-        std::vector<double> rho_Y_average;
-        rho_Y_average.reserve(d_num_species);
-        switch (d_proj_mat_primitive_var_averaging)
-        {
-            case AVERAGING::SIMPLE:
-            {
-                rho_average = 0.5*(rho[idx_density_minus] + rho[idx_density_plus]);
-                c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
-                
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    rho_Y_average.push_back(0.5*(rho_Y[si][idx_minus] +
-                        rho_Y[si][idx_plus]));
-                }
-                
-                break;
-            }
-            case AVERAGING::ROE:
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
-                    << "Roe averaging is not yet implemented."
-                    << std::endl);
-                
-                rho_average = 0.0;
-                c_average   = 0.0;
-                
-                break;
-            }
-            default:
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
-                    << "Unknown d_proj_mat_primitive_var_averaging given."
-                    << std::endl);
-                
-                rho_average = 0.0;
-                c_average   = 0.0;
-            }
-        }
-        
-        switch (direction)
-        {
-            case DIRECTION::X_DIRECTION:
-            {
-                projection_matrix[0][d_num_species] = 1.0;
-                projection_matrix[0][d_num_species + 1] = -1.0/(rho_average*c_average);
-                
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    projection_matrix[1 + si][si] = 1.0;
-                    projection_matrix[1 + si][d_num_species + 1] = -rho_Y_average[si]/
-                        (rho_average*c_average*c_average);
-                }
-                
-                projection_matrix[d_num_species + 1][d_num_species] = 1.0;
-                projection_matrix[d_num_species + 1][d_num_species + 1] = 1.0/(rho_average*c_average);
-                
-                break;
-            }
-            default:
-            {
-                TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
-                << "There is only x-direction for one-dimensional problem."
-                << std::endl);
-            }
-        }
-    }
-    else if (d_dim == tbox::Dimension(2))
-    {
-        // Compute the linear indices.
-        const int idx_minus = (cell_index_minus[0] + d_num_ghosts[0]) +
-            (cell_index_minus[1] + d_num_ghosts[1])*d_ghostcell_dims[0];
-        
-        const int idx_plus = (cell_index_plus[0] + d_num_ghosts[0]) +
-            (cell_index_plus[1] + d_num_ghosts[1])*d_ghostcell_dims[0];
-        
-        const int idx_density_minus = (cell_index_minus[0] + d_num_subghosts_density[0]) +
-            (cell_index_minus[1] + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
-        
-        const int idx_density_plus = (cell_index_plus[0] + d_num_subghosts_density[0]) +
-            (cell_index_plus[1] + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
-        
-        const int idx_sound_speed_minus = (cell_index_minus[0] + d_num_subghosts_sound_speed[0]) +
-            (cell_index_minus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
-        
-        const int idx_sound_speed_plus = (cell_index_plus[0] + d_num_subghosts_sound_speed[0]) +
-            (cell_index_plus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
-        
-        // Compute the average values.
-        double rho_average, c_average;
-        std::vector<double> rho_Y_average;
-        rho_Y_average.reserve(d_num_species);
-        switch (d_proj_mat_primitive_var_averaging)
-        {
-            case AVERAGING::SIMPLE:
-            {
-                rho_average = 0.5*(rho[idx_density_minus] + rho[idx_density_plus]);
-                c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
-                
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    rho_Y_average.push_back(0.5*(rho_Y[si][idx_minus] +
-                        rho_Y[si][idx_plus]));
-                }
-                
-                break;
-            }
-            case AVERAGING::ROE:
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
-                    << "Roe averaging is not yet implemented."
-                    << std::endl);
-                
-                rho_average = 0.0;
-                c_average   = 0.0;
-                
-                break;
-            }
-            default:
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
-                    << "Unknown d_proj_mat_primitive_var_averaging given."
-                    << std::endl);
-                
-                rho_average = 0.0;
-                c_average   = 0.0;
-            }
-        }
-        
-        switch (direction)
-        {
-            case DIRECTION::X_DIRECTION:
-            {
-                projection_matrix[0][d_num_species] = 1.0;
-                projection_matrix[0][d_num_species + 2] = -1.0/(rho_average*c_average);
-                
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    projection_matrix[1 + si][si] = 1.0;
-                    projection_matrix[1 + si][d_num_species + 2] = -rho_Y_average[si]/
-                        (rho_average*c_average*c_average);
-                }
-                
-                projection_matrix[d_num_species + 1][d_num_species + 1] = 1.0;
-                
-                projection_matrix[d_num_species + 2][d_num_species] = 1.0;
-                projection_matrix[d_num_species + 2][d_num_species + 2] = 1.0/(rho_average*c_average);
-                
-                break;
-            }
-            case DIRECTION::Y_DIRECTION:
-            {
-                projection_matrix[0][d_num_species + 1] = 1.0;
-                projection_matrix[0][d_num_species + 2] = -1.0/(rho_average*c_average);
-                
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    projection_matrix[1 + si][si] = 1.0;
-                    projection_matrix[1 + si][d_num_species + 2] = -rho_Y_average[si]/
-                        (rho_average*c_average*c_average);
-                }
-                
-                projection_matrix[d_num_species + 1][d_num_species] = 1.0;
-                
-                projection_matrix[d_num_species + 2][d_num_species + 1] = 1.0;
-                projection_matrix[d_num_species + 2][d_num_species + 2] = 1.0/(rho_average*c_average);
-                
-                break;
-            }
-            default:
-            {
-                TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
-                << "There are only x-direction and y-direction for two-dimensional problem."
-                << std::endl);
-            }
-        }
-    }
-    else if (d_dim == tbox::Dimension(3))
-    {
-        const int idx_minus = (cell_index_minus[0] + d_num_ghosts[0]) +
-            (cell_index_minus[1] + d_num_ghosts[1])*d_ghostcell_dims[0] +
-            (cell_index_minus[2] + d_num_ghosts[2])*d_ghostcell_dims[0]*
-                d_ghostcell_dims[1];
-        
-        const int idx_plus = (cell_index_plus[0] + d_num_ghosts[0]) +
-            (cell_index_plus[1] + d_num_ghosts[1])*d_ghostcell_dims[0] +
-            (cell_index_plus[2] + d_num_ghosts[2])*d_ghostcell_dims[0]*
-                d_ghostcell_dims[1];
-        
-        const int idx_density_minus = (cell_index_minus[0] + d_num_subghosts_density[0]) +
-            (cell_index_minus[1] + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
-            (cell_index_minus[2] + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
-                d_subghostcell_dims_density[1];
-        
-        const int idx_density_plus = (cell_index_plus[0] + d_num_subghosts_density[0]) +
-            (cell_index_plus[1] + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
-            (cell_index_plus[2] + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
-                d_subghostcell_dims_density[1];
-        
-        const int idx_sound_speed_minus = (cell_index_minus[0] + d_num_subghosts_sound_speed[0]) +
-            (cell_index_minus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
-            (cell_index_minus[2] + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
-                d_subghostcell_dims_sound_speed[1];
-        
-        const int idx_sound_speed_plus = (cell_index_plus[0] + d_num_subghosts_sound_speed[0]) +
-            (cell_index_plus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
-            (cell_index_plus[2] + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
-                d_subghostcell_dims_sound_speed[1];
-        
-        // Compute the average values.
-        double rho_average, c_average;
-        std::vector<double> rho_Y_average;
-        rho_Y_average.reserve(d_num_species);
-        switch (d_proj_mat_primitive_var_averaging)
-        {
-            case AVERAGING::SIMPLE:
-            {
-                rho_average = 0.5*(rho[idx_density_minus] + rho[idx_density_plus]);
-                c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
-                
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    rho_Y_average.push_back(0.5*(rho_Y[si][idx_minus] +
-                        rho_Y[si][idx_plus]));
-                }
-                
-                break;
-            }
-            case AVERAGING::ROE:
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
-                    << "Roe averaging is not yet implemented."
-                    << std::endl);
-                
-                rho_average = 0.0;
-                c_average   = 0.0;
-                
-                break;
-            }
-            default:
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
-                    << "Unknown d_proj_mat_primitive_var_averaging given."
-                    << std::endl);
-                
-                rho_average = 0.0;
-                c_average   = 0.0;
-            }
-        }
-        
-        switch (direction)
-        {
-            case DIRECTION::X_DIRECTION:
-            {
-                projection_matrix[0][d_num_species] = 1.0;
-                projection_matrix[0][d_num_species + 3] = -1.0/(rho_average*c_average);
-                
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    projection_matrix[1 + si][si] = 1.0;
-                    projection_matrix[1 + si][d_num_species + 3] = -rho_Y_average[si]/
-                        (rho_average*c_average*c_average);
-                }
-                
-                projection_matrix[d_num_species + 1][d_num_species + 1] = 1.0;
-                
-                projection_matrix[d_num_species + 2][d_num_species + 2] = 1.0;
-                
-                projection_matrix[d_num_species + 3][d_num_species] = 1.0;
-                projection_matrix[d_num_species + 3][d_num_species + 3] = 1.0/(rho_average*c_average);
-                
-                break;
-            }
-            case DIRECTION::Y_DIRECTION:
-            {
-                projection_matrix[0][d_num_species + 1] = 1.0;
-                projection_matrix[0][d_num_species + 3] = -1.0/(rho_average*c_average);
-                
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    projection_matrix[1 + si][si] = 1.0;
-                    projection_matrix[1 + si][d_num_species + 3] = -rho_Y_average[si]/
-                        (rho_average*c_average*c_average);
-                }
-                
-                projection_matrix[d_num_species + 1][d_num_species] = 1.0;
-                
-                projection_matrix[d_num_species + 2][d_num_species + 2] = 1.0;
-                
-                projection_matrix[d_num_species + 3][d_num_species + 1] = 1.0;
-                projection_matrix[d_num_species + 3][d_num_species + 3] = 1.0/(rho_average*c_average);
-                
-                break;
-            }
-            case DIRECTION::Z_DIRECTION:
-            {
-                projection_matrix[0][d_num_species + 2] = 1.0;
-                projection_matrix[0][d_num_species + 3] = -1.0/(rho_average*c_average);
-                
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    projection_matrix[1 + si][si] = 1.0;
-                    projection_matrix[1 + si][d_num_species + 3] = -rho_Y_average[si]/
-                        (rho_average*c_average*c_average);
-                }
-                
-                projection_matrix[d_num_species + 1][d_num_species] = 1.0;
-                
-                projection_matrix[d_num_species + 2][d_num_species + 1] = 1.0;
-                
-                projection_matrix[d_num_species + 3][d_num_species + 2] = 1.0;
-                projection_matrix[d_num_species + 3][d_num_species + 3] = 1.0/(rho_average*c_average);
-                
-                break;
-            }
-            default:
-            {
-                TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
-                << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
-                << std::endl);
-            }
-        }
-    }
-}
-
-
-/*
- * Compute the local face data of inverse of projection matrix of primitive variables
- * in the registered patch.
- */
-void
-FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables(
-    boost::multi_array<double, 2>& projection_matrix_inv,
-    const hier::Index& cell_index_minus,
-    const hier::Index& cell_index_plus,
-    const DIRECTION::TYPE& direction)
-{
-    if (!d_proj_mat_primitive_var_registered)
-    {
-        TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
-            << "Projection matrices is not yet registered."
-            << std::endl);
-    }
-    
-    projection_matrix_inv.resize(boost::extents[d_num_eqn][d_num_eqn]);
-    
-    // Get the cell data of the variable partial density.
-    boost::shared_ptr<pdat::CellData<double> > data_partial_density =
-        getGlobalCellDataPartialDensity();
-    
-    // Get the pointers to the cell data of partial density, total density and sound speed.
-    std::vector<double*> rho_Y;
-    rho_Y.reserve(d_num_species);
-    for (int si = 0; si < d_num_species; si++)
-    {
-        rho_Y.push_back(data_partial_density->getPointer(si));
-    }
-    if (!d_data_sound_speed)
-    {
-        computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
-    }
-    double* rho = d_data_density->getPointer(0);
-    double* c = d_data_sound_speed->getPointer(0);
-    
-    /*
-     * Fill the inverse of projection matrix with zeros.
-     */
-    for (int ei = 0; ei < d_num_eqn; ei++)
-    {
-        for (int ej = 0; ej < d_num_eqn; ej++)
-        {
-            projection_matrix_inv[ei][ej] = 0.0;
-        }
-    }
-    
-    // Compute the projection matrix.
-    if (d_dim == tbox::Dimension(1))
-    {
-        // Compute the linear indices.
-        const int idx_minus = cell_index_minus[0] + d_num_ghosts[0];
-        const int idx_plus = cell_index_plus[0] + d_num_ghosts[0];
-        const int idx_density_minus = cell_index_minus[0] + d_num_subghosts_density[0];
-        const int idx_density_plus = cell_index_plus[0] + d_num_subghosts_density[0];
-        const int idx_sound_speed_minus = cell_index_minus[0] + d_num_subghosts_sound_speed[0];
-        const int idx_sound_speed_plus = cell_index_plus[0] + d_num_subghosts_sound_speed[0];
-        
-        // Compute the average values.
-        double rho_average, c_average;
-        std::vector<double> rho_Y_average;
-        rho_Y_average.reserve(d_num_species);
-        switch (d_proj_mat_primitive_var_averaging)
-        {
-            case AVERAGING::SIMPLE:
-            {
-                rho_average = 0.5*(rho[idx_density_minus] + rho[idx_density_plus]);
-                c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
-                
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    rho_Y_average.push_back(0.5*(rho_Y[si][idx_minus] +
-                        rho_Y[si][idx_plus]));
-                }
-                
-                break;
-            }
-            case AVERAGING::ROE:
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
-                    << "Roe averaging is not yet implemented."
-                    << std::endl);
-                
-                rho_average = 0.0;
-                c_average   = 0.0;
-                
-                break;
-            }
-            default:
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
-                    << "Unknown d_proj_mat_primitive_var_averaging given."
-                    << std::endl);
-                
-                rho_average = 0.0;
-                c_average   = 0.0;
-            }
-        }
-        
-        switch (direction)
-        {
-            case DIRECTION::X_DIRECTION:
-            {
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    projection_matrix_inv[si][0] = -0.5*rho_Y_average[si]/c_average;
-                    projection_matrix_inv[si][si + 1] = 1.0;
-                    projection_matrix_inv[si][d_num_eqn - 1] = 0.5*rho_Y_average[si]/c_average;
-                }
-                
-                projection_matrix_inv[d_num_species][0] = 0.5;
-                projection_matrix_inv[d_num_species][d_num_eqn - 1] = 0.5;
-                
-                projection_matrix_inv[d_num_species + 1][0] = -0.5*rho_average*c_average;
-                projection_matrix_inv[d_num_species + 1][d_num_eqn - 1] = 0.5*rho_average*c_average;
-                
-                break;
-            }
-            default:
-            {
-                TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
-                << "There is only x-direction for one-dimensional problem."
-                << std::endl);
-            }
-        }
-    }
-    else if (d_dim == tbox::Dimension(2))
-    {
-        // Compute the linear indices.
-        const int idx_minus = (cell_index_minus[0] + d_num_ghosts[0]) +
-            (cell_index_minus[1] + d_num_ghosts[1])*d_ghostcell_dims[0];
-        
-        const int idx_plus = (cell_index_plus[0] + d_num_ghosts[0]) +
-            (cell_index_plus[1] + d_num_ghosts[1])*d_ghostcell_dims[0];
-        
-        const int idx_density_minus = (cell_index_minus[0] + d_num_subghosts_density[0]) +
-            (cell_index_minus[1] + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
-        
-        const int idx_density_plus = (cell_index_plus[0] + d_num_subghosts_density[0]) +
-            (cell_index_plus[1] + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
-        
-        const int idx_sound_speed_minus = (cell_index_minus[0] + d_num_subghosts_sound_speed[0]) +
-            (cell_index_minus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
-        
-        const int idx_sound_speed_plus = (cell_index_plus[0] + d_num_subghosts_sound_speed[0]) +
-            (cell_index_plus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
-        
-        // Compute the average values.
-        double rho_average, c_average;
-        std::vector<double> rho_Y_average;
-        rho_Y_average.reserve(d_num_species);
-        switch (d_proj_mat_primitive_var_averaging)
-        {
-            case AVERAGING::SIMPLE:
-            {
-                rho_average = 0.5*(rho[idx_density_minus] + rho[idx_density_plus]);
-                c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
-                
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    rho_Y_average.push_back(0.5*(rho_Y[si][idx_minus] +
-                        rho_Y[si][idx_plus]));
-                }
-                
-                break;
-            }
-            case AVERAGING::ROE:
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
-                    << "Roe averaging is not yet implemented."
-                    << std::endl);
-                
-                rho_average = 0.0;
-                c_average   = 0.0;
-                
-                break;
-            }
-            default:
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
-                    << "Unknown d_proj_mat_primitive_var_averaging given."
-                    << std::endl);
-                
-                rho_average = 0.0;
-                c_average   = 0.0;
-            }
-        }
-        
-        switch (direction)
-        {
-            case DIRECTION::X_DIRECTION:
-            {
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    projection_matrix_inv[si][0] = -0.5*rho_Y_average[si]/c_average;
-                    projection_matrix_inv[si][si + 1] = 1.0;
-                    projection_matrix_inv[si][d_num_eqn - 1] = 0.5*rho_Y_average[si]/c_average;
-                }
-                
-                projection_matrix_inv[d_num_species][0] = 0.5;
-                projection_matrix_inv[d_num_species][d_num_eqn - 1] = 0.5;
-                
-                projection_matrix_inv[d_num_species + 1][d_num_species + 1] = 1.0;
-                
-                projection_matrix_inv[d_num_species + 2][0] = -0.5*rho_average*c_average;
-                projection_matrix_inv[d_num_species + 2][d_num_eqn - 1] = 0.5*rho_average*c_average;
-                
-                break;
-            }
-            case DIRECTION::Y_DIRECTION:
-            {
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    projection_matrix_inv[si][0] = -0.5*rho_Y_average[si]/c_average;
-                    projection_matrix_inv[si][si + 1] = 1.0;
-                    projection_matrix_inv[si][d_num_eqn - 1] = 0.5*rho_Y_average[si]/c_average;
-                }
-                
-                projection_matrix_inv[d_num_species][d_num_species + 1] = 1.0;
-                
-                projection_matrix_inv[d_num_species + 1][0] = 0.5;
-                projection_matrix_inv[d_num_species + 1][d_num_eqn - 1] = 0.5;
-                
-                projection_matrix_inv[d_num_species + 2][0] = -0.5*rho_average*c_average;
-                projection_matrix_inv[d_num_species + 2][d_num_eqn - 1] = 0.5*rho_average*c_average;
-                
-                break;
-            }
-            default:
-            {
-                TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
-                << "There are only x-direction and y-direction for two-dimensional problem."
-                << std::endl);
-            }
-        }
-    }
-    else if (d_dim == tbox::Dimension(3))
-    {
-        const int idx_minus = (cell_index_minus[0] + d_num_ghosts[0]) +
-            (cell_index_minus[1] + d_num_ghosts[1])*d_ghostcell_dims[0] +
-            (cell_index_minus[2] + d_num_ghosts[2])*d_ghostcell_dims[0]*
-                d_ghostcell_dims[1];
-        
-        const int idx_plus = (cell_index_plus[0] + d_num_ghosts[0]) +
-            (cell_index_plus[1] + d_num_ghosts[1])*d_ghostcell_dims[0] +
-            (cell_index_plus[2] + d_num_ghosts[2])*d_ghostcell_dims[0]*
-                d_ghostcell_dims[1];
-        
-        const int idx_density_minus = (cell_index_minus[0] + d_num_subghosts_density[0]) +
-            (cell_index_minus[1] + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
-            (cell_index_minus[2] + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
-                d_subghostcell_dims_density[1];
-        
-        const int idx_density_plus = (cell_index_plus[0] + d_num_subghosts_density[0]) +
-            (cell_index_plus[1] + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
-            (cell_index_plus[2] + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
-                d_subghostcell_dims_density[1];
-        
-        const int idx_sound_speed_minus = (cell_index_minus[0] + d_num_subghosts_sound_speed[0]) +
-            (cell_index_minus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
-            (cell_index_minus[2] + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
-                d_subghostcell_dims_sound_speed[1];
-        
-        const int idx_sound_speed_plus = (cell_index_plus[0] + d_num_subghosts_sound_speed[0]) +
-            (cell_index_plus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
-            (cell_index_plus[2] + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
-                d_subghostcell_dims_sound_speed[1];
-        
-        // Compute the average values.
-        double rho_average, c_average;
-        std::vector<double> rho_Y_average;
-        rho_Y_average.reserve(d_num_species);
-        switch (d_proj_mat_primitive_var_averaging)
-        {
-            case AVERAGING::SIMPLE:
-            {
-                rho_average = 0.5*(rho[idx_density_minus] + rho[idx_density_plus]);
-                c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
-                
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    rho_Y_average.push_back(0.5*(rho_Y[si][idx_minus] +
-                        rho_Y[si][idx_plus]));
-                }
-                
-                break;
-            }
-            case AVERAGING::ROE:
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
-                    << "Roe averaging is not yet implemented."
-                    << std::endl);
-                
-                rho_average = 0.0;
-                c_average   = 0.0;
-                
-                break;
-            }
-            default:
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
-                    << "Unknown d_proj_mat_primitive_var_averaging given."
-                    << std::endl);
-                
-                rho_average = 0.0;
-                c_average   = 0.0;
-            }
-        }
-        
-        switch (direction)
-        {
-            case DIRECTION::X_DIRECTION:
-            {
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    projection_matrix_inv[si][0] = -0.5*rho_Y_average[si]/c_average;
-                    projection_matrix_inv[si][si + 1] = 1.0;
-                    projection_matrix_inv[si][d_num_eqn - 1] = 0.5*rho_Y_average[si]/c_average;
-                }
-                
-                projection_matrix_inv[d_num_species][0] = 0.5;
-                projection_matrix_inv[d_num_species][d_num_eqn - 1] = 0.5;
-                
-                projection_matrix_inv[d_num_species + 1][d_num_species + 1] = 1.0;
-                
-                projection_matrix_inv[d_num_species + 2][d_num_species + 2] = 1.0;
-                
-                projection_matrix_inv[d_num_species + 3][0] = -0.5*rho_average*c_average;
-                projection_matrix_inv[d_num_species + 3][d_num_eqn - 1] = 0.5*rho_average*c_average;
-                
-                break;
-            }
-            case DIRECTION::Y_DIRECTION:
-            {
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    projection_matrix_inv[si][0] = -0.5*rho_Y_average[si]/c_average;
-                    projection_matrix_inv[si][si + 1] = 1.0;
-                    projection_matrix_inv[si][d_num_eqn - 1] = 0.5*rho_Y_average[si]/c_average;
-                }
-                
-                projection_matrix_inv[d_num_species][d_num_species + 1] = 1.0;
-                
-                projection_matrix_inv[d_num_species + 1][0] = 0.5;
-                projection_matrix_inv[d_num_species + 1][d_num_eqn - 1] = 0.5;
-                
-                projection_matrix_inv[d_num_species + 2][d_num_species + 2] = 1.0;
-                
-                projection_matrix_inv[d_num_species + 3][0] = -0.5*rho_average*c_average;
-                projection_matrix_inv[d_num_species + 3][d_num_eqn - 1] = 0.5*rho_average*c_average;
-                
-                break;
-            }
-            case DIRECTION::Z_DIRECTION:
-            {
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    projection_matrix_inv[si][0] = -0.5*rho_Y_average[si]/c_average;
-                    projection_matrix_inv[si][si + 1] = 1.0;
-                    projection_matrix_inv[si][d_num_eqn - 1] = 0.5*rho_Y_average[si]/c_average;
-                }
-                
-                projection_matrix_inv[d_num_species][d_num_species + 1] = 1.0;
-                
-                projection_matrix_inv[d_num_species + 1][d_num_species + 2] = 1.0;
-                
-                projection_matrix_inv[d_num_species + 2][0] = 0.5;
-                projection_matrix_inv[d_num_species + 2][d_num_eqn - 1] = 0.5;
-                
-                projection_matrix_inv[d_num_species + 3][0] = -0.5*rho_average*c_average;
-                projection_matrix_inv[d_num_species + 3][d_num_eqn - 1] = 0.5*rho_average*c_average;
-                
-                break;
-            }
-            default:
-            {
-                TBOX_ERROR(d_object_name
-                << ": FlowModelFourEqnConservative::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
-                << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
-                << std::endl);
             }
         }
     }
@@ -6154,94 +5309,6 @@ FlowModelFourEqnConservative::checkGlobalSideDataPrimitiveVariablesBounded(
             }
         }
     }
-}
-
-
-/*
- * Check whether the given conservative variables are within the bounds.
- */
-bool
-FlowModelFourEqnConservative::haveConservativeVariablesBounded(const std::vector<double>& conservative_variables)
-{
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(conservative_variables.size()) == d_num_eqn);
-#endif
-    
-    bool are_bounded = true;
-    
-    // Check if the total energy is bounded.
-    if (conservative_variables[d_num_species + d_dim.getValue()] < 0)
-    {
-        are_bounded = false;
-    }
-    
-    // Check if the total density is bounded.
-    double rho = 0.0;
-    for (int si = 0; si < d_num_species; si++)
-    {
-        rho += conservative_variables[si];
-    }
-    if (rho < 0.0)
-    {
-        are_bounded = false;
-    }
-    
-    // Check if the mass fractions are bounded.
-    for (int si = 0; si < d_num_species; si++)
-    {
-        const double Y = conservative_variables[si]/rho;
-        
-        if (Y < d_Y_bound_lo || Y > d_Y_bound_up)
-        {
-            are_bounded = false;
-        }
-    }
-    
-    return are_bounded;
-}
-
-
-/*
- * Check whether the given primitive variables are within the bounds.
- */
-bool
-FlowModelFourEqnConservative::havePrimitiveVariablesBounded(const std::vector<double>& primitive_variables)
-{
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(primitive_variables.size()) == d_num_eqn);
-#endif
-    
-    bool are_bounded = true;
-    
-    // Check if the pressure is bounded.
-    if (primitive_variables[d_num_species + d_dim.getValue()] < 0)
-    {
-        are_bounded = false;
-    }
-    
-    // Check if the total density is bounded.
-    double rho = 0.0;
-    for (int si = 0; si < d_num_species; si++)
-    {
-        rho += primitive_variables[si];
-    }
-    if (rho < 0.0)
-    {
-        are_bounded = false;
-    }
-    
-    // Check if the mass fractions are bounded.
-    for (int si = 0; si < d_num_species; si++)
-    {
-        const double Y = primitive_variables[si]/rho;
-        
-        if (Y < d_Y_bound_lo || Y > d_Y_bound_up)
-        {
-            are_bounded = false;
-        }
-    }
-    
-    return are_bounded;
 }
 
 

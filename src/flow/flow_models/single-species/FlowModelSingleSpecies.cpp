@@ -794,11 +794,11 @@ FlowModelSingleSpecies::registerDerivedCellVariable(
 
 
 /*
- * Register the required variables for the computation of projection matrix
- * of conservative variables and its inverse at faces in the registered patch.
+ * Register the required derived variables for transformation between conservative
+ * variables and characteristic variables.
  */
 void
-FlowModelSingleSpecies::registerFaceProjectionMatricesOfConservativeVariables(
+FlowModelSingleSpecies::registerDerivedVariablesForCharacteristicProjectionOfConservativeVariables(
     const hier::IntVector& num_subghosts,
     const AVERAGING::TYPE& averaging)
 {
@@ -806,25 +806,24 @@ FlowModelSingleSpecies::registerFaceProjectionMatricesOfConservativeVariables(
     if (!d_patch)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::registerFaceProjectionMatricesOfConservativeVariables()\n"
+            << ": FlowModelSingleSpecies::"
+            << "registerDerivedVariablesForCharacteristicProjectionOfConservativeVariables()\n"
             << "No patch is registered yet."
             << std::endl);
     }
     
     NULL_USE(num_subghosts);
     
-    d_proj_mat_conservative_var_averaging = averaging;
-    
-    d_proj_mat_conservative_var_registered = true;
+    d_proj_var_conservative_averaging = averaging;
 }
 
 
 /*
- * Register the required variables for the computation of projection matrix
- * of primitive variables and its inverse at faces in the registered patch.
+ * Register the required derived variables for transformation between primitive variables
+ * and characteristic variables.
  */
 void
-FlowModelSingleSpecies::registerFaceProjectionMatricesOfPrimitiveVariables(
+FlowModelSingleSpecies::registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
     const hier::IntVector& num_subghosts,
     const AVERAGING::TYPE& averaging)
 {
@@ -832,19 +831,18 @@ FlowModelSingleSpecies::registerFaceProjectionMatricesOfPrimitiveVariables(
     if (!d_patch)
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::registerFaceProjectionMatricesOfPrimitiveVariables()\n"
+            << ": FlowModelSingleSpecies::"
+            << "registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables()\n"
             << "No patch is registered yet."
             << std::endl);
     }
     
-    d_proj_mat_primitive_var_averaging = averaging;
+    d_proj_var_primitive_averaging = averaging;
     
     setNumberOfSubGhosts(
         num_subghosts,
         "SOUND_SPEED",
         "PROJECTION_MATRICES");
-    
-    d_proj_mat_primitive_var_registered = true;
 }
 
 
@@ -965,9 +963,6 @@ FlowModelSingleSpecies::unregisterPatch()
     d_data_max_wave_speed_y.reset();
     d_data_max_wave_speed_z.reset();
     d_data_diffusivities.reset();
-    
-    d_proj_mat_conservative_var_registered = false;
-    d_proj_mat_primitive_var_registered    = false;
     
     clearDataContext();
 }
@@ -1584,7 +1579,7 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
         const int num_ghosts_0_projection_var = num_ghosts_projection_var[0];
         const int num_subghosts_0_sound_speed = d_num_subghosts_sound_speed[0];
         
-        switch (d_proj_mat_primitive_var_averaging)
+        switch (d_proj_var_primitive_averaging)
         {
             case AVERAGING::SIMPLE:
             {
@@ -1630,7 +1625,7 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
                 TBOX_ERROR(d_object_name
                     << ": FlowModelSingleSpecies::"
                     << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
-                    << "Unknown d_proj_mat_primitive_var_averaging given."
+                    << "Unknown d_proj_var_primitive_averaging given."
                     << std::endl);
             }
         }
@@ -1652,7 +1647,7 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
         const int num_subghosts_1_sound_speed = d_num_subghosts_sound_speed[1];
         const int subghostcell_dim_0_sound_speed = d_subghostcell_dims_sound_speed[0];
         
-        switch (d_proj_mat_primitive_var_averaging)
+        switch (d_proj_var_primitive_averaging)
         {
             case AVERAGING::SIMPLE:
             {
@@ -1746,7 +1741,7 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
                 TBOX_ERROR(d_object_name
                     << ": FlowModelSingleSpecies::"
                     << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
-                    << "Unknown d_proj_mat_primitive_var_averaging given."
+                    << "Unknown d_proj_var_primitive_averaging given."
                     << std::endl);
             }
         }
@@ -1775,7 +1770,7 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
         const int subghostcell_dim_0_sound_speed = d_subghostcell_dims_sound_speed[0];
         const int subghostcell_dim_1_sound_speed = d_subghostcell_dims_sound_speed[1];
         
-        switch (d_proj_mat_primitive_var_averaging)
+        switch (d_proj_var_primitive_averaging)
         {
             case AVERAGING::SIMPLE:
             {
@@ -1946,7 +1941,7 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
                 TBOX_ERROR(d_object_name
                     << ": FlowModelSingleSpecies::"
                     << "computeGlobalSideDataProjectionVariablesForPrimitiveVariables()\n"
-                    << "Unknown d_proj_mat_primitive_var_averaging given."
+                    << "Unknown d_proj_var_primitive_averaging given."
                     << std::endl);
             }
         }
@@ -2983,788 +2978,6 @@ FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristi
 
 
 /*
- * Compute the local face data of projection matrix of conservative variables in the
- * registered patch.
- */
-void
-FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfConservativeVariables(
-    boost::multi_array<double, 2>& projection_matrix,
-    const hier::Index& cell_index_minus,
-    const hier::Index& cell_index_plus,
-    const DIRECTION::TYPE& direction)
-{
-    NULL_USE(projection_matrix);
-    NULL_USE(cell_index_minus);
-    NULL_USE(cell_index_plus);
-    NULL_USE(direction);
-    
-    TBOX_ERROR(d_object_name
-        << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfConservativeVariables()\n"
-        << "Method computeLocalFaceProjectionMatrixOfConservativeVariables() is not yet implemented."
-        << std::endl);
-}
-
-
-/*
- * Compute the local face data of inverse of projection matrix of conservative variables
- * in the registered patch.
- */
-void
-FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfConservativeVariables(
-    boost::multi_array<double, 2>& projection_matrix_inv,
-    const hier::Index& cell_index_minus,
-    const hier::Index& cell_index_plus,
-    const DIRECTION::TYPE& direction)
-{
-    NULL_USE(projection_matrix_inv);
-    NULL_USE(cell_index_minus);
-    NULL_USE(cell_index_plus);
-    NULL_USE(direction);
-    
-    TBOX_ERROR(d_object_name
-        << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfConservativeVariables()\n"
-        << "Method computeLocalFaceProjectionMatrixInverseOfConservativeVariables() is not yet implemented."
-        << std::endl);
-}
-
-
-/*
- * Compute the local face data of projection matrix of primitive variables in the
- * registered patch.
- */
-void
-FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables(
-    boost::multi_array<double, 2>& projection_matrix,
-    const hier::Index& cell_index_minus,
-    const hier::Index& cell_index_plus,
-    const DIRECTION::TYPE& direction)
-{
-    if (!d_proj_mat_primitive_var_registered)
-    {
-        TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
-            << "Projection matrices is not yet registered."
-            << std::endl);
-    }
-    
-    projection_matrix.resize(boost::extents[d_num_eqn][d_num_eqn]);
-    
-    // Get the cell data of the variable density.
-    boost::shared_ptr<pdat::CellData<double> > data_density =
-        getGlobalCellDataDensity();
-    
-    // Get the pointers to the cell data of density and sound speed.
-    double* rho = data_density->getPointer(0);
-    if (!d_data_sound_speed)
-    {
-        computeGlobalCellDataSoundSpeedWithPressure();
-    }
-    double* c = d_data_sound_speed->getPointer(0);
-    
-    // Compute the projection matrix.
-    if (d_dim == tbox::Dimension(1))
-    {
-        // Compute the linear indices.
-        const int idx_minus = cell_index_minus[0] + d_num_ghosts[0];
-        const int idx_plus = cell_index_plus[0] + d_num_ghosts[0];
-        const int idx_sound_speed_minus = cell_index_minus[0] + d_num_subghosts_sound_speed[0];
-        const int idx_sound_speed_plus = cell_index_plus[0] + d_num_subghosts_sound_speed[0];
-        
-        // Compute the average values.
-        double rho_average, c_average;
-        switch (d_proj_mat_primitive_var_averaging)
-        {
-            case AVERAGING::SIMPLE:
-            {
-                rho_average = 0.5*(rho[idx_minus] + rho[idx_plus]);
-                c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
-                
-                break;
-            }
-            case AVERAGING::ROE:
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
-                    << "Roe averaging is not yet implemented."
-                    << std::endl);
-                
-                rho_average = 0.0;
-                c_average   = 0.0;
-                
-                break;
-            }
-            default:
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
-                    << "Unknown d_proj_mat_primitive_var_averaging given."
-                    << std::endl);
-                
-                rho_average = 0.0;
-                c_average   = 0.0;
-            }
-        }
-        
-        switch (direction)
-        {
-            case DIRECTION::X_DIRECTION:
-            {
-                projection_matrix[0][0] = 0.0;
-                projection_matrix[0][1] = -0.5*rho_average*c_average;
-                projection_matrix[0][2] = 0.5;
-                projection_matrix[1][0] = 1.0;
-                projection_matrix[1][1] = 0.0;
-                projection_matrix[1][2] = -1.0/(c_average*c_average);
-                projection_matrix[2][0] = 0.0;
-                projection_matrix[2][1] = 0.5*rho_average*c_average;
-                projection_matrix[2][2] = 0.5;
-                
-                break;
-            }
-            default:
-            {
-                TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
-                << "There is only x-direction for one-dimensional problem."
-                << std::endl);
-            }
-        }
-    }
-    else if (d_dim == tbox::Dimension(2))
-    {
-        const int idx_minus = (cell_index_minus[0] + d_num_ghosts[0]) +
-            (cell_index_minus[1] + d_num_ghosts[1])*d_ghostcell_dims[0];
-        
-        const int idx_plus = (cell_index_plus[0] + d_num_ghosts[0]) +
-            (cell_index_plus[1] + d_num_ghosts[1])*d_ghostcell_dims[0];
-        
-        const int idx_sound_speed_minus = (cell_index_minus[0] + d_num_subghosts_sound_speed[0]) +
-            (cell_index_minus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
-        
-        const int idx_sound_speed_plus = (cell_index_plus[0] + d_num_subghosts_sound_speed[0]) +
-            (cell_index_plus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
-        
-        // Compute the average values.
-        double rho_average, c_average;
-        switch (d_proj_mat_primitive_var_averaging)
-        {
-            case AVERAGING::SIMPLE:
-            {
-                rho_average = 0.5*(rho[idx_minus] + rho[idx_plus]);
-                c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
-                
-                break;
-            }
-            case AVERAGING::ROE:
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
-                    << "Roe averaging is not yet implemented."
-                    << std::endl);
-                
-                rho_average = 0.0;
-                c_average   = 0.0;
-                
-                break;
-            }
-            default:
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
-                    << "Unknown d_proj_mat_primitive_var_averaging given."
-                    << std::endl);
-                
-                rho_average = 0.0;
-                c_average   = 0.0;
-            }
-        }
-        
-        switch (direction)
-        {
-            case DIRECTION::X_DIRECTION:
-            {
-                projection_matrix[0][0] = 0.0;
-                projection_matrix[0][1] = -0.5*rho_average*c_average;
-                projection_matrix[0][2] = 0.0;
-                projection_matrix[0][3] = 0.5;
-                projection_matrix[1][0] = 1.0;
-                projection_matrix[1][1] = 0.0;
-                projection_matrix[1][2] = 0.0;
-                projection_matrix[1][3] = -1.0/(c_average*c_average);
-                projection_matrix[2][0] = 0.0;
-                projection_matrix[2][1] = 0.0;
-                projection_matrix[2][2] = 1.0;
-                projection_matrix[2][3] = 0.0;
-                projection_matrix[3][0] = 0.0;
-                projection_matrix[3][1] = 0.5*rho_average*c_average;
-                projection_matrix[3][2] = 0.0;
-                projection_matrix[3][3] = 0.5;
-                
-                break;
-            }
-            case DIRECTION::Y_DIRECTION:
-            {
-                projection_matrix[0][0] = 0.0;
-                projection_matrix[0][1] = 0.0;
-                projection_matrix[0][2] = -0.5*rho_average*c_average;
-                projection_matrix[0][3] = 0.5;
-                projection_matrix[1][0] = 1.0;
-                projection_matrix[1][1] = 0.0;
-                projection_matrix[1][2] = 0.0;
-                projection_matrix[1][3] = -1.0/(c_average*c_average);
-                projection_matrix[2][0] = 0.0;
-                projection_matrix[2][1] = 1.0;
-                projection_matrix[2][2] = 0.0;
-                projection_matrix[2][3] = 0.0;
-                projection_matrix[3][0] = 0.0;
-                projection_matrix[3][1] = 0.0;
-                projection_matrix[3][2] = 0.5*rho_average*c_average;
-                projection_matrix[3][3] = 0.5;
-                
-                break;
-            }
-            default:
-            {
-                TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
-                << "There are only x-direction and y-direction for two-dimensional problem."
-                << std::endl);
-            }
-        }
-    }
-    else if (d_dim == tbox::Dimension(3))
-    {
-        const int idx_minus = (cell_index_minus[0] + d_num_ghosts[0]) +
-            (cell_index_minus[1] + d_num_ghosts[1])*d_ghostcell_dims[0] +
-            (cell_index_minus[2] + d_num_ghosts[2])*d_ghostcell_dims[0]*
-                d_ghostcell_dims[1];
-        
-        const int idx_plus = (cell_index_plus[0] + d_num_ghosts[0]) +
-            (cell_index_plus[1] + d_num_ghosts[1])*d_ghostcell_dims[0] +
-            (cell_index_plus[2] + d_num_ghosts[2])*d_ghostcell_dims[0]*
-                d_ghostcell_dims[1];
-        
-        const int idx_sound_speed_minus = (cell_index_minus[0] + d_num_subghosts_sound_speed[0]) +
-            (cell_index_minus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
-            (cell_index_minus[2] + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
-                d_subghostcell_dims_sound_speed[1];
-        
-        const int idx_sound_speed_plus = (cell_index_plus[0] + d_num_subghosts_sound_speed[0]) +
-            (cell_index_plus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
-            (cell_index_plus[2] + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
-                d_subghostcell_dims_sound_speed[1];
-        
-        // Compute the average values.
-        double rho_average, c_average;
-        switch (d_proj_mat_primitive_var_averaging)
-        {
-            case AVERAGING::SIMPLE:
-            {
-                rho_average = 0.5*(rho[idx_minus] + rho[idx_plus]);
-                c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
-                
-                break;
-            }
-            case AVERAGING::ROE:
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
-                    << "Roe averaging is not yet implemented."
-                    << std::endl);
-                
-                rho_average = 0.0;
-                c_average   = 0.0;
-                
-                break;
-            }
-            default:
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
-                    << "Unknown d_proj_mat_primitive_var_averaging given."
-                    << std::endl);
-                
-                rho_average = 0.0;
-                c_average   = 0.0;
-            }
-        }
-        
-        switch (direction)
-        {
-            case DIRECTION::X_DIRECTION:
-            {
-                projection_matrix[0][0] = 0.0;
-                projection_matrix[0][1] = -0.5*rho_average*c_average;
-                projection_matrix[0][2] = 0.0;
-                projection_matrix[0][3] = 0.0;
-                projection_matrix[0][4] = 0.5;
-                projection_matrix[1][0] = 1.0;
-                projection_matrix[1][1] = 0.0;
-                projection_matrix[1][2] = 0.0;
-                projection_matrix[1][3] = 0.0;
-                projection_matrix[1][4] = -1.0/(c_average*c_average);
-                projection_matrix[2][0] = 0.0;
-                projection_matrix[2][1] = 0.0;
-                projection_matrix[2][2] = 1.0;
-                projection_matrix[2][3] = 0.0;
-                projection_matrix[2][4] = 0.0;
-                projection_matrix[3][0] = 0.0;
-                projection_matrix[3][1] = 0.0;
-                projection_matrix[3][2] = 0.0;
-                projection_matrix[3][3] = 1.0;
-                projection_matrix[3][4] = 0.0;
-                projection_matrix[4][0] = 0.0;
-                projection_matrix[4][1] = 0.5*rho_average*c_average;
-                projection_matrix[4][2] = 0.0;
-                projection_matrix[4][3] = 0.0;
-                projection_matrix[4][4] = 0.5;
-                
-                break;
-            }
-            case DIRECTION::Y_DIRECTION:
-            {
-                projection_matrix[0][0] = 0.0;
-                projection_matrix[0][1] = 0.0;
-                projection_matrix[0][2] = -0.5*rho_average*c_average;
-                projection_matrix[0][3] = 0.0;
-                projection_matrix[0][4] = 0.5;
-                projection_matrix[1][0] = 1.0;
-                projection_matrix[1][1] = 0.0;
-                projection_matrix[1][2] = 0.0;
-                projection_matrix[1][3] = 0.0;
-                projection_matrix[1][4] = -1.0/(c_average*c_average);
-                projection_matrix[2][0] = 0.0;
-                projection_matrix[2][1] = 1.0;
-                projection_matrix[2][2] = 0.0;
-                projection_matrix[2][3] = 0.0;
-                projection_matrix[2][4] = 0.0;
-                projection_matrix[3][0] = 0.0;
-                projection_matrix[3][1] = 0.0;
-                projection_matrix[3][2] = 0.0;
-                projection_matrix[3][3] = 1.0;
-                projection_matrix[3][4] = 0.0;
-                projection_matrix[4][0] = 0.0;
-                projection_matrix[4][1] = 0.0;
-                projection_matrix[4][2] = 0.5*rho_average*c_average;
-                projection_matrix[4][3] = 0.0;
-                projection_matrix[4][4] = 0.5;
-                
-                break;
-            }
-            case DIRECTION::Z_DIRECTION:
-            {
-                projection_matrix[0][0] = 0.0;
-                projection_matrix[0][1] = 0.0;
-                projection_matrix[0][2] = 0.0;
-                projection_matrix[0][3] = -0.5*rho_average*c_average;
-                projection_matrix[0][4] = 0.5;
-                projection_matrix[1][0] = 1.0;
-                projection_matrix[1][1] = 0.0;
-                projection_matrix[1][2] = 0.0;
-                projection_matrix[1][3] = 0.0;
-                projection_matrix[1][4] = -1.0/(c_average*c_average);
-                projection_matrix[2][0] = 0.0;
-                projection_matrix[2][1] = 1.0;
-                projection_matrix[2][2] = 0.0;
-                projection_matrix[2][3] = 0.0;
-                projection_matrix[2][4] = 0.0;
-                projection_matrix[3][0] = 0.0;
-                projection_matrix[3][1] = 0.0;
-                projection_matrix[3][2] = 1.0;
-                projection_matrix[3][3] = 0.0;
-                projection_matrix[3][4] = 0.0;
-                projection_matrix[4][0] = 0.0;
-                projection_matrix[4][1] = 0.0;
-                projection_matrix[4][2] = 0.0;
-                projection_matrix[4][3] = 0.5*rho_average*c_average;
-                projection_matrix[4][4] = 0.5;
-                
-                break;
-            }
-            default:
-            {
-                TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixOfPrimitiveVariables()\n"
-                << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
-                << std::endl);
-            }
-        }
-    }
-}
-
-
-/*
- * Compute the local face data of inverse of projection matrix of primitive variables
- * in the registered patch.
- */
-void
-FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables(
-    boost::multi_array<double, 2>& projection_matrix_inv,
-    const hier::Index& cell_index_minus,
-    const hier::Index& cell_index_plus,
-    const DIRECTION::TYPE& direction)
-{
-    if (!d_proj_mat_primitive_var_registered)
-    {
-        TBOX_ERROR(d_object_name
-            << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
-            << "Projection matrices is not yet registered."
-            << std::endl);
-    }
-    
-    projection_matrix_inv.resize(boost::extents[d_num_eqn][d_num_eqn]);
-    
-    // Get the cell data of the variable density.
-    boost::shared_ptr<pdat::CellData<double> > data_density =
-        getGlobalCellDataDensity();
-    
-    // Get the pointers to the cell data of density and sound speed.
-    double* rho = data_density->getPointer(0);
-    if (!d_data_sound_speed)
-    {
-        computeGlobalCellDataSoundSpeedWithPressure();
-    }
-    double* c = d_data_sound_speed->getPointer(0);
-
-    // Compute the inverse of the projection matrix.
-    if (d_dim == tbox::Dimension(1))
-    {
-        // Compute the linear indices.
-        const int idx_minus = cell_index_minus[0] + d_num_ghosts[0];
-        const int idx_plus = cell_index_plus[0] + d_num_ghosts[0];
-        const int idx_sound_speed_minus = cell_index_minus[0] + d_num_subghosts_sound_speed[0];
-        const int idx_sound_speed_plus = cell_index_plus[0] + d_num_subghosts_sound_speed[0];
-        
-        // Compute the average values.
-        double rho_average, c_average;
-        switch (d_proj_mat_primitive_var_averaging)
-        {
-            case AVERAGING::SIMPLE:
-            {
-                rho_average = 0.5*(rho[idx_minus] + rho[idx_plus]);
-                c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
-                
-                break;
-            }
-            case AVERAGING::ROE:
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::"
-                    << "computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
-                    << "Roe averaging is not yet implemented."
-                    << std::endl);
-                
-                rho_average = 0.0;
-                c_average   = 0.0;
-                
-                break;
-            }
-            default:
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::"
-                    << "computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
-                    << "Unknown d_proj_mat_primitive_var_averaging given."
-                    << std::endl);
-                
-                rho_average = 0.0;
-                c_average   = 0.0;
-            }
-        }
-        
-        switch (direction)
-        {
-            case DIRECTION::X_DIRECTION:
-            {
-                projection_matrix_inv[0][0] = 1.0/(c_average*c_average);
-                projection_matrix_inv[0][1] = 1.0;
-                projection_matrix_inv[0][2] = 1.0/(c_average*c_average);
-                projection_matrix_inv[1][0] = -1.0/(rho_average*c_average);
-                projection_matrix_inv[1][1] = 0.0;
-                projection_matrix_inv[1][2] = 1.0/(rho_average*c_average);
-                projection_matrix_inv[2][0] = 1.0;
-                projection_matrix_inv[2][1] = 0.0;
-                projection_matrix_inv[2][2] = 1.0;
-                
-                break;
-            }
-            default:
-            {
-                TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
-                << "There is only x-direction for one-dimensional problem."
-                << std::endl);
-            }
-        }
-    }
-    else if (d_dim == tbox::Dimension(2))
-    {
-        const int idx_minus = (cell_index_minus[0] + d_num_ghosts[0]) +
-            (cell_index_minus[1] + d_num_ghosts[1])*d_ghostcell_dims[0];
-        
-        const int idx_plus = (cell_index_plus[0] + d_num_ghosts[0]) +
-            (cell_index_plus[1] + d_num_ghosts[1])*d_ghostcell_dims[0];
-        
-        const int idx_sound_speed_minus = (cell_index_minus[0] + d_num_subghosts_sound_speed[0]) +
-            (cell_index_minus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
-        
-        const int idx_sound_speed_plus = (cell_index_plus[0] + d_num_subghosts_sound_speed[0]) +
-            (cell_index_plus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
-        
-        // Compute the average values.
-        double rho_average, c_average;
-        switch (d_proj_mat_primitive_var_averaging)
-        {
-            case AVERAGING::SIMPLE:
-            {
-                rho_average = 0.5*(rho[idx_minus] + rho[idx_plus]);
-                c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
-                
-                break;
-            }
-            case AVERAGING::ROE:
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::"
-                    << "computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
-                    << "Roe averaging is not yet implemented."
-                    << std::endl);
-                
-                rho_average = 0.0;
-                c_average   = 0.0;
-                
-                break;
-            }
-            default:
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::"
-                    << "computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
-                    << "Unknown d_proj_mat_primitive_var_averaging given."
-                    << std::endl);
-                
-                rho_average = 0.0;
-                c_average   = 0.0;
-            }
-        }
-        
-        switch (direction)
-        {
-            case DIRECTION::X_DIRECTION:
-            {
-                projection_matrix_inv[0][0] = 1.0/(c_average*c_average);
-                projection_matrix_inv[0][1] = 1.0;
-                projection_matrix_inv[0][2] = 0.0;
-                projection_matrix_inv[0][3] = 1.0/(c_average*c_average);
-                projection_matrix_inv[1][0] = -1.0/(rho_average*c_average);
-                projection_matrix_inv[1][1] = 0.0;
-                projection_matrix_inv[1][2] = 0.0;
-                projection_matrix_inv[1][3] = 1.0/(rho_average*c_average);
-                projection_matrix_inv[2][0] = 0.0;
-                projection_matrix_inv[2][1] = 0.0;
-                projection_matrix_inv[2][2] = 1.0;
-                projection_matrix_inv[2][3] = 0.0;
-                projection_matrix_inv[3][0] = 1.0;
-                projection_matrix_inv[3][1] = 0.0;
-                projection_matrix_inv[3][2] = 0.0;
-                projection_matrix_inv[3][3] = 1.0;
-                
-                break;
-            }
-            case DIRECTION::Y_DIRECTION:
-            {
-                projection_matrix_inv[0][0] = 1.0/(c_average*c_average);
-                projection_matrix_inv[0][1] = 1.0;
-                projection_matrix_inv[0][2] = 0.0;
-                projection_matrix_inv[0][3] = 1.0/(c_average*c_average);
-                projection_matrix_inv[1][0] = 0.0;
-                projection_matrix_inv[1][1] = 0.0;
-                projection_matrix_inv[1][2] = 1.0;
-                projection_matrix_inv[1][3] = 0.0;
-                projection_matrix_inv[2][0] = -1.0/(rho_average*c_average);
-                projection_matrix_inv[2][1] = 0.0;
-                projection_matrix_inv[2][2] = 0.0;
-                projection_matrix_inv[2][3] = 1.0/(rho_average*c_average);
-                projection_matrix_inv[3][0] = 1.0;
-                projection_matrix_inv[3][1] = 0.0;
-                projection_matrix_inv[3][2] = 0.0;
-                projection_matrix_inv[3][3] = 1.0;
-                
-                break;
-            }
-            default:
-            {
-                TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
-                << "There are only x-direction and y-direction for two-dimensional problem."
-                << std::endl);
-            }
-        }
-    }
-    else if (d_dim == tbox::Dimension(3))
-    {
-        const int idx_minus = (cell_index_minus[0] + d_num_ghosts[0]) +
-            (cell_index_minus[1] + d_num_ghosts[1])*d_ghostcell_dims[0] +
-            (cell_index_minus[2] + d_num_ghosts[2])*d_ghostcell_dims[0]*
-                d_ghostcell_dims[1];
-        
-        const int idx_plus = (cell_index_plus[0] + d_num_ghosts[0]) +
-            (cell_index_plus[1] + d_num_ghosts[1])*d_ghostcell_dims[0] +
-            (cell_index_plus[2] + d_num_ghosts[2])*d_ghostcell_dims[0]*
-                d_ghostcell_dims[1];
-        
-        const int idx_sound_speed_minus = (cell_index_minus[0] + d_num_subghosts_sound_speed[0]) +
-            (cell_index_minus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
-            (cell_index_minus[2] + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
-                d_subghostcell_dims_sound_speed[1];
-        
-        const int idx_sound_speed_plus = (cell_index_plus[0] + d_num_subghosts_sound_speed[0]) +
-            (cell_index_plus[1] + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
-            (cell_index_plus[2] + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
-                d_subghostcell_dims_sound_speed[1];
-        
-        // Compute the average values.
-        double rho_average, c_average;
-        switch (d_proj_mat_primitive_var_averaging)
-        {
-            case AVERAGING::SIMPLE:
-            {
-                rho_average = 0.5*(rho[idx_minus] + rho[idx_plus]);
-                c_average = 0.5*(c[idx_sound_speed_minus] + c[idx_sound_speed_plus]);
-                
-                break;
-            }
-            case AVERAGING::ROE:
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::"
-                    << "computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
-                    << "Roe averaging is not yet implemented."
-                    << std::endl);
-                
-                rho_average = 0.0;
-                c_average   = 0.0;
-                
-                break;
-            }
-            default:
-            {
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelSingleSpecies::"
-                    << "computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
-                    << "Unknown d_proj_mat_primitive_var_averaging given."
-                    << std::endl);
-                
-                rho_average = 0.0;
-                c_average   = 0.0;
-            }
-        }
-        
-        switch (direction)
-        {
-            case DIRECTION::X_DIRECTION:
-            {
-                projection_matrix_inv[0][0] = 1.0/(c_average*c_average);
-                projection_matrix_inv[0][1] = 1.0;
-                projection_matrix_inv[0][2] = 0.0;
-                projection_matrix_inv[0][3] = 0.0;
-                projection_matrix_inv[0][4] = 1.0/(c_average*c_average);
-                projection_matrix_inv[1][0] = -1.0/(rho_average*c_average);
-                projection_matrix_inv[1][1] = 0.0;
-                projection_matrix_inv[1][2] = 0.0;
-                projection_matrix_inv[1][3] = 0.0;
-                projection_matrix_inv[1][4] = 1.0/(rho_average*c_average);
-                projection_matrix_inv[2][0] = 0.0;
-                projection_matrix_inv[2][1] = 0.0;
-                projection_matrix_inv[2][2] = 1.0;
-                projection_matrix_inv[2][3] = 0.0;
-                projection_matrix_inv[2][4] = 0.0;
-                projection_matrix_inv[3][0] = 0.0;
-                projection_matrix_inv[3][1] = 0.0;
-                projection_matrix_inv[3][2] = 0.0;
-                projection_matrix_inv[3][3] = 1.0;
-                projection_matrix_inv[3][4] = 0.0;
-                projection_matrix_inv[4][0] = 1.0;
-                projection_matrix_inv[4][1] = 0.0;
-                projection_matrix_inv[4][2] = 0.0;
-                projection_matrix_inv[4][3] = 0.0;
-                projection_matrix_inv[4][4] = 1.0;
-                
-                break;
-            }
-            case DIRECTION::Y_DIRECTION:
-            {
-                projection_matrix_inv[0][0] = 1.0/(c_average*c_average);
-                projection_matrix_inv[0][1] = 1.0;
-                projection_matrix_inv[0][2] = 0.0;
-                projection_matrix_inv[0][3] = 0.0;
-                projection_matrix_inv[0][4] = 1.0/(c_average*c_average);
-                projection_matrix_inv[1][0] = 0.0;
-                projection_matrix_inv[1][1] = 0.0;
-                projection_matrix_inv[1][2] = 1.0;
-                projection_matrix_inv[1][3] = 0.0;
-                projection_matrix_inv[1][4] = 0.0;
-                projection_matrix_inv[2][0] = -1.0/(rho_average*c_average);
-                projection_matrix_inv[2][1] = 0.0;
-                projection_matrix_inv[2][2] = 0.0;
-                projection_matrix_inv[2][3] = 0.0;
-                projection_matrix_inv[2][4] = 1.0/(rho_average*c_average);
-                projection_matrix_inv[3][0] = 0.0;
-                projection_matrix_inv[3][1] = 0.0;
-                projection_matrix_inv[3][2] = 0.0;
-                projection_matrix_inv[3][3] = 1.0;
-                projection_matrix_inv[3][4] = 0.0;
-                projection_matrix_inv[4][0] = 1.0;
-                projection_matrix_inv[4][1] = 0.0;
-                projection_matrix_inv[4][2] = 0.0;
-                projection_matrix_inv[4][3] = 0.0;
-                projection_matrix_inv[4][4] = 1.0;
-                
-                break;
-            }
-            case DIRECTION::Z_DIRECTION:
-            {
-                projection_matrix_inv[0][0] = 1.0/(c_average*c_average);
-                projection_matrix_inv[0][1] = 1.0;
-                projection_matrix_inv[0][2] = 0.0;
-                projection_matrix_inv[0][3] = 0.0;
-                projection_matrix_inv[0][4] = 1.0/(c_average*c_average);
-                projection_matrix_inv[1][0] = 0.0;
-                projection_matrix_inv[1][1] = 0.0;
-                projection_matrix_inv[1][2] = 1.0;
-                projection_matrix_inv[1][3] = 0.0;
-                projection_matrix_inv[1][4] = 0.0;
-                projection_matrix_inv[2][0] = 0.0;
-                projection_matrix_inv[2][1] = 0.0;
-                projection_matrix_inv[2][2] = 0.0;
-                projection_matrix_inv[2][3] = 1.0;
-                projection_matrix_inv[2][4] = 0.0;
-                projection_matrix_inv[3][0] = -1.0/(rho_average*c_average);
-                projection_matrix_inv[3][1] = 0.0;
-                projection_matrix_inv[3][2] = 0.0;
-                projection_matrix_inv[3][3] = 0.0;
-                projection_matrix_inv[3][4] = 1.0/(rho_average*c_average);
-                projection_matrix_inv[4][0] = 1.0;
-                projection_matrix_inv[4][1] = 0.0;
-                projection_matrix_inv[4][2] = 0.0;
-                projection_matrix_inv[4][3] = 0.0;
-                projection_matrix_inv[4][4] = 1.0;
-                
-                break;
-            }
-            default:
-            {
-                TBOX_ERROR(d_object_name
-                << ": FlowModelSingleSpecies::computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables()\n"
-                << "There are only x-direction, y-direction and z-direction for three-dimensional problem."
-                << std::endl);
-            }
-        }
-    }
-}
-
-
-/*
  * Compute the local intercell quantities with conservative variables on each side of the face
  * from Riemann solver at face.
  * flux_face: Convective flux at face.
@@ -4677,62 +3890,6 @@ FlowModelSingleSpecies::checkGlobalSideDataPrimitiveVariablesBounded(
             }
         }
     }
-}
-
-
-/*
- * Check whether the given conservative variables are within the bounds.
- */
-bool
-FlowModelSingleSpecies::haveConservativeVariablesBounded(const std::vector<double>& conservative_variables)
-{
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(conservative_variables.size()) == d_num_eqn);
-#endif
-    
-    bool are_bounded = true;
-    
-    // Check if the density is bounded.
-    if (conservative_variables[0] < 0.0)
-    {
-        are_bounded = false;
-    }
-    
-    // Check if the total energy is bounded.
-    if (conservative_variables[d_num_eqn - 1] < 0.0)
-    {
-        are_bounded = false;
-    }
-    
-    return are_bounded;
-}
-
-
-/*
- * Check whether the given primitive variables are within the bounds.
- */
-bool
-FlowModelSingleSpecies::havePrimitiveVariablesBounded(const std::vector<double>& primitive_variables)
-{
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(primitive_variables.size()) == d_num_eqn);
-#endif
-    
-    bool are_bounded = true;
-    
-    // Check if the density is bounded.
-    if (primitive_variables[0] < 0.0)
-    {
-        are_bounded = false;
-    }
-    
-    // Check if the pressure is bounded.
-    if (primitive_variables[d_num_eqn - 1] < 0.0)
-    {
-        are_bounded = false;
-    }
-    
-    return are_bounded;
 }
 
 

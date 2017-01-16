@@ -78,10 +78,8 @@ class FlowModel:
                 d_ghost_box(hier::Box::getEmptyBox(dim)),
                 d_interior_dims(hier::IntVector::getZero(d_dim)),
                 d_ghostcell_dims(hier::IntVector::getZero(d_dim)),
-                d_proj_mat_conservative_var_registered(false),
-                d_proj_mat_primitive_var_registered(false),
-                d_proj_mat_conservative_var_averaging(AVERAGING::SIMPLE),
-                d_proj_mat_primitive_var_averaging(AVERAGING::SIMPLE),
+                d_proj_var_conservative_averaging(AVERAGING::SIMPLE),
+                d_proj_var_primitive_averaging(AVERAGING::SIMPLE),
                 d_diffusive_flux_var_registered(false)
         {
             NULL_USE(flow_model_db);
@@ -186,20 +184,20 @@ class FlowModel:
             const std::unordered_map<std::string, hier::IntVector>& num_subghosts_of_data) = 0;
         
         /*
-         * Register the required derived variables for the computation of projection matrix
-         * of conservative variables and its inverse at faces in the registered patch.
+         * Register the required derived variables for transformation between conservative
+         * variables and characteristic variables.
          */
         virtual void
-        registerFaceProjectionMatricesOfConservativeVariables(
+        registerDerivedVariablesForCharacteristicProjectionOfConservativeVariables(
             const hier::IntVector& num_subghosts,
             const AVERAGING::TYPE& averaging) = 0;
         
         /*
-         * Register the required derived variables for the computation of projection matrix
-         * of primitive variables and its inverse at faces in the registered patch.
+         * Register the required derived variables for transformation between primitive variables
+         * and characteristic variables.
          */
         virtual void
-        registerFaceProjectionMatricesOfPrimitiveVariables(
+        registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
             const hier::IntVector& num_subghosts,
             const AVERAGING::TYPE& averaging) = 0;
         
@@ -259,117 +257,73 @@ class FlowModel:
         virtual std::vector<boost::shared_ptr<pdat::CellData<double> > >
         getGlobalCellDataPrimitiveVariables() = 0;
         
-/*
- * Get the number of projection variables for transformation between conservative
- * variables and characteristic variables.
- */
-virtual int
-getNumberOfProjectionVariablesForConservativeVariables() const = 0;
-
-/*
- * Get the number of projection variables for transformation between primitive variables
- * and characteristic variables.
- */
-virtual int
-getNumberOfProjectionVariablesForPrimitiveVariables() const = 0;
-
-/*
- * Compute global side data of the projection variables for transformation between
- * conservative variables and characteristic variables.
- */
-virtual void
-computeGlobalSideDataProjectionVariablesForConservativeVariables(
-    std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
-
-/*
- * Compute global side data of the projection variables for transformation between
- * primitive variables and characteristic variables.
- */
-virtual void
-computeGlobalSideDataProjectionVariablesForPrimitiveVariables(
-    std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
-
-/*
- * Compute global side data of characteristic variables from conservative variables.
- */
-virtual void
-computeGlobalSideDataCharacteristicVariablesFromConservativeVariables(
-    std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
-    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
-    const int& idx_offset) = 0;
-
-/*
- * Compute global side data of characteristic variables from primitive variables.
- */
-virtual void
-computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables(
-    std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
-    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
-    const int& idx_offset) = 0;
-
-/*
- * Compute global side data of conservative variables from characteristic variables.
- */
-virtual void
-computeGlobalSideDataConservativeVariablesFromCharacteristicVariables(
-    std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
-
-/*
- * Compute global side data of primitive variables from characteristic variables.
- */
-virtual void
-computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
-    std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
+        /*
+         * Get the number of projection variables for transformation between conservative
+         * variables and characteristic variables.
+         */
+        virtual int
+        getNumberOfProjectionVariablesForConservativeVariables() const = 0;
         
         /*
-         * Compute the local face datum of projection matrix of conservative variables in the
-         * registered patch.
+         * Get the number of projection variables for transformation between primitive variables
+         * and characteristic variables.
          */
-        virtual void
-        computeLocalFaceProjectionMatrixOfConservativeVariables(
-            boost::multi_array<double, 2>& projection_matrix,
-            const hier::Index& cell_index_minus,
-            const hier::Index& cell_index_plus,
-            const DIRECTION::TYPE& direction) = 0;
+        virtual int
+        getNumberOfProjectionVariablesForPrimitiveVariables() const = 0;
         
         /*
-         * Compute the local face datum of inverse of projection matrix of conservative variables
-         * in the registered patch.
+         * Compute global side data of the projection variables for transformation between
+         * conservative variables and characteristic variables.
          */
         virtual void
-        computeLocalFaceProjectionMatrixInverseOfConservativeVariables(
-            boost::multi_array<double, 2>& projection_matrix_inv,
-            const hier::Index& cell_index_minus,
-            const hier::Index& cell_index_plus,
-            const DIRECTION::TYPE& direction) = 0;
+        computeGlobalSideDataProjectionVariablesForConservativeVariables(
+            std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
         
         /*
-         * Compute the local face datum of projection matrix of primitive variables in the
-         * registered patch.
+         * Compute global side data of the projection variables for transformation between
+         * primitive variables and characteristic variables.
          */
         virtual void
-        computeLocalFaceProjectionMatrixOfPrimitiveVariables(
-            boost::multi_array<double, 2>& projection_matrix,
-            const hier::Index& cell_index_minus,
-            const hier::Index& cell_index_plus,
-            const DIRECTION::TYPE& direction) = 0;
+        computeGlobalSideDataProjectionVariablesForPrimitiveVariables(
+            std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
         
         /*
-         * Compute the local face datum of inverse of projection matrix of primitive variables
-         * in the registered patch.
+         * Compute global side data of characteristic variables from conservative variables.
          */
         virtual void
-        computeLocalFaceProjectionMatrixInverseOfPrimitiveVariables(
-            boost::multi_array<double, 2>& projection_matrix_inv,
-            const hier::Index& cell_index_minus,
-            const hier::Index& cell_index_plus,
-            const DIRECTION::TYPE& direction) = 0;
+        computeGlobalSideDataCharacteristicVariablesFromConservativeVariables(
+            std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
+            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
+            const int& idx_offset) = 0;
+        
+        /*
+         * Compute global side data of characteristic variables from primitive variables.
+         */
+        virtual void
+        computeGlobalSideDataCharacteristicVariablesFromPrimitiveVariables(
+            std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
+            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables,
+            const int& idx_offset) = 0;
+        
+        /*
+         * Compute global side data of conservative variables from characteristic variables.
+         */
+        virtual void
+        computeGlobalSideDataConservativeVariablesFromCharacteristicVariables(
+            std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
+        
+        /*
+         * Compute global side data of primitive variables from characteristic variables.
+         */
+        virtual void
+        computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
+            std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
         
         /*
          * Compute the local intercell quantities with conservative variables on each side of the face
@@ -403,33 +357,21 @@ computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
             const DIRECTION::TYPE& direction,
             const RIEMANN_SOLVER::TYPE& Riemann_solver) = 0;
         
-/*
- * Check whether the given side conservative variables are within the bounds.
- */
-virtual void
-checkGlobalSideDataConservativeVariablesBounded(
-    boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables) = 0;
-
-/*
- * Check whether the given side primitive variables are within the bounds.
- */
-virtual void
-checkGlobalSideDataPrimitiveVariablesBounded(
-    boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
-    const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables) = 0;
+        /*
+         * Check whether the given side conservative variables are within the bounds.
+         */
+        virtual void
+        checkGlobalSideDataConservativeVariablesBounded(
+            boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables) = 0;
         
         /*
-         * Check whether the given conservative variables are within the bounds.
+         * Check whether the given side primitive variables are within the bounds.
          */
-        virtual bool
-        haveConservativeVariablesBounded(const std::vector<double>& conservative_variables) = 0;
-        
-        /*
-         * Check whether the given primitive variables are within the bounds.
-         */
-        virtual bool
-        havePrimitiveVariablesBounded(const std::vector<double>& primitive_variables) = 0;
+        virtual void
+        checkGlobalSideDataPrimitiveVariablesBounded(
+            boost::shared_ptr<pdat::SideData<int> >& bounded_flag,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables) = 0;
         
         /*
          * Convert vector of pointers of conservative cell data to vectors of pointers of primitive cell data.
@@ -614,12 +556,10 @@ checkGlobalSideDataPrimitiveVariablesBounded(
         hier::IntVector d_ghostcell_dims;
         
         /*
-         * Properties of the projection matrix and its inverse.
+         * Settings for projection variables.
          */
-        bool d_proj_mat_conservative_var_registered;
-        bool d_proj_mat_primitive_var_registered;
-        AVERAGING::TYPE d_proj_mat_conservative_var_averaging;
-        AVERAGING::TYPE d_proj_mat_primitive_var_averaging;
+        AVERAGING::TYPE d_proj_var_conservative_averaging;
+        AVERAGING::TYPE d_proj_var_primitive_averaging;
         
         /*
          * Properties of the diffusive fluxes.

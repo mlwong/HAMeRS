@@ -107,7 +107,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
         
         d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
         
-        d_flow_model->registerFaceProjectionMatricesOfPrimitiveVariables(
+        d_flow_model->registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
             d_num_conv_ghosts,
             AVERAGING::SIMPLE);
         
@@ -556,7 +556,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
         
         d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
         
-        d_flow_model->registerFaceProjectionMatricesOfPrimitiveVariables(
+        d_flow_model->registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
             d_num_conv_ghosts,
             AVERAGING::SIMPLE);
         
@@ -1356,7 +1356,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
         
         d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
         
-        d_flow_model->registerFaceProjectionMatricesOfPrimitiveVariables(
+        d_flow_model->registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables(
             d_num_conv_ghosts,
             AVERAGING::SIMPLE);
         
