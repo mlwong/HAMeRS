@@ -1,7 +1,12 @@
 #ifndef FLOW_MODEL_HPP
 #define FLOW_MODEL_HPP
 
-#include "SAMRAI/SAMRAI_config.h"
+#include "HAMeRS_config.hpp"
+
+#include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
+#include "flow/flow_models/FlowModelBoundaryUtilities.hpp"
+#include "util/Directions.hpp"
+#include "util/mixing_rules/equations_of_state/EquationOfStateMixingRulesManager.hpp"
 
 #include "SAMRAI/appu/VisDerivedDataStrategy.h"
 #include "SAMRAI/appu/VisItDataWriter.h"
@@ -11,13 +16,6 @@
 #include "SAMRAI/pdat/CellVariable.h"
 #include "SAMRAI/pdat/FaceData.h"
 #include "SAMRAI/pdat/SideData.h"
-
-#include "HAMeRS_config.hpp"
-
-#include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
-#include "flow/flow_models/FlowModelBoundaryUtilities.hpp"
-#include "util/Directions.hpp"
-#include "util/mixing_rules/equations_of_state/EquationOfStateMixingRulesManager.hpp"
 
 #include "boost/multi_array.hpp"
 #include "boost/shared_ptr.hpp"

@@ -1,11 +1,11 @@
 #ifndef EQUATION_OF_SHEAR_VISCOSITY_MIXING_RULES_MANAGER_HPP
 #define EQUATION_OF_SHEAR_VISCOSITY_MIXING_RULES_MANAGER_HPP
 
-#include "SAMRAI/SAMRAI_config.h"
-
-#include "SAMRAI/tbox/Dimension.h"
+#include "HAMeRS_config.hpp"
 
 #include "util/mixing_rules/equations_of_shear_viscosity/EquationsOfShearViscosity.hpp"
+
+#include "SAMRAI/tbox/Dimension.h"
 
 #include "boost/shared_ptr.hpp"
 #include <string>

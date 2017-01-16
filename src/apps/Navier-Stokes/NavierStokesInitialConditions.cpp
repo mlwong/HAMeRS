@@ -1,8 +1,7 @@
 #include "apps/Navier-Stokes/NavierStokesInitialConditions.hpp"
 
-#include <boost/math/constants/constants.hpp>
-#include <boost/math/special_functions/prime.hpp>
-
+#include "boost/math/constants/constants.hpp"
+#include "boost/math/special_functions/prime.hpp"
 #include <sstream>
 
 /*
@@ -27,7 +26,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
             BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                 patch.getPatchGeometry()));
         
-#ifdef DEBUG_CHECK_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(patch_geom);
 #endif
         
@@ -57,7 +56,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                         patch.getPatchData(d_total_energy, data_context)));
                 
-#ifdef DEBUG_CHECK_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
                 TBOX_ASSERT(density);
                 TBOX_ASSERT(momentum);
                 TBOX_ASSERT(total_energy);
@@ -572,7 +571,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                         patch.getPatchData(d_total_energy, data_context)));
                 
-#ifdef DEBUG_CHECK_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
                 TBOX_ASSERT(partial_density);
                 TBOX_ASSERT(momentum);
                 TBOX_ASSERT(total_energy);
@@ -1239,7 +1238,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                     BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                         patch.getPatchData(d_volume_fraction, data_context)));
                 
-#ifdef DEBUG_CHECK_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
                 TBOX_ASSERT(partial_density);
                 TBOX_ASSERT(momentum);
                 TBOX_ASSERT(total_energy);

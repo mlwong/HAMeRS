@@ -12,7 +12,7 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxFromConservativeVa
     const std::vector<boost::reference_wrapper<double> >& conservative_variables_plus,
     const DIRECTION::TYPE& direction)
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(flux_intercell.size()) == d_num_eqn);
     TBOX_ASSERT(static_cast<int>(conservative_variables_minus.size()) == d_num_eqn);
     TBOX_ASSERT(static_cast<int>(conservative_variables_plus.size()) == d_num_eqn);
@@ -69,7 +69,7 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxFromPrimitiveVaria
     const std::vector<boost::reference_wrapper<double> >& primitive_variables_plus,
     const DIRECTION::TYPE& direction)
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(flux_intercell.size()) == d_num_eqn);
     TBOX_ASSERT(static_cast<int>(primitive_variables_minus.size()) == d_num_eqn);
     TBOX_ASSERT(static_cast<int>(primitive_variables_plus.size()) == d_num_eqn);
@@ -126,7 +126,7 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInXDirectionFromCo
     const std::vector<boost::reference_wrapper<double> >& Q_L,
     const std::vector<boost::reference_wrapper<double> >& Q_R)
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(F_x_intercell.size()) == d_num_eqn);
     TBOX_ASSERT(static_cast<int>(Q_L.size()) == d_num_eqn);
     TBOX_ASSERT(static_cast<int>(Q_R.size()) == d_num_eqn);
@@ -845,7 +845,7 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInYDirectionFromCo
     const std::vector<boost::reference_wrapper<double> >& Q_B,
     const std::vector<boost::reference_wrapper<double> >& Q_T)
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(F_y_intercell.size()) == d_num_eqn);
     TBOX_ASSERT(static_cast<int>(Q_B.size()) == d_num_eqn);
     TBOX_ASSERT(static_cast<int>(Q_T.size()) == d_num_eqn);
@@ -1433,7 +1433,7 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInZDirectionFromCo
     const std::vector<boost::reference_wrapper<double> >& Q_B,
     const std::vector<boost::reference_wrapper<double> >& Q_F)
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(F_z_intercell.size()) == d_num_eqn);
     TBOX_ASSERT(static_cast<int>(Q_B.size()) == d_num_eqn);
     TBOX_ASSERT(static_cast<int>(Q_F.size()) == d_num_eqn);
@@ -1755,7 +1755,7 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInXDirectionFromPr
     const std::vector<boost::reference_wrapper<double> >& V_L,
     const std::vector<boost::reference_wrapper<double> >& V_R)
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(F_x_intercell.size()) == d_num_eqn);
     TBOX_ASSERT(static_cast<int>(V_L.size()) == d_num_eqn);
     TBOX_ASSERT(static_cast<int>(V_R.size()) == d_num_eqn);
@@ -2621,7 +2621,7 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInYDirectionFromPr
     const std::vector<boost::reference_wrapper<double> >& V_B,
     const std::vector<boost::reference_wrapper<double> >& V_T)
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(F_y_intercell.size()) == d_num_eqn);
     TBOX_ASSERT(static_cast<int>(V_B.size()) == d_num_eqn);
     TBOX_ASSERT(static_cast<int>(V_T.size()) == d_num_eqn);
@@ -3342,7 +3342,7 @@ RiemannSolverFourEqnConservativeHLLC_HLL::computeIntercellFluxInZDirectionFromPr
     const std::vector<boost::reference_wrapper<double> >& V_B,
     const std::vector<boost::reference_wrapper<double> >& V_F)
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(F_z_intercell.size()) == d_num_eqn);
     TBOX_ASSERT(static_cast<int>(V_B.size()) == d_num_eqn);
     TBOX_ASSERT(static_cast<int>(V_F.size()) == d_num_eqn);

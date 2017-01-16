@@ -13,7 +13,7 @@ RiemannSolverFiveEqnAllaireHLLC_HLL::computeIntercellFluxAndVelocityFromConserva
     const std::vector<boost::reference_wrapper<double> >& conservative_variables_plus,
     const DIRECTION::TYPE& direction)
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(flux_intercell.size()) == d_num_eqn);
     TBOX_ASSERT(static_cast<int>(velocity_intercell.size()) == d_dim.getValue());
     TBOX_ASSERT(static_cast<int>(conservative_variables_minus.size()) == d_num_eqn);
@@ -75,7 +75,7 @@ RiemannSolverFiveEqnAllaireHLLC_HLL::computeIntercellFluxAndVelocityFromPrimitiv
     const std::vector<boost::reference_wrapper<double> >& primitive_variables_plus,
     const DIRECTION::TYPE& direction)
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(flux_intercell.size()) == d_num_eqn);
     TBOX_ASSERT(static_cast<int>(velocity_intercell.size()) == d_dim.getValue());
     TBOX_ASSERT(static_cast<int>(primitive_variables_minus.size()) == d_num_eqn);
@@ -137,7 +137,7 @@ RiemannSolverFiveEqnAllaireHLLC_HLL::computeIntercellFluxAndVelocityInXDirection
     const std::vector<boost::reference_wrapper<double> >& Q_L,
     const std::vector<boost::reference_wrapper<double> >& Q_R)
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(F_x_intercell.size()) == d_num_eqn);
     TBOX_ASSERT(static_cast<int>(vel_intercell.size()) == d_dim.getValue());
     TBOX_ASSERT(static_cast<int>(Q_L.size()) == d_num_eqn);
@@ -1007,7 +1007,7 @@ RiemannSolverFiveEqnAllaireHLLC_HLL::computeIntercellFluxAndVelocityInYDirection
     const std::vector<boost::reference_wrapper<double> >& Q_B,
     const std::vector<boost::reference_wrapper<double> >& Q_T)
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(F_y_intercell.size()) == d_num_eqn);
     TBOX_ASSERT(static_cast<int>(vel_intercell.size()) == d_dim.getValue());
     TBOX_ASSERT(static_cast<int>(Q_B.size()) == d_num_eqn);
@@ -1709,7 +1709,7 @@ RiemannSolverFiveEqnAllaireHLLC_HLL::computeIntercellFluxAndVelocityInZDirection
     const std::vector<boost::reference_wrapper<double> >& Q_B,
     const std::vector<boost::reference_wrapper<double> >& Q_F)
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(F_z_intercell.size()) == d_num_eqn);
     TBOX_ASSERT(static_cast<int>(vel_intercell.size()) == d_dim.getValue());
     TBOX_ASSERT(static_cast<int>(Q_B.size()) == d_num_eqn);
@@ -2089,7 +2089,7 @@ RiemannSolverFiveEqnAllaireHLLC_HLL::computeIntercellFluxAndVelocityInXDirection
     const std::vector<boost::reference_wrapper<double> >& V_L,
     const std::vector<boost::reference_wrapper<double> >& V_R)
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(F_x_intercell.size()) == d_num_eqn);
     TBOX_ASSERT(static_cast<int>(vel_intercell.size()) == d_dim.getValue());
     TBOX_ASSERT(static_cast<int>(V_L.size()) == d_num_eqn);
@@ -3203,7 +3203,7 @@ RiemannSolverFiveEqnAllaireHLLC_HLL::computeIntercellFluxAndVelocityInYDirection
     const std::vector<boost::reference_wrapper<double> >& V_B,
     const std::vector<boost::reference_wrapper<double> >& V_T)
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(F_y_intercell.size()) == d_num_eqn);
     TBOX_ASSERT(static_cast<int>(vel_intercell.size()) == d_dim.getValue());
     TBOX_ASSERT(static_cast<int>(V_B.size()) == d_num_eqn);
@@ -4120,7 +4120,7 @@ RiemannSolverFiveEqnAllaireHLLC_HLL::computeIntercellFluxAndVelocityInZDirection
     const std::vector<boost::reference_wrapper<double> >& V_B,
     const std::vector<boost::reference_wrapper<double> >& V_F)
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(F_z_intercell.size()) == d_num_eqn);
     TBOX_ASSERT(static_cast<int>(vel_intercell.size()) == d_dim.getValue());
     TBOX_ASSERT(static_cast<int>(V_B.size()) == d_num_eqn);

@@ -1,7 +1,9 @@
 #ifndef FLOW_MODEL_MANAGER_HPP
 #define FLOW_MODEL_MANAGER_HPP
 
-#include "SAMRAI/SAMRAI_config.h"
+#include "HAMeRS_config.hpp"
+
+#include "flow/flow_models/FlowModels.hpp"
 
 #include "SAMRAI/appu/VisDerivedDataStrategy.h"
 #include "SAMRAI/appu/VisItDataWriter.h"
@@ -12,8 +14,6 @@
 #include "SAMRAI/hier/Patch.h"
 #include "SAMRAI/pdat/CellVariable.h"
 #include "SAMRAI/tbox/Dimension.h"
-
-#include "flow/flow_models/FlowModels.hpp"
 
 #include "boost/shared_ptr.hpp"
 #include <string>

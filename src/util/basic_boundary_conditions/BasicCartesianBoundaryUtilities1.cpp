@@ -1,13 +1,13 @@
 #include "util/basic_boundary_conditions/BasicCartesianBoundaryUtilities1.hpp"
 
+#include "util/basic_boundary_conditions/BasicBoundaryConditions.hpp"
+#include "util/basic_boundary_conditions/CartesianBoundaryDefines.hpp"
+
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 #include "SAMRAI/hier/BoundaryBox.h"
 #include "SAMRAI/pdat/CellIndex.h"
 #include "SAMRAI/tbox/Utilities.h"
 #include "SAMRAI/tbox/MathUtilities.h"
-
-#include "util/basic_boundary_conditions/BasicBoundaryConditions.hpp"
-#include "util/basic_boundary_conditions/CartesianBoundaryDefines.hpp"
 
 #include <algorithm>
 

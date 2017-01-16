@@ -31,7 +31,7 @@ EquationOfStateIdealGas::getPressure(
     const double* const internal_energy,
     const std::vector<const double*>& thermo_properties) const
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) >= 1);
 #endif
     
@@ -53,7 +53,7 @@ EquationOfStateIdealGas::getSoundSpeed(
     const double* const pressure,
     const std::vector<const double*>& thermo_properties) const
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) >= 1);
 #endif
     
@@ -75,7 +75,7 @@ EquationOfStateIdealGas::getInternalEnergy(
     const double* const pressure,
     const std::vector<const double*>& thermo_properties) const
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) >= 1);
 #endif
     
@@ -97,7 +97,7 @@ EquationOfStateIdealGas::getEnthalpy(
     const double* const pressure,
     const std::vector<const double*>& thermo_properties) const
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) >= 1);
 #endif
     
@@ -119,7 +119,7 @@ EquationOfStateIdealGas::getTemperature(
     const double* const pressure,
     const std::vector<const double*>& thermo_properties) const
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) == 4);
 #endif
     
@@ -144,7 +144,7 @@ EquationOfStateIdealGas::getInternalEnergyFromTemperature(
 {
     NULL_USE(density);
     
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) == 4);
 #endif
     
@@ -168,7 +168,7 @@ EquationOfStateIdealGas::getIsochoricPartialInternalEnergyPartialPressure(
     NULL_USE(density);
     NULL_USE(pressure);
     
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) >= 1);
 #endif
     
@@ -204,7 +204,7 @@ EquationOfStateIdealGas::getDensity(
     const double* const temperature,
     const std::vector<const double*>& thermo_properties) const
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(thermo_properties.size()) >= 2);
 #endif
     

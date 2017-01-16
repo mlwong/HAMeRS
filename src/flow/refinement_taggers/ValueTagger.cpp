@@ -1460,7 +1460,7 @@ ValueTagger::transferDataToClassVariable(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
             patch.getPatchData(variable_value_tagger, data_context)));
     
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(data_input->getDepth() > depth);
 #endif
     
@@ -1470,7 +1470,7 @@ ValueTagger::transferDataToClassVariable(
     hier::IntVector num_subghosts_value_tagger = data_value_tagger->getGhostCellWidth();
     hier::IntVector subghostcell_dims_value_tagger = data_value_tagger->getGhostBox().numberCells();
     
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(num_subghosts_input >= num_subghosts_value_tagger);
 #endif
     

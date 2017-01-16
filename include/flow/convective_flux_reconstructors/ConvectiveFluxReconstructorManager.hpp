@@ -1,12 +1,12 @@
 #ifndef CONVECTIVE_FLUX_RECONSTRUCTOR_MANAGER_HPP
 #define CONVECTIVE_FLUX_RECONSTRUCTOR_MANAGER_HPP
 
-#include "SAMRAI/SAMRAI_config.h"
+#include "HAMeRS_config.hpp"
+
+#include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructors.hpp"
 
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/tbox/Dimension.h"
-
-#include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructors.hpp"
 
 #include "boost/shared_ptr.hpp"
 #include <string>

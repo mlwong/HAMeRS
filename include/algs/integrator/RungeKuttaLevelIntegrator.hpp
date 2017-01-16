@@ -14,7 +14,10 @@
 #ifndef RUNGE_KUTTA_LEVEL_INTEGRATOR_HPP
 #define RUNGE_KUTTA_LEVEL_INTEGRATOR_HPP
 
-#include "SAMRAI/SAMRAI_config.h"
+#include "HAMeRS_config.hpp"
+
+#include "algs/integrator/ExtendedTagAndInitialize.hpp"
+#include "algs/patch_strategy/RungeKuttaPatchStrategy.hpp"
 
 #include "SAMRAI/algs/TimeRefinementLevelStrategy.h"
 #include "SAMRAI/hier/ComponentSelector.h"
@@ -29,16 +32,6 @@
 #include "SAMRAI/xfer/RefineAlgorithm.h"
 #include "SAMRAI/xfer/RefineSchedule.h"
 
-#include "algs/integrator/ExtendedTagAndInitialize.hpp"
-#include "algs/patch_strategy/RungeKuttaPatchStrategy.hpp"
-
-#include "boost/shared_ptr.hpp"
-#include "boost/multi_array.hpp"
-#include <iostream>
-#include <list>
-#include <string>
-#include <vector>
-
 #define HLI_RECORD_STATS
 // #undef DGA_RECORD_STATS
 
@@ -46,6 +39,13 @@
 #include "SAMRAI/tbox/Statistic.h"
 #include "SAMRAI/tbox/Statistician.h"
 #endif
+
+#include "boost/shared_ptr.hpp"
+#include "boost/multi_array.hpp"
+#include <iostream>
+#include <list>
+#include <string>
+#include <vector>
 
 using namespace SAMRAI;
 

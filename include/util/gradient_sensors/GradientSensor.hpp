@@ -1,7 +1,7 @@
 #ifndef GRADIENT_SENSOR_HPP
 #define GRADIENT_SENSOR_HPP
 
-#include "SAMRAI/SAMRAI_config.h"
+#include "HAMeRS_config.hpp"
 
 #include "SAMRAI/hier/IntVector.h"
 #include "SAMRAI/hier/Patch.h"

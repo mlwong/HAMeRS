@@ -1,12 +1,12 @@
 #include "flow/flow_models/five-eqn_Allaire/FlowModelBoundaryUtilitiesFiveEqnAllaire.hpp"
 
+#include "util/basic_boundary_conditions/CartesianBoundaryDefines.hpp"
+
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 #include "SAMRAI/hier/BoundaryBox.h"
 #include "SAMRAI/pdat/CellIndex.h"
 #include "SAMRAI/tbox/Utilities.h"
 #include "SAMRAI/tbox/MathUtilities.h"
-
-#include "util/basic_boundary_conditions/CartesianBoundaryDefines.hpp"
 
 /*
  * Function to read 1d boundary data from input database.

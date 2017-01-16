@@ -12,7 +12,9 @@
 #ifndef CARTESIAN_BOUNDARY_UTILITIES3_HPP
 #define CARTESIAN_BOUNDARY_UTILITIES3_HPP
 
-#include "SAMRAI/SAMRAI_config.h"
+#include "HAMeRS_config.hpp"
+
+#include "util/basic_boundary_conditions/BoundaryUtilityStrategy.hpp"
 
 #include "SAMRAI/pdat/CellData.h"
 #include "SAMRAI/hier/BoundaryBox.h"
@@ -20,8 +22,6 @@
 #include "SAMRAI/hier/IntVector.h"
 #include "SAMRAI/hier/Patch.h"
 #include "SAMRAI/tbox/Database.h"
-
-#include "util/basic_boundary_conditions/BoundaryUtilityStrategy.hpp"
 
 #include "boost/shared_ptr.hpp"
 #include <string>

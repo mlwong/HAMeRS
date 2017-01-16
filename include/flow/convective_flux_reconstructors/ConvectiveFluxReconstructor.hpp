@@ -1,7 +1,9 @@
 #ifndef CONVECTIVE_FLUX_RECONSTRUCTOR_HPP
 #define CONVECTIVE_FLUX_RECONSTRUCTOR_HPP
 
-#include "SAMRAI/SAMRAI_config.h"
+#include "HAMeRS_config.hpp"
+
+#include "flow/flow_models/FlowModels.hpp"
 
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/hier/IntVector.h"
@@ -10,10 +12,6 @@
 #include "SAMRAI/pdat/FaceVariable.h"
 #include "SAMRAI/tbox/Dimension.h"
 #include "SAMRAI/tbox/Utilities.h"
-
-#include "HAMeRS_config.hpp"
-
-#include "flow/flow_models/FlowModels.hpp"
 
 #include "boost/shared_ptr.hpp"
 #include <string>

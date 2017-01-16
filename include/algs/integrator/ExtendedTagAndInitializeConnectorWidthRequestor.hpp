@@ -12,7 +12,7 @@
 #ifndef EXTENDED_TAG_AND_INITIALIZE_CONNECTOR_WIDTH_REQUESTOR_HPP
 #define EXTENDED_TAG_AND_INITIALIZE_CONNECTOR_WIDTH_REQUESTOR_HPP
 
-#include "SAMRAI/SAMRAI_config.h"
+#include "HAMeRS_config.hpp"
 
 #include "SAMRAI/hier/PatchHierarchy.h"
 

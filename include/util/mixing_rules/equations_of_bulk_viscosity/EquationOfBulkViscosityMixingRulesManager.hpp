@@ -1,11 +1,11 @@
 #ifndef EQUATION_OF_BULK_VISCOSITY_MIXING_RULES_MANAGER_HPP
 #define EQUATION_OF_BULK_VISCOSITY_MIXING_RULES_MANAGER_HPP
 
-#include "SAMRAI/SAMRAI_config.h"
-
-#include "SAMRAI/tbox/Dimension.h"
+#include "HAMeRS_config.hpp"
 
 #include "util/mixing_rules/equations_of_bulk_viscosity/EquationsOfBulkViscosity.hpp"
+
+#include "SAMRAI/tbox/Dimension.h"
 
 #include "boost/shared_ptr.hpp"
 #include <string>

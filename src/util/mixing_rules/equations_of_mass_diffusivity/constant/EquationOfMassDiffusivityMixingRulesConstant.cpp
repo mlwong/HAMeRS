@@ -125,7 +125,7 @@ EquationOfMassDiffusivityMixingRulesConstant::getMassDiffusivities(
     NULL_USE(temperature);
     NULL_USE(mass_fraction);
     
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(mass_diffusivities.size()) == d_num_species);
     TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
                 (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
@@ -148,7 +148,7 @@ EquationOfMassDiffusivityMixingRulesConstant::getSpeciesMolecularProperties(
     std::vector<double*>& species_molecular_properties,
     const int& species_index) const
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(species_molecular_properties.size()) >= 1);
     TBOX_ASSERT(species_index >= 0);
     TBOX_ASSERT(species_index < d_num_species);

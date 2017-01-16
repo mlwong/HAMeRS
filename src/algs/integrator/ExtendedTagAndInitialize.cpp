@@ -205,7 +205,7 @@ ExtendedTagAndInitialize::resetHierarchyConfiguration(
     TBOX_ASSERT((coarsest_level >= 0) &&
         (coarsest_level <= finest_level) &&
         (finest_level <= hierarchy->getFinestLevelNumber()));
-#ifdef DEBUG_CHECK_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     for (int ln0 = 0; ln0 <= finest_level; ln0++)
     {
         TBOX_ASSERT(hierarchy->getPatchLevel(ln0));

@@ -1,10 +1,12 @@
 #ifndef RIEMANN_SOLVER_SINGLE_SPECIES_HPP
 #define RIEMANN_SOLVER_SINGLE_SPECIES_HPP
 
-#include "SAMRAI/tbox/Dimension.h"
+#include "HAMeRS_config.hpp"
 
 #include "util/Directions.hpp"
 #include "util/mixing_rules/equations_of_state/EquationOfStateMixingRules.hpp"
+
+#include "SAMRAI/tbox/Dimension.h"
 
 #include "boost/ref.hpp"
 #include "boost/shared_ptr.hpp"

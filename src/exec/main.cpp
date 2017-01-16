@@ -1,6 +1,13 @@
-#include "SAMRAI/SAMRAI_config.h"
+// Headers for application-specific algorithm/data structure object
+
+#include "algs/integrator/ExtendedTagAndInitialize.hpp"
+#include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
+#include "apps/Euler/Euler.hpp"
+#include "apps/Navier-Stokes/NavierStokes.hpp"
 
 // Headers for basic SAMRAI objects
+
+#include "SAMRAI/SAMRAI_config.h"
 
 #include "SAMRAI/hier/BoxContainer.h"
 #include "SAMRAI/hier/Index.h"
@@ -29,13 +36,6 @@
 #include "SAMRAI/mesh/BergerRigoutsos.h"
 #include "SAMRAI/mesh/GriddingAlgorithm.h"
 #include "SAMRAI/mesh/TreeLoadBalancer.h"
-
-// Headers for application-specific algorithm/data structure object
-
-#include "algs/integrator/ExtendedTagAndInitialize.hpp"
-#include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
-#include "apps/Euler/Euler.hpp"
-#include "apps/Navier-Stokes/NavierStokes.hpp"
 
 #include "boost/shared_ptr.hpp"
 #include <fstream>

@@ -1,12 +1,12 @@
 #ifndef DIFFUSIVE_FLUX_RECONSTRUCTOR_MANAGER_HPP
 #define DIFFUSIVE_FLUX_RECONSTRUCTOR_MANAGER_HPP
 
-#include "SAMRAI/SAMRAI_config.h"
+#include "HAMeRS_config.hpp"
+
+#include "flow/diffusive_flux_reconstructors/DiffusiveFluxReconstructors.hpp"
 
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/tbox/Dimension.h"
-
-#include "flow/diffusive_flux_reconstructors/DiffusiveFluxReconstructors.hpp"
 
 #include "boost/shared_ptr.hpp"
 #include <string>

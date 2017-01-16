@@ -192,7 +192,7 @@ EquationOfStateMixingRulesIdealGas::getPressure(
     const double* const internal_energy,
     const std::vector<const double*>& mass_fraction) const
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
                 (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
     TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
@@ -237,7 +237,7 @@ EquationOfStateMixingRulesIdealGas::getPressure(
     const std::vector<const double*>& mass_fraction,
     const std::vector<const double*>& volume_fraction) const
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
                 (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
@@ -284,7 +284,7 @@ EquationOfStateMixingRulesIdealGas::getSoundSpeed(
     const double* const pressure,
     const std::vector<const double*>& mass_fraction) const
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
                 (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
     TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
@@ -329,7 +329,7 @@ EquationOfStateMixingRulesIdealGas::getSoundSpeed(
     const std::vector<const double*>& mass_fraction,
     const std::vector<const double*>& volume_fraction) const
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
                 (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
@@ -376,7 +376,7 @@ EquationOfStateMixingRulesIdealGas::getInternalEnergy(
     const double* const pressure,
     const std::vector<const double*>& mass_fraction) const
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
                 (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
     TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
@@ -421,7 +421,7 @@ EquationOfStateMixingRulesIdealGas::getInternalEnergy(
     const std::vector<const double*>& mass_fraction,
     const std::vector<const double*>& volume_fraction) const
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
                 (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
@@ -468,7 +468,7 @@ EquationOfStateMixingRulesIdealGas::getTemperature(
     const double* const pressure,
     const std::vector<const double*>& mass_fraction) const
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
                 (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
     TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
@@ -513,7 +513,7 @@ EquationOfStateMixingRulesIdealGas::getInternalEnergyFromTemperature(
     const double* const temperature,
     const std::vector<const double*>& mass_fraction) const
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
                 (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
     TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
@@ -556,7 +556,7 @@ EquationOfStateMixingRulesIdealGas::getSpeciesThermodynamicProperties(
     std::vector<double*>& species_thermo_properties,
     const int& species_index) const
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(species_thermo_properties.size()) == 4);
     TBOX_ASSERT(species_index >= 0);
     TBOX_ASSERT(species_index < d_num_species);
@@ -661,7 +661,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithMassFra
     std::vector<double*>& mixture_thermo_properties,
     const std::vector<const double*>& mass_fraction) const
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(mixture_thermo_properties.size()) == 4);
 #endif
     
@@ -723,7 +723,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeF
     std::vector<double*>& mixture_thermo_properties,
     const std::vector<const double*>& volume_fraction) const
 {
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(mixture_thermo_properties.size()) == 1);
 #endif
     

@@ -12,7 +12,7 @@
 #ifndef BOUNDARY_UTILITY_STRATEGY_HPP
 #define BOUNDARY_UTILITY_STRATEGY_HPP
 
-#include "SAMRAI/SAMRAI_config.h"
+#include "HAMeRS_config.hpp"
 
 #include "SAMRAI/tbox/Database.h"
 #include "SAMRAI/tbox/Utilities.h"

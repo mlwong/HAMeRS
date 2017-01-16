@@ -1,12 +1,12 @@
 #include "flow/flow_models/single-species/FlowModelBoundaryUtilitiesSingleSpecies.hpp"
 
+#include "util/basic_boundary_conditions/CartesianBoundaryDefines.hpp"
+
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 #include "SAMRAI/hier/BoundaryBox.h"
 #include "SAMRAI/pdat/CellIndex.h"
 #include "SAMRAI/tbox/Utilities.h"
 #include "SAMRAI/tbox/MathUtilities.h"
-
-#include "util/basic_boundary_conditions/CartesianBoundaryDefines.hpp"
 
 // Integer constant for debugging improperly set boundary data.
 #define BOGUS_BDRY_LOC (-9999)

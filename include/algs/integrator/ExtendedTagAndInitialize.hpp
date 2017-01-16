@@ -13,15 +13,14 @@
 #ifndef EXTENDED_TAG_AND_INITIALIZE_HPP
 #define EXTENDED_TAG_AND_INITIALIZE_HPP
 
-#include "SAMRAI/SAMRAI_config.h"
-
-#include "SAMRAI/mesh/TagAndInitializeStrategy.h"
+#include "HAMeRS_config.hpp"
 
 #include "algs/integrator/ExtendedTagAndInitializeConnectorWidthRequestor.hpp"
 #include "algs/integrator/ExtendedTagAndInitStrategy.hpp"
 
-#include "boost/shared_ptr.hpp"
+#include "SAMRAI/mesh/TagAndInitializeStrategy.h"
 
+#include "boost/shared_ptr.hpp"
 #include <vector>
 
 using namespace SAMRAI;

@@ -486,7 +486,7 @@ RungeKuttaLevelIntegrator::resetHierarchyConfiguration(
         && (coarsest_level <= finest_level)
         && (finest_level <= hierarchy->getFinestLevelNumber()));
     
-#ifdef DEBUG_CHECK_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     for (int ln0 = 0; ln0 <= finest_level; ln0++)
     {
        TBOX_ASSERT(hierarchy->getPatchLevel(ln0));
@@ -1328,7 +1328,7 @@ RungeKuttaLevelIntegrator::getMaxFinerLevelDt(
 {
     NULL_USE(finer_level_number);
     
-#ifdef DEBUG_CHECK_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     for (int id = 0; id < ratio.getDim().getValue(); id++)
     {
         TBOX_ASSERT(ratio(id) > 0);
@@ -1904,7 +1904,7 @@ RungeKuttaLevelIntegrator::standardLevelSynchronization(
                 && (coarsest_level < finest_level)
                 && (finest_level <= hierarchy->getFinestLevelNumber()));
     TBOX_ASSERT(static_cast<int>(old_times.size()) >= finest_level);
-#ifdef DEBUG_CHECK_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     for (int ln = coarsest_level; ln < finest_level; ln++)
     {
         TBOX_ASSERT(hierarchy->getPatchLevel(ln));
@@ -1987,7 +1987,7 @@ RungeKuttaLevelIntegrator::synchronizeNewLevels(
                 && (coarsest_level < finest_level)
                 && (finest_level <= hierarchy->getFinestLevelNumber()));
     
-#ifdef DEBUG_CHECK_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     for (int ln = coarsest_level; ln <= finest_level; ln++)
     {
         TBOX_ASSERT(hierarchy->getPatchLevel(ln));

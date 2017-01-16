@@ -99,7 +99,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
     // Initialize the data of diffusive flux to zero.
     diffusive_flux->fillAll(0.0);
     
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(diffusive_flux);
     TBOX_ASSERT(diffusive_flux->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
 #endif

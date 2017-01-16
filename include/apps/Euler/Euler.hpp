@@ -1,7 +1,17 @@
 #ifndef EULER_HPP
 #define EULER_HPP
 
-#include "SAMRAI/SAMRAI_config.h"
+#include "HAMeRS_config.hpp"
+
+#include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
+#include "algs/patch_strategy/RungeKuttaPatchStrategy.hpp"
+#include "apps/Euler/EulerBoundaryConditions.hpp"
+#include "apps/Euler/EulerInitialConditions.hpp"
+#include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructorManager.hpp"
+#include "flow/flow_models/FlowModelManager.hpp"
+#include "flow/refinement_taggers/GradientTagger.hpp"
+#include "flow/refinement_taggers/MultiresolutionTagger.hpp"
+#include "flow/refinement_taggers/ValueTagger.hpp"
 
 #include "SAMRAI/appu/VisDerivedDataStrategy.h"
 #include "SAMRAI/appu/VisItDataWriter.h"
@@ -18,16 +28,6 @@
 #include "SAMRAI/tbox/Database.h"
 #include "SAMRAI/tbox/MessageStream.h"
 #include "SAMRAI/tbox/Serializable.h"
-
-#include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
-#include "algs/patch_strategy/RungeKuttaPatchStrategy.hpp"
-#include "apps/Euler/EulerBoundaryConditions.hpp"
-#include "apps/Euler/EulerInitialConditions.hpp"
-#include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructorManager.hpp"
-#include "flow/flow_models/FlowModelManager.hpp"
-#include "flow/refinement_taggers/GradientTagger.hpp"
-#include "flow/refinement_taggers/MultiresolutionTagger.hpp"
-#include "flow/refinement_taggers/ValueTagger.hpp"
 
 #include "boost/shared_ptr.hpp"
 #include <string>

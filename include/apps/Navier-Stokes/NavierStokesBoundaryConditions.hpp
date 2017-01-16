@@ -1,13 +1,12 @@
 #ifndef NAVIER_STOKES_BOUNDARY_CONDITIONS_HPP
 #define NAVIER_STOKES_BOUNDARY_CONDITIONS_HPP
 
-#include "SAMRAI/SAMRAI_config.h"
+#include "HAMeRS_config.hpp"
 
+#include "flow/flow_models/FlowModels.hpp"
 #include "util/basic_boundary_conditions/BasicBoundaryConditions.hpp"
 #include "util/basic_boundary_conditions/BoundaryUtilityStrategy.hpp"
 #include "util/basic_boundary_conditions/CartesianBoundaryDefines.hpp"
-
-#include "flow/flow_models/FlowModels.hpp"
 
 #include "boost/shared_ptr.hpp"
 #include <map>

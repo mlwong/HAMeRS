@@ -2,6 +2,7 @@
 #define EQUATION_OF_THERMAL_CONDUCTIVITY_MIXING_RULES_CONSTANT_HPP
 
 #include "util/mixing_rules/equations_of_thermal_conductivity/EquationOfThermalConductivityMixingRules.hpp"
+
 #include "util/mixing_rules/equations_of_thermal_conductivity/constant/EquationOfThermalConductivityConstant.hpp"
 
 class EquationOfThermalConductivityMixingRulesConstant: public EquationOfThermalConductivityMixingRules

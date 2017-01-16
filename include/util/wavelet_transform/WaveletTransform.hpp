@@ -1,7 +1,7 @@
 #ifndef WAVELET_TRANSFORM_HPP
 #define WAVELET_TRANSFORM_HPP
 
-#include "SAMRAI/SAMRAI_config.h"
+#include "HAMeRS_config.hpp"
 
 #include "SAMRAI/hier/IntVector.h"
 #include "SAMRAI/hier/Patch.h"

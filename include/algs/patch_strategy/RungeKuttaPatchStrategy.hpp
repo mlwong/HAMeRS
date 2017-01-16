@@ -14,7 +14,7 @@
 #ifndef RUNGE_KUTTA_PATCH_STRATEGY_HPP
 #define RUNGE_KUTTA_PATCH_STRATEGY_HPP
 
-#include "SAMRAI/SAMRAI_config.h"
+#include "HAMeRS_config.hpp"
 
 #include "SAMRAI/hier/IntVector.h"
 #include "SAMRAI/hier/PatchData.h"

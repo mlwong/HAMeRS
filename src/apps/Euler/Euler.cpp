@@ -470,7 +470,7 @@ Euler::computeStableDtOnPatch(
         BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     
-#ifdef DEBUG_CHECK_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(patch_geom);
 #endif
     
@@ -745,7 +745,7 @@ Euler::advanceSingleStep(
         BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     
-#ifdef DEBUG_CHECK_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(patch_geom);
 #endif
     
@@ -812,7 +812,7 @@ Euler::advanceSingleStep(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
             patch.getPatchData(d_variable_source, getDataContext())));
     
-#ifdef DEBUG_CHECK_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(convective_flux);
     TBOX_ASSERT(source);
     
@@ -832,7 +832,7 @@ Euler::advanceSingleStep(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(d_variable_source, intermediate_context[n])));
         
-#ifdef DEBUG_CHECK_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(convective_flux_intermediate);
         TBOX_ASSERT(source_intermediate);
         
@@ -1247,7 +1247,7 @@ Euler::synchronizeHyperbolicFluxes(
         BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     
-#ifdef DEBUG_CHECK_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(patch_geom);
 #endif
     
@@ -1307,7 +1307,7 @@ Euler::synchronizeHyperbolicFluxes(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
             patch.getPatchData(d_variable_source, getDataContext())));
     
-#ifdef DEBUG_CHECK_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(convective_flux);
     TBOX_ASSERT(source);
     
@@ -1495,7 +1495,7 @@ Euler::tagValueDetectorCells(
         BOOST_CAST<pdat::CellData<int>, hier::PatchData>(
             patch.getPatchData(tag_indx)));
     
-#ifdef DEBUG_CHECK_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(tags);
     TBOX_ASSERT(tags->getGhostCellWidth() == 0);
 #endif
@@ -1547,7 +1547,7 @@ Euler::tagGradientDetectorCells(
         BOOST_CAST<pdat::CellData<int>, hier::PatchData>(
             patch.getPatchData(tag_indx)));
     
-#ifdef DEBUG_CHECK_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(tags);
     TBOX_ASSERT(tags->getGhostCellWidth() == 0);
 #endif
@@ -1644,7 +1644,7 @@ Euler::tagMultiresolutionDetectorCells(
         BOOST_CAST<pdat::CellData<int>, hier::PatchData>(
             patch.getPatchData(tag_indx)));
     
-#ifdef DEBUG_CHECK_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(tags);
     TBOX_ASSERT(tags->getGhostCellWidth() == 0);
 #endif

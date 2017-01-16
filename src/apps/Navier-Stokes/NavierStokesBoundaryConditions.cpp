@@ -1,14 +1,12 @@
 #include "apps/Navier-Stokes/NavierStokesBoundaryConditions.hpp"
 
-//integer constant for debugging improperly set boundary data
-#define BOGUS_BDRY_DATA (-9999)
-
 // routines for managing boundary data
 #include "util/basic_boundary_conditions/BasicCartesianBoundaryUtilities1.hpp"
 #include "util/basic_boundary_conditions/BasicCartesianBoundaryUtilities2.hpp"
 #include "util/basic_boundary_conditions/BasicCartesianBoundaryUtilities3.hpp"
 
-#include <algorithm>
+//integer constant for debugging improperly set boundary data
+#define BOGUS_BDRY_DATA (-9999)
 
 NavierStokesBoundaryConditions::NavierStokesBoundaryConditions(
     const std::string& object_name,
@@ -1025,8 +1023,8 @@ NavierStokesBoundaryConditions::setPhysicalBoundaryConditions(
             BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
                 patch.getPatchGeometry()));
         
-#ifdef DEBUG_CHECK_ASSERTIONS
-            TBOX_ASSERT(patch_geom);
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(patch_geom);
 #endif
         
         if (patch_geom->getTouchesRegularBoundary(1, 0) ||

@@ -1,11 +1,11 @@
 #ifndef EQUATION_OF_THERMAL_CONDUCTIVITY_MIXING_RULES_MANAGER_HPP
 #define EQUATION_OF_THERMAL_CONDUCTIVITY_MIXING_RULES_MANAGER_HPP
 
-#include "SAMRAI/SAMRAI_config.h"
-
-#include "SAMRAI/tbox/Dimension.h"
+#include "HAMeRS_config.hpp"
 
 #include "util/mixing_rules/equations_of_thermal_conductivity/EquationsOfThermalConductivity.hpp"
+
+#include "SAMRAI/tbox/Dimension.h"
 
 #include "boost/shared_ptr.hpp"
 #include <string>

@@ -34,7 +34,7 @@ EquationOfBulkViscosityConstant::getBulkViscosity(
     NULL_USE(pressure);
     NULL_USE(temperature);
     
-#ifdef DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(molecular_properties.size()) >= 1);
 #endif
     

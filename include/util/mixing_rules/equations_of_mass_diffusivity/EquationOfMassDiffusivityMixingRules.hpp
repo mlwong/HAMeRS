@@ -1,13 +1,13 @@
 #ifndef EQUATION_OF_MASS_DIFFUSIVITY_MIXING_RULES_HPP
 #define EQUATION_OF_MASS_DIFFUSIVITY_MIXING_RULES_HPP
 
+#include "util/mixing_rules/MixingClosureModels.hpp"
+
 #include "SAMRAI/tbox/Database.h"
 #include "SAMRAI/tbox/Dimension.h"
 
 #include <string>
 #include <vector>
-
-#include "util/mixing_rules/MixingClosureModels.hpp"
 
 using namespace SAMRAI;
 

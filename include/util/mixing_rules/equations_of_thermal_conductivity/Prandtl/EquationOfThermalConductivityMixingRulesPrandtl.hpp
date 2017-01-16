@@ -2,6 +2,7 @@
 #define EQUATION_OF_THERMAL_CONDUCTIVITY_MIXING_RULES_PRANDTL_HPP
 
 #include "util/mixing_rules/equations_of_thermal_conductivity/EquationOfThermalConductivityMixingRules.hpp"
+
 #include "util/mixing_rules/equations_of_thermal_conductivity/Prandtl/EquationOfThermalConductivityPrandtl.hpp"
 #include "util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosityMixingRulesManager.hpp"
 

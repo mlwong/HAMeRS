@@ -67,7 +67,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
             patch.getPatchData(variable_source, data_context)));
     
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(convective_flux);
     TBOX_ASSERT(convective_flux->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
     

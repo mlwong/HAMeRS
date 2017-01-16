@@ -11,14 +11,14 @@
 
 #include "util/basic_boundary_conditions/BasicCartesianBoundaryUtilities3.hpp"
 
+#include "util/basic_boundary_conditions/BasicBoundaryConditions.hpp"
+#include "util/basic_boundary_conditions/CartesianBoundaryDefines.hpp"
+
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 #include "SAMRAI/hier/BoundaryBox.h"
 #include "SAMRAI/pdat/CellIndex.h"
 #include "SAMRAI/tbox/Utilities.h"
 #include "SAMRAI/tbox/MathUtilities.h"
-
-#include "util/basic_boundary_conditions/BasicBoundaryConditions.hpp"
-#include "util/basic_boundary_conditions/CartesianBoundaryDefines.hpp"
 
 /*
  * This function reads 3D boundary data from given input database.

@@ -1,19 +1,18 @@
 #ifndef GRADIENT_TAGGER_HPP
 #define GRADIENT_TAGGER_HPP
 
-#include "SAMRAI/SAMRAI_config.h"
+#include "HAMeRS_config.hpp"
+
+#include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
+#include "flow/flow_models/FlowModels.hpp"
+#include "util/gradient_sensors/GradientSensorJameson.hpp"
 
 #include "SAMRAI/appu/VisItDataWriter.h"
-
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 #include "SAMRAI/hier/IntVector.h"
 #include "SAMRAI/hier/Patch.h"
 #include "SAMRAI/tbox/Dimension.h"
-
-#include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
-#include "flow/flow_models/FlowModels.hpp"
-#include "util/gradient_sensors/GradientSensorJameson.hpp"
 
 #include "boost/shared_ptr.hpp"
 #include <string>

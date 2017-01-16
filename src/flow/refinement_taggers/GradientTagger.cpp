@@ -635,8 +635,8 @@ GradientTagger::tagCellsWithGradientSensor(
         BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     
-#ifdef DEBUG_CHECK_ASSERTIONS
-            TBOX_ASSERT(patch_geom);
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(patch_geom);
 #endif
     
     // Get the pointer of the tags.

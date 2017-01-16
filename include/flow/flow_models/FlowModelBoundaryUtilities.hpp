@@ -1,7 +1,9 @@
 #ifndef FLOW_MODEL_BOUNDARY_UTILITIES_HPP
 #define FLOW_MODEL_BOUNDARY_UTILITIES_HPP
 
-#include "SAMRAI/SAMRAI_config.h"
+#include "HAMeRS_config.hpp"
+
+#include "util/mixing_rules/equations_of_state/EquationOfStateMixingRulesManager.hpp"
 
 #include "SAMRAI/pdat/CellData.h"
 #include "SAMRAI/hier/BoundaryBox.h"
@@ -9,8 +11,6 @@
 #include "SAMRAI/hier/IntVector.h"
 #include "SAMRAI/hier/Patch.h"
 #include "SAMRAI/tbox/Database.h"
-
-#include "util/mixing_rules/equations_of_state/EquationOfStateMixingRulesManager.hpp"
 
 #include "boost/shared_ptr.hpp"
 #include <string>

@@ -1,14 +1,14 @@
 #ifndef EQUATION_OF_SHEAR_VISCOSITY_MIXING_RULES_HPP
 #define EQUATION_OF_SHEAR_VISCOSITY_MIXING_RULES_HPP
 
+#include "util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosity.hpp"
+#include "util/mixing_rules/MixingClosureModels.hpp"
+
 #include "SAMRAI/tbox/Database.h"
 #include "SAMRAI/tbox/Dimension.h"
 
 #include <string>
 #include <vector>
-
-#include "util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosity.hpp"
-#include "util/mixing_rules/MixingClosureModels.hpp"
 
 using namespace SAMRAI;
 

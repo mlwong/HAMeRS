@@ -1,7 +1,9 @@
 #ifndef NAVIER_STOKES_INITIAL_CONDITIONS_HPP
 #define NAVIER_STOKES_INITIAL_CONDITIONS_HPP
 
-#include "SAMRAI/SAMRAI_config.h"
+#include "HAMeRS_config.hpp"
+
+#include "flow/flow_models/FlowModels.hpp"
 
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
@@ -9,8 +11,6 @@
 #include "SAMRAI/hier/Patch.h"
 #include "SAMRAI/pdat/CellVariable.h"
 #include "SAMRAI/tbox/Dimension.h"
-
-#include "flow/flow_models/FlowModels.hpp"
 
 #include "boost/shared_ptr.hpp"
 #include <string>
