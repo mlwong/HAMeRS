@@ -1590,9 +1590,9 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
                 rho_average = projection_variables[0]->getPointer(0);
                 c_average = projection_variables[1]->getPointer(0);
                 
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = -num_ghosts_0_projection_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
                      i++)
@@ -1660,9 +1660,9 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
                 
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = -num_ghosts_0_projection_var;
                          i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
                          i++)
@@ -1698,9 +1698,9 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
                      j < interior_dim_1 + 1 + num_ghosts_1_projection_var;
                      j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -1785,9 +1785,9 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-                        #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
-                        #endif
+#endif
                         for (int i = -num_ghosts_0_projection_var;
                              i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
                              i++)
@@ -1837,9 +1837,9 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
                          j < interior_dim_1 + 1 + num_ghosts_1_projection_var;
                          j++)
                     {
-                        #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
-                        #endif
+#endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -1887,9 +1887,9 @@ FlowModelSingleSpecies::computeGlobalSideDataProjectionVariablesForPrimitiveVari
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-                        #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
-                        #endif
+#endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -2193,9 +2193,9 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
         rho_average = projection_variables[0]->getPointer(0);
         c_average = projection_variables[1]->getPointer(0);
         
-        #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
-        #endif
+#endif
         for (int i = -num_ghosts_0_characteristic_var;
              i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
              i++)
@@ -2250,9 +2250,9 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
         
         for (int j = 0; j < interior_dim_1; j++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = -num_ghosts_0_characteristic_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
                  i++)
@@ -2293,9 +2293,9 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
              j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
              j++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -2368,9 +2368,9 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = -num_ghosts_0_characteristic_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
                      i++)
@@ -2423,9 +2423,9 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
                  j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
                  j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -2476,9 +2476,9 @@ FlowModelSingleSpecies::computeGlobalSideDataCharacteristicVariablesFromPrimitiv
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -2723,9 +2723,9 @@ FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristi
         rho_average = projection_variables[0]->getPointer(0);
         c_average = projection_variables[1]->getPointer(0);
         
-        #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
-        #endif
+#endif
         for (int i = -num_ghosts_0_characteristic_var;
              i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
              i++)
@@ -2768,9 +2768,9 @@ FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristi
         
         for (int j = 0; j < interior_dim_1; j++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = -num_ghosts_0_characteristic_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
                  i++)
@@ -2809,9 +2809,9 @@ FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristi
              j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
              j++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear index.
@@ -2860,9 +2860,9 @@ FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristi
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = -num_ghosts_0_characteristic_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
                      i++)
@@ -2907,9 +2907,9 @@ FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristi
                  j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
                  j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -2952,9 +2952,9 @@ FlowModelSingleSpecies::computeGlobalSideDataPrimitiveVariablesFromCharacteristi
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -3192,9 +3192,9 @@ FlowModelSingleSpecies::checkGlobalSideDataConservativeVariablesBounded(
         }
         
         // Check if density and total energy are bounded.
-        #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
-        #endif
+#endif
         for (int i = -num_ghosts_0_conservative_var;
              i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
              i++)
@@ -3244,9 +3244,9 @@ FlowModelSingleSpecies::checkGlobalSideDataConservativeVariablesBounded(
         // Check if density and total energy are bounded.
         for (int j = 0; j < interior_dim_1; j++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = -num_ghosts_0_conservative_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
                  i++)
@@ -3291,9 +3291,9 @@ FlowModelSingleSpecies::checkGlobalSideDataConservativeVariablesBounded(
              j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
              j++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear index.
@@ -3348,9 +3348,9 @@ FlowModelSingleSpecies::checkGlobalSideDataConservativeVariablesBounded(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = -num_ghosts_0_conservative_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
                      i++)
@@ -3400,9 +3400,9 @@ FlowModelSingleSpecies::checkGlobalSideDataConservativeVariablesBounded(
                  j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
                  j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -3450,9 +3450,9 @@ FlowModelSingleSpecies::checkGlobalSideDataConservativeVariablesBounded(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -3600,9 +3600,9 @@ FlowModelSingleSpecies::checkGlobalSideDataPrimitiveVariablesBounded(
         }
         
         // Check if density and pressure are bounded.
-        #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
-        #endif
+#endif
         for (int i = -num_ghosts_0_primitive_var;
              i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
              i++)
@@ -3652,9 +3652,9 @@ FlowModelSingleSpecies::checkGlobalSideDataPrimitiveVariablesBounded(
         // Check if density and pressure are bounded.
         for (int j = 0; j < interior_dim_1; j++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = -num_ghosts_0_primitive_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
                  i++)
@@ -3699,9 +3699,9 @@ FlowModelSingleSpecies::checkGlobalSideDataPrimitiveVariablesBounded(
              j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
              j++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear index.
@@ -3756,9 +3756,9 @@ FlowModelSingleSpecies::checkGlobalSideDataPrimitiveVariablesBounded(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = -num_ghosts_0_primitive_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
                      i++)
@@ -3808,9 +3808,9 @@ FlowModelSingleSpecies::checkGlobalSideDataPrimitiveVariablesBounded(
                  j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
                  j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -3858,9 +3858,9 @@ FlowModelSingleSpecies::checkGlobalSideDataPrimitiveVariablesBounded(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.

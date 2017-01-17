@@ -1667,9 +1667,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
                 
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = -num_ghosts_0_projection_var;
                          i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
                          i++)
@@ -1683,9 +1683,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
                     }
                 }
                 
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = -num_ghosts_0_projection_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
                      i++)
@@ -1763,9 +1763,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-                        #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
-                        #endif
+#endif
                         for (int i = -num_ghosts_0_projection_var;
                              i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
                              i++)
@@ -1787,9 +1787,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
                 
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = -num_ghosts_0_projection_var;
                          i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
                          i++)
@@ -1832,9 +1832,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
                          j < interior_dim_1 + 1 + num_ghosts_1_projection_var;
                          j++)
                     {
-                        #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
-                        #endif
+#endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -1856,9 +1856,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
                      j < interior_dim_1 + 1 + num_ghosts_1_projection_var;
                      j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -1955,9 +1955,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-                            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                             #pragma omp simd
-                            #endif
+#endif
                             for (int i = -num_ghosts_0_projection_var;
                                  i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
                                  i++)
@@ -1988,9 +1988,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-                        #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
-                        #endif
+#endif
                         for (int i = -num_ghosts_0_projection_var;
                              i < interior_dim_0 + 1 + num_ghosts_0_projection_var;
                              i++)
@@ -2046,9 +2046,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
                              j < interior_dim_1 + 1 + num_ghosts_1_projection_var;
                              j++)
                         {
-                            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                             #pragma omp simd
-                            #endif
+#endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -2079,9 +2079,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
                          j < interior_dim_1 + 1 + num_ghosts_1_projection_var;
                          j++)
                     {
-                        #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
-                        #endif
+#endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -2135,9 +2135,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-                            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                             #pragma omp simd
-                            #endif
+#endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute the linear indices.
@@ -2168,9 +2168,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-                        #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
-                        #endif
+#endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
@@ -2495,9 +2495,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataCharacteristicVariablesFromPrimiti
         
         for (int si = 0; si < d_num_species; si++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = -num_ghosts_0_characteristic_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
                  i++)
@@ -2515,9 +2515,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataCharacteristicVariablesFromPrimiti
         
         for (int si = 0; si < d_num_species - 1; si++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = -num_ghosts_0_characteristic_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
                  i++)
@@ -2530,9 +2530,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataCharacteristicVariablesFromPrimiti
             }
         }
         
-        #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
-        #endif
+#endif
         for (int i = -num_ghosts_0_characteristic_var;
              i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
              i++)
@@ -2599,9 +2599,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataCharacteristicVariablesFromPrimiti
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = -num_ghosts_0_characteristic_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
                      i++)
@@ -2627,9 +2627,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataCharacteristicVariablesFromPrimiti
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = -num_ghosts_0_characteristic_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
                      i++)
@@ -2648,9 +2648,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataCharacteristicVariablesFromPrimiti
         
         for (int j = 0; j < interior_dim_1; j++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = -num_ghosts_0_characteristic_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
                  i++)
@@ -2697,9 +2697,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataCharacteristicVariablesFromPrimiti
                  j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
                  j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -2725,9 +2725,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataCharacteristicVariablesFromPrimiti
                  j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
                  j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -2746,9 +2746,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataCharacteristicVariablesFromPrimiti
              j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
              j++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear indices.
@@ -2834,9 +2834,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataCharacteristicVariablesFromPrimiti
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = -num_ghosts_0_characteristic_var;
                          i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
                          i++)
@@ -2871,9 +2871,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataCharacteristicVariablesFromPrimiti
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = -num_ghosts_0_characteristic_var;
                          i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
                          i++)
@@ -2899,9 +2899,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataCharacteristicVariablesFromPrimiti
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = -num_ghosts_0_characteristic_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
                      i++)
@@ -2959,9 +2959,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataCharacteristicVariablesFromPrimiti
                      j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
                      j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -2996,9 +2996,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataCharacteristicVariablesFromPrimiti
                      j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
                      j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -3024,9 +3024,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataCharacteristicVariablesFromPrimiti
                  j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
                  j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -3082,9 +3082,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataCharacteristicVariablesFromPrimiti
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -3119,9 +3119,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataCharacteristicVariablesFromPrimiti
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -3147,9 +3147,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataCharacteristicVariablesFromPrimiti
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -3404,9 +3404,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
         
         for (int si = 0; si < d_num_species; si++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = -num_ghosts_0_characteristic_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
                  i++)
@@ -3422,9 +3422,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
         
         for (int si = 0; si < d_num_species - 1; si++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = -num_ghosts_0_characteristic_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
                  i++)
@@ -3436,9 +3436,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
             }
         }
         
-        #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
-        #endif
+#endif
         for (int i = -num_ghosts_0_characteristic_var;
              i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
              i++)
@@ -3487,9 +3487,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = -num_ghosts_0_characteristic_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
                      i++)
@@ -3509,9 +3509,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = -num_ghosts_0_characteristic_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
                      i++)
@@ -3527,9 +3527,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
         
         for (int j = 0; j < interior_dim_1; j++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = -num_ghosts_0_characteristic_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
                  i++)
@@ -3575,9 +3575,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
                  j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
                  j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -3597,9 +3597,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
                  j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
                  j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -3615,9 +3615,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
              j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
              j++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear index.
@@ -3673,9 +3673,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = -num_ghosts_0_characteristic_var;
                          i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
                          i++)
@@ -3700,9 +3700,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = -num_ghosts_0_characteristic_var;
                          i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
                          i++)
@@ -3723,9 +3723,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = -num_ghosts_0_characteristic_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_characteristic_var;
                      i++)
@@ -3778,9 +3778,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
                      j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
                      j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -3805,9 +3805,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
                      j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
                      j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -3828,9 +3828,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
                  j < interior_dim_1 + 1 + num_ghosts_1_characteristic_var;
                  j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -3881,9 +3881,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -3908,9 +3908,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -3931,9 +3931,9 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -4197,9 +4197,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
         // Compute last volume fraction and check if volume fractions are bounded.
         for (int si = 0; si < d_num_species - 1; si++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = -num_ghosts_0_conservative_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
                  i++)
@@ -4222,9 +4222,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
         }
         
         // Check if last volume fraction is bounded.
-        #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
-        #endif
+#endif
         for (int i = -num_ghosts_0_conservative_var;
              i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
              i++)
@@ -4245,9 +4245,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
         // Compute density.
         for (int si = 0; si < d_num_species; si++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = -num_ghosts_0_conservative_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
                  i++)
@@ -4262,9 +4262,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
         // Check if mass fractions are bounded.
         for (int si = 0; si < d_num_species; si++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = -num_ghosts_0_conservative_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
                  i++)
@@ -4286,9 +4286,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
         }
         
         // Check if density and total energy are bounded.
-        #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
-        #endif
+#endif
         for (int i = -num_ghosts_0_conservative_var;
              i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
              i++)
@@ -4344,9 +4344,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = -num_ghosts_0_conservative_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
                      i++)
@@ -4373,9 +4373,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
         // Check if last volume fraction is bounded.
         for (int j = 0; j < interior_dim_1; j++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = -num_ghosts_0_conservative_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
                  i++)
@@ -4400,9 +4400,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = -num_ghosts_0_conservative_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
                      i++)
@@ -4421,9 +4421,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = -num_ghosts_0_conservative_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
                      i++)
@@ -4449,9 +4449,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
         // Check if density and total energy are bounded.
         for (int j = 0; j < interior_dim_1; j++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = -num_ghosts_0_conservative_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
                  i++)
@@ -4502,9 +4502,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
                  j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
                  j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -4531,9 +4531,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
              j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
              j++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear index.
@@ -4558,9 +4558,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
                  j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
                  j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -4579,9 +4579,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
                  j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
                  j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -4607,9 +4607,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
              j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
              j++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear index.
@@ -4670,9 +4670,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = -num_ghosts_0_conservative_var;
                          i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
                          i++)
@@ -4704,9 +4704,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = -num_ghosts_0_conservative_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
                      i++)
@@ -4736,9 +4736,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = -num_ghosts_0_conservative_var;
                          i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
                          i++)
@@ -4762,9 +4762,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = -num_ghosts_0_conservative_var;
                          i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
                          i++)
@@ -4795,9 +4795,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = -num_ghosts_0_conservative_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_conservative_var;
                      i++)
@@ -4853,9 +4853,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
                      j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
                      j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -4887,9 +4887,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
                  j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
                  j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -4919,9 +4919,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
                      j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
                      j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -4945,9 +4945,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
                      j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
                      j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -4978,9 +4978,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
                  j < interior_dim_1 + 1 + num_ghosts_1_conservative_var;
                  j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -5034,9 +5034,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -5068,9 +5068,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -5100,9 +5100,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -5126,9 +5126,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -5159,9 +5159,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -5332,9 +5332,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
         // Compute last volume fraction and check if volume fractions are bounded.
         for (int si = 0; si < d_num_species - 1; si++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = -num_ghosts_0_primitive_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
                  i++)
@@ -5357,9 +5357,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
         }
         
         // Check if last volume fraction is bounded.
-        #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
-        #endif
+#endif
         for (int i = -num_ghosts_0_primitive_var;
              i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
              i++)
@@ -5380,9 +5380,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
         // Compute density.
         for (int si = 0; si < d_num_species; si++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = -num_ghosts_0_primitive_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
                  i++)
@@ -5397,9 +5397,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
         // Check if mass fractions are bounded.
         for (int si = 0; si < d_num_species; si++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = -num_ghosts_0_primitive_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
                  i++)
@@ -5421,9 +5421,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
         }
         
         // Check if density and pressure are bounded.
-        #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
-        #endif
+#endif
         for (int i = -num_ghosts_0_primitive_var;
              i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
              i++)
@@ -5479,9 +5479,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = -num_ghosts_0_primitive_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
                      i++)
@@ -5508,9 +5508,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
         // Check if last volume fraction is bounded.
         for (int j = 0; j < interior_dim_1; j++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = -num_ghosts_0_primitive_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
                  i++)
@@ -5535,9 +5535,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = -num_ghosts_0_primitive_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
                      i++)
@@ -5556,9 +5556,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = -num_ghosts_0_primitive_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
                      i++)
@@ -5584,9 +5584,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
         // Check if density and pressure are bounded.
         for (int j = 0; j < interior_dim_1; j++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = -num_ghosts_0_primitive_var;
                  i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
                  i++)
@@ -5637,9 +5637,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
                  j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
                  j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -5666,9 +5666,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
              j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
              j++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear index.
@@ -5693,9 +5693,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
                  j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
                  j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -5714,9 +5714,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
                  j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
                  j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -5742,9 +5742,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
              j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
              j++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear index.
@@ -5805,9 +5805,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = -num_ghosts_0_primitive_var;
                          i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
                          i++)
@@ -5839,9 +5839,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = -num_ghosts_0_primitive_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
                      i++)
@@ -5871,9 +5871,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = -num_ghosts_0_primitive_var;
                          i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
                          i++)
@@ -5897,9 +5897,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = -num_ghosts_0_primitive_var;
                          i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
                          i++)
@@ -5930,9 +5930,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = -num_ghosts_0_primitive_var;
                      i < interior_dim_0 + 1 + num_ghosts_0_primitive_var;
                      i++)
@@ -5988,9 +5988,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
                      j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
                      j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -6022,9 +6022,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
                  j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
                  j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -6054,9 +6054,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
                      j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
                      j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -6080,9 +6080,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
                      j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
                      j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -6113,9 +6113,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
                  j < interior_dim_1 + 1 + num_ghosts_1_primitive_var;
                  j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -6169,9 +6169,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -6203,9 +6203,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
@@ -6235,9 +6235,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -6261,9 +6261,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
@@ -6294,9 +6294,9 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
         {
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.

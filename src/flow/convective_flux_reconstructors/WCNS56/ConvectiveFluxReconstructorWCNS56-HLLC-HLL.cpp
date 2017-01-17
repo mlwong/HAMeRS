@@ -376,9 +376,9 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
         {
             const int num_subghosts_0_primitive_var = num_subghosts_primitive_var[ei][0];
             
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = -1; i < interior_dim_0 + 2; i++)
             {
                 // Compute the linear indices.
@@ -451,9 +451,9 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
         {
             double* F_face_x = convective_flux->getPointer(0, ei);
             
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = 0; i < interior_dim_0 + 1; i++)
             {
                 // Compute the linear indices.
@@ -488,9 +488,9 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
                 
                 const int num_subghosts_0_conservative_var = num_subghosts_conservative_var[ei][0];
                 
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices. 
@@ -642,9 +642,9 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
         // Compute the magnitude of vorticity.
         for (int j = -num_conv_ghosts_1 + 1; j < interior_dim_1 + num_conv_ghosts_1 - 1; j++)
         {
-            #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #endif
+#endif
             for (int i = -num_conv_ghosts_0 + 1; i < interior_dim_0 + num_conv_ghosts_0 - 1; i++)
             {
                 // Compute the linear indices.
@@ -904,9 +904,9 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
             
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = -1; i < interior_dim_0 + 2; i++)
                 {
                     // Compute the linear indices.
@@ -950,9 +950,9 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
             
             for (int j = -1; j < interior_dim_1 + 2; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -1158,9 +1158,9 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
             
             for (int j = 0; j < interior_dim_1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0 + 1; i++)
                 {
                     // Compute the linear indices.
@@ -1201,9 +1201,9 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
             
             for (int j = 0; j < interior_dim_1 + 1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
@@ -1255,9 +1255,9 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
                 
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -1473,9 +1473,9 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
         {
             for (int j = -num_conv_ghosts_1 + 1; j < interior_dim_1 + num_conv_ghosts_1 - 1; j++)
             {
-                #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
-                #endif
+#endif
                 for (int i = -num_conv_ghosts_0 + 1; i < interior_dim_0 + num_conv_ghosts_0 - 1; i++)
                 {
                     // Compute the linear indices
@@ -1746,9 +1746,9 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = -1; i < interior_dim_0 + 2; i++)
                     {
                         // Compute the linear indices.
@@ -1803,9 +1803,9 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
             {
                 for (int j = -1; j < interior_dim_1 + 2; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // // Compute the linear indices.
@@ -1860,9 +1860,9 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // // Compute the linear indices.
@@ -2204,9 +2204,9 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0 + 1; i++)
                     {
                         // Compute the linear indices.
@@ -2262,9 +2262,9 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
             {
                 for (int j = 0; j < interior_dim_1 + 1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -2320,9 +2320,9 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-                    #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
-                    #endif
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
@@ -2391,9 +2391,9 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-                        #ifdef HAMERS_ENABLE_SIMD
+#ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
-                        #endif
+#endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices. 
