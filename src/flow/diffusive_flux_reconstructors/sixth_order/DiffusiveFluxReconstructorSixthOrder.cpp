@@ -112,6 +112,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
         
         const int interior_dim_0 = interior_dims[0];
         
+        const double dx_0 = dx[0];
+        
         const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
         
         /*
@@ -221,7 +223,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                         
                         dudx[idx] = (-1.0/60.0*u[idx_var_LLL] + 3.0/20.0*u[idx_var_LL] - 3.0/4.0*u[idx_var_L]
                                      + 3.0/4.0*u[idx_var_R] - 3.0/20.0*u[idx_var_RR] + 1.0/60.0*u[idx_var_RRR])/
-                                        dx[0];
+                                        dx_0;
                     }
                     
                     std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
@@ -287,7 +289,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                     const int idx_node_RRR = i + 2 + num_diff_ghosts_0;
                     
                     F_face_x[idx_face_x] += dt*mu[idx_diffusivity]*(
-                        1.0/60*(dudx[idx_node_LLL] + dudx[idx_node_RRR]) - 2.0/15.0*(dudx[idx_node_LL] + dudx[idx_node_RR])
+                        1.0/60*(dudx[idx_node_LLL] + dudx[idx_node_RRR])
+                        - 2.0/15.0*(dudx[idx_node_LL] + dudx[idx_node_RR])
                         + 37.0/60.0*(dudx[idx_node_L] + dudx[idx_node_R]));
                 }
             }
@@ -314,6 +317,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
         
         const int interior_dim_0 = interior_dims[0];
         const int interior_dim_1 = interior_dims[1];
+        
+        const double dx_0 = dx[0];
+        const double dx_1 = dx[1];
         
         const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
         const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
@@ -468,7 +474,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                             
                             dudx[idx] = (-1.0/60.0*u[idx_var_LLL] + 3.0/20.0*u[idx_var_LL] - 3.0/4.0*u[idx_var_L]
                                          + 3.0/4.0*u[idx_var_R] - 3.0/20.0*u[idx_var_RR] + 1.0/60.0*u[idx_var_RRR])/
-                                            dx[0];
+                                            dx_0;
                         }
                     }
                     
@@ -562,7 +568,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                             
                             dudy[idx] = (-1.0/60.0*u[idx_var_BBB] + 3.0/20.0*u[idx_var_BB] - 3.0/4.0*u[idx_var_B]
                                          + 3.0/4.0*u[idx_var_T] - 3.0/20.0*u[idx_var_TT] + 1.0/60.0*u[idx_var_TTT])/
-                                            dx[1];
+                                            dx_1;
                         }
                     }
                     
@@ -861,7 +867,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                             
                             dudx[idx] = (-1.0/60.0*u[idx_var_LLL] + 3.0/20.0*u[idx_var_LL] - 3.0/4.0*u[idx_var_L]
                                          + 3.0/4.0*u[idx_var_R] - 3.0/20.0*u[idx_var_RR] + 1.0/60.0*u[idx_var_RRR])/
-                                            dx[0];
+                                            dx_0;
                         }
                     }
                     
@@ -955,7 +961,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                             
                             dudy[idx] = (-1.0/60.0*u[idx_var_BBB] + 3.0/20.0*u[idx_var_BB] - 3.0/4.0*u[idx_var_B]
                                          + 3.0/4.0*u[idx_var_T] - 3.0/20.0*u[idx_var_TT] + 1.0/60.0*u[idx_var_TTT])/
-                                            dx[1];
+                                            dx_1;
                         }
                     }
                     
@@ -1155,6 +1161,10 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
         const int interior_dim_1 = interior_dims[1];
         const int interior_dim_2 = interior_dims[2];
         
+        const double dx_0 = dx[0];
+        const double dx_1 = dx[1];
+        const double dx_2 = dx[2];
+        
         const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
         const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
         const int num_diff_ghosts_2 = d_num_diff_ghosts[2];
@@ -1350,7 +1360,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                                 
                                 dudx[idx] = (-1.0/60.0*u[idx_var_LLL] + 3.0/20.0*u[idx_var_LL] - 3.0/4.0*u[idx_var_L]
                                              + 3.0/4.0*u[idx_var_R] - 3.0/20.0*u[idx_var_RR] + 1.0/60.0*u[idx_var_RRR])/
-                                                dx[0];
+                                                dx_0;
                             }
                         }
                     }
@@ -1463,7 +1473,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                                 
                                 dudy[idx] = (-1.0/60.0*u[idx_var_BBB] + 3.0/20.0*u[idx_var_BB] - 3.0/4.0*u[idx_var_B]
                                              + 3.0/4.0*u[idx_var_T] - 3.0/20.0*u[idx_var_TT] + 1.0/60.0*u[idx_var_TTT])/
-                                                dx[1];
+                                                dx_1;
                             }
                         }
                     }
@@ -1576,7 +1586,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                                 
                                 dudz[idx] = (-1.0/60.0*u[idx_var_BBB] + 3.0/20.0*u[idx_var_BB] - 3.0/4.0*u[idx_var_B]
                                              + 3.0/4.0*u[idx_var_F] - 3.0/20.0*u[idx_var_FF] + 1.0/60.0*u[idx_var_FFF])/
-                                                dx[2];
+                                                dx_2;
                             }
                         }
                     }
@@ -2046,7 +2056,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                                 
                                 dudx[idx] = (-1.0/60.0*u[idx_var_LLL] + 3.0/20.0*u[idx_var_LL] - 3.0/4.0*u[idx_var_L]
                                              + 3.0/4.0*u[idx_var_R] - 3.0/20.0*u[idx_var_RR] + 1.0/60.0*u[idx_var_RRR])/
-                                                dx[0];
+                                                dx_0;
                             }
                         }
                     }
@@ -2159,7 +2169,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                                 
                                 dudy[idx] = (-1.0/60.0*u[idx_var_BBB] + 3.0/20.0*u[idx_var_BB] - 3.0/4.0*u[idx_var_B]
                                              + 3.0/4.0*u[idx_var_T] - 3.0/20.0*u[idx_var_TT] + 1.0/60.0*u[idx_var_TTT])/
-                                                dx[1];
+                                                dx_1;
                             }
                         }
                     }
@@ -2272,7 +2282,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                                 
                                 dudz[idx] = (-1.0/60.0*u[idx_var_BBB] + 3.0/20.0*u[idx_var_BB] - 3.0/4.0*u[idx_var_B]
                                              + 3.0/4.0*u[idx_var_F] - 3.0/20.0*u[idx_var_FF] + 1.0/60.0*u[idx_var_FFF])/
-                                                dx[2];
+                                                dx_2;
                             }
                         }
                     }
@@ -2742,7 +2752,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                                 
                                 dudx[idx] = (-1.0/60.0*u[idx_var_LLL] + 3.0/20.0*u[idx_var_LL] - 3.0/4.0*u[idx_var_L]
                                              + 3.0/4.0*u[idx_var_R] - 3.0/20.0*u[idx_var_RR] + 1.0/60.0*u[idx_var_RRR])/
-                                                dx[0];
+                                                dx_0;
                             }
                         }
                     }
@@ -2855,7 +2865,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                                 
                                 dudy[idx] = (-1.0/60.0*u[idx_var_BBB] + 3.0/20.0*u[idx_var_BB] - 3.0/4.0*u[idx_var_B]
                                              + 3.0/4.0*u[idx_var_T] - 3.0/20.0*u[idx_var_TT] + 1.0/60.0*u[idx_var_TTT])/
-                                                dx[1];
+                                                dx_1;
                             }
                         }
                     }
@@ -2968,7 +2978,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                                 
                                 dudz[idx] = (-1.0/60.0*u[idx_var_BBB] + 3.0/20.0*u[idx_var_BB] - 3.0/4.0*u[idx_var_B]
                                              + 3.0/4.0*u[idx_var_F] - 3.0/20.0*u[idx_var_FF] + 1.0/60.0*u[idx_var_FFF])/
-                                                dx[2];
+                                                dx_2;
                             }
                         }
                     }
