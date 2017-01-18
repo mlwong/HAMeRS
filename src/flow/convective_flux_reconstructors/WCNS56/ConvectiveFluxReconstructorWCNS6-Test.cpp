@@ -298,17 +298,25 @@ ConvectiveFluxReconstructorWCNS6_Test::ConvectiveFluxReconstructorWCNS6_Test(
 {
     d_num_conv_ghosts = hier::IntVector::getOne(d_dim)*4;
     
-    d_constant_C = d_convective_flux_reconstructor_db->getDoubleWithDefault("constant_C", 1.0e9);
-    d_constant_C = d_convective_flux_reconstructor_db->getDoubleWithDefault("d_constant_C", d_constant_C);
+    d_constant_C = d_convective_flux_reconstructor_db->
+        getDoubleWithDefault("constant_C", 1.0e9);
+    d_constant_C = d_convective_flux_reconstructor_db->
+        getDoubleWithDefault("d_constant_C", d_constant_C);
     
-    d_constant_p = d_convective_flux_reconstructor_db->getIntegerWithDefault("constant_p", 2);
-    d_constant_p = d_convective_flux_reconstructor_db->getIntegerWithDefault("d_constant_p", d_constant_p);
+    d_constant_p = d_convective_flux_reconstructor_db->
+        getIntegerWithDefault("constant_p", 2);
+    d_constant_p = d_convective_flux_reconstructor_db->
+        getIntegerWithDefault("d_constant_p", d_constant_p);
     
-    d_constant_q = d_convective_flux_reconstructor_db->getIntegerWithDefault("constant_q", 4);
-    d_constant_q = d_convective_flux_reconstructor_db->getIntegerWithDefault("d_constant_q", d_constant_q);
+    d_constant_q = d_convective_flux_reconstructor_db->
+        getIntegerWithDefault("constant_q", 4);
+    d_constant_q = d_convective_flux_reconstructor_db->
+        getIntegerWithDefault("d_constant_q", d_constant_q);
     
-    d_constant_alpha_tau = d_convective_flux_reconstructor_db->getDoubleWithDefault("constant_alpha_tau", 35.0);
-    d_constant_alpha_tau = d_convective_flux_reconstructor_db->getDoubleWithDefault("d_constant_alpha_tau", d_constant_alpha_tau);
+    d_constant_alpha_tau = d_convective_flux_reconstructor_db->
+        getDoubleWithDefault("constant_alpha_tau", 35.0);
+    d_constant_alpha_tau = d_convective_flux_reconstructor_db->
+        getDoubleWithDefault("d_constant_alpha_tau", d_constant_alpha_tau);
     
     t_characteristic_decomposition = tbox::TimerManager::getManager()->
         getTimer("ConvectiveFluxReconstructorWCNS6_Test::t_characteristic_decomposition");
