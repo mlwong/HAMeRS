@@ -249,6 +249,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
             TBOX_ASSERT(static_cast<int>(diffusivities_data_x[ei].size()) ==
                         static_cast<int>(diffusivities_component_idx_x[ei].size()));
             
+            double* F_face_x = diffusive_flux->getPointer(0, ei);
+            
             for (int vi = 0; vi < static_cast<int>(derivative_var_data_x[ei].size()); vi++)
             {
                 // Get the index of variable for derivative.
@@ -284,7 +286,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                     const int idx_node_RR  = i + 1 + num_diff_ghosts_0;
                     const int idx_node_RRR = i + 2 + num_diff_ghosts_0;
                     
-                    diffusive_flux->getPointer(0, ei)[idx_face_x] += dt*mu[idx_diffusivity]*(
+                    F_face_x[idx_face_x] += dt*mu[idx_diffusivity]*(
                         1.0/60*(dudx[idx_node_LLL] + dudx[idx_node_RRR]) - 2.0/15.0*(dudx[idx_node_LL] + dudx[idx_node_RR])
                         + 37.0/60.0*(dudx[idx_node_L] + dudx[idx_node_R]));
                 }
@@ -589,6 +591,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
             TBOX_ASSERT(static_cast<int>(diffusivities_data_x[ei].size()) ==
                         static_cast<int>(diffusivities_component_idx_x[ei].size()));
             
+            double* F_face_x = diffusive_flux->getPointer(0, ei);
+            
             for (int vi = 0; vi < static_cast<int>(derivative_var_data_x[ei].size()); vi++)
             {
                 // Get the index of variable for derivative.
@@ -646,7 +650,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                         const int idx_node_RRR = (i + 2 + num_diff_ghosts_0) +
                             (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
                         
-                        diffusive_flux->getPointer(0, ei)[idx_face_x] += dt*mu[idx_diffusivity]*(
+                        F_face_x[idx_face_x] += dt*mu[idx_diffusivity]*(
                             1.0/60*(dudx[idx_node_LLL] + dudx[idx_node_RRR])
                             - 2.0/15.0*(dudx[idx_node_LL] + dudx[idx_node_RR])
                             + 37.0/60.0*(dudx[idx_node_L] + dudx[idx_node_R]));
@@ -717,7 +721,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                         const int idx_node_RRR = i + 2 + num_diff_ghosts_0 +
                             (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
                         
-                        diffusive_flux->getPointer(0, ei)[idx_face_x] += dt*mu[idx_diffusivity]*(
+                        F_face_x[idx_face_x] += dt*mu[idx_diffusivity]*(
                             1.0/60*(dudy[idx_node_LLL] + dudy[idx_node_RRR])
                             - 2.0/15.0*(dudy[idx_node_LL] + dudy[idx_node_RR])
                             + 37.0/60.0*(dudy[idx_node_L] + dudy[idx_node_R]));
@@ -980,6 +984,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
             TBOX_ASSERT(static_cast<int>(diffusivities_data_x[ei].size()) ==
                         static_cast<int>(diffusivities_component_idx_x[ei].size()));
             
+            double* F_face_y = diffusive_flux->getPointer(1, ei);
+            
             for (int vi = 0; vi < static_cast<int>(derivative_var_data_x[ei].size()); vi++)
             {
                 // Get the index of variable for derivative.
@@ -1037,7 +1043,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                         const int idx_node_TTT = (i + num_diff_ghosts_0) +
                             (j + 2 + num_diff_ghosts_0)*diff_ghostcell_dim_0;
                         
-                        diffusive_flux->getPointer(1, ei)[idx_face_y] += dt*mu[idx_diffusivity]*(
+                        F_face_y[idx_face_y] += dt*mu[idx_diffusivity]*(
                             1.0/60*(dudx[idx_node_BBB] + dudx[idx_node_TTT])
                             - 2.0/15.0*(dudx[idx_node_BB] + dudx[idx_node_TT])
                             + 37.0/60.0*(dudx[idx_node_B] + dudx[idx_node_T]));
@@ -1108,7 +1114,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                         const int idx_node_TTT = (i + num_diff_ghosts_0) +
                             (j + 2 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
                         
-                        diffusive_flux->getPointer(1, ei)[idx_face_y] += dt*mu[idx_diffusivity]*(
+                        F_face_y[idx_face_y] += dt*mu[idx_diffusivity]*(
                             1.0/60*(dudy[idx_node_BBB] + dudy[idx_node_TTT])
                             - 2.0/15.0*(dudy[idx_node_BB] + dudy[idx_node_TT])
                             + 37.0/60.0*(dudy[idx_node_B] + dudy[idx_node_T]));
@@ -1600,6 +1606,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
             TBOX_ASSERT(static_cast<int>(diffusivities_data_x[ei].size()) ==
                         static_cast<int>(diffusivities_component_idx_x[ei].size()));
             
+            double* F_face_x = diffusive_flux->getPointer(0, ei);
+            
             for (int vi = 0; vi < static_cast<int>(derivative_var_data_x[ei].size()); vi++)
             {
                 // Get the index of variable for derivative.
@@ -1676,7 +1684,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                                 (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
                                     diff_ghostcell_dim_1;
                             
-                            diffusive_flux->getPointer(0, ei)[idx_face_x] += dt*mu[idx_diffusivity]*(
+                            F_face_x[idx_face_x] += dt*mu[idx_diffusivity]*(
                                 1.0/60*(dudx[idx_node_LLL] + dudx[idx_node_RRR])
                                 - 2.0/15.0*(dudx[idx_node_LL] + dudx[idx_node_RR])
                                 + 37.0/60.0*(dudx[idx_node_L] + dudx[idx_node_R]));
@@ -1767,7 +1775,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                                 (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
                                     diff_ghostcell_dim_1;
                             
-                            diffusive_flux->getPointer(0, ei)[idx_face_x] += dt*mu[idx_diffusivity]*(
+                            F_face_x[idx_face_x] += dt*mu[idx_diffusivity]*(
                                 1.0/60*(dudy[idx_node_LLL] + dudy[idx_node_RRR])
                                 - 2.0/15.0*(dudy[idx_node_LL] + dudy[idx_node_RR])
                                 + 37.0/60.0*(dudy[idx_node_L] + dudy[idx_node_R]));
@@ -1858,7 +1866,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                                 (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
                                     diff_ghostcell_dim_1;
                             
-                            diffusive_flux->getPointer(0, ei)[idx_face_x] += dt*mu[idx_diffusivity]*(
+                            F_face_x[idx_face_x] += dt*mu[idx_diffusivity]*(
                                 1.0/60*(dudz[idx_node_LLL] + dudz[idx_node_RRR])
                                 - 2.0/15.0*(dudz[idx_node_LL] + dudz[idx_node_RR])
                                 + 37.0/60.0*(dudz[idx_node_L] + dudz[idx_node_R]));
@@ -2294,6 +2302,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
             TBOX_ASSERT(static_cast<int>(diffusivities_data_x[ei].size()) ==
                         static_cast<int>(diffusivities_component_idx_x[ei].size()));
             
+            double* F_face_y = diffusive_flux->getPointer(1, ei);
+            
             for (int vi = 0; vi < static_cast<int>(derivative_var_data_x[ei].size()); vi++)
             {
                 // Get the index of variable for derivative.
@@ -2370,7 +2380,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                                 (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
                                     diff_ghostcell_dim_1;
                             
-                            diffusive_flux->getPointer(1, ei)[idx_face_y] += dt*mu[idx_diffusivity]*(
+                            F_face_y[idx_face_y] += dt*mu[idx_diffusivity]*(
                                 1.0/60*(dudx[idx_node_BBB] + dudx[idx_node_TTT])
                                 - 2.0/15.0*(dudx[idx_node_BB] + dudx[idx_node_TT])
                                 + 37.0/60.0*(dudx[idx_node_B] + dudx[idx_node_T]));
@@ -2461,7 +2471,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                                 (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
                                     diff_ghostcell_dim_1;
                             
-                            diffusive_flux->getPointer(1, ei)[idx_face_y] += dt*mu[idx_diffusivity]*(
+                            F_face_y[idx_face_y] += dt*mu[idx_diffusivity]*(
                                 1.0/60*(dudy[idx_node_BBB] + dudy[idx_node_TTT])
                                 - 2.0/15.0*(dudy[idx_node_BB] + dudy[idx_node_TT])
                                 + 37.0/60.0*(dudy[idx_node_B] + dudy[idx_node_T]));
@@ -2552,7 +2562,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                                 (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
                                     diff_ghostcell_dim_1;
                             
-                            diffusive_flux->getPointer(1, ei)[idx_face_y] += dt*mu[idx_diffusivity]*(
+                            F_face_y[idx_face_y] += dt*mu[idx_diffusivity]*(
                                 1.0/60*(dudz[idx_node_BBB] + dudz[idx_node_TTT])
                                 - 2.0/15.0*(dudz[idx_node_BB] + dudz[idx_node_TT])
                                 + 37.0/60.0*(dudz[idx_node_B] + dudz[idx_node_T]));
@@ -2988,6 +2998,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
             TBOX_ASSERT(static_cast<int>(diffusivities_data_x[ei].size()) ==
                         static_cast<int>(diffusivities_component_idx_x[ei].size()));
             
+            double* F_face_z = diffusive_flux->getPointer(2, ei);
+            
             for (int vi = 0; vi < static_cast<int>(derivative_var_data_x[ei].size()); vi++)
             {
                 // Get the index of variable for derivative.
@@ -3064,7 +3076,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                                 (k + 2 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
                                     diff_ghostcell_dim_1;
                             
-                            diffusive_flux->getPointer(2, ei)[idx_face_z] += dt*mu[idx_diffusivity]*(
+                            F_face_z[idx_face_z] += dt*mu[idx_diffusivity]*(
                                 1.0/60*(dudx[idx_node_BBB] + dudx[idx_node_FFF])
                                 - 2.0/15.0*(dudx[idx_node_BB] + dudx[idx_node_FF])
                                 + 37.0/60.0*(dudx[idx_node_B] + dudx[idx_node_F]));
@@ -3155,7 +3167,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                                 (k + 2 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
                                     diff_ghostcell_dim_1;
                             
-                            diffusive_flux->getPointer(2, ei)[idx_face_z] += dt*mu[idx_diffusivity]*(
+                            F_face_z[idx_face_z] += dt*mu[idx_diffusivity]*(
                                 1.0/60*(dudy[idx_node_BBB] + dudy[idx_node_FFF])
                                 - 2.0/15.0*(dudy[idx_node_BB] + dudy[idx_node_FF])
                                 + 37.0/60.0*(dudy[idx_node_B] + dudy[idx_node_F]));
@@ -3246,7 +3258,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                                 (k + 2 + num_diff_ghosts_2)*diff_ghostcell_dim_0*
                                     diff_ghostcell_dim_1;
                             
-                            diffusive_flux->getPointer(2, ei)[idx_face_z] += dt*mu[idx_diffusivity]*(
+                            F_face_z[idx_face_z] += dt*mu[idx_diffusivity]*(
                                 1.0/60*(dudz[idx_node_BBB] + dudz[idx_node_FFF])
                                 - 2.0/15.0*(dudz[idx_node_BB] + dudz[idx_node_FF])
                                 + 37.0/60.0*(dudz[idx_node_B] + dudz[idx_node_F]));
