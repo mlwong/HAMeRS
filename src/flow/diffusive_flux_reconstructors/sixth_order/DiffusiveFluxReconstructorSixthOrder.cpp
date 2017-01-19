@@ -83,14 +83,6 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
     diff_ghost_box.grow(d_num_diff_ghosts);
     const hier::IntVector diff_ghostcell_dims = diff_ghost_box.numberCells();
     
-    // Get the grid spacing.
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-            patch.getPatchGeometry()));
-    
-    // Get the grid spacing.
-    const double* const dx = patch_geom->getDx();
-    
     // Get the face data of diffusive flux.
     boost::shared_ptr<pdat::FaceData<double> > diffusive_flux(
         BOOST_CAST<pdat::FaceData<double>, hier::PatchData>(
