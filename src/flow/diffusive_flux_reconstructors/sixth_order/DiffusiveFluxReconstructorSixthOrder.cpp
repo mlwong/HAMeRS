@@ -112,8 +112,6 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
         
         const int interior_dim_0 = interior_dims[0];
         
-        const double dx_0 = dx[0];
-        
         const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
         
         /*
@@ -169,75 +167,12 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
          * Compute the derivatives in x-direction for diffusive flux in x-direction.
          */
         
-        derivative_x.resize(d_num_eqn);
-        
-        for (int ei = 0; ei < d_num_eqn; ei ++)
-        {
-            TBOX_ASSERT(static_cast<int>(derivative_var_data_x[ei].size()) ==
-                        static_cast<int>(derivative_var_component_idx_x[ei].size()));
-            
-            derivative_x[ei].reserve(static_cast<int>(derivative_var_data_x[ei].size()));
-            
-            for (int vi = 0; vi < static_cast<int>(derivative_var_data_x[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int u_idx = derivative_var_component_idx_x[ei][vi];
-                
-                if (derivative_x_computed.find(derivative_var_data_x[ei][vi]->getPointer(u_idx))
-                    == derivative_x_computed.end())
-                {
-                    // Get the pointer to variable for derivative.
-                    double* u = derivative_var_data_x[ei][vi]->getPointer(u_idx);
-                    
-                    // Declare container to store the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
-                        new pdat::CellData<double>(
-                            interior_box, 1, d_num_diff_ghosts));
-                    
-                    // Get the pointer to the derivative.
-                    double* dudx = derivative->getPointer(0);
-                    
-                    /*
-                     * Get the sub-ghost cell width of the variable.
-                     */
-                    
-                    hier::IntVector num_subghosts_variable =
-                        derivative_var_data_x[ei][vi]->getGhostCellWidth();
-                    
-                    const int num_subghosts_0_variable = num_subghosts_variable[0];
-                    
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = -3; i < interior_dim_0 + 3; i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx = i + num_diff_ghosts_0;
-                        
-                        const int idx_var_LLL = i - 3 + num_subghosts_0_variable;
-                        const int idx_var_LL  = i - 2 + num_subghosts_0_variable;
-                        const int idx_var_L   = i - 1 + num_subghosts_0_variable;
-                        const int idx_var_R   = i + 1 + num_subghosts_0_variable;
-                        const int idx_var_RR  = i + 2 + num_subghosts_0_variable;
-                        const int idx_var_RRR = i + 3 + num_subghosts_0_variable;
-                        
-                        dudx[idx] = (-1.0/60.0*u[idx_var_LLL] + 3.0/20.0*u[idx_var_LL] - 3.0/4.0*u[idx_var_L]
-                                     + 3.0/4.0*u[idx_var_R] - 3.0/20.0*u[idx_var_RR] + 1.0/60.0*u[idx_var_RRR])/
-                                        dx_0;
-                    }
-                    
-                    std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
-                        u,
-                        derivative);
-                    
-                    derivative_x_computed.insert(derivative_pair);
-                }
-                
-                derivative_x[ei].push_back(
-                    derivative_x_computed.find(derivative_var_data_x[ei][vi]->getPointer(u_idx))->
-                        second);
-            }
-        }
+        computeDerivativesInXForDiffusiveFlux(
+            patch,
+            derivative_x,
+            derivative_x_computed,
+            derivative_var_data_x,
+            derivative_var_component_idx_x);
         
         /*
          * Reconstruct the flux in x-direction.
@@ -317,9 +252,6 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
         
         const int interior_dim_0 = interior_dims[0];
         const int interior_dim_1 = interior_dims[1];
-        
-        const double dx_0 = dx[0];
-        const double dx_1 = dx[1];
         
         const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
         const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
@@ -401,189 +333,23 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
          * Compute the derivatives in x-direction for diffusive flux in x-direction.
          */
         
-        derivative_x.resize(d_num_eqn);
-        
-        for (int ei = 0; ei < d_num_eqn; ei ++)
-        {
-            TBOX_ASSERT(static_cast<int>(derivative_var_data_x[ei].size()) ==
-                        static_cast<int>(derivative_var_component_idx_x[ei].size()));
-            
-            derivative_x[ei].reserve(static_cast<int>(derivative_var_data_x[ei].size()));
-            
-            for (int vi = 0; vi < static_cast<int>(derivative_var_data_x[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int u_idx = derivative_var_component_idx_x[ei][vi];
-                
-                if (derivative_x_computed.find(derivative_var_data_x[ei][vi]->getPointer(u_idx))
-                    == derivative_x_computed.end())
-                {
-                    // Get the pointer to variable for derivative.
-                    double* u = derivative_var_data_x[ei][vi]->getPointer(u_idx);
-                    
-                    // Declare container to store the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
-                        new pdat::CellData<double>(
-                            interior_box, 1, d_num_diff_ghosts));
-                    
-                    // Get the pointer to the derivative.
-                    double* dudx = derivative->getPointer(0);
-                    
-                    /*
-                     * Get the sub-ghost cell width and ghost box dimensions of the variable.
-                     */
-                    
-                    hier::IntVector num_subghosts_variable =
-                        derivative_var_data_x[ei][vi]->getGhostCellWidth();
-                    
-                    hier::IntVector subghostcell_dims_variable =
-                        derivative_var_data_x[ei][vi]->getGhostBox().numberCells();
-                    
-                    const int num_subghosts_0_variable = num_subghosts_variable[0];
-                    const int num_subghosts_1_variable = num_subghosts_variable[1];
-                    const int subghostcell_dim_0_variable = subghostcell_dims_variable[0];
-                    
-                    for (int j = -3; j < interior_dim_1 + 3; j++)
-                    {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = -3; i < interior_dim_0 + 3; i++)
-                        {
-                            // Compute the linear indices.
-                            const int idx = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                            
-                            const int idx_var_LLL = (i - 3 + num_subghosts_0_variable) +
-                                (j + num_subghosts_1_variable)*subghostcell_dim_0_variable;
-                            
-                            const int idx_var_LL = (i - 2 + num_subghosts_0_variable) +
-                                (j + num_subghosts_1_variable)*subghostcell_dim_0_variable;
-                            
-                            const int idx_var_L = (i - 1 + num_subghosts_0_variable) +
-                                (j + num_subghosts_1_variable)*subghostcell_dim_0_variable;
-                            
-                            const int idx_var_R = (i + 1 + num_subghosts_0_variable) +
-                                (j + num_subghosts_1_variable)*subghostcell_dim_0_variable;
-                            
-                            const int idx_var_RR = (i + 2 + num_subghosts_0_variable) +
-                                (j + num_subghosts_1_variable)*subghostcell_dim_0_variable;
-                            
-                            const int idx_var_RRR = (i + 3 + num_subghosts_0_variable) +
-                                (j + num_subghosts_1_variable)*subghostcell_dim_0_variable;
-                            
-                            dudx[idx] = (-1.0/60.0*u[idx_var_LLL] + 3.0/20.0*u[idx_var_LL] - 3.0/4.0*u[idx_var_L]
-                                         + 3.0/4.0*u[idx_var_R] - 3.0/20.0*u[idx_var_RR] + 1.0/60.0*u[idx_var_RRR])/
-                                            dx_0;
-                        }
-                    }
-                    
-                    std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
-                        u,
-                        derivative);
-                    
-                    derivative_x_computed.insert(derivative_pair);
-                }
-                
-                derivative_x[ei].push_back(
-                    derivative_x_computed.find(derivative_var_data_x[ei][vi]->getPointer(u_idx))->
-                        second);
-            }
-        }
+        computeDerivativesInXForDiffusiveFlux(
+            patch,
+            derivative_x,
+            derivative_x_computed,
+            derivative_var_data_x,
+            derivative_var_component_idx_x);
         
         /*
          * Compute the derivatives in y-direction for diffusive flux in x-direction.
          */
         
-        derivative_y.resize(d_num_eqn);
-        
-        for (int ei = 0; ei < d_num_eqn; ei ++)
-        {
-            TBOX_ASSERT(static_cast<int>(derivative_var_data_y[ei].size()) ==
-                        static_cast<int>(derivative_var_component_idx_y[ei].size()));
-            
-            derivative_y[ei].reserve(static_cast<int>(derivative_var_data_y[ei].size()));
-            
-            for (int vi = 0; vi < static_cast<int>(derivative_var_data_y[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int u_idx = derivative_var_component_idx_y[ei][vi];
-                
-                if (derivative_y_computed.find(derivative_var_data_y[ei][vi]->getPointer(u_idx))
-                    == derivative_y_computed.end())
-                {
-                    // Get the pointer to variable for derivative.
-                    double* u = derivative_var_data_y[ei][vi]->getPointer(u_idx);
-                    
-                    // Declare container to store the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
-                        new pdat::CellData<double>(
-                            interior_box, 1, d_num_diff_ghosts));
-                    
-                    // Get the pointer to the derivative.
-                    double* dudy = derivative->getPointer(0);
-                    
-                    /*
-                     * Get the sub-ghost cell width and ghost box dimensions of the variable.
-                     */
-                    
-                    hier::IntVector num_subghosts_variable =
-                        derivative_var_data_y[ei][vi]->getGhostCellWidth();
-                    
-                    hier::IntVector subghostcell_dims_variable =
-                        derivative_var_data_y[ei][vi]->getGhostBox().numberCells();
-                    
-                    const int num_subghosts_0_variable = num_subghosts_variable[0];
-                    const int num_subghosts_1_variable = num_subghosts_variable[1];
-                    const int subghostcell_dim_0_variable = subghostcell_dims_variable[0];
-                    
-                    for (int j = -3; j < interior_dim_1 + 3; j++)
-                    {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = -3; i < interior_dim_0 + 3; i++)
-                        {
-                            // Compute the linear indices.
-                            const int idx = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                            
-                            const int idx_var_BBB = (i + num_subghosts_0_variable) +
-                                (j - 3 + num_subghosts_1_variable)*subghostcell_dim_0_variable;
-                            
-                            const int idx_var_BB = (i + num_subghosts_0_variable) +
-                                (j - 2 + num_subghosts_1_variable)*subghostcell_dim_0_variable;
-                            
-                            const int idx_var_B = (i + num_subghosts_0_variable) +
-                                (j - 1 + num_subghosts_1_variable)*subghostcell_dim_0_variable;
-                            
-                            const int idx_var_T = (i + num_subghosts_0_variable) +
-                                (j + 1 + num_subghosts_1_variable)*subghostcell_dim_0_variable;
-                            
-                            const int idx_var_TT = (i + num_subghosts_0_variable) +
-                                (j + 2 + num_subghosts_1_variable)*subghostcell_dim_0_variable;
-                            
-                            const int idx_var_TTT = (i + num_subghosts_0_variable) +
-                                (j + 3 + num_subghosts_1_variable)*subghostcell_dim_0_variable;
-                            
-                            dudy[idx] = (-1.0/60.0*u[idx_var_BBB] + 3.0/20.0*u[idx_var_BB] - 3.0/4.0*u[idx_var_B]
-                                         + 3.0/4.0*u[idx_var_T] - 3.0/20.0*u[idx_var_TT] + 1.0/60.0*u[idx_var_TTT])/
-                                            dx_1;
-                        }
-                    }
-                    
-                    std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
-                        u,
-                        derivative);
-                    
-                    derivative_y_computed.insert(derivative_pair);
-                }
-                
-                derivative_y[ei].push_back(
-                    derivative_y_computed.find(derivative_var_data_y[ei][vi]->getPointer(u_idx))->
-                        second);
-            }
-        }
+        computeDerivativesInYForDiffusiveFlux(
+            patch,
+            derivative_y,
+            derivative_y_computed,
+            derivative_var_data_y,
+            derivative_var_component_idx_y);
         
         /*
          * Reconstruct the flux in x-direction.
@@ -794,189 +560,23 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
          * Compute the derivatives in x-direction for diffusive flux in y-direction.
          */
         
-        derivative_x.resize(d_num_eqn);
-        
-        for (int ei = 0; ei < d_num_eqn; ei ++)
-        {
-            TBOX_ASSERT(static_cast<int>(derivative_var_data_x[ei].size()) ==
-                        static_cast<int>(derivative_var_component_idx_x[ei].size()));
-            
-            derivative_x[ei].reserve(static_cast<int>(derivative_var_data_x[ei].size()));
-            
-            for (int vi = 0; vi < static_cast<int>(derivative_var_data_x[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int u_idx = derivative_var_component_idx_x[ei][vi];
-                
-                if (derivative_x_computed.find(derivative_var_data_x[ei][vi]->getPointer(u_idx))
-                    == derivative_x_computed.end())
-                {
-                    // Get the pointer to variable for derivative.
-                    double* u = derivative_var_data_x[ei][vi]->getPointer(u_idx);
-                    
-                    // Declare container to store the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
-                        new pdat::CellData<double>(
-                            interior_box, 1, d_num_diff_ghosts));
-                    
-                    // Get the pointer to the derivative.
-                    double* dudx = derivative->getPointer(0);
-                    
-                    /*
-                     * Get the sub-ghost cell width and ghost box dimensions of the variable.
-                     */
-                    
-                    hier::IntVector num_subghosts_variable =
-                        derivative_var_data_x[ei][vi]->getGhostCellWidth();
-                    
-                    hier::IntVector subghostcell_dims_variable =
-                        derivative_var_data_x[ei][vi]->getGhostBox().numberCells();
-                    
-                    const int num_subghosts_0_variable = num_subghosts_variable[0];
-                    const int num_subghosts_1_variable = num_subghosts_variable[1];
-                    const int subghostcell_dim_0_variable = subghostcell_dims_variable[0];
-                    
-                    for (int j = -3; j < interior_dim_1 + 3; j++)
-                    {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = -3; i < interior_dim_0 + 3; i++)
-                        {
-                            // Compute the linear indices.
-                            const int idx = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                            
-                            const int idx_var_LLL = (i - 3 + num_subghosts_0_variable) +
-                                (j + num_subghosts_1_variable)*subghostcell_dim_0_variable;
-                            
-                            const int idx_var_LL = (i - 2 + num_subghosts_0_variable) +
-                                (j + num_subghosts_1_variable)*subghostcell_dim_0_variable;
-                            
-                            const int idx_var_L = (i - 1 + num_subghosts_0_variable) +
-                                (j + num_subghosts_1_variable)*subghostcell_dim_0_variable;
-                            
-                            const int idx_var_R = (i + 1 + num_subghosts_0_variable) +
-                                (j + num_subghosts_1_variable)*subghostcell_dim_0_variable;
-                            
-                            const int idx_var_RR = (i + 2 + num_subghosts_0_variable) +
-                                (j + num_subghosts_1_variable)*subghostcell_dim_0_variable;
-                            
-                            const int idx_var_RRR = (i + 3 + num_subghosts_0_variable) +
-                                (j + num_subghosts_1_variable)*subghostcell_dim_0_variable;
-                            
-                            dudx[idx] = (-1.0/60.0*u[idx_var_LLL] + 3.0/20.0*u[idx_var_LL] - 3.0/4.0*u[idx_var_L]
-                                         + 3.0/4.0*u[idx_var_R] - 3.0/20.0*u[idx_var_RR] + 1.0/60.0*u[idx_var_RRR])/
-                                            dx_0;
-                        }
-                    }
-                    
-                    std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
-                        u,
-                        derivative);
-                    
-                    derivative_x_computed.insert(derivative_pair);
-                }
-                
-                derivative_x[ei].push_back(
-                    derivative_x_computed.find(derivative_var_data_x[ei][vi]->getPointer(u_idx))->
-                        second);
-            }
-        }
+        computeDerivativesInXForDiffusiveFlux(
+            patch,
+            derivative_x,
+            derivative_x_computed,
+            derivative_var_data_x,
+            derivative_var_component_idx_x);
         
         /*
          * Compute the derivatives in y-direction for diffusive flux in y-direction.
          */
         
-        derivative_y.resize(d_num_eqn);
-        
-        for (int ei = 0; ei < d_num_eqn; ei ++)
-        {
-            TBOX_ASSERT(static_cast<int>(derivative_var_data_y[ei].size()) ==
-                        static_cast<int>(derivative_var_component_idx_y[ei].size()));
-            
-            derivative_y[ei].reserve(static_cast<int>(derivative_var_data_y[ei].size()));
-            
-            for (int vi = 0; vi < static_cast<int>(derivative_var_data_y[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int u_idx = derivative_var_component_idx_y[ei][vi];
-                
-                if (derivative_y_computed.find(derivative_var_data_y[ei][vi]->getPointer(u_idx))
-                    == derivative_y_computed.end())
-                {
-                    // Get the pointer to variable for derivative.
-                    double* u = derivative_var_data_y[ei][vi]->getPointer(u_idx);
-                    
-                    // Declare container to store the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
-                        new pdat::CellData<double>(
-                            interior_box, 1, d_num_diff_ghosts));
-                    
-                    // Get the pointer to the derivative.
-                    double* dudy = derivative->getPointer(0);
-                    
-                    /*
-                     * Get the sub-ghost cell width and ghost box dimensions of the variable.
-                     */
-                    
-                    hier::IntVector num_subghosts_variable =
-                        derivative_var_data_y[ei][vi]->getGhostCellWidth();
-                    
-                    hier::IntVector subghostcell_dims_variable =
-                        derivative_var_data_y[ei][vi]->getGhostBox().numberCells();
-                    
-                    const int num_subghosts_0_variable = num_subghosts_variable[0];
-                    const int num_subghosts_1_variable = num_subghosts_variable[1];
-                    const int subghostcell_dim_0_variable = subghostcell_dims_variable[0];
-                    
-                    for (int j = -3; j < interior_dim_1 + 3; j++)
-                    {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = -3; i < interior_dim_0 + 3; i++)
-                        {
-                            // Compute the linear indices.
-                            const int idx = (i + num_diff_ghosts_0) +
-                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
-                            
-                            const int idx_var_BBB = (i + num_subghosts_0_variable) +
-                                (j - 3 + num_subghosts_1_variable)*subghostcell_dim_0_variable;
-                            
-                            const int idx_var_BB = (i + num_subghosts_0_variable) +
-                                (j - 2 + num_subghosts_1_variable)*subghostcell_dim_0_variable;
-                            
-                            const int idx_var_B = (i + num_subghosts_0_variable) +
-                                (j - 1 + num_subghosts_1_variable)*subghostcell_dim_0_variable;
-                            
-                            const int idx_var_T = (i + num_subghosts_0_variable) +
-                                (j + 1 + num_subghosts_1_variable)*subghostcell_dim_0_variable;
-                            
-                            const int idx_var_TT = (i + num_subghosts_0_variable) +
-                                (j + 2 + num_subghosts_1_variable)*subghostcell_dim_0_variable;
-                            
-                            const int idx_var_TTT = (i + num_subghosts_0_variable) +
-                                (j + 3 + num_subghosts_1_variable)*subghostcell_dim_0_variable;
-                            
-                            dudy[idx] = (-1.0/60.0*u[idx_var_BBB] + 3.0/20.0*u[idx_var_BB] - 3.0/4.0*u[idx_var_B]
-                                         + 3.0/4.0*u[idx_var_T] - 3.0/20.0*u[idx_var_TT] + 1.0/60.0*u[idx_var_TTT])/
-                                            dx_1;
-                        }
-                    }
-                    
-                    std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
-                        u,
-                        derivative);
-                    
-                    derivative_y_computed.insert(derivative_pair);
-                }
-                
-                derivative_y[ei].push_back(
-                    derivative_y_computed.find(derivative_var_data_y[ei][vi]->getPointer(u_idx))->
-                        second);
-            }
-        }
+        computeDerivativesInYForDiffusiveFlux(
+            patch,
+            derivative_y,
+            derivative_y_computed,
+            derivative_var_data_y,
+            derivative_var_component_idx_y);
         
         /*
          * Reconstruct the flux in y-direction.
@@ -1161,10 +761,6 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
         const int interior_dim_1 = interior_dims[1];
         const int interior_dim_2 = interior_dims[2];
         
-        const double dx_0 = dx[0];
-        const double dx_1 = dx[1];
-        const double dx_2 = dx[2];
-        
         const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
         const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
         const int num_diff_ghosts_2 = d_num_diff_ghosts[2];
@@ -1269,340 +865,34 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
          * Compute the derivatives in x-direction for diffusive flux in x-direction.
          */
         
-        derivative_x.resize(d_num_eqn);
-        
-        for (int ei = 0; ei < d_num_eqn; ei ++)
-        {
-            TBOX_ASSERT(static_cast<int>(derivative_var_data_x[ei].size()) ==
-                        static_cast<int>(derivative_var_component_idx_x[ei].size()));
-            
-            derivative_x[ei].reserve(static_cast<int>(derivative_var_data_x[ei].size()));
-            
-            for (int vi = 0; vi < static_cast<int>(derivative_var_data_x[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int u_idx = derivative_var_component_idx_x[ei][vi];
-                
-                if (derivative_x_computed.find(derivative_var_data_x[ei][vi]->getPointer(u_idx))
-                    == derivative_x_computed.end())
-                {
-                    // Get the pointer to variable for derivative.
-                    double* u = derivative_var_data_x[ei][vi]->getPointer(u_idx);
-                    
-                    // Declare container to store the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
-                        new pdat::CellData<double>(
-                            interior_box, 1, d_num_diff_ghosts));
-                    
-                    // Get the pointer to the derivative.
-                    double* dudx = derivative->getPointer(0);
-                    
-                    /*
-                     * Get the sub-ghost cell width and ghost box dimensions of the variable.
-                     */
-                    
-                    hier::IntVector num_subghosts_variable =
-                        derivative_var_data_x[ei][vi]->getGhostCellWidth();
-                    
-                    hier::IntVector subghostcell_dims_variable =
-                        derivative_var_data_x[ei][vi]->getGhostBox().numberCells();
-                    
-                    const int num_subghosts_0_variable = num_subghosts_variable[0];
-                    const int num_subghosts_1_variable = num_subghosts_variable[1];
-                    const int num_subghosts_2_variable = num_subghosts_variable[2];
-                    const int subghostcell_dim_0_variable = subghostcell_dims_variable[0];
-                    const int subghostcell_dim_1_variable = subghostcell_dims_variable[1];
-                    
-                    for (int k = -3; k < interior_dim_2 + 3; k++)
-                    {
-                        for (int j = -3; j < interior_dim_1 + 3; j++)
-                        {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
-                            for (int i = -3; i < interior_dim_0 + 3; i++)
-                            {
-                                // Compute the linear indices.
-                                const int idx = (i + num_diff_ghosts_0) +
-                                    (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                        diff_ghostcell_dim_1;
-                                
-                                const int idx_var_LLL = (i - 3 + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_LL = (i - 2 + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_L = (i - 1 + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_R = (i + 1 + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_RR = (i + 2 + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_RRR = (i + 3 + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                dudx[idx] = (-1.0/60.0*u[idx_var_LLL] + 3.0/20.0*u[idx_var_LL] - 3.0/4.0*u[idx_var_L]
-                                             + 3.0/4.0*u[idx_var_R] - 3.0/20.0*u[idx_var_RR] + 1.0/60.0*u[idx_var_RRR])/
-                                                dx_0;
-                            }
-                        }
-                    }
-                    
-                    std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
-                        u,
-                        derivative);
-                    
-                    derivative_x_computed.insert(derivative_pair);
-                }
-                
-                derivative_x[ei].push_back(
-                    derivative_x_computed.find(derivative_var_data_x[ei][vi]->getPointer(u_idx))->
-                        second);
-            }
-        }
+        computeDerivativesInXForDiffusiveFlux(
+            patch,
+            derivative_x,
+            derivative_x_computed,
+            derivative_var_data_x,
+            derivative_var_component_idx_x);
         
         /*
          * Compute the derivatives in y-direction for diffusive flux in x-direction.
          */
         
-        derivative_y.resize(d_num_eqn);
-        
-        for (int ei = 0; ei < d_num_eqn; ei ++)
-        {
-            TBOX_ASSERT(static_cast<int>(derivative_var_data_y[ei].size()) ==
-                        static_cast<int>(derivative_var_component_idx_y[ei].size()));
-            
-            derivative_y[ei].reserve(static_cast<int>(derivative_var_data_y[ei].size()));
-            
-            for (int vi = 0; vi < static_cast<int>(derivative_var_data_y[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int u_idx = derivative_var_component_idx_y[ei][vi];
-                
-                if (derivative_y_computed.find(derivative_var_data_y[ei][vi]->getPointer(u_idx))
-                    == derivative_y_computed.end())
-                {
-                    // Get the pointer to variable for derivative.
-                    double* u = derivative_var_data_y[ei][vi]->getPointer(u_idx);
-                    
-                    // Declare container to store the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
-                        new pdat::CellData<double>(
-                            interior_box, 1, d_num_diff_ghosts));
-                    
-                    // Get the pointer to the derivative.
-                    double* dudy = derivative->getPointer(0);
-                    
-                    /*
-                     * Get the sub-ghost cell width and ghost box dimensions of the variable.
-                     */
-                    
-                    hier::IntVector num_subghosts_variable =
-                        derivative_var_data_y[ei][vi]->getGhostCellWidth();
-                    
-                    hier::IntVector subghostcell_dims_variable =
-                        derivative_var_data_y[ei][vi]->getGhostBox().numberCells();
-                    
-                    const int num_subghosts_0_variable = num_subghosts_variable[0];
-                    const int num_subghosts_1_variable = num_subghosts_variable[1];
-                    const int num_subghosts_2_variable = num_subghosts_variable[2];
-                    const int subghostcell_dim_0_variable = subghostcell_dims_variable[0];
-                    const int subghostcell_dim_1_variable = subghostcell_dims_variable[1];
-                    
-                    for (int k = -3; k < interior_dim_2 + 3; k++)
-                    {
-                        for (int j = -3; j < interior_dim_1 + 3; j++)
-                        {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
-                            for (int i = -3; i < interior_dim_0 + 3; i++)
-                            {
-                                // Compute the linear indices.
-                                const int idx = (i + num_diff_ghosts_0) +
-                                    (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                        diff_ghostcell_dim_1;
-                                
-                                const int idx_var_BBB = (i + num_subghosts_0_variable) +
-                                    (j - 3 + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_BB = (i + num_subghosts_0_variable) +
-                                    (j - 2 + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_B = (i + num_subghosts_0_variable) +
-                                    (j - 1 + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_T = (i + num_subghosts_0_variable) +
-                                    (j + 1 + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_TT = (i + num_subghosts_0_variable) +
-                                    (j + 2 + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_TTT = (i + num_subghosts_0_variable) +
-                                    (j + 3 + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                dudy[idx] = (-1.0/60.0*u[idx_var_BBB] + 3.0/20.0*u[idx_var_BB] - 3.0/4.0*u[idx_var_B]
-                                             + 3.0/4.0*u[idx_var_T] - 3.0/20.0*u[idx_var_TT] + 1.0/60.0*u[idx_var_TTT])/
-                                                dx_1;
-                            }
-                        }
-                    }
-                    
-                    std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
-                        u,
-                        derivative);
-                    
-                    derivative_y_computed.insert(derivative_pair);
-                }
-                
-                derivative_y[ei].push_back(
-                    derivative_y_computed.find(derivative_var_data_y[ei][vi]->getPointer(u_idx))->
-                        second);
-            }
-        }
+        computeDerivativesInYForDiffusiveFlux(
+            patch,
+            derivative_y,
+            derivative_y_computed,
+            derivative_var_data_y,
+            derivative_var_component_idx_y);
         
         /*
          * Compute the derivatives in z-direction for diffusive flux in x-direction.
          */
         
-        derivative_z.resize(d_num_eqn);
-        
-        for (int ei = 0; ei < d_num_eqn; ei ++)
-        {
-            TBOX_ASSERT(static_cast<int>(derivative_var_data_z[ei].size()) ==
-                        static_cast<int>(derivative_var_component_idx_z[ei].size()));
-            
-            derivative_z[ei].reserve(static_cast<int>(derivative_var_data_z[ei].size()));
-            
-            for (int vi = 0; vi < static_cast<int>(derivative_var_data_z[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int u_idx = derivative_var_component_idx_z[ei][vi];
-                
-                if (derivative_z_computed.find(derivative_var_data_z[ei][vi]->getPointer(u_idx))
-                    == derivative_z_computed.end())
-                {
-                    // Get the pointer to variable for derivative.
-                    double* u = derivative_var_data_z[ei][vi]->getPointer(u_idx);
-                    
-                    // Declare container to store the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
-                        new pdat::CellData<double>(
-                            interior_box, 1, d_num_diff_ghosts));
-                    
-                    // Get the pointer to the derivative.
-                    double* dudz = derivative->getPointer(0);
-                    
-                    /*
-                     * Get the sub-ghost cell width and ghost box dimensions of the variable.
-                     */
-                    
-                    hier::IntVector num_subghosts_variable =
-                        derivative_var_data_z[ei][vi]->getGhostCellWidth();
-                    
-                    hier::IntVector subghostcell_dims_variable =
-                        derivative_var_data_z[ei][vi]->getGhostBox().numberCells();
-                    
-                    const int num_subghosts_0_variable = num_subghosts_variable[0];
-                    const int num_subghosts_1_variable = num_subghosts_variable[1];
-                    const int num_subghosts_2_variable = num_subghosts_variable[2];
-                    const int subghostcell_dim_0_variable = subghostcell_dims_variable[0];
-                    const int subghostcell_dim_1_variable = subghostcell_dims_variable[1];
-                    
-                    for (int k = -3; k < interior_dim_2 + 3; k++)
-                    {
-                        for (int j = -3; j < interior_dim_1 + 3; j++)
-                        {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
-                            for (int i = -3; i < interior_dim_0 + 3; i++)
-                            {
-                                // Compute the linear indices.
-                                const int idx = (i + num_diff_ghosts_0) +
-                                    (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                        diff_ghostcell_dim_1;
-                                
-                                const int idx_var_BBB = (i + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k - 3 + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_BB = (i + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k - 2 + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_B = (i + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k - 1 + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_F = (i + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + 1 + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_FF = (i + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + 2 + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_FFF = (i + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + 3 + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                dudz[idx] = (-1.0/60.0*u[idx_var_BBB] + 3.0/20.0*u[idx_var_BB] - 3.0/4.0*u[idx_var_B]
-                                             + 3.0/4.0*u[idx_var_F] - 3.0/20.0*u[idx_var_FF] + 1.0/60.0*u[idx_var_FFF])/
-                                                dx_2;
-                            }
-                        }
-                    }
-                    
-                    std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
-                        u,
-                        derivative);
-                    
-                    derivative_z_computed.insert(derivative_pair);
-                }
-                
-                derivative_z[ei].push_back(
-                    derivative_z_computed.find(derivative_var_data_z[ei][vi]->getPointer(u_idx))->
-                        second);
-            }
-        }
+        computeDerivativesInZForDiffusiveFlux(
+            patch,
+            derivative_z,
+            derivative_z_computed,
+            derivative_var_data_z,
+            derivative_var_component_idx_z);
         
         /*
          * Reconstruct the flux in x-direction.
@@ -1965,340 +1255,34 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
          * Compute the derivatives in x-direction for diffusive flux in y-direction.
          */
         
-        derivative_x.resize(d_num_eqn);
-        
-        for (int ei = 0; ei < d_num_eqn; ei ++)
-        {
-            TBOX_ASSERT(static_cast<int>(derivative_var_data_x[ei].size()) ==
-                        static_cast<int>(derivative_var_component_idx_x[ei].size()));
-            
-            derivative_x[ei].reserve(static_cast<int>(derivative_var_data_x[ei].size()));
-            
-            for (int vi = 0; vi < static_cast<int>(derivative_var_data_x[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int u_idx = derivative_var_component_idx_x[ei][vi];
-                
-                if (derivative_x_computed.find(derivative_var_data_x[ei][vi]->getPointer(u_idx))
-                    == derivative_x_computed.end())
-                {
-                    // Get the pointer to variable for derivative.
-                    double* u = derivative_var_data_x[ei][vi]->getPointer(u_idx);
-                    
-                    // Declare container to store the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
-                        new pdat::CellData<double>(
-                            interior_box, 1, d_num_diff_ghosts));
-                    
-                    // Get the pointer to the derivative.
-                    double* dudx = derivative->getPointer(0);
-                    
-                    /*
-                     * Get the sub-ghost cell width and ghost box dimensions of the variable.
-                     */
-                    
-                    hier::IntVector num_subghosts_variable =
-                        derivative_var_data_x[ei][vi]->getGhostCellWidth();
-                    
-                    hier::IntVector subghostcell_dims_variable =
-                        derivative_var_data_x[ei][vi]->getGhostBox().numberCells();
-                    
-                    const int num_subghosts_0_variable = num_subghosts_variable[0];
-                    const int num_subghosts_1_variable = num_subghosts_variable[1];
-                    const int num_subghosts_2_variable = num_subghosts_variable[2];
-                    const int subghostcell_dim_0_variable = subghostcell_dims_variable[0];
-                    const int subghostcell_dim_1_variable = subghostcell_dims_variable[1];
-                    
-                    for (int k = -3; k < interior_dim_2 + 3; k++)
-                    {
-                        for (int j = -3; j < interior_dim_1 + 3; j++)
-                        {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
-                            for (int i = -3; i < interior_dim_0 + 3; i++)
-                            {
-                                // Compute the linear indices.
-                                const int idx = (i + num_diff_ghosts_0) +
-                                    (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                        diff_ghostcell_dim_1;
-                                
-                                const int idx_var_LLL = (i - 3 + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_LL = (i - 2 + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_L = (i - 1 + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_R = (i + 1 + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_RR = (i + 2 + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_RRR = (i + 3 + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                dudx[idx] = (-1.0/60.0*u[idx_var_LLL] + 3.0/20.0*u[idx_var_LL] - 3.0/4.0*u[idx_var_L]
-                                             + 3.0/4.0*u[idx_var_R] - 3.0/20.0*u[idx_var_RR] + 1.0/60.0*u[idx_var_RRR])/
-                                                dx_0;
-                            }
-                        }
-                    }
-                    
-                    std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
-                        u,
-                        derivative);
-                    
-                    derivative_x_computed.insert(derivative_pair);
-                }
-                
-                derivative_x[ei].push_back(
-                    derivative_x_computed.find(derivative_var_data_x[ei][vi]->getPointer(u_idx))->
-                        second);
-            }
-        }
+        computeDerivativesInXForDiffusiveFlux(
+            patch,
+            derivative_x,
+            derivative_x_computed,
+            derivative_var_data_x,
+            derivative_var_component_idx_x);
         
         /*
          * Compute the derivatives in y-direction for diffusive flux in y-direction.
          */
         
-        derivative_y.resize(d_num_eqn);
-        
-        for (int ei = 0; ei < d_num_eqn; ei ++)
-        {
-            TBOX_ASSERT(static_cast<int>(derivative_var_data_y[ei].size()) ==
-                        static_cast<int>(derivative_var_component_idx_y[ei].size()));
-            
-            derivative_y[ei].reserve(static_cast<int>(derivative_var_data_y[ei].size()));
-            
-            for (int vi = 0; vi < static_cast<int>(derivative_var_data_y[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int u_idx = derivative_var_component_idx_y[ei][vi];
-                
-                if (derivative_y_computed.find(derivative_var_data_y[ei][vi]->getPointer(u_idx))
-                    == derivative_y_computed.end())
-                {
-                    // Get the pointer to variable for derivative.
-                    double* u = derivative_var_data_y[ei][vi]->getPointer(u_idx);
-                    
-                    // Declare container to store the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
-                        new pdat::CellData<double>(
-                            interior_box, 1, d_num_diff_ghosts));
-                    
-                    // Get the pointer to the derivative.
-                    double* dudy = derivative->getPointer(0);
-                    
-                    /*
-                     * Get the sub-ghost cell width and ghost box dimensions of the variable.
-                     */
-                    
-                    hier::IntVector num_subghosts_variable =
-                        derivative_var_data_y[ei][vi]->getGhostCellWidth();
-                    
-                    hier::IntVector subghostcell_dims_variable =
-                        derivative_var_data_y[ei][vi]->getGhostBox().numberCells();
-                    
-                    const int num_subghosts_0_variable = num_subghosts_variable[0];
-                    const int num_subghosts_1_variable = num_subghosts_variable[1];
-                    const int num_subghosts_2_variable = num_subghosts_variable[2];
-                    const int subghostcell_dim_0_variable = subghostcell_dims_variable[0];
-                    const int subghostcell_dim_1_variable = subghostcell_dims_variable[1];
-                    
-                    for (int k = -3; k < interior_dim_2 + 3; k++)
-                    {
-                        for (int j = -3; j < interior_dim_1 + 3; j++)
-                        {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
-                            for (int i = -3; i < interior_dim_0 + 3; i++)
-                            {
-                                // Compute the linear indices.
-                                const int idx = (i + num_diff_ghosts_0) +
-                                    (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                        diff_ghostcell_dim_1;
-                                
-                                const int idx_var_BBB = (i + num_subghosts_0_variable) +
-                                    (j - 3 + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_BB = (i + num_subghosts_0_variable) +
-                                    (j - 2 + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_B = (i + num_subghosts_0_variable) +
-                                    (j - 1 + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_T = (i + num_subghosts_0_variable) +
-                                    (j + 1 + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_TT = (i + num_subghosts_0_variable) +
-                                    (j + 2 + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_TTT = (i + num_subghosts_0_variable) +
-                                    (j + 3 + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                dudy[idx] = (-1.0/60.0*u[idx_var_BBB] + 3.0/20.0*u[idx_var_BB] - 3.0/4.0*u[idx_var_B]
-                                             + 3.0/4.0*u[idx_var_T] - 3.0/20.0*u[idx_var_TT] + 1.0/60.0*u[idx_var_TTT])/
-                                                dx_1;
-                            }
-                        }
-                    }
-                    
-                    std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
-                        u,
-                        derivative);
-                    
-                    derivative_y_computed.insert(derivative_pair);
-                }
-                
-                derivative_y[ei].push_back(
-                    derivative_y_computed.find(derivative_var_data_y[ei][vi]->getPointer(u_idx))->
-                        second);
-            }
-        }
+        computeDerivativesInYForDiffusiveFlux(
+            patch,
+            derivative_y,
+            derivative_y_computed,
+            derivative_var_data_y,
+            derivative_var_component_idx_y);
         
         /*
          * Compute the derivatives in z-direction for diffusive flux in y-direction.
          */
         
-        derivative_z.resize(d_num_eqn);
-        
-        for (int ei = 0; ei < d_num_eqn; ei ++)
-        {
-            TBOX_ASSERT(static_cast<int>(derivative_var_data_z[ei].size()) ==
-                        static_cast<int>(derivative_var_component_idx_z[ei].size()));
-            
-            derivative_z[ei].reserve(static_cast<int>(derivative_var_data_z[ei].size()));
-            
-            for (int vi = 0; vi < static_cast<int>(derivative_var_data_z[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int u_idx = derivative_var_component_idx_z[ei][vi];
-                
-                if (derivative_z_computed.find(derivative_var_data_z[ei][vi]->getPointer(u_idx))
-                    == derivative_z_computed.end())
-                {
-                    // Get the pointer to variable for derivative.
-                    double* u = derivative_var_data_z[ei][vi]->getPointer(u_idx);
-                    
-                    // Declare container to store the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
-                        new pdat::CellData<double>(
-                            interior_box, 1, d_num_diff_ghosts));
-                    
-                    // Get the pointer to the derivative.
-                    double* dudz = derivative->getPointer(0);
-                    
-                    /*
-                     * Get the sub-ghost cell width and ghost box dimensions of the variable.
-                     */
-                    
-                    hier::IntVector num_subghosts_variable =
-                        derivative_var_data_z[ei][vi]->getGhostCellWidth();
-                    
-                    hier::IntVector subghostcell_dims_variable =
-                        derivative_var_data_z[ei][vi]->getGhostBox().numberCells();
-                    
-                    const int num_subghosts_0_variable = num_subghosts_variable[0];
-                    const int num_subghosts_1_variable = num_subghosts_variable[1];
-                    const int num_subghosts_2_variable = num_subghosts_variable[2];
-                    const int subghostcell_dim_0_variable = subghostcell_dims_variable[0];
-                    const int subghostcell_dim_1_variable = subghostcell_dims_variable[1];
-                    
-                    for (int k = -3; k < interior_dim_2 + 3; k++)
-                    {
-                        for (int j = -3; j < interior_dim_1 + 3; j++)
-                        {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
-                            for (int i = -3; i < interior_dim_0 + 3; i++)
-                            {
-                                // Compute the linear indices.
-                                const int idx = (i + num_diff_ghosts_0) +
-                                    (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                        diff_ghostcell_dim_1;
-                                
-                                const int idx_var_BBB = (i + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k - 3 + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_BB = (i + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k - 2 + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_B = (i + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k - 1 + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_F = (i + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + 1 + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_FF = (i + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + 2 + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_FFF = (i + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + 3 + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                dudz[idx] = (-1.0/60.0*u[idx_var_BBB] + 3.0/20.0*u[idx_var_BB] - 3.0/4.0*u[idx_var_B]
-                                             + 3.0/4.0*u[idx_var_F] - 3.0/20.0*u[idx_var_FF] + 1.0/60.0*u[idx_var_FFF])/
-                                                dx_2;
-                            }
-                        }
-                    }
-                    
-                    std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
-                        u,
-                        derivative);
-                    
-                    derivative_z_computed.insert(derivative_pair);
-                }
-                
-                derivative_z[ei].push_back(
-                    derivative_z_computed.find(derivative_var_data_z[ei][vi]->getPointer(u_idx))->
-                        second);
-            }
-        }
+        computeDerivativesInZForDiffusiveFlux(
+            patch,
+            derivative_z,
+            derivative_z_computed,
+            derivative_var_data_z,
+            derivative_var_component_idx_z);
         
         /*
          * Reconstruct the flux in y-direction.
@@ -2661,340 +1645,34 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
          * Compute the derivatives in x-direction for diffusive flux in z-direction.
          */
         
-        derivative_x.resize(d_num_eqn);
-        
-        for (int ei = 0; ei < d_num_eqn; ei ++)
-        {
-            TBOX_ASSERT(static_cast<int>(derivative_var_data_x[ei].size()) ==
-                        static_cast<int>(derivative_var_component_idx_x[ei].size()));
-            
-            derivative_x[ei].reserve(static_cast<int>(derivative_var_data_x[ei].size()));
-            
-            for (int vi = 0; vi < static_cast<int>(derivative_var_data_x[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int u_idx = derivative_var_component_idx_x[ei][vi];
-                
-                if (derivative_x_computed.find(derivative_var_data_x[ei][vi]->getPointer(u_idx))
-                    == derivative_x_computed.end())
-                {
-                    // Get the pointer to variable for derivative.
-                    double* u = derivative_var_data_x[ei][vi]->getPointer(u_idx);
-                    
-                    // Declare container to store the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
-                        new pdat::CellData<double>(
-                            interior_box, 1, d_num_diff_ghosts));
-                    
-                    // Get the pointer to the derivative.
-                    double* dudx = derivative->getPointer(0);
-                    
-                    /*
-                     * Get the sub-ghost cell width and ghost box dimensions of the variable.
-                     */
-                    
-                    hier::IntVector num_subghosts_variable =
-                        derivative_var_data_x[ei][vi]->getGhostCellWidth();
-                    
-                    hier::IntVector subghostcell_dims_variable =
-                        derivative_var_data_x[ei][vi]->getGhostBox().numberCells();
-                    
-                    const int num_subghosts_0_variable = num_subghosts_variable[0];
-                    const int num_subghosts_1_variable = num_subghosts_variable[1];
-                    const int num_subghosts_2_variable = num_subghosts_variable[2];
-                    const int subghostcell_dim_0_variable = subghostcell_dims_variable[0];
-                    const int subghostcell_dim_1_variable = subghostcell_dims_variable[1];
-                    
-                    for (int k = -3; k < interior_dim_2 + 3; k++)
-                    {
-                        for (int j = -3; j < interior_dim_1 + 3; j++)
-                        {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
-                            for (int i = -3; i < interior_dim_0 + 3; i++)
-                            {
-                                // Compute the linear indices.
-                                const int idx = (i + num_diff_ghosts_0) +
-                                    (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                        diff_ghostcell_dim_1;
-                                
-                                const int idx_var_LLL = (i - 3 + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_LL = (i - 2 + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_L = (i - 1 + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_R = (i + 1 + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_RR = (i + 2 + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_RRR = (i + 3 + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                dudx[idx] = (-1.0/60.0*u[idx_var_LLL] + 3.0/20.0*u[idx_var_LL] - 3.0/4.0*u[idx_var_L]
-                                             + 3.0/4.0*u[idx_var_R] - 3.0/20.0*u[idx_var_RR] + 1.0/60.0*u[idx_var_RRR])/
-                                                dx_0;
-                            }
-                        }
-                    }
-                    
-                    std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
-                        u,
-                        derivative);
-                    
-                    derivative_x_computed.insert(derivative_pair);
-                }
-                
-                derivative_x[ei].push_back(
-                    derivative_x_computed.find(derivative_var_data_x[ei][vi]->getPointer(u_idx))->
-                        second);
-            }
-        }
+        computeDerivativesInXForDiffusiveFlux(
+            patch,
+            derivative_x,
+            derivative_x_computed,
+            derivative_var_data_x,
+            derivative_var_component_idx_x);
         
         /*
          * Compute the derivatives in y-direction for diffusive flux in z-direction.
          */
         
-        derivative_y.resize(d_num_eqn);
-        
-        for (int ei = 0; ei < d_num_eqn; ei ++)
-        {
-            TBOX_ASSERT(static_cast<int>(derivative_var_data_y[ei].size()) ==
-                        static_cast<int>(derivative_var_component_idx_y[ei].size()));
-            
-            derivative_y[ei].reserve(static_cast<int>(derivative_var_data_y[ei].size()));
-            
-            for (int vi = 0; vi < static_cast<int>(derivative_var_data_y[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int u_idx = derivative_var_component_idx_y[ei][vi];
-                
-                if (derivative_y_computed.find(derivative_var_data_y[ei][vi]->getPointer(u_idx))
-                    == derivative_y_computed.end())
-                {
-                    // Get the pointer to variable for derivative.
-                    double* u = derivative_var_data_y[ei][vi]->getPointer(u_idx);
-                    
-                    // Declare container to store the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
-                        new pdat::CellData<double>(
-                            interior_box, 1, d_num_diff_ghosts));
-                    
-                    // Get the pointer to the derivative.
-                    double* dudy = derivative->getPointer(0);
-                    
-                    /*
-                     * Get the sub-ghost cell width and ghost box dimensions of the variable.
-                     */
-                    
-                    hier::IntVector num_subghosts_variable =
-                        derivative_var_data_y[ei][vi]->getGhostCellWidth();
-                    
-                    hier::IntVector subghostcell_dims_variable =
-                        derivative_var_data_y[ei][vi]->getGhostBox().numberCells();
-                    
-                    const int num_subghosts_0_variable = num_subghosts_variable[0];
-                    const int num_subghosts_1_variable = num_subghosts_variable[1];
-                    const int num_subghosts_2_variable = num_subghosts_variable[2];
-                    const int subghostcell_dim_0_variable = subghostcell_dims_variable[0];
-                    const int subghostcell_dim_1_variable = subghostcell_dims_variable[1];
-                    
-                    for (int k = -3; k < interior_dim_2 + 3; k++)
-                    {
-                        for (int j = -3; j < interior_dim_1 + 3; j++)
-                        {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
-                            for (int i = -3; i < interior_dim_0 + 3; i++)
-                            {
-                                // Compute the linear indices.
-                                const int idx = (i + num_diff_ghosts_0) +
-                                    (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                        diff_ghostcell_dim_1;
-                                
-                                const int idx_var_BBB = (i + num_subghosts_0_variable) +
-                                    (j - 3 + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_BB = (i + num_subghosts_0_variable) +
-                                    (j - 2 + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_B = (i + num_subghosts_0_variable) +
-                                    (j - 1 + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_T = (i + num_subghosts_0_variable) +
-                                    (j + 1 + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_TT = (i + num_subghosts_0_variable) +
-                                    (j + 2 + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_TTT = (i + num_subghosts_0_variable) +
-                                    (j + 3 + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                dudy[idx] = (-1.0/60.0*u[idx_var_BBB] + 3.0/20.0*u[idx_var_BB] - 3.0/4.0*u[idx_var_B]
-                                             + 3.0/4.0*u[idx_var_T] - 3.0/20.0*u[idx_var_TT] + 1.0/60.0*u[idx_var_TTT])/
-                                                dx_1;
-                            }
-                        }
-                    }
-                    
-                    std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
-                        u,
-                        derivative);
-                    
-                    derivative_y_computed.insert(derivative_pair);
-                }
-                
-                derivative_y[ei].push_back(
-                    derivative_y_computed.find(derivative_var_data_y[ei][vi]->getPointer(u_idx))->
-                        second);
-            }
-        }
+        computeDerivativesInYForDiffusiveFlux(
+            patch,
+            derivative_y,
+            derivative_y_computed,
+            derivative_var_data_y,
+            derivative_var_component_idx_y);
         
         /*
          * Compute the derivatives in z-direction for diffusive flux in z-direction.
          */
         
-        derivative_z.resize(d_num_eqn);
-        
-        for (int ei = 0; ei < d_num_eqn; ei ++)
-        {
-            TBOX_ASSERT(static_cast<int>(derivative_var_data_z[ei].size()) ==
-                        static_cast<int>(derivative_var_component_idx_z[ei].size()));
-            
-            derivative_z[ei].reserve(static_cast<int>(derivative_var_data_z[ei].size()));
-            
-            for (int vi = 0; vi < static_cast<int>(derivative_var_data_z[ei].size()); vi++)
-            {
-                // Get the index of variable for derivative.
-                const int u_idx = derivative_var_component_idx_z[ei][vi];
-                
-                if (derivative_z_computed.find(derivative_var_data_z[ei][vi]->getPointer(u_idx))
-                    == derivative_z_computed.end())
-                {
-                    // Get the pointer to variable for derivative.
-                    double* u = derivative_var_data_z[ei][vi]->getPointer(u_idx);
-                    
-                    // Declare container to store the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
-                        new pdat::CellData<double>(
-                            interior_box, 1, d_num_diff_ghosts));
-                    
-                    // Get the pointer to the derivative.
-                    double* dudz = derivative->getPointer(0);
-                    
-                    /*
-                     * Get the sub-ghost cell width and ghost box dimensions of the variable.
-                     */
-                    
-                    hier::IntVector num_subghosts_variable =
-                        derivative_var_data_z[ei][vi]->getGhostCellWidth();
-                    
-                    hier::IntVector subghostcell_dims_variable =
-                        derivative_var_data_z[ei][vi]->getGhostBox().numberCells();
-                    
-                    const int num_subghosts_0_variable = num_subghosts_variable[0];
-                    const int num_subghosts_1_variable = num_subghosts_variable[1];
-                    const int num_subghosts_2_variable = num_subghosts_variable[2];
-                    const int subghostcell_dim_0_variable = subghostcell_dims_variable[0];
-                    const int subghostcell_dim_1_variable = subghostcell_dims_variable[1];
-                    
-                    for (int k = -3; k < interior_dim_2 + 3; k++)
-                    {
-                        for (int j = -3; j < interior_dim_1 + 3; j++)
-                        {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
-                            for (int i = -3; i < interior_dim_0 + 3; i++)
-                            {
-                                // Compute the linear indices.
-                                const int idx = (i + num_diff_ghosts_0) +
-                                    (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
-                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
-                                        diff_ghostcell_dim_1;
-                                
-                                const int idx_var_BBB = (i + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k - 3 + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_BB = (i + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k - 2 + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_B = (i + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k - 1 + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_F = (i + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + 1 + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_FF = (i + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + 2 + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                const int idx_var_FFF = (i + num_subghosts_0_variable) +
-                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
-                                    (k + 3 + num_subghosts_2_variable)*subghostcell_dim_0_variable*
-                                        subghostcell_dim_1_variable;
-                                
-                                dudz[idx] = (-1.0/60.0*u[idx_var_BBB] + 3.0/20.0*u[idx_var_BB] - 3.0/4.0*u[idx_var_B]
-                                             + 3.0/4.0*u[idx_var_F] - 3.0/20.0*u[idx_var_FF] + 1.0/60.0*u[idx_var_FFF])/
-                                                dx_2;
-                            }
-                        }
-                    }
-                    
-                    std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
-                        u,
-                        derivative);
-                    
-                    derivative_z_computed.insert(derivative_pair);
-                }
-                
-                derivative_z[ei].push_back(
-                    derivative_z_computed.find(derivative_var_data_z[ei][vi]->getPointer(u_idx))->
-                        second);
-            }
-        }
+        computeDerivativesInZForDiffusiveFlux(
+            patch,
+            derivative_z,
+            derivative_z_computed,
+            derivative_var_data_z,
+            derivative_var_component_idx_z);
         
         /*
          * Reconstruct the flux in z-direction.
@@ -3305,4 +1983,799 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
         d_flow_model->unregisterPatch();
         
     } // if (d_dim == tbox::Dimension(3))
+}
+
+
+/*
+ * Compute the derivatives in the x-direction for diffusive flux.
+ */
+void
+DiffusiveFluxReconstructorSixthOrder::computeDerivativesInXForDiffusiveFlux(
+    hier::Patch& patch,
+    std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_x,
+    std::map<double*, boost::shared_ptr<pdat::CellData<double> > >& derivative_x_computed,
+    const std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_var_data_x,
+    const std::vector<std::vector<int> >& derivative_var_component_idx_x)
+{
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    for (int ei = 0; ei < d_num_eqn; ei ++)
+    {
+        TBOX_ASSERT(static_cast<int>(derivative_var_data_x[ei].size()) ==
+                    static_cast<int>(derivative_var_component_idx_x[ei].size()));
+    }
+#endif
+    
+    derivative_x.resize(d_num_eqn);
+    
+    // Get the dimensions of box that covers the interior of patch.
+    hier::Box interior_box = patch.getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+    // Get the dimensions of box that covers interior of patch plus
+    // diffusive ghost cells.
+    hier::Box diff_ghost_box = interior_box;
+    diff_ghost_box.grow(d_num_diff_ghosts);
+    const hier::IntVector diff_ghostcell_dims = diff_ghost_box.numberCells();
+    
+    // Get the grid spacing.
+    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+            patch.getPatchGeometry()));
+    
+    const double* const dx = patch_geom->getDx();
+    
+    const double dx_0 = dx[0];
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        /*
+         * Get the dimensions and number of ghost cells.
+         */
+        
+        const int interior_dim_0 = interior_dims[0];
+        
+        const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
+        
+        for (int ei = 0; ei < d_num_eqn; ei ++)
+        {
+            derivative_x[ei].reserve(static_cast<int>(derivative_var_data_x[ei].size()));
+            
+            for (int vi = 0; vi < static_cast<int>(derivative_var_data_x[ei].size()); vi++)
+            {
+                // Get the index of variable for derivative.
+                const int u_idx = derivative_var_component_idx_x[ei][vi];
+                
+                if (derivative_x_computed.find(derivative_var_data_x[ei][vi]->getPointer(u_idx))
+                    == derivative_x_computed.end())
+                {
+                    // Get the pointer to variable for derivative.
+                    double* u = derivative_var_data_x[ei][vi]->getPointer(u_idx);
+                    
+                    // Declare container to store the derivative.
+                    boost::shared_ptr<pdat::CellData<double> > derivative(
+                        new pdat::CellData<double>(
+                            interior_box, 1, d_num_diff_ghosts));
+                    
+                    // Get the pointer to the derivative.
+                    double* dudx = derivative->getPointer(0);
+                    
+                    /*
+                     * Get the sub-ghost cell width of the variable.
+                     */
+                    
+                    hier::IntVector num_subghosts_variable =
+                        derivative_var_data_x[ei][vi]->getGhostCellWidth();
+                    
+                    const int num_subghosts_0_variable = num_subghosts_variable[0];
+                    
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = -3; i < interior_dim_0 + 3; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx = i + num_diff_ghosts_0;
+                        
+                        const int idx_var_LLL = i - 3 + num_subghosts_0_variable;
+                        const int idx_var_LL  = i - 2 + num_subghosts_0_variable;
+                        const int idx_var_L   = i - 1 + num_subghosts_0_variable;
+                        const int idx_var_R   = i + 1 + num_subghosts_0_variable;
+                        const int idx_var_RR  = i + 2 + num_subghosts_0_variable;
+                        const int idx_var_RRR = i + 3 + num_subghosts_0_variable;
+                        
+                        dudx[idx] = (-1.0/60.0*u[idx_var_LLL] + 3.0/20.0*u[idx_var_LL]
+                                     - 3.0/4.0*u[idx_var_L] + 3.0/4.0*u[idx_var_R]
+                                     - 3.0/20.0*u[idx_var_RR] + 1.0/60.0*u[idx_var_RRR])/
+                                        dx_0;
+                    }
+                    
+                    std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
+                        u,
+                        derivative);
+                    
+                    derivative_x_computed.insert(derivative_pair);
+                }
+                
+                derivative_x[ei].push_back(
+                    derivative_x_computed.find(derivative_var_data_x[ei][vi]->getPointer(u_idx))->
+                        second);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        /*
+         * Get the dimensions and number of ghost cells.
+         */
+        
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        
+        const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
+        const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
+        
+        const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
+        
+        for (int ei = 0; ei < d_num_eqn; ei ++)
+        {
+            derivative_x[ei].reserve(static_cast<int>(derivative_var_data_x[ei].size()));
+            
+            for (int vi = 0; vi < static_cast<int>(derivative_var_data_x[ei].size()); vi++)
+            {
+                // Get the index of variable for derivative.
+                const int u_idx = derivative_var_component_idx_x[ei][vi];
+                
+                if (derivative_x_computed.find(derivative_var_data_x[ei][vi]->getPointer(u_idx))
+                    == derivative_x_computed.end())
+                {
+                    // Get the pointer to variable for derivative.
+                    double* u = derivative_var_data_x[ei][vi]->getPointer(u_idx);
+                    
+                    // Declare container to store the derivative.
+                    boost::shared_ptr<pdat::CellData<double> > derivative(
+                        new pdat::CellData<double>(
+                            interior_box, 1, d_num_diff_ghosts));
+                    
+                    // Get the pointer to the derivative.
+                    double* dudx = derivative->getPointer(0);
+                    
+                    /*
+                     * Get the sub-ghost cell width and ghost box dimensions of the variable.
+                     */
+                    
+                    hier::IntVector num_subghosts_variable =
+                        derivative_var_data_x[ei][vi]->getGhostCellWidth();
+                    
+                    hier::IntVector subghostcell_dims_variable =
+                        derivative_var_data_x[ei][vi]->getGhostBox().numberCells();
+                    
+                    const int num_subghosts_0_variable = num_subghosts_variable[0];
+                    const int num_subghosts_1_variable = num_subghosts_variable[1];
+                    const int subghostcell_dim_0_variable = subghostcell_dims_variable[0];
+                    
+                    for (int j = -3; j < interior_dim_1 + 3; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = -3; i < interior_dim_0 + 3; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx = (i + num_diff_ghosts_0) +
+                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
+                            
+                            const int idx_var_LLL = (i - 3 + num_subghosts_0_variable) +
+                                (j + num_subghosts_1_variable)*subghostcell_dim_0_variable;
+                            
+                            const int idx_var_LL = (i - 2 + num_subghosts_0_variable) +
+                                (j + num_subghosts_1_variable)*subghostcell_dim_0_variable;
+                            
+                            const int idx_var_L = (i - 1 + num_subghosts_0_variable) +
+                                (j + num_subghosts_1_variable)*subghostcell_dim_0_variable;
+                            
+                            const int idx_var_R = (i + 1 + num_subghosts_0_variable) +
+                                (j + num_subghosts_1_variable)*subghostcell_dim_0_variable;
+                            
+                            const int idx_var_RR = (i + 2 + num_subghosts_0_variable) +
+                                (j + num_subghosts_1_variable)*subghostcell_dim_0_variable;
+                            
+                            const int idx_var_RRR = (i + 3 + num_subghosts_0_variable) +
+                                (j + num_subghosts_1_variable)*subghostcell_dim_0_variable;
+                            
+                            dudx[idx] = (-1.0/60.0*u[idx_var_LLL] + 3.0/20.0*u[idx_var_LL]
+                                         - 3.0/4.0*u[idx_var_L] + 3.0/4.0*u[idx_var_R]
+                                         - 3.0/20.0*u[idx_var_RR] + 1.0/60.0*u[idx_var_RRR])/
+                                            dx_0;
+                        }
+                    }
+                    
+                    std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
+                        u,
+                        derivative);
+                    
+                    derivative_x_computed.insert(derivative_pair);
+                }
+                
+                derivative_x[ei].push_back(
+                    derivative_x_computed.find(derivative_var_data_x[ei][vi]->getPointer(u_idx))->
+                        second);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        /*
+         * Get the dimensions and number of ghost cells.
+         */
+        
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        const int interior_dim_2 = interior_dims[2];
+        
+        const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
+        const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
+        const int num_diff_ghosts_2 = d_num_diff_ghosts[2];
+        
+        const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
+        const int diff_ghostcell_dim_1 = diff_ghostcell_dims[1];
+        
+        for (int ei = 0; ei < d_num_eqn; ei ++)
+        {
+            derivative_x[ei].reserve(static_cast<int>(derivative_var_data_x[ei].size()));
+            
+            for (int vi = 0; vi < static_cast<int>(derivative_var_data_x[ei].size()); vi++)
+            {
+                // Get the index of variable for derivative.
+                const int u_idx = derivative_var_component_idx_x[ei][vi];
+                
+                if (derivative_x_computed.find(derivative_var_data_x[ei][vi]->getPointer(u_idx))
+                    == derivative_x_computed.end())
+                {
+                    // Get the pointer to variable for derivative.
+                    double* u = derivative_var_data_x[ei][vi]->getPointer(u_idx);
+                    
+                    // Declare container to store the derivative.
+                    boost::shared_ptr<pdat::CellData<double> > derivative(
+                        new pdat::CellData<double>(
+                            interior_box, 1, d_num_diff_ghosts));
+                    
+                    // Get the pointer to the derivative.
+                    double* dudx = derivative->getPointer(0);
+                    
+                    /*
+                     * Get the sub-ghost cell width and ghost box dimensions of the variable.
+                     */
+                    
+                    hier::IntVector num_subghosts_variable =
+                        derivative_var_data_x[ei][vi]->getGhostCellWidth();
+                    
+                    hier::IntVector subghostcell_dims_variable =
+                        derivative_var_data_x[ei][vi]->getGhostBox().numberCells();
+                    
+                    const int num_subghosts_0_variable = num_subghosts_variable[0];
+                    const int num_subghosts_1_variable = num_subghosts_variable[1];
+                    const int num_subghosts_2_variable = num_subghosts_variable[2];
+                    const int subghostcell_dim_0_variable = subghostcell_dims_variable[0];
+                    const int subghostcell_dim_1_variable = subghostcell_dims_variable[1];
+                    
+                    for (int k = -3; k < interior_dim_2 + 3; k++)
+                    {
+                        for (int j = -3; j < interior_dim_1 + 3; j++)
+                        {
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = -3; i < interior_dim_0 + 3; i++)
+                            {
+                                // Compute the linear indices.
+                                const int idx = (i + num_diff_ghosts_0) +
+                                    (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                        diff_ghostcell_dim_1;
+                                
+                                const int idx_var_LLL = (i - 3 + num_subghosts_0_variable) +
+                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
+                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
+                                        subghostcell_dim_1_variable;
+                                
+                                const int idx_var_LL = (i - 2 + num_subghosts_0_variable) +
+                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
+                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
+                                        subghostcell_dim_1_variable;
+                                
+                                const int idx_var_L = (i - 1 + num_subghosts_0_variable) +
+                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
+                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
+                                        subghostcell_dim_1_variable;
+                                
+                                const int idx_var_R = (i + 1 + num_subghosts_0_variable) +
+                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
+                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
+                                        subghostcell_dim_1_variable;
+                                
+                                const int idx_var_RR = (i + 2 + num_subghosts_0_variable) +
+                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
+                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
+                                        subghostcell_dim_1_variable;
+                                
+                                const int idx_var_RRR = (i + 3 + num_subghosts_0_variable) +
+                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
+                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
+                                        subghostcell_dim_1_variable;
+                                
+                                dudx[idx] = (-1.0/60.0*u[idx_var_LLL] + 3.0/20.0*u[idx_var_LL]
+                                             - 3.0/4.0*u[idx_var_L] + 3.0/4.0*u[idx_var_R]
+                                             - 3.0/20.0*u[idx_var_RR] + 1.0/60.0*u[idx_var_RRR])/
+                                                dx_0;
+                            }
+                        }
+                    }
+                    
+                    std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
+                        u,
+                        derivative);
+                    
+                    derivative_x_computed.insert(derivative_pair);
+                }
+                
+                derivative_x[ei].push_back(
+                    derivative_x_computed.find(derivative_var_data_x[ei][vi]->getPointer(u_idx))->
+                        second);
+            }
+        }
+    }
+}
+
+
+/*
+ * Compute the derivatives in the y-direction for diffusive flux.
+ */
+void
+DiffusiveFluxReconstructorSixthOrder::computeDerivativesInYForDiffusiveFlux(
+    hier::Patch& patch,
+    std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_y,
+    std::map<double*, boost::shared_ptr<pdat::CellData<double> > >& derivative_y_computed,
+    const std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_var_data_y,
+    const std::vector<std::vector<int> >& derivative_var_component_idx_y)
+{
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    for (int ei = 0; ei < d_num_eqn; ei ++)
+    {
+        TBOX_ASSERT(static_cast<int>(derivative_var_data_y[ei].size()) ==
+                    static_cast<int>(derivative_var_component_idx_y[ei].size()));
+    }
+#endif
+    
+    derivative_y.resize(d_num_eqn);
+    
+    // Get the dimensions of box that covers the interior of patch.
+    hier::Box interior_box = patch.getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+    // Get the dimensions of box that covers interior of patch plus
+    // diffusive ghost cells.
+    hier::Box diff_ghost_box = interior_box;
+    diff_ghost_box.grow(d_num_diff_ghosts);
+    const hier::IntVector diff_ghostcell_dims = diff_ghost_box.numberCells();
+    
+    // Get the grid spacing.
+    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+            patch.getPatchGeometry()));
+    
+    const double* const dx = patch_geom->getDx();
+    
+    const double dx_1 = dx[1];
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": DiffusiveFluxReconstructorSixthOrder::"
+            << "computeDerivativesInYForDiffusiveFlux()\n"
+            << "There isn't y-direction for 1D problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        /*
+         * Get the dimensions and number of ghost cells.
+         */
+        
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        
+        const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
+        const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
+        
+        const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
+        
+        for (int ei = 0; ei < d_num_eqn; ei ++)
+        {
+            derivative_y[ei].reserve(static_cast<int>(derivative_var_data_y[ei].size()));
+            
+            for (int vi = 0; vi < static_cast<int>(derivative_var_data_y[ei].size()); vi++)
+            {
+                // Get the index of variable for derivative.
+                const int u_idx = derivative_var_component_idx_y[ei][vi];
+                
+                if (derivative_y_computed.find(derivative_var_data_y[ei][vi]->getPointer(u_idx))
+                    == derivative_y_computed.end())
+                {
+                    // Get the pointer to variable for derivative.
+                    double* u = derivative_var_data_y[ei][vi]->getPointer(u_idx);
+                    
+                    // Declare container to store the derivative.
+                    boost::shared_ptr<pdat::CellData<double> > derivative(
+                        new pdat::CellData<double>(
+                            interior_box, 1, d_num_diff_ghosts));
+                    
+                    // Get the pointer to the derivative.
+                    double* dudy = derivative->getPointer(0);
+                    
+                    /*
+                     * Get the sub-ghost cell width and ghost box dimensions of the variable.
+                     */
+                    
+                    hier::IntVector num_subghosts_variable =
+                        derivative_var_data_y[ei][vi]->getGhostCellWidth();
+                    
+                    hier::IntVector subghostcell_dims_variable =
+                        derivative_var_data_y[ei][vi]->getGhostBox().numberCells();
+                    
+                    const int num_subghosts_0_variable = num_subghosts_variable[0];
+                    const int num_subghosts_1_variable = num_subghosts_variable[1];
+                    const int subghostcell_dim_0_variable = subghostcell_dims_variable[0];
+                    
+                    for (int j = -3; j < interior_dim_1 + 3; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = -3; i < interior_dim_0 + 3; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx = (i + num_diff_ghosts_0) +
+                                (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
+                            
+                            const int idx_var_BBB = (i + num_subghosts_0_variable) +
+                                (j - 3 + num_subghosts_1_variable)*subghostcell_dim_0_variable;
+                            
+                            const int idx_var_BB = (i + num_subghosts_0_variable) +
+                                (j - 2 + num_subghosts_1_variable)*subghostcell_dim_0_variable;
+                            
+                            const int idx_var_B = (i + num_subghosts_0_variable) +
+                                (j - 1 + num_subghosts_1_variable)*subghostcell_dim_0_variable;
+                            
+                            const int idx_var_T = (i + num_subghosts_0_variable) +
+                                (j + 1 + num_subghosts_1_variable)*subghostcell_dim_0_variable;
+                            
+                            const int idx_var_TT = (i + num_subghosts_0_variable) +
+                                (j + 2 + num_subghosts_1_variable)*subghostcell_dim_0_variable;
+                            
+                            const int idx_var_TTT = (i + num_subghosts_0_variable) +
+                                (j + 3 + num_subghosts_1_variable)*subghostcell_dim_0_variable;
+                            
+                            dudy[idx] = (-1.0/60.0*u[idx_var_BBB] + 3.0/20.0*u[idx_var_BB]
+                                         - 3.0/4.0*u[idx_var_B] + 3.0/4.0*u[idx_var_T]
+                                         - 3.0/20.0*u[idx_var_TT] + 1.0/60.0*u[idx_var_TTT])/
+                                            dx_1;
+                        }
+                    }
+                    
+                    std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
+                        u,
+                        derivative);
+                    
+                    derivative_y_computed.insert(derivative_pair);
+                }
+                
+                derivative_y[ei].push_back(
+                    derivative_y_computed.find(derivative_var_data_y[ei][vi]->getPointer(u_idx))->
+                        second);
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        /*
+         * Get the dimensions and number of ghost cells.
+         */
+        
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        const int interior_dim_2 = interior_dims[2];
+        
+        const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
+        const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
+        const int num_diff_ghosts_2 = d_num_diff_ghosts[2];
+        
+        const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
+        const int diff_ghostcell_dim_1 = diff_ghostcell_dims[1];
+        
+        for (int ei = 0; ei < d_num_eqn; ei ++)
+        {
+            derivative_y[ei].reserve(static_cast<int>(derivative_var_data_y[ei].size()));
+            
+            for (int vi = 0; vi < static_cast<int>(derivative_var_data_y[ei].size()); vi++)
+            {
+                // Get the index of variable for derivative.
+                const int u_idx = derivative_var_component_idx_y[ei][vi];
+                
+                if (derivative_y_computed.find(derivative_var_data_y[ei][vi]->getPointer(u_idx))
+                    == derivative_y_computed.end())
+                {
+                    // Get the pointer to variable for derivative.
+                    double* u = derivative_var_data_y[ei][vi]->getPointer(u_idx);
+                    
+                    // Declare container to store the derivative.
+                    boost::shared_ptr<pdat::CellData<double> > derivative(
+                        new pdat::CellData<double>(
+                            interior_box, 1, d_num_diff_ghosts));
+                    
+                    // Get the pointer to the derivative.
+                    double* dudy = derivative->getPointer(0);
+                    
+                    /*
+                     * Get the sub-ghost cell width and ghost box dimensions of the variable.
+                     */
+                    
+                    hier::IntVector num_subghosts_variable =
+                        derivative_var_data_y[ei][vi]->getGhostCellWidth();
+                    
+                    hier::IntVector subghostcell_dims_variable =
+                        derivative_var_data_y[ei][vi]->getGhostBox().numberCells();
+                    
+                    const int num_subghosts_0_variable = num_subghosts_variable[0];
+                    const int num_subghosts_1_variable = num_subghosts_variable[1];
+                    const int num_subghosts_2_variable = num_subghosts_variable[2];
+                    const int subghostcell_dim_0_variable = subghostcell_dims_variable[0];
+                    const int subghostcell_dim_1_variable = subghostcell_dims_variable[1];
+                    
+                    for (int k = -3; k < interior_dim_2 + 3; k++)
+                    {
+                        for (int j = -3; j < interior_dim_1 + 3; j++)
+                        {
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = -3; i < interior_dim_0 + 3; i++)
+                            {
+                                // Compute the linear indices.
+                                const int idx = (i + num_diff_ghosts_0) +
+                                    (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                        diff_ghostcell_dim_1;
+                                
+                                const int idx_var_BBB = (i + num_subghosts_0_variable) +
+                                    (j - 3 + num_subghosts_1_variable)*subghostcell_dim_0_variable +
+                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
+                                        subghostcell_dim_1_variable;
+                                
+                                const int idx_var_BB = (i + num_subghosts_0_variable) +
+                                    (j - 2 + num_subghosts_1_variable)*subghostcell_dim_0_variable +
+                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
+                                        subghostcell_dim_1_variable;
+                                
+                                const int idx_var_B = (i + num_subghosts_0_variable) +
+                                    (j - 1 + num_subghosts_1_variable)*subghostcell_dim_0_variable +
+                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
+                                        subghostcell_dim_1_variable;
+                                
+                                const int idx_var_T = (i + num_subghosts_0_variable) +
+                                    (j + 1 + num_subghosts_1_variable)*subghostcell_dim_0_variable +
+                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
+                                        subghostcell_dim_1_variable;
+                                
+                                const int idx_var_TT = (i + num_subghosts_0_variable) +
+                                    (j + 2 + num_subghosts_1_variable)*subghostcell_dim_0_variable +
+                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
+                                        subghostcell_dim_1_variable;
+                                
+                                const int idx_var_TTT = (i + num_subghosts_0_variable) +
+                                    (j + 3 + num_subghosts_1_variable)*subghostcell_dim_0_variable +
+                                    (k + num_subghosts_2_variable)*subghostcell_dim_0_variable*
+                                        subghostcell_dim_1_variable;
+                                
+                                dudy[idx] = (-1.0/60.0*u[idx_var_BBB] + 3.0/20.0*u[idx_var_BB]
+                                             - 3.0/4.0*u[idx_var_B] + 3.0/4.0*u[idx_var_T]
+                                             - 3.0/20.0*u[idx_var_TT] + 1.0/60.0*u[idx_var_TTT])/
+                                                dx_1;
+                            }
+                        }
+                    }
+                    
+                    std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
+                        u,
+                        derivative);
+                    
+                    derivative_y_computed.insert(derivative_pair);
+                }
+                
+                derivative_y[ei].push_back(
+                    derivative_y_computed.find(derivative_var_data_y[ei][vi]->getPointer(u_idx))->
+                        second);
+            }
+        }
+    }
+}
+
+
+/*
+ * Compute the derivatives in the z-direction for diffusive flux.
+ */
+void
+DiffusiveFluxReconstructorSixthOrder::computeDerivativesInZForDiffusiveFlux(
+    hier::Patch& patch,
+    std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_z,
+    std::map<double*, boost::shared_ptr<pdat::CellData<double> > >& derivative_z_computed,
+    const std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_var_data_z,
+    const std::vector<std::vector<int> >& derivative_var_component_idx_z)
+{
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    for (int ei = 0; ei < d_num_eqn; ei ++)
+    {
+        TBOX_ASSERT(static_cast<int>(derivative_var_data_z[ei].size()) ==
+                    static_cast<int>(derivative_var_component_idx_z[ei].size()));
+    }
+#endif
+    
+    derivative_z.resize(d_num_eqn);
+    
+    // Get the dimensions of box that covers the interior of patch.
+    hier::Box interior_box = patch.getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+    // Get the dimensions of box that covers interior of patch plus
+    // diffusive ghost cells.
+    hier::Box diff_ghost_box = interior_box;
+    diff_ghost_box.grow(d_num_diff_ghosts);
+    const hier::IntVector diff_ghostcell_dims = diff_ghost_box.numberCells();
+    
+    // Get the grid spacing.
+    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+            patch.getPatchGeometry()));
+    
+    const double* const dx = patch_geom->getDx();
+    
+    const double dx_2 = dx[2];
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": DiffusiveFluxReconstructorSixthOrder::"
+            << "computeDerivativesInYForDiffusiveFlux()\n"
+            << "There isn't z-direction for 1D problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        TBOX_ERROR(d_object_name
+            << ": DiffusiveFluxReconstructorSixthOrder::"
+            << "computeDerivativesInYForDiffusiveFlux()\n"
+            << "There isn't z-direction for 2D problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        /*
+         * Get the dimensions and number of ghost cells.
+         */
+        
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        const int interior_dim_2 = interior_dims[2];
+        
+        const int num_diff_ghosts_0 = d_num_diff_ghosts[0];
+        const int num_diff_ghosts_1 = d_num_diff_ghosts[1];
+        const int num_diff_ghosts_2 = d_num_diff_ghosts[2];
+        
+        const int diff_ghostcell_dim_0 = diff_ghostcell_dims[0];
+        const int diff_ghostcell_dim_1 = diff_ghostcell_dims[1];
+        
+        for (int ei = 0; ei < d_num_eqn; ei ++)
+        {
+            derivative_z[ei].reserve(static_cast<int>(derivative_var_data_z[ei].size()));
+            
+            for (int vi = 0; vi < static_cast<int>(derivative_var_data_z[ei].size()); vi++)
+            {
+                // Get the index of variable for derivative.
+                const int u_idx = derivative_var_component_idx_z[ei][vi];
+                
+                if (derivative_z_computed.find(derivative_var_data_z[ei][vi]->getPointer(u_idx))
+                    == derivative_z_computed.end())
+                {
+                    // Get the pointer to variable for derivative.
+                    double* u = derivative_var_data_z[ei][vi]->getPointer(u_idx);
+                    
+                    // Declare container to store the derivative.
+                    boost::shared_ptr<pdat::CellData<double> > derivative(
+                        new pdat::CellData<double>(
+                            interior_box, 1, d_num_diff_ghosts));
+                    
+                    // Get the pointer to the derivative.
+                    double* dudz = derivative->getPointer(0);
+                    
+                    /*
+                     * Get the sub-ghost cell width and ghost box dimensions of the variable.
+                     */
+                    
+                    hier::IntVector num_subghosts_variable =
+                        derivative_var_data_z[ei][vi]->getGhostCellWidth();
+                    
+                    hier::IntVector subghostcell_dims_variable =
+                        derivative_var_data_z[ei][vi]->getGhostBox().numberCells();
+                    
+                    const int num_subghosts_0_variable = num_subghosts_variable[0];
+                    const int num_subghosts_1_variable = num_subghosts_variable[1];
+                    const int num_subghosts_2_variable = num_subghosts_variable[2];
+                    const int subghostcell_dim_0_variable = subghostcell_dims_variable[0];
+                    const int subghostcell_dim_1_variable = subghostcell_dims_variable[1];
+                    
+                    for (int k = -3; k < interior_dim_2 + 3; k++)
+                    {
+                        for (int j = -3; j < interior_dim_1 + 3; j++)
+                        {
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = -3; i < interior_dim_0 + 3; i++)
+                            {
+                                // Compute the linear indices.
+                                const int idx = (i + num_diff_ghosts_0) +
+                                    (j + num_diff_ghosts_1)*diff_ghostcell_dim_0 +
+                                    (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
+                                        diff_ghostcell_dim_1;
+                                
+                                const int idx_var_BBB = (i + num_subghosts_0_variable) +
+                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
+                                    (k - 3 + num_subghosts_2_variable)*subghostcell_dim_0_variable*
+                                        subghostcell_dim_1_variable;
+                                
+                                const int idx_var_BB = (i + num_subghosts_0_variable) +
+                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
+                                    (k - 2 + num_subghosts_2_variable)*subghostcell_dim_0_variable*
+                                        subghostcell_dim_1_variable;
+                                
+                                const int idx_var_B = (i + num_subghosts_0_variable) +
+                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
+                                    (k - 1 + num_subghosts_2_variable)*subghostcell_dim_0_variable*
+                                        subghostcell_dim_1_variable;
+                                
+                                const int idx_var_F = (i + num_subghosts_0_variable) +
+                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
+                                    (k + 1 + num_subghosts_2_variable)*subghostcell_dim_0_variable*
+                                        subghostcell_dim_1_variable;
+                                
+                                const int idx_var_FF = (i + num_subghosts_0_variable) +
+                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
+                                    (k + 2 + num_subghosts_2_variable)*subghostcell_dim_0_variable*
+                                        subghostcell_dim_1_variable;
+                                
+                                const int idx_var_FFF = (i + num_subghosts_0_variable) +
+                                    (j + num_subghosts_1_variable)*subghostcell_dim_0_variable +
+                                    (k + 3 + num_subghosts_2_variable)*subghostcell_dim_0_variable*
+                                        subghostcell_dim_1_variable;
+                                
+                                dudz[idx] = (-1.0/60.0*u[idx_var_BBB] + 3.0/20.0*u[idx_var_BB]
+                                             - 3.0/4.0*u[idx_var_B] + 3.0/4.0*u[idx_var_F] -
+                                             3.0/20.0*u[idx_var_FF] + 1.0/60.0*u[idx_var_FFF])/
+                                                dx_2;
+                            }
+                        }
+                    }
+                    
+                    std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
+                        u,
+                        derivative);
+                    
+                    derivative_z_computed.insert(derivative_pair);
+                }
+                
+                derivative_z[ei].push_back(
+                    derivative_z_computed.find(derivative_var_data_z[ei][vi]->getPointer(u_idx))->
+                        second);
+            }
+        }
+    }
 }
