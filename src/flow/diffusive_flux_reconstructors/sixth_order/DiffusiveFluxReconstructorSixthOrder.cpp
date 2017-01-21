@@ -99,7 +99,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the dimensions and number of ghost cells.
+         * Get the dimension and number of ghost cells.
          */
         
         const int interior_dim_0 = interior_dims[0];
