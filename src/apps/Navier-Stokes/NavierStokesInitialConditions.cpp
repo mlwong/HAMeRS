@@ -909,7 +909,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                             }
                         }
                     }
-                    else if (d_project_name.find("2D Poggi's RMI thick interface") != std::string::npos)
+                    else if (d_project_name.find("2D Poggi's RMI smooth interface") != std::string::npos)
                     {
                         if (d_num_species != 2)
                         {
@@ -924,7 +924,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                          * Get the settings.
                          */
                         
-                        std::string settings = d_project_name.substr(31);
+                        std::string settings = d_project_name.substr(32);
                         
                         std::stringstream ss(settings);
                         
@@ -952,7 +952,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         int m_max = m_max_candidates[std::stoi(m_idx_str) - 1];
                         
                         // Characteristic length of the initial interface thickness.
-                        const double epsilon_i = 0.002;
+                        const double epsilon_i = 0.004;
                         
                         double* rho_Y_0   = partial_density->getPointer(0);
                         double* rho_Y_1   = partial_density->getPointer(1);
