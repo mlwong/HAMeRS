@@ -639,7 +639,7 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
                             (j + 1 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
                         
                         const int idx_node_TTT = (i + num_diff_ghosts_0) +
-                            (j + 2 + num_diff_ghosts_0)*diff_ghostcell_dim_0;
+                            (j + 2 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
                         
                         F_face_y[idx_face_y] += dt*mu[idx_diffusivity]*(
                             1.0/60*(dudx[idx_node_BBB] + dudx[idx_node_TTT])
