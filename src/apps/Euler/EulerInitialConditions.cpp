@@ -630,7 +630,7 @@ EulerInitialConditions::initializeDataOnPatch(
                         std::getline(ss, m_idx_str, '-');
                         std::getline(ss, prime_idx_str);
                         
-                        double A_candidates[] = {1.0e-3, 0.70710678118e-3, 0.5e-3};
+                        double A_candidates[] = {0.5e-3, 0.35355339e-3, 0.25e-3};
                         int m_min_candidates[] = {40, 30, 20};
                         int m_max_candidates[] = {60, 60, 60};
                         
