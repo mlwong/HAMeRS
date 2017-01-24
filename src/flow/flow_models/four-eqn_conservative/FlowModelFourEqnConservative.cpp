@@ -87,8 +87,8 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
     d_eqn_form.push_back(EQN_FORM::CONSERVATIVE);
     
     // Set the bounds for the variables.
-    d_Y_bound_lo = -0.0001;
-    d_Y_bound_up = 1.0001;
+    d_Y_bound_lo = -0.001;
+    d_Y_bound_up = 1.001;
     
     /*
      * Initialize the conservative variables.
