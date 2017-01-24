@@ -1808,7 +1808,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
 #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
-                        // // Compute the linear indices.
+                        // Compute the linear indices.
                         const int idx_midpoint_y = (i + 1) +
                             (j + 1)*(interior_dim_0 + 2) +
                             (k + 1)*(interior_dim_0 + 2)*
@@ -1865,7 +1865,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxesAndSources(
 #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
-                        // // Compute the linear indices.
+                        // Compute the linear indices.
                         const int idx_midpoint_z = (i + 1) +
                             (j + 1)*(interior_dim_0 + 2) +
                             (k + 1)*(interior_dim_0 + 2)*
