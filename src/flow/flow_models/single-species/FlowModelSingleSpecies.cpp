@@ -6585,6 +6585,7 @@ FlowModelSingleSpecies::registerPlotQuantities(
            d_variable_density,
            d_plot_context));
     
+    /*
     visit_writer->registerPlotQuantity(
         "momentum",
         "VECTOR",
@@ -6598,6 +6599,7 @@ FlowModelSingleSpecies::registerPlotQuantities(
         vardb->mapVariableAndContextToIndex(
            d_variable_total_energy,
            d_plot_context));
+    */
     
     visit_writer->registerDerivedPlotQuantity("pressure",
         "SCALAR",

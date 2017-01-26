@@ -9817,6 +9817,7 @@ FlowModelFiveEqnAllaire::registerPlotQuantities(
     
     hier::VariableDatabase* vardb = hier::VariableDatabase::getDatabase();
     
+    /*
     for (int si = 0; si < d_num_species; si++)
     {
         std::string partial_density_name =
@@ -9844,6 +9845,7 @@ FlowModelFiveEqnAllaire::registerPlotQuantities(
         vardb->mapVariableAndContextToIndex(
            d_variable_total_energy,
            d_plot_context));
+    */
     
     for (int si = 0; si < d_num_species; si++)
     {

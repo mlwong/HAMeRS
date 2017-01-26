@@ -9843,6 +9843,7 @@ FlowModelFourEqnConservative::registerPlotQuantities(
             << std::endl);
     }
     
+    /*
     hier::VariableDatabase* vardb = hier::VariableDatabase::getDatabase();
     
     for (int si = 0; si < d_num_species; si++)
@@ -9872,6 +9873,7 @@ FlowModelFourEqnConservative::registerPlotQuantities(
         vardb->mapVariableAndContextToIndex(
            d_variable_total_energy,
            d_plot_context));
+    */
     
     visit_writer->registerDerivedPlotQuantity("pressure",
         "SCALAR",
