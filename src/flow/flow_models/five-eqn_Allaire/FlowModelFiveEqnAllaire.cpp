@@ -9847,7 +9847,7 @@ FlowModelFiveEqnAllaire::registerPlotQuantities(
            d_plot_context));
     */
     
-    for (int si = 0; si < d_num_species; si++)
+    for (int si = 0; si < d_num_species - 1; si++)
     {
         std::string volume_fraction_name =
             "volume fraction " + tbox::Utilities::intToString(si);
@@ -9877,7 +9877,7 @@ FlowModelFiveEqnAllaire::registerPlotQuantities(
         "SCALAR",
         this);
     
-    for (int si = 0; si < d_num_species; si++)
+    for (int si = 0; si < d_num_species - 1; si++)
     {
         std::string mass_fraction_name =
             "mass fraction " + tbox::Utilities::intToString(si);
