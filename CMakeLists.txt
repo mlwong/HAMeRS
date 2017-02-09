@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
 
-set(CMAKE_CXX_COMPILER mpicxx)
-set(CMAKE_C_COMPILER mpicc)
-set(CMAKE_Fortran_COMPILER gfortran)
-
 project(HAMeRS C CXX Fortran)
 
 find_package(MPI)
@@ -11,6 +7,28 @@ find_package(MPI)
 if (MPI_FOUND)
   include_directories(${MPI_INCLUDE_PATH})
 endif(MPI_FOUND)
+
+# Find the boost package
+find_package(Boost 1.45 REQUIRED)
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
+LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
+
+# Find the hdf5 package
+find_package(HDF5 1.8.4 REQUIRED)
+INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIR})
+LINK_DIRECTORIES(${HDF5_LIBRARY_DIRS})
+
+# Set the preprocessor variables
+option(HAMERS_ENABLE_SIMD "HAMERS_ENABLE_SIMD" OFF)
+option(HAMERS_DEBUG_CHECK_ASSERTIONS "HAMERS_DEBUG_CHECK_ASSERTIONS" ON)
+option(HAMERS_DEBUG_CHECK_DEV_ASSERTIONS "HAMERS_DEBUG_CHECK_DEV_ASSERTIONS" ON)
+
+configure_file(${HAMeRS_SOURCE_DIR}/include/HAMeRS_config.hpp.in ${HAMeRS_SOURCE_DIR}/include/HAMeRS_config.hpp)
+
+# Set the compilers
+set(CMAKE_CXX_COMPILER mpicxx)
+set(CMAKE_C_COMPILER mpicc)
+set(CMAKE_Fortran_COMPILER gfortran)
 
 if (NOT CMAKE_BUILD_TYPE)
     message(STATUS "No build type selected, default to Release")
@@ -36,25 +54,23 @@ endif()
 
 # Directories to look for include files
 include_directories(${HAMeRS_SOURCE_DIR}/include
-                    ${HAMeRS_SOURCE_DIR}/hdf5/include
-                    ${HAMeRS_SOURCE_DIR}/SAMRAI/include)
+                    /afs/ir.stanford.edu/users/w/o/wongml/AMR-WCNS/SAMRAI/include)
 
 # Directories to look for libraries
-link_directories(${HAMeRS_SOURCE_DIR}/hdf5/lib
-                 ${HAMeRS_SOURCE_DIR}/SAMRAI/lib
-		 ${HAMeRS_BINARY_DIR}/algs/patch_strategy
-		 ${HAMeRS_BINARY_DIR}/algs/integrator/fortran
+link_directories(/afs/ir.stanford.edu/users/w/o/wongml/AMR-WCNS/SAMRAI/lib
+                 ${HAMeRS_BINARY_DIR}/algs/patch_strategy
+                 ${HAMeRS_BINARY_DIR}/algs/integrator/fortran
                  ${HAMeRS_BINARY_DIR}/algs/integrator
-		 ${HAMeRS_BINARY_DIR}/apps/Euler
-		 ${HAMeRS_BINARY_DIR}/apps/Navier-Stokes
-		 ${HAMeRS_BINARY_DIR}/flow/flow_models
-		 ${HAMeRS_BINARY_DIR}/flow/convective_flux_reconstructors
-		 ${HAMeRS_BINARY_DIR}/flow/diffusive_flux_reconstructors
-		 ${HAMeRS_BINARY_DIR}/flow/refinement_taggers
-		 ${HAMeRS_BINARY_DIR}/util
-		 ${HAMeRS_BINARY_DIR}/util/basic_boundary_conditions
-		 ${HAMeRS_BINARY_DIR}/util/mixing_rules
-		 ${HAMeRS_BINARY_DIR}/util/mixing_rules/equations_of_state)
+                 ${HAMeRS_BINARY_DIR}/apps/Euler
+                 ${HAMeRS_BINARY_DIR}/apps/Navier-Stokes
+                 ${HAMeRS_BINARY_DIR}/flow/flow_models
+                 ${HAMeRS_BINARY_DIR}/flow/convective_flux_reconstructors
+                 ${HAMeRS_BINARY_DIR}/flow/diffusive_flux_reconstructors
+                 ${HAMeRS_BINARY_DIR}/flow/refinement_taggers
+                 ${HAMeRS_BINARY_DIR}/util
+                 ${HAMeRS_BINARY_DIR}/util/basic_boundary_conditions
+                 ${HAMeRS_BINARY_DIR}/util/mixing_rules
+                 ${HAMeRS_BINARY_DIR}/util/mixing_rules/equations_of_state)
 
 add_subdirectory(src/algs/integrator/fortran)
 add_subdirectory(src/algs/patch_strategy)
