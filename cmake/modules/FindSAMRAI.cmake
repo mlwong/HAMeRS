@@ -2,8 +2,7 @@
 # Once done this will define
 #  SAMRAI_FOUND - if system found SAMRAI library
 #  SAMRAI_INCLUDE_DIRS - The SAMRAI include directories
-#  SAMRAI_LIBRARIES - The libraries needed to use SAMRAI
-#  SAMRAI_DEFINITIONS - Compiler switches required for using SAMRAI
+#  SAMRAI_LIBRARY_DIRS - The SAMRAI lib directories
 
 set (SAMRAI_ROOT_DIR $ENV{SAMRAI_ROOT})
 # Uncomment the following line to print which directory CMake is looking in.
@@ -26,7 +25,7 @@ if (SAMRAI_FOUND)
     if (NOT SAMRAI_FIND_QUIETLY)
         message(STATUS "Found SAMRAI: ${SAMRAI_LIBRARY_DIRS}")
     endif (NOT SAMRAI_FIND_QUIETLY)
-    else (SAMRAI_FOUND)
+else (SAMRAI_FOUND)
     if (SAMRAI_FIND_REQUIRED)
         message(FATAL_ERROR "Could NOT find SAMRAI")
     endif (SAMRAI_FIND_REQUIRED)
