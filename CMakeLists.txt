@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 
 project(HAMeRS C CXX Fortran)
 
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
+
 find_package(MPI)
 
 if (MPI_FOUND)
@@ -17,6 +19,13 @@ LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 find_package(HDF5 1.8.4 REQUIRED)
 INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIR})
 LINK_DIRECTORIES(${HDF5_LIBRARY_DIRS})
+
+# Find the SAMRAI package
+find_package(SAMRAI REQUIRED)
+INCLUDE_DIRECTORIES(${SAMRAI_INCLUDE_DIR})
+LINK_DIRECTORIES(${SAMRAI_LIBRARY_DIRS})
+
+MESSAGE(STATUS "SAMRAI_INCLUDE_DIR: " ${SAMRAI_INCLUDE_DIR})
 
 # Set the preprocessor variables
 option(HAMERS_ENABLE_SIMD "HAMERS_ENABLE_SIMD" OFF)
@@ -38,9 +47,9 @@ endif()
 # Intel compiler suite
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
     if (CMAKE_BUILD_TYPE MATCHES "Release")
-        set(CMAKE_CXX_FLAGS "-std=c++11 -g -O3 -Wall -Wno-deprecated -xhost")
+        set(CMAKE_CXX_FLAGS "-std=c++11 -g -O3 -Wall -Wno-deprecated -xhost -qopt-report")
     elseif (CMAKE_BUILD_TYPE MATCHES "Debug")
-        set(CMAKE_CXX_FLAGS "-std=c++11 -g -O3 -Wall -Wno-deprecated")
+        set(CMAKE_CXX_FLAGS "-std=c++11 -g -O0 -Wall -Wno-deprecated -qopt-report")
     endif()
 
 # Standard GNU compilers
@@ -53,12 +62,10 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 endif()
 
 # Directories to look for include files
-include_directories(${HAMeRS_SOURCE_DIR}/include
-                    /afs/ir.stanford.edu/users/w/o/wongml/AMR-WCNS/SAMRAI/include)
+include_directories(${HAMeRS_SOURCE_DIR}/include)
 
 # Directories to look for libraries
-link_directories(/afs/ir.stanford.edu/users/w/o/wongml/AMR-WCNS/SAMRAI/lib
-                 ${HAMeRS_BINARY_DIR}/algs/patch_strategy
+link_directories(${HAMeRS_BINARY_DIR}/algs/patch_strategy
                  ${HAMeRS_BINARY_DIR}/algs/integrator/fortran
                  ${HAMeRS_BINARY_DIR}/algs/integrator
                  ${HAMeRS_BINARY_DIR}/apps/Euler
