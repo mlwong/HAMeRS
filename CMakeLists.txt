@@ -47,15 +47,15 @@ endif()
 # Intel compiler suite
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
     if (CMAKE_BUILD_TYPE MATCHES "Release")
-        set(CMAKE_CXX_FLAGS "-std=c++11 -g -O3 -Wall -Wno-deprecated -xhost -qopt-report")
+        set(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wall -Wno-deprecated -xhost -qopt-report")
     elseif (CMAKE_BUILD_TYPE MATCHES "Debug")
-        set(CMAKE_CXX_FLAGS "-std=c++11 -g -O0 -Wall -Wno-deprecated -qopt-report")
+        set(CMAKE_CXX_FLAGS "-std=c++11 -g -O0 -Wall -Wno-deprecated")
     endif()
 
 # Standard GNU compilers
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     if (CMAKE_BUILD_TYPE MATCHES "Release")
-        set(CMAKE_CXX_FLAGS "-std=c++11 -g -O3 -Wall -Wno-deprecated")
+        set(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wall -Wno-deprecated")
     elseif (CMAKE_BUILD_TYPE MATCHES "Debug")
         set(CMAKE_CXX_FLAGS "-std=c++11 -g -O0 -Wall -Wno-deprecated")
     endif()
