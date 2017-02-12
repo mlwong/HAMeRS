@@ -17,4 +17,3 @@ set(algs_fortran_source_files
 # in algs_fortran_source_files
 add_library(algs_fortran ${algs_fortran_source_files})
 
-TARGET_LINK_LIBRARIES(algs_fortran gfortran)
