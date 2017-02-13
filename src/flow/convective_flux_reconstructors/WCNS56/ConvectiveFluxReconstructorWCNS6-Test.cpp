@@ -14,6 +14,24 @@ boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_compute_
 
 
 /*
+ * Integer based power function.
+ */
+static inline __attribute__((always_inline)) double ipow(double base, int exp)
+{
+    double result = 1.0;
+    while (exp)
+    {
+        if (exp & 1)
+            result *= base;
+        exp >>= 1;
+        base *= base;
+    }
+
+    return result;
+}
+
+
+/*
  * Compute local sigma.
  */
 static inline __attribute__((always_inline)) void computeLocalSigma(
@@ -157,15 +175,15 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolation(
     omega_upwind_1 = tau_5/(beta_1 + EPSILON);
     omega_upwind_2 = tau_5/(beta_2 + EPSILON);
     
-    omega_upwind_0 = 1.0/16.0*(1.0 + omega_upwind_0*omega_upwind_0);
-    omega_upwind_1 = 5.0/8.0*(1.0 + omega_upwind_1*omega_upwind_1);
-    omega_upwind_2 = 5.0/16.0*(1.0 + omega_upwind_2*omega_upwind_2);
-    
 /*
-omega_upwind_0 = 1.0/16.0*(1.0 + pow(tau_5/(beta_0 + EPSILON), p));
-omega_upwind_1 = 5.0/8.0*(1.0 + pow(tau_5/(beta_1 + EPSILON), p));
-omega_upwind_2 = 5.0/16.0*(1.0 + pow(tau_5/(beta_2 + EPSILON), p));
+omega_upwind_0 = 1.0/16.0*(1.0 + omega_upwind_0*omega_upwind_0);
+omega_upwind_1 = 5.0/8.0*(1.0 + omega_upwind_1*omega_upwind_1);
+omega_upwind_2 = 5.0/16.0*(1.0 + omega_upwind_2*omega_upwind_2);
 */
+    
+    omega_upwind_0 = 1.0/16.0*(1.0 + ipow(tau_5/(beta_0 + EPSILON), p));
+    omega_upwind_1 = 5.0/8.0*(1.0 + ipow(tau_5/(beta_1 + EPSILON), p));
+    omega_upwind_2 = 5.0/16.0*(1.0 + ipow(tau_5/(beta_2 + EPSILON), p));
     
     double omega_upwind_sum = omega_upwind_0 + omega_upwind_1 + omega_upwind_2;
     
@@ -187,17 +205,17 @@ omega_upwind_2 = 5.0/16.0*(1.0 + pow(tau_5/(beta_2 + EPSILON), p));
     omega_2 = tau_6/(beta_2 + EPSILON);
     omega_3 = tau_6/(beta_3 + EPSILON);
     
-    omega_0 = 1.0/32.0*(C + omega_0*omega_0*omega_0*omega_0);
-    omega_1 = 15.0/32.0*(C + omega_1*omega_1*omega_1*omega_1);
-    omega_2 = 15.0/32.0*(C + omega_2*omega_2*omega_2*omega_2);
-    omega_3 = 1.0/32.0*(C + omega_3*omega_3*omega_3*omega_3);
-    
 /*
-omega_0 = 1.0/32.0*(C + pow(tau_6/(beta_0 + EPSILON), q));
-omega_1 = 15.0/32.0*(C + pow(tau_6/(beta_1 + EPSILON), q));
-omega_2 = 15.0/32.0*(C + pow(tau_6/(beta_2 + EPSILON), q));
-omega_3 = 1.0/32.0*(C + pow(tau_6/(beta_3 + EPSILON), q));
+omega_0 = 1.0/32.0*(C + omega_0*omega_0*omega_0*omega_0);
+omega_1 = 15.0/32.0*(C + omega_1*omega_1*omega_1*omega_1);
+omega_2 = 15.0/32.0*(C + omega_2*omega_2*omega_2*omega_2);
+omega_3 = 1.0/32.0*(C + omega_3*omega_3*omega_3*omega_3);
 */
+    
+    omega_0 = 1.0/32.0*(C + ipow(tau_6/(beta_0 + EPSILON), q));
+    omega_1 = 15.0/32.0*(C + ipow(tau_6/(beta_1 + EPSILON), q));
+    omega_2 = 15.0/32.0*(C + ipow(tau_6/(beta_2 + EPSILON), q));
+    omega_3 = 1.0/32.0*(C + ipow(tau_6/(beta_3 + EPSILON), q));
     
     double omega_sum = omega_0 + omega_1 + omega_2 + omega_3;
     
@@ -251,15 +269,15 @@ omega_3 = 1.0/32.0*(C + pow(tau_6/(beta_3 + EPSILON), q));
     omega_upwind_tilde_1 = tau_5_tilde/(beta_tilde_1 + EPSILON);
     omega_upwind_tilde_2 = tau_5_tilde/(beta_tilde_2 + EPSILON);
     
-    omega_upwind_tilde_0 = 1.0/16.0*(1.0 + omega_upwind_tilde_0*omega_upwind_tilde_0);
-    omega_upwind_tilde_1 = 5.0/8.0*(1.0 + omega_upwind_tilde_1*omega_upwind_tilde_1);
-    omega_upwind_tilde_2 = 5.0/16.0*(1.0 + omega_upwind_tilde_2*omega_upwind_tilde_2);
-    
 /*
-omega_upwind_tilde_0 = 1.0/16.0*(1.0 + pow(tau_5_tilde/(beta_tilde_0 + EPSILON), p));
-omega_upwind_tilde_1 = 5.0/8.0*(1.0 + pow(tau_5_tilde/(beta_tilde_1 + EPSILON), p));
-omega_upwind_tilde_2 = 5.0/16.0*(1.0 + pow(tau_5_tilde/(beta_tilde_2 + EPSILON), p));
+omega_upwind_tilde_0 = 1.0/16.0*(1.0 + omega_upwind_tilde_0*omega_upwind_tilde_0);
+omega_upwind_tilde_1 = 5.0/8.0*(1.0 + omega_upwind_tilde_1*omega_upwind_tilde_1);
+omega_upwind_tilde_2 = 5.0/16.0*(1.0 + omega_upwind_tilde_2*omega_upwind_tilde_2);
 */
+    
+    omega_upwind_tilde_0 = 1.0/16.0*(1.0 + ipow(tau_5_tilde/(beta_tilde_0 + EPSILON), p));
+    omega_upwind_tilde_1 = 5.0/8.0*(1.0 + ipow(tau_5_tilde/(beta_tilde_1 + EPSILON), p));
+    omega_upwind_tilde_2 = 5.0/16.0*(1.0 + ipow(tau_5_tilde/(beta_tilde_2 + EPSILON), p));
     
     double omega_upwind_tilde_sum = omega_upwind_tilde_0 + omega_upwind_tilde_1 + omega_upwind_tilde_2;
     
@@ -281,17 +299,17 @@ omega_upwind_tilde_2 = 5.0/16.0*(1.0 + pow(tau_5_tilde/(beta_tilde_2 + EPSILON),
     omega_tilde_2 = tau_6_tilde/(beta_tilde_2 + EPSILON);
     omega_tilde_3 = tau_6_tilde/(beta_tilde_3 + EPSILON);
     
-    omega_tilde_0 = 1.0/32.0*(C + omega_tilde_0*omega_tilde_0*omega_tilde_0*omega_tilde_0);
-    omega_tilde_1 = 15.0/32.0*(C + omega_tilde_1*omega_tilde_1*omega_tilde_1*omega_tilde_1);
-    omega_tilde_2 = 15.0/32.0*(C + omega_tilde_2*omega_tilde_2*omega_tilde_2*omega_tilde_2);
-    omega_tilde_3 = 1.0/32.0*(C + omega_tilde_3*omega_tilde_3*omega_tilde_3*omega_tilde_3);
-    
 /*
-omega_tilde_0 = 1.0/32.0*(C + pow(tau_6_tilde/(beta_tilde_0 + EPSILON), q));
-omega_tilde_1 = 15.0/32.0*(C + pow(tau_6_tilde/(beta_tilde_1 + EPSILON), q));
-omega_tilde_2 = 15.0/32.0*(C + pow(tau_6_tilde/(beta_tilde_2 + EPSILON), q));
-omega_tilde_3 = 1.0/32.0*(C + pow(tau_6_tilde/(beta_tilde_3 + EPSILON), q));
+omega_tilde_0 = 1.0/32.0*(C + omega_tilde_0*omega_tilde_0*omega_tilde_0*omega_tilde_0);
+omega_tilde_1 = 15.0/32.0*(C + omega_tilde_1*omega_tilde_1*omega_tilde_1*omega_tilde_1);
+omega_tilde_2 = 15.0/32.0*(C + omega_tilde_2*omega_tilde_2*omega_tilde_2*omega_tilde_2);
+omega_tilde_3 = 1.0/32.0*(C + omega_tilde_3*omega_tilde_3*omega_tilde_3*omega_tilde_3);
 */
+    
+    omega_tilde_0 = 1.0/32.0*(C + ipow(tau_6_tilde/(beta_tilde_0 + EPSILON), q));
+    omega_tilde_1 = 15.0/32.0*(C + ipow(tau_6_tilde/(beta_tilde_1 + EPSILON), q));
+    omega_tilde_2 = 15.0/32.0*(C + ipow(tau_6_tilde/(beta_tilde_2 + EPSILON), q));
+    omega_tilde_3 = 1.0/32.0*(C + ipow(tau_6_tilde/(beta_tilde_3 + EPSILON), q));
     
     double omega_tilde_sum = omega_tilde_0 + omega_tilde_1 + omega_tilde_2 + omega_tilde_3;
     
