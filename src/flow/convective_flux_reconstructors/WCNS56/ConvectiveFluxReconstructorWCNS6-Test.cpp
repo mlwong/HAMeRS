@@ -18,8 +18,8 @@ boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_compute_
  * Compute local sigma.
  */
 static inline __attribute__((always_inline)) void computeLocalSigma(
-    double*__restrict__ sigma,
-    double**__restrict__ U_array,
+    double* sigma,
+    double** U_array,
     int idx_side)
 {
     /*
@@ -41,11 +41,11 @@ static inline __attribute__((always_inline)) void computeLocalSigma(
  * Compute local beta's.
  */
 static inline __attribute__((always_inline)) void computeLocalBeta(
-    double*__restrict__ beta_0,
-    double*__restrict__ beta_1,
-    double*__restrict__ beta_2,
-    double*__restrict__ beta_3,
-    double**__restrict__ U_array,
+    double* beta_0,
+    double* beta_1,
+    double* beta_2,
+    double* beta_3,
+    double** U_array,
     int idx_side)
 {
     *beta_0 = 1.0/3.0*(U_array[0][idx_side]*(4.0*U_array[0][idx_side] - 19.0*U_array[1][idx_side] +
@@ -81,11 +81,11 @@ static inline __attribute__((always_inline)) void computeLocalBeta(
  * Compute local beta_tilde's.
  */
 static inline __attribute__((always_inline)) void computeLocalBetaTilde(
-    double*__restrict__ beta_tilde_0,
-    double*__restrict__ beta_tilde_1,
-    double*__restrict__ beta_tilde_2,
-    double*__restrict__ beta_tilde_3,
-    double**__restrict__ U_array,
+    double* beta_tilde_0,
+    double* beta_tilde_1,
+    double* beta_tilde_2,
+    double* beta_tilde_3,
+    double** U_array,
     int idx_side)
 {
     *beta_tilde_0 = 1.0/3.0*(U_array[5][idx_side]*(4.0*U_array[5][idx_side] - 19.0*U_array[4][idx_side] +
@@ -121,9 +121,9 @@ static inline __attribute__((always_inline)) void computeLocalBetaTilde(
  * Perform local WENO interpolation.
  */
 static inline __attribute__((always_inline)) void performLocalWENOInterpolation(
-   double*__restrict__ U_minus,
-   double*__restrict__ U_plus,
-   double**__restrict__ U_array,
+   double* U_minus,
+   double* U_plus,
+   double** U_array,
    int idx_side,
    int p,
    int q,
@@ -158,15 +158,15 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolation(
     omega_upwind_1 = tau_5/(beta_1 + EPSILON);
     omega_upwind_2 = tau_5/(beta_2 + EPSILON);
     
-/*
-omega_upwind_0 = 1.0/16.0*(1.0 + omega_upwind_0*omega_upwind_0);
-omega_upwind_1 = 5.0/8.0*(1.0 + omega_upwind_1*omega_upwind_1);
-omega_upwind_2 = 5.0/16.0*(1.0 + omega_upwind_2*omega_upwind_2);
-*/
+    omega_upwind_0 = 1.0/16.0*(1.0 + omega_upwind_0*omega_upwind_0);
+    omega_upwind_1 = 5.0/8.0*(1.0 + omega_upwind_1*omega_upwind_1);
+    omega_upwind_2 = 5.0/16.0*(1.0 + omega_upwind_2*omega_upwind_2);
     
+    /*
     omega_upwind_0 = 1.0/16.0*(1.0 + std::pow(tau_5/(beta_0 + EPSILON), p));
     omega_upwind_1 = 5.0/8.0*(1.0 + std::pow(tau_5/(beta_1 + EPSILON), p));
     omega_upwind_2 = 5.0/16.0*(1.0 + std::pow(tau_5/(beta_2 + EPSILON), p));
+    */
     
     double omega_upwind_sum = omega_upwind_0 + omega_upwind_1 + omega_upwind_2;
     
@@ -188,17 +188,17 @@ omega_upwind_2 = 5.0/16.0*(1.0 + omega_upwind_2*omega_upwind_2);
     omega_2 = tau_6/(beta_2 + EPSILON);
     omega_3 = tau_6/(beta_3 + EPSILON);
     
-/*
-omega_0 = 1.0/32.0*(C + omega_0*omega_0*omega_0*omega_0);
-omega_1 = 15.0/32.0*(C + omega_1*omega_1*omega_1*omega_1);
-omega_2 = 15.0/32.0*(C + omega_2*omega_2*omega_2*omega_2);
-omega_3 = 1.0/32.0*(C + omega_3*omega_3*omega_3*omega_3);
-*/
+    omega_0 = 1.0/32.0*(C + omega_0*omega_0*omega_0*omega_0);
+    omega_1 = 15.0/32.0*(C + omega_1*omega_1*omega_1*omega_1);
+    omega_2 = 15.0/32.0*(C + omega_2*omega_2*omega_2*omega_2);
+    omega_3 = 1.0/32.0*(C + omega_3*omega_3*omega_3*omega_3);
     
+    /*
     omega_0 = 1.0/32.0*(C + std::pow(tau_6/(beta_0 + EPSILON), q));
     omega_1 = 15.0/32.0*(C + std::pow(tau_6/(beta_1 + EPSILON), q));
     omega_2 = 15.0/32.0*(C + std::pow(tau_6/(beta_2 + EPSILON), q));
     omega_3 = 1.0/32.0*(C + std::pow(tau_6/(beta_3 + EPSILON), q));
+    */
     
     double omega_sum = omega_0 + omega_1 + omega_2 + omega_3;
     
@@ -252,15 +252,15 @@ omega_3 = 1.0/32.0*(C + omega_3*omega_3*omega_3*omega_3);
     omega_upwind_tilde_1 = tau_5_tilde/(beta_tilde_1 + EPSILON);
     omega_upwind_tilde_2 = tau_5_tilde/(beta_tilde_2 + EPSILON);
     
-/*
-omega_upwind_tilde_0 = 1.0/16.0*(1.0 + omega_upwind_tilde_0*omega_upwind_tilde_0);
-omega_upwind_tilde_1 = 5.0/8.0*(1.0 + omega_upwind_tilde_1*omega_upwind_tilde_1);
-omega_upwind_tilde_2 = 5.0/16.0*(1.0 + omega_upwind_tilde_2*omega_upwind_tilde_2);
-*/
+    omega_upwind_tilde_0 = 1.0/16.0*(1.0 + omega_upwind_tilde_0*omega_upwind_tilde_0);
+    omega_upwind_tilde_1 = 5.0/8.0*(1.0 + omega_upwind_tilde_1*omega_upwind_tilde_1);
+    omega_upwind_tilde_2 = 5.0/16.0*(1.0 + omega_upwind_tilde_2*omega_upwind_tilde_2);
     
-    omega_upwind_tilde_0 = 1.0/16.0*(1.0 + std::pow(tau_5_tilde/(beta_tilde_0 + EPSILON), p));
-    omega_upwind_tilde_1 = 5.0/8.0*(1.0 + std::pow(tau_5_tilde/(beta_tilde_1 + EPSILON), p));
-    omega_upwind_tilde_2 = 5.0/16.0*(1.0 + std::pow(tau_5_tilde/(beta_tilde_2 + EPSILON), p));
+/*
+omega_upwind_tilde_0 = 1.0/16.0*(1.0 + std::pow(tau_5_tilde/(beta_tilde_0 + EPSILON), p));
+omega_upwind_tilde_1 = 5.0/8.0*(1.0 + std::pow(tau_5_tilde/(beta_tilde_1 + EPSILON), p));
+omega_upwind_tilde_2 = 5.0/16.0*(1.0 + std::pow(tau_5_tilde/(beta_tilde_2 + EPSILON), p));
+*/
     
     double omega_upwind_tilde_sum = omega_upwind_tilde_0 + omega_upwind_tilde_1 + omega_upwind_tilde_2;
     
@@ -282,17 +282,17 @@ omega_upwind_tilde_2 = 5.0/16.0*(1.0 + omega_upwind_tilde_2*omega_upwind_tilde_2
     omega_tilde_2 = tau_6_tilde/(beta_tilde_2 + EPSILON);
     omega_tilde_3 = tau_6_tilde/(beta_tilde_3 + EPSILON);
     
-/*
-omega_tilde_0 = 1.0/32.0*(C + omega_tilde_0*omega_tilde_0*omega_tilde_0*omega_tilde_0);
-omega_tilde_1 = 15.0/32.0*(C + omega_tilde_1*omega_tilde_1*omega_tilde_1*omega_tilde_1);
-omega_tilde_2 = 15.0/32.0*(C + omega_tilde_2*omega_tilde_2*omega_tilde_2*omega_tilde_2);
-omega_tilde_3 = 1.0/32.0*(C + omega_tilde_3*omega_tilde_3*omega_tilde_3*omega_tilde_3);
-*/
+    omega_tilde_0 = 1.0/32.0*(C + omega_tilde_0*omega_tilde_0*omega_tilde_0*omega_tilde_0);
+    omega_tilde_1 = 15.0/32.0*(C + omega_tilde_1*omega_tilde_1*omega_tilde_1*omega_tilde_1);
+    omega_tilde_2 = 15.0/32.0*(C + omega_tilde_2*omega_tilde_2*omega_tilde_2*omega_tilde_2);
+    omega_tilde_3 = 1.0/32.0*(C + omega_tilde_3*omega_tilde_3*omega_tilde_3*omega_tilde_3);
     
-    omega_tilde_0 = 1.0/32.0*(C + std::pow(tau_6_tilde/(beta_tilde_0 + EPSILON), q));
-    omega_tilde_1 = 15.0/32.0*(C + std::pow(tau_6_tilde/(beta_tilde_1 + EPSILON), q));
-    omega_tilde_2 = 15.0/32.0*(C + std::pow(tau_6_tilde/(beta_tilde_2 + EPSILON), q));
-    omega_tilde_3 = 1.0/32.0*(C + std::pow(tau_6_tilde/(beta_tilde_3 + EPSILON), q));
+/*
+omega_tilde_0 = 1.0/32.0*(C + std::pow(tau_6_tilde/(beta_tilde_0 + EPSILON), q));
+omega_tilde_1 = 15.0/32.0*(C + std::pow(tau_6_tilde/(beta_tilde_1 + EPSILON), q));
+omega_tilde_2 = 15.0/32.0*(C + std::pow(tau_6_tilde/(beta_tilde_2 + EPSILON), q));
+omega_tilde_3 = 1.0/32.0*(C + std::pow(tau_6_tilde/(beta_tilde_3 + EPSILON), q));
+*/
     
     double omega_tilde_sum = omega_tilde_0 + omega_tilde_1 + omega_tilde_2 + omega_tilde_3;
     
