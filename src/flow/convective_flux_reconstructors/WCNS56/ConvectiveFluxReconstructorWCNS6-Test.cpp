@@ -22,7 +22,7 @@ double ipow(double base, int exp)
     if (exp == 0) return 1;
     if (exp == 1) return base;
     
-    return base*ipow(base, p - 1);
+    return base*ipow(base, exp - 1);
 }
 
 
