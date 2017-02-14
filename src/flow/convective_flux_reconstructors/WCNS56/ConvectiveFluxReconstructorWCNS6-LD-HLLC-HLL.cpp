@@ -431,7 +431,8 @@ ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL::performWENOInterpolation(
             double* U_R = variables_plus[ei]->getPointer(0);
             
 #ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd safelen(1024)
+            #pragma omp simd
+            #pragma ivdep
 #endif
             for (int i = -1; i < interior_dim_0 + 2; i++)
             {
