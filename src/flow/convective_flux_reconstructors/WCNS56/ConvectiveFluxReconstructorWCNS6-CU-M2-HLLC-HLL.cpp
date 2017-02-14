@@ -2,6 +2,22 @@
 
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 
+
+/*
+ * Interger based power function.
+ */
+static inline __attribute__((always_inline)) double ipow(double base, int exp)
+{
+    double result = base;
+    for (int i = 1; i < exp; i++)
+    {
+        result *= base;
+    }
+
+    return result;
+}
+
+
 /*
  * Compute local beta's.
  */
@@ -113,13 +129,13 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolation(
     double beta_avg = 1.0/8*(beta_0 + beta_2 + 6*beta_1);
     double tau_6 = fabs(beta_3 - beta_avg);
     
-    omega_0 = 1.0/32.0*pow(C + tau_6/(beta_0 + epsilon*dx*dx)*
+    omega_0 = 1.0/32.0*ipow(C + tau_6/(beta_0 + epsilon*dx*dx)*
         (beta_avg + Chi*dx*dx)/(beta_0 + Chi*dx*dx), q);
-    omega_1 = 15.0/32.0*pow(C + tau_6/(beta_1 + epsilon*dx*dx)*
+    omega_1 = 15.0/32.0*ipow(C + tau_6/(beta_1 + epsilon*dx*dx)*
         (beta_avg + Chi*dx*dx)/(beta_1 + Chi*dx*dx), q);
-    omega_2 = 15.0/32.0*pow(C + tau_6/(beta_2 + epsilon*dx*dx)*
+    omega_2 = 15.0/32.0*ipow(C + tau_6/(beta_2 + epsilon*dx*dx)*
         (beta_avg + Chi*dx*dx)/(beta_2 + Chi*dx*dx), q);
-    omega_3 = 1.0/32.0*pow(C + tau_6/(beta_3 + epsilon*dx*dx)*
+    omega_3 = 1.0/32.0*ipow(C + tau_6/(beta_3 + epsilon*dx*dx)*
         (beta_avg + Chi*dx*dx)/(beta_3 + Chi*dx*dx), q);
     
     double omega_sum = omega_0 + omega_1 + omega_2 + omega_3;
@@ -157,13 +173,13 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolation(
     double beta_avg_tilde = 1.0/8*(beta_tilde_0 + beta_tilde_2 + 6*beta_tilde_1);
     double tau_6_tilde = fabs(beta_tilde_3 - beta_avg_tilde);
     
-    omega_tilde_0 = 1.0/32.0*pow(C + tau_6_tilde/(beta_tilde_0 + epsilon*dx*dx)*
+    omega_tilde_0 = 1.0/32.0*ipow(C + tau_6_tilde/(beta_tilde_0 + epsilon*dx*dx)*
         (beta_avg_tilde + Chi*dx*dx)/(beta_tilde_0 + Chi*dx*dx), q);
-    omega_tilde_1 = 15.0/32.0*pow(C + tau_6_tilde/(beta_tilde_1 + epsilon*dx*dx)*
+    omega_tilde_1 = 15.0/32.0*ipow(C + tau_6_tilde/(beta_tilde_1 + epsilon*dx*dx)*
         (beta_avg_tilde + Chi*dx*dx)/(beta_tilde_1 + Chi*dx*dx), q);
-    omega_tilde_2 = 15.0/32.0*pow(C + tau_6_tilde/(beta_tilde_2 + epsilon*dx*dx)*
+    omega_tilde_2 = 15.0/32.0*ipow(C + tau_6_tilde/(beta_tilde_2 + epsilon*dx*dx)*
         (beta_avg_tilde + Chi*dx*dx)/(beta_tilde_2 + Chi*dx*dx), q);
-    omega_tilde_3 = 1.0/32.0*pow(C + tau_6_tilde/(beta_tilde_3 + epsilon*dx*dx)*
+    omega_tilde_3 = 1.0/32.0*ipow(C + tau_6_tilde/(beta_tilde_3 + epsilon*dx*dx)*
         (beta_avg_tilde + Chi*dx*dx)/(beta_tilde_3 + Chi*dx*dx), q);
     
     double omega_tilde_sum = omega_tilde_0 + omega_tilde_1 + omega_tilde_2 + omega_tilde_3;
@@ -179,6 +195,7 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolation(
         (3.0/8.0*omega_tilde_1 + 6.0/8.0*omega_tilde_2 + 15.0/8.0*omega_tilde_3)*U_array[2][idx_side] +
         (-1.0/8.0*omega_tilde_2 - 10.0/8.0*omega_tilde_3)*U_array[1][idx_side] +
         3.0/8.0*omega_tilde_3*U_array[0][idx_side];
+    
 }
 
 

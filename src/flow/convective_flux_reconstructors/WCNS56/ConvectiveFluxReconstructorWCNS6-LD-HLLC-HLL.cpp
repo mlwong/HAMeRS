@@ -2,6 +2,22 @@
 
 #define EPSILON 1e-40
 
+
+/*
+ * Interger based power function.
+ */
+static inline __attribute__((always_inline)) double ipow(double base, int exp)
+{
+    double result = base;
+    for (int i = 1; i < exp; i++)
+    {
+        result *= base;
+    }
+
+    return result;
+}
+
+
 /*
  * Compute local sigma.
  */
@@ -142,9 +158,9 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolation(
     
     double tau_5 = fabs(beta_0 - beta_2);
     
-    omega_upwind_0 = 1.0/16.0*(1.0 + pow(tau_5/(beta_0 + EPSILON), p));
-    omega_upwind_1 = 5.0/8.0*(1.0 + pow(tau_5/(beta_1 + EPSILON), p));
-    omega_upwind_2 = 5.0/16.0*(1.0 + pow(tau_5/(beta_2 + EPSILON), p));
+    omega_upwind_0 = 1.0/16.0*(1.0 + ipow(tau_5/(beta_0 + EPSILON), p));
+    omega_upwind_1 = 5.0/8.0*(1.0 + ipow(tau_5/(beta_1 + EPSILON), p));
+    omega_upwind_2 = 5.0/16.0*(1.0 + ipow(tau_5/(beta_2 + EPSILON), p));
     
     double omega_upwind_sum = omega_upwind_0 + omega_upwind_1 + omega_upwind_2;
     
@@ -161,10 +177,10 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolation(
     double beta_avg = 1.0/8*(beta_0 + beta_2 + 6*beta_1);
     double tau_6 = fabs(beta_3 - beta_avg);
     
-    omega_0 = 1.0/32.0*(C + pow(tau_6/(beta_0 + EPSILON), q));
-    omega_1 = 15.0/32.0*(C + pow(tau_6/(beta_1 + EPSILON), q));
-    omega_2 = 15.0/32.0*(C + pow(tau_6/(beta_2 + EPSILON), q));
-    omega_3 = 1.0/32.0*(C + pow(tau_6/(beta_3 + EPSILON), q));
+    omega_0 = 1.0/32.0*(C + ipow(tau_6/(beta_0 + EPSILON), q));
+    omega_1 = 15.0/32.0*(C + ipow(tau_6/(beta_1 + EPSILON), q));
+    omega_2 = 15.0/32.0*(C + ipow(tau_6/(beta_2 + EPSILON), q));
+    omega_3 = 1.0/32.0*(C + ipow(tau_6/(beta_3 + EPSILON), q));
     
     double omega_sum = omega_0 + omega_1 + omega_2 + omega_3;
     
@@ -214,9 +230,9 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolation(
     
     double tau_5_tilde = fabs(beta_tilde_0 - beta_tilde_2);
     
-    omega_upwind_tilde_0 = 1.0/16.0*(1.0 + pow(tau_5_tilde/(beta_tilde_0 + EPSILON), p));
-    omega_upwind_tilde_1 = 5.0/8.0*(1.0 + pow(tau_5_tilde/(beta_tilde_1 + EPSILON), p));
-    omega_upwind_tilde_2 = 5.0/16.0*(1.0 + pow(tau_5_tilde/(beta_tilde_2 + EPSILON), p));
+    omega_upwind_tilde_0 = 1.0/16.0*(1.0 + ipow(tau_5_tilde/(beta_tilde_0 + EPSILON), p));
+    omega_upwind_tilde_1 = 5.0/8.0*(1.0 + ipow(tau_5_tilde/(beta_tilde_1 + EPSILON), p));
+    omega_upwind_tilde_2 = 5.0/16.0*(1.0 + ipow(tau_5_tilde/(beta_tilde_2 + EPSILON), p));
     
     double omega_upwind_tilde_sum = omega_upwind_tilde_0 + omega_upwind_tilde_1 + omega_upwind_tilde_2;
     
@@ -233,10 +249,10 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolation(
     double beta_avg_tilde = 1.0/8*(beta_tilde_0 + beta_tilde_2 + 6*beta_tilde_1);
     double tau_6_tilde = fabs(beta_tilde_3 - beta_avg_tilde);
     
-    omega_tilde_0 = 1.0/32.0*(C + pow(tau_6_tilde/(beta_tilde_0 + EPSILON), q));
-    omega_tilde_1 = 15.0/32.0*(C + pow(tau_6_tilde/(beta_tilde_1 + EPSILON), q));
-    omega_tilde_2 = 15.0/32.0*(C + pow(tau_6_tilde/(beta_tilde_2 + EPSILON), q));
-    omega_tilde_3 = 1.0/32.0*(C + pow(tau_6_tilde/(beta_tilde_3 + EPSILON), q));
+    omega_tilde_0 = 1.0/32.0*(C + ipow(tau_6_tilde/(beta_tilde_0 + EPSILON), q));
+    omega_tilde_1 = 15.0/32.0*(C + ipow(tau_6_tilde/(beta_tilde_1 + EPSILON), q));
+    omega_tilde_2 = 15.0/32.0*(C + ipow(tau_6_tilde/(beta_tilde_2 + EPSILON), q));
+    omega_tilde_3 = 1.0/32.0*(C + ipow(tau_6_tilde/(beta_tilde_3 + EPSILON), q));
     
     double omega_tilde_sum = omega_tilde_0 + omega_tilde_1 + omega_tilde_2 + omega_tilde_3;
     
@@ -265,6 +281,7 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolation(
         (3.0/8.0*omega_tilde_1 + 6.0/8.0*omega_tilde_2 + 15.0/8.0*omega_tilde_3)*U_array[2][idx_side] +
         (-1.0/8.0*omega_tilde_2 - 10.0/8.0*omega_tilde_3)*U_array[1][idx_side] +
         3.0/8.0*omega_tilde_3*U_array[0][idx_side];
+    
 }
 
 

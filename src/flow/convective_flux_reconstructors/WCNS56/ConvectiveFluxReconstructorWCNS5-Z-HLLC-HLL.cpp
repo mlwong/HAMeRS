@@ -2,6 +2,22 @@
 
 #define EPSILON 1e-40
 
+
+/*
+ * Interger based power function.
+ */
+static inline __attribute__((always_inline)) double ipow(double base, int exp)
+{
+    double result = base;
+    for (int i = 1; i < exp; i++)
+    {
+        result *= base;
+    }
+
+    return result;
+}
+
+
 /*
  * Compute local beta's.
  */
@@ -76,9 +92,9 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolation(
     
     double tau_5 = fabs(beta_0 - beta_2);
     
-    omega_0 = 1.0/16.0*(1.0 + pow(tau_5/(beta_0 + EPSILON), p));
-    omega_1 = 5.0/8.0*(1.0 + pow(tau_5/(beta_1 + EPSILON), p));
-    omega_2 = 5.0/16.0*(1.0 + pow(tau_5/(beta_2 + EPSILON), p));
+    omega_0 = 1.0/16.0*(1.0 + ipow(tau_5/(beta_0 + EPSILON), p));
+    omega_1 = 5.0/8.0*(1.0 + ipow(tau_5/(beta_1 + EPSILON), p));
+    omega_2 = 5.0/16.0*(1.0 + ipow(tau_5/(beta_2 + EPSILON), p));
     
     double omega_sum = omega_0 + omega_1 + omega_2;
     
@@ -112,9 +128,9 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolation(
     
     double tau_5_tilde = fabs(beta_tilde_0 - beta_tilde_2);
     
-    omega_tilde_0 = 1.0/16.0*(1.0 + pow(tau_5_tilde/(beta_tilde_0 + EPSILON), p));
-    omega_tilde_1 = 5.0/8.0*(1.0 + pow(tau_5_tilde/(beta_tilde_1 + EPSILON), p));
-    omega_tilde_2 = 5.0/16.0*(1.0 + pow(tau_5_tilde/(beta_tilde_2 + EPSILON), p));
+    omega_tilde_0 = 1.0/16.0*(1.0 + ipow(tau_5_tilde/(beta_tilde_0 + EPSILON), p));
+    omega_tilde_1 = 5.0/8.0*(1.0 + ipow(tau_5_tilde/(beta_tilde_1 + EPSILON), p));
+    omega_tilde_2 = 5.0/16.0*(1.0 + ipow(tau_5_tilde/(beta_tilde_2 + EPSILON), p));
     
     double omega_tilde_sum = omega_tilde_0 + omega_tilde_1 + omega_tilde_2;
     
@@ -127,6 +143,7 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolation(
         (15.0/8.0*omega_tilde_0 + 6.0/8.0*omega_tilde_1 + 3.0/8.0*omega_tilde_2)*U_array[3][idx_side] +
         (3.0/8.0*omega_tilde_1 + 6.0/8.0*omega_tilde_2)*U_array[2][idx_side] -
         1.0/8.0*omega_tilde_2*U_array[1][idx_side];
+    
 }
 
 
