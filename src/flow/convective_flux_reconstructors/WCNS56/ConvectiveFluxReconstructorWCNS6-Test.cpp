@@ -18,15 +18,12 @@ boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_compute_
  */
 static inline __attribute__((always_inline)) double ipow(double base, int exp)
 {
-    double result = 1.0;
-    while (exp)
+    double result = base;
+    for (int i = 1; int i < exp; i++)
     {
-        if (exp & 1)
-            result *= base;
-        exp >>= 1;
-        base *= base;
+        result *= base;
     }
-
+    
     return result;
 }
 
