@@ -432,7 +432,6 @@ ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL::performWENOInterpolation(
             
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
-            #pragma ivdep
 #endif
             for (int i = -1; i < interior_dim_0 + 2; i++)
             {
@@ -481,7 +480,7 @@ ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL::performWENOInterpolation(
             for (int j = 0; j < interior_dim_1; j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd safelen(1024)
+                #pragma omp simd
 #endif
                 for (int i = -1; i < interior_dim_0 + 2; i++)
                 {
@@ -522,7 +521,7 @@ ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL::performWENOInterpolation(
             for (int j = -1; j < interior_dim_1 + 2; j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd safelen(1024)
+                #pragma omp simd
 #endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
@@ -576,7 +575,7 @@ ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL::performWENOInterpolation(
                 for (int j = 0; j < interior_dim_1; j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd safelen(1024)
+                    #pragma omp simd
 #endif
                     for (int i = -1; i < interior_dim_0 + 2; i++)
                     {
@@ -622,7 +621,7 @@ ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL::performWENOInterpolation(
                 for (int j = -1; j < interior_dim_1 + 2; j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd safelen(1024)
+                    #pragma omp simd
 #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
@@ -668,7 +667,7 @@ ConvectiveFluxReconstructorWCNS6_LD_HLLC_HLL::performWENOInterpolation(
                 for (int j = 0; j < interior_dim_1; j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd safelen(1024)
+                    #pragma omp simd
 #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {

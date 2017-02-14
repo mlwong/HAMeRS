@@ -1,10 +1,8 @@
 #ifndef HAMERS_CONFIG_HPP
 #define HAMERS_CONFIG_HPP
 
-#ifdef _OPENMP
 /* Enable SIMD */
-/* #undef HAMERS_ENABLE_SIMD */
-#endif
+#define HAMERS_ENABLE_SIMD
 
 /* Enable assertion checking */
 #define HAMERS_DEBUG_CHECK_ASSERTIONS
