@@ -11408,7 +11408,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataTemperatureWithDensityMassFra
         
         if (d_dim == tbox::Dimension(1))
         {
-            // Compute the sound speed field.
+            // Compute the temperature field.
             for (int i = -d_num_subghosts_temperature[0];
                  i < d_interior_dims[0] + d_num_subghosts_temperature[0];
                  i++)
@@ -11435,7 +11435,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataTemperatureWithDensityMassFra
         }
         else if (d_dim == tbox::Dimension(2))
         {
-            // Compute the sound speed field.
+            // Compute the temperature field.
             for (int j = -d_num_subghosts_temperature[1];
                  j < d_interior_dims[1] + d_num_subghosts_temperature[1];
                  j++)
@@ -11474,7 +11474,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataTemperatureWithDensityMassFra
         }
         else if (d_dim == tbox::Dimension(3))
         {
-            // Compute the sound speed field.
+            // Compute the temperature field.
             for (int k = -d_num_subghosts_temperature[2];
                  k < d_interior_dims[2] + d_num_subghosts_temperature[2];
                  k++)
