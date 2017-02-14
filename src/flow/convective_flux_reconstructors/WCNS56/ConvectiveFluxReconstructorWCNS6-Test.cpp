@@ -3109,8 +3109,8 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
     }
 #endif
     
-    const constant_p = d_constant_p;
-    const constant_q = d_constant_q;
+    const int constant_p = d_constant_p;
+    const int constant_q = d_constant_q;
     
     if (d_dim == tbox::Dimension(1))
     {
