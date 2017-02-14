@@ -1473,14 +1473,14 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                             }
                         }
                     }
-                    else if (d_project_name.find("2D Poggi's RMI smooth interface") != std::string::npos)
+                    else if (d_project_name.find("2D Poggi's RMI diffuse interface") != std::string::npos)
                     {
                         if (d_num_species != 2)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
                                 << "Please provide only two-species for the problem"
-                                << " '2D Poggi's RMI'."
+                                << " '2D Poggi's RMI diffuse interface'."
                                 << std::endl);
                         }
                         
@@ -1488,7 +1488,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                          * Get the settings.
                          */
                         
-                        std::string settings = d_project_name.substr(32);
+                        std::string settings = d_project_name.substr(33);
                         
                         std::stringstream ss(settings);
                         
@@ -1500,7 +1500,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         std::getline(ss, m_idx_str, '-');
                         std::getline(ss, prime_idx_str);
                         
-                        double A_candidates[] = {0.5e-3, 0.35355339e-3, 0.25e-3};
+                        double A_candidates[] = {0.5e-3, 0.35355339e-3, 0.25e-3, 0.176776695e-3, 0.125e-3};
                         int m_min_candidates[] = {40, 30, 20};
                         int m_max_candidates[] = {60, 60, 60};
                         
@@ -1516,7 +1516,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         int m_max = m_max_candidates[std::stoi(m_idx_str) - 1];
                         
                         // Characteristic length of the initial interface thickness.
-                        const double epsilon_i = 0.004;
+                        const double epsilon_i = 0.01;
                         
                         double* rho_Y_0   = partial_density->getPointer(0);
                         double* rho_Y_1   = partial_density->getPointer(1);
