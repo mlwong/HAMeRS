@@ -16,18 +16,13 @@ boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_compute_
 /*
  * Integer based power function.
  */
-static inline __attribute__((always_inline)) double ipow(double base, int exp)
+double ipow(double base, int exp)
 {
     double result = base;
-    while (exp)
-    {
-        if (exp & 1)
-            result *= base;
-        exp >>= 1;
-        base *= base;
-    }
+    if (exp == 0) return 1;
+    if (exp == 1) return base;
     
-    return result;
+    return base*ipow(base, p - 1);
 }
 
 
