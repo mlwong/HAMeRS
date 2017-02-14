@@ -1,7 +1,5 @@
 #include "flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS6-Test.hpp"
 
-#include <cmath>
-
 #define EPSILON 1e-40
 
 /*
@@ -17,9 +15,9 @@ boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_compute_
 /*
  * Interger based power function.
  */
-static inline __attribute__((always_inline)) int ipow(int base, int exp)
+static inline __attribute__((always_inline)) double ipow(double base, int exp)
 {
-    int result = base;
+    double result = base;
     for (int i = 1; i < exp; i++)
     {
         result *= base;
