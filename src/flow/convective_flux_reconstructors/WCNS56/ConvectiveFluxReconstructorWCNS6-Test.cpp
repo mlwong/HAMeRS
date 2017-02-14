@@ -18,8 +18,8 @@ boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_compute_
  * Compute local sigma.
  */
 static inline __attribute__((always_inline)) void computeLocalSigma(
-    double*restrict sigma,
-    double**restrict U_array,
+    double *restrict sigma,
+    double **restrict U_array,
     int idx_side)
 {
     /*
@@ -41,11 +41,11 @@ static inline __attribute__((always_inline)) void computeLocalSigma(
  * Compute local beta's.
  */
 static inline __attribute__((always_inline)) void computeLocalBeta(
-    double*restrict beta_0,
-    double*restrict beta_1,
-    double*restrict beta_2,
-    double*restrict beta_3,
-    double**restrict U_array,
+    double *restrict beta_0,
+    double *restrict beta_1,
+    double *restrict beta_2,
+    double *restrict beta_3,
+    double **restrict U_array,
     int idx_side)
 {
     *beta_0 = 1.0/3.0*(U_array[0][idx_side]*(4.0*U_array[0][idx_side] - 19.0*U_array[1][idx_side] +
@@ -81,11 +81,11 @@ static inline __attribute__((always_inline)) void computeLocalBeta(
  * Compute local beta_tilde's.
  */
 static inline __attribute__((always_inline)) void computeLocalBetaTilde(
-    double*restrict beta_tilde_0,
-    double*restrict beta_tilde_1,
-    double*restrict beta_tilde_2,
-    double*restrict beta_tilde_3,
-    double**restrict U_array,
+    double *restrict beta_tilde_0,
+    double *restrict beta_tilde_1,
+    double *restrict beta_tilde_2,
+    double *restrict beta_tilde_3,
+    double **restrict U_array,
     int idx_side)
 {
     *beta_tilde_0 = 1.0/3.0*(U_array[5][idx_side]*(4.0*U_array[5][idx_side] - 19.0*U_array[4][idx_side] +
@@ -121,9 +121,9 @@ static inline __attribute__((always_inline)) void computeLocalBetaTilde(
  * Perform local WENO interpolation.
  */
 static inline __attribute__((always_inline)) void performLocalWENOInterpolation(
-   double*restrict U_minus,
-   double*restrict U_plus,
-   double**restrict U_array,
+   double *restrict U_minus,
+   double *restrict U_plus,
+   double **restrict U_array,
    int idx_side,
    int p,
    int q,
@@ -3092,9 +3092,6 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
     }
 #endif
     
-    const int constant_p = d_constant_p;
-    const int constant_q = d_constant_q;
-    
     if (d_dim == tbox::Dimension(1))
     {
         /*
@@ -3133,8 +3130,8 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
                     U_R,
                     U_array.data(),
                     idx_midpoint_x,
-                    constant_p,
-                    constant_q,
+                    d_constant_p,
+                    d_constant_q,
                     d_constant_C,
                     d_constant_alpha_tau);
             }
@@ -3183,8 +3180,8 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
                         U_R,
                         U_array.data(),
                         idx_midpoint_x,
-                        constant_p,
-                        constant_q,
+                        d_constant_p,
+                        d_constant_q,
                         d_constant_C,
                         d_constant_alpha_tau);
                 }
@@ -3280,8 +3277,8 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
                             U_R,
                             U_array.data(),
                             idx_midpoint_x,
-                            constant_p,
-                            constant_q,
+                            d_constant_p,
+                            d_constant_q,
                             d_constant_C,
                             d_constant_alpha_tau);
                     }
@@ -3326,8 +3323,8 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
                             U_T,
                             U_array.data(),
                             idx_midpoint_y,
-                            constant_p,
-                            constant_q,
+                            d_constant_p,
+                            d_constant_q,
                             d_constant_C,
                             d_constant_alpha_tau);
                     }
@@ -3372,8 +3369,8 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
                             U_F,
                             U_array.data(),
                             idx_midpoint_z,
-                            constant_p,
-                            constant_q,
+                            d_constant_p,
+                            d_constant_q,
                             d_constant_C,
                             d_constant_alpha_tau);
                     }
