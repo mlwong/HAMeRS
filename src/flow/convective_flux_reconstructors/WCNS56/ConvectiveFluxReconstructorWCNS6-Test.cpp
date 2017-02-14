@@ -1,5 +1,7 @@
 #include "flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS6-Test.hpp"
 
+#include <cmath>
+
 #define EPSILON 1e-40
 
 /*
@@ -11,20 +13,6 @@ boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_WENO_int
 boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_Riemann_solver;
 boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_reconstruct_flux;
 boost::shared_ptr<tbox::Timer> ConvectiveFluxReconstructorWCNS6_Test::t_compute_source;
-
-
-/*
- * Integer based power function.
- */
-double ipow(double base, int exp)
-{
-    double result = base;
-    if (exp == 0) return 1;
-    if (exp == 1) return base;
-    
-    return base*ipow(base, exp - 1);
-}
-
 
 /*
  * Compute local sigma.
@@ -176,9 +164,9 @@ omega_upwind_1 = 5.0/8.0*(1.0 + omega_upwind_1*omega_upwind_1);
 omega_upwind_2 = 5.0/16.0*(1.0 + omega_upwind_2*omega_upwind_2);
 */
     
-    omega_upwind_0 = 1.0/16.0*(1.0 + ipow(tau_5/(beta_0 + EPSILON), p));
-    omega_upwind_1 = 5.0/8.0*(1.0 + ipow(tau_5/(beta_1 + EPSILON), p));
-    omega_upwind_2 = 5.0/16.0*(1.0 + ipow(tau_5/(beta_2 + EPSILON), p));
+    omega_upwind_0 = 1.0/16.0*(1.0 + std::pow(tau_5/(beta_0 + EPSILON), p));
+    omega_upwind_1 = 5.0/8.0*(1.0 + std::pow(tau_5/(beta_1 + EPSILON), p));
+    omega_upwind_2 = 5.0/16.0*(1.0 + std::pow(tau_5/(beta_2 + EPSILON), p));
     
     double omega_upwind_sum = omega_upwind_0 + omega_upwind_1 + omega_upwind_2;
     
@@ -207,10 +195,10 @@ omega_2 = 15.0/32.0*(C + omega_2*omega_2*omega_2*omega_2);
 omega_3 = 1.0/32.0*(C + omega_3*omega_3*omega_3*omega_3);
 */
     
-    omega_0 = 1.0/32.0*(C + ipow(tau_6/(beta_0 + EPSILON), q));
-    omega_1 = 15.0/32.0*(C + ipow(tau_6/(beta_1 + EPSILON), q));
-    omega_2 = 15.0/32.0*(C + ipow(tau_6/(beta_2 + EPSILON), q));
-    omega_3 = 1.0/32.0*(C + ipow(tau_6/(beta_3 + EPSILON), q));
+    omega_0 = 1.0/32.0*(C + std::pow(tau_6/(beta_0 + EPSILON), q));
+    omega_1 = 15.0/32.0*(C + std::pow(tau_6/(beta_1 + EPSILON), q));
+    omega_2 = 15.0/32.0*(C + std::pow(tau_6/(beta_2 + EPSILON), q));
+    omega_3 = 1.0/32.0*(C + std::pow(tau_6/(beta_3 + EPSILON), q));
     
     double omega_sum = omega_0 + omega_1 + omega_2 + omega_3;
     
@@ -270,9 +258,9 @@ omega_upwind_tilde_1 = 5.0/8.0*(1.0 + omega_upwind_tilde_1*omega_upwind_tilde_1)
 omega_upwind_tilde_2 = 5.0/16.0*(1.0 + omega_upwind_tilde_2*omega_upwind_tilde_2);
 */
     
-    omega_upwind_tilde_0 = 1.0/16.0*(1.0 + ipow(tau_5_tilde/(beta_tilde_0 + EPSILON), p));
-    omega_upwind_tilde_1 = 5.0/8.0*(1.0 + ipow(tau_5_tilde/(beta_tilde_1 + EPSILON), p));
-    omega_upwind_tilde_2 = 5.0/16.0*(1.0 + ipow(tau_5_tilde/(beta_tilde_2 + EPSILON), p));
+    omega_upwind_tilde_0 = 1.0/16.0*(1.0 + std::pow(tau_5_tilde/(beta_tilde_0 + EPSILON), p));
+    omega_upwind_tilde_1 = 5.0/8.0*(1.0 + std::pow(tau_5_tilde/(beta_tilde_1 + EPSILON), p));
+    omega_upwind_tilde_2 = 5.0/16.0*(1.0 + std::pow(tau_5_tilde/(beta_tilde_2 + EPSILON), p));
     
     double omega_upwind_tilde_sum = omega_upwind_tilde_0 + omega_upwind_tilde_1 + omega_upwind_tilde_2;
     
@@ -301,10 +289,10 @@ omega_tilde_2 = 15.0/32.0*(C + omega_tilde_2*omega_tilde_2*omega_tilde_2*omega_t
 omega_tilde_3 = 1.0/32.0*(C + omega_tilde_3*omega_tilde_3*omega_tilde_3*omega_tilde_3);
 */
     
-    omega_tilde_0 = 1.0/32.0*(C + ipow(tau_6_tilde/(beta_tilde_0 + EPSILON), q));
-    omega_tilde_1 = 15.0/32.0*(C + ipow(tau_6_tilde/(beta_tilde_1 + EPSILON), q));
-    omega_tilde_2 = 15.0/32.0*(C + ipow(tau_6_tilde/(beta_tilde_2 + EPSILON), q));
-    omega_tilde_3 = 1.0/32.0*(C + ipow(tau_6_tilde/(beta_tilde_3 + EPSILON), q));
+    omega_tilde_0 = 1.0/32.0*(C + std::pow(tau_6_tilde/(beta_tilde_0 + EPSILON), q));
+    omega_tilde_1 = 15.0/32.0*(C + std::pow(tau_6_tilde/(beta_tilde_1 + EPSILON), q));
+    omega_tilde_2 = 15.0/32.0*(C + std::pow(tau_6_tilde/(beta_tilde_2 + EPSILON), q));
+    omega_tilde_3 = 1.0/32.0*(C + std::pow(tau_6_tilde/(beta_tilde_3 + EPSILON), q));
     
     double omega_tilde_sum = omega_tilde_0 + omega_tilde_1 + omega_tilde_2 + omega_tilde_3;
     
