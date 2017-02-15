@@ -485,6 +485,14 @@ Euler::computeStableDtOnPatch(
     if (d_dim == tbox::Dimension(1))
     {
         /*
+         * Get the dimension and grid spacing.
+         */
+        
+        const int interior_dim_0 = interior_dims[0];
+        
+        const double dx_0 = dx[0];
+        
+        /*
          * Register the patch and maximum wave speed in the flow model and compute the corresponding cell data.
          */
         
@@ -510,14 +518,19 @@ Euler::computeStableDtOnPatch(
         hier::IntVector num_subghosts_max_wave_speed_x = max_wave_speed_x->getGhostCellWidth();
         hier::IntVector subghostcell_dims_max_wave_speed_x = max_wave_speed_x->getGhostBox().numberCells();
         
+        const int num_subghosts_0_max_wave_speed_x = num_subghosts_max_wave_speed_x[0];
+        
         double* max_lambda_x = max_wave_speed_x->getPointer(0);
         
-        for (int i = 0; i < interior_dims[0]; i++)
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd reduction(max:stable_spectral_radius) private(i)
+#endif
+        for (int i = 0; i < interior_dim_0; i++)
         {
             // Compute the linear index.
-            const int idx_max_wave_speed_x = i + num_subghosts_max_wave_speed_x[0];
+            const int idx_max_wave_speed_x = i + num_subghosts_0_max_wave_speed_x;
             
-            const double spectral_radius = (max_lambda_x[idx_max_wave_speed_x])/dx[0];
+            const double spectral_radius = (max_lambda_x[idx_max_wave_speed_x])/dx_0;
             stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius);
         }
         
@@ -530,6 +543,16 @@ Euler::computeStableDtOnPatch(
     }
     else if (d_dim == tbox::Dimension(2))
     {
+        /*
+         * Get the dimensions and grid spacings.
+         */
+        
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        
+        const double dx_0 = dx[0];
+        const double dx_1 = dx[1];
+        
         /*
          * Register the patch and maximum wave speeds in the flow model and compute the corresponding cell data.
          */
@@ -565,22 +588,33 @@ Euler::computeStableDtOnPatch(
         hier::IntVector num_subghosts_max_wave_speed_y = max_wave_speed_y->getGhostCellWidth();
         hier::IntVector subghostcell_dims_max_wave_speed_y = max_wave_speed_y->getGhostBox().numberCells();
         
+        const int num_subghosts_0_max_wave_speed_x = num_subghosts_max_wave_speed_x[0];
+        const int num_subghosts_1_max_wave_speed_x = num_subghosts_max_wave_speed_x[1];
+        const int subghostcell_dim_0_max_wave_speed_x = subghostcell_dims_max_wave_speed_x[0];
+        
+        const int num_subghosts_0_max_wave_speed_y = num_subghosts_max_wave_speed_y[0];
+        const int num_subghosts_1_max_wave_speed_y = num_subghosts_max_wave_speed_y[1];
+        const int subghostcell_dim_0_max_wave_speed_y = subghostcell_dims_max_wave_speed_y[0];
+        
         double* max_lambda_x = max_wave_speed_x->getPointer(0);
         double* max_lambda_y = max_wave_speed_y->getPointer(0);
         
-        for (int j = 0; j < interior_dims[1]; j++)
+        for (int j = 0; j < interior_dim_1; j++)
         {
-            for (int i = 0; i < interior_dims[0]; i++)
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd reduction(max:stable_spectral_radius) private(i)
+#endif
+            for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx_max_wave_speed_x = (i + num_subghosts_max_wave_speed_x[0]) +
-                    (j + num_subghosts_max_wave_speed_x[1])*subghostcell_dims_max_wave_speed_x[0];
+                const int idx_max_wave_speed_x = (i + num_subghosts_0_max_wave_speed_x) +
+                    (j + num_subghosts_1_max_wave_speed_x)*subghostcell_dim_0_max_wave_speed_x;
                 
-                const int idx_max_wave_speed_y = (i + num_subghosts_max_wave_speed_y[0]) +
-                    (j + num_subghosts_max_wave_speed_y[1])*subghostcell_dims_max_wave_speed_y[0];
+                const int idx_max_wave_speed_y = (i + num_subghosts_0_max_wave_speed_y) +
+                    (j + num_subghosts_1_max_wave_speed_y)*subghostcell_dim_0_max_wave_speed_y;
                 
-                const double spectral_radius = (max_lambda_x[idx_max_wave_speed_x])/dx[0] +
-                    (max_lambda_y[idx_max_wave_speed_y])/dx[1];
+                const double spectral_radius = (max_lambda_x[idx_max_wave_speed_x])/dx_0 +
+                    (max_lambda_y[idx_max_wave_speed_y])/dx_1;
                 
                 stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius);
             }
@@ -595,6 +629,18 @@ Euler::computeStableDtOnPatch(
     }
     else if (d_dim == tbox::Dimension(3))
     {
+        /*
+         * Get the dimensions and grid spacings.
+         */
+        
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        const int interior_dim_2 = interior_dims[2];
+        
+        const double dx_0 = dx[0];
+        const double dx_1 = dx[1];
+        const double dx_2 = dx[2];
+        
         /*
          * Register the patch and maximum wave speeds in the flow model and compute the corresponding cell data.
          */
@@ -638,35 +684,56 @@ Euler::computeStableDtOnPatch(
         hier::IntVector num_subghosts_max_wave_speed_z = max_wave_speed_z->getGhostCellWidth();
         hier::IntVector subghostcell_dims_max_wave_speed_z = max_wave_speed_z->getGhostBox().numberCells();
         
+        const int num_subghosts_0_max_wave_speed_x = num_subghosts_max_wave_speed_x[0];
+        const int num_subghosts_1_max_wave_speed_x = num_subghosts_max_wave_speed_x[1];
+        const int num_subghosts_2_max_wave_speed_x = num_subghosts_max_wave_speed_x[2];
+        const int subghostcell_dim_0_max_wave_speed_x = subghostcell_dims_max_wave_speed_x[0];
+        const int subghostcell_dim_1_max_wave_speed_x = subghostcell_dims_max_wave_speed_x[1];
+        
+        const int num_subghosts_0_max_wave_speed_y = num_subghosts_max_wave_speed_y[0];
+        const int num_subghosts_1_max_wave_speed_y = num_subghosts_max_wave_speed_y[1];
+        const int num_subghosts_2_max_wave_speed_y = num_subghosts_max_wave_speed_y[2];
+        const int subghostcell_dim_0_max_wave_speed_y = subghostcell_dims_max_wave_speed_y[0];
+        const int subghostcell_dim_1_max_wave_speed_y = subghostcell_dims_max_wave_speed_y[1];
+        
+        const int num_subghosts_0_max_wave_speed_z = num_subghosts_max_wave_speed_z[0];
+        const int num_subghosts_1_max_wave_speed_z = num_subghosts_max_wave_speed_z[1];
+        const int num_subghosts_2_max_wave_speed_z = num_subghosts_max_wave_speed_z[2];
+        const int subghostcell_dim_0_max_wave_speed_z = subghostcell_dims_max_wave_speed_z[0];
+        const int subghostcell_dim_1_max_wave_speed_z = subghostcell_dims_max_wave_speed_z[1];
+        
         double* max_lambda_x = max_wave_speed_x->getPointer(0);
         double* max_lambda_y = max_wave_speed_y->getPointer(0);
         double* max_lambda_z = max_wave_speed_z->getPointer(0);
         
-        for (int k = 0; k < interior_dims[2]; k++)
+        for (int k = 0; k < interior_dim_2; k++)
         {
-            for (int j = 0; j < interior_dims[1]; j++)
+            for (int j = 0; j < interior_dim_1; j++)
             {
-                for (int i = 0; i < interior_dims[0]; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd reduction(max:stable_spectral_radius) private(i)
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_max_wave_speed_x = (i + num_subghosts_max_wave_speed_x[0]) +
-                        (j + num_subghosts_max_wave_speed_x[1])*subghostcell_dims_max_wave_speed_x[0] +
-                        (k + num_subghosts_max_wave_speed_x[2])*subghostcell_dims_max_wave_speed_x[0]*
-                            subghostcell_dims_max_wave_speed_x[1];
+                    const int idx_max_wave_speed_x = (i + num_subghosts_0_max_wave_speed_x) +
+                        (j + num_subghosts_1_max_wave_speed_x)*subghostcell_dim_0_max_wave_speed_x +
+                        (k + num_subghosts_2_max_wave_speed_x)*subghostcell_dim_0_max_wave_speed_x*
+                            subghostcell_dim_1_max_wave_speed_x;
                     
-                    const int idx_max_wave_speed_y = (i + num_subghosts_max_wave_speed_y[0]) +
-                        (j + num_subghosts_max_wave_speed_y[1])*subghostcell_dims_max_wave_speed_y[0] +
-                        (k + num_subghosts_max_wave_speed_y[2])*subghostcell_dims_max_wave_speed_y[0]*
-                            subghostcell_dims_max_wave_speed_y[1];
+                    const int idx_max_wave_speed_y = (i + num_subghosts_0_max_wave_speed_y) +
+                        (j + num_subghosts_1_max_wave_speed_y)*subghostcell_dim_0_max_wave_speed_y +
+                        (k + num_subghosts_2_max_wave_speed_y)*subghostcell_dim_0_max_wave_speed_y*
+                            subghostcell_dim_1_max_wave_speed_y;
                     
-                    const int idx_max_wave_speed_z = (i + num_subghosts_max_wave_speed_z[0]) +
-                        (j + num_subghosts_max_wave_speed_z[1])*subghostcell_dims_max_wave_speed_z[0] +
-                        (k + num_subghosts_max_wave_speed_z[2])*subghostcell_dims_max_wave_speed_z[0]*
-                            subghostcell_dims_max_wave_speed_z[1];
+                    const int idx_max_wave_speed_z = (i + num_subghosts_0_max_wave_speed_z) +
+                        (j + num_subghosts_1_max_wave_speed_z)*subghostcell_dim_0_max_wave_speed_z +
+                        (k + num_subghosts_2_max_wave_speed_z)*subghostcell_dim_0_max_wave_speed_z*
+                            subghostcell_dim_1_max_wave_speed_z;
                     
-                    const double spectral_radius = (max_lambda_x[idx_max_wave_speed_x])/dx[0] +
-                        (max_lambda_y[idx_max_wave_speed_y])/dx[1] +
-                        (max_lambda_z[idx_max_wave_speed_z])/dx[2];
+                    const double spectral_radius = (max_lambda_x[idx_max_wave_speed_x])/dx_0 +
+                        (max_lambda_y[idx_max_wave_speed_y])/dx_1 +
+                        (max_lambda_z[idx_max_wave_speed_z])/dx_2;
                     
                     stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius);
                 }
