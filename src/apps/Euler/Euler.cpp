@@ -516,7 +516,6 @@ Euler::computeStableDtOnPatch(
             d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_X");
         
         hier::IntVector num_subghosts_max_wave_speed_x = max_wave_speed_x->getGhostCellWidth();
-        hier::IntVector subghostcell_dims_max_wave_speed_x = max_wave_speed_x->getGhostBox().numberCells();
         
         const int num_subghosts_0_max_wave_speed_x = num_subghosts_max_wave_speed_x[0];
         
@@ -530,7 +529,7 @@ Euler::computeStableDtOnPatch(
             // Compute the linear index.
             const int idx_max_wave_speed_x = i + num_subghosts_0_max_wave_speed_x;
             
-            const double spectral_radius = (max_lambda_x[idx_max_wave_speed_x])/dx_0;
+            const double spectral_radius = max_lambda_x[idx_max_wave_speed_x]/dx_0;
             stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius);
         }
         
@@ -613,8 +612,8 @@ Euler::computeStableDtOnPatch(
                 const int idx_max_wave_speed_y = (i + num_subghosts_0_max_wave_speed_y) +
                     (j + num_subghosts_1_max_wave_speed_y)*subghostcell_dim_0_max_wave_speed_y;
                 
-                const double spectral_radius = (max_lambda_x[idx_max_wave_speed_x])/dx_0 +
-                    (max_lambda_y[idx_max_wave_speed_y])/dx_1;
+                const double spectral_radius = max_lambda_x[idx_max_wave_speed_x]/dx_0 +
+                    max_lambda_y[idx_max_wave_speed_y]/dx_1;
                 
                 stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius);
             }
@@ -644,6 +643,7 @@ Euler::computeStableDtOnPatch(
         /*
          * Register the patch and maximum wave speeds in the flow model and compute the corresponding cell data.
          */
+        
         d_flow_model->registerPatchWithDataContext(patch, getDataContext());
         
         std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
@@ -731,9 +731,9 @@ Euler::computeStableDtOnPatch(
                         (k + num_subghosts_2_max_wave_speed_z)*subghostcell_dim_0_max_wave_speed_z*
                             subghostcell_dim_1_max_wave_speed_z;
                     
-                    const double spectral_radius = (max_lambda_x[idx_max_wave_speed_x])/dx_0 +
-                        (max_lambda_y[idx_max_wave_speed_y])/dx_1 +
-                        (max_lambda_z[idx_max_wave_speed_z])/dx_2;
+                    const double spectral_radius = max_lambda_x[idx_max_wave_speed_x]/dx_0 +
+                        max_lambda_y[idx_max_wave_speed_y]/dx_1 +
+                        max_lambda_z[idx_max_wave_speed_z]/dx_2;
                     
                     stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius);
                 }
@@ -1513,7 +1513,8 @@ Euler::synchronizeHyperbolicFluxes(
                 const int idx_source = i;
                 const int idx_flux_x = i + 1;
                 
-                Q[ei][idx_cell] += (-(F_x[idx_flux_x] - F_x[idx_flux_x - 1])/dx_0 +
+                Q[ei][idx_cell] +=
+                    (-(F_x[idx_flux_x] - F_x[idx_flux_x - 1])/dx_0 +
                     S[idx_source]);
             }
         }
@@ -1555,7 +1556,8 @@ Euler::synchronizeHyperbolicFluxes(
                     const int idx_flux_x = (i + 1) + j*(interior_dim_0 + 1);
                     const int idx_flux_y = (j + 1) + i*(interior_dim_0 + 1);
                     
-                    Q[ei][idx_cell] += (-(F_x[idx_flux_x] - F_x[idx_flux_x - 1])/dx_0 -
+                    Q[ei][idx_cell] +=
+                        (-(F_x[idx_flux_x] - F_x[idx_flux_x - 1])/dx_0 -
                         (F_y[idx_flux_y] - F_y[idx_flux_y - 1])/dx_1 +
                         S[idx_source]);
                 }
@@ -1620,7 +1622,8 @@ Euler::synchronizeHyperbolicFluxes(
                             i*(interior_dim_2 + 1) +
                             j*(interior_dim_2 + 1)*interior_dim_0;
                         
-                        Q[ei][idx_cell] += (-(F_x[idx_flux_x] - F_x[idx_flux_x - 1])/dx_0 -
+                        Q[ei][idx_cell] +=
+                            (-(F_x[idx_flux_x] - F_x[idx_flux_x - 1])/dx_0 -
                             (F_y[idx_flux_y] - F_y[idx_flux_y - 1])/dx_1 -
                             (F_z[idx_flux_z] - F_z[idx_flux_z - 1])/dx_2 +
                             S[idx_source]);
