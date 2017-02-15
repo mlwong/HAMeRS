@@ -523,7 +523,7 @@ Euler::computeStableDtOnPatch(
         double* max_lambda_x = max_wave_speed_x->getPointer(0);
         
 #ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd reduction(max:stable_spectral_radius) private(i)
+        #pragma omp simd reduction(max:stable_spectral_radius)
 #endif
         for (int i = 0; i < interior_dim_0; i++)
         {
@@ -602,7 +602,7 @@ Euler::computeStableDtOnPatch(
         for (int j = 0; j < interior_dim_1; j++)
         {
 #ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(max:stable_spectral_radius) private(i)
+            #pragma omp simd reduction(max:stable_spectral_radius)
 #endif
             for (int i = 0; i < interior_dim_0; i++)
             {
@@ -711,7 +711,7 @@ Euler::computeStableDtOnPatch(
             for (int j = 0; j < interior_dim_1; j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd reduction(max:stable_spectral_radius) private(i)
+                #pragma omp simd reduction(max:stable_spectral_radius)
 #endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
