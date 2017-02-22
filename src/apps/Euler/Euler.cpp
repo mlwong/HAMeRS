@@ -1503,9 +1503,6 @@ Euler::synchronizeHyperbolicFluxes(
             
             const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute linear indices.
@@ -1543,9 +1540,6 @@ Euler::synchronizeHyperbolicFluxes(
             
             for (int j = 0; j < interior_dim_1; j++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute linear indices.
@@ -1595,9 +1589,6 @@ Euler::synchronizeHyperbolicFluxes(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute linear indices.
