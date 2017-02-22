@@ -661,10 +661,17 @@ GradientTagger::tagCellsWithGradientSensor(
     {
         if (d_dim == tbox::Dimension(1))
         {
-            for (int i = 0; i < interior_dims[0]; i++)
+            const int interior_dim_0 = interior_dims[0];
+            
+            const int num_ghosts_0 = num_ghosts[0];
+            
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute indices.
-                const int idx = i + num_ghosts[0];
+                const int idx = i + num_ghosts_0;
                 const int idx_nghost = i;
                 
                 if (psi[idx] > tol)
@@ -675,15 +682,26 @@ GradientTagger::tagCellsWithGradientSensor(
         }
         else if (d_dim == tbox::Dimension(2))
         {
-            for (int j = 0; j < interior_dims[1]; j++)
+            const int interior_dim_0 = interior_dims[0];
+            const int interior_dim_1 = interior_dims[1];
+            
+            const int num_ghosts_0 = num_ghosts[0];
+            const int num_ghosts_1 = num_ghosts[1];
+            const int ghostcell_dim_0 = ghostcell_dims[0];
+            
+            for (int j = 0; j < interior_dim_1; j++)
             {
-                for (int i = 0; i < interior_dims[0]; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute indices.
-                    const int idx = (i + num_ghosts[0]) +
-                        (j + num_ghosts[1])*ghostcell_dims[0];
+                    const int idx = (i + num_ghosts_0) +
+                        (j + num_ghosts_1)*ghostcell_dim_0;
                     
-                    const int idx_nghost = i + j*interior_dims[0];
+                    const int idx_nghost = i +
+                        j*interior_dim_0;
                     
                     if (psi[idx] > tol)
                     {
@@ -694,18 +712,33 @@ GradientTagger::tagCellsWithGradientSensor(
         }
         else if (d_dim == tbox::Dimension(3))
         {
-            for (int k = 0; k < interior_dims[2]; k++)
+            const int interior_dim_0 = interior_dims[0];
+            const int interior_dim_1 = interior_dims[1];
+            const int interior_dim_2 = interior_dims[2];
+            
+            const int num_ghosts_0 = num_ghosts[0];
+            const int num_ghosts_1 = num_ghosts[1];
+            const int num_ghosts_2 = num_ghosts[2];
+            const int ghostcell_dim_0 = ghostcell_dims[0];
+            const int ghostcell_dim_1 = ghostcell_dims[1];
+            
+            for (int k = 0; k < interior_dim_2; k++)
             {
-                for (int j = 0; j < interior_dims[1]; j++)
+                for (int j = 0; j < interior_dim_1; j++)
                 {
-                    for (int i = 0; i < interior_dims[0]; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute indices.
-                        const int idx = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0] +
-                            (k + num_ghosts[2])*ghostcell_dims[0]*ghostcell_dims[1];
+                        const int idx = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0 +
+                            (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
                         
-                        const int idx_nghost = i + j*interior_dims[0] + k*interior_dims[0]*interior_dims[1];
+                        const int idx_nghost = i +
+                            j*interior_dim_0 +
+                            k*interior_dim_0*interior_dim_1;
                         
                         if (psi[idx] > tol)
                         {
