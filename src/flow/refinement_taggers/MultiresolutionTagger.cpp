@@ -2081,14 +2081,7 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
     const hier::IntVector num_ghosts_wavelet_coeffs = wavelet_coeffs[0]->getGhostCellWidth();
     const hier::IntVector ghostcell_dims_wavelet_coeffs = wavelet_coeffs[0]->getGhostBox().numberCells();
     
-    // Allocate temporary patch data.
-    boost::shared_ptr<pdat::CellData<int> > tags_multiresolution_tagger(
-        new pdat::CellData<int>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
-    
-    tags_multiresolution_tagger->fillAll(1);
-    
-    // Get the pointers to the tags.
-    int* tag_ptr_multiresolution_tagger = tags_multiresolution_tagger->getPointer(0);
+    // Get the pointer to the tags.
     int* tag_ptr = tags->getPointer(0);
     
     std::vector<boost::shared_ptr<pdat::CellData<double> > > wavelet_coeffs_local_mean;
@@ -2134,6 +2127,15 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
             
             if (uses_global_tol)
             {
+                // Allocate temporary patch data.
+                boost::shared_ptr<pdat::CellData<int> > tags_global_tol(
+                    new pdat::CellData<int>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
+                
+                tags_global_tol->fillAll(0);
+                
+                // Get the pointer to the tags.
+                int* tag_ptr_global_tol = tags_global_tol->getPointer(0);
+                
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
@@ -2142,23 +2144,28 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                     // Compute the linear indices.
                     const int idx = i + num_ghosts_0_wavelet_coeffs;
                     const int idx_nghost = i;
-                    
-                    int tag_cell_global_tol = 0;
                     
                     for (int li = 0; li < Harten_wavelet_num_level; li++)
                     {
                         if (w[li][idx]/(wavelet_coeffs_maxs[li] + EPSILON) > global_tol)
                         {
-                            tag_cell_global_tol = 1;
+                            tag_ptr_global_tol[idx_nghost] = 1;
                         }
                     }
-                    
-                    tag_ptr_multiresolution_tagger[idx_nghost] &= tag_cell_global_tol;
                 }
             }
             
             if (uses_local_tol)
             {
+                // Allocate temporary patch data.
+                boost::shared_ptr<pdat::CellData<int> > tags_local_tol(
+                    new pdat::CellData<int>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
+                
+                tags_local_tol->fillAll(0);
+                
+                // Get the pointer to the tags.
+                int* tag_ptr_local_tol = tags_local_tol->getPointer(0);
+                
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
@@ -2168,22 +2175,25 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                     const int idx = i + num_ghosts_0_wavelet_coeffs;
                     const int idx_nghost = i;
                     
-                    int tag_cell_local_tol  = 0;
-                    
                     for (int li = 0; li < Harten_wavelet_num_level; li++)
                     {
                         if (w[li][idx]/(u_mean[li][idx] + EPSILON) > local_tol)
                         {
-                            tag_cell_local_tol = 1;
+                            tag_ptr_local_tol[idx_nghost] = 1;
                         }
                     }
-                    
-                    tag_ptr_multiresolution_tagger[idx_nghost] &= tag_cell_local_tol;
                 }
             }
             
             if (uses_alpha_tol)
             {
+                // Allocate temporary patch data.
+                boost::shared_ptr<pdat::CellData<int> > tags_alpha_tol(
+                    new pdat::CellData<int>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
+                
+                // Get the pointer to the tags.
+                int* tag_ptr_alpha_tol = tags_alpha_tol->getPointer(0);
+                
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
@@ -2195,11 +2205,11 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                     
                     if (alpha[idx] < alpha_tol)
                     {
-                        tag_ptr_multiresolution_tagger[idx_nghost] &= 1;
+                        tag_ptr_alpha_tol[idx_nghost] &= 1;
                     }
                     else
                     {
-                        tag_ptr_multiresolution_tagger[idx_nghost] &= 0;
+                        tag_ptr_alpha_tol[idx_nghost] &= 0;
                     }
                 }
             }
@@ -2212,7 +2222,9 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                 // Compute the linear index.
                 const int idx_nghost = i;
                 
-                tag_ptr[idx_nghost] |= tag_ptr_multiresolution_tagger[idx_nghost];
+                int tag_cell = 1;
+                
+                tag_ptr[idx_nghost] |= tag_cell;
             }
         }
         else if (d_dim == tbox::Dimension(2))
