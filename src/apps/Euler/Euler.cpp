@@ -1548,7 +1548,7 @@ Euler::synchronizeHyperbolicFluxes(
                     
                     const int idx_source = i + j*interior_dim_0;
                     const int idx_flux_x = (i + 1) + j*(interior_dim_0 + 1);
-                    const int idx_flux_y = (j + 1) + i*(interior_dim_0 + 1);
+                    const int idx_flux_y = (j + 1) + i*(interior_dim_1 + 1);
                     
                     Q[ei][idx_cell] +=
                         (-(F_x[idx_flux_x] - F_x[idx_flux_x - 1])/dx_0 -
