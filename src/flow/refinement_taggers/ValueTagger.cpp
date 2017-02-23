@@ -1213,15 +1213,15 @@ ValueTagger::tagCellsWithValue(
     const boost::shared_ptr<hier::VariableContext>& data_context,
     const boost::shared_ptr<pdat::CellData<int> >& tags,
     const boost::shared_ptr<pdat::CellVariable<double> >& variable_value_tagger,
-    double& value_max,
-    bool& uses_global_tol_up,
-    bool& uses_global_tol_lo,
-    bool& uses_local_tol_up,
-    bool& uses_local_tol_lo,
-    double& global_tol_up,
-    double& global_tol_lo,
-    double& local_tol_up,
-    double& local_tol_lo)
+    const double value_max,
+    const bool uses_global_tol_up,
+    const bool uses_global_tol_lo,
+    const bool uses_local_tol_up,
+    const bool uses_local_tol_lo,
+    const double global_tol_up,
+    const double global_tol_lo,
+    const double local_tol_up,
+    const double local_tol_lo)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(tags->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
