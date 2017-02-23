@@ -1240,7 +1240,13 @@ ValueTagger::tagCellsWithValue(
     const hier::IntVector num_ghosts_value_tagger = data_value_tagger->getGhostCellWidth();
     const hier::IntVector ghostcell_dims_value_tagger = data_value_tagger->getGhostBox().numberCells();
     
+    boost::shared_ptr<pdat::CellData<int> > tags_value_tagger(
+        new pdat::CellData<int>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
+    
+    tags_value_tagger->fillAll(1);
+    
     // Get the pointer to the tags.
+    int* tag_ptr_value_tagger = tags_value_tagger->getPointer(0);
     int* tag_ptr  = tags->getPointer(0);
     
     // Get the pointer to the data.
@@ -1252,66 +1258,103 @@ ValueTagger::tagCellsWithValue(
         
         const int num_ghosts_0_value_tagger = num_ghosts_value_tagger[0];
         
+        if (uses_global_tol_up)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = 0; i < interior_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx = i + num_ghosts_0_value_tagger;
+                const int idx_nghost = i;
+                
+                if (u[idx]/(value_max + EPSILON) <= global_tol_up)
+                {
+                    tag_ptr_value_tagger[idx_nghost] &= 1;
+                }
+                else
+                {
+                    tag_ptr_value_tagger[idx_nghost] &= 0;
+                }
+            }
+        }
+        
+        if (uses_global_tol_lo)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = 0; i < interior_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx = i + num_ghosts_0_value_tagger;
+                const int idx_nghost = i;
+                
+                if (u[idx]/(value_max + EPSILON) >= global_tol_lo)
+                {
+                    tag_ptr_value_tagger[idx_nghost] &= 1;
+                }
+                else
+                {
+                    tag_ptr_value_tagger[idx_nghost] &= 0;
+                }
+            }
+        }
+        
+        if (uses_local_tol_up)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = 0; i < interior_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx = i + num_ghosts_0_value_tagger;
+                const int idx_nghost = i;
+                
+                if (u[idx] <= local_tol_up)
+                {
+                    tag_ptr_value_tagger[idx_nghost] &= 1;
+                }
+                else
+                {
+                    tag_ptr_value_tagger[idx_nghost] &= 0;
+                }
+            }
+        }
+        
+        if (uses_local_tol_lo)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = 0; i < interior_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx = i + num_ghosts_0_value_tagger;
+                const int idx_nghost = i;
+                
+                if (u[idx] >= local_tol_lo)
+                {
+                    tag_ptr_value_tagger[idx_nghost] &= 1;
+                }
+                else
+                {
+                    tag_ptr_value_tagger[idx_nghost] &= 0;
+                }
+            }
+        }
+        
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
 #endif
         for (int i = 0; i < interior_dim_0; i++)
         {
-            // Compute the linear indices.
-            const int idx = i + num_ghosts_0_value_tagger;
+            // Compute the linear index.
             const int idx_nghost = i;
             
-            int tag_cell = 1;
-            
-            if (uses_global_tol_up)
-            {
-                if (u[idx]/(value_max + EPSILON) <= global_tol_up)
-                {
-                    tag_cell &= 1;
-                }
-                else
-                {
-                    tag_cell &= 0;
-                }
-            }
-            
-            if (uses_global_tol_lo)
-            {
-                if (u[idx]/(value_max + EPSILON) >= global_tol_lo)
-                {
-                    tag_cell &= 1;
-                }
-                else
-                {
-                    tag_cell &= 0;
-                }
-            }
-            
-            if (uses_local_tol_up)
-            {
-                if (u[idx] <= local_tol_up)
-                {
-                    tag_cell &= 1;
-                }
-                else
-                {
-                    tag_cell &= 0;
-                }
-            }
-            
-            if (uses_local_tol_lo)
-            {
-                if (u[idx] >= local_tol_lo)
-                {
-                    tag_cell &= 1;
-                }
-                else
-                {
-                    tag_cell &= 0;
-                }
-            }
-            
-            tag_ptr[idx_nghost] |= tag_cell;
+            tag_ptr[idx_nghost] |= tag_ptr_value_tagger[idx_nghost];
         }
     }
     else if (d_dim == tbox::Dimension(2))
