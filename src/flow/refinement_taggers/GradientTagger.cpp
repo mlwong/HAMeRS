@@ -626,7 +626,7 @@ GradientTagger::tagCellsWithGradientSensor(
     hier::Patch& patch,
     boost::shared_ptr<pdat::CellData<int> > tags,
     boost::shared_ptr<pdat::CellData<double> > gradient,
-    double& tol,
+    const double tol,
     std::string& sensor_key)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS

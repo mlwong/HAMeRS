@@ -85,7 +85,7 @@ class GradientTagger
             hier::Patch& patch,
             boost::shared_ptr<pdat::CellData<int> > tags,
             boost::shared_ptr<pdat::CellData<double> > gradient,
-            double& tol,
+            const double tol,
             std::string& sensor_key);
         
         /*

@@ -1489,15 +1489,15 @@ ValueTagger::transferDataToClassVariable(
     const boost::shared_ptr<hier::VariableContext>& data_context,
     const boost::shared_ptr<pdat::CellData<double> >& data_input,
     const boost::shared_ptr<pdat::CellVariable<double> >& variable_value_tagger,
-    int depth)
+    const int depth)
 {
-    boost::shared_ptr<pdat::CellData<double> > data_value_tagger(
-        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            patch.getPatchData(variable_value_tagger, data_context)));
-    
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(data_input->getDepth() > depth);
 #endif
+    
+    boost::shared_ptr<pdat::CellData<double> > data_value_tagger(
+        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+            patch.getPatchData(variable_value_tagger, data_context)));
     
     // Get the snumber of ghost cells and dimensions of box that covers interior of patch plus
     // ghost cells.

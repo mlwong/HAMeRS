@@ -121,7 +121,7 @@ class ValueTagger
             const boost::shared_ptr<hier::VariableContext>& data_context,
             const boost::shared_ptr<pdat::CellData<double> >& data_input,
             const boost::shared_ptr<pdat::CellVariable<double> >& variable_value_tagger,
-            int depth);
+            const int depth);
         
         /*
          * The object name is used for error/warning reporting.

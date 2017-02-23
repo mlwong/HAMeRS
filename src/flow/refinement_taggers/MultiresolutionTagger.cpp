@@ -2066,6 +2066,10 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
     const double alpha_tol,
     std::string& sensor_key)
 {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(tags->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
+#endif
+    
     const int Harten_wavelet_num_level = d_Harten_wavelet_num_level;
     
     // Get the dimensions of box that covers the interior of patch.
