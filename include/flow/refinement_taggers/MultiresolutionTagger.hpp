@@ -110,12 +110,12 @@ class MultiresolutionTagger
             std::vector<double>& wavelet_coeffs_maxs,
             std::vector<boost::shared_ptr<pdat::CellData<double> > >& variable_local_means,
             boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent,
-            bool& uses_global_tol,
-            bool& uses_local_tol,
-            bool& uses_alpha_tol,
-            double& global_tol,
-            double& local_tol,
-            double& alpha_tol,
+            const bool uses_global_tol,
+            const bool uses_local_tol,
+            const bool uses_alpha_tol,
+            const double global_tol,
+            const double local_tol,
+            const double alpha_tol,
             std::string& sensor_key);
         
         /*

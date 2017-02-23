@@ -629,33 +629,24 @@ GradientTagger::tagCellsWithGradientSensor(
     double& tol,
     std::string& sensor_key)
 {
-    TBOX_ASSERT(tags->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
-    
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-            patch.getPatchGeometry()));
-    
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(patch_geom);
+    TBOX_ASSERT(tags->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
 #endif
+    
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = patch.getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+    // Get the number of ghost cells and dimensions of box that covers interior of patch plus
+    // ghost cells.
+    const hier::IntVector num_ghosts_gradient_tagger = gradient->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_gradient_tagger = gradient->getGhostBox().numberCells();
     
     // Get the pointer of the tags.
     int* tag_ptr  = tags->getPointer(0);
     
-    // Get the pointer to the gradient.
+    // Get the pointer to the data.
     double* psi = gradient->getPointer(0);
-    
-    // Get the number of ghost cells of gradient.
-    hier::IntVector num_ghosts = gradient->getGhostCellWidth();
-    
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = gradient->getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
-    
-    // Get the dimensions of box that covers interior of patch plus
-    // ghost cells.
-    const hier::Box ghost_box = gradient->getGhostBox();
-    const hier::IntVector ghostcell_dims = ghost_box.numberCells();
     
     if (sensor_key == "JAMESON_GRADIENT")
     {
@@ -663,7 +654,7 @@ GradientTagger::tagCellsWithGradientSensor(
         {
             const int interior_dim_0 = interior_dims[0];
             
-            const int num_ghosts_0 = num_ghosts[0];
+            const int num_ghosts_0_gradient_tagger = num_ghosts_gradient_tagger[0];
             
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
@@ -671,7 +662,7 @@ GradientTagger::tagCellsWithGradientSensor(
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute indices.
-                const int idx = i + num_ghosts_0;
+                const int idx = i + num_ghosts_0_gradient_tagger;
                 const int idx_nghost = i;
                 
                 if (psi[idx] > tol)
@@ -685,9 +676,9 @@ GradientTagger::tagCellsWithGradientSensor(
             const int interior_dim_0 = interior_dims[0];
             const int interior_dim_1 = interior_dims[1];
             
-            const int num_ghosts_0 = num_ghosts[0];
-            const int num_ghosts_1 = num_ghosts[1];
-            const int ghostcell_dim_0 = ghostcell_dims[0];
+            const int num_ghosts_0_gradient_tagger = num_ghosts_gradient_tagger[0];
+            const int num_ghosts_1_gradient_tagger = num_ghosts_gradient_tagger[1];
+            const int ghostcell_dim_0_gradient_tagger = ghostcell_dims_gradient_tagger[0];
             
             for (int j = 0; j < interior_dim_1; j++)
             {
@@ -697,8 +688,8 @@ GradientTagger::tagCellsWithGradientSensor(
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute indices.
-                    const int idx = (i + num_ghosts_0) +
-                        (j + num_ghosts_1)*ghostcell_dim_0;
+                    const int idx = (i + num_ghosts_0_gradient_tagger) +
+                        (j + num_ghosts_1_gradient_tagger)*ghostcell_dim_0_gradient_tagger;
                     
                     const int idx_nghost = i +
                         j*interior_dim_0;
@@ -716,11 +707,11 @@ GradientTagger::tagCellsWithGradientSensor(
             const int interior_dim_1 = interior_dims[1];
             const int interior_dim_2 = interior_dims[2];
             
-            const int num_ghosts_0 = num_ghosts[0];
-            const int num_ghosts_1 = num_ghosts[1];
-            const int num_ghosts_2 = num_ghosts[2];
-            const int ghostcell_dim_0 = ghostcell_dims[0];
-            const int ghostcell_dim_1 = ghostcell_dims[1];
+            const int num_ghosts_0_gradient_tagger = num_ghosts_gradient_tagger[0];
+            const int num_ghosts_1_gradient_tagger = num_ghosts_gradient_tagger[1];
+            const int num_ghosts_2_gradient_tagger = num_ghosts_gradient_tagger[2];
+            const int ghostcell_dim_0_gradient_tagger = ghostcell_dims_gradient_tagger[0];
+            const int ghostcell_dim_1_gradient_tagger = ghostcell_dims_gradient_tagger[1];
             
             for (int k = 0; k < interior_dim_2; k++)
             {
@@ -732,9 +723,10 @@ GradientTagger::tagCellsWithGradientSensor(
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute indices.
-                        const int idx = (i + num_ghosts_0) +
-                            (j + num_ghosts_1)*ghostcell_dim_0 +
-                            (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
+                        const int idx = (i + num_ghosts_0_gradient_tagger) +
+                            (j + num_ghosts_1_gradient_tagger)*ghostcell_dim_0_gradient_tagger +
+                            (k + num_ghosts_2_gradient_tagger)*ghostcell_dim_0_gradient_tagger*
+                                ghostcell_dim_1_gradient_tagger;
                         
                         const int idx_nghost = i +
                             j*interior_dim_0 +

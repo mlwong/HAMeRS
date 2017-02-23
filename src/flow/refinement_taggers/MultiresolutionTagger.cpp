@@ -1529,12 +1529,10 @@ MultiresolutionTagger::computeLipschitzExponent(
             w.push_back(wavelet_coeffs[li]->getPointer(0));
         }
         
-        // Get the number of ghost cells of the wavelet coefficients.
+        // Get the number of ghost cells and dimensions of box that covers interior of patch plus
+        // ghost cells.
         const hier::IntVector num_ghosts_wavelet_coeffs = wavelet_coeffs[0]->getGhostCellWidth();
-        
-        // Get the dimensions of boxes that cover interior of patch plus ghost cells.
-        const hier::Box ghost_box_wavelet_coeffs = wavelet_coeffs[0]->getGhostBox();
-        const hier::IntVector ghostcell_dims_wavelet_coeffs = ghost_box_wavelet_coeffs.numberCells();
+        const hier::IntVector ghostcell_dims_wavelet_coeffs = wavelet_coeffs[0]->getGhostBox().numberCells();
         
         // Create a vector of maximum wavelet coefficients in domain of dependence.
         std::vector<boost::shared_ptr<pdat::CellData<double> > > wavelet_coeffs_local_max;
@@ -1552,41 +1550,71 @@ MultiresolutionTagger::computeLipschitzExponent(
         }
         
         // Get the stencil width of the wavelet transform.
-        int p = d_wavelet_transfrom_Harten->getLeftStencilWidth();
-        int q = d_wavelet_transfrom_Harten->getRightStencilWidth();
+        const int p = d_wavelet_transfrom_Harten->getLeftStencilWidth();
+        const int q = d_wavelet_transfrom_Harten->getRightStencilWidth();
         
         for (int li = 0; li < d_Harten_wavelet_num_level; li++)
         {
             if (d_dim == tbox::Dimension(1))
             {
-                // NOT YET IMPLEMENTED
+                const int interior_dim_0 = interior_dims[0];
+                
+                const int num_ghosts_0_wavelet_coeffs = num_ghosts_wavelet_coeffs[0];
+                
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute linear index.
+                    const int idx = i + num_ghosts_0_wavelet_coeffs;
+                    
+                    // Find the maximum wavelet coefficient over the domain of dependence.
+                    r[li][idx] = 0.0;
+                    for (int ii = -p*pow(2,li+1); ii <= q*pow(2,li+1); ii++)
+                    {
+                        // Compute the index.
+                        const int idx_s = i + ii + num_ghosts_0_wavelet_coeffs;
+                        
+                        r[li][idx] = fmax(r[li][idx], w[li][idx_s]);
+                    }
+                }
             }
             else if (d_dim == tbox::Dimension(2))
             {
-                for (int j = 0; j < interior_dims[1]; j++)
+                const int interior_dim_0 = interior_dims[0];
+                const int interior_dim_1 = interior_dims[1];
+                
+                const int num_ghosts_0_wavelet_coeffs = num_ghosts_wavelet_coeffs[0];
+                const int num_ghosts_1_wavelet_coeffs = num_ghosts_wavelet_coeffs[1];
+                const int ghostcell_dim_0_wavelet_coeffs = ghostcell_dims_wavelet_coeffs[0];
+                
+                for (int j = 0; j < interior_dim_1; j++)
                 {
-                    for (int i = 0; i < interior_dims[0]; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
                     {
-                        // Compute index into linear data array.
-                        const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                            (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                        // Compute linear index.
+                        const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                            (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                         
-                        // Find the maximum wavelet coefficient over the domain
-                        // of dependence.
+                        // Find the maximum wavelet coefficient over the domain of dependence.
                         r[li][idx] = 0.0;
                         for (int ii = -p*pow(2,li+1); ii <= q*pow(2,li+1); ii++)
                         {
                             // Compute the index.
-                            const int idx_s = (i + ii + num_ghosts_wavelet_coeffs[0]) +
-                                (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                            const int idx_s = (i + ii + num_ghosts_0_wavelet_coeffs) +
+                                (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
                             r[li][idx] = fmax(r[li][idx], w[li][idx_s]);
                         }
                         for (int jj = -p*pow(2,li+1); jj <= q*pow(2,li+1); jj++)
                         {
                             // Compute the index.
-                            const int idx_s = (i + num_ghosts_wavelet_coeffs[0]) +
-                                (j + jj + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                            const int idx_s = (i + num_ghosts_0_wavelet_coeffs) +
+                                (j + jj + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
                             r[li][idx] = fmax(r[li][idx], w[li][idx_s]);
                         }
@@ -1595,48 +1623,60 @@ MultiresolutionTagger::computeLipschitzExponent(
             }
             else if (d_dim == tbox::Dimension(3))
             {
-                for (int k = 0; k < interior_dims[2]; k++)
+                const int interior_dim_0 = interior_dims[0];
+                const int interior_dim_1 = interior_dims[1];
+                const int interior_dim_2 = interior_dims[2];
+                
+                const int num_ghosts_0_wavelet_coeffs = num_ghosts_wavelet_coeffs[0];
+                const int num_ghosts_1_wavelet_coeffs = num_ghosts_wavelet_coeffs[1];
+                const int num_ghosts_2_wavelet_coeffs = num_ghosts_wavelet_coeffs[2];
+                const int ghostcell_dim_0_wavelet_coeffs = ghostcell_dims_wavelet_coeffs[0];
+                const int ghostcell_dim_1_wavelet_coeffs = ghostcell_dims_wavelet_coeffs[1];
+                
+                for (int k = 0; k < interior_dim_2; k++)
                 {
-                    for (int j = 0; j < interior_dims[1]; j++)
+                    for (int j = 0; j < interior_dim_1; j++)
                     {
-                        for (int i = 0; i < interior_dims[0]; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
                         {
-                            // Compute index into linear data array.
-                            const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                    ghostcell_dims_wavelet_coeffs[1];
+                            // Compute linear index.
+                            const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                    ghostcell_dim_1_wavelet_coeffs;
                             
-                            // Find the maximum wavelet coefficient over the domain
-                            // of dependence.
+                            // Find the maximum wavelet coefficient over the domain of dependence.
                             r[li][idx] = 0.0;
                             for (int ii = -p*pow(2,li+1); ii <= q*pow(2,li+1); ii++)
                             {
                                 // Compute the index.
-                                const int idx_s = (i + ii + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx_s = (i + ii + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
                                 r[li][idx] = fmax(r[li][idx], w[li][idx_s]);
                             }
                             for (int jj = -p*pow(2,li+1); jj <= q*pow(2,li+1); jj++)
                             {
                                 // Compute the index.
-                                const int idx_s = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + jj + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx_s = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + jj + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
                                 r[li][idx] = fmax(r[li][idx], w[li][idx_s]);
                             }
                             for (int kk = -p*pow(2,li+1); kk <=q*pow(2,li+1); kk++)
                             {
                                 // Compute the index.
-                                const int idx_s = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + kk + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx_s = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + kk + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
                                 r[li][idx] = fmax(r[li][idx], w[li][idx_s]);
                             }
@@ -1658,25 +1698,56 @@ MultiresolutionTagger::computeLipschitzExponent(
             {
                 if (d_dim == tbox::Dimension(1))
                 {
-                    // NOT YET IMPLEMENTED
+                    const int interior_dim_0 = interior_dims[0];
+                    
+                    const int num_ghosts_0_wavelet_coeffs = num_ghosts_wavelet_coeffs[0];
+                    
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute linear index.
+                        const int idx = i + num_ghosts_0_wavelet_coeffs;
+                        
+                        if ((r[0][idx] > 1.0e-8) &&
+                            (r[1][idx] > 1.0e-8))
+                        {
+                            alpha[idx] = fmin(
+                                log2(r[1][idx]/r[0][idx]),
+                                (double) d_Harten_wavelet_num_vanishing_moments);
+                        }
+                        else
+                        {
+                            alpha[idx] = (double) d_Harten_wavelet_num_vanishing_moments;
+                        }
+                    }
                 }
                 else if (d_dim == tbox::Dimension(2))
                 {
-                    for (int j = 0; j < interior_dims[1]; j++)
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    
+                    const int num_ghosts_0_wavelet_coeffs = num_ghosts_wavelet_coeffs[0];
+                    const int num_ghosts_1_wavelet_coeffs = num_ghosts_wavelet_coeffs[1];
+                    const int ghostcell_dim_0_wavelet_coeffs = ghostcell_dims_wavelet_coeffs[0];
+                    
+                    for (int j = 0; j < interior_dim_1; j++)
                     {
-                        for (int i = 0; i < interior_dims[0]; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
                         {
-                            // Compute indices.
-                            const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                            // Compute linear index.
+                            const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
                             if ((r[0][idx] > 1.0e-8) &&
                                 (r[1][idx] > 1.0e-8))
                             {
-                                alpha[idx] = log2(r[1][idx]/r[0][idx]);
-                                
                                 alpha[idx] = fmin(
-                                    alpha[idx],
+                                    log2(r[1][idx]/r[0][idx]),
                                     (double) d_Harten_wavelet_num_vanishing_moments);
                             }
                             else
@@ -1688,25 +1759,36 @@ MultiresolutionTagger::computeLipschitzExponent(
                 }
                 else if (d_dim == tbox::Dimension(3))
                 {
-                    for (int k = 0; k < interior_dims[2]; k++)
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const int num_ghosts_0_wavelet_coeffs = num_ghosts_wavelet_coeffs[0];
+                    const int num_ghosts_1_wavelet_coeffs = num_ghosts_wavelet_coeffs[1];
+                    const int num_ghosts_2_wavelet_coeffs = num_ghosts_wavelet_coeffs[2];
+                    const int ghostcell_dim_0_wavelet_coeffs = ghostcell_dims_wavelet_coeffs[0];
+                    const int ghostcell_dim_1_wavelet_coeffs = ghostcell_dims_wavelet_coeffs[1];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
                     {
-                        for (int j = 0; j < interior_dims[1]; j++)
+                        for (int j = 0; j < interior_dim_1; j++)
                         {
-                            for (int i = 0; i < interior_dims[0]; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
                             {
-                                // Compute indices.
-                                const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                // Compute linear index.
+                                const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
                                 if ((r[0][idx] > 1.0e-8) &&
                                     (r[1][idx] > 1.0e-8))
                                 {
-                                    alpha[idx] = log2(r[1][idx]/r[0][idx]);
-                                    
                                     alpha[idx] = fmin(
-                                        alpha[idx],
+                                        log2(r[1][idx]/r[0][idx]),
                                         (double) d_Harten_wavelet_num_vanishing_moments);
                                 }
                                 else
@@ -1724,26 +1806,58 @@ MultiresolutionTagger::computeLipschitzExponent(
             {
                 if (d_dim == tbox::Dimension(1))
                 {
-                    // NOT YET IMPLEMENTED
+                    const int interior_dim_0 = interior_dims[0];
+                    
+                    const int num_ghosts_0_wavelet_coeffs = num_ghosts_wavelet_coeffs[0];
+                    
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute linear index.
+                        const int idx = i + num_ghosts_0_wavelet_coeffs;
+                        
+                        if ((r[0][idx] > 1.0e-8) &&
+                            (r[1][idx] > 1.0e-8) &&
+                            (r[2][idx] > 1.0e-8))
+                        {
+                            alpha[idx] = fmin(
+                                0.5*log2(r[2][idx]/r[0][idx]),
+                                (double) d_Harten_wavelet_num_vanishing_moments);
+                        }
+                        else
+                        {
+                            alpha[idx] = (double) d_Harten_wavelet_num_vanishing_moments;
+                        }
+                    }
                 }
                 else if (d_dim == tbox::Dimension(2))
                 {
-                    for (int j = 0; j < interior_dims[1]; j++)
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    
+                    const int num_ghosts_0_wavelet_coeffs = num_ghosts_wavelet_coeffs[0];
+                    const int num_ghosts_1_wavelet_coeffs = num_ghosts_wavelet_coeffs[1];
+                    const int ghostcell_dim_0_wavelet_coeffs = ghostcell_dims_wavelet_coeffs[0];
+                    
+                    for (int j = 0; j < interior_dim_1; j++)
                     {
-                        for (int i = 0; i < interior_dims[0]; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
                         {
-                            // Compute indices.
-                            const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                            // Compute linear index.
+                            const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
                             if ((r[0][idx] > 1.0e-8) &&
                                 (r[1][idx] > 1.0e-8) &&
                                 (r[2][idx] > 1.0e-8))
                             {
-                                alpha[idx] = 0.5*log2(r[2][idx]/r[0][idx]);
-                                
                                 alpha[idx] = fmin(
-                                    alpha[idx],
+                                    0.5*log2(r[2][idx]/r[0][idx]),
                                     (double) d_Harten_wavelet_num_vanishing_moments);
                             }
                             else
@@ -1755,26 +1869,37 @@ MultiresolutionTagger::computeLipschitzExponent(
                 }
                 else if (d_dim == tbox::Dimension(3))
                 {
-                    for (int k = 0; k < interior_dims[2]; k++)
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const int num_ghosts_0_wavelet_coeffs = num_ghosts_wavelet_coeffs[0];
+                    const int num_ghosts_1_wavelet_coeffs = num_ghosts_wavelet_coeffs[1];
+                    const int num_ghosts_2_wavelet_coeffs = num_ghosts_wavelet_coeffs[2];
+                    const int ghostcell_dim_0_wavelet_coeffs = ghostcell_dims_wavelet_coeffs[0];
+                    const int ghostcell_dim_1_wavelet_coeffs = ghostcell_dims_wavelet_coeffs[1];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
                     {
-                        for (int j = 0; j < interior_dims[1]; j++)
+                        for (int j = 0; j < interior_dim_1; j++)
                         {
-                            for (int i = 0; i < interior_dims[0]; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
                             {
-                                // Compute indices.
-                                const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                // Compute linear index.
+                                const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
                                 if ((r[0][idx] > 1.0e-8) &&
                                     (r[1][idx] > 1.0e-8) &&
                                     (r[2][idx] > 1.0e-8))
                                 {
-                                    alpha[idx] = 0.5*log2(r[2][idx]/r[0][idx]);
-                                    
                                     alpha[idx] = fmin(
-                                        alpha[idx],
+                                        0.5*log2(r[2][idx]/r[0][idx]),
                                         (double) d_Harten_wavelet_num_vanishing_moments);
                                 }
                                 else
@@ -1792,28 +1917,62 @@ MultiresolutionTagger::computeLipschitzExponent(
             {
                 if (d_dim == tbox::Dimension(1))
                 {
-                    // NOT YET IMPLEMENTED
+                    const int interior_dim_0 = interior_dims[0];
+                    
+                    const int num_ghosts_0_wavelet_coeffs = num_ghosts_wavelet_coeffs[0];
+                    
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute linear index.
+                        const int idx = i + num_ghosts_0_wavelet_coeffs;
+                        
+                        if ((r[0][idx] > 1.0e-8) &&
+                            (r[1][idx] > 1.0e-8) &&
+                            (r[2][idx] > 1.0e-8) &&
+                            (r[3][idx] > 1.0e-8))
+                        {
+                            alpha[idx] = fmin(
+                                (3.0/10.0*log2(r[3][idx]/r[0][idx]) +
+                                    1.0/10.0*log2(r[2][idx]/r[1][idx])),
+                                (double) d_Harten_wavelet_num_vanishing_moments);
+                        }
+                        else
+                        {
+                            alpha[idx] = (double) d_Harten_wavelet_num_vanishing_moments;
+                        }
+                    }
                 }
                 else if (d_dim == tbox::Dimension(2))
                 {
-                    for (int j = 0; j < interior_dims[1]; j++)
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    
+                    const int num_ghosts_0_wavelet_coeffs = num_ghosts_wavelet_coeffs[0];
+                    const int num_ghosts_1_wavelet_coeffs = num_ghosts_wavelet_coeffs[1];
+                    const int ghostcell_dim_0_wavelet_coeffs = ghostcell_dims_wavelet_coeffs[0];
+                    
+                    for (int j = 0; j < interior_dim_1; j++)
                     {
-                        for (int i = 0; i < interior_dims[0]; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
                         {
-                            // Compute indices.
-                            const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                            // Compute linear index.
+                            const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
                             if ((r[0][idx] > 1.0e-8) &&
                                 (r[1][idx] > 1.0e-8) &&
                                 (r[2][idx] > 1.0e-8) &&
                                 (r[3][idx] > 1.0e-8))
                             {
-                                alpha[idx] = (3.0*log2(r[3][idx]/r[0][idx]) +
-                                    log2(r[2][idx]/r[1][idx]))/10.0;
-                                
                                 alpha[idx] = fmin(
-                                    alpha[idx],
+                                    (3.0/10.0*log2(r[3][idx]/r[0][idx]) +
+                                        1.0/10.0*log2(r[2][idx]/r[1][idx])),
                                     (double) d_Harten_wavelet_num_vanishing_moments);
                             }
                             else
@@ -1825,28 +1984,39 @@ MultiresolutionTagger::computeLipschitzExponent(
                 }
                 else if (d_dim == tbox::Dimension(3))
                 {
-                    for (int k = 0; k < interior_dims[2]; k++)
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const int num_ghosts_0_wavelet_coeffs = num_ghosts_wavelet_coeffs[0];
+                    const int num_ghosts_1_wavelet_coeffs = num_ghosts_wavelet_coeffs[1];
+                    const int num_ghosts_2_wavelet_coeffs = num_ghosts_wavelet_coeffs[2];
+                    const int ghostcell_dim_0_wavelet_coeffs = ghostcell_dims_wavelet_coeffs[0];
+                    const int ghostcell_dim_1_wavelet_coeffs = ghostcell_dims_wavelet_coeffs[1];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
                     {
-                        for (int j = 0; j < interior_dims[1]; j++)
+                        for (int j = 0; j < interior_dim_1; j++)
                         {
-                            for (int i = 0; i < interior_dims[0]; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
                             {
-                                // Compute indices.
-                                const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                // Compute linear index.
+                                const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
                                 if ((r[0][idx] > 1.0e-8) &&
                                     (r[1][idx] > 1.0e-8) &&
                                     (r[2][idx] > 1.0e-8) &&
                                     (r[3][idx] > 1.0e-8))
                                 {
-                                    alpha[idx] = (3*log2(r[3][idx]/r[0][idx]) +
-                                        log2(r[2][idx]/r[1][idx]))/10;
-                                    
                                     alpha[idx] = fmin(
-                                        alpha[idx],
+                                        (3.0/10.0*log2(r[3][idx]/r[0][idx]) +
+                                            1.0/10.0*log2(r[2][idx]/r[1][idx])),
                                         (double) d_Harten_wavelet_num_vanishing_moments);
                                 }
                                 else
@@ -1888,24 +2058,24 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
     std::vector<double>& wavelet_coeffs_maxs,
     std::vector<boost::shared_ptr<pdat::CellData<double> > >& variable_local_means,
     boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent,
-    bool& uses_global_tol,
-    bool& uses_local_tol,
-    bool& uses_alpha_tol,
-    double& global_tol,
-    double& local_tol,
-    double& alpha_tol,
+    const bool uses_global_tol,
+    const bool uses_local_tol,
+    const bool uses_alpha_tol,
+    const double global_tol,
+    const double local_tol,
+    const double alpha_tol,
     std::string& sensor_key)
 {
+    const int Harten_wavelet_num_level = d_Harten_wavelet_num_level;
+    
     // Get the dimensions of box that covers the interior of patch.
     const hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
     
-    // Get the number of ghost cells of the wavelet coefficients.
+    // Get the number of ghost cells and dimensions of box that covers interior of patch plus
+    // ghost cells.
     const hier::IntVector num_ghosts_wavelet_coeffs = wavelet_coeffs[0]->getGhostCellWidth();
-    
-    // Get the dimensions of boxes that cover interior of patch plus ghost cells.
-    const hier::Box ghost_box_wavelet_coeffs = wavelet_coeffs[0]->getGhostBox();
-    const hier::IntVector ghostcell_dims_wavelet_coeffs = ghost_box_wavelet_coeffs.numberCells();
+    const hier::IntVector ghostcell_dims_wavelet_coeffs = wavelet_coeffs[0]->getGhostBox().numberCells();
     
     // Get the pointer of the tags.
     int* tag_ptr  = tags->getPointer(0);
@@ -1914,7 +2084,7 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
     
     // Get the pointers to the wavelet coefficients.
     std::vector<double*> w;
-    for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+    for (int li = 0; li < Harten_wavelet_num_level; li++)
     {
         w.push_back(wavelet_coeffs[li]->getPointer(0));
     }
@@ -1923,7 +2093,7 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
     std::vector<double*> u_mean;
     if (uses_local_tol)
     {
-        for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+        for (int li = 0; li < Harten_wavelet_num_level; li++)
         {
             u_mean.push_back(variable_local_means[li]->getPointer(0));
         }
@@ -1947,10 +2117,17 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
         
         if (d_dim == tbox::Dimension(1))
         {
-            for (int i = 0; i < interior_dims[0]; i++)
+            const int interior_dim_0 = interior_dims[0];
+            
+            const int num_ghosts_0_wavelet_coeffs = num_ghosts_wavelet_coeffs[0];
+            
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx = i + num_ghosts_wavelet_coeffs[0];
+                const int idx = i + num_ghosts_0_wavelet_coeffs;
                 const int idx_nghost = i;
                 
                 int tag_cell            = 1;
@@ -1960,13 +2137,11 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                 
                 if (uses_global_tol)
                 {
-                    for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                    for (int li = 0; li < Harten_wavelet_num_level; li++)
                     {
                         if (w[li][idx]/(wavelet_coeffs_maxs[li] + EPSILON) > global_tol)
                         {
                             tag_cell_global_tol = 1;
-                            
-                            break;
                         }
                     }
                     
@@ -1975,13 +2150,11 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                 
                 if (uses_local_tol)
                 {
-                    for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                    for (int li = 0; li < Harten_wavelet_num_level; li++)
                     {
                         if (w[li][idx]/(u_mean[li][idx] + EPSILON) > local_tol)
                         {
                             tag_cell_local_tol = 1;
-                            
-                            break;
                         }
                     }
                     
@@ -2003,15 +2176,26 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
         }
         else if (d_dim == tbox::Dimension(2))
         {
-            for (int j = 0; j < interior_dims[1]; j++)
+            const int interior_dim_0 = interior_dims[0];
+            const int interior_dim_1 = interior_dims[1];
+            
+            const int num_ghosts_0_wavelet_coeffs = num_ghosts_wavelet_coeffs[0];
+            const int num_ghosts_1_wavelet_coeffs = num_ghosts_wavelet_coeffs[1];
+            const int ghostcell_dim_0_wavelet_coeffs = ghostcell_dims_wavelet_coeffs[0];
+            
+            for (int j = 0; j < interior_dim_1; j++)
             {
-                for (int i = 0; i < interior_dims[0]; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                        (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                    const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                        (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                     
-                    const int idx_nghost = i + j*interior_dims[0];
+                    const int idx_nghost = i +
+                        j*interior_dim_0;
                     
                     int tag_cell            = 1;
                     int tag_cell_global_tol = 0;
@@ -2020,13 +2204,11 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                     
                     if (uses_global_tol)
                     {
-                        for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                        for (int li = 0; li < Harten_wavelet_num_level; li++)
                         {
                             if (w[li][idx]/(wavelet_coeffs_maxs[li] + EPSILON) > global_tol)
                             {
                                 tag_cell_global_tol = 1;
-                                
-                                break;
                             }
                         }
                         
@@ -2035,13 +2217,11 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                     
                     if (uses_local_tol)
                     {
-                        for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                        for (int li = 0; li < Harten_wavelet_num_level; li++)
                         {
                             if (w[li][idx]/(u_mean[li][idx] + EPSILON) > local_tol)
                             {
                                 tag_cell_local_tol = 1;
-                                
-                                break;
                             }
                         }
                         
@@ -2064,19 +2244,35 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
         }
         else if (d_dim == tbox::Dimension(3))
         {
-            for (int k = 0; k < interior_dims[2]; k++)
+            const int interior_dim_0 = interior_dims[0];
+            const int interior_dim_1 = interior_dims[1];
+            const int interior_dim_2 = interior_dims[2];
+            
+            const int num_ghosts_0_wavelet_coeffs = num_ghosts_wavelet_coeffs[0];
+            const int num_ghosts_1_wavelet_coeffs = num_ghosts_wavelet_coeffs[1];
+            const int num_ghosts_2_wavelet_coeffs = num_ghosts_wavelet_coeffs[2];
+            const int ghostcell_dim_0_wavelet_coeffs = ghostcell_dims_wavelet_coeffs[0];
+            const int ghostcell_dim_1_wavelet_coeffs = ghostcell_dims_wavelet_coeffs[1];
+            
+            for (int k = 0; k < interior_dim_2; k++)
             {
-                for (int j = 0; j < interior_dims[1]; j++)
+                for (int j = 0; j < interior_dim_1; j++)
                 {
-                    for (int i = 0; i < interior_dims[0]; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                            (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                            (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                ghostcell_dims_wavelet_coeffs[1];
+                        const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                            (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                            (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                ghostcell_dim_1_wavelet_coeffs;
                         
-                        const int idx_nghost = i + j*interior_dims[0] + k*interior_dims[0]*interior_dims[1];
+                        const int idx_nghost = i +
+                            j*interior_dim_0 +
+                            k*interior_dim_0*
+                                interior_dim_1;
                         
                         int tag_cell            = 1;
                         int tag_cell_global_tol = 0;
@@ -2085,13 +2281,11 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                         
                         if (uses_global_tol)
                         {
-                            for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                            for (int li = 0; li < Harten_wavelet_num_level; li++)
                             {
                                 if (w[li][idx]/(wavelet_coeffs_maxs[li] + EPSILON) > global_tol)
                                 {
                                     tag_cell_global_tol = 1;
-                                    
-                                    break;
                                 }
                             }
                             
@@ -2100,13 +2294,11 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                         
                         if (uses_local_tol)
                         {
-                            for (int li = 0; li < d_Harten_wavelet_num_level; li++)
+                            for (int li = 0; li < Harten_wavelet_num_level; li++)
                             {
                                 if (w[li][idx]/(u_mean[li][idx] + EPSILON) > local_tol)
                                 {
                                     tag_cell_local_tol = 1;
-                                    
-                                    break;
                                 }
                             }
                             

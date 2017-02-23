@@ -1223,6 +1223,10 @@ ValueTagger::tagCellsWithValue(
     double& local_tol_up,
     double& local_tol_lo)
 {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(tags->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
+#endif
+    
     boost::shared_ptr<pdat::CellData<double> > data_value_tagger(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
             patch.getPatchData(variable_value_tagger, data_context)));
@@ -1231,25 +1235,30 @@ ValueTagger::tagCellsWithValue(
     const hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
     
-    // Get the number of ghost cells.
+    // Get the number of ghost cells and dimensions of boxes that cover interior of patch plus
+    // ghost cells.
     const hier::IntVector num_ghosts_value_tagger = data_value_tagger->getGhostCellWidth();
-    
-    // Get the dimensions of boxes that cover interior of patch plus ghost cells.
-    const hier::Box ghost_box_value_tagger = data_value_tagger->getGhostBox();
-    const hier::IntVector ghostcell_dims_value_tagger = ghost_box_value_tagger.numberCells();
-    
-    // Get the pointer to the data value.
-    double* u = data_value_tagger->getPointer(0);
+    const hier::IntVector ghostcell_dims_value_tagger = data_value_tagger->getGhostBox().numberCells();
     
     // Get the pointer to the tags.
     int* tag_ptr  = tags->getPointer(0);
     
+    // Get the pointer to the data.
+    double* u = data_value_tagger->getPointer(0);
+    
     if (d_dim == tbox::Dimension(1))
     {
-        for (int i = 0; i < interior_dims[0]; i++)
+        const int interior_dim_0 = interior_dims[0];
+        
+        const int num_ghosts_0_value_tagger = num_ghosts_value_tagger[0];
+        
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = 0; i < interior_dim_0; i++)
         {
             // Compute the linear indices.
-            const int idx = i + num_ghosts_value_tagger[0];
+            const int idx = i + num_ghosts_0_value_tagger;
             const int idx_nghost = i;
             
             int tag_cell = 1;
@@ -1307,15 +1316,26 @@ ValueTagger::tagCellsWithValue(
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        for (int j = 0; j < interior_dims[1]; j++)
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        
+        const int num_ghosts_0_value_tagger = num_ghosts_value_tagger[0];
+        const int num_ghosts_1_value_tagger = num_ghosts_value_tagger[1];
+        const int ghostcell_dim_0_value_tagger = ghostcell_dims_value_tagger[0];
+        
+        for (int j = 0; j < interior_dim_1; j++)
         {
-            for (int i = 0; i < interior_dims[0]; i++)
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx = (i + num_ghosts_value_tagger[0]) +
-                    (j + num_ghosts_value_tagger[1])*ghostcell_dims_value_tagger[0];
+                const int idx = (i + num_ghosts_0_value_tagger) +
+                    (j + num_ghosts_1_value_tagger)*ghostcell_dim_0_value_tagger;
                 
-                const int idx_nghost = i + j*interior_dims[0];
+                const int idx_nghost = i +
+                    j*interior_dim_0;
                 
                 int tag_cell = 1;
                 
@@ -1373,19 +1393,34 @@ ValueTagger::tagCellsWithValue(
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        for (int k = 0; k < interior_dims[2]; k++)
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        const int interior_dim_2 = interior_dims[2];
+        
+        const int num_ghosts_0_value_tagger = num_ghosts_value_tagger[0];
+        const int num_ghosts_1_value_tagger = num_ghosts_value_tagger[1];
+        const int num_ghosts_2_value_tagger = num_ghosts_value_tagger[2];
+        const int ghostcell_dim_0_value_tagger = ghostcell_dims_value_tagger[0];
+        const int ghostcell_dim_1_value_tagger = ghostcell_dims_value_tagger[1];
+        
+        for (int k = 0; k < interior_dim_2; k++)
         {
-            for (int j = 0; j < interior_dims[1]; j++)
+            for (int j = 0; j < interior_dim_1; j++)
             {
-                for (int i = 0; i < interior_dims[0]; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx = (i + num_ghosts_value_tagger[0]) +
-                        (j + num_ghosts_value_tagger[1])*ghostcell_dims_value_tagger[0] +
-                        (k + num_ghosts_value_tagger[2])*ghostcell_dims_value_tagger[0]*
-                            ghostcell_dims_value_tagger[1];
+                    const int idx = (i + num_ghosts_0_value_tagger) +
+                        (j + num_ghosts_1_value_tagger)*ghostcell_dim_0_value_tagger +
+                        (k + num_ghosts_2_value_tagger)*ghostcell_dim_0_value_tagger*
+                            ghostcell_dim_1_value_tagger;
                     
-                    const int idx_nghost = i + j*interior_dims[0] + k*interior_dims[0]*interior_dims[1];
+                    const int idx_nghost = i +
+                        j*interior_dim_0 +
+                        k*interior_dim_0*interior_dim_1;
                     
                     int tag_cell = 1;
                     
@@ -1464,18 +1499,20 @@ ValueTagger::transferDataToClassVariable(
     TBOX_ASSERT(data_input->getDepth() > depth);
 #endif
     
-    hier::IntVector num_subghosts_input = data_input->getGhostCellWidth();
-    hier::IntVector subghostcell_dims_input = data_input->getGhostBox().numberCells();
+    // Get the snumber of ghost cells and dimensions of box that covers interior of patch plus
+    // ghost cells.
+    const hier::IntVector num_ghosts_input = data_input->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_input = data_input->getGhostBox().numberCells();
     
-    hier::IntVector num_subghosts_value_tagger = data_value_tagger->getGhostCellWidth();
-    hier::IntVector subghostcell_dims_value_tagger = data_value_tagger->getGhostBox().numberCells();
+    const hier::IntVector num_ghosts_value_tagger = data_value_tagger->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_value_tagger = data_value_tagger->getGhostBox().numberCells();
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(num_subghosts_input >= num_subghosts_value_tagger);
+    TBOX_ASSERT(num_ghosts_input >= num_ghosts_value_tagger);
 #endif
     
     // Get the dimensions of box that covers the interior of patch.
-    hier::Box interior_box = patch.getBox();
+    const hier::Box interior_box = patch.getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
     
     // Get the pointer to the data.
@@ -1484,33 +1521,55 @@ ValueTagger::transferDataToClassVariable(
     
     if (d_dim == tbox::Dimension(1))
     {
-        for (int i = -num_subghosts_value_tagger[0];
-             i < interior_dims[0] + num_subghosts_value_tagger[0];
+        const int interior_dim_0 = interior_dims[0];
+        
+        const int num_ghosts_0_input = num_ghosts_input[0];
+        const int num_ghosts_0_value_tagger = num_ghosts_value_tagger[0];
+        
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = -num_ghosts_0_value_tagger;
+             i < interior_dim_0 + num_ghosts_0_value_tagger;
              i++)
         {
             // Compute the linear indices.
-            const int idx_input = i + num_subghosts_input[0];
-            const int idx_value_tagger = i + num_subghosts_value_tagger[0];
+            const int idx_input = i + num_ghosts_0_input;
+            const int idx_value_tagger = i + num_ghosts_0_value_tagger;
             
             u_value_tagger[idx_value_tagger] = u_input[idx_input];
         }
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        for (int j = -num_subghosts_value_tagger[1];
-             j < interior_dims[1] + num_subghosts_value_tagger[1];
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        
+        const int num_ghosts_0_input = num_ghosts_input[0];
+        const int num_ghosts_1_input = num_ghosts_input[1];
+        const int ghostcell_dim_0_input = ghostcell_dims_input[0];
+        
+        const int num_ghosts_0_value_tagger = num_ghosts_value_tagger[0];
+        const int num_ghosts_1_value_tagger = num_ghosts_value_tagger[1];
+        const int ghostcell_dim_0_value_tagger = ghostcell_dims_value_tagger[0];
+        
+        for (int j = -num_ghosts_1_value_tagger;
+             j < interior_dim_1 + num_ghosts_1_value_tagger;
              j++)
         {
-            for (int i = -num_subghosts_value_tagger[0];
-                 i < interior_dims[0] + num_subghosts_value_tagger[0];
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = -num_ghosts_0_value_tagger;
+                 i < interior_dim_0 + num_ghosts_0_value_tagger;
                  i++)
             {
                 // Compute the linear indices.
-                const int idx_input = (i + num_subghosts_input[0]) +
-                    (j + num_subghosts_input[1])*subghostcell_dims_input[0];
+                const int idx_input = (i + num_ghosts_0_input) +
+                    (j + num_ghosts_1_input)*ghostcell_dim_0_input;
                 
-                const int idx_value_tagger = (i + num_subghosts_value_tagger[0]) +
-                    (j + num_subghosts_value_tagger[1])*subghostcell_dims_value_tagger[0];
+                const int idx_value_tagger = (i + num_ghosts_0_value_tagger) +
+                    (j + num_ghosts_1_value_tagger)*ghostcell_dim_0_value_tagger;
                 
                 u_value_tagger[idx_value_tagger] = u_input[idx_input];
             }
@@ -1518,26 +1577,47 @@ ValueTagger::transferDataToClassVariable(
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        for (int k = -num_subghosts_value_tagger[2];
-             k < interior_dims[2] + num_subghosts_value_tagger[2];
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        const int interior_dim_2 = interior_dims[2];
+        
+        const int num_ghosts_0_input = num_ghosts_input[0];
+        const int num_ghosts_1_input = num_ghosts_input[1];
+        const int num_ghosts_2_input = num_ghosts_input[2];
+        const int ghostcell_dim_0_input = ghostcell_dims_input[0];
+        const int ghostcell_dim_1_input = ghostcell_dims_input[1];
+        
+        const int num_ghosts_0_value_tagger = num_ghosts_value_tagger[0];
+        const int num_ghosts_1_value_tagger = num_ghosts_value_tagger[1];
+        const int num_ghosts_2_value_tagger = num_ghosts_value_tagger[2];
+        const int ghostcell_dim_0_value_tagger = ghostcell_dims_value_tagger[0];
+        const int ghostcell_dim_1_value_tagger = ghostcell_dims_value_tagger[1];
+        
+        for (int k = -num_ghosts_2_value_tagger;
+             k < interior_dim_2 + num_ghosts_2_value_tagger;
              k++)
         {
-            for (int j = -num_subghosts_value_tagger[1];
-                 j < interior_dims[1] + num_subghosts_value_tagger[1];
+            for (int j = -num_ghosts_1_value_tagger;
+                 j < interior_dim_1 + num_ghosts_1_value_tagger;
                  j++)
             {
-                for (int i = -num_subghosts_value_tagger[0];
-                     i < interior_dims[0] + num_subghosts_value_tagger[0];
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = -num_ghosts_0_value_tagger;
+                     i < interior_dim_0 + num_ghosts_0_value_tagger;
                      i++)
                 {
                     // Compute the linear indices.
-                    const int idx_input = (i + num_subghosts_input[0]) +
-                        (j + num_subghosts_input[1])*subghostcell_dims_input[0] +
-                        (k + num_subghosts_input[2])*subghostcell_dims_input[0]*subghostcell_dims_input[1];
+                    const int idx_input = (i + num_ghosts_0_input) +
+                        (j + num_ghosts_1_input)*ghostcell_dim_0_input +
+                        (k + num_ghosts_2_input)*ghostcell_dim_0_input*
+                            ghostcell_dim_1_input;
                     
-                    const int idx_value_tagger = (i + num_subghosts_value_tagger[0]) +
-                        (j + num_subghosts_value_tagger[1])*subghostcell_dims_value_tagger[0] +
-                        (k + num_subghosts_value_tagger[2])*subghostcell_dims_value_tagger[0]*subghostcell_dims_value_tagger[1];
+                    const int idx_value_tagger = (i + num_ghosts_0_value_tagger) +
+                        (j + num_ghosts_1_value_tagger)*ghostcell_dim_0_value_tagger +
+                        (k + num_ghosts_2_value_tagger)*ghostcell_dim_0_value_tagger*
+                            ghostcell_dim_1_value_tagger;
                     
                     u_value_tagger[idx_value_tagger] = u_input[idx_input];
                 }
