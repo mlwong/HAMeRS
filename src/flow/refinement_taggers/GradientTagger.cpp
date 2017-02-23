@@ -498,11 +498,11 @@ GradientTagger::tagCells(
                     
                     // Tag the cells.
                     tagCellsWithGradientSensor(
+                        sensor_key,
                         patch,
                         tags,
                         gradient,
-                        tol,
-                        sensor_key);
+                        tol);
                     
                     /*
                      * Unregister the patch and data of all registered derived cell variables in the flow model.
@@ -544,11 +544,11 @@ GradientTagger::tagCells(
                     
                     // Tag the cells.
                     tagCellsWithGradientSensor(
+                        sensor_key,
                         patch,
                         tags,
                         gradient,
-                        tol,
-                        sensor_key);
+                        tol);
                     
                     /*
                      * Unregister the patch and data of all registered derived cell variables in the flow model.
@@ -590,11 +590,11 @@ GradientTagger::tagCells(
                     
                     // Tag the cells.
                     tagCellsWithGradientSensor(
+                        sensor_key,
                         patch,
                         tags,
                         gradient,
-                        tol,
-                        sensor_key);
+                        tol);
                     
                     /*
                      * Unregister the patch and data of all registered derived cell variables in the flow model.
@@ -623,11 +623,11 @@ GradientTagger::tagCells(
  */
 void
 GradientTagger::tagCellsWithGradientSensor(
+    std::string& sensor_key,
     hier::Patch& patch,
     boost::shared_ptr<pdat::CellData<int> > tags,
     boost::shared_ptr<pdat::CellData<double> > gradient,
-    const double tol,
-    std::string& sensor_key)
+    const double tol)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(tags->getGhostCellWidth() == hier::IntVector::getZero(d_dim));

@@ -82,11 +82,11 @@ class GradientTagger
          */
         void
         tagCellsWithGradientSensor(
+            std::string& sensor_key,
             hier::Patch& patch,
             boost::shared_ptr<pdat::CellData<int> > tags,
             boost::shared_ptr<pdat::CellData<double> > gradient,
-            const double tol,
-            std::string& sensor_key);
+            const double tol);
         
         /*
          * The object name is used for error/warning reporting.

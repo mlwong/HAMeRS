@@ -1383,6 +1383,7 @@ MultiresolutionTagger::tagCells(
                     }
                     
                     tagCellsWithWaveletSensor(
+                        sensor_key,
                         patch,
                         tags,
                         wavelet_coeffs,
@@ -1394,8 +1395,7 @@ MultiresolutionTagger::tagCells(
                         uses_alpha_tol,
                         global_tol,
                         local_tol,
-                        alpha_tol,
-                        sensor_key);
+                        alpha_tol);
                 }
                 else if (variable_key == "TOTAL_ENERGY")
                 {
@@ -1427,6 +1427,7 @@ MultiresolutionTagger::tagCells(
                     }
                     
                     tagCellsWithWaveletSensor(
+                        sensor_key,
                         patch,
                         tags,
                         wavelet_coeffs,
@@ -1438,8 +1439,7 @@ MultiresolutionTagger::tagCells(
                         uses_alpha_tol,
                         global_tol,
                         local_tol,
-                        alpha_tol,
-                        sensor_key);
+                        alpha_tol);
                 }
                 else if (variable_key == "PRESSURE")
                 {
@@ -1471,6 +1471,7 @@ MultiresolutionTagger::tagCells(
                     }
                     
                     tagCellsWithWaveletSensor(
+                        sensor_key,
                         patch,
                         tags,
                         wavelet_coeffs,
@@ -1482,8 +1483,7 @@ MultiresolutionTagger::tagCells(
                         uses_alpha_tol,
                         global_tol,
                         local_tol,
-                        alpha_tol,
-                        sensor_key);
+                        alpha_tol);
                 }
                 else
                 {
@@ -1507,10 +1507,10 @@ MultiresolutionTagger::tagCells(
  */
 void
 MultiresolutionTagger::computeLipschitzExponent(
+    std::string& sensor_key,
     hier::Patch& patch,
     std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
-    boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent,
-    std::string& sensor_key)
+    boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent)
 {
     // Get the dimensions of box that covers the interior of patch.
     const hier::Box interior_box = patch.getBox();
@@ -2052,6 +2052,7 @@ MultiresolutionTagger::computeLipschitzExponent(
  */
 void
 MultiresolutionTagger::tagCellsWithWaveletSensor(
+    std::string& sensor_key,
     hier::Patch& patch,
     boost::shared_ptr<pdat::CellData<int> >& tags,
     std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
@@ -2063,8 +2064,7 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
     const bool uses_alpha_tol,
     const double global_tol,
     const double local_tol,
-    const double alpha_tol,
-    std::string& sensor_key)
+    const double alpha_tol)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(tags->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
@@ -2081,8 +2081,15 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
     const hier::IntVector num_ghosts_wavelet_coeffs = wavelet_coeffs[0]->getGhostCellWidth();
     const hier::IntVector ghostcell_dims_wavelet_coeffs = wavelet_coeffs[0]->getGhostBox().numberCells();
     
-    // Get the pointer of the tags.
-    int* tag_ptr  = tags->getPointer(0);
+    // Allocate temporary patch data.
+    boost::shared_ptr<pdat::CellData<int> > tags_multiresolution_tagger(
+        new pdat::CellData<int>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
+    
+    tags_multiresolution_tagger->fillAll(1);
+    
+    // Get the pointers to the tags.
+    int* tag_ptr_multiresolution_tagger = tags_multiresolution_tagger->getPointer(0);
+    int* tag_ptr = tags->getPointer(0);
     
     std::vector<boost::shared_ptr<pdat::CellData<double> > > wavelet_coeffs_local_mean;
     
@@ -2113,10 +2120,10 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
             alpha = Lipschitz_exponent->getPointer(0);
             
             computeLipschitzExponent(
+                sensor_key,
                 patch,
                 wavelet_coeffs,
-                Lipschitz_exponent,
-                sensor_key);
+                Lipschitz_exponent);
         }
         
         if (d_dim == tbox::Dimension(1))
@@ -2125,22 +2132,19 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
             
             const int num_ghosts_0_wavelet_coeffs = num_ghosts_wavelet_coeffs[0];
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
-            for (int i = 0; i < interior_dim_0; i++)
+            if (uses_global_tol)
             {
-                // Compute the linear indices.
-                const int idx = i + num_ghosts_0_wavelet_coeffs;
-                const int idx_nghost = i;
-                
-                int tag_cell            = 1;
-                int tag_cell_global_tol = 0;
-                int tag_cell_local_tol  = 0;
-                int tag_cell_alpha_tol  = 0;
-                
-                if (uses_global_tol)
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
                 {
+                    // Compute the linear indices.
+                    const int idx = i + num_ghosts_0_wavelet_coeffs;
+                    const int idx_nghost = i;
+                    
+                    int tag_cell_global_tol = 0;
+                    
                     for (int li = 0; li < Harten_wavelet_num_level; li++)
                     {
                         if (w[li][idx]/(wavelet_coeffs_maxs[li] + EPSILON) > global_tol)
@@ -2149,11 +2153,23 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                         }
                     }
                     
-                    tag_cell &= tag_cell_global_tol;
+                    tag_ptr_multiresolution_tagger[idx_nghost] &= tag_cell_global_tol;
                 }
-                
-                if (uses_local_tol)
+            }
+            
+            if (uses_local_tol)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
                 {
+                    // Compute the linear indices.
+                    const int idx = i + num_ghosts_0_wavelet_coeffs;
+                    const int idx_nghost = i;
+                    
+                    int tag_cell_local_tol  = 0;
+                    
                     for (int li = 0; li < Harten_wavelet_num_level; li++)
                     {
                         if (w[li][idx]/(u_mean[li][idx] + EPSILON) > local_tol)
@@ -2162,20 +2178,41 @@ MultiresolutionTagger::tagCellsWithWaveletSensor(
                         }
                     }
                     
-                    tag_cell &= tag_cell_local_tol;
+                    tag_ptr_multiresolution_tagger[idx_nghost] &= tag_cell_local_tol;
                 }
-                
-                if (uses_alpha_tol)
+            }
+            
+            if (uses_alpha_tol)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
                 {
+                    // Compute the linear indices.
+                    const int idx = i + num_ghosts_0_wavelet_coeffs;
+                    const int idx_nghost = i;
+                    
                     if (alpha[idx] < alpha_tol)
                     {
-                        tag_cell_alpha_tol = 1;
+                        tag_ptr_multiresolution_tagger[idx_nghost] &= 1;
                     }
-                    
-                    tag_cell &= tag_cell_alpha_tol;
+                    else
+                    {
+                        tag_ptr_multiresolution_tagger[idx_nghost] &= 0;
+                    }
                 }
+            }
+            
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = 0; i < interior_dim_0; i++)
+            {
+                // Compute the linear index.
+                const int idx_nghost = i;
                 
-                tag_ptr[idx_nghost] |= tag_cell;
+                tag_ptr[idx_nghost] |= tag_ptr_multiresolution_tagger[idx_nghost];
             }
         }
         else if (d_dim == tbox::Dimension(2))

@@ -104,6 +104,7 @@ class MultiresolutionTagger
          */
         void
         tagCellsWithWaveletSensor(
+            std::string& sensor_key,
             hier::Patch& patch,
             boost::shared_ptr<pdat::CellData<int> >& tags,
             std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
@@ -115,8 +116,7 @@ class MultiresolutionTagger
             const bool uses_alpha_tol,
             const double global_tol,
             const double local_tol,
-            const double alpha_tol,
-            std::string& sensor_key);
+            const double alpha_tol);
         
         /*
          * Compute the Lipschitz's exponent. There are two steps:
@@ -125,10 +125,10 @@ class MultiresolutionTagger
          */
         void
         computeLipschitzExponent(
+            std::string& sensor_key,
             hier::Patch& patch,
             std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
-            boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent,
-            std::string& sensor_key);
+            boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent);
         
         /*
          * The object name is used for error/warning reporting.
