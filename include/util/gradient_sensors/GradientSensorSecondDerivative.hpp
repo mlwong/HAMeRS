@@ -1,16 +1,16 @@
-#ifndef GRADIENT_SENSOR_JAMESON_HPP
-#define GRADIENT_SENSOR_JAMESON_HPP
+#ifndef GRADIENT_SENSOR_SECOND_DERIVATIVE_HPP
+#define GRADIENT_SENSOR_SECOND_DERIVATIVE_HPP
 
 #include "util/gradient_sensors/GradientSensor.hpp"
 
-class GradientSensorJameson: public GradientSensor
+class GradientSensorSecondDerivative: public GradientSensor
 {
     public:
-        GradientSensorJameson(
+        GradientSensorSecondDerivative(
             const std::string& object_name,
             const tbox::Dimension& dim);
         
-        ~GradientSensorJameson() {}
+        ~GradientSensorSecondDerivative() {}
         
         /*
          * Compute the gradient with the given cell data.
@@ -35,4 +35,4 @@ class GradientSensorJameson: public GradientSensor
         
 };
 
-#endif /* GRADIENT_SENSOR_JAMESON_HPP */
+#endif /* GRADIENT_SENSOR_SECOND_DERIVATIVE_HPP */

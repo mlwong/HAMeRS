@@ -105,6 +105,10 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
 {
     TBOX_ASSERT(wavelet_coeffs.size() == variable_local_means.size());
     
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = patch.getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
     // Get the number of ghost cells of the cell data, wavelet coefficients and local means.
     const hier::IntVector num_ghosts_cell_data = cell_data->getGhostCellWidth();
     const hier::IntVector num_ghosts_wavelet_coeffs = wavelet_coeffs[0]->getGhostCellWidth();
@@ -124,7 +128,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
         TBOX_ASSERT(wavelet_coeffs[li]->getGhostBox().numberCells() == ghostcell_dims_wavelet_coeffs);
     }
     
-    // Determine whether local means at different levels are required to compute them.
+    // Determine whether local means at different levels are required to be computed.
     bool compute_variable_local_means = false;
     if (!variable_local_means.empty())
     {
@@ -135,14 +139,6 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
             TBOX_ASSERT(variable_local_means[li]->getGhostBox().numberCells() == ghostcell_dims_wavelet_coeffs);
         }
     }
-    
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-            patch.getPatchGeometry()));
-    
-    // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = patch.getBox();
-    const hier::IntVector interior_dims = interior_box.numberCells();
     
     // Get the pointer to the desired depth component of the given cell data.
     double* f = cell_data->getPointer(depth);

@@ -33,14 +33,6 @@ GradientSensorJameson::computeGradient(
             << std::endl);
     }
     
-    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-            patch.getPatchGeometry()));
-    
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(patch_geom);
-#endif
-    
     // Get the number of ghost cells of the cell data and gradient data.
     const hier::IntVector num_ghosts_cell_data = cell_data->getGhostCellWidth();
     const hier::IntVector num_ghosts_gradient = gradient->getGhostCellWidth();
@@ -367,4 +359,23 @@ GradientSensorJameson::computeGradient(
             }
         }
     }
+}
+
+
+/*
+ * Compute the gradient and the local mean of the given cell data.
+ */
+void
+GradientSensorJameson::computeGradientWithVariableLocalMean(
+    hier::Patch& patch,
+    boost::shared_ptr<pdat::CellData<double> > cell_data,
+    boost::shared_ptr<pdat::CellData<double> > gradient,
+    boost::shared_ptr<pdat::CellData<double> > variable_local_mean,
+    int depth)
+{
+    NULL_USE(patch);
+    NULL_USE(cell_data);
+    NULL_USE(gradient);
+    NULL_USE(variable_local_mean);
+    NULL_USE(depth);
 }

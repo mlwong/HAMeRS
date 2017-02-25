@@ -1,6 +1,8 @@
 # Define a variable utils_source_files containing
 # a list of the source files for the utils library
 set(utils_source_files
+    ./gradient_sensors/GradientSensorFirstDerivative.cpp
+    ./gradient_sensors/GradientSensorSecondDerivative.cpp
     ./gradient_sensors/GradientSensorJameson.cpp
     ./wavelet_transform/WaveletTransformHarten.cpp
 )
