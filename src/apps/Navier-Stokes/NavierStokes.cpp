@@ -1844,6 +1844,51 @@ NavierStokes::tagValueDetectorCells(
 
 
 /*
+ * Preprocess before tagging cells using gradient detector.
+ */
+void
+NavierStokes::preprocessTagGradientDetectorCells(
+   const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+   const int level_number,
+   const double regrid_time,
+   const bool initial_error,
+   const bool uses_value_detector_too,
+   const bool uses_multiresolution_detector_too,
+   const bool uses_integral_detector_too,
+   const bool uses_richardson_extrapolation_too)
+{
+    NULL_USE(regrid_time);
+    NULL_USE(initial_error);
+    NULL_USE(uses_value_detector_too);
+    NULL_USE(uses_multiresolution_detector_too);
+    NULL_USE(uses_integral_detector_too);
+    NULL_USE(uses_richardson_extrapolation_too);
+    
+    if (d_gradient_tagger != nullptr)
+    {
+        boost::shared_ptr<hier::PatchLevel> level(
+            patch_hierarchy->getPatchLevel(level_number));
+        
+        for (hier::PatchLevel::iterator ip(level->begin());
+             ip != level->end();
+             ip++)
+        {
+            const boost::shared_ptr<hier::Patch>& patch = *ip;
+            
+            d_gradient_tagger->computeGradientSensorValues(
+                *patch,
+                getDataContext());
+        }
+        
+        d_gradient_tagger->getSensorValueStatistics(
+            patch_hierarchy,
+            level_number,
+            getDataContext());
+    }
+}
+
+
+/*
  * Tag cells for refinement using gradient detector.
  */
 void

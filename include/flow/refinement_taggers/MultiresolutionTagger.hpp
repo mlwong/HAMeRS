@@ -92,7 +92,7 @@ class MultiresolutionTagger
         void
         tagCells(
             hier::Patch& patch,
-            boost::shared_ptr<pdat::CellData<int> >& tags,
+            const boost::shared_ptr<pdat::CellData<int> >& tags,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
     private:
@@ -104,19 +104,19 @@ class MultiresolutionTagger
          */
         void
         tagCellsWithWaveletSensor(
-            std::string& sensor_key,
             hier::Patch& patch,
-            boost::shared_ptr<pdat::CellData<int> >& tags,
-            std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
-            std::vector<double>& wavelet_coeffs_maxs,
-            std::vector<boost::shared_ptr<pdat::CellData<double> > >& variable_local_means,
-            boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent,
-            const bool uses_global_tol,
-            const bool uses_local_tol,
-            const bool uses_alpha_tol,
-            const double global_tol,
-            const double local_tol,
-            const double alpha_tol);
+            const std::string& sensor_key,
+            const boost::shared_ptr<pdat::CellData<int> >& tags,
+            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
+            const std::vector<double>& wavelet_coeffs_maxs,
+            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& variable_local_means,
+            const boost::shared_ptr<pdat::CellData<double> >& Lipschitz_exponent,
+            const bool& uses_global_tol,
+            const bool& uses_local_tol,
+            const bool& uses_alpha_tol,
+            const double& global_tol,
+            const double& local_tol,
+            const double& alpha_tol);
         
         /*
          * Compute the Lipschitz's exponent. There are two steps:
@@ -125,10 +125,10 @@ class MultiresolutionTagger
          */
         void
         computeLipschitzExponent(
-            std::string& sensor_key,
             hier::Patch& patch,
-            std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
-            boost::shared_ptr<pdat::CellData<double> > Lipschitz_exponent);
+            const std::string& sensor_key,
+            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
+            const boost::shared_ptr<pdat::CellData<double> >& Lipschitz_exponent);
         
         /*
          * The object name is used for error/warning reporting.
@@ -190,24 +190,24 @@ class MultiresolutionTagger
         /*
          * boost::shared_ptr to wavelet coefficients at different levels.
          */
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_density_wavelet_coeffs;
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_total_energy_wavelet_coeffs;
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_pressure_wavelet_coeffs;
+        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_wavelet_coeffs_density;
+        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_wavelet_coeffs_total_energy;
+        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_wavelet_coeffs_pressure;
         
         /*
          * Statistics of sensor values.
          */
-        std::vector<double> d_Harten_density_wavelet_coeffs_maxs;
-        std::vector<double> d_Harten_total_energy_wavelet_coeffs_maxs;
-        std::vector<double> d_Harten_pressure_wavelet_coeffs_maxs;
+        std::vector<double> d_Harten_wavelet_coeffs_maxs_density;
+        std::vector<double> d_Harten_wavelet_coeffs_maxs_total_energy;
+        std::vector<double> d_Harten_wavelet_coeffs_maxs_pressure;
         
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_density_local_means;
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_total_energy_local_means;
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_pressure_local_means;
+        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_local_means_density;
+        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_local_means_total_energy;
+        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_local_means_pressure;
         
-        boost::shared_ptr<pdat::CellVariable<double> > d_Harten_density_Lipschitz_exponent;
-        boost::shared_ptr<pdat::CellVariable<double> > d_Harten_total_energy_Lipschitz_exponent;
-        boost::shared_ptr<pdat::CellVariable<double> > d_Harten_pressure_Lipschitz_exponent;
+        boost::shared_ptr<pdat::CellVariable<double> > d_Harten_Lipschitz_exponent_density;
+        boost::shared_ptr<pdat::CellVariable<double> > d_Harten_Lipschitz_exponent_total_energy;
+        boost::shared_ptr<pdat::CellVariable<double> > d_Harten_Lipschitz_exponent_pressure;
         
 };
 

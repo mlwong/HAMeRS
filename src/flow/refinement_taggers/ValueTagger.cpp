@@ -20,11 +20,11 @@ ValueTagger::ValueTagger(
         d_num_value_ghosts(hier::IntVector::getZero(d_dim)),
         d_num_species(num_species),
         d_flow_model(flow_model),
-        d_value_tagger_density_max(0.0),
-        d_value_tagger_total_energy_max(0.0),
-        d_value_tagger_pressure_max(0.0),
-        d_value_tagger_dilatation_max(0.0),
-        d_value_tagger_enstrophy_max(0.0)
+        d_value_tagger_max_density(0.0),
+        d_value_tagger_max_total_energy(0.0),
+        d_value_tagger_max_pressure(0.0),
+        d_value_tagger_max_dilatation(0.0),
+        d_value_tagger_max_enstrophy(0.0)
 {
     if (value_tagger_db != nullptr)
     {
@@ -380,11 +380,11 @@ ValueTagger::registerValueTaggerVariables(
             
             if (d_uses_global_tol_up[vi] || d_uses_global_tol_lo[vi])
             {
-                d_value_tagger_mass_fraction_max.reserve(d_num_species);
+                d_value_tagger_max_mass_fraction.reserve(d_num_species);
                 
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    d_value_tagger_mass_fraction_max.push_back(0.0);
+                    d_value_tagger_max_mass_fraction.push_back(0.0);
                 }
             }
         }
@@ -950,11 +950,11 @@ ValueTagger::getValueStatistics(
                     data_context);
                 
                 double rho_max_local = cell_double_operator.max(rho_id);
-                d_value_tagger_density_max = 0.0;
+                d_value_tagger_max_density = 0.0;
                 
                 mpi.Allreduce(
                     &rho_max_local,
-                    &d_value_tagger_density_max,
+                    &d_value_tagger_max_density,
                     1,
                     MPI_DOUBLE,
                     MPI_MAX);
@@ -966,11 +966,11 @@ ValueTagger::getValueStatistics(
                     data_context);
                 
                 double E_max_local = cell_double_operator.max(E_id);
-                d_value_tagger_total_energy_max = 0.0;
+                d_value_tagger_max_total_energy = 0.0;
                 
                 mpi.Allreduce(
                     &E_max_local,
-                    &d_value_tagger_total_energy_max,
+                    &d_value_tagger_max_total_energy,
                     1,
                     MPI_DOUBLE,
                     MPI_MAX);
@@ -982,11 +982,11 @@ ValueTagger::getValueStatistics(
                     data_context);
                 
                 double p_max_local = cell_double_operator.max(p_id);
-                d_value_tagger_pressure_max = 0.0;
+                d_value_tagger_max_pressure = 0.0;
                 
                 mpi.Allreduce(
                     &p_max_local,
-                    &d_value_tagger_pressure_max,
+                    &d_value_tagger_max_pressure,
                     1,
                     MPI_DOUBLE,
                     MPI_MAX);
@@ -998,11 +998,11 @@ ValueTagger::getValueStatistics(
                     data_context);
                 
                 double theta_max_local = cell_double_operator.max(theta_id);
-                d_value_tagger_dilatation_max = 0.0;
+                d_value_tagger_max_dilatation = 0.0;
                 
                 mpi.Allreduce(
                     &theta_max_local,
-                    &d_value_tagger_dilatation_max,
+                    &d_value_tagger_max_dilatation,
                     1,
                     MPI_DOUBLE,
                     MPI_MAX);
@@ -1014,11 +1014,11 @@ ValueTagger::getValueStatistics(
                     data_context);
                 
                 double Omega_max_local = cell_double_operator.max(Omega_id);
-                d_value_tagger_enstrophy_max = 0.0;
+                d_value_tagger_max_enstrophy = 0.0;
                 
                 mpi.Allreduce(
                     &Omega_max_local,
-                    &d_value_tagger_enstrophy_max,
+                    &d_value_tagger_max_enstrophy,
                     1,
                     MPI_DOUBLE,
                     MPI_MAX);
@@ -1032,11 +1032,11 @@ ValueTagger::getValueStatistics(
                         data_context);
                     
                     double Y_max_local = cell_double_operator.max(Y_id);
-                    d_value_tagger_mass_fraction_max[si] = 0.0;
+                    d_value_tagger_max_mass_fraction[si] = 0.0;
                     
                     mpi.Allreduce(
                         &Y_max_local,
-                        &d_value_tagger_mass_fraction_max[si],
+                        &d_value_tagger_max_mass_fraction[si],
                         1,
                         MPI_DOUBLE,
                         MPI_MAX);
@@ -1053,7 +1053,7 @@ ValueTagger::getValueStatistics(
 void
 ValueTagger::tagCells(
    hier::Patch& patch,
-   boost::shared_ptr<pdat::CellData<int> > tags,
+   const boost::shared_ptr<pdat::CellData<int> >& tags,
    const boost::shared_ptr<hier::VariableContext>& data_context)
 {
     int count_global_tol_up = 0;
@@ -1107,7 +1107,7 @@ ValueTagger::tagCells(
                 data_context,
                 tags,
                 d_value_tagger_variable_density,
-                d_value_tagger_density_max,
+                d_value_tagger_max_density,
                 uses_global_tol_up,
                 uses_global_tol_lo,
                 uses_local_tol_up,
@@ -1123,7 +1123,7 @@ ValueTagger::tagCells(
                 data_context,
                 tags,
                 d_value_tagger_variable_total_energy,
-                d_value_tagger_total_energy_max,
+                d_value_tagger_max_total_energy,
                 uses_global_tol_up,
                 uses_global_tol_lo,
                 uses_local_tol_up,
@@ -1139,7 +1139,7 @@ ValueTagger::tagCells(
                 data_context,
                 tags,
                 d_value_tagger_variable_pressure,
-                d_value_tagger_pressure_max,
+                d_value_tagger_max_pressure,
                 uses_global_tol_up,
                 uses_global_tol_lo,
                 uses_local_tol_up,
@@ -1155,7 +1155,7 @@ ValueTagger::tagCells(
                 data_context,
                 tags,
                 d_value_tagger_variable_dilatation,
-                d_value_tagger_dilatation_max,
+                d_value_tagger_max_dilatation,
                 uses_global_tol_up,
                 uses_global_tol_lo,
                 uses_local_tol_up,
@@ -1171,7 +1171,7 @@ ValueTagger::tagCells(
                 data_context,
                 tags,
                 d_value_tagger_variable_enstrophy,
-                d_value_tagger_enstrophy_max,
+                d_value_tagger_max_enstrophy,
                 uses_global_tol_up,
                 uses_global_tol_lo,
                 uses_local_tol_up,
@@ -1189,7 +1189,7 @@ ValueTagger::tagCells(
                     data_context,
                     tags,
                     d_value_tagger_variable_mass_fraction[si],
-                    d_value_tagger_mass_fraction_max[si],
+                    d_value_tagger_max_mass_fraction[si],
                     uses_global_tol_up,
                     uses_global_tol_lo,
                     uses_local_tol_up,
@@ -1213,15 +1213,15 @@ ValueTagger::tagCellsWithValue(
     const boost::shared_ptr<hier::VariableContext>& data_context,
     const boost::shared_ptr<pdat::CellData<int> >& tags,
     const boost::shared_ptr<pdat::CellVariable<double> >& variable_value_tagger,
-    const double value_max,
-    const bool uses_global_tol_up,
-    const bool uses_global_tol_lo,
-    const bool uses_local_tol_up,
-    const bool uses_local_tol_lo,
-    const double global_tol_up,
-    const double global_tol_lo,
-    const double local_tol_up,
-    const double local_tol_lo)
+    const double& value_max,
+    const bool& uses_global_tol_up,
+    const bool& uses_global_tol_lo,
+    const bool& uses_local_tol_up,
+    const bool& uses_local_tol_lo,
+    const double& global_tol_up,
+    const double& global_tol_lo,
+    const double& local_tol_up,
+    const double& local_tol_lo)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(tags->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
@@ -1673,7 +1673,7 @@ ValueTagger::transferDataToClassVariable(
     const boost::shared_ptr<hier::VariableContext>& data_context,
     const boost::shared_ptr<pdat::CellData<double> >& data_input,
     const boost::shared_ptr<pdat::CellVariable<double> >& variable_value_tagger,
-    const int depth)
+    const int& depth)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(data_input->getDepth() > depth);

@@ -90,7 +90,7 @@ class ValueTagger
         void
         tagCells(
             hier::Patch& patch,
-            boost::shared_ptr<pdat::CellData<int> > tags,
+            const boost::shared_ptr<pdat::CellData<int> >& tags,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
     private:
@@ -103,15 +103,15 @@ class ValueTagger
             const boost::shared_ptr<hier::VariableContext>& data_context,
             const boost::shared_ptr<pdat::CellData<int> >& tags,
             const boost::shared_ptr<pdat::CellVariable<double> >& variable_value_tagger,
-            const double value_max,
-            const bool uses_global_tol_up,
-            const bool uses_global_tol_lo,
-            const bool uses_local_tol_up,
-            const bool uses_local_tol_lo,
-            const double global_tol_up,
-            const double global_tol_lo,
-            const double local_tol_up,
-            const double local_tol_lo);
+            const double& value_max,
+            const bool& uses_global_tol_up,
+            const bool& uses_global_tol_lo,
+            const bool& uses_local_tol_up,
+            const bool& uses_local_tol_lo,
+            const double& global_tol_up,
+            const double& global_tol_lo,
+            const double& local_tol_up,
+            const double& local_tol_lo);
         
         /*
          * Transfer data input to data in class variable.
@@ -121,7 +121,7 @@ class ValueTagger
             const boost::shared_ptr<hier::VariableContext>& data_context,
             const boost::shared_ptr<pdat::CellData<double> >& data_input,
             const boost::shared_ptr<pdat::CellVariable<double> >& variable_value_tagger,
-            const int depth);
+            const int& depth);
         
         /*
          * The object name is used for error/warning reporting.
@@ -179,12 +179,12 @@ class ValueTagger
         /*
          * Statistics of data values.
          */
-        double d_value_tagger_density_max;
-        double d_value_tagger_total_energy_max;
-        double d_value_tagger_pressure_max;
-        double d_value_tagger_dilatation_max;
-        double d_value_tagger_enstrophy_max;
-        std::vector<double> d_value_tagger_mass_fraction_max;
+        double d_value_tagger_max_density;
+        double d_value_tagger_max_total_energy;
+        double d_value_tagger_max_pressure;
+        double d_value_tagger_max_dilatation;
+        double d_value_tagger_max_enstrophy;
+        std::vector<double> d_value_tagger_max_mass_fraction;
         
 };
 
