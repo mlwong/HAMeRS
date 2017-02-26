@@ -5,8 +5,8 @@
 
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
 #include "flow/flow_models/FlowModels.hpp"
-#include "util/gradient_sensors/GradientSensorFirstDerivative.hpp"
-#include "util/gradient_sensors/GradientSensorSecondDerivative.hpp"
+#include "util/differences/DifferenceFirstDerivative.hpp"
+#include "util/differences/DifferenceSecondDerivative.hpp"
 #include "util/gradient_sensors/GradientSensorJameson.hpp"
 
 #include "SAMRAI/appu/VisItDataWriter.h"
@@ -160,10 +160,10 @@ class GradientTagger
         std::vector<std::string> d_gradient_sensors;
         
         /*
-         * boost::shared_ptr to gradient sensors.
+         * boost::shared_ptr to difference operators.
          */
-        boost::shared_ptr<GradientSensorFirstDerivative> d_gradient_sensor_first_derivative;
-        boost::shared_ptr<GradientSensorSecondDerivative> d_gradient_sensor_second_derivative;
+        boost::shared_ptr<DifferenceFirstDerivative> d_difference_first_derivative;
+        boost::shared_ptr<DifferenceSecondDerivative> d_difference_second_derivative;
         
         /*
          * boost::shared_ptr to GradientSensorJameson.
@@ -173,17 +173,17 @@ class GradientTagger
         /*
          * Variables, tolerances and settings for the gradient sensors.
          */
-        std::vector<std::string> d_first_derivative_variables;
-        std::vector<double> d_first_derivative_global_tol;
-        std::vector<double> d_first_derivative_local_tol;
-        std::vector<bool> d_first_derivative_uses_global_tol;
-        std::vector<bool> d_first_derivative_uses_local_tol;
+        std::vector<std::string> d_difference_first_derivative_variables;
+        std::vector<double> d_difference_first_derivative_global_tol;
+        std::vector<double> d_difference_first_derivative_local_tol;
+        std::vector<bool> d_difference_first_derivative_uses_global_tol;
+        std::vector<bool> d_difference_first_derivative_uses_local_tol;
         
-        std::vector<std::string> d_second_derivative_variables;
-        std::vector<double> d_second_derivative_global_tol;
-        std::vector<double> d_second_derivative_local_tol;
-        std::vector<bool> d_second_derivative_uses_global_tol;
-        std::vector<bool> d_second_derivative_uses_local_tol;
+        std::vector<std::string> d_difference_second_derivative_variables;
+        std::vector<double> d_difference_second_derivative_global_tol;
+        std::vector<double> d_difference_second_derivative_local_tol;
+        std::vector<bool> d_difference_second_derivative_uses_global_tol;
+        std::vector<bool> d_difference_second_derivative_uses_local_tol;
         
         /*
          * Variables and tolerances for the gradient sensors.
@@ -194,13 +194,13 @@ class GradientTagger
         /*
          * boost::shared_ptr to derivatives.
          */
-        boost::shared_ptr<pdat::CellVariable<double> > d_first_derivative_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_first_derivative_total_energy;
-        boost::shared_ptr<pdat::CellVariable<double> > d_first_derivative_pressure;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_derivative_density;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_derivative_total_energy;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_derivative_pressure;
         
-        boost::shared_ptr<pdat::CellVariable<double> > d_second_derivative_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_second_derivative_total_energy;
-        boost::shared_ptr<pdat::CellVariable<double> > d_second_derivative_pressure;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_derivative_density;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_derivative_total_energy;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_derivative_pressure;
         
         /*
          * boost::shared_ptr to values of Jameson's gradient sensor.
@@ -212,21 +212,21 @@ class GradientTagger
         /*
          * Statistics of sensor values.
          */
-        double d_first_derivative_max_density;
-        double d_first_derivative_max_total_energy;
-        double d_first_derivative_max_pressure;
+        double d_difference_first_derivative_max_density;
+        double d_difference_first_derivative_max_total_energy;
+        double d_difference_first_derivative_max_pressure;
         
-        double d_second_derivative_max_density;
-        double d_second_derivative_max_total_energy;
-        double d_second_derivative_max_pressure;
+        double d_difference_second_derivative_max_density;
+        double d_difference_second_derivative_max_total_energy;
+        double d_difference_second_derivative_max_pressure;
         
-        boost::shared_ptr<pdat::CellVariable<double> > d_first_derivative_local_mean_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_first_derivative_local_mean_total_energy;
-        boost::shared_ptr<pdat::CellVariable<double> > d_first_derivative_local_mean_pressure;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_derivative_local_mean_density;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_derivative_local_mean_total_energy;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_derivative_local_mean_pressure;
         
-        boost::shared_ptr<pdat::CellVariable<double> > d_second_derivative_local_mean_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_second_derivative_local_mean_total_energy;
-        boost::shared_ptr<pdat::CellVariable<double> > d_second_derivative_local_mean_pressure;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_derivative_local_mean_density;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_derivative_local_mean_total_energy;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_derivative_local_mean_pressure;
         
 };
 

@@ -29,11 +29,13 @@ MultiresolutionTagger::MultiresolutionTagger(
         
         if (multiresolution_tagger_db->keyExists("multiresolution_sensors"))
         {
-            d_multiresolution_sensors = multiresolution_tagger_db->getStringVector("multiresolution_sensors");
+            d_multiresolution_sensors =
+                multiresolution_tagger_db->getStringVector("multiresolution_sensors");
         }
         else if (multiresolution_tagger_db->keyExists("d_multiresolution_sensors"))
         {
-            d_multiresolution_sensors = multiresolution_tagger_db->getStringVector("d_multiresolution_sensors");
+            d_multiresolution_sensors =
+                multiresolution_tagger_db->getStringVector("d_multiresolution_sensors");
         }
         else
         {
@@ -56,7 +58,8 @@ MultiresolutionTagger::MultiresolutionTagger(
             std::string sensor_key = sensor_keys[i];
             sensor_db.reset();
             
-            if (!((sensor_key == "multiresolution_sensors") || (sensor_key == "d_multiresolution_sensors")))
+            if (!((sensor_key == "multiresolution_sensors") ||
+                  (sensor_key == "d_multiresolution_sensors")))
             {
                 if (!(sensor_key == "HARTEN_WAVELET"))
                 {
@@ -89,7 +92,8 @@ MultiresolutionTagger::MultiresolutionTagger(
                     {
                         TBOX_ERROR(d_object_name
                             << ": "
-                            << "No key 'Harten_wavelet_num_level'/'d_Harten_wavelet_num_level' found in data for "
+                            << "No key 'Harten_wavelet_num_level'/"
+                            << "'d_Harten_wavelet_num_level' found in data for "
                             << sensor_key
                             << "."
                             << std::endl);
@@ -109,17 +113,20 @@ MultiresolutionTagger::MultiresolutionTagger(
                     // Get the number of vanishing moments.
                     if (sensor_db->keyExists("Harten_wavelet_num_vanishing_moments"))
                     {
-                        d_Harten_wavelet_num_vanishing_moments = sensor_db->getInteger("Harten_wavelet_num_vanishing_moments");
+                        d_Harten_wavelet_num_vanishing_moments =
+                            sensor_db->getInteger("Harten_wavelet_num_vanishing_moments");
                     }
                     else if (sensor_db->keyExists("d_Harten_wavelet_num_vanishing_moments"))
                     {
-                        d_Harten_wavelet_num_vanishing_moments = sensor_db->getInteger("d_Harten_wavelet_num_vanishing_moments");
+                        d_Harten_wavelet_num_vanishing_moments =
+                            sensor_db->getInteger("d_Harten_wavelet_num_vanishing_moments");
                     }
                     else
                     {
                         TBOX_ERROR(d_object_name
                             << ": "
-                            << "No key 'Harten_wavelet_num_vanishing_moments'/'d_Harten_wavelet_num_vanishing_moments' found in data for "
+                            << "No key 'Harten_wavelet_num_vanishing_moments'/"
+                            << "'d_Harten_wavelet_num_vanishing_moments' found in data for "
                             << sensor_key
                             << "."
                             << std::endl);
@@ -134,17 +141,20 @@ MultiresolutionTagger::MultiresolutionTagger(
                     // Get the variables for the wavelet sensor to apply on.
                     if (sensor_db->keyExists("Harten_wavelet_variables"))
                     {
-                        d_Harten_wavelet_variables = sensor_db->getStringVector("Harten_wavelet_variables");
+                        d_Harten_wavelet_variables =
+                            sensor_db->getStringVector("Harten_wavelet_variables");
                     }
                     else if (sensor_db->keyExists("d_Harten_wavelet_variables"))
                     {
-                        d_Harten_wavelet_variables = sensor_db->getStringVector("d_Harten_wavelet_variables");
+                        d_Harten_wavelet_variables =
+                            sensor_db->getStringVector("d_Harten_wavelet_variables");
                     }
                     else
                     {
                         TBOX_ERROR(d_object_name
                             << ": "
-                            << "No key 'Harten_wavelet_variables'/'d_Harten_wavelet_variables' found in database for "
+                            << "No key 'Harten_wavelet_variables'/"
+                            << "'d_Harten_wavelet_variables' found in database for "
                             << sensor_key
                             << "."
                             << std::endl);
@@ -175,11 +185,13 @@ MultiresolutionTagger::MultiresolutionTagger(
                     
                     if (sensor_db->keyExists("Harten_wavelet_uses_global_tol"))
                     {
-                        d_Harten_wavelet_uses_global_tol = sensor_db->getBoolVector("Harten_wavelet_uses_global_tol");
+                        d_Harten_wavelet_uses_global_tol =
+                            sensor_db->getBoolVector("Harten_wavelet_uses_global_tol");
                     }
                     else if (sensor_db->keyExists("d_Harten_wavelet_uses_global_tol"))
                     {
-                        d_Harten_wavelet_uses_global_tol = sensor_db->getBoolVector("d_Harten_wavelet_uses_global_tol");
+                        d_Harten_wavelet_uses_global_tol =
+                            sensor_db->getBoolVector("d_Harten_wavelet_uses_global_tol");
                     }
                     else
                     {
@@ -212,17 +224,20 @@ MultiresolutionTagger::MultiresolutionTagger(
                     {
                         if (sensor_db->keyExists("Harten_wavelet_global_tol"))
                         {
-                            d_Harten_wavelet_global_tol = sensor_db->getDoubleVector("Harten_wavelet_global_tol");
+                            d_Harten_wavelet_global_tol =
+                                sensor_db->getDoubleVector("Harten_wavelet_global_tol");
                         }
                         else if (sensor_db->keyExists("d_Harten_wavelet_global_tol"))
                         {
-                            d_Harten_wavelet_global_tol = sensor_db->getDoubleVector("d_Harten_wavelet_global_tol");
+                            d_Harten_wavelet_global_tol =
+                                sensor_db->getDoubleVector("d_Harten_wavelet_global_tol");
                         }
                         else
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
-                                << "No key 'Harten_wavelet_global_tol'/'d_Harten_wavelet_global_tol' found in database for "
+                                << "No key 'Harten_wavelet_global_tol'/"
+                                << "'d_Harten_wavelet_global_tol' found in database for "
                                 << sensor_key
                                 << "."
                                 << std::endl);
@@ -247,17 +262,20 @@ MultiresolutionTagger::MultiresolutionTagger(
                     
                     if (sensor_db->keyExists("Harten_wavelet_uses_local_tol"))
                     {
-                        d_Harten_wavelet_uses_local_tol = sensor_db->getBoolVector("Harten_wavelet_uses_local_tol");
+                        d_Harten_wavelet_uses_local_tol =
+                            sensor_db->getBoolVector("Harten_wavelet_uses_local_tol");
                     }
                     else if (sensor_db->keyExists("d_Harten_wavelet_uses_local_tol"))
                     {
-                        d_Harten_wavelet_uses_local_tol = sensor_db->getBoolVector("d_Harten_wavelet_uses_local_tol");
+                        d_Harten_wavelet_uses_local_tol =
+                            sensor_db->getBoolVector("d_Harten_wavelet_uses_local_tol");
                     }
                     else
                     {
                         TBOX_ERROR(d_object_name
                             << ": "
-                            << "No key 'Harten_wavelet_uses_local_tol'/'d_Harten_wavelet_uses_local_tol'"
+                            << "No key 'Harten_wavelet_uses_local_tol'/"
+                            << "'d_Harten_wavelet_uses_local_tol'"
                             << " found in database for "
                             << sensor_key
                             << "."
@@ -284,17 +302,20 @@ MultiresolutionTagger::MultiresolutionTagger(
                     {
                         if (sensor_db->keyExists("Harten_wavelet_local_tol"))
                         {
-                            d_Harten_wavelet_local_tol = sensor_db->getDoubleVector("Harten_wavelet_local_tol");
+                            d_Harten_wavelet_local_tol =
+                                sensor_db->getDoubleVector("Harten_wavelet_local_tol");
                         }
                         else if (sensor_db->keyExists("d_Harten_wavelet_local_tol"))
                         {
-                            d_Harten_wavelet_local_tol = sensor_db->getDoubleVector("d_Harten_wavelet_local_tol");
+                            d_Harten_wavelet_local_tol =
+                                sensor_db->getDoubleVector("d_Harten_wavelet_local_tol");
                         }
                         else
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
-                                << "No key 'Harten_wavelet_local_tol'/'d_Harten_wavelet_local_tol' found in database for "
+                                << "No key 'Harten_wavelet_local_tol'/"
+                                << "'d_Harten_wavelet_local_tol' found in database for "
                                 << sensor_key
                                 << "."
                                 << std::endl);
@@ -319,11 +340,13 @@ MultiresolutionTagger::MultiresolutionTagger(
                     
                     if (sensor_db->keyExists("Harten_wavelet_uses_alpha_tol"))
                     {
-                        d_Harten_wavelet_uses_alpha_tol = sensor_db->getBoolVector("Harten_wavelet_uses_alpha_tol");
+                        d_Harten_wavelet_uses_alpha_tol =
+                            sensor_db->getBoolVector("Harten_wavelet_uses_alpha_tol");
                     }
                     else if (sensor_db->keyExists("d_Harten_wavelet_uses_alpha_tol"))
                     {
-                        d_Harten_wavelet_uses_alpha_tol = sensor_db->getBoolVector("d_Harten_wavelet_uses_alpha_tol");
+                        d_Harten_wavelet_uses_alpha_tol =
+                            sensor_db->getBoolVector("d_Harten_wavelet_uses_alpha_tol");
                     }
                     else
                     {
@@ -356,17 +379,20 @@ MultiresolutionTagger::MultiresolutionTagger(
                     {
                         if (sensor_db->keyExists("Harten_wavelet_alpha_tol"))
                         {
-                            d_Harten_wavelet_alpha_tol = sensor_db->getDoubleVector("Harten_wavelet_alpha_tol");
+                            d_Harten_wavelet_alpha_tol =
+                                sensor_db->getDoubleVector("Harten_wavelet_alpha_tol");
                         }
                         else if (sensor_db->keyExists("d_Harten_wavelet_alpha_tol"))
                         {
-                            d_Harten_wavelet_alpha_tol = sensor_db->getDoubleVector("d_Harten_wavelet_alpha_tol");
+                            d_Harten_wavelet_alpha_tol =
+                                sensor_db->getDoubleVector("d_Harten_wavelet_alpha_tol");
                         }
                         else
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
-                                << "No key 'Harten_wavelet_alpha_tol'/'d_Harten_wavelet_alpha_tol' found in database for "
+                                << "No key 'Harten_wavelet_alpha_tol'/"
+                                << "'d_Harten_wavelet_alpha_tol' found in database for "
                                 << sensor_key
                                 << "."
                                 << std::endl);
@@ -467,7 +493,8 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                         d_Harten_wavelet_coeffs_density.push_back(
                             boost::make_shared<pdat::CellVariable<double> >(
                                 d_dim,
-                                "Harten wavelet coefficient of density at level " + boost::lexical_cast<std::string>(li),
+                                "Harten wavelet coefficient of density at level " +
+                                    boost::lexical_cast<std::string>(li),
                                 1));
                         
                         if (d_Harten_wavelet_uses_global_tol[vi])
@@ -480,7 +507,8 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                             d_Harten_local_means_density.push_back(
                                 boost::make_shared<pdat::CellVariable<double> >(
                                     d_dim,
-                                    "Harten local mean of density at level " + boost::lexical_cast<std::string>(li),
+                                    "Harten local mean of density at level " +
+                                        boost::lexical_cast<std::string>(li),
                                     1));
                         }
                     }
@@ -489,7 +517,10 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                     {
                         d_Harten_Lipschitz_exponent_density =
                             boost::shared_ptr<pdat::CellVariable<double> > (
-                                new pdat::CellVariable<double>(d_dim, "Harten Lipschitz's exponent of density", 1));
+                                new pdat::CellVariable<double>(
+                                    d_dim,
+                                    "Harten Lipschitz's exponent of density",
+                                    1));
                     }
                 }
                 else if (variable_key == "TOTAL_ENERGY")
@@ -499,7 +530,8 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                         d_Harten_wavelet_coeffs_total_energy.push_back(
                             boost::make_shared<pdat::CellVariable<double> >(
                                 d_dim,
-                                "Harten wavelet coefficient of total energy at level " + boost::lexical_cast<std::string>(li),
+                                "Harten wavelet coefficient of total energy at level " +
+                                    boost::lexical_cast<std::string>(li),
                                 1));
                         
                         if (d_Harten_wavelet_uses_global_tol[vi])
@@ -512,7 +544,8 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                             d_Harten_local_means_total_energy.push_back(
                                 boost::make_shared<pdat::CellVariable<double> >(
                                     d_dim,
-                                    "Harten local mean of total energy at level " + boost::lexical_cast<std::string>(li),
+                                    "Harten local mean of total energy at level " +
+                                        boost::lexical_cast<std::string>(li),
                                     1));
                         }
                     }
@@ -521,7 +554,10 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                     {
                         d_Harten_Lipschitz_exponent_total_energy =
                             boost::shared_ptr<pdat::CellVariable<double> > (
-                                new pdat::CellVariable<double>(d_dim, "Harten Lipschitz's exponent of total energy", 1));
+                                new pdat::CellVariable<double>(
+                                    d_dim,
+                                    "Harten Lipschitz's exponent of total energy",
+                                    1));
                     }
                 }
                 else if (variable_key == "PRESSURE")
@@ -531,7 +567,8 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                         d_Harten_wavelet_coeffs_pressure.push_back(
                             boost::make_shared<pdat::CellVariable<double> >(
                                 d_dim,
-                                "Harten wavelet coefficient of pressure at level " + boost::lexical_cast<std::string>(li),
+                                "Harten wavelet coefficient of pressure at level " +
+                                    boost::lexical_cast<std::string>(li),
                                 1));
                         
                         if (d_Harten_wavelet_uses_global_tol[vi])
@@ -544,7 +581,8 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                             d_Harten_local_means_pressure.push_back(
                                 boost::make_shared<pdat::CellVariable<double> >(
                                     d_dim,
-                                    "Harten local mean of pressure at level " + boost::lexical_cast<std::string>(li),
+                                    "Harten local mean of pressure at level " +
+                                        boost::lexical_cast<std::string>(li),
                                     1));
                         }
                     }
@@ -553,7 +591,10 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                     {
                         d_Harten_Lipschitz_exponent_pressure =
                             boost::shared_ptr<pdat::CellVariable<double> > (
-                                new pdat::CellVariable<double>(d_dim, "Harten Lipschitz's exponent of pressure", 1));
+                                new pdat::CellVariable<double>(
+                                    d_dim,
+                                    "Harten Lipschitz's exponent of pressure",
+                                    1));
                     }
                 }
                 else
@@ -721,7 +762,8 @@ MultiresolutionTagger::registerPlotQuantities(
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                     {
                         visit_writer->registerPlotQuantity(
-                            "Harten wavelet coefficient of density at level " + boost::lexical_cast<std::string>(li),
+                            "Harten wavelet coefficient of density at level " +
+                                boost::lexical_cast<std::string>(li),
                             "SCALAR",
                             vardb->mapVariableAndContextToIndex(
                                d_Harten_wavelet_coeffs_density[li],
@@ -743,7 +785,8 @@ MultiresolutionTagger::registerPlotQuantities(
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                     {
                         visit_writer->registerPlotQuantity(
-                            "Harten wavelet coefficient of total energy at level " + boost::lexical_cast<std::string>(li),
+                            "Harten wavelet coefficient of total energy at level " +
+                                boost::lexical_cast<std::string>(li),
                             "SCALAR",
                             vardb->mapVariableAndContextToIndex(
                                d_Harten_wavelet_coeffs_total_energy[li],
@@ -765,7 +808,8 @@ MultiresolutionTagger::registerPlotQuantities(
                     for (int li = 0; li < d_Harten_wavelet_num_level; li++)
                     {
                         visit_writer->registerPlotQuantity(
-                            "Harten wavelet coefficient of pressure at level " + boost::lexical_cast<std::string>(li),
+                            "Harten wavelet coefficient of pressure at level " +
+                                boost::lexical_cast<std::string>(li),
                             "SCALAR",
                             vardb->mapVariableAndContextToIndex(
                                d_Harten_wavelet_coeffs_pressure[li],

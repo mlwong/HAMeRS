@@ -53,8 +53,8 @@ GradientTagger::GradientTagger(
             
             if (!((sensor_key == "gradient_sensors") || (sensor_key == "d_gradient_sensors")))
             {
-                if (!((sensor_key == "FIRST_DERIVATIVE") ||
-                      (sensor_key == "SECOND_DERIVATIVE") ||
+                if (!((sensor_key == "DIFFERENCE_FIRST_DERIVATIVE") ||
+                      (sensor_key == "DIFFERENCE_SECOND_DERIVATIVE") ||
                       (sensor_key == "JAMESON_GRADIENT")))
                 {
                     TBOX_ERROR(d_object_name
@@ -71,33 +71,38 @@ GradientTagger::GradientTagger(
                     sensor_keys_count++;
                 }
                 
-                if (sensor_db && sensor_key == "FIRST_DERIVATIVE")
+                if (sensor_db && sensor_key == "DIFFERENCE_FIRST_DERIVATIVE")
                 {
-                    d_gradient_sensor_first_derivative.reset(new GradientSensorFirstDerivative(
-                        "first derivative gradient sensor",
+                    d_difference_first_derivative.reset(new DifferenceFirstDerivative(
+                        "difference of first derivative",
                         d_dim));
                     
-                    if (sensor_db->keyExists("first_derivative_variables"))
+                    if (sensor_db->keyExists("difference_first_derivative_variables"))
                     {
-                        d_first_derivative_variables = sensor_db->getStringVector("first_derivative_variables");
+                        d_difference_first_derivative_variables =
+                            sensor_db->getStringVector("difference_first_derivative_variables");
                     }
-                    else if (sensor_db->keyExists("d_first_derivative_variables"))
+                    else if (sensor_db->keyExists("d_difference_first_derivative_variables"))
                     {
-                        d_first_derivative_variables = sensor_db->getStringVector("d_first_derivative_variables");
+                        d_difference_first_derivative_variables =
+                            sensor_db->getStringVector("d_difference_first_derivative_variables");
                     }
                     else
                     {
                         TBOX_ERROR(d_object_name
                             << ": "
-                            << "No key 'first_derivative_variables'/'d_first_derivative_variables' found in database for "
+                            << "No key 'difference_first_derivative_variables'/"
+                            << "'d_difference_first_derivative_variables' found in database for "
                             << sensor_key
                             << "."
                             << std::endl);
                     }
                     
-                    for (int vi = 0; vi < static_cast<int>(d_first_derivative_variables.size()); vi++)
+                    for (int vi = 0;
+                         vi < static_cast<int>(d_difference_first_derivative_variables.size());
+                         vi++)
                     {
-                        std::string variable_key = d_first_derivative_variables[vi];
+                        std::string variable_key = d_difference_first_derivative_variables[vi];
                         
                         if (!((variable_key == "DENSITY") ||
                               (variable_key == "TOTAL_ENERGY") ||
@@ -115,30 +120,33 @@ GradientTagger::GradientTagger(
                     int num_true = 0;
                     
                     /*
-                     * Get the settings for derivative global tolerances.
+                     * Get the settings for difference global tolerances.
                      */
                     
-                    if (sensor_db->keyExists("first_derivative_uses_global_tol"))
+                    if (sensor_db->keyExists("difference_first_derivative_uses_global_tol"))
                     {
-                        d_first_derivative_uses_global_tol = sensor_db->getBoolVector("first_derivative_uses_global_tol");
+                        d_difference_first_derivative_uses_global_tol =
+                            sensor_db->getBoolVector("difference_first_derivative_uses_global_tol");
                     }
-                    else if (sensor_db->keyExists("d_first_derivative_uses_global_tol"))
+                    else if (sensor_db->keyExists("d_difference_first_derivative_uses_global_tol"))
                     {
-                        d_first_derivative_uses_global_tol = sensor_db->getBoolVector("d_first_derivative_uses_global_tol");
+                        d_difference_first_derivative_uses_global_tol =
+                            sensor_db->getBoolVector("d_difference_first_derivative_uses_global_tol");
                     }
                     else
                     {
                         TBOX_ERROR(d_object_name
                             << ": "
-                            << "No key 'first_derivative_uses_global_tol'/'d_first_derivative_uses_global_tol'"
+                            << "No key 'difference_first_derivative_uses_global_tol'/"
+                            << "'d_difference_first_derivative_uses_global_tol'"
                             << " found in database for "
                             << sensor_key
                             << "."
                             << std::endl);
                     }
                     
-                    if (static_cast<int>(d_first_derivative_variables.size()) !=
-                        static_cast<int>(d_first_derivative_uses_global_tol.size()))
+                    if (static_cast<int>(d_difference_first_derivative_variables.size()) !=
+                        static_cast<int>(d_difference_first_derivative_uses_global_tol.size()))
                     {
                         TBOX_ERROR(d_object_name
                             << ": "
@@ -149,31 +157,34 @@ GradientTagger::GradientTagger(
                             << std::endl);
                     }
                     
-                    num_true = std::count(d_first_derivative_uses_global_tol.begin(),
-                        d_first_derivative_uses_global_tol.end(),
+                    num_true = std::count(d_difference_first_derivative_uses_global_tol.begin(),
+                        d_difference_first_derivative_uses_global_tol.end(),
                         true);
                     
                     if (num_true > 0)
                     {
-                        if (sensor_db->keyExists("first_derivative_global_tol"))
+                        if (sensor_db->keyExists("difference_first_derivative_global_tol"))
                         {
-                            d_first_derivative_global_tol = sensor_db->getDoubleVector("first_derivative_global_tol");
+                            d_difference_first_derivative_global_tol =
+                                sensor_db->getDoubleVector("difference_first_derivative_global_tol");
                         }
-                        else if (sensor_db->keyExists("d_first_derivative_global_tol"))
+                        else if (sensor_db->keyExists("d_difference_first_derivative_global_tol"))
                         {
-                            d_first_derivative_global_tol = sensor_db->getDoubleVector("d_first_derivative_global_tol");
+                            d_difference_first_derivative_global_tol =
+                                sensor_db->getDoubleVector("d_difference_first_derivative_global_tol");
                         }
                         else
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
-                                << "No key 'first_derivative_global_tol'/'d_first_derivative_global_tol' found in database for "
+                                << "No key 'difference_first_derivative_global_tol'/"
+                                << "'d_difference_first_derivative_global_tol' found in database for "
                                 << sensor_key
                                 << "."
                                 << std::endl);
                         }
                         
-                        if (num_true != static_cast<int>(d_first_derivative_global_tol.size()))
+                        if (num_true != static_cast<int>(d_difference_first_derivative_global_tol.size()))
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
@@ -187,30 +198,33 @@ GradientTagger::GradientTagger(
                     }
                     
                     /*
-                     * Get the settings for derivative local tolerances.
+                     * Get the settings for difference local tolerances.
                      */
                     
-                    if (sensor_db->keyExists("first_derivative_uses_local_tol"))
+                    if (sensor_db->keyExists("difference_first_derivative_uses_local_tol"))
                     {
-                        d_first_derivative_uses_local_tol = sensor_db->getBoolVector("first_derivative_uses_local_tol");
+                        d_difference_first_derivative_uses_local_tol =
+                            sensor_db->getBoolVector("difference_first_derivative_uses_local_tol");
                     }
-                    else if (sensor_db->keyExists("d_first_derivative_uses_local_tol"))
+                    else if (sensor_db->keyExists("d_difference_first_derivative_uses_local_tol"))
                     {
-                        d_first_derivative_uses_local_tol = sensor_db->getBoolVector("d_first_derivative_uses_local_tol");
+                        d_difference_first_derivative_uses_local_tol =
+                            sensor_db->getBoolVector("d_difference_first_derivative_uses_local_tol");
                     }
                     else
                     {
                         TBOX_ERROR(d_object_name
                             << ": "
-                            << "No key 'first_derivative_uses_local_tol'/'d_first_derivative_uses_local_tol'"
+                            << "No key 'difference_first_derivative_uses_local_tol'/"
+                            << "'d_difference_first_derivative_uses_local_tol'"
                             << " found in database for "
                             << sensor_key
                             << "."
                             << std::endl);
                     }
                     
-                    if (static_cast<int>(d_first_derivative_variables.size()) !=
-                        static_cast<int>(d_first_derivative_uses_local_tol.size()))
+                    if (static_cast<int>(d_difference_first_derivative_variables.size()) !=
+                        static_cast<int>(d_difference_first_derivative_uses_local_tol.size()))
                     {
                         TBOX_ERROR(d_object_name
                             << ": "
@@ -221,31 +235,34 @@ GradientTagger::GradientTagger(
                             << std::endl);
                     }
                     
-                    num_true = std::count(d_first_derivative_uses_local_tol.begin(),
-                        d_first_derivative_uses_local_tol.end(),
+                    num_true = std::count(d_difference_first_derivative_uses_local_tol.begin(),
+                        d_difference_first_derivative_uses_local_tol.end(),
                         true);
                     
                     if (num_true > 0)
                     {
-                        if (sensor_db->keyExists("first_derivative_local_tol"))
+                        if (sensor_db->keyExists("difference_first_derivative_local_tol"))
                         {
-                            d_first_derivative_local_tol = sensor_db->getDoubleVector("first_derivative_local_tol");
+                            d_difference_first_derivative_local_tol =
+                                sensor_db->getDoubleVector("difference_first_derivative_local_tol");
                         }
-                        else if (sensor_db->keyExists("d_first_derivative_local_tol"))
+                        else if (sensor_db->keyExists("d_difference_first_derivative_local_tol"))
                         {
-                            d_first_derivative_local_tol = sensor_db->getDoubleVector("d_first_derivative_local_tol");
+                            d_difference_first_derivative_local_tol =
+                                sensor_db->getDoubleVector("d_difference_first_derivative_local_tol");
                         }
                         else
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
-                                << "No key 'first_derivative_local_tol'/'d_first_derivative_local_tol' found in database for "
+                                << "No key 'difference_first_derivative_local_tol'/"
+                                << "'d_difference_first_derivative_local_tol' found in database for "
                                 << sensor_key
                                 << "."
                                 << std::endl);
                         }
                         
-                        if (num_true != static_cast<int>(d_first_derivative_local_tol.size()))
+                        if (num_true != static_cast<int>(d_difference_first_derivative_local_tol.size()))
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
@@ -258,33 +275,38 @@ GradientTagger::GradientTagger(
                         }
                     }
                 }
-                else if (sensor_db && sensor_key == "SECOND_DERIVATIVE")
+                else if (sensor_db && sensor_key == "DIFFERENCE_SECOND_DERIVATIVE")
                 {
-                    d_gradient_sensor_second_derivative.reset(new GradientSensorSecondDerivative(
-                        "second derivative gradient sensor",
+                    d_difference_second_derivative.reset(new DifferenceSecondDerivative(
+                        "difference of second derivative",
                         d_dim));
                     
-                    if (sensor_db->keyExists("second_derivative_variables"))
+                    if (sensor_db->keyExists("difference_second_derivative_variables"))
                     {
-                        d_second_derivative_variables = sensor_db->getStringVector("second_derivative_variables");
+                        d_difference_second_derivative_variables =
+                            sensor_db->getStringVector("difference_second_derivative_variables");
                     }
-                    else if (sensor_db->keyExists("d_second_derivative_variables"))
+                    else if (sensor_db->keyExists("d_difference_second_derivative_variables"))
                     {
-                        d_second_derivative_variables = sensor_db->getStringVector("d_second_derivative_variables");
+                        d_difference_second_derivative_variables =
+                            sensor_db->getStringVector("d_difference_second_derivative_variables");
                     }
                     else
                     {
                         TBOX_ERROR(d_object_name
                             << ": "
-                            << "No key 'second_derivative_variables'/'d_second_derivative_variables' found in database for "
+                            << "No key 'difference_second_derivative_variables'/"
+                            << "'d_difference_second_derivative_variables' found in database for "
                             << sensor_key
                             << "."
                             << std::endl);
                     }
                     
-                    for (int vi = 0; vi < static_cast<int>(d_second_derivative_variables.size()); vi++)
+                    for (int vi = 0;
+                         vi < static_cast<int>(d_difference_second_derivative_variables.size());
+                         vi++)
                     {
-                        std::string variable_key = d_second_derivative_variables[vi];
+                        std::string variable_key = d_difference_second_derivative_variables[vi];
                         
                         if (!((variable_key == "DENSITY") ||
                               (variable_key == "TOTAL_ENERGY") ||
@@ -302,30 +324,33 @@ GradientTagger::GradientTagger(
                     int num_true = 0;
                     
                     /*
-                     * Get the settings for derivative global tolerances.
+                     * Get the settings for difference global tolerances.
                      */
                     
-                    if (sensor_db->keyExists("second_derivative_uses_global_tol"))
+                    if (sensor_db->keyExists("difference_second_derivative_uses_global_tol"))
                     {
-                        d_second_derivative_uses_global_tol = sensor_db->getBoolVector("second_derivative_uses_global_tol");
+                        d_difference_second_derivative_uses_global_tol =
+                            sensor_db->getBoolVector("difference_second_derivative_uses_global_tol");
                     }
-                    else if (sensor_db->keyExists("d_second_derivative_uses_global_tol"))
+                    else if (sensor_db->keyExists("d_difference_second_derivative_uses_global_tol"))
                     {
-                        d_second_derivative_uses_global_tol = sensor_db->getBoolVector("d_second_derivative_uses_global_tol");
+                        d_difference_second_derivative_uses_global_tol =
+                            sensor_db->getBoolVector("d_difference_second_derivative_uses_global_tol");
                     }
                     else
                     {
                         TBOX_ERROR(d_object_name
                             << ": "
-                            << "No key 'second_derivative_uses_global_tol'/'d_second_derivative_uses_global_tol'"
+                            << "No key 'difference_second_derivative_uses_global_tol'/"
+                            << "'d_difference_second_derivative_uses_global_tol'"
                             << " found in database for "
                             << sensor_key
                             << "."
                             << std::endl);
                     }
                     
-                    if (static_cast<int>(d_second_derivative_variables.size()) !=
-                        static_cast<int>(d_second_derivative_uses_global_tol.size()))
+                    if (static_cast<int>(d_difference_second_derivative_variables.size()) !=
+                        static_cast<int>(d_difference_second_derivative_uses_global_tol.size()))
                     {
                         TBOX_ERROR(d_object_name
                             << ": "
@@ -336,31 +361,34 @@ GradientTagger::GradientTagger(
                             << std::endl);
                     }
                     
-                    num_true = std::count(d_second_derivative_uses_global_tol.begin(),
-                        d_second_derivative_uses_global_tol.end(),
+                    num_true = std::count(d_difference_second_derivative_uses_global_tol.begin(),
+                        d_difference_second_derivative_uses_global_tol.end(),
                         true);
                     
                     if (num_true > 0)
                     {
-                        if (sensor_db->keyExists("second_derivative_global_tol"))
+                        if (sensor_db->keyExists("difference_second_derivative_global_tol"))
                         {
-                            d_second_derivative_global_tol = sensor_db->getDoubleVector("second_derivative_global_tol");
+                            d_difference_second_derivative_global_tol =
+                                sensor_db->getDoubleVector("second_derivative_global_tol");
                         }
-                        else if (sensor_db->keyExists("d_second_derivative_global_tol"))
+                        else if (sensor_db->keyExists("d_difference_second_derivative_global_tol"))
                         {
-                            d_second_derivative_global_tol = sensor_db->getDoubleVector("d_second_derivative_global_tol");
+                            d_difference_second_derivative_global_tol =
+                                sensor_db->getDoubleVector("d_difference_second_derivative_global_tol");
                         }
                         else
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
-                                << "No key 'second_derivative_global_tol'/'d_second_derivative_global_tol' found in database for "
+                                << "No key 'difference_second_derivative_global_tol'/"
+                                << "'d_difference_second_derivative_global_tol' found in database for "
                                 << sensor_key
                                 << "."
                                 << std::endl);
                         }
                         
-                        if (num_true != static_cast<int>(d_second_derivative_global_tol.size()))
+                        if (num_true != static_cast<int>(d_difference_second_derivative_global_tol.size()))
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
@@ -374,30 +402,33 @@ GradientTagger::GradientTagger(
                     }
                     
                     /*
-                     * Get the settings for derivative local tolerances.
+                     * Get the settings for difference local tolerances.
                      */
                     
-                    if (sensor_db->keyExists("second_derivative_uses_local_tol"))
+                    if (sensor_db->keyExists("difference_second_derivative_uses_local_tol"))
                     {
-                        d_second_derivative_uses_local_tol = sensor_db->getBoolVector("second_derivative_uses_local_tol");
+                        d_difference_second_derivative_uses_local_tol =
+                            sensor_db->getBoolVector("difference_second_derivative_uses_local_tol");
                     }
-                    else if (sensor_db->keyExists("d_second_derivative_uses_local_tol"))
+                    else if (sensor_db->keyExists("d_difference_second_derivative_uses_local_tol"))
                     {
-                        d_second_derivative_uses_local_tol = sensor_db->getBoolVector("d_second_derivative_uses_local_tol");
+                        d_difference_second_derivative_uses_local_tol =
+                            sensor_db->getBoolVector("d_difference_second_derivative_uses_local_tol");
                     }
                     else
                     {
                         TBOX_ERROR(d_object_name
                             << ": "
-                            << "No key 'second_derivative_uses_local_tol'/'d_second_derivative_uses_local_tol'"
+                            << "No key 'second_derivative_uses_local_tol'/"
+                            << "'d_difference_second_derivative_uses_local_tol'"
                             << " found in database for "
                             << sensor_key
                             << "."
                             << std::endl);
                     }
                     
-                    if (static_cast<int>(d_second_derivative_variables.size()) !=
-                        static_cast<int>(d_second_derivative_uses_local_tol.size()))
+                    if (static_cast<int>(d_difference_second_derivative_variables.size()) !=
+                        static_cast<int>(d_difference_second_derivative_uses_local_tol.size()))
                     {
                         TBOX_ERROR(d_object_name
                             << ": "
@@ -408,31 +439,34 @@ GradientTagger::GradientTagger(
                             << std::endl);
                     }
                     
-                    num_true = std::count(d_second_derivative_uses_local_tol.begin(),
-                        d_second_derivative_uses_local_tol.end(),
+                    num_true = std::count(d_difference_second_derivative_uses_local_tol.begin(),
+                        d_difference_second_derivative_uses_local_tol.end(),
                         true);
                     
                     if (num_true > 0)
                     {
-                        if (sensor_db->keyExists("second_derivative_local_tol"))
+                        if (sensor_db->keyExists("difference_second_derivative_local_tol"))
                         {
-                            d_second_derivative_local_tol = sensor_db->getDoubleVector("second_derivative_local_tol");
+                            d_difference_second_derivative_local_tol =
+                                sensor_db->getDoubleVector("difference_second_derivative_local_tol");
                         }
-                        else if (sensor_db->keyExists("d_second_derivative_local_tol"))
+                        else if (sensor_db->keyExists("d_difference_second_derivative_local_tol"))
                         {
-                            d_second_derivative_local_tol = sensor_db->getDoubleVector("d_second_derivative_local_tol");
+                            d_difference_second_derivative_local_tol =
+                                sensor_db->getDoubleVector("d_difference_second_derivative_local_tol");
                         }
                         else
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
-                                << "No key 'second_derivative_local_tol'/'d_second_derivative_local_tol' found in database for "
+                                << "No key 'difference_second_derivative_local_tol'/"
+                                << "'d_difference_second_derivative_local_tol' found in database for "
                                 << sensor_key
                                 << "."
                                 << std::endl);
                         }
                         
-                        if (num_true != static_cast<int>(d_second_derivative_local_tol.size()))
+                        if (num_true != static_cast<int>(d_difference_second_derivative_local_tol.size()))
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
@@ -504,7 +538,8 @@ GradientTagger::GradientTagger(
                             << std::endl);
                     }
                     
-                    if (static_cast<int>(d_Jameson_gradient_variables.size()) != static_cast<int>(d_Jameson_gradient_tol.size()))
+                    if (static_cast<int>(d_Jameson_gradient_variables.size()) !=
+                        static_cast<int>(d_Jameson_gradient_tol.size()))
                     {
                         TBOX_ERROR(d_object_name
                             << ": "
@@ -565,17 +600,17 @@ GradientTagger::GradientTagger(
     {
         std::string sensor_key = d_gradient_sensors[si];
         
-        if (sensor_key == "FIRST_DERIVATIVE")
+        if (sensor_key == "DIFFERENCE_FIRST_DERIVATIVE")
         {
             d_num_gradient_ghosts = hier::IntVector::max(
                 d_num_gradient_ghosts,
-                d_gradient_sensor_first_derivative->getGradientSensorNumberOfGhostCells());
+                d_difference_first_derivative->getDifferenceNumberOfGhostCells());
         }
-        else if (sensor_key == "SECOND_DERIVATIVE")
+        else if (sensor_key == "DIFFERENCE_SECOND_DERIVATIVE")
         {
             d_num_gradient_ghosts = hier::IntVector::max(
                 d_num_gradient_ghosts,
-                d_gradient_sensor_second_derivative->getGradientSensorNumberOfGhostCells());
+                d_difference_second_derivative->getDifferenceNumberOfGhostCells());
         }
         else if (sensor_key == "JAMESON_GRADIENT")
         {
@@ -600,65 +635,83 @@ GradientTagger::registerGradientTaggerVariables(
     {
         std::string sensor_key = d_gradient_sensors[si];
         
-        if (sensor_key == "FIRST_DERIVATIVE")
+        if (sensor_key == "DIFFERENCE_FIRST_DERIVATIVE")
         {
-            for (int vi = 0; vi < static_cast<int>(d_first_derivative_variables.size()); vi++)
+            for (int vi = 0; vi < static_cast<int>(d_difference_first_derivative_variables.size()); vi++)
             {
                 // Get the key of the current variable.
-                std::string variable_key = d_first_derivative_variables[vi];
+                std::string variable_key = d_difference_first_derivative_variables[vi];
                 
                 if (variable_key == "DENSITY")
                 {
-                    d_first_derivative_density =
+                    d_difference_first_derivative_density =
                         boost::shared_ptr<pdat::CellVariable<double> > (
-                            new pdat::CellVariable<double>(d_dim, "first derivative of density", 1));
+                            new pdat::CellVariable<double>(
+                                d_dim,
+                                "first derivative of density",
+                                1));
                     
-                    if (d_first_derivative_uses_global_tol[vi])
+                    if (d_difference_first_derivative_uses_global_tol[vi])
                     {
-                        d_first_derivative_max_density = 0.0;
+                        d_difference_first_derivative_max_density = 0.0;
                     }
                     
-                    if (d_first_derivative_uses_local_tol[vi])
+                    if (d_difference_first_derivative_uses_local_tol[vi])
                     {
-                        d_first_derivative_local_mean_density =
+                        d_difference_first_derivative_local_mean_density =
                             boost::shared_ptr<pdat::CellVariable<double> > (
-                                new pdat::CellVariable<double>(d_dim, "first derivative local mean of density", 1));
+                                new pdat::CellVariable<double>(
+                                    d_dim,
+                                    "first derivative local mean of density",
+                                    1));
                     }
                 }
                 else if (variable_key == "TOTAL_ENERGY")
                 {
-                    d_first_derivative_total_energy =
+                    d_difference_first_derivative_total_energy =
                         boost::shared_ptr<pdat::CellVariable<double> > (
-                            new pdat::CellVariable<double>(d_dim, "first derivative of total energy", 1));
+                            new pdat::CellVariable<double>(
+                                d_dim,
+                                "first derivative of total energy",
+                                1));
                     
-                    if (d_first_derivative_uses_global_tol[vi])
+                    if (d_difference_first_derivative_uses_global_tol[vi])
                     {
-                        d_first_derivative_max_total_energy = 0.0;
+                        d_difference_first_derivative_max_total_energy = 0.0;
                     }
                     
-                    if (d_first_derivative_uses_local_tol[vi])
+                    if (d_difference_first_derivative_uses_local_tol[vi])
                     {
-                        d_first_derivative_local_mean_total_energy =
+                        d_difference_first_derivative_local_mean_total_energy =
                             boost::shared_ptr<pdat::CellVariable<double> > (
-                                new pdat::CellVariable<double>(d_dim, "first derivative local mean of total energy", 1));
+                                new pdat::CellVariable<double>(
+                                    d_dim,
+                                    "first derivative local mean of total energy",
+                                    1));
                     }
                 }
                 else if (variable_key == "PRESSURE")
                 {
-                    d_first_derivative_pressure =
+                    d_difference_first_derivative_pressure =
                         boost::shared_ptr<pdat::CellVariable<double> > (
-                            new pdat::CellVariable<double>(d_dim, "first derivative of pressure", 1));
+                            new pdat::CellVariable<double>(
+                                d_dim,
+                                "first derivative of pressure",
+                                1));
                     
-                    if (d_first_derivative_uses_global_tol[vi])
+                    if (d_difference_first_derivative_uses_global_tol[vi])
                     {
-                        d_first_derivative_max_pressure = 0.0;
+                        d_difference_first_derivative_max_pressure = 0.0;
                     }
                     
-                    if (d_first_derivative_uses_local_tol[vi])
+                    if (d_difference_first_derivative_uses_local_tol[vi])
                     {
-                        d_first_derivative_local_mean_pressure =
+                        d_difference_first_derivative_local_mean_pressure =
                             boost::shared_ptr<pdat::CellVariable<double> > (
-                                new pdat::CellVariable<double>(d_dim, "first derivative local mean of pressure", 1));
+                                new pdat::CellVariable<double>(
+                                    d_dim,
+                                    "first derivative local mean of pressure",
+                                    1));
                     }
                 }
                 else
@@ -672,15 +725,15 @@ GradientTagger::registerGradientTaggerVariables(
                 }
             }
             
-            for (int vi = 0; vi < static_cast<int>(d_first_derivative_variables.size()); vi++)
+            for (int vi = 0; vi < static_cast<int>(d_difference_first_derivative_variables.size()); vi++)
             {
                 // Get the key of the current variable.
-                std::string variable_key = d_first_derivative_variables[vi];
+                std::string variable_key = d_difference_first_derivative_variables[vi];
                 
                 if (variable_key == "DENSITY")
                 {
                     integrator->registerVariable(
-                        d_first_derivative_density,
+                        d_difference_first_derivative_density,
                         d_num_gradient_ghosts,
                         RungeKuttaLevelIntegrator::TIME_DEP,
                             d_grid_geometry,
@@ -690,7 +743,7 @@ GradientTagger::registerGradientTaggerVariables(
                 else if (variable_key == "TOTAL_ENERGY")
                 {
                     integrator->registerVariable(
-                        d_first_derivative_total_energy,
+                        d_difference_first_derivative_total_energy,
                         d_num_gradient_ghosts,
                         RungeKuttaLevelIntegrator::TIME_DEP,
                             d_grid_geometry,
@@ -700,7 +753,7 @@ GradientTagger::registerGradientTaggerVariables(
                 else if (variable_key == "PRESSURE")
                 {
                     integrator->registerVariable(
-                        d_first_derivative_pressure,
+                        d_difference_first_derivative_pressure,
                         d_num_gradient_ghosts,
                         RungeKuttaLevelIntegrator::TIME_DEP,
                             d_grid_geometry,
@@ -718,65 +771,83 @@ GradientTagger::registerGradientTaggerVariables(
                 }
             }
         }
-        else if (sensor_key == "SECOND_DERIVATIVE")
+        else if (sensor_key == "DIFFERENCE_SECOND_DERIVATIVE")
         {
-            for (int vi = 0; vi < static_cast<int>(d_second_derivative_variables.size()); vi++)
+            for (int vi = 0; vi < static_cast<int>(d_difference_second_derivative_variables.size()); vi++)
             {
                 // Get the key of the current variable.
-                std::string variable_key = d_second_derivative_variables[vi];
+                std::string variable_key = d_difference_second_derivative_variables[vi];
                 
                 if (variable_key == "DENSITY")
                 {
-                    d_second_derivative_density =
+                    d_difference_second_derivative_density =
                         boost::shared_ptr<pdat::CellVariable<double> > (
-                            new pdat::CellVariable<double>(d_dim, "second derivative of density", 1));
+                            new pdat::CellVariable<double>(
+                                d_dim,
+                                "second derivative of density",
+                                1));
                     
-                    if (d_second_derivative_uses_global_tol[vi])
+                    if (d_difference_second_derivative_uses_global_tol[vi])
                     {
-                        d_second_derivative_max_density = 0.0;
+                        d_difference_second_derivative_max_density = 0.0;
                     }
                     
-                    if (d_second_derivative_uses_local_tol[vi])
+                    if (d_difference_second_derivative_uses_local_tol[vi])
                     {
-                        d_second_derivative_local_mean_density =
+                        d_difference_second_derivative_local_mean_density =
                             boost::shared_ptr<pdat::CellVariable<double> > (
-                                new pdat::CellVariable<double>(d_dim, "second derivative local mean of density", 1));
+                                new pdat::CellVariable<double>(
+                                    d_dim,
+                                    "second derivative local mean of density",
+                                    1));
                     }
                 }
                 else if (variable_key == "TOTAL_ENERGY")
                 {
-                    d_second_derivative_total_energy =
+                    d_difference_second_derivative_total_energy =
                         boost::shared_ptr<pdat::CellVariable<double> > (
-                            new pdat::CellVariable<double>(d_dim, "second derivative of total energy", 1));
+                            new pdat::CellVariable<double>(
+                                d_dim,
+                                "second derivative of total energy",
+                                1));
                     
-                    if (d_second_derivative_uses_global_tol[vi])
+                    if (d_difference_second_derivative_uses_global_tol[vi])
                     {
-                        d_second_derivative_max_total_energy = 0.0;
+                        d_difference_second_derivative_max_total_energy = 0.0;
                     }
                     
-                    if (d_second_derivative_uses_local_tol[vi])
+                    if (d_difference_second_derivative_uses_local_tol[vi])
                     {
-                        d_second_derivative_local_mean_total_energy =
+                        d_difference_second_derivative_local_mean_total_energy =
                             boost::shared_ptr<pdat::CellVariable<double> > (
-                                new pdat::CellVariable<double>(d_dim, "second derivative local mean of total energy", 1));
+                                new pdat::CellVariable<double>(
+                                    d_dim,
+                                    "second derivative local mean of total energy",
+                                    1));
                     }
                 }
                 else if (variable_key == "PRESSURE")
                 {
-                    d_second_derivative_pressure =
+                    d_difference_second_derivative_pressure =
                         boost::shared_ptr<pdat::CellVariable<double> > (
-                            new pdat::CellVariable<double>(d_dim, "second derivative of pressure", 1));
+                            new pdat::CellVariable<double>(
+                                d_dim,
+                                "second derivative of pressure",
+                                1));
                     
-                    if (d_second_derivative_uses_global_tol[vi])
+                    if (d_difference_second_derivative_uses_global_tol[vi])
                     {
-                        d_second_derivative_max_pressure = 0.0;
+                        d_difference_second_derivative_max_pressure = 0.0;
                     }
                     
-                    if (d_second_derivative_uses_local_tol[vi])
+                    if (d_difference_second_derivative_uses_local_tol[vi])
                     {
-                        d_second_derivative_local_mean_pressure =
+                        d_difference_second_derivative_local_mean_pressure =
                             boost::shared_ptr<pdat::CellVariable<double> > (
-                                new pdat::CellVariable<double>(d_dim, "second derivative local mean of pressure", 1));
+                                new pdat::CellVariable<double>(
+                                    d_dim,
+                                    "second derivative local mean of pressure",
+                                    1));
                     }
                 }
                 else
@@ -790,15 +861,15 @@ GradientTagger::registerGradientTaggerVariables(
                 }
             }
             
-            for (int vi = 0; vi < static_cast<int>(d_second_derivative_variables.size()); vi++)
+            for (int vi = 0; vi < static_cast<int>(d_difference_second_derivative_variables.size()); vi++)
             {
                 // Get the key of the current variable.
-                std::string variable_key = d_second_derivative_variables[vi];
+                std::string variable_key = d_difference_second_derivative_variables[vi];
                 
                 if (variable_key == "DENSITY")
                 {
                     integrator->registerVariable(
-                        d_second_derivative_density,
+                        d_difference_second_derivative_density,
                         d_num_gradient_ghosts,
                         RungeKuttaLevelIntegrator::TIME_DEP,
                             d_grid_geometry,
@@ -808,7 +879,7 @@ GradientTagger::registerGradientTaggerVariables(
                 else if (variable_key == "TOTAL_ENERGY")
                 {
                     integrator->registerVariable(
-                        d_second_derivative_total_energy,
+                        d_difference_second_derivative_total_energy,
                         d_num_gradient_ghosts,
                         RungeKuttaLevelIntegrator::TIME_DEP,
                             d_grid_geometry,
@@ -818,7 +889,7 @@ GradientTagger::registerGradientTaggerVariables(
                 else if (variable_key == "PRESSURE")
                 {
                     integrator->registerVariable(
-                        d_second_derivative_pressure,
+                        d_difference_second_derivative_pressure,
                         d_num_gradient_ghosts,
                         RungeKuttaLevelIntegrator::TIME_DEP,
                             d_grid_geometry,
@@ -847,19 +918,28 @@ GradientTagger::registerGradientTaggerVariables(
                 {
                     d_Jameson_gradient_density =
                         boost::shared_ptr<pdat::CellVariable<double> > (
-                            new pdat::CellVariable<double>(d_dim, "Jameson density gradient", 1));
+                            new pdat::CellVariable<double>(
+                                d_dim,
+                                "Jameson density gradient",
+                                1));
                 }
                 else if (variable_key == "TOTAL_ENERGY")
                 {
                     d_Jameson_gradient_total_energy =
                         boost::shared_ptr<pdat::CellVariable<double> > (
-                            new pdat::CellVariable<double>(d_dim, "Jameson total_energy gradient", 1));
+                            new pdat::CellVariable<double>(
+                                d_dim,
+                                "Jameson total_energy gradient",
+                                1));
                 }
                 else if (variable_key == "PRESSURE")
                 {
                     d_Jameson_gradient_pressure =
                         boost::shared_ptr<pdat::CellVariable<double> > (
-                            new pdat::CellVariable<double>(d_dim, "Jameson pressure gradient", 1));
+                            new pdat::CellVariable<double>(
+                                d_dim,
+                                "Jameson pressure gradient",
+                                1));
                 }
                 else
                 {
@@ -939,12 +1019,14 @@ GradientTagger::registerPlotQuantities(
     {
         std::string sensor_key = d_gradient_sensors[si];
         
-        if (sensor_key == "FIRST_DERIVATIVE")
+        if (sensor_key == "DIFFERENCE_FIRST_DERIVATIVE")
         {
-            for (int vi = 0; vi < static_cast<int>(d_first_derivative_variables.size()); vi++)
+            for (int vi = 0;
+                 vi < static_cast<int>(d_difference_first_derivative_variables.size());
+                 vi++)
             {
                 // Get the key of the current variable.
-                std::string variable_key = d_first_derivative_variables[vi];
+                std::string variable_key = d_difference_first_derivative_variables[vi];
                 
                 if (variable_key == "DENSITY")
                 {
@@ -952,7 +1034,7 @@ GradientTagger::registerPlotQuantities(
                         "first derivative of density",
                         "SCALAR",
                         vardb->mapVariableAndContextToIndex(
-                           d_first_derivative_density,
+                           d_difference_first_derivative_density,
                            plot_context));
                 }
                 else if (variable_key == "TOTAL_ENERGY")
@@ -961,7 +1043,7 @@ GradientTagger::registerPlotQuantities(
                         "first derivative of total energy",
                         "SCALAR",
                         vardb->mapVariableAndContextToIndex(
-                           d_first_derivative_total_energy,
+                           d_difference_first_derivative_total_energy,
                            plot_context));
                 }
                 else if (variable_key == "PRESSURE")
@@ -970,17 +1052,19 @@ GradientTagger::registerPlotQuantities(
                         "first derivative of pressure",
                         "SCALAR",
                         vardb->mapVariableAndContextToIndex(
-                           d_first_derivative_pressure,
+                           d_difference_first_derivative_pressure,
                            plot_context));
                 }
             }
         }
-        else if (sensor_key == "SECOND_DERIVATIVE")
+        else if (sensor_key == "DIFFERENCE_SECOND_DERIVATIVE")
         {
-            for (int vi = 0; vi < static_cast<int>(d_second_derivative_variables.size()); vi++)
+            for (int vi = 0;
+                 vi < static_cast<int>(d_difference_second_derivative_variables.size());
+                 vi++)
             {
                 // Get the key of the current variable.
-                std::string variable_key = d_second_derivative_variables[vi];
+                std::string variable_key = d_difference_second_derivative_variables[vi];
                 
                 if (variable_key == "DENSITY")
                 {
@@ -988,7 +1072,7 @@ GradientTagger::registerPlotQuantities(
                         "second derivative of density",
                         "SCALAR",
                         vardb->mapVariableAndContextToIndex(
-                           d_second_derivative_density,
+                           d_difference_second_derivative_density,
                            plot_context));
                 }
                 else if (variable_key == "TOTAL_ENERGY")
@@ -997,7 +1081,7 @@ GradientTagger::registerPlotQuantities(
                         "second derivative of total energy",
                         "SCALAR",
                         vardb->mapVariableAndContextToIndex(
-                           d_second_derivative_total_energy,
+                           d_difference_second_derivative_total_energy,
                            plot_context));
                 }
                 else if (variable_key == "PRESSURE")
@@ -1006,14 +1090,16 @@ GradientTagger::registerPlotQuantities(
                         "second derivative of pressure",
                         "SCALAR",
                         vardb->mapVariableAndContextToIndex(
-                           d_second_derivative_pressure,
+                           d_difference_second_derivative_pressure,
                            plot_context));
                 }
             }
         }
         else if (sensor_key == "JAMESON_GRADIENT")
         {
-            for (int vi = 0; vi < static_cast<int>(d_Jameson_gradient_variables.size()); vi++)
+            for (int vi = 0;
+                 vi < static_cast<int>(d_Jameson_gradient_variables.size());
+                 vi++)
             {
                 // Get the key of the current variable.
                 std::string variable_key = d_Jameson_gradient_variables[vi];
@@ -1075,63 +1161,73 @@ GradientTagger::printClassData(std::ostream& os) const
     }
     os << std::endl;
     
-    if (d_gradient_sensor_first_derivative != nullptr)
+    if (d_difference_first_derivative != nullptr)
     {
         os << std::endl;
-        os << "d_first_derivative_variables = ";
-        for (int vi = 0; vi < static_cast<int>(d_first_derivative_variables.size()); vi++)
+        os << "d_difference_first_derivative_variables = ";
+        for (int vi = 0;
+             vi< static_cast<int>(d_difference_first_derivative_variables.size());
+             vi++)
         {
-            os << "\"" << d_first_derivative_variables[vi] << "\"";
+            os << "\"" << d_difference_first_derivative_variables[vi] << "\"";
             
-            if (vi < static_cast<int>(d_first_derivative_variables.size()) - 1)
+            if (vi < static_cast<int>(d_difference_first_derivative_variables.size()) - 1)
             {
                 os << ", ";
             }
         }
         os << std::endl;
         
-        os << "d_first_derivative_uses_global_tol = ";
-        for (int ti = 0; ti < static_cast<int>(d_first_derivative_uses_global_tol.size()); ti++)
+        os << "d_difference_first_derivative_uses_global_tol = ";
+        for (int ti = 0;
+             ti < static_cast<int>(d_difference_first_derivative_uses_global_tol.size());
+             ti++)
         {
-            os << "\"" << d_first_derivative_uses_global_tol[ti] << "\"";
+            os << "\"" << d_difference_first_derivative_uses_global_tol[ti] << "\"";
             
-            if (ti < static_cast<int>(d_first_derivative_uses_global_tol.size()) - 1)
+            if (ti < static_cast<int>(d_difference_first_derivative_uses_global_tol.size()) - 1)
             {
                 os << ", ";
             }
         }
         os << std::endl;
         
-        os << "d_first_derivative_global_tol = ";
-        for (int ti = 0; ti < static_cast<int>(d_first_derivative_global_tol.size()); ti++)
+        os << "d_difference_first_derivative_global_tol = ";
+        for (int ti = 0;
+             ti < static_cast<int>(d_difference_first_derivative_global_tol.size());
+             ti++)
         {
-            os << "\"" << d_first_derivative_global_tol[ti] << "\"";
+            os << "\"" << d_difference_first_derivative_global_tol[ti] << "\"";
             
-            if (ti < static_cast<int>(d_first_derivative_global_tol.size()) - 1)
+            if (ti < static_cast<int>(d_difference_first_derivative_global_tol.size()) - 1)
             {
                 os << ", ";
             }
         }
         os << std::endl;
         
-        os << "d_first_derivative_uses_local_tol = ";
-        for (int ti = 0; ti < static_cast<int>(d_first_derivative_uses_local_tol.size()); ti++)
+        os << "d_difference_first_derivative_uses_local_tol = ";
+        for (int ti = 0;
+             ti < static_cast<int>(d_difference_first_derivative_uses_local_tol.size());
+             ti++)
         {
-            os << "\"" << d_first_derivative_uses_local_tol[ti] << "\"";
+            os << "\"" << d_difference_first_derivative_uses_local_tol[ti] << "\"";
             
-            if (ti < static_cast<int>(d_first_derivative_uses_local_tol.size()) - 1)
+            if (ti < static_cast<int>(d_difference_first_derivative_uses_local_tol.size()) - 1)
             {
                 os << ", ";
             }
         }
         os << std::endl;
         
-        os << "d_first_derivative_local_tol = ";
-        for (int ti = 0; ti < static_cast<int>(d_first_derivative_local_tol.size()); ti++)
+        os << "d_difference_first_derivative_local_tol = ";
+        for (int ti = 0;
+             ti < static_cast<int>(d_difference_first_derivative_local_tol.size());
+             ti++)
         {
-            os << "\"" << d_first_derivative_local_tol[ti] << "\"";
+            os << "\"" << d_difference_first_derivative_local_tol[ti] << "\"";
             
-            if (ti < static_cast<int>(d_first_derivative_local_tol.size()) - 1)
+            if (ti < static_cast<int>(d_difference_first_derivative_local_tol.size()) - 1)
             {
                 os << ", ";
             }
@@ -1139,63 +1235,73 @@ GradientTagger::printClassData(std::ostream& os) const
         os << std::endl;
     }
     
-    if (d_gradient_sensor_second_derivative != nullptr)
+    if (d_difference_second_derivative != nullptr)
     {
         os << std::endl;
-        os << "d_second_derivative_variables = ";
-        for (int vi = 0; vi < static_cast<int>(d_second_derivative_variables.size()); vi++)
+        os << "d_difference_second_derivative_variables = ";
+        for (int vi = 0;
+             vi < static_cast<int>(d_difference_second_derivative_variables.size());
+             vi++)
         {
-            os << "\"" << d_second_derivative_variables[vi] << "\"";
+            os << "\"" << d_difference_second_derivative_variables[vi] << "\"";
             
-            if (vi < static_cast<int>(d_second_derivative_variables.size()) - 1)
+            if (vi < static_cast<int>(d_difference_second_derivative_variables.size()) - 1)
             {
                 os << ", ";
             }
         }
         os << std::endl;
         
-        os << "d_second_derivative_uses_global_tol = ";
-        for (int ti = 0; ti < static_cast<int>(d_second_derivative_uses_global_tol.size()); ti++)
+        os << "d_difference_second_derivative_uses_global_tol = ";
+        for (int ti = 0;
+             ti < static_cast<int>(d_difference_second_derivative_uses_global_tol.size());
+             ti++)
         {
-            os << "\"" << d_second_derivative_uses_global_tol[ti] << "\"";
+            os << "\"" << d_difference_second_derivative_uses_global_tol[ti] << "\"";
             
-            if (ti < static_cast<int>(d_second_derivative_uses_global_tol.size()) - 1)
+            if (ti < static_cast<int>(d_difference_second_derivative_uses_global_tol.size()) - 1)
             {
                 os << ", ";
             }
         }
         os << std::endl;
         
-        os << "d_second_derivative_global_tol = ";
-        for (int ti = 0; ti < static_cast<int>(d_second_derivative_global_tol.size()); ti++)
+        os << "d_difference_second_derivative_global_tol = ";
+        for (int ti = 0;
+             ti < static_cast<int>(d_difference_second_derivative_global_tol.size());
+             ti++)
         {
-            os << "\"" << d_second_derivative_global_tol[ti] << "\"";
+            os << "\"" << d_difference_second_derivative_global_tol[ti] << "\"";
             
-            if (ti < static_cast<int>(d_second_derivative_global_tol.size()) - 1)
+            if (ti < static_cast<int>(d_difference_second_derivative_global_tol.size()) - 1)
             {
                 os << ", ";
             }
         }
         os << std::endl;
         
-        os << "d_second_derivative_uses_local_tol = ";
-        for (int ti = 0; ti < static_cast<int>(d_second_derivative_uses_local_tol.size()); ti++)
+        os << "d_difference_second_derivative_uses_local_tol = ";
+        for (int ti = 0;
+             ti < static_cast<int>(d_difference_second_derivative_uses_local_tol.size());
+             ti++)
         {
-            os << "\"" << d_second_derivative_uses_local_tol[ti] << "\"";
+            os << "\"" << d_difference_second_derivative_uses_local_tol[ti] << "\"";
             
-            if (ti < static_cast<int>(d_second_derivative_uses_local_tol.size()) - 1)
+            if (ti < static_cast<int>(d_difference_second_derivative_uses_local_tol.size()) - 1)
             {
                 os << ", ";
             }
         }
         os << std::endl;
         
-        os << "d_second_derivative_local_tol = ";
-        for (int ti = 0; ti < static_cast<int>(d_second_derivative_local_tol.size()); ti++)
+        os << "d_difference_second_derivative_local_tol = ";
+        for (int ti = 0;
+             ti < static_cast<int>(d_difference_second_derivative_local_tol.size());
+             ti++)
         {
-            os << "\"" << d_second_derivative_local_tol[ti] << "\"";
+            os << "\"" << d_difference_second_derivative_local_tol[ti] << "\"";
             
-            if (ti < static_cast<int>(d_second_derivative_local_tol.size()) - 1)
+            if (ti < static_cast<int>(d_difference_second_derivative_local_tol.size()) - 1)
             {
                 os << ", ";
             }
@@ -1207,7 +1313,9 @@ GradientTagger::printClassData(std::ostream& os) const
     {
         os << std::endl;
         os << "d_Jameson_gradient_variables = ";
-        for (int vi = 0; vi < static_cast<int>(d_Jameson_gradient_variables.size()); vi++)
+        for (int vi = 0;
+             vi < static_cast<int>(d_Jameson_gradient_variables.size());
+             vi++)
         {
             os << "\"" << d_Jameson_gradient_variables[vi] << "\"";
             
@@ -1218,7 +1326,9 @@ GradientTagger::printClassData(std::ostream& os) const
         }
         os << std::endl;
         os << "d_Jameson_gradient_tol = ";
-        for (int ti = 0; ti < static_cast<int>(d_Jameson_gradient_tol.size()); ti++)
+        for (int ti = 0;
+             ti < static_cast<int>(d_Jameson_gradient_tol.size());
+             ti++)
         {
             os << "\"" << d_Jameson_gradient_tol[ti] << "\"";
             
@@ -1247,73 +1357,73 @@ GradientTagger::putToRestart(
     
     for (int si = 0; si < static_cast<int>(d_gradient_sensors.size()); si++)
     {
-        if (d_gradient_sensors[si] == "FIRST_DERIVATIVE")
+        if (d_gradient_sensors[si] == "DIFFERENCE_FIRST_DERIVATIVE")
         {
             boost::shared_ptr<tbox::Database> sensor_db =
-                restart_db->putDatabase("FIRST_DERIVATIVE");
+                restart_db->putDatabase("DIFFERENCE_FIRST_DERIVATIVE");
             
-            sensor_db->putStringVector("d_first_derivative_variables",
-                d_first_derivative_variables);
+            sensor_db->putStringVector("d_difference_first_derivative_variables",
+                d_difference_first_derivative_variables);
             
-            sensor_db->putBoolVector("d_first_derivative_uses_global_tol",
-                d_first_derivative_uses_global_tol);
+            sensor_db->putBoolVector("d_difference_first_derivative_uses_global_tol",
+                d_difference_first_derivative_uses_global_tol);
             
-            sensor_db->putBoolVector("d_first_derivative_uses_local_tol",
-                d_first_derivative_uses_local_tol);
+            sensor_db->putBoolVector("d_difference_first_derivative_uses_local_tol",
+                d_difference_first_derivative_uses_local_tol);
             
             int num_true = 0;
             
-            num_true = std::count(d_first_derivative_uses_global_tol.begin(),
-                d_first_derivative_uses_global_tol.end(),
+            num_true = std::count(d_difference_first_derivative_uses_global_tol.begin(),
+                d_difference_first_derivative_uses_global_tol.end(),
                 true);
             if (num_true > 0)
             {
-                sensor_db->putDoubleVector("d_first_derivative_global_tol",
-                    d_first_derivative_global_tol);
+                sensor_db->putDoubleVector("d_difference_first_derivative_global_tol",
+                    d_difference_first_derivative_global_tol);
             }
             
-            num_true = std::count(d_first_derivative_uses_local_tol.begin(),
-                d_first_derivative_uses_local_tol.end(),
+            num_true = std::count(d_difference_first_derivative_uses_local_tol.begin(),
+                d_difference_first_derivative_uses_local_tol.end(),
                 true);
             if (num_true > 0)
             {
-                sensor_db->putDoubleVector("d_first_derivative_local_tol",
-                    d_first_derivative_local_tol);
+                sensor_db->putDoubleVector("d_difference_first_derivative_local_tol",
+                    d_difference_first_derivative_local_tol);
             }
         }
         
-        if (d_gradient_sensors[si] == "SECOND_DERIVATIVE")
+        if (d_gradient_sensors[si] == "DIFFERENCE_SECOND_DERIVATIVE")
         {
             boost::shared_ptr<tbox::Database> sensor_db =
-                restart_db->putDatabase("SECOND_DERIVATIVE");
+                restart_db->putDatabase("DIFFERENCE_SECOND_DERIVATIVE");
             
-            sensor_db->putStringVector("d_second_derivative_variables",
-                d_second_derivative_variables);
+            sensor_db->putStringVector("d_difference_second_derivative_variables",
+                d_difference_second_derivative_variables);
             
-            sensor_db->putBoolVector("d_second_derivative_uses_global_tol",
-                d_second_derivative_uses_global_tol);
+            sensor_db->putBoolVector("d_difference_second_derivative_uses_global_tol",
+                d_difference_second_derivative_uses_global_tol);
             
-            sensor_db->putBoolVector("d_second_derivative_uses_local_tol",
-                d_second_derivative_uses_local_tol);
+            sensor_db->putBoolVector("d_difference_second_derivative_uses_local_tol",
+                d_difference_second_derivative_uses_local_tol);
             
             int num_true = 0;
             
-            num_true = std::count(d_second_derivative_uses_global_tol.begin(),
-                d_second_derivative_uses_global_tol.end(),
+            num_true = std::count(d_difference_second_derivative_uses_global_tol.begin(),
+                d_difference_second_derivative_uses_global_tol.end(),
                 true);
             if (num_true > 0)
             {
-                sensor_db->putDoubleVector("d_second_derivative_global_tol",
-                    d_second_derivative_global_tol);
+                sensor_db->putDoubleVector("d_difference_second_derivative_global_tol",
+                    d_difference_second_derivative_global_tol);
             }
             
-            num_true = std::count(d_second_derivative_uses_local_tol.begin(),
-                d_second_derivative_uses_local_tol.end(),
+            num_true = std::count(d_difference_second_derivative_uses_local_tol.begin(),
+                d_difference_second_derivative_uses_local_tol.end(),
                 true);
             if (num_true > 0)
             {
-                sensor_db->putDoubleVector("d_second_derivative_local_tol",
-                    d_second_derivative_local_tol);
+                sensor_db->putDoubleVector("d_difference_second_derivative_local_tol",
+                    d_difference_second_derivative_local_tol);
             }
         }
         
@@ -1347,12 +1457,12 @@ GradientTagger::computeGradientSensorValues(
     {
         std::string sensor_key = d_gradient_sensors[si];
         
-        if (sensor_key == "FIRST_DERIVATIVE")
+        if (sensor_key == "DIFFERENCE_FIRST_DERIVATIVE")
         {
-            for (int vi = 0; vi < static_cast<int>(d_first_derivative_variables.size()); vi++)
+            for (int vi = 0; vi < static_cast<int>(d_difference_first_derivative_variables.size()); vi++)
             {
                 // Get the key of the current variable.
-                std::string variable_key = d_first_derivative_variables[vi];
+                std::string variable_key = d_difference_first_derivative_variables[vi];
                 
                 if (variable_key == "DENSITY")
                 {
@@ -1374,31 +1484,31 @@ GradientTagger::computeGradientSensorValues(
                     boost::shared_ptr<pdat::CellData<double> > data_density =
                         d_flow_model->getGlobalCellData("DENSITY");
                     
-                    // Get the cell data of the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
+                    // Get the cell data of the difference.
+                    boost::shared_ptr<pdat::CellData<double> > difference(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_first_derivative_density, data_context)));
+                            patch.getPatchData(d_difference_first_derivative_density, data_context)));
                     
-                    // Compute the derivative.
-                    if (d_first_derivative_uses_local_tol[vi])
+                    // Compute the difference.
+                    if (d_difference_first_derivative_uses_local_tol[vi])
                     {
                         // Get the cell data of local mean.
                         boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
                             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(d_first_derivative_local_mean_density, data_context)));
+                                patch.getPatchData(d_difference_first_derivative_local_mean_density, data_context)));
                         
-                        d_gradient_sensor_first_derivative->computeGradientWithVariableLocalMean(
+                        d_difference_first_derivative->computeDifferenceWithVariableLocalMean(
                             patch,
                             data_density,
-                            derivative,
+                            difference,
                             variable_local_mean);
                     }
                     else
                     {
-                        d_gradient_sensor_first_derivative->computeGradient(
+                        d_difference_first_derivative->computeDifference(
                             patch,
                             data_density,
-                            derivative);
+                            difference);
                     }
                     
                     /*
@@ -1428,31 +1538,31 @@ GradientTagger::computeGradientSensorValues(
                     boost::shared_ptr<pdat::CellData<double> > data_total_energy =
                         d_flow_model->getGlobalCellData("TOTAL_ENERGY");
                     
-                    // Get the cell data of the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
+                    // Get the cell data of the difference.
+                    boost::shared_ptr<pdat::CellData<double> > difference(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_first_derivative_total_energy, data_context)));
+                            patch.getPatchData(d_difference_first_derivative_total_energy, data_context)));
                     
-                    // Compute the derivative.
-                    if (d_first_derivative_uses_local_tol[vi])
+                    // Compute the difference.
+                    if (d_difference_first_derivative_uses_local_tol[vi])
                     {
                         // Get the cell data of local mean.
                         boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
                             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(d_first_derivative_local_mean_total_energy, data_context)));
+                                patch.getPatchData(d_difference_first_derivative_local_mean_total_energy, data_context)));
                         
-                        d_gradient_sensor_first_derivative->computeGradientWithVariableLocalMean(
+                        d_difference_first_derivative->computeDifferenceWithVariableLocalMean(
                             patch,
                             data_total_energy,
-                            derivative,
+                            difference,
                             variable_local_mean);
                     }
                     else
                     {
-                        d_gradient_sensor_first_derivative->computeGradient(
+                        d_difference_first_derivative->computeDifference(
                             patch,
                             data_total_energy,
-                            derivative);
+                            difference);
                     }
                     
                     /*
@@ -1482,31 +1592,33 @@ GradientTagger::computeGradientSensorValues(
                     boost::shared_ptr<pdat::CellData<double> > data_pressure =
                         d_flow_model->getGlobalCellData("PRESSURE");
                     
-                    // Get the cell data of the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
+                    // Get the cell data of the difference.
+                    boost::shared_ptr<pdat::CellData<double> > difference(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_first_derivative_pressure, data_context)));
+                            patch.getPatchData(d_difference_first_derivative_pressure, data_context)));
                     
-                    // Compute the derivative.
-                    if (d_first_derivative_uses_local_tol[vi])
+                    // Compute the difference.
+                    if (d_difference_first_derivative_uses_local_tol[vi])
                     {
                         // Get the local mean.
                         boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
                             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(d_first_derivative_local_mean_pressure, data_context)));
+                                patch.getPatchData(
+                                    d_difference_first_derivative_local_mean_pressure,
+                                    data_context)));
                         
-                        d_gradient_sensor_first_derivative->computeGradientWithVariableLocalMean(
+                        d_difference_first_derivative->computeDifferenceWithVariableLocalMean(
                             patch,
                             data_pressure,
-                            derivative,
+                            difference,
                             variable_local_mean);
                     }
                     else
                     {
-                        d_gradient_sensor_first_derivative->computeGradient(
+                        d_difference_first_derivative->computeDifference(
                             patch,
                             data_pressure,
-                            derivative);
+                            difference);
                     }
                     
                     /*
@@ -1527,12 +1639,12 @@ GradientTagger::computeGradientSensorValues(
                 }
             } // Looop over variables chosen.
         }
-        else if (sensor_key == "SECOND_DERIVATIVE")
+        else if (sensor_key == "DIFFERENCE_SECOND_DERIVATIVE")
         {
-            for (int vi = 0; vi < static_cast<int>(d_second_derivative_variables.size()); vi++)
+            for (int vi = 0; vi < static_cast<int>(d_difference_second_derivative_variables.size()); vi++)
             {
                 // Get the key of the current variable.
-                std::string variable_key = d_second_derivative_variables[vi];
+                std::string variable_key = d_difference_second_derivative_variables[vi];
                 
                 if (variable_key == "DENSITY")
                 {
@@ -1554,31 +1666,31 @@ GradientTagger::computeGradientSensorValues(
                     boost::shared_ptr<pdat::CellData<double> > data_density =
                         d_flow_model->getGlobalCellData("DENSITY");
                     
-                    // Get the cell data of the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
+                    // Get the cell data of the difference.
+                    boost::shared_ptr<pdat::CellData<double> > difference(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_second_derivative_density, data_context)));
+                            patch.getPatchData(d_difference_second_derivative_density, data_context)));
                     
-                    // Compute the derivative.
-                    if (d_second_derivative_uses_local_tol[vi])
+                    // Compute the difference.
+                    if (d_difference_second_derivative_uses_local_tol[vi])
                     {
                         // Get the cell data of local mean.
                         boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
                             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(d_second_derivative_local_mean_density, data_context)));
+                                patch.getPatchData(d_difference_second_derivative_local_mean_density, data_context)));
                         
-                        d_gradient_sensor_second_derivative->computeGradientWithVariableLocalMean(
+                        d_difference_second_derivative->computeDifferenceWithVariableLocalMean(
                             patch,
                             data_density,
-                            derivative,
+                            difference,
                             variable_local_mean);
                     }
                     else
                     {
-                        d_gradient_sensor_second_derivative->computeGradient(
+                        d_difference_second_derivative->computeDifference(
                             patch,
                             data_density,
-                            derivative);
+                            difference);
                     }
                     
                     /*
@@ -1608,31 +1720,31 @@ GradientTagger::computeGradientSensorValues(
                     boost::shared_ptr<pdat::CellData<double> > data_total_energy =
                         d_flow_model->getGlobalCellData("TOTAL_ENERGY");
                     
-                    // Get the cell data of the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
+                    // Get the cell data of the difference.
+                    boost::shared_ptr<pdat::CellData<double> > difference(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_second_derivative_total_energy, data_context)));
+                            patch.getPatchData(d_difference_second_derivative_total_energy, data_context)));
                     
-                    // Compute the derivative.
-                    if (d_second_derivative_uses_local_tol[vi])
+                    // Compute the difference.
+                    if (d_difference_second_derivative_uses_local_tol[vi])
                     {
                         // Get the cell data of local mean.
                         boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
                             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(d_second_derivative_local_mean_total_energy, data_context)));
+                                patch.getPatchData(d_difference_second_derivative_local_mean_total_energy, data_context)));
                         
-                        d_gradient_sensor_second_derivative->computeGradientWithVariableLocalMean(
+                        d_difference_second_derivative->computeDifferenceWithVariableLocalMean(
                             patch,
                             data_total_energy,
-                            derivative,
+                            difference,
                             variable_local_mean);
                     }
                     else
                     {
-                        d_gradient_sensor_second_derivative->computeGradient(
+                        d_difference_second_derivative->computeDifference(
                             patch,
                             data_total_energy,
-                            derivative);
+                            difference);
                     }
                     
                     /*
@@ -1662,35 +1774,38 @@ GradientTagger::computeGradientSensorValues(
                     boost::shared_ptr<pdat::CellData<double> > data_pressure =
                         d_flow_model->getGlobalCellData("PRESSURE");
                     
-                    // Get the cell data of the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
+                    // Get the cell data of the difference.
+                    boost::shared_ptr<pdat::CellData<double> > difference(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_second_derivative_pressure, data_context)));
+                            patch.getPatchData(d_difference_second_derivative_pressure, data_context)));
                     
-                    // Compute the derivative.
-                    if (d_second_derivative_uses_local_tol[vi])
+                    // Compute the difference.
+                    if (d_difference_second_derivative_uses_local_tol[vi])
                     {
                         // Get the local mean.
                         boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
                             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(d_second_derivative_local_mean_pressure, data_context)));
+                                patch.getPatchData(
+                                    d_difference_second_derivative_local_mean_pressure,
+                                    data_context)));
                         
-                        d_gradient_sensor_second_derivative->computeGradientWithVariableLocalMean(
+                        d_difference_second_derivative->computeDifferenceWithVariableLocalMean(
                             patch,
                             data_pressure,
-                            derivative,
+                            difference,
                             variable_local_mean);
                     }
                     else
                     {
-                        d_gradient_sensor_second_derivative->computeGradient(
+                        d_difference_second_derivative->computeDifference(
                             patch,
                             data_pressure,
-                            derivative);
+                            difference);
                     }
                     
                     /*
-                     * Unregister the patch and data of all registered derived cell variables in the flow model.
+                     * Unregister the patch and data of all registered derived cell variables in
+                     * the flow model.
                      */
                     
                     d_flow_model->unregisterPatch();
@@ -1733,28 +1848,28 @@ GradientTagger::getSensorValueStatistics(
     {
         std::string sensor_key = d_gradient_sensors[si];
         
-        if (sensor_key == "FIRST_DERIVATIVE")
+        if (sensor_key == "DIFFERENCE_FIRST_DERIVATIVE")
         {
-            for (int vi = 0; vi < static_cast<int>(d_first_derivative_variables.size()); vi++)
+            for (int vi = 0; vi < static_cast<int>(d_difference_first_derivative_variables.size()); vi++)
             {
                 // Only get the statistics if global tolerances is used.
-                if (d_first_derivative_uses_global_tol[vi])
+                if (d_difference_first_derivative_uses_global_tol[vi])
                 {
                     // Get the key of the current variable.
-                    std::string variable_key = d_first_derivative_variables[vi];
+                    std::string variable_key = d_difference_first_derivative_variables[vi];
                     
                     if (variable_key == "DENSITY")
                     {
                         const int w_rho_id = variable_db->mapVariableAndContextToIndex(
-                            d_first_derivative_density,
+                            d_difference_first_derivative_density,
                             data_context);
                         
                         double w_max_rho_local = cell_double_operator.max(w_rho_id);
-                        d_first_derivative_max_density = 0.0;
+                        d_difference_first_derivative_max_density = 0.0;
                         
                         mpi.Allreduce(
                             &w_max_rho_local,
-                            &d_first_derivative_max_density,
+                            &d_difference_first_derivative_max_density,
                             1,
                             MPI_DOUBLE,
                             MPI_MAX);
@@ -1762,15 +1877,15 @@ GradientTagger::getSensorValueStatistics(
                     else if (variable_key == "TOTAL_ENERGY")
                     {
                         const int w_E_id = variable_db->mapVariableAndContextToIndex(
-                            d_first_derivative_total_energy,
+                            d_difference_first_derivative_total_energy,
                             data_context);
                         
                         double w_max_E_local = cell_double_operator.max(w_E_id);
-                        d_first_derivative_max_total_energy = 0.0;
+                        d_difference_first_derivative_max_total_energy = 0.0;
                         
                         mpi.Allreduce(
                             &w_max_E_local,
-                            &d_first_derivative_max_total_energy,
+                            &d_difference_first_derivative_max_total_energy,
                             1,
                             MPI_DOUBLE,
                             MPI_MAX);
@@ -1778,15 +1893,15 @@ GradientTagger::getSensorValueStatistics(
                     else if (variable_key == "PRESSURE")
                     {
                         const int w_p_id = variable_db->mapVariableAndContextToIndex(
-                            d_first_derivative_pressure,
+                            d_difference_first_derivative_pressure,
                             data_context);
                         
                         double w_max_p_local = cell_double_operator.max(w_p_id);
-                        d_first_derivative_max_pressure = 0.0;
+                        d_difference_first_derivative_max_pressure = 0.0;
                         
                         mpi.Allreduce(
                             &w_max_p_local,
-                            &d_first_derivative_max_pressure,
+                            &d_difference_first_derivative_max_pressure,
                             1,
                             MPI_DOUBLE,
                             MPI_MAX);
@@ -1794,28 +1909,28 @@ GradientTagger::getSensorValueStatistics(
                 }
             }
         }
-        else if (sensor_key == "SECOND_DERIVATIVE")
+        else if (sensor_key == "DIFFERENCE_SECOND_DERIVATIVE")
         {
-            for (int vi = 0; vi < static_cast<int>(d_second_derivative_variables.size()); vi++)
+            for (int vi = 0; vi < static_cast<int>(d_difference_second_derivative_variables.size()); vi++)
             {
                 // Only get the statistics if global tolerances is used.
-                if (d_second_derivative_uses_global_tol[vi])
+                if (d_difference_second_derivative_uses_global_tol[vi])
                 {
                     // Get the key of the current variable.
-                    std::string variable_key = d_second_derivative_variables[vi];
+                    std::string variable_key = d_difference_second_derivative_variables[vi];
                     
                     if (variable_key == "DENSITY")
                     {
                         const int w_rho_id = variable_db->mapVariableAndContextToIndex(
-                            d_second_derivative_density,
+                            d_difference_second_derivative_density,
                             data_context);
                         
                         double w_max_rho_local = cell_double_operator.max(w_rho_id);
-                        d_second_derivative_max_density = 0.0;
+                        d_difference_second_derivative_max_density = 0.0;
                         
                         mpi.Allreduce(
                             &w_max_rho_local,
-                            &d_second_derivative_max_density,
+                            &d_difference_second_derivative_max_density,
                             1,
                             MPI_DOUBLE,
                             MPI_MAX);
@@ -1823,15 +1938,15 @@ GradientTagger::getSensorValueStatistics(
                     else if (variable_key == "TOTAL_ENERGY")
                     {
                         const int w_E_id = variable_db->mapVariableAndContextToIndex(
-                            d_second_derivative_total_energy,
+                            d_difference_second_derivative_total_energy,
                             data_context);
                         
                         double w_max_E_local = cell_double_operator.max(w_E_id);
-                        d_second_derivative_max_total_energy = 0.0;
+                        d_difference_second_derivative_max_total_energy = 0.0;
                         
                         mpi.Allreduce(
                             &w_max_E_local,
-                            &d_second_derivative_max_total_energy,
+                            &d_difference_second_derivative_max_total_energy,
                             1,
                             MPI_DOUBLE,
                             MPI_MAX);
@@ -1839,15 +1954,15 @@ GradientTagger::getSensorValueStatistics(
                     else if (variable_key == "PRESSURE")
                     {
                         const int w_p_id = variable_db->mapVariableAndContextToIndex(
-                            d_second_derivative_pressure,
+                            d_difference_second_derivative_pressure,
                             data_context);
                         
                         double w_max_p_local = cell_double_operator.max(w_p_id);
-                        d_second_derivative_max_pressure = 0.0;
+                        d_difference_second_derivative_max_pressure = 0.0;
                         
                         mpi.Allreduce(
                             &w_max_p_local,
-                            &d_second_derivative_max_pressure,
+                            &d_difference_second_derivative_max_pressure,
                             1,
                             MPI_DOUBLE,
                             MPI_MAX);
@@ -1875,33 +1990,33 @@ GradientTagger::tagCells(
     {
         std::string sensor_key = d_gradient_sensors[si];
         
-        if (sensor_key == "FIRST_DERIVATIVE")
+        if (sensor_key == "DIFFERENCE_FIRST_DERIVATIVE")
         {
             int count_global_tol = 0;
             int count_local_tol = 0;
             
             // Looop over variables chosen.
-            for (int vi = 0; vi < static_cast<int>(d_first_derivative_variables.size()); vi++)
+            for (int vi = 0; vi < static_cast<int>(d_difference_first_derivative_variables.size()); vi++)
             {
                 // Get the key of the current variable.
-                std::string variable_key = d_first_derivative_variables[vi];
+                std::string variable_key = d_difference_first_derivative_variables[vi];
                 
                 // Get tolerance settings for the current variable.
-                bool uses_global_tol = d_first_derivative_uses_global_tol[vi];
-                bool uses_local_tol = d_first_derivative_uses_local_tol[vi];
+                bool uses_global_tol = d_difference_first_derivative_uses_global_tol[vi];
+                bool uses_local_tol = d_difference_first_derivative_uses_local_tol[vi];
                 
                 double global_tol = 0.0;
                 double local_tol = 0.0;
                 
                 if (uses_global_tol)
                 {
-                    global_tol = d_first_derivative_global_tol[count_global_tol];
+                    global_tol = d_difference_first_derivative_global_tol[count_global_tol];
                     count_global_tol++;
                 }
                 
                 if (uses_local_tol)
                 {
-                    local_tol = d_first_derivative_local_tol[count_local_tol];
+                    local_tol = d_difference_first_derivative_local_tol[count_local_tol];
                     count_local_tol++;
                 }
                 
@@ -1915,7 +2030,7 @@ GradientTagger::tagCells(
                     // Get the cell data of the derivative.
                     boost::shared_ptr<pdat::CellData<double> > derivative(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_first_derivative_density, data_context)));
+                            patch.getPatchData(d_difference_first_derivative_density, data_context)));
                     
                     boost::shared_ptr<pdat::CellData<double> > variable_local_mean;
                     if (uses_local_tol)
@@ -1923,14 +2038,14 @@ GradientTagger::tagCells(
                         // Get the cell data of local mean.
                         boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
                             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(d_first_derivative_local_mean_density, data_context)));
+                                patch.getPatchData(d_difference_first_derivative_local_mean_density, data_context)));
                     }
                     
                     tagCellsWithDerivativeSensor(
                         patch,
                         tags,
                         derivative,
-                        d_first_derivative_max_density,
+                        d_difference_first_derivative_max_density,
                         variable_local_mean,
                         uses_global_tol,
                         uses_local_tol,
@@ -1942,7 +2057,7 @@ GradientTagger::tagCells(
                     // Get the cell data of the derivative.
                     boost::shared_ptr<pdat::CellData<double> > derivative(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_first_derivative_total_energy, data_context)));
+                            patch.getPatchData(d_difference_first_derivative_total_energy, data_context)));
                     
                     boost::shared_ptr<pdat::CellData<double> > variable_local_mean;
                     if (uses_local_tol)
@@ -1950,14 +2065,14 @@ GradientTagger::tagCells(
                         // Get the cell data of local mean.
                         boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
                             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(d_first_derivative_local_mean_total_energy, data_context)));
+                                patch.getPatchData(d_difference_first_derivative_local_mean_total_energy, data_context)));
                     }
                     
                     tagCellsWithDerivativeSensor(
                         patch,
                         tags,
                         derivative,
-                        d_first_derivative_max_total_energy,
+                        d_difference_first_derivative_max_total_energy,
                         variable_local_mean,
                         uses_global_tol,
                         uses_local_tol,
@@ -1969,7 +2084,7 @@ GradientTagger::tagCells(
                     // Get the cell data of the derivative.
                     boost::shared_ptr<pdat::CellData<double> > derivative(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_first_derivative_pressure, data_context)));
+                            patch.getPatchData(d_difference_first_derivative_pressure, data_context)));
                     
                     boost::shared_ptr<pdat::CellData<double> > variable_local_mean;
                     if (uses_local_tol)
@@ -1977,14 +2092,14 @@ GradientTagger::tagCells(
                         // Get the cell data of local mean.
                         boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
                             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(d_first_derivative_local_mean_pressure, data_context)));
+                                patch.getPatchData(d_difference_first_derivative_local_mean_pressure, data_context)));
                     }
                     
                     tagCellsWithDerivativeSensor(
                         patch,
                         tags,
                         derivative,
-                        d_first_derivative_max_pressure,
+                        d_difference_first_derivative_max_pressure,
                         variable_local_mean,
                         uses_global_tol,
                         uses_local_tol,
@@ -2002,33 +2117,33 @@ GradientTagger::tagCells(
                 }
             } // Looop over variables chosen.
         }
-        else if (sensor_key == "SECOND_DERIVATIVE")
+        else if (sensor_key == "DIFFERENCE_SECOND_DERIVATIVE")
         {
             int count_global_tol = 0;
             int count_local_tol = 0;
             
             // Looop over variables chosen.
-            for (int vi = 0; vi < static_cast<int>(d_second_derivative_variables.size()); vi++)
+            for (int vi = 0; vi < static_cast<int>(d_difference_second_derivative_variables.size()); vi++)
             {
                 // Get the key of the current variable.
-                std::string variable_key = d_second_derivative_variables[vi];
+                std::string variable_key = d_difference_second_derivative_variables[vi];
                 
                 // Get tolerance settings for the current variable.
-                bool uses_global_tol = d_second_derivative_uses_global_tol[vi];
-                bool uses_local_tol = d_second_derivative_uses_local_tol[vi];
+                bool uses_global_tol = d_difference_second_derivative_uses_global_tol[vi];
+                bool uses_local_tol = d_difference_second_derivative_uses_local_tol[vi];
                 
                 double global_tol = 0.0;
                 double local_tol = 0.0;
                 
                 if (uses_global_tol)
                 {
-                    global_tol = d_second_derivative_global_tol[count_global_tol];
+                    global_tol = d_difference_second_derivative_global_tol[count_global_tol];
                     count_global_tol++;
                 }
                 
                 if (uses_local_tol)
                 {
-                    local_tol = d_second_derivative_local_tol[count_local_tol];
+                    local_tol = d_difference_second_derivative_local_tol[count_local_tol];
                     count_local_tol++;
                 }
                 
@@ -2042,7 +2157,7 @@ GradientTagger::tagCells(
                     // Get the cell data of the derivative.
                     boost::shared_ptr<pdat::CellData<double> > derivative(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_second_derivative_density, data_context)));
+                            patch.getPatchData(d_difference_second_derivative_density, data_context)));
                     
                     boost::shared_ptr<pdat::CellData<double> > variable_local_mean;
                     if (uses_local_tol)
@@ -2050,14 +2165,14 @@ GradientTagger::tagCells(
                         // Get the cell data of local mean.
                         boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
                             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(d_second_derivative_local_mean_density, data_context)));
+                                patch.getPatchData(d_difference_second_derivative_local_mean_density, data_context)));
                     }
                     
                     tagCellsWithDerivativeSensor(
                         patch,
                         tags,
                         derivative,
-                        d_second_derivative_max_density,
+                        d_difference_second_derivative_max_density,
                         variable_local_mean,
                         uses_global_tol,
                         uses_local_tol,
@@ -2069,7 +2184,7 @@ GradientTagger::tagCells(
                     // Get the cell data of the derivative.
                     boost::shared_ptr<pdat::CellData<double> > derivative(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_second_derivative_total_energy, data_context)));
+                            patch.getPatchData(d_difference_second_derivative_total_energy, data_context)));
                     
                     boost::shared_ptr<pdat::CellData<double> > variable_local_mean;
                     if (uses_local_tol)
@@ -2077,14 +2192,14 @@ GradientTagger::tagCells(
                         // Get the cell data of local mean.
                         boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
                             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(d_second_derivative_local_mean_total_energy, data_context)));
+                                patch.getPatchData(d_difference_second_derivative_local_mean_total_energy, data_context)));
                     }
                     
                     tagCellsWithDerivativeSensor(
                         patch,
                         tags,
                         derivative,
-                        d_second_derivative_max_total_energy,
+                        d_difference_second_derivative_max_total_energy,
                         variable_local_mean,
                         uses_global_tol,
                         uses_local_tol,
@@ -2096,7 +2211,7 @@ GradientTagger::tagCells(
                     // Get the cell data of the derivative.
                     boost::shared_ptr<pdat::CellData<double> > derivative(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_second_derivative_pressure, data_context)));
+                            patch.getPatchData(d_difference_second_derivative_pressure, data_context)));
                     
                     boost::shared_ptr<pdat::CellData<double> > variable_local_mean;
                     if (uses_local_tol)
@@ -2104,14 +2219,14 @@ GradientTagger::tagCells(
                         // Get the cell data of local mean.
                         boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
                             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(d_second_derivative_local_mean_pressure, data_context)));
+                                patch.getPatchData(d_difference_second_derivative_local_mean_pressure, data_context)));
                     }
                     
                     tagCellsWithDerivativeSensor(
                         patch,
                         tags,
                         derivative,
-                        d_second_derivative_max_pressure,
+                        d_difference_second_derivative_max_pressure,
                         variable_local_mean,
                         uses_global_tol,
                         uses_local_tol,
