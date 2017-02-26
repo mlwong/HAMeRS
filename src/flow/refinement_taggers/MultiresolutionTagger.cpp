@@ -3,7 +3,7 @@
 #include <algorithm>
 #include "boost/lexical_cast.hpp"
 
-// #define PLOTTING_MULTIRESOLUTION_TAGGER
+// #define HAMERS_PLOTTING_MULTIRESOLUTION_TAGGER
 
 #define EPSILON 1e-40
 
@@ -700,7 +700,7 @@ MultiresolutionTagger::registerPlotQuantities(
     const boost::shared_ptr<appu::VisItDataWriter>& visit_writer,
     const boost::shared_ptr<hier::VariableContext>& plot_context)
 {
-#ifdef PLOTTING_MULTIRESOLUTION_TAGGER
+#ifdef HAMERS_PLOTTING_MULTIRESOLUTION_TAGGER
     hier::VariableDatabase* vardb = hier::VariableDatabase::getDatabase();
     
     for (int si = 0;
@@ -1011,10 +1011,7 @@ MultiresolutionTagger::computeMultiresolutionSensorValues(
                     
                     d_flow_model->computeGlobalDerivedCellData();
                     
-                    /*
-                     * Get the pointer to density data inside the flow model.
-                     */
-                    
+                    // Get the pointer to density data inside the flow model.
                     boost::shared_ptr<pdat::CellData<double> > data_density =
                         d_flow_model->getGlobalCellData("DENSITY");
                     
@@ -1074,10 +1071,7 @@ MultiresolutionTagger::computeMultiresolutionSensorValues(
                     
                     d_flow_model->computeGlobalDerivedCellData();
                     
-                    /*
-                     * Get the pointer to total energy data inside the flow model.
-                     */
-                    
+                    // Get the pointer to total energy data inside the flow model.
                     boost::shared_ptr<pdat::CellData<double> > data_total_energy =
                         d_flow_model->getGlobalCellData("TOTAL_ENERGY");
                     
@@ -1137,10 +1131,7 @@ MultiresolutionTagger::computeMultiresolutionSensorValues(
                     
                     d_flow_model->computeGlobalDerivedCellData();
                     
-                    /*
-                     * Get the pointer to pressure data inside the flow model.
-                     */
-                    
+                    // Get the pointer to pressure data inside the flow model.
                     boost::shared_ptr<pdat::CellData<double> > data_pressure =
                         d_flow_model->getGlobalCellData("PRESSURE");
                     

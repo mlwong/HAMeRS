@@ -3,7 +3,7 @@
 #include <algorithm>
 #include "boost/lexical_cast.hpp"
 
-// #define PLOTTING_VALUE_TAGGER
+// #define HAMERS_PLOTTING_VALUE_TAGGER
 
 #define EPSILON 1e-40
 
@@ -489,7 +489,7 @@ ValueTagger::registerPlotQuantities(
     const boost::shared_ptr<appu::VisItDataWriter>& visit_writer,
     const boost::shared_ptr<hier::VariableContext>& plot_context)
 {
-#ifdef PLOTTING_VALUE_TAGGER
+#ifdef HAMERS_PLOTTING_VALUE_TAGGER
 #endif
 }
 

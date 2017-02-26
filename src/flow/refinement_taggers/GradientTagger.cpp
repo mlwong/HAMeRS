@@ -2,7 +2,7 @@
 
 #include "boost/lexical_cast.hpp"
 
-// #define PLOTTING_GRADIENT_TAGGER
+// #define HAMERS_PLOTTING_GRADIENT_TAGGER
 
 #define EPSILON 1e-40
 
@@ -930,7 +930,7 @@ GradientTagger::registerPlotQuantities(
     const boost::shared_ptr<appu::VisItDataWriter>& visit_writer,
     const boost::shared_ptr<hier::VariableContext>& plot_context)
 {
-#ifdef PLOTTING_GRADIENT_TAGGER
+#ifdef HAMERS_PLOTTING_GRADIENT_TAGGER
     hier::VariableDatabase* vardb = hier::VariableDatabase::getDatabase();
     
     for (int si = 0;
