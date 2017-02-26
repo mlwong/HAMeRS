@@ -92,7 +92,8 @@ ValueTagger::ValueTagger(
         {
             TBOX_ERROR(d_object_name
                 << ": "
-                << "The numbers of variables and switches for global upper tolerances provided don't match"
+                << "The numbers of variables and switches for global upper tolerances"
+                << " provided don't match"
                 << " in database of value tagger."
                 << std::endl);
         }
@@ -372,10 +373,11 @@ ValueTagger::registerValueTaggerVariables(
             
             for (int si = 0; si < d_num_species; si++)
             {
-                d_value_tagger_variable_mass_fraction.push_back(boost::make_shared<pdat::CellVariable<double> >(
-                    d_dim,
-                    "Value tagger mass fraction "  + boost::lexical_cast<std::string>(si),
-                    1));
+                d_value_tagger_variable_mass_fraction.push_back(
+                    boost::make_shared<pdat::CellVariable<double> >(
+                        d_dim,
+                        "Value tagger mass fraction "  + boost::lexical_cast<std::string>(si),
+                        1));
             }
             
             if (d_uses_global_tol_up[vi] || d_uses_global_tol_lo[vi])
@@ -683,7 +685,8 @@ ValueTagger::computeValueTaggerValues(
             
             std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
             
-            num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("DENSITY", d_num_value_ghosts));
+            num_subghosts_of_data.insert(
+                std::pair<std::string, hier::IntVector>("DENSITY", d_num_value_ghosts));
             
             d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
             
@@ -723,7 +726,8 @@ ValueTagger::computeValueTaggerValues(
             
             std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
             
-            num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("TOTAL_ENERGY", d_num_value_ghosts));
+            num_subghosts_of_data.insert(
+                std::pair<std::string, hier::IntVector>("TOTAL_ENERGY", d_num_value_ghosts));
             
             d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
             
@@ -763,7 +767,8 @@ ValueTagger::computeValueTaggerValues(
             
             std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
             
-            num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("PRESSURE", d_num_value_ghosts));
+            num_subghosts_of_data.insert(
+                std::pair<std::string, hier::IntVector>("PRESSURE", d_num_value_ghosts));
             
             d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
             
@@ -803,7 +808,8 @@ ValueTagger::computeValueTaggerValues(
             
             std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
             
-            num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("DILATATION", d_num_value_ghosts));
+            num_subghosts_of_data.insert(
+                std::pair<std::string, hier::IntVector>("DILATATION", d_num_value_ghosts));
             
             d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
             
@@ -843,7 +849,8 @@ ValueTagger::computeValueTaggerValues(
             
             std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
             
-            num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("ENSTROPHY", d_num_value_ghosts));
+            num_subghosts_of_data.insert(
+                std::pair<std::string, hier::IntVector>("ENSTROPHY", d_num_value_ghosts));
             
             d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
             
@@ -883,7 +890,8 @@ ValueTagger::computeValueTaggerValues(
             
             std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
             
-            num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("MASS_FRACTION", d_num_value_ghosts));
+            num_subghosts_of_data.insert(
+                std::pair<std::string, hier::IntVector>("MASS_FRACTION", d_num_value_ghosts));
             
             d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
             

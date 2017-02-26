@@ -110,14 +110,14 @@ class GradientTagger
             const double tol);
         
         /*
-         * Tag cells using value of derivative sensor.
+         * Tag cells using difference sensor.
          */
         void
-        tagCellsWithDerivativeSensor(
+        tagCellsWithDifferenceSensor(
             hier::Patch& patch,
             const boost::shared_ptr<pdat::CellData<int> >& tags,
-            const boost::shared_ptr<pdat::CellData<double> >& derivative,
-            const double& derivative_max,
+            const boost::shared_ptr<pdat::CellData<double> >& difference,
+            const double& difference_max,
             const boost::shared_ptr<pdat::CellData<double> >& variable_local_mean,
             const bool& uses_global_tol,
             const bool& uses_local_tol,
@@ -186,13 +186,13 @@ class GradientTagger
         std::vector<bool> d_difference_second_derivative_uses_local_tol;
         
         /*
-         * Variables and tolerances for the gradient sensors.
+         * Variables and tolerances for the Jameson gradient sensors.
          */
         std::vector<std::string> d_Jameson_gradient_variables;
         std::vector<double> d_Jameson_gradient_tol;
         
         /*
-         * boost::shared_ptr to derivatives.
+         * boost::shared_ptr to differences.
          */
         boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_derivative_density;
         boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_derivative_total_energy;
@@ -203,7 +203,7 @@ class GradientTagger
         boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_derivative_pressure;
         
         /*
-         * boost::shared_ptr to values of Jameson's gradient sensor.
+         * boost::shared_ptr to values of Jameson gradient sensor.
          */
         boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_gradient_density;
         boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_gradient_total_energy;

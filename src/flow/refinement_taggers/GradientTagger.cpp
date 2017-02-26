@@ -150,8 +150,8 @@ GradientTagger::GradientTagger(
                     {
                         TBOX_ERROR(d_object_name
                             << ": "
-                            << "The numbers of variables and switches for global tolerances provided don't match"
-                            << " in database for "
+                            << "The numbers of variables and switches for global tolerances provided"
+                            << " don't match in database for "
                             << sensor_key
                             << "."
                             << std::endl);
@@ -228,8 +228,8 @@ GradientTagger::GradientTagger(
                     {
                         TBOX_ERROR(d_object_name
                             << ": "
-                            << "The numbers of variables and switches for local tolerances provided don't match"
-                            << " in database for "
+                            << "The numbers of variables and switches for local tolerances provided"
+                            << " don't match in database for "
                             << sensor_key
                             << "."
                             << std::endl);
@@ -354,8 +354,8 @@ GradientTagger::GradientTagger(
                     {
                         TBOX_ERROR(d_object_name
                             << ": "
-                            << "The numbers of variables and switches for global tolerances provided don't match"
-                            << " in database for "
+                            << "The numbers of variables and switches for global tolerances provided"
+                            << " don't match in database for "
                             << sensor_key
                             << "."
                             << std::endl);
@@ -432,8 +432,8 @@ GradientTagger::GradientTagger(
                     {
                         TBOX_ERROR(d_object_name
                             << ": "
-                            << "The numbers of variables and switches for local tolerances provided don't match"
-                            << " in database for "
+                            << "The numbers of variables and switches for local tolerances provided"
+                            << " don't match in database for "
                             << sensor_key
                             << "."
                             << std::endl);
@@ -487,23 +487,28 @@ GradientTagger::GradientTagger(
                     
                     if (sensor_db->keyExists("Jameson_gradient_variables"))
                     {
-                        d_Jameson_gradient_variables = sensor_db->getStringVector("Jameson_gradient_variables");
+                        d_Jameson_gradient_variables =
+                            sensor_db->getStringVector("Jameson_gradient_variables");
                     }
                     else if (sensor_db->keyExists("d_Jameson_gradient_variables"))
                     {
-                        d_Jameson_gradient_variables = sensor_db->getStringVector("d_Jameson_gradient_variables");
+                        d_Jameson_gradient_variables =
+                            sensor_db->getStringVector("d_Jameson_gradient_variables");
                     }
                     else
                     {
                         TBOX_ERROR(d_object_name
                             << ": "
-                            << "No key 'Jameson_gradient_variables'/'d_Jameson_gradient_variables' found in data for "
+                            << "No key 'Jameson_gradient_variables'/"
+                            << "'d_Jameson_gradient_variables' found in data for "
                             << sensor_key
                             << "."
                             << std::endl);
                     }
                     
-                    for (int vi = 0; vi < static_cast<int>(d_Jameson_gradient_variables.size()); vi++)
+                    for (int vi = 0;
+                         vi < static_cast<int>(d_Jameson_gradient_variables.size());
+                         vi++)
                     {
                         std::string variable_key = d_Jameson_gradient_variables[vi];
                         
@@ -522,17 +527,20 @@ GradientTagger::GradientTagger(
                     
                     if (sensor_db->keyExists("Jameson_gradient_tol"))
                     {
-                        d_Jameson_gradient_tol = sensor_db->getDoubleVector("Jameson_gradient_tol");
+                        d_Jameson_gradient_tol =
+                            sensor_db->getDoubleVector("Jameson_gradient_tol");
                     }
                     else if (sensor_db->keyExists("d_Jameson_gradient_tol"))
                     {
-                        d_Jameson_gradient_tol = sensor_db->getDoubleVector("d_Jameson_gradient_tol");
+                        d_Jameson_gradient_tol =
+                            sensor_db->getDoubleVector("d_Jameson_gradient_tol");
                     }
                     else
                     {
                         TBOX_ERROR(d_object_name
                             << ": "
-                            << "No key 'Jameson_gradient_tol'/'d_Jameson_gradient_tol' found in data for "
+                            << "No key 'Jameson_gradient_tol'/"
+                            << "'d_Jameson_gradient_tol' found in data for "
                             << sensor_key
                             << "."
                             << std::endl);
@@ -594,9 +602,7 @@ GradientTagger::GradientTagger(
      * Compute the number of ghost cells requried by the gradient detector.
      */
     
-    for (int si = 0;
-         si < static_cast<int>(d_gradient_sensors.size());
-         si++)
+    for (int si = 0; si < static_cast<int>(d_gradient_sensors.size()); si++)
     {
         std::string sensor_key = d_gradient_sensors[si];
         
@@ -629,15 +635,15 @@ void
 GradientTagger::registerGradientTaggerVariables(
     RungeKuttaLevelIntegrator* integrator)
 {
-    for (int si = 0;
-             si < static_cast<int>(d_gradient_sensors.size());
-             si++)
+    for (int si = 0; si < static_cast<int>(d_gradient_sensors.size()); si++)
     {
         std::string sensor_key = d_gradient_sensors[si];
         
         if (sensor_key == "DIFFERENCE_FIRST_DERIVATIVE")
         {
-            for (int vi = 0; vi < static_cast<int>(d_difference_first_derivative_variables.size()); vi++)
+            for (int vi = 0;
+                 vi < static_cast<int>(d_difference_first_derivative_variables.size());
+                 vi++)
             {
                 // Get the key of the current variable.
                 std::string variable_key = d_difference_first_derivative_variables[vi];
@@ -725,7 +731,9 @@ GradientTagger::registerGradientTaggerVariables(
                 }
             }
             
-            for (int vi = 0; vi < static_cast<int>(d_difference_first_derivative_variables.size()); vi++)
+            for (int vi = 0;
+                 vi < static_cast<int>(d_difference_first_derivative_variables.size());
+                 vi++)
             {
                 // Get the key of the current variable.
                 std::string variable_key = d_difference_first_derivative_variables[vi];
@@ -773,7 +781,9 @@ GradientTagger::registerGradientTaggerVariables(
         }
         else if (sensor_key == "DIFFERENCE_SECOND_DERIVATIVE")
         {
-            for (int vi = 0; vi < static_cast<int>(d_difference_second_derivative_variables.size()); vi++)
+            for (int vi = 0;
+                 vi < static_cast<int>(d_difference_second_derivative_variables.size());
+                 vi++)
             {
                 // Get the key of the current variable.
                 std::string variable_key = d_difference_second_derivative_variables[vi];
@@ -861,7 +871,9 @@ GradientTagger::registerGradientTaggerVariables(
                 }
             }
             
-            for (int vi = 0; vi < static_cast<int>(d_difference_second_derivative_variables.size()); vi++)
+            for (int vi = 0;
+                 vi < static_cast<int>(d_difference_second_derivative_variables.size());
+                 vi++)
             {
                 // Get the key of the current variable.
                 std::string variable_key = d_difference_second_derivative_variables[vi];
@@ -909,7 +921,9 @@ GradientTagger::registerGradientTaggerVariables(
         }
         else if (sensor_key == "JAMESON_GRADIENT")
         {
-            for (int vi = 0; vi < static_cast<int>(d_Jameson_gradient_variables.size()); vi++)
+            for (int vi = 0;
+                 vi < static_cast<int>(d_Jameson_gradient_variables.size());
+                 vi++)
             {
                 // Get the key of the current variable.
                 std::string variable_key = d_Jameson_gradient_variables[vi];
@@ -952,7 +966,9 @@ GradientTagger::registerGradientTaggerVariables(
                 }
             }
             
-            for (int vi = 0; vi < static_cast<int>(d_Jameson_gradient_variables.size()); vi++)
+            for (int vi = 0;
+                 vi < static_cast<int>(d_Jameson_gradient_variables.size());
+                 vi++)
             {
                 // Get the key of the current variable.
                 std::string variable_key = d_Jameson_gradient_variables[vi];
@@ -1013,9 +1029,7 @@ GradientTagger::registerPlotQuantities(
 #ifdef HAMERS_PLOTTING_GRADIENT_TAGGER
     hier::VariableDatabase* vardb = hier::VariableDatabase::getDatabase();
     
-    for (int si = 0;
-             si < static_cast<int>(d_gradient_sensors.size());
-             si++)
+    for (int si = 0; si < static_cast<int>(d_gradient_sensors.size()); si++)
     {
         std::string sensor_key = d_gradient_sensors[si];
         
@@ -1451,15 +1465,15 @@ GradientTagger::computeGradientSensorValues(
     const boost::shared_ptr<hier::VariableContext>& data_context)
 {
     // Loop over gradient sensors chosen.
-    for (int si = 0;
-             si < static_cast<int>(d_gradient_sensors.size());
-             si++)
+    for (int si = 0; si < static_cast<int>(d_gradient_sensors.size()); si++)
     {
         std::string sensor_key = d_gradient_sensors[si];
         
         if (sensor_key == "DIFFERENCE_FIRST_DERIVATIVE")
         {
-            for (int vi = 0; vi < static_cast<int>(d_difference_first_derivative_variables.size()); vi++)
+            for (int vi = 0;
+                 vi < static_cast<int>(d_difference_first_derivative_variables.size());
+                 vi++)
             {
                 // Get the key of the current variable.
                 std::string variable_key = d_difference_first_derivative_variables[vi];
@@ -1467,14 +1481,16 @@ GradientTagger::computeGradientSensorValues(
                 if (variable_key == "DENSITY")
                 {
                     /*
-                     * Register the patch and density in the flow model and compute the corresponding cell data.
+                     * Register the patch and density in the flow model and compute the
+                     * corresponding cell data.
                      */
                     
                     d_flow_model->registerPatchWithDataContext(patch, data_context);
                     
                     std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                     
-                    num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("DENSITY", d_num_gradient_ghosts));
+                    num_subghosts_of_data.insert(
+                        std::pair<std::string, hier::IntVector>("DENSITY", d_num_gradient_ghosts));
                     
                     d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
                     
@@ -1495,7 +1511,9 @@ GradientTagger::computeGradientSensorValues(
                         // Get the cell data of local mean.
                         boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
                             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(d_difference_first_derivative_local_mean_density, data_context)));
+                                patch.getPatchData(
+                                    d_difference_first_derivative_local_mean_density,
+                                    data_context)));
                         
                         d_difference_first_derivative->computeDifferenceWithVariableLocalMean(
                             patch,
@@ -1512,7 +1530,8 @@ GradientTagger::computeGradientSensorValues(
                     }
                     
                     /*
-                     * Unregister the patch and data of all registered derived cell variables in the flow model.
+                     * Unregister the patch and data of all registered derived cell variables in
+                     * the flow model.
                      */
                     
                     d_flow_model->unregisterPatch();
@@ -1521,14 +1540,16 @@ GradientTagger::computeGradientSensorValues(
                 else if (variable_key ==  "TOTAL_ENERGY")
                 {
                     /*
-                     * Register the patch and total energy in the flow model and compute the corresponding cell data.
+                     * Register the patch and total energy in the flow model and compute the
+                     * corresponding cell data.
                      */
                     
                     d_flow_model->registerPatchWithDataContext(patch, data_context);
                     
                     std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                     
-                    num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("TOTAL_ENERGY", d_num_gradient_ghosts));
+                    num_subghosts_of_data.insert(
+                        std::pair<std::string, hier::IntVector>("TOTAL_ENERGY", d_num_gradient_ghosts));
                     
                     d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
                     
@@ -1541,7 +1562,9 @@ GradientTagger::computeGradientSensorValues(
                     // Get the cell data of the difference.
                     boost::shared_ptr<pdat::CellData<double> > difference(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_difference_first_derivative_total_energy, data_context)));
+                            patch.getPatchData(
+                                d_difference_first_derivative_total_energy,
+                                data_context)));
                     
                     // Compute the difference.
                     if (d_difference_first_derivative_uses_local_tol[vi])
@@ -1549,7 +1572,9 @@ GradientTagger::computeGradientSensorValues(
                         // Get the cell data of local mean.
                         boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
                             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(d_difference_first_derivative_local_mean_total_energy, data_context)));
+                                patch.getPatchData(
+                                    d_difference_first_derivative_local_mean_total_energy,
+                                    data_context)));
                         
                         d_difference_first_derivative->computeDifferenceWithVariableLocalMean(
                             patch,
@@ -1566,7 +1591,8 @@ GradientTagger::computeGradientSensorValues(
                     }
                     
                     /*
-                     * Unregister the patch and data of all registered derived cell variables in the flow model.
+                     * Unregister the patch and data of all registered derived cell variables in
+                     * the flow model.
                      */
                     
                     d_flow_model->unregisterPatch();
@@ -1575,14 +1601,16 @@ GradientTagger::computeGradientSensorValues(
                 else if (variable_key == "PRESSURE")
                 {
                     /*
-                     * Register the patch and pressure in the flow model and compute the corresponding cell data.
+                     * Register the patch and pressure in the flow model and compute the
+                     * corresponding cell data.
                      */
                     
                     d_flow_model->registerPatchWithDataContext(patch, data_context);
                     
                     std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                     
-                    num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("PRESSURE", d_num_gradient_ghosts));
+                    num_subghosts_of_data.insert(
+                        std::pair<std::string, hier::IntVector>("PRESSURE", d_num_gradient_ghosts));
                     
                     d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
                     
@@ -1595,7 +1623,9 @@ GradientTagger::computeGradientSensorValues(
                     // Get the cell data of the difference.
                     boost::shared_ptr<pdat::CellData<double> > difference(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_difference_first_derivative_pressure, data_context)));
+                            patch.getPatchData(
+                                d_difference_first_derivative_pressure,
+                                data_context)));
                     
                     // Compute the difference.
                     if (d_difference_first_derivative_uses_local_tol[vi])
@@ -1622,7 +1652,8 @@ GradientTagger::computeGradientSensorValues(
                     }
                     
                     /*
-                     * Unregister the patch and data of all registered derived cell variables in the flow model.
+                     * Unregister the patch and data of all registered derived cell variables in
+                     * the flow model.
                      */
                     
                     d_flow_model->unregisterPatch();
@@ -1641,7 +1672,9 @@ GradientTagger::computeGradientSensorValues(
         }
         else if (sensor_key == "DIFFERENCE_SECOND_DERIVATIVE")
         {
-            for (int vi = 0; vi < static_cast<int>(d_difference_second_derivative_variables.size()); vi++)
+            for (int vi = 0;
+                 vi < static_cast<int>(d_difference_second_derivative_variables.size());
+                 vi++)
             {
                 // Get the key of the current variable.
                 std::string variable_key = d_difference_second_derivative_variables[vi];
@@ -1649,14 +1682,16 @@ GradientTagger::computeGradientSensorValues(
                 if (variable_key == "DENSITY")
                 {
                     /*
-                     * Register the patch and density in the flow model and compute the corresponding cell data.
+                     * Register the patch and density in the flow model and compute the
+                     * corresponding cell data.
                      */
                     
                     d_flow_model->registerPatchWithDataContext(patch, data_context);
                     
                     std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                     
-                    num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("DENSITY", d_num_gradient_ghosts));
+                    num_subghosts_of_data.insert(
+                        std::pair<std::string, hier::IntVector>("DENSITY", d_num_gradient_ghosts));
                     
                     d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
                     
@@ -1669,7 +1704,9 @@ GradientTagger::computeGradientSensorValues(
                     // Get the cell data of the difference.
                     boost::shared_ptr<pdat::CellData<double> > difference(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_difference_second_derivative_density, data_context)));
+                            patch.getPatchData(
+                                d_difference_second_derivative_density,
+                                data_context)));
                     
                     // Compute the difference.
                     if (d_difference_second_derivative_uses_local_tol[vi])
@@ -1677,7 +1714,9 @@ GradientTagger::computeGradientSensorValues(
                         // Get the cell data of local mean.
                         boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
                             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(d_difference_second_derivative_local_mean_density, data_context)));
+                                patch.getPatchData(
+                                    d_difference_second_derivative_local_mean_density,
+                                    data_context)));
                         
                         d_difference_second_derivative->computeDifferenceWithVariableLocalMean(
                             patch,
@@ -1694,7 +1733,8 @@ GradientTagger::computeGradientSensorValues(
                     }
                     
                     /*
-                     * Unregister the patch and data of all registered derived cell variables in the flow model.
+                     * Unregister the patch and data of all registered derived cell variables in
+                     * the flow model.
                      */
                     
                     d_flow_model->unregisterPatch();
@@ -1703,14 +1743,16 @@ GradientTagger::computeGradientSensorValues(
                 else if (variable_key ==  "TOTAL_ENERGY")
                 {
                     /*
-                     * Register the patch and total energy in the flow model and compute the corresponding cell data.
+                     * Register the patch and total energy in the flow model and compute the
+                     * corresponding cell data.
                      */
                     
                     d_flow_model->registerPatchWithDataContext(patch, data_context);
                     
                     std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                     
-                    num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("TOTAL_ENERGY", d_num_gradient_ghosts));
+                    num_subghosts_of_data.insert(
+                        std::pair<std::string, hier::IntVector>("TOTAL_ENERGY", d_num_gradient_ghosts));
                     
                     d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
                     
@@ -1723,7 +1765,9 @@ GradientTagger::computeGradientSensorValues(
                     // Get the cell data of the difference.
                     boost::shared_ptr<pdat::CellData<double> > difference(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_difference_second_derivative_total_energy, data_context)));
+                            patch.getPatchData(
+                                d_difference_second_derivative_total_energy,
+                                data_context)));
                     
                     // Compute the difference.
                     if (d_difference_second_derivative_uses_local_tol[vi])
@@ -1731,7 +1775,9 @@ GradientTagger::computeGradientSensorValues(
                         // Get the cell data of local mean.
                         boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
                             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(d_difference_second_derivative_local_mean_total_energy, data_context)));
+                                patch.getPatchData(
+                                    d_difference_second_derivative_local_mean_total_energy,
+                                    data_context)));
                         
                         d_difference_second_derivative->computeDifferenceWithVariableLocalMean(
                             patch,
@@ -1748,7 +1794,8 @@ GradientTagger::computeGradientSensorValues(
                     }
                     
                     /*
-                     * Unregister the patch and data of all registered derived cell variables in the flow model.
+                     * Unregister the patch and data of all registered derived cell variables in
+                     * the flow model.
                      */
                     
                     d_flow_model->unregisterPatch();
@@ -1757,14 +1804,16 @@ GradientTagger::computeGradientSensorValues(
                 else if (variable_key == "PRESSURE")
                 {
                     /*
-                     * Register the patch and pressure in the flow model and compute the corresponding cell data.
+                     * Register the patch and pressure in the flow model and compute the
+                     * corresponding cell data.
                      */
                     
                     d_flow_model->registerPatchWithDataContext(patch, data_context);
                     
                     std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                     
-                    num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("PRESSURE", d_num_gradient_ghosts));
+                    num_subghosts_of_data.insert(
+                        std::pair<std::string, hier::IntVector>("PRESSURE", d_num_gradient_ghosts));
                     
                     d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
                     
@@ -1777,7 +1826,9 @@ GradientTagger::computeGradientSensorValues(
                     // Get the cell data of the difference.
                     boost::shared_ptr<pdat::CellData<double> > difference(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_difference_second_derivative_pressure, data_context)));
+                            patch.getPatchData(
+                                d_difference_second_derivative_pressure,
+                                data_context)));
                     
                     // Compute the difference.
                     if (d_difference_second_derivative_uses_local_tol[vi])
@@ -1842,15 +1893,15 @@ GradientTagger::getSensorValueStatistics(
     
     hier::VariableDatabase* variable_db = hier::VariableDatabase::getDatabase();
     
-    for (int si = 0;
-             si < static_cast<int>(d_gradient_sensors.size());
-             si++)
+    for (int si = 0; si < static_cast<int>(d_gradient_sensors.size()); si++)
     {
         std::string sensor_key = d_gradient_sensors[si];
         
         if (sensor_key == "DIFFERENCE_FIRST_DERIVATIVE")
         {
-            for (int vi = 0; vi < static_cast<int>(d_difference_first_derivative_variables.size()); vi++)
+            for (int vi = 0;
+                 vi < static_cast<int>(d_difference_first_derivative_variables.size());
+                 vi++)
             {
                 // Only get the statistics if global tolerances is used.
                 if (d_difference_first_derivative_uses_global_tol[vi])
@@ -1911,7 +1962,9 @@ GradientTagger::getSensorValueStatistics(
         }
         else if (sensor_key == "DIFFERENCE_SECOND_DERIVATIVE")
         {
-            for (int vi = 0; vi < static_cast<int>(d_difference_second_derivative_variables.size()); vi++)
+            for (int vi = 0;
+                 vi < static_cast<int>(d_difference_second_derivative_variables.size());
+                 vi++)
             {
                 // Only get the statistics if global tolerances is used.
                 if (d_difference_second_derivative_uses_global_tol[vi])
@@ -1984,9 +2037,7 @@ GradientTagger::tagCells(
    const boost::shared_ptr<hier::VariableContext>& data_context)
 {
     // Loop over gradient sensors chosen.
-    for (int si = 0;
-             si < static_cast<int>(d_gradient_sensors.size());
-             si++)
+    for (int si = 0; si < static_cast<int>(d_gradient_sensors.size()); si++)
     {
         std::string sensor_key = d_gradient_sensors[si];
         
@@ -1996,7 +2047,9 @@ GradientTagger::tagCells(
             int count_local_tol = 0;
             
             // Looop over variables chosen.
-            for (int vi = 0; vi < static_cast<int>(d_difference_first_derivative_variables.size()); vi++)
+            for (int vi = 0;
+                 vi < static_cast<int>(d_difference_first_derivative_variables.size());
+                 vi++)
             {
                 // Get the key of the current variable.
                 std::string variable_key = d_difference_first_derivative_variables[vi];
@@ -2030,7 +2083,9 @@ GradientTagger::tagCells(
                     // Get the cell data of the derivative.
                     boost::shared_ptr<pdat::CellData<double> > derivative(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_difference_first_derivative_density, data_context)));
+                            patch.getPatchData(
+                                d_difference_first_derivative_density,
+                                data_context)));
                     
                     boost::shared_ptr<pdat::CellData<double> > variable_local_mean;
                     if (uses_local_tol)
@@ -2038,10 +2093,12 @@ GradientTagger::tagCells(
                         // Get the cell data of local mean.
                         boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
                             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(d_difference_first_derivative_local_mean_density, data_context)));
+                                patch.getPatchData(
+                                    d_difference_first_derivative_local_mean_density,
+                                    data_context)));
                     }
                     
-                    tagCellsWithDerivativeSensor(
+                    tagCellsWithDifferenceSensor(
                         patch,
                         tags,
                         derivative,
@@ -2057,7 +2114,9 @@ GradientTagger::tagCells(
                     // Get the cell data of the derivative.
                     boost::shared_ptr<pdat::CellData<double> > derivative(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_difference_first_derivative_total_energy, data_context)));
+                            patch.getPatchData(
+                                d_difference_first_derivative_total_energy,
+                                data_context)));
                     
                     boost::shared_ptr<pdat::CellData<double> > variable_local_mean;
                     if (uses_local_tol)
@@ -2065,10 +2124,12 @@ GradientTagger::tagCells(
                         // Get the cell data of local mean.
                         boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
                             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(d_difference_first_derivative_local_mean_total_energy, data_context)));
+                                patch.getPatchData(
+                                    d_difference_first_derivative_local_mean_total_energy,
+                                    data_context)));
                     }
                     
-                    tagCellsWithDerivativeSensor(
+                    tagCellsWithDifferenceSensor(
                         patch,
                         tags,
                         derivative,
@@ -2084,7 +2145,9 @@ GradientTagger::tagCells(
                     // Get the cell data of the derivative.
                     boost::shared_ptr<pdat::CellData<double> > derivative(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_difference_first_derivative_pressure, data_context)));
+                            patch.getPatchData(
+                                d_difference_first_derivative_pressure,
+                                data_context)));
                     
                     boost::shared_ptr<pdat::CellData<double> > variable_local_mean;
                     if (uses_local_tol)
@@ -2092,10 +2155,12 @@ GradientTagger::tagCells(
                         // Get the cell data of local mean.
                         boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
                             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(d_difference_first_derivative_local_mean_pressure, data_context)));
+                                patch.getPatchData(
+                                    d_difference_first_derivative_local_mean_pressure,
+                                    data_context)));
                     }
                     
-                    tagCellsWithDerivativeSensor(
+                    tagCellsWithDifferenceSensor(
                         patch,
                         tags,
                         derivative,
@@ -2123,7 +2188,9 @@ GradientTagger::tagCells(
             int count_local_tol = 0;
             
             // Looop over variables chosen.
-            for (int vi = 0; vi < static_cast<int>(d_difference_second_derivative_variables.size()); vi++)
+            for (int vi = 0;
+                 vi < static_cast<int>(d_difference_second_derivative_variables.size());
+                 vi++)
             {
                 // Get the key of the current variable.
                 std::string variable_key = d_difference_second_derivative_variables[vi];
@@ -2157,7 +2224,9 @@ GradientTagger::tagCells(
                     // Get the cell data of the derivative.
                     boost::shared_ptr<pdat::CellData<double> > derivative(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_difference_second_derivative_density, data_context)));
+                            patch.getPatchData(
+                                d_difference_second_derivative_density,
+                                data_context)));
                     
                     boost::shared_ptr<pdat::CellData<double> > variable_local_mean;
                     if (uses_local_tol)
@@ -2165,10 +2234,12 @@ GradientTagger::tagCells(
                         // Get the cell data of local mean.
                         boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
                             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(d_difference_second_derivative_local_mean_density, data_context)));
+                                patch.getPatchData(
+                                    d_difference_second_derivative_local_mean_density,
+                                    data_context)));
                     }
                     
-                    tagCellsWithDerivativeSensor(
+                    tagCellsWithDifferenceSensor(
                         patch,
                         tags,
                         derivative,
@@ -2184,7 +2255,9 @@ GradientTagger::tagCells(
                     // Get the cell data of the derivative.
                     boost::shared_ptr<pdat::CellData<double> > derivative(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_difference_second_derivative_total_energy, data_context)));
+                            patch.getPatchData(
+                                d_difference_second_derivative_total_energy,
+                                data_context)));
                     
                     boost::shared_ptr<pdat::CellData<double> > variable_local_mean;
                     if (uses_local_tol)
@@ -2192,10 +2265,12 @@ GradientTagger::tagCells(
                         // Get the cell data of local mean.
                         boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
                             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(d_difference_second_derivative_local_mean_total_energy, data_context)));
+                                patch.getPatchData(
+                                    d_difference_second_derivative_local_mean_total_energy,
+                                    data_context)));
                     }
                     
-                    tagCellsWithDerivativeSensor(
+                    tagCellsWithDifferenceSensor(
                         patch,
                         tags,
                         derivative,
@@ -2211,7 +2286,9 @@ GradientTagger::tagCells(
                     // Get the cell data of the derivative.
                     boost::shared_ptr<pdat::CellData<double> > derivative(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_difference_second_derivative_pressure, data_context)));
+                            patch.getPatchData(
+                                d_difference_second_derivative_pressure,
+                                data_context)));
                     
                     boost::shared_ptr<pdat::CellData<double> > variable_local_mean;
                     if (uses_local_tol)
@@ -2219,10 +2296,12 @@ GradientTagger::tagCells(
                         // Get the cell data of local mean.
                         boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
                             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(d_difference_second_derivative_local_mean_pressure, data_context)));
+                                patch.getPatchData(
+                                    d_difference_second_derivative_local_mean_pressure,
+                                    data_context)));
                     }
                     
-                    tagCellsWithDerivativeSensor(
+                    tagCellsWithDifferenceSensor(
                         patch,
                         tags,
                         derivative,
@@ -2247,7 +2326,9 @@ GradientTagger::tagCells(
         else if (sensor_key == "JAMESON_GRADIENT")
         {
             // Looop over variables chosen.
-            for (int vi = 0; vi < static_cast<int>(d_Jameson_gradient_variables.size()); vi++)
+            for (int vi = 0;
+                 vi < static_cast<int>(d_Jameson_gradient_variables.size());
+                 vi++)
             {
                 // Get the key of the current variable.
                 std::string variable_key = d_Jameson_gradient_variables[vi];
@@ -2258,14 +2339,16 @@ GradientTagger::tagCells(
                 if (variable_key == "DENSITY")
                 {
                     /*
-                     * Register the patch and density in the flow model and compute the corresponding cell data.
+                     * Register the patch and density in the flow model and compute the
+                     * corresponding cell data.
                      */
                     
                     d_flow_model->registerPatchWithDataContext(patch, data_context);
                     
                     std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                     
-                    num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("DENSITY", d_num_gradient_ghosts));
+                    num_subghosts_of_data.insert(
+                        std::pair<std::string, hier::IntVector>("DENSITY", d_num_gradient_ghosts));
                     
                     d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
                     
@@ -2281,7 +2364,9 @@ GradientTagger::tagCells(
                     // Get the cell data of the density gradient.
                     boost::shared_ptr<pdat::CellData<double> > gradient(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_Jameson_gradient_density, data_context)));
+                            patch.getPatchData(
+                                d_Jameson_gradient_density,
+                                data_context)));
                     
                     // Compute the gradient.
                     d_gradient_sensor_Jameson->computeGradient(patch, data_density, gradient);
@@ -2295,7 +2380,8 @@ GradientTagger::tagCells(
                         tol);
                     
                     /*
-                     * Unregister the patch and data of all registered derived cell variables in the flow model.
+                     * Unregister the patch and data of all registered derived cell variables in
+                     * the flow model.
                      */
                     
                     d_flow_model->unregisterPatch();
@@ -2304,14 +2390,16 @@ GradientTagger::tagCells(
                 else if (variable_key == "TOTAL_ENERGY")
                 {
                     /*
-                     * Register the patch and total energy in the flow model and compute the corresponding cell data.
+                     * Register the patch and total energy in the flow model and compute the
+                     * corresponding cell data.
                      */
                     
                     d_flow_model->registerPatchWithDataContext(patch, data_context);
                     
                     std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                     
-                    num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("TOTAL_ENERGY", d_num_gradient_ghosts));
+                    num_subghosts_of_data.insert(
+                        std::pair<std::string, hier::IntVector>("TOTAL_ENERGY", d_num_gradient_ghosts));
                     
                     d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
                     
@@ -2327,7 +2415,9 @@ GradientTagger::tagCells(
                     // Get the cell data of the total energy gradient.
                     boost::shared_ptr<pdat::CellData<double> > gradient(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_Jameson_gradient_total_energy, data_context)));
+                            patch.getPatchData(
+                                d_Jameson_gradient_total_energy,
+                                data_context)));
                     
                     // Compute the gradient.
                     d_gradient_sensor_Jameson->computeGradient(patch, data_total_energy, gradient);
@@ -2341,7 +2431,8 @@ GradientTagger::tagCells(
                         tol);
                     
                     /*
-                     * Unregister the patch and data of all registered derived cell variables in the flow model.
+                     * Unregister the patch and data of all registered derived cell variables in
+                     * the flow model.
                      */
                     
                     d_flow_model->unregisterPatch();
@@ -2350,14 +2441,16 @@ GradientTagger::tagCells(
                 else if (variable_key == "PRESSURE")
                 {
                     /*
-                     * Register the patch and pressure in the flow model and compute the corresponding cell data.
+                     * Register the patch and pressure in the flow model and compute the
+                     * corresponding cell data.
                      */
                     
                     d_flow_model->registerPatchWithDataContext(patch, data_context);
                     
                     std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                     
-                    num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("PRESSURE", d_num_gradient_ghosts));
+                    num_subghosts_of_data.insert(
+                        std::pair<std::string, hier::IntVector>("PRESSURE", d_num_gradient_ghosts));
                     
                     d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
                     
@@ -2373,7 +2466,9 @@ GradientTagger::tagCells(
                     // Get the cell data of the pressure gradient.
                     boost::shared_ptr<pdat::CellData<double> > gradient(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                            patch.getPatchData(d_Jameson_gradient_pressure, data_context)));
+                            patch.getPatchData(
+                                d_Jameson_gradient_pressure,
+                                data_context)));
                     
                     // Compute the gradient.
                     d_gradient_sensor_Jameson->computeGradient(patch, data_pressure, gradient);
@@ -2387,7 +2482,8 @@ GradientTagger::tagCells(
                         tol);
                     
                     /*
-                     * Unregister the patch and data of all registered derived cell variables in the flow model.
+                     * Unregister the patch and data of all registered derived cell variables in
+                     * the flow model.
                      */
                     
                     d_flow_model->unregisterPatch();
@@ -2535,14 +2631,14 @@ GradientTagger::tagCellsWithGradientSensor(
 
 
 /*
- * Tag cells using value of derivative sensor.
+ * Tag cells using difference sensor.
  */
 void
-GradientTagger::tagCellsWithDerivativeSensor(
+GradientTagger::tagCellsWithDifferenceSensor(
     hier::Patch& patch,
     const boost::shared_ptr<pdat::CellData<int> >& tags,
-    const boost::shared_ptr<pdat::CellData<double> >& derivative,
-    const double& derivative_max,
+    const boost::shared_ptr<pdat::CellData<double> >& difference,
+    const double& difference_max,
     const boost::shared_ptr<pdat::CellData<double> >& variable_local_mean,
     const bool& uses_global_tol,
     const bool& uses_local_tol,
@@ -2559,8 +2655,8 @@ GradientTagger::tagCellsWithDerivativeSensor(
     
     // Get the number of ghost cells and dimensions of box that covers interior of patch plus
     // ghost cells.
-    const hier::IntVector num_ghosts_derivative = derivative->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_derivative = derivative->getGhostBox().numberCells();
+    const hier::IntVector num_ghosts_difference = difference->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_difference = difference->getGhostBox().numberCells();
     
     // Allocate temporary patch data.
     boost::shared_ptr<pdat::CellData<int> > tags_gradient_tagger(
@@ -2572,8 +2668,8 @@ GradientTagger::tagCellsWithDerivativeSensor(
     int* tag_ptr_gradient_tagger = tags_gradient_tagger->getPointer(0);
     int* tag_ptr = tags->getPointer(0);
     
-    // Get the pointers to the derivative.
-    double* w = derivative->getPointer(0);
+    // Get the pointers to the difference.
+    double* w = difference->getPointer(0);
     
     // Get the pointers to the variable local means.
     double* u_mean = variable_local_mean->getPointer(0);
@@ -2582,7 +2678,7 @@ GradientTagger::tagCellsWithDerivativeSensor(
     {
         const int interior_dim_0 = interior_dims[0];
         
-        const int num_ghosts_0_derivative = num_ghosts_derivative[0];
+        const int num_ghosts_0_difference = num_ghosts_difference[0];
         
         if (uses_global_tol)
         {
@@ -2601,10 +2697,10 @@ GradientTagger::tagCellsWithDerivativeSensor(
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx = i + num_ghosts_0_derivative;
+                const int idx = i + num_ghosts_0_difference;
                 const int idx_nghost = i;
                 
-                if (w[idx]/(derivative_max + EPSILON) > global_tol)
+                if (w[idx]/(difference_max + EPSILON) > global_tol)
                 {
                     tag_ptr_global_tol[idx_nghost] = 1;
                 }
@@ -2639,7 +2735,7 @@ GradientTagger::tagCellsWithDerivativeSensor(
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx = i + num_ghosts_0_derivative;
+                const int idx = i + num_ghosts_0_difference;
                 const int idx_nghost = i;
                 
                 if (w[idx]/(u_mean[idx] + EPSILON) > local_tol)
@@ -2676,9 +2772,9 @@ GradientTagger::tagCellsWithDerivativeSensor(
         const int interior_dim_0 = interior_dims[0];
         const int interior_dim_1 = interior_dims[1];
         
-        const int num_ghosts_0_derivative = num_ghosts_derivative[0];
-        const int num_ghosts_1_derivative = num_ghosts_derivative[1];
-        const int ghostcell_dim_0_derivative = ghostcell_dims_derivative[0];
+        const int num_ghosts_0_difference = num_ghosts_difference[0];
+        const int num_ghosts_1_difference = num_ghosts_difference[1];
+        const int ghostcell_dim_0_difference = ghostcell_dims_difference[0];
         
         if (uses_global_tol)
         {
@@ -2699,13 +2795,12 @@ GradientTagger::tagCellsWithDerivativeSensor(
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx = (i + num_ghosts_0_derivative) +
-                        (j + num_ghosts_1_derivative)*ghostcell_dim_0_derivative;
+                    const int idx = (i + num_ghosts_0_difference) +
+                        (j + num_ghosts_1_difference)*ghostcell_dim_0_difference;
                     
-                    const int idx_nghost = i +
-                        j*interior_dim_0;
+                    const int idx_nghost = i + j*interior_dim_0;
                     
-                    if (w[idx]/(derivative_max + EPSILON) > global_tol)
+                    if (w[idx]/(difference_max + EPSILON) > global_tol)
                     {
                         tag_ptr_global_tol[idx_nghost] = 1;
                     }
@@ -2720,8 +2815,7 @@ GradientTagger::tagCellsWithDerivativeSensor(
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
-                    const int idx_nghost = i +
-                        j*interior_dim_0;
+                    const int idx_nghost = i + j*interior_dim_0;
                     
                     tag_ptr_gradient_tagger[idx_nghost] &= tag_ptr_global_tol[idx_nghost];
                 }
@@ -2747,11 +2841,10 @@ GradientTagger::tagCellsWithDerivativeSensor(
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx = (i + num_ghosts_0_derivative) +
-                        (j + num_ghosts_1_derivative)*ghostcell_dim_0_derivative;
+                    const int idx = (i + num_ghosts_0_difference) +
+                        (j + num_ghosts_1_difference)*ghostcell_dim_0_difference;
                     
-                    const int idx_nghost = i +
-                        j*interior_dim_0;
+                    const int idx_nghost = i + j*interior_dim_0;
                     
                     if (w[idx]/(u_mean[idx] + EPSILON) > local_tol)
                     {
@@ -2768,8 +2861,7 @@ GradientTagger::tagCellsWithDerivativeSensor(
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
-                    const int idx_nghost = i +
-                        j*interior_dim_0;
+                    const int idx_nghost = i + j*interior_dim_0;
                     
                     tag_ptr_gradient_tagger[idx_nghost] &= tag_ptr_local_tol[idx_nghost];
                 }
@@ -2797,11 +2889,11 @@ GradientTagger::tagCellsWithDerivativeSensor(
         const int interior_dim_1 = interior_dims[1];
         const int interior_dim_2 = interior_dims[2];
         
-        const int num_ghosts_0_derivative = num_ghosts_derivative[0];
-        const int num_ghosts_1_derivative = num_ghosts_derivative[1];
-        const int num_ghosts_2_derivative = num_ghosts_derivative[2];
-        const int ghostcell_dim_0_derivative = ghostcell_dims_derivative[0];
-        const int ghostcell_dim_1_derivative = ghostcell_dims_derivative[1];
+        const int num_ghosts_0_difference = num_ghosts_difference[0];
+        const int num_ghosts_1_difference = num_ghosts_difference[1];
+        const int num_ghosts_2_difference = num_ghosts_difference[2];
+        const int ghostcell_dim_0_difference = ghostcell_dims_difference[0];
+        const int ghostcell_dim_1_difference = ghostcell_dims_difference[1];
         
         if (uses_global_tol)
         {
@@ -2824,17 +2916,14 @@ GradientTagger::tagCellsWithDerivativeSensor(
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx = (i + num_ghosts_0_derivative) +
-                            (j + num_ghosts_1_derivative)*ghostcell_dim_0_derivative +
-                            (k + num_ghosts_2_derivative)*ghostcell_dim_0_derivative*
-                                ghostcell_dim_1_derivative;
+                        const int idx = (i + num_ghosts_0_difference) +
+                            (j + num_ghosts_1_difference)*ghostcell_dim_0_difference +
+                            (k + num_ghosts_2_difference)*ghostcell_dim_0_difference*
+                                ghostcell_dim_1_difference;
                         
-                        const int idx_nghost = i +
-                            j*interior_dim_0 +
-                            k*interior_dim_0*
-                                interior_dim_1;
+                        const int idx_nghost = i + j*interior_dim_0 + k*interior_dim_0*interior_dim_1;
                         
-                        if (w[idx]/(derivative_max + EPSILON) > global_tol)
+                        if (w[idx]/(difference_max + EPSILON) > global_tol)
                         {
                             tag_ptr_global_tol[idx_nghost] = 1;
                         }
@@ -2852,10 +2941,7 @@ GradientTagger::tagCellsWithDerivativeSensor(
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
-                        const int idx_nghost = i +
-                            j*interior_dim_0 +
-                            k*interior_dim_0*
-                                interior_dim_1;
+                        const int idx_nghost = i + j*interior_dim_0 + k*interior_dim_0*interior_dim_1;
                         
                         tag_ptr_gradient_tagger[idx_nghost] &= tag_ptr_global_tol[idx_nghost];
                     }
@@ -2884,15 +2970,12 @@ GradientTagger::tagCellsWithDerivativeSensor(
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx = (i + num_ghosts_0_derivative) +
-                            (j + num_ghosts_1_derivative)*ghostcell_dim_0_derivative +
-                            (k + num_ghosts_2_derivative)*ghostcell_dim_0_derivative*
-                                ghostcell_dim_1_derivative;
+                        const int idx = (i + num_ghosts_0_difference) +
+                            (j + num_ghosts_1_difference)*ghostcell_dim_0_difference +
+                            (k + num_ghosts_2_difference)*ghostcell_dim_0_difference*
+                                ghostcell_dim_1_difference;
                         
-                        const int idx_nghost = i +
-                            j*interior_dim_0 +
-                            k*interior_dim_0*
-                                interior_dim_1;
+                        const int idx_nghost = i + j*interior_dim_0 + k*interior_dim_0*interior_dim_1;
                         
                         if (w[idx]/(u_mean[idx] + EPSILON) > local_tol)
                         {
@@ -2912,10 +2995,7 @@ GradientTagger::tagCellsWithDerivativeSensor(
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear index.
-                        const int idx_nghost = i +
-                            j*interior_dim_0 +
-                            k*interior_dim_0*
-                                interior_dim_1;
+                        const int idx_nghost = i + j*interior_dim_0 + k*interior_dim_0*interior_dim_1;
                         
                         tag_ptr_gradient_tagger[idx_nghost] &= tag_ptr_local_tol[idx_nghost];
                     }
@@ -2933,10 +3013,7 @@ GradientTagger::tagCellsWithDerivativeSensor(
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear index.
-                    const int idx_nghost = i +
-                            j*interior_dim_0 +
-                            k*interior_dim_0*
-                                interior_dim_1;
+                    const int idx_nghost = i + j*interior_dim_0 + k*interior_dim_0*interior_dim_1;
                     
                     tag_ptr[idx_nghost] |= tag_ptr_gradient_tagger[idx_nghost];
                 }

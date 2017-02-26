@@ -3,8 +3,6 @@
 set(utils_source_files
     ./differences/DifferenceFirstDerivative.cpp
     ./differences/DifferenceSecondDerivative.cpp
-    ./gradient_sensors/GradientSensorFirstDerivative.cpp
-    ./gradient_sensors/GradientSensorSecondDerivative.cpp
     ./gradient_sensors/GradientSensorJameson.cpp
     ./wavelet_transform/WaveletTransformHarten.cpp
 )
