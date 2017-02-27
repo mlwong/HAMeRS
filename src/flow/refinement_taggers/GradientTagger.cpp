@@ -563,9 +563,7 @@ GradientTagger::GradientTagger(
         /*
          * Check that input is found for each string identifier in key list.
          */
-        for (int ki = 0;
-             ki < static_cast<int>(d_gradient_sensors.size());
-             ki++)
+        for (int ki = 0; ki < static_cast<int>(d_gradient_sensors.size()); ki++)
         {
             std::string use_key = d_gradient_sensors[ki];
             bool key_found = false;
@@ -747,6 +745,17 @@ GradientTagger::registerGradientTaggerVariables(
                             d_grid_geometry,
                             "NO_COARSEN",
                             "NO_REFINE");
+                    
+                    if (d_difference_first_derivative_uses_local_tol[vi])
+                    {
+                        integrator->registerVariable(
+                            d_difference_first_derivative_local_mean_density,
+                            d_num_gradient_ghosts,
+                            RungeKuttaLevelIntegrator::TEMPORARY,
+                                d_grid_geometry,
+                                "NO_COARSEN",
+                                "NO_REFINE");
+                    }
                 }
                 else if (variable_key == "TOTAL_ENERGY")
                 {
@@ -757,6 +766,17 @@ GradientTagger::registerGradientTaggerVariables(
                             d_grid_geometry,
                             "NO_COARSEN",
                             "NO_REFINE");
+                    
+                    if (d_difference_first_derivative_uses_local_tol[vi])
+                    {
+                        integrator->registerVariable(
+                            d_difference_first_derivative_local_mean_total_energy,
+                            d_num_gradient_ghosts,
+                            RungeKuttaLevelIntegrator::TEMPORARY,
+                                d_grid_geometry,
+                                "NO_COARSEN",
+                                "NO_REFINE");
+                    }
                 }
                 else if (variable_key == "PRESSURE")
                 {
@@ -767,6 +787,17 @@ GradientTagger::registerGradientTaggerVariables(
                             d_grid_geometry,
                             "NO_COARSEN",
                             "NO_REFINE");
+                    
+                    if (d_difference_first_derivative_uses_local_tol[vi])
+                    {
+                        integrator->registerVariable(
+                            d_difference_first_derivative_local_mean_pressure,
+                            d_num_gradient_ghosts,
+                            RungeKuttaLevelIntegrator::TEMPORARY,
+                                d_grid_geometry,
+                                "NO_COARSEN",
+                                "NO_REFINE");
+                    }
                 }
                 else
                 {
@@ -887,6 +918,17 @@ GradientTagger::registerGradientTaggerVariables(
                             d_grid_geometry,
                             "NO_COARSEN",
                             "NO_REFINE");
+                    
+                    if (d_difference_second_derivative_uses_local_tol[vi])
+                    {
+                        integrator->registerVariable(
+                            d_difference_second_derivative_local_mean_density,
+                            d_num_gradient_ghosts,
+                            RungeKuttaLevelIntegrator::TEMPORARY,
+                                d_grid_geometry,
+                                "NO_COARSEN",
+                                "NO_REFINE");
+                    }
                 }
                 else if (variable_key == "TOTAL_ENERGY")
                 {
@@ -897,6 +939,17 @@ GradientTagger::registerGradientTaggerVariables(
                             d_grid_geometry,
                             "NO_COARSEN",
                             "NO_REFINE");
+                    
+                    if (d_difference_second_derivative_uses_local_tol[vi])
+                    {
+                        integrator->registerVariable(
+                            d_difference_second_derivative_local_mean_total_energy,
+                            d_num_gradient_ghosts,
+                            RungeKuttaLevelIntegrator::TEMPORARY,
+                                d_grid_geometry,
+                                "NO_COARSEN",
+                                "NO_REFINE");
+                    }
                 }
                 else if (variable_key == "PRESSURE")
                 {
@@ -907,6 +960,17 @@ GradientTagger::registerGradientTaggerVariables(
                             d_grid_geometry,
                             "NO_COARSEN",
                             "NO_REFINE");
+                    
+                    if (d_difference_second_derivative_uses_local_tol[vi])
+                    {
+                        integrator->registerVariable(
+                            d_difference_second_derivative_local_mean_pressure,
+                            d_num_gradient_ghosts,
+                            RungeKuttaLevelIntegrator::TEMPORARY,
+                                d_grid_geometry,
+                                "NO_COARSEN",
+                                "NO_REFINE");
+                    }
                 }
                 else
                 {
@@ -2080,8 +2144,8 @@ GradientTagger::tagCells(
                 
                 if (variable_key == "DENSITY")
                 {
-                    // Get the cell data of the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
+                    // Get the cell data of the difference.
+                    boost::shared_ptr<pdat::CellData<double> > difference(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_difference_first_derivative_density,
@@ -2091,17 +2155,16 @@ GradientTagger::tagCells(
                     if (uses_local_tol)
                     {
                         // Get the cell data of local mean.
-                        boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
-                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(
-                                    d_difference_first_derivative_local_mean_density,
-                                    data_context)));
+                        variable_local_mean = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(
+                                d_difference_first_derivative_local_mean_density,
+                                data_context));
                     }
                     
                     tagCellsWithDifferenceSensor(
                         patch,
                         tags,
-                        derivative,
+                        difference,
                         d_difference_first_derivative_max_density,
                         variable_local_mean,
                         uses_global_tol,
@@ -2111,8 +2174,8 @@ GradientTagger::tagCells(
                 }
                 else if (variable_key == "TOTAL_ENERGY")
                 {
-                    // Get the cell data of the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
+                    // Get the cell data of the difference.
+                    boost::shared_ptr<pdat::CellData<double> > difference(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_difference_first_derivative_total_energy,
@@ -2122,17 +2185,16 @@ GradientTagger::tagCells(
                     if (uses_local_tol)
                     {
                         // Get the cell data of local mean.
-                        boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
-                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(
-                                    d_difference_first_derivative_local_mean_total_energy,
-                                    data_context)));
+                        variable_local_mean = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(
+                                d_difference_first_derivative_local_mean_total_energy,
+                                data_context));
                     }
                     
                     tagCellsWithDifferenceSensor(
                         patch,
                         tags,
-                        derivative,
+                        difference,
                         d_difference_first_derivative_max_total_energy,
                         variable_local_mean,
                         uses_global_tol,
@@ -2142,8 +2204,8 @@ GradientTagger::tagCells(
                 }
                 else if (variable_key == "PRESSURE")
                 {
-                    // Get the cell data of the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
+                    // Get the cell data of the difference.
+                    boost::shared_ptr<pdat::CellData<double> > difference(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_difference_first_derivative_pressure,
@@ -2153,17 +2215,16 @@ GradientTagger::tagCells(
                     if (uses_local_tol)
                     {
                         // Get the cell data of local mean.
-                        boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
-                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(
-                                    d_difference_first_derivative_local_mean_pressure,
-                                    data_context)));
+                        variable_local_mean = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(
+                                d_difference_first_derivative_local_mean_pressure,
+                                data_context));
                     }
                     
                     tagCellsWithDifferenceSensor(
                         patch,
                         tags,
-                        derivative,
+                        difference,
                         d_difference_first_derivative_max_pressure,
                         variable_local_mean,
                         uses_global_tol,
@@ -2221,8 +2282,8 @@ GradientTagger::tagCells(
                 
                 if (variable_key == "DENSITY")
                 {
-                    // Get the cell data of the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
+                    // Get the cell data of the difference.
+                    boost::shared_ptr<pdat::CellData<double> > difference(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_difference_second_derivative_density,
@@ -2232,17 +2293,16 @@ GradientTagger::tagCells(
                     if (uses_local_tol)
                     {
                         // Get the cell data of local mean.
-                        boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
-                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(
-                                    d_difference_second_derivative_local_mean_density,
-                                    data_context)));
+                        variable_local_mean = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(
+                                d_difference_second_derivative_local_mean_density,
+                                data_context));
                     }
                     
                     tagCellsWithDifferenceSensor(
                         patch,
                         tags,
-                        derivative,
+                        difference,
                         d_difference_second_derivative_max_density,
                         variable_local_mean,
                         uses_global_tol,
@@ -2252,8 +2312,8 @@ GradientTagger::tagCells(
                 }
                 else if (variable_key == "TOTAL_ENERGY")
                 {
-                    // Get the cell data of the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
+                    // Get the cell data of the difference.
+                    boost::shared_ptr<pdat::CellData<double> > difference(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_difference_second_derivative_total_energy,
@@ -2263,17 +2323,16 @@ GradientTagger::tagCells(
                     if (uses_local_tol)
                     {
                         // Get the cell data of local mean.
-                        boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
-                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(
-                                    d_difference_second_derivative_local_mean_total_energy,
-                                    data_context)));
+                        variable_local_mean = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(
+                                d_difference_second_derivative_local_mean_total_energy,
+                                data_context));
                     }
                     
                     tagCellsWithDifferenceSensor(
                         patch,
                         tags,
-                        derivative,
+                        difference,
                         d_difference_second_derivative_max_total_energy,
                         variable_local_mean,
                         uses_global_tol,
@@ -2283,8 +2342,8 @@ GradientTagger::tagCells(
                 }
                 else if (variable_key == "PRESSURE")
                 {
-                    // Get the cell data of the derivative.
-                    boost::shared_ptr<pdat::CellData<double> > derivative(
+                    // Get the cell data of the difference.
+                    boost::shared_ptr<pdat::CellData<double> > difference(
                         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                             patch.getPatchData(
                                 d_difference_second_derivative_pressure,
@@ -2294,17 +2353,16 @@ GradientTagger::tagCells(
                     if (uses_local_tol)
                     {
                         // Get the cell data of local mean.
-                        boost::shared_ptr<pdat::CellData<double> > variable_local_mean(
-                            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                                patch.getPatchData(
-                                    d_difference_second_derivative_local_mean_pressure,
-                                    data_context)));
+                        variable_local_mean = BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(
+                                d_difference_second_derivative_local_mean_pressure,
+                                data_context));
                     }
                     
                     tagCellsWithDifferenceSensor(
                         patch,
                         tags,
-                        derivative,
+                        difference,
                         d_difference_second_derivative_max_pressure,
                         variable_local_mean,
                         uses_global_tol,
@@ -2672,7 +2730,11 @@ GradientTagger::tagCellsWithDifferenceSensor(
     double* w = difference->getPointer(0);
     
     // Get the pointers to the variable local means.
-    double* u_mean = variable_local_mean->getPointer(0);
+    double* u_mean = nullptr;
+    if (uses_local_tol)
+    {
+        u_mean = variable_local_mean->getPointer(0);
+    }
     
     if (d_dim == tbox::Dimension(1))
     {
