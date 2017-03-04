@@ -220,26 +220,13 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 }
                 
                 // Compute the starting and ending indices.
-                const int start_index_i = -d_num_wavelet_ghosts[0] + 1;
-                const int end_index_i = interior_dim_0 + d_num_wavelet_ghosts[0] - 1;
+                const int start_index_x_i = -d_num_wavelet_ghosts[0] + 1;
+                const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - 1;
                 
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
-                for (int i = start_index_i; i < end_index_i; i++)
-                {
-                    // Compute the linear indices.
-                    const int idx     = i + num_ghosts_0_wavelet_coeffs;
-                    const int idx_x_L = i - 1 + num_ghosts_0_cell_data;
-                    const int idx_x_R = i + 1 + num_ghosts_0_cell_data;
-                    
-                    f_x[0][idx] = 0.5*(f[idx_x_L] + f[idx_x_R]);
-                }
-                
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
-                for (int i = start_index_i; i < end_index_i; i++)
+                for (int i = start_index_x_i; i < end_index_x_i; i++)
                 {
                     // Compute the linear indices.
                     const int idx     = i + num_ghosts_0_wavelet_coeffs;
@@ -247,6 +234,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     const int idx_x   = i + num_ghosts_0_cell_data;
                     const int idx_x_R = i + 1 + num_ghosts_0_cell_data;
                     
+                    f_x[0][idx] = 0.5*(f[idx_x_L] + f[idx_x_R]);
                     w[0][idx] = fabs(-0.5*(f[idx_x_L] - 2*f[idx_x] + f[idx_x_R]));
                 }
                 
@@ -286,28 +274,13 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 }
                 
                 // Compute the starting and ending indices.
-                const int start_index_i = -d_num_wavelet_ghosts[0] + 2;
-                const int end_index_i = interior_dim_0 + d_num_wavelet_ghosts[0] - 2;
+                const int start_index_x_i = -d_num_wavelet_ghosts[0] + 2;
+                const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - 2;
                 
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
-                for (int i = start_index_i; i < end_index_i; i++)
-                {
-                    // Compute the linear indices.
-                    const int idx      = i + num_ghosts_0_wavelet_coeffs;
-                    const int idx_x_LL = i - 2 + num_ghosts_0_cell_data;
-                    const int idx_x_L  = i - 1 + num_ghosts_0_cell_data;
-                    const int idx_x_R  = i + 1 + num_ghosts_0_cell_data;
-                    const int idx_x_RR = i + 2 + num_ghosts_0_cell_data;
-                    
-                    f_x[0][idx] = 1.0/6.0*(-f[idx_x_LL] + 4*f[idx_x_L] + 4*f[idx_x_R] - f[idx_x_RR]);
-                }
-                
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
-                for (int i = start_index_i; i < end_index_i; i++)
+                for (int i = start_index_x_i; i < end_index_x_i; i++)
                 {
                     // Compute the linear indices.
                     const int idx      = i + num_ghosts_0_wavelet_coeffs;
@@ -317,6 +290,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     const int idx_x_R  = i + 1 + num_ghosts_0_cell_data;
                     const int idx_x_RR = i + 2 + num_ghosts_0_cell_data;
                     
+                    f_x[0][idx] = 1.0/6.0*(-f[idx_x_LL] + 4*f[idx_x_L] + 4*f[idx_x_R] - f[idx_x_RR]);
                     w[0][idx]   = fabs(1.0/6.0*(f[idx_x_LL] - 4*f[idx_x_L] + 6*f[idx_x] - 4*f[idx_x_R] + f[idx_x_RR]));
                 }
                 
@@ -367,15 +341,15 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                      */
                     
                     // Compute the starting and ending indices.
-                    const int start_index_i = -d_num_wavelet_ghosts[0] + pow(2, li);
-                    const int end_index_i = interior_dim_0 + d_num_wavelet_ghosts[0] - pow(2, li);
+                    const int start_index_x_i = -d_num_wavelet_ghosts[0] + pow(2, li);
+                    const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - pow(2, li);
                     
                     const int offset = pow(2, li);
                     
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
-                    for (int i = start_index_i; i < end_index_i; i++)
+                    for (int i = start_index_x_i; i < end_index_x_i; i++)
                     {
                         // Compute the linear indices.
                         const int idx     = i + num_ghosts_0_wavelet_coeffs;
@@ -383,18 +357,6 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                         const int idx_x_R = i + offset + num_ghosts_0_wavelet_coeffs;
                         
                         f_x[li][idx] = 0.5*(f_x[li-1][idx_x_L] + f_x[li-1][idx_x_R]);
-                    }
-                    
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = start_index_i; i < end_index_i; i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx     = i + num_ghosts_0_wavelet_coeffs;
-                        const int idx_x_L = i - offset + num_ghosts_0_wavelet_coeffs;
-                        const int idx_x_R = i + offset + num_ghosts_0_wavelet_coeffs;
-                        
                         w[li][idx]   = fabs(-0.5*(f_x[li-1][idx_x_L] - 2*f_x[li-1][idx] + f_x[li-1][idx_x_R]));
                     }
                     
@@ -423,15 +385,15 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                      */
                     
                     // Compute the starting and ending indices.
-                    const int start_index_i = -d_num_wavelet_ghosts[0] + 2*pow(2, li);
-                    const int end_index_i = interior_dim_0 + d_num_wavelet_ghosts[0] - 2*pow(2, li);
+                    const int start_index_x_i = -d_num_wavelet_ghosts[0] + 2*pow(2, li);
+                    const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - 2*pow(2, li);
                     
                     const int offset = pow(2, li);
                     
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
-                    for (int i = start_index_i; i < end_index_i; i++)
+                    for (int i = start_index_x_i; i < end_index_x_i; i++)
                     {
                         // Compute indices.
                         const int idx      = i + num_ghosts_0_wavelet_coeffs;
@@ -442,20 +404,6 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                         
                         f_x[li][idx] = 1.0/6.0*(-f_x[li-1][idx_x_LL] + 4*f_x[li-1][idx_x_L] +
                             4*f_x[li-1][idx_x_R] - f_x[li-1][idx_x_RR]);
-                    }
-                    
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = start_index_i; i < end_index_i; i++)
-                    {
-                        // Compute indices.
-                        const int idx      = i + num_ghosts_0_wavelet_coeffs;
-                        const int idx_x_LL = i - 2*offset + num_ghosts_0_wavelet_coeffs;
-                        const int idx_x_L  = i - offset + num_ghosts_0_wavelet_coeffs;
-                        const int idx_x_R  = i + offset + num_ghosts_0_wavelet_coeffs;
-                        const int idx_x_RR = i + 2*offset + num_ghosts_0_wavelet_coeffs;
-                        
                         w[li][idx] = fabs(1.0/6.0*(f_x[li-1][idx_x_LL] - 4*f_x[li-1][idx_x_L] +
                             6*f_x[li-1][idx] - 4*f_x[li-1][idx_x_R] + f_x[li-1][idx_x_RR]));
                     }
@@ -497,6 +445,17 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
     }
     else if (d_dim == tbox::Dimension(2))
     {
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        
+        const int num_ghosts_0_cell_data = num_ghosts_cell_data[0];
+        const int num_ghosts_1_cell_data = num_ghosts_cell_data[1];
+        const int ghostcell_dim_0_cell_data = ghostcell_dims_cell_data[0];
+        
+        const int num_ghosts_0_wavelet_coeffs = num_ghosts_wavelet_coeffs[0];
+        const int num_ghosts_1_wavelet_coeffs = num_ghosts_wavelet_coeffs[1];
+        const int ghostcell_dim_0_wavelet_coeffs = ghostcell_dims_wavelet_coeffs[0];
+        
         // Allocate wavelet coefficients in different dimensions.
         std::vector<boost::shared_ptr<pdat::CellData<double> > > wavelet_coeffs_x;
         std::vector<boost::shared_ptr<pdat::CellData<double> > > wavelet_coeffs_y;
@@ -540,9 +499,6 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
         {
             case 2:
             {
-                int start_index_i, end_index_i,
-                    start_index_j, end_index_j;
-                
                 /*
                  * Compute scaling and wavelet coefficients in the x-direction.
                  */
@@ -558,27 +514,27 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 }
                 
                 // Compute the starting and ending indices.
-                start_index_i = -d_num_wavelet_ghosts[0] + 1;
-                end_index_i   = interior_dims[0] + d_num_wavelet_ghosts[0] - 1;
-                start_index_j = -d_num_wavelet_ghosts[1];
-                end_index_j   = interior_dims[1] + d_num_wavelet_ghosts[1];
+                const int start_index_x_i = -d_num_wavelet_ghosts[0] + 1;
+                const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - 1;
+                const int start_index_x_j = -d_num_wavelet_ghosts[1];
+                const int end_index_x_j = interior_dim_1 + d_num_wavelet_ghosts[1];
                 
-                for (int j = start_index_j; j < end_index_j; j++)
+                for (int j = start_index_x_j; j < end_index_x_j; j++)
                 {
-                    for (int i = start_index_i; i < end_index_i; i++)
+                    for (int i = start_index_x_i; i < end_index_x_i; i++)
                     {
                         // Compute the linear indices.
-                        const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                            (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                        const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                            (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dims_wavelet_coeffs[0];
                         
-                        const int idx_x_L = (i - 1 + num_ghosts_cell_data[0]) +
-                            (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                        const int idx_x_L = (i - 1 + num_ghosts_0_cell_data) +
+                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                         
-                        const int idx_x   = (i + num_ghosts_cell_data[0]) +
-                            (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                        const int idx_x   = (i + num_ghosts_0_cell_data) +
+                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                         
-                        const int idx_x_R = (i + 1 + num_ghosts_cell_data[0]) +
-                            (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                        const int idx_x_R = (i + 1 + num_ghosts_0_cell_data) +
+                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                         
                         f_x[0][idx] = 0.5*(f[idx_x_L] + f[idx_x_R]);
                         w_x[0][idx] = -0.5*(f[idx_x_L] - 2*f[idx_x] + f[idx_x_R]);
@@ -600,27 +556,27 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 }
                 
                 // Compute the starting and ending indices.
-                start_index_i = -d_num_wavelet_ghosts[0];
-                end_index_i   = interior_dims[0] + d_num_wavelet_ghosts[0];
-                start_index_j = -d_num_wavelet_ghosts[1] + 1;
-                end_index_j   = interior_dims[1] + d_num_wavelet_ghosts[1] - 1;
+                const int start_index_y_i = -d_num_wavelet_ghosts[0];
+                const int end_index_y_i = interior_dim_0 + d_num_wavelet_ghosts[0];
+                const int start_index_y_j = -d_num_wavelet_ghosts[1] + 1;
+                const int end_index_y_j = interior_dim_1 + d_num_wavelet_ghosts[1] - 1;
                 
-                for (int i = start_index_i; i < end_index_i; i++)
+                for (int i = start_index_y_i; i < end_index_y_i; i++)
                 {
-                    for (int j = start_index_j; j < end_index_j; j++)
+                    for (int j = start_index_y_j; j < end_index_y_j; j++)
                     {
                         // Compute the linear indices.
-                        const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                            (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                        const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                            (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                         
-                        const int idx_y_B = (i + num_ghosts_cell_data[0]) +
-                            (j - 1 + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                        const int idx_y_B = (i + num_ghosts_0_cell_data) +
+                            (j - 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                         
-                        const int idx_y   = (i + num_ghosts_cell_data[0]) +
-                            (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                        const int idx_y   = (i + num_ghosts_0_cell_data) +
+                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                         
-                        const int idx_y_T = (i + num_ghosts_cell_data[0]) +
-                            (j + 1 + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                        const int idx_y_T = (i + num_ghosts_0_cell_data) +
+                            (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                         
                         f_y[0][idx] = 0.5*(f[idx_y_B] + f[idx_y_T]);
                         w_y[0][idx] = -0.5*(f[idx_y_B] - 2*f[idx_y] + f[idx_y_T]);
@@ -629,30 +585,30 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 
                 if (compute_variable_local_means)
                 {
-                    for (int j = 0; j < interior_dims[1]; j++)
+                    for (int j = 0; j < interior_dim_1; j++)
                     {
-                        for (int i = 0; i < interior_dims[0]; i++)
+                        for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
-                            const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                            const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
-                            const int idx_x_L = (i - 1 + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                            const int idx_x_L = (i - 1 + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                             
-                            const int idx_x   = (i + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                            const int idx_x = (i + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                             
-                            const int idx_x_R = (i + 1 + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                            const int idx_x_R = (i + 1 + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                             
-                            const int idx_y_B = (i + num_ghosts_cell_data[0]) +
-                                (j - 1 + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                            const int idx_y_B = (i + num_ghosts_0_cell_data) +
+                                (j - 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                             
-                            const int idx_y   = idx_x;
+                            const int idx_y = idx_x;
                             
-                            const int idx_y_T = (i + num_ghosts_cell_data[0]) +
-                                (j + 1 + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                            const int idx_y_T = (i + num_ghosts_0_cell_data) +
+                                (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                             
                             f_mean[0][idx] = 0.5*sqrt(
                                 pow(f[idx_x_L] + 2*f[idx_x] + f[idx_x_R], 2.0) +
@@ -1087,6 +1043,22 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
     }
     else if (d_dim == tbox::Dimension(3))
     {
+        const int interior_dim_0 = interior_dims[0];
+        const int interior_dim_1 = interior_dims[1];
+        const int interior_dim_2 = interior_dims[2];
+        
+        const int num_ghosts_0_cell_data = num_ghosts_cell_data[0];
+        const int num_ghosts_1_cell_data = num_ghosts_cell_data[1];
+        const int num_ghosts_2_cell_data = num_ghosts_cell_data[2];
+        const int ghostcell_dim_0_cell_data = ghostcell_dims_cell_data[0];
+        const int ghostcell_dim_1_cell_data = ghostcell_dims_cell_data[1];
+        
+        const int num_ghosts_0_wavelet_coeffs = num_ghosts_wavelet_coeffs[0];
+        const int num_ghosts_1_wavelet_coeffs = num_ghosts_wavelet_coeffs[1];
+        const int num_ghosts_2_wavelet_coeffs = num_ghosts_wavelet_coeffs[2];
+        const int ghostcell_dim_0_wavelet_coeffs = ghostcell_dims_wavelet_coeffs[0];
+        const int ghostcell_dim_1_wavelet_coeffs = ghostcell_dims_wavelet_coeffs[1];
+        
         // Allocate wavelet coefficients in different dimensions.
         std::vector<boost::shared_ptr<pdat::CellData<double> > > wavelet_coeffs_x;
         std::vector<boost::shared_ptr<pdat::CellData<double> > > wavelet_coeffs_y;
