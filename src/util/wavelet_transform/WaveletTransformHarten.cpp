@@ -231,7 +231,6 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     // Compute the linear indices.
                     const int idx     = i + num_ghosts_0_wavelet_coeffs;
                     const int idx_x_L = i - 1 + num_ghosts_0_cell_data;
-                    const int idx_x   = i + num_ghosts_0_cell_data;
                     const int idx_x_R = i + 1 + num_ghosts_0_cell_data;
                     
                     f_x[0][idx] = 0.5*(f[idx_x_L] + f[idx_x_R]);
@@ -299,7 +298,6 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     const int idx      = i + num_ghosts_0_wavelet_coeffs;
                     const int idx_x_LL = i - 2 + num_ghosts_0_cell_data;
                     const int idx_x_L  = i - 1 + num_ghosts_0_cell_data;
-                    const int idx_x    = i + num_ghosts_0_cell_data;
                     const int idx_x_R  = i + 1 + num_ghosts_0_cell_data;
                     const int idx_x_RR = i + 2 + num_ghosts_0_cell_data;
                     
