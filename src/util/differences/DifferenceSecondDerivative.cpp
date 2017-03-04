@@ -102,11 +102,12 @@ DifferenceSecondDerivative::computeDifferenceWithVariableLocalMean(
         {
             // Compute the linear indices.
             const int idx = i + num_ghosts_0_difference;
-            const int idx_cell_data = i + num_ghosts_0_cell_data;
+            
+            const int idx_cell_data     = i + num_ghosts_0_cell_data;
             const int idx_cell_data_x_L = i - 1 + num_ghosts_0_cell_data;
             const int idx_cell_data_x_R = i + 1 + num_ghosts_0_cell_data;
             
-            w[idx] = fabs(f[idx_cell_data_x_R] - 2*f[idx_cell_data] + f[idx_cell_data_x_L]);
+            w[idx] = fabs(f[idx_cell_data_x_R] - 2.0*f[idx_cell_data] + f[idx_cell_data_x_L]);
         }
         
         if (compute_variable_local_mean)
@@ -118,11 +119,12 @@ DifferenceSecondDerivative::computeDifferenceWithVariableLocalMean(
             {
                 // Compute the linear indices.
                 const int idx = i + num_ghosts_0_difference;
-                const int idx_cell_data = i + num_ghosts_0_cell_data;
+                
+                const int idx_cell_data     = i + num_ghosts_0_cell_data;
                 const int idx_cell_data_x_L = i - 1 + num_ghosts_0_cell_data;
                 const int idx_cell_data_x_R = i + 1 + num_ghosts_0_cell_data;
                 
-                f_mean[idx] = f[idx_cell_data_x_R] + 2*f[idx_cell_data] + f[idx_cell_data_x_L];
+                f_mean[idx] = f[idx_cell_data_x_R] + 2.0*f[idx_cell_data] + f[idx_cell_data_x_L];
             }
         }
     }
@@ -165,8 +167,8 @@ DifferenceSecondDerivative::computeDifferenceWithVariableLocalMean(
                 const int idx_cell_data_y_T = (i + num_ghosts_0_cell_data) +
                     (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                 
-                double w_x = f[idx_cell_data_x_R] - 2*f[idx_cell_data] + f[idx_cell_data_x_L];
-                double w_y = f[idx_cell_data_y_T] - 2*f[idx_cell_data] + f[idx_cell_data_y_B];
+                double w_x = f[idx_cell_data_x_R] - 2.0*f[idx_cell_data] + f[idx_cell_data_x_L];
+                double w_y = f[idx_cell_data_y_T] - 2.0*f[idx_cell_data] + f[idx_cell_data_y_B];
                 
                 w[idx] = sqrt(w_x*w_x + w_y*w_y);
             }
@@ -200,8 +202,8 @@ DifferenceSecondDerivative::computeDifferenceWithVariableLocalMean(
                     const int idx_cell_data_y_T = (i + num_ghosts_0_cell_data) +
                         (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                     
-                    double f_mean_x = f[idx_cell_data_x_R] + 2*f[idx_cell_data] + f[idx_cell_data_x_L];
-                    double f_mean_y = f[idx_cell_data_y_T] + 2*f[idx_cell_data] + f[idx_cell_data_y_B];
+                    double f_mean_x = f[idx_cell_data_x_R] + 2.0*f[idx_cell_data] + f[idx_cell_data_x_L];
+                    double f_mean_y = f[idx_cell_data_y_T] + 2.0*f[idx_cell_data] + f[idx_cell_data_y_B];
                     
                     f_mean[idx] = sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y);
                 }
@@ -276,9 +278,9 @@ DifferenceSecondDerivative::computeDifferenceWithVariableLocalMean(
                         (k + 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
                             ghostcell_dim_1_cell_data;
                     
-                    double w_x = f[idx_cell_data_x_R] - 2*f[idx_cell_data] + f[idx_cell_data_x_L];
-                    double w_y = f[idx_cell_data_y_T] - 2*f[idx_cell_data] + f[idx_cell_data_y_B];
-                    double w_z = f[idx_cell_data_z_F] - 2*f[idx_cell_data] + f[idx_cell_data_z_B];
+                    const double w_x = f[idx_cell_data_x_R] - 2.0*f[idx_cell_data] + f[idx_cell_data_x_L];
+                    const double w_y = f[idx_cell_data_y_T] - 2.0*f[idx_cell_data] + f[idx_cell_data_y_B];
+                    const double w_z = f[idx_cell_data_z_F] - 2.0*f[idx_cell_data] + f[idx_cell_data_z_B];
                     
                     w[idx] = sqrt(w_x*w_x + w_y*w_y + w_z*w_z);
                 }
@@ -337,9 +339,9 @@ DifferenceSecondDerivative::computeDifferenceWithVariableLocalMean(
                             (k + 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
                                 ghostcell_dim_1_cell_data;
                         
-                        double f_mean_x = f[idx_cell_data_x_R] + 2*f[idx_cell_data] + f[idx_cell_data_x_L];
-                        double f_mean_y = f[idx_cell_data_y_T] + 2*f[idx_cell_data] + f[idx_cell_data_y_B];
-                        double f_mean_z = f[idx_cell_data_z_F] + 2*f[idx_cell_data] + f[idx_cell_data_z_B];
+                        double f_mean_x = f[idx_cell_data_x_R] + 2.0*f[idx_cell_data] + f[idx_cell_data_x_L];
+                        double f_mean_y = f[idx_cell_data_y_T] + 2.0*f[idx_cell_data] + f[idx_cell_data_y_B];
+                        double f_mean_z = f[idx_cell_data_z_F] + 2.0*f[idx_cell_data] + f[idx_cell_data_z_B];
                         
                         f_mean[idx] = sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y + f_mean_z*f_mean_z);
                     }

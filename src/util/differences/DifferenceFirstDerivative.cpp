@@ -102,6 +102,7 @@ DifferenceFirstDerivative::computeDifferenceWithVariableLocalMean(
         {
             // Compute the linear indices.
             const int idx = i + num_ghosts_0_difference;
+            
             const int idx_cell_data_x_L = i - 1 + num_ghosts_0_cell_data;
             const int idx_cell_data_x_R = i + 1 + num_ghosts_0_cell_data;
             
@@ -117,6 +118,7 @@ DifferenceFirstDerivative::computeDifferenceWithVariableLocalMean(
             {
                 // Compute the linear indices.
                 const int idx = i + num_ghosts_0_difference;
+                
                 const int idx_cell_data_x_L = i - 1 + num_ghosts_0_cell_data;
                 const int idx_cell_data_x_R = i + 1 + num_ghosts_0_cell_data;
                 

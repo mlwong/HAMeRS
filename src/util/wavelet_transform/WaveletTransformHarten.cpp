@@ -229,13 +229,16 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 for (int i = start_index_x_i; i < end_index_x_i; i++)
                 {
                     // Compute the linear indices.
-                    const int idx     = i + num_ghosts_0_wavelet_coeffs;
-                    const int idx_x_L = i - 1 + num_ghosts_0_cell_data;
-                    const int idx_x   = i + num_ghosts_0_cell_data;
-                    const int idx_x_R = i + 1 + num_ghosts_0_cell_data;
+                    const int idx = i + num_ghosts_0_wavelet_coeffs;
                     
-                    f_x[0][idx] = 0.5*(f[idx_x_L] + f[idx_x_R]);
-                    w[0][idx] = fabs(-0.5*(f[idx_x_L] - 2*f[idx_x] + f[idx_x_R]));
+                    const int idx_cell_data_x   = i + num_ghosts_0_cell_data;
+                    const int idx_cell_data_x_L = i - 1 + num_ghosts_0_cell_data;
+                    const int idx_cell_data_x_R = i + 1 + num_ghosts_0_cell_data;
+                    
+                    f_x[0][idx] = 0.5*(f[idx_cell_data_x_L] + f[idx_cell_data_x_R]);
+                    
+                    w[0][idx] = fabs(-0.5*(f[idx_cell_data_x_L] - 2*f[idx_cell_data_x] +
+                                           f[idx_cell_data_x_R]));
                 }
                 
                 if (compute_variable_local_means)
@@ -246,12 +249,14 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx     = i + num_ghosts_0_wavelet_coeffs;
-                        const int idx_x_L = i - 1 + num_ghosts_0_cell_data;
-                        const int idx_x   = i + num_ghosts_0_cell_data;
-                        const int idx_x_R = i + 1 + num_ghosts_0_cell_data;
+                        const int idx = i + num_ghosts_0_wavelet_coeffs;
                         
-                        f_mean[0][idx] = 0.5*(f[idx_x_L] + 2*f[idx_x] + f[idx_x_R]);
+                        const int idx_cell_data_x   = i + num_ghosts_0_cell_data;
+                        const int idx_cell_data_x_L = i - 1 + num_ghosts_0_cell_data;
+                        const int idx_cell_data_x_R = i + 1 + num_ghosts_0_cell_data;
+                        
+                        f_mean[0][idx] = 0.5*(f[idx_cell_data_x_L] + 2*f[idx_cell_data_x] +
+                                              f[idx_cell_data_x_R]);
                     }
                 }
                 
@@ -283,15 +288,20 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 for (int i = start_index_x_i; i < end_index_x_i; i++)
                 {
                     // Compute the linear indices.
-                    const int idx      = i + num_ghosts_0_wavelet_coeffs;
-                    const int idx_x_LL = i - 2 + num_ghosts_0_cell_data;
-                    const int idx_x_L  = i - 1 + num_ghosts_0_cell_data;
-                    const int idx_x    = i + num_ghosts_0_cell_data;
-                    const int idx_x_R  = i + 1 + num_ghosts_0_cell_data;
-                    const int idx_x_RR = i + 2 + num_ghosts_0_cell_data;
+                    const int idx = i + num_ghosts_0_wavelet_coeffs;
                     
-                    f_x[0][idx] = 1.0/6.0*(-f[idx_x_LL] + 4*f[idx_x_L] + 4*f[idx_x_R] - f[idx_x_RR]);
-                    w[0][idx]   = fabs(1.0/6.0*(f[idx_x_LL] - 4*f[idx_x_L] + 6*f[idx_x] - 4*f[idx_x_R] + f[idx_x_RR]));
+                    const int idx_cell_data_x    = i + num_ghosts_0_cell_data;
+                    const int idx_cell_data_x_LL = i - 2 + num_ghosts_0_cell_data;
+                    const int idx_cell_data_x_L  = i - 1 + num_ghosts_0_cell_data;
+                    const int idx_cell_data_x_R  = i + 1 + num_ghosts_0_cell_data;
+                    const int idx_cell_data_x_RR = i + 2 + num_ghosts_0_cell_data;
+                    
+                    f_x[0][idx] = 1.0/6.0*(-f[idx_cell_data_x_LL] + 4*f[idx_cell_data_x_L] +
+                                           4*f[idx_cell_data_x_R] - f[idx_cell_data_x_RR]);
+                    
+                    w[0][idx] = fabs(1.0/6.0*(f[idx_cell_data_x_LL] - 4*f[idx_cell_data_x_L] +
+                                              6*f[idx_cell_data_x] - 4*f[idx_cell_data_x_R] +
+                                              f[idx_cell_data_x_RR]));
                 }
                 
                 if (compute_variable_local_means)
@@ -302,14 +312,17 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx      = i + num_ghosts_0_wavelet_coeffs;
-                        const int idx_x_LL = i - 2 + num_ghosts_0_cell_data;
-                        const int idx_x_L  = i - 1 + num_ghosts_0_cell_data;
-                        const int idx_x    = i + num_ghosts_0_cell_data;
-                        const int idx_x_R  = i + 1 + num_ghosts_0_cell_data;
-                        const int idx_x_RR = i + 2 + num_ghosts_0_cell_data;
+                        const int idx = i + num_ghosts_0_wavelet_coeffs;
                         
-                        f_mean[0][idx] = 1.0/6.0*(f[idx_x_LL] + 4*f[idx_x_L] + 6*f[idx_x] + 4*f[idx_x_R] + f[idx_x_RR]);
+                        const int idx_cell_data_x    = i + num_ghosts_0_cell_data;
+                        const int idx_cell_data_x_LL = i - 2 + num_ghosts_0_cell_data;
+                        const int idx_cell_data_x_L  = i - 1 + num_ghosts_0_cell_data;
+                        const int idx_cell_data_x_R  = i + 1 + num_ghosts_0_cell_data;
+                        const int idx_cell_data_x_RR = i + 2 + num_ghosts_0_cell_data;
+                        
+                        f_mean[0][idx] = 1.0/6.0*(f[idx_cell_data_x_LL] + 4*f[idx_cell_data_x_L] +
+                                                  6*f[idx_cell_data_x] + 4*f[idx_cell_data_x_R] +
+                                                  f[idx_cell_data_x_RR]);
                     }
                 }
                 
@@ -357,7 +370,9 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                         const int idx_x_R = i + offset + num_ghosts_0_wavelet_coeffs;
                         
                         f_x[li][idx] = 0.5*(f_x[li-1][idx_x_L] + f_x[li-1][idx_x_R]);
-                        w[li][idx]   = fabs(-0.5*(f_x[li-1][idx_x_L] - 2*f_x[li-1][idx] + f_x[li-1][idx_x_R]));
+                        
+                        w[li][idx]   = fabs(-0.5*(f_x[li-1][idx_x_L] - 2*f_x[li-1][idx] +
+                                                  f_x[li-1][idx_x_R]));
                     }
                     
                     if (compute_variable_local_means)
@@ -372,7 +387,8 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                             const int idx_x_L = i - offset + num_ghosts_0_wavelet_coeffs;
                             const int idx_x_R = i + offset + num_ghosts_0_wavelet_coeffs;
                             
-                            f_mean[li][idx] = 0.5*(f_x[li-1][idx_x_L] + 2*f_x[li-1][idx] + f_x[li-1][idx_x_R]);
+                            f_mean[li][idx] = 0.5*(f_x[li-1][idx_x_L] + 2*f_x[li-1][idx] +
+                                                   f_x[li-1][idx_x_R]);
                         }
                     }
                     
@@ -403,9 +419,11 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                         const int idx_x_RR = i + 2*offset + num_ghosts_0_wavelet_coeffs;
                         
                         f_x[li][idx] = 1.0/6.0*(-f_x[li-1][idx_x_LL] + 4*f_x[li-1][idx_x_L] +
-                            4*f_x[li-1][idx_x_R] - f_x[li-1][idx_x_RR]);
+                                                4*f_x[li-1][idx_x_R] - f_x[li-1][idx_x_RR]);
+                        
                         w[li][idx] = fabs(1.0/6.0*(f_x[li-1][idx_x_LL] - 4*f_x[li-1][idx_x_L] +
-                            6*f_x[li-1][idx] - 4*f_x[li-1][idx_x_R] + f_x[li-1][idx_x_RR]));
+                                                   6*f_x[li-1][idx] - 4*f_x[li-1][idx_x_R] +
+                                                   f_x[li-1][idx_x_RR]));
                     }
                     
                     if (compute_variable_local_means)
@@ -425,7 +443,8 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                             const int idx_x_RR = i + 2*offset + num_ghosts_0_wavelet_coeffs;
                             
                             f_mean[li][idx] = 1.0/6.0*(f_x[li-1][idx_x_LL] + 4*f_x[li-1][idx_x_L] +
-                                6*f_x[li-1][idx] + 4*f_x[li-1][idx_x_R] + f_x[li-1][idx_x_RR]);
+                                                       6*f_x[li-1][idx] + 4*f_x[li-1][idx_x_R] +
+                                                       f_x[li-1][idx_x_RR]);
                         }
                     }
                     
