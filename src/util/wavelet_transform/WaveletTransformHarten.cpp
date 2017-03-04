@@ -404,6 +404,16 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                         
                         f_x[li][idx] = 1.0/6.0*(-f_x[li-1][idx_x_LL] + 4*f_x[li-1][idx_x_L] +
                             4*f_x[li-1][idx_x_R] - f_x[li-1][idx_x_RR]);
+                    }
+                    
+                    for (int i = start_index_i; i < end_index_i; i++)
+                    {
+                        // Compute indices.
+                        const int idx      = i + num_ghosts_0_wavelet_coeffs;
+                        const int idx_x_LL = i - 2*offset + num_ghosts_0_wavelet_coeffs;
+                        const int idx_x_L  = i - offset + num_ghosts_0_wavelet_coeffs;
+                        const int idx_x_R  = i + offset + num_ghosts_0_wavelet_coeffs;
+                        const int idx_x_RR = i + 2*offset + num_ghosts_0_wavelet_coeffs;
                         
                         w[li][idx] = fabs(1.0/6.0*(f_x[li-1][idx_x_LL] - 4*f_x[li-1][idx_x_L] +
                             6*f_x[li-1][idx] - 4*f_x[li-1][idx_x_R] + f_x[li-1][idx_x_RR]));
@@ -411,6 +421,8 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     
                     if (compute_variable_local_means)
                     {
+                        const int offset = pow(2, li);
+                        
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
@@ -418,10 +430,10 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                         {
                             // Compute indices.
                             const int idx      = i + num_ghosts_0_wavelet_coeffs;
-                            const int idx_x_LL = i - 2*pow(2, li) + num_ghosts_0_wavelet_coeffs;
-                            const int idx_x_L  = i - pow(2, li) + num_ghosts_0_wavelet_coeffs;
-                            const int idx_x_R  = i + pow(2, li) + num_ghosts_0_wavelet_coeffs;
-                            const int idx_x_RR = i + 2*pow(2, li) + num_ghosts_0_wavelet_coeffs;
+                            const int idx_x_LL = i - 2*offset + num_ghosts_0_wavelet_coeffs;
+                            const int idx_x_L  = i - offset + num_ghosts_0_wavelet_coeffs;
+                            const int idx_x_R  = i + offset + num_ghosts_0_wavelet_coeffs;
+                            const int idx_x_RR = i + 2*offset + num_ghosts_0_wavelet_coeffs;
                             
                             f_mean[li][idx] = 1.0/6.0*(f_x[li-1][idx_x_LL] + 4*f_x[li-1][idx_x_L] +
                                 6*f_x[li-1][idx] + 4*f_x[li-1][idx_x_R] + f_x[li-1][idx_x_RR]);
