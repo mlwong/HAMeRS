@@ -235,6 +235,19 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     const int idx_x_R = i + 1 + num_ghosts_0_cell_data;
                     
                     f_x[0][idx] = 0.5*(f[idx_x_L] + f[idx_x_R]);
+                }
+                
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = start_index_i; i < end_index_i; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx     = i + num_ghosts_0_wavelet_coeffs;
+                    const int idx_x_L = i - 1 + num_ghosts_0_cell_data;
+                    const int idx_x   = i + num_ghosts_0_cell_data;
+                    const int idx_x_R = i + 1 + num_ghosts_0_cell_data;
+                    
                     w[0][idx] = fabs(-0.5*(f[idx_x_L] - 2*f[idx_x] + f[idx_x_R]));
                 }
                 
@@ -291,6 +304,21 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     const int idx_x_RR = i + 2 + num_ghosts_0_cell_data;
                     
                     f_x[0][idx] = 1.0/6.0*(-f[idx_x_LL] + 4*f[idx_x_L] + 4*f[idx_x_R] - f[idx_x_RR]);
+                }
+                
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = start_index_i; i < end_index_i; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx      = i + num_ghosts_0_wavelet_coeffs;
+                    const int idx_x_LL = i - 2 + num_ghosts_0_cell_data;
+                    const int idx_x_L  = i - 1 + num_ghosts_0_cell_data;
+                    const int idx_x    = i + num_ghosts_0_cell_data;
+                    const int idx_x_R  = i + 1 + num_ghosts_0_cell_data;
+                    const int idx_x_RR = i + 2 + num_ghosts_0_cell_data;
+                    
                     w[0][idx]   = fabs(1.0/6.0*(f[idx_x_LL] - 4*f[idx_x_L] + 6*f[idx_x] - 4*f[idx_x_R] + f[idx_x_RR]));
                 }
                 
@@ -357,6 +385,18 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                         const int idx_x_R = i + offset + num_ghosts_0_wavelet_coeffs;
                         
                         f_x[li][idx] = 0.5*(f_x[li-1][idx_x_L] + f_x[li-1][idx_x_R]);
+                    }
+                    
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = start_index_i; i < end_index_i; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx     = i + num_ghosts_0_wavelet_coeffs;
+                        const int idx_x_L = i - offset + num_ghosts_0_wavelet_coeffs;
+                        const int idx_x_R = i + offset + num_ghosts_0_wavelet_coeffs;
+                        
                         w[li][idx]   = fabs(-0.5*(f_x[li-1][idx_x_L] - 2*f_x[li-1][idx] + f_x[li-1][idx_x_R]));
                     }
                     
@@ -406,6 +446,9 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                             4*f_x[li-1][idx_x_R] - f_x[li-1][idx_x_RR]);
                     }
                     
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
                     for (int i = start_index_i; i < end_index_i; i++)
                     {
                         // Compute indices.
