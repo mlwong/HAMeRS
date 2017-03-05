@@ -2340,10 +2340,11 @@ WaveletTransformHarten::smoothCellData(
             
             int count = 1;
             
+            const int ii_bound_lo = std::max(i - 1, start_index_x_i);
+            const int ii_bound_up = std::min(i + 2, end_index_x_i);
+            
             // Sum over the neighboring cells.
-            for (int ii = std::max(i - 1, start_index_x_i);
-                 ii < std::min(i + 2, end_index_x_i);
-                 ii++)
+            for (int ii = ii_bound_lo; ii < ii_bound_up; ii++)
             {
                 if (ii != i)
                 {
