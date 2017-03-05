@@ -2348,7 +2348,7 @@ WaveletTransformHarten::smoothCellData(
             {
                 if (ii != i)
                 {
-                    const int idx_ii = ii + num_ghosts_cell_data[0];
+                    const int idx_ii = ii + num_ghosts_0_cell_data;
                         
                     f_smoothed[idx] += f[idx_ii];
                     count++;
