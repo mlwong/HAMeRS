@@ -278,9 +278,9 @@ DifferenceSecondDerivative::computeDifferenceWithVariableLocalMean(
                         (k + 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
                             ghostcell_dim_1_cell_data;
                     
-                    const double w_x = f[idx_cell_data_x_R] - 2.0*f[idx_cell_data] + f[idx_cell_data_x_L];
-                    const double w_y = f[idx_cell_data_y_T] - 2.0*f[idx_cell_data] + f[idx_cell_data_y_B];
-                    const double w_z = f[idx_cell_data_z_F] - 2.0*f[idx_cell_data] + f[idx_cell_data_z_B];
+                    double w_x = f[idx_cell_data_x_R] - 2.0*f[idx_cell_data] + f[idx_cell_data_x_L];
+                    double w_y = f[idx_cell_data_y_T] - 2.0*f[idx_cell_data] + f[idx_cell_data_y_B];
+                    double w_z = f[idx_cell_data_z_F] - 2.0*f[idx_cell_data] + f[idx_cell_data_z_B];
                     
                     w[idx] = sqrt(w_x*w_x + w_y*w_y + w_z*w_z);
                 }

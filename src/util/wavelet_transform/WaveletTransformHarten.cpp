@@ -231,14 +231,14 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     // Compute the linear indices.
                     const int idx = i + num_ghosts_0_wavelet_coeffs;
                     
-                    const int idx_cell_data_x   = i + num_ghosts_0_cell_data;
+                    const int idx_cell_data     = i + num_ghosts_0_cell_data;
                     const int idx_cell_data_x_L = i - 1 + num_ghosts_0_cell_data;
                     const int idx_cell_data_x_R = i + 1 + num_ghosts_0_cell_data;
                     
                     f_x[0][idx] = 0.5*(f[idx_cell_data_x_L] + f[idx_cell_data_x_R]);
                     
-                    w[0][idx] = fabs(-0.5*(f[idx_cell_data_x_L] - 2*f[idx_cell_data_x] +
-                                           f[idx_cell_data_x_R]));
+                    w[0][idx] = fabs(-0.5*(f[idx_cell_data_x_L] - 2.0*f[idx_cell_data] +
+                        f[idx_cell_data_x_R]));
                 }
                 
                 if (compute_variable_local_means)
@@ -251,12 +251,12 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                         // Compute the linear indices.
                         const int idx = i + num_ghosts_0_wavelet_coeffs;
                         
-                        const int idx_cell_data_x   = i + num_ghosts_0_cell_data;
+                        const int idx_cell_data     = i + num_ghosts_0_cell_data;
                         const int idx_cell_data_x_L = i - 1 + num_ghosts_0_cell_data;
                         const int idx_cell_data_x_R = i + 1 + num_ghosts_0_cell_data;
                         
-                        f_mean[0][idx] = 0.5*(f[idx_cell_data_x_L] + 2*f[idx_cell_data_x] +
-                                              f[idx_cell_data_x_R]);
+                        f_mean[0][idx] = 0.5*(f[idx_cell_data_x_L] + 2.0*f[idx_cell_data] +
+                            f[idx_cell_data_x_R]);
                     }
                 }
                 
@@ -290,18 +290,17 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     // Compute the linear indices.
                     const int idx = i + num_ghosts_0_wavelet_coeffs;
                     
-                    const int idx_cell_data_x    = i + num_ghosts_0_cell_data;
+                    const int idx_cell_data      = i + num_ghosts_0_cell_data;
                     const int idx_cell_data_x_LL = i - 2 + num_ghosts_0_cell_data;
                     const int idx_cell_data_x_L  = i - 1 + num_ghosts_0_cell_data;
                     const int idx_cell_data_x_R  = i + 1 + num_ghosts_0_cell_data;
                     const int idx_cell_data_x_RR = i + 2 + num_ghosts_0_cell_data;
                     
-                    f_x[0][idx] = 1.0/6.0*(-f[idx_cell_data_x_LL] + 4*f[idx_cell_data_x_L] +
-                                           4*f[idx_cell_data_x_R] - f[idx_cell_data_x_RR]);
+                    f_x[0][idx] = 1.0/6.0*(-f[idx_cell_data_x_LL] + 4.0*f[idx_cell_data_x_L] +
+                        4.0*f[idx_cell_data_x_R] - f[idx_cell_data_x_RR]);
                     
-                    w[0][idx] = fabs(1.0/6.0*(f[idx_cell_data_x_LL] - 4*f[idx_cell_data_x_L] +
-                                              6*f[idx_cell_data_x] - 4*f[idx_cell_data_x_R] +
-                                              f[idx_cell_data_x_RR]));
+                    w[0][idx] = fabs(1.0/6.0*(f[idx_cell_data_x_LL] - 4.0*f[idx_cell_data_x_L] +
+                        6.0*f[idx_cell_data] - 4.0*f[idx_cell_data_x_R] + f[idx_cell_data_x_RR]));
                 }
                 
                 if (compute_variable_local_means)
@@ -314,15 +313,14 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                         // Compute the linear indices.
                         const int idx = i + num_ghosts_0_wavelet_coeffs;
                         
-                        const int idx_cell_data_x    = i + num_ghosts_0_cell_data;
+                        const int idx_cell_data      = i + num_ghosts_0_cell_data;
                         const int idx_cell_data_x_LL = i - 2 + num_ghosts_0_cell_data;
                         const int idx_cell_data_x_L  = i - 1 + num_ghosts_0_cell_data;
                         const int idx_cell_data_x_R  = i + 1 + num_ghosts_0_cell_data;
                         const int idx_cell_data_x_RR = i + 2 + num_ghosts_0_cell_data;
                         
-                        f_mean[0][idx] = 1.0/6.0*(f[idx_cell_data_x_LL] + 4*f[idx_cell_data_x_L] +
-                                                  6*f[idx_cell_data_x] + 4*f[idx_cell_data_x_R] +
-                                                  f[idx_cell_data_x_RR]);
+                        f_mean[0][idx] = 1.0/6.0*(f[idx_cell_data_x_LL] + 4.0*f[idx_cell_data_x_L] +
+                            6.0*f[idx_cell_data] + 4.0*f[idx_cell_data_x_R] + f[idx_cell_data_x_RR]);
                     }
                 }
                 
@@ -345,6 +343,8 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
         
         for (int li = 1; li < d_num_level; li++)
         {
+            const int offset = pow(2, li);
+            
             switch (d_k)
             {
                 case 2:
@@ -354,10 +354,8 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                      */
                     
                     // Compute the starting and ending indices.
-                    const int start_index_x_i = -d_num_wavelet_ghosts[0] + pow(2, li);
-                    const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - pow(2, li);
-                    
-                    const int offset = pow(2, li);
+                    const int start_index_x_i = -d_num_wavelet_ghosts[0] + offset;
+                    const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - offset;
                     
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
@@ -371,8 +369,8 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                         
                         f_x[li][idx] = 0.5*(f_x[li-1][idx_x_L] + f_x[li-1][idx_x_R]);
                         
-                        w[li][idx]   = fabs(-0.5*(f_x[li-1][idx_x_L] - 2*f_x[li-1][idx] +
-                                                  f_x[li-1][idx_x_R]));
+                        w[li][idx]   = fabs(-0.5*(f_x[li-1][idx_x_L] - 2.0*f_x[li-1][idx] +
+                            f_x[li-1][idx_x_R]));
                     }
                     
                     if (compute_variable_local_means)
@@ -387,8 +385,8 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                             const int idx_x_L = i - offset + num_ghosts_0_wavelet_coeffs;
                             const int idx_x_R = i + offset + num_ghosts_0_wavelet_coeffs;
                             
-                            f_mean[li][idx] = 0.5*(f_x[li-1][idx_x_L] + 2*f_x[li-1][idx] +
-                                                   f_x[li-1][idx_x_R]);
+                            f_mean[li][idx] = 0.5*(f_x[li-1][idx_x_L] + 2.0*f_x[li-1][idx] +
+                                f_x[li-1][idx_x_R]);
                         }
                     }
                     
@@ -401,10 +399,8 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                      */
                     
                     // Compute the starting and ending indices.
-                    const int start_index_x_i = -d_num_wavelet_ghosts[0] + 2*pow(2, li);
-                    const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - 2*pow(2, li);
-                    
-                    const int offset = pow(2, li);
+                    const int start_index_x_i = -d_num_wavelet_ghosts[0] + 2*offset;
+                    const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - 2*offset;
                     
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
@@ -418,18 +414,15 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                         const int idx_x_R  = i + offset + num_ghosts_0_wavelet_coeffs;
                         const int idx_x_RR = i + 2*offset + num_ghosts_0_wavelet_coeffs;
                         
-                        f_x[li][idx] = 1.0/6.0*(-f_x[li-1][idx_x_LL] + 4*f_x[li-1][idx_x_L] +
-                                                4*f_x[li-1][idx_x_R] - f_x[li-1][idx_x_RR]);
+                        f_x[li][idx] = 1.0/6.0*(-f_x[li-1][idx_x_LL] + 4.0*f_x[li-1][idx_x_L] +
+                            4.0*f_x[li-1][idx_x_R] - f_x[li-1][idx_x_RR]);
                         
-                        w[li][idx] = fabs(1.0/6.0*(f_x[li-1][idx_x_LL] - 4*f_x[li-1][idx_x_L] +
-                                                   6*f_x[li-1][idx] - 4*f_x[li-1][idx_x_R] +
-                                                   f_x[li-1][idx_x_RR]));
+                        w[li][idx] = fabs(1.0/6.0*(f_x[li-1][idx_x_LL] - 4.0*f_x[li-1][idx_x_L] +
+                            6.0*f_x[li-1][idx] - 4.0*f_x[li-1][idx_x_R] + f_x[li-1][idx_x_RR]));
                     }
                     
                     if (compute_variable_local_means)
                     {
-                        const int offset = pow(2, li);
-                        
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
@@ -442,9 +435,8 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                             const int idx_x_R  = i + offset + num_ghosts_0_wavelet_coeffs;
                             const int idx_x_RR = i + 2*offset + num_ghosts_0_wavelet_coeffs;
                             
-                            f_mean[li][idx] = 1.0/6.0*(f_x[li-1][idx_x_LL] + 4*f_x[li-1][idx_x_L] +
-                                                       6*f_x[li-1][idx] + 4*f_x[li-1][idx_x_R] +
-                                                       f_x[li-1][idx_x_RR]);
+                            f_mean[li][idx] = 1.0/6.0*(f_x[li-1][idx_x_LL] + 4.0*f_x[li-1][idx_x_L] +
+                                6.0*f_x[li-1][idx] + 4.0*f_x[li-1][idx_x_R] + f_x[li-1][idx_x_RR]);
                         }
                     }
                     
@@ -540,23 +532,28 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 
                 for (int j = start_index_x_j; j < end_index_x_j; j++)
                 {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
                     for (int i = start_index_x_i; i < end_index_x_i; i++)
                     {
                         // Compute the linear indices.
                         const int idx = (i + num_ghosts_0_wavelet_coeffs) +
-                            (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dims_wavelet_coeffs[0];
+                            (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                         
-                        const int idx_x_L = (i - 1 + num_ghosts_0_cell_data) +
+                        const int idx_cell_data = (i + num_ghosts_0_cell_data) +
                             (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                         
-                        const int idx_x   = (i + num_ghosts_0_cell_data) +
+                        const int idx_cell_data_x_L = (i - 1 + num_ghosts_0_cell_data) +
                             (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                         
-                        const int idx_x_R = (i + 1 + num_ghosts_0_cell_data) +
+                        const int idx_cell_data_x_R = (i + 1 + num_ghosts_0_cell_data) +
                             (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                         
-                        f_x[0][idx] = 0.5*(f[idx_x_L] + f[idx_x_R]);
-                        w_x[0][idx] = -0.5*(f[idx_x_L] - 2*f[idx_x] + f[idx_x_R]);
+                        f_x[0][idx] = 0.5*(f[idx_cell_data_x_L] + f[idx_cell_data_x_R]);
+                        
+                        w_x[0][idx] = -0.5*(f[idx_cell_data_x_L] - 2.0*f[idx_cell_data] +
+                            f[idx_cell_data_x_R]);
                     }
                 }
                 
@@ -580,25 +577,29 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 const int start_index_y_j = -d_num_wavelet_ghosts[1] + 1;
                 const int end_index_y_j = interior_dim_1 + d_num_wavelet_ghosts[1] - 1;
                 
-                for (int i = start_index_y_i; i < end_index_y_i; i++)
+                for (int j = start_index_y_j; j < end_index_y_j; j++)
                 {
-                    for (int j = start_index_y_j; j < end_index_y_j; j++)
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = start_index_y_i; i < end_index_y_i; i++)
                     {
                         // Compute the linear indices.
                         const int idx = (i + num_ghosts_0_wavelet_coeffs) +
                             (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                         
-                        const int idx_y_B = (i + num_ghosts_0_cell_data) +
-                            (j - 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
-                        
-                        const int idx_y   = (i + num_ghosts_0_cell_data) +
+                        const int idx_cell_data = (i + num_ghosts_0_cell_data) +
                             (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                         
-                        const int idx_y_T = (i + num_ghosts_0_cell_data) +
+                        const int idx_cell_data_y_B = (i + num_ghosts_0_cell_data) +
+                            (j - 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        
+                        const int idx_cell_data_y_T = (i + num_ghosts_0_cell_data) +
                             (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                         
-                        f_y[0][idx] = 0.5*(f[idx_y_B] + f[idx_y_T]);
-                        w_y[0][idx] = -0.5*(f[idx_y_B] - 2*f[idx_y] + f[idx_y_T]);
+                        f_y[0][idx] = 0.5*(f[idx_cell_data_y_B] + f[idx_cell_data_y_T]);
+                        w_y[0][idx] = -0.5*(f[idx_cell_data_y_B] - 2.0*f[idx_cell_data] +
+                            f[idx_cell_data_y_T]);
                     }
                 }
                 
@@ -606,32 +607,37 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 {
                     for (int j = 0; j < interior_dim_1; j++)
                     {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
                             const int idx = (i + num_ghosts_0_wavelet_coeffs) +
                                 (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
-                            const int idx_x_L = (i - 1 + num_ghosts_0_cell_data) +
+                            const int idx_cell_data = (i + num_ghosts_0_cell_data) +
                                 (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                             
-                            const int idx_x = (i + num_ghosts_0_cell_data) +
+                            const int idx_cell_data_x_L = (i - 1 + num_ghosts_0_cell_data) +
                                 (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                             
-                            const int idx_x_R = (i + 1 + num_ghosts_0_cell_data) +
+                            const int idx_cell_data_x_R = (i + 1 + num_ghosts_0_cell_data) +
                                 (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                             
-                            const int idx_y_B = (i + num_ghosts_0_cell_data) +
+                            const int idx_cell_data_y_B = (i + num_ghosts_0_cell_data) +
                                 (j - 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                             
-                            const int idx_y = idx_x;
-                            
-                            const int idx_y_T = (i + num_ghosts_0_cell_data) +
+                            const int idx_cell_data_y_T = (i + num_ghosts_0_cell_data) +
                                 (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                             
-                            f_mean[0][idx] = 0.5*sqrt(
-                                pow(f[idx_x_L] + 2*f[idx_x] + f[idx_x_R], 2.0) +
-                                pow(f[idx_y_B] + 2*f[idx_y] + f[idx_y_T], 2.0));
+                            double f_mean_x = f[idx_cell_data_x_L] + 2.0*f[idx_cell_data] +
+                                              f[idx_cell_data_x_R];
+                            
+                            double f_mean_y = f[idx_cell_data_y_B] + 2.0*f[idx_cell_data] +
+                                              f[idx_cell_data_y_T];
+                            
+                            f_mean[0][idx] = 0.5*sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y);
                         }
                     }
                 }
@@ -640,9 +646,6 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
             }
             case 4:
             {
-                int start_index_i, end_index_i,
-                    start_index_j, end_index_j;
-                
                 /*
                  * Compute scaling and wavelet coefficients in the x-direction.
                  */
@@ -658,36 +661,42 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 }
                 
                 // Compute the starting and ending indices.
-                start_index_i = -d_num_wavelet_ghosts[0] + 2;
-                end_index_i   = interior_dims[0] + d_num_wavelet_ghosts[0] - 2;
-                start_index_j = -d_num_wavelet_ghosts[1];
-                end_index_j   = interior_dims[1] + d_num_wavelet_ghosts[1];
+                const int start_index_x_i = -d_num_wavelet_ghosts[0] + 2;
+                const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - 2;
+                const int start_index_x_j = -d_num_wavelet_ghosts[1];
+                const int end_index_x_j = interior_dim_1 + d_num_wavelet_ghosts[1];
                 
-                for (int j = start_index_j; j < end_index_j; j++)
+                for (int j = start_index_x_j; j < end_index_x_j; j++)
                 {
-                    for (int i = start_index_i; i < end_index_i; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = start_index_x_i; i < end_index_x_i; i++)
                     {
                         // Compute the linear indices.
-                        const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                            (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                        const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                            (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                         
-                        const int idx_x_LL = (i - 2 + num_ghosts_cell_data[0]) +
-                            (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                        const int idx_cell_data = (i + num_ghosts_0_cell_data) +
+                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                         
-                        const int idx_x_L = (i - 1 + num_ghosts_cell_data[0]) +
-                            (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                        const int idx_cell_data_x_LL = (i - 2 + num_ghosts_0_cell_data) +
+                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                         
-                        const int idx_x   = (i + num_ghosts_cell_data[0]) +
-                            (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                        const int idx_cell_data_x_L = (i - 1 + num_ghosts_0_cell_data) +
+                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                         
-                        const int idx_x_R = (i + 1 + num_ghosts_cell_data[0]) +
-                            (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                        const int idx_cell_data_x_R = (i + 1 + num_ghosts_0_cell_data) +
+                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                         
-                        const int idx_x_RR = (i + 2 + num_ghosts_cell_data[0]) +
-                            (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                        const int idx_cell_data_x_RR = (i + 2 + num_ghosts_0_cell_data) +
+                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                         
-                        f_x[0][idx] = 1.0/6.0*(-f[idx_x_LL] + 4*f[idx_x_L] + 4*f[idx_x_R] - f[idx_x_RR]);
-                        w_x[0][idx] = 1.0/6.0*(f[idx_x_LL] - 4*f[idx_x_L] + 6*f[idx_x] - 4*f[idx_x_R] + f[idx_x_RR]);
+                        f_x[0][idx] = 1.0/6.0*(-f[idx_cell_data_x_LL] + 4.0*f[idx_cell_data_x_L] +
+                            4.0*f[idx_cell_data_x_R] - f[idx_cell_data_x_RR]);
+                        
+                        w_x[0][idx] = 1.0/6.0*(f[idx_cell_data_x_LL] - 4.0*f[idx_cell_data_x_L] +
+                            6.0*f[idx_cell_data] - 4.0*f[idx_cell_data_x_R] + f[idx_cell_data_x_RR]);
                     }
                 }
                 
@@ -706,81 +715,92 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 }
                 
                 // Compute the starting and ending indices.
-                start_index_i = -d_num_wavelet_ghosts[0];
-                end_index_i   = interior_dims[0] + d_num_wavelet_ghosts[0];
-                start_index_j = -d_num_wavelet_ghosts[1] + 2;
-                end_index_j   = interior_dims[1] + d_num_wavelet_ghosts[1] - 2;
+                const int start_index_y_i = -d_num_wavelet_ghosts[0];
+                const int end_index_y_i = interior_dim_0 + d_num_wavelet_ghosts[0];
+                const int start_index_y_j = -d_num_wavelet_ghosts[1] + 2;
+                const int end_index_y_j = interior_dim_1 + d_num_wavelet_ghosts[1] - 2;
                 
-                for (int i = start_index_i; i < end_index_i; i++)
+                for (int j = start_index_y_j; j < end_index_y_j; j++)
                 {
-                    for (int j = start_index_j; j < end_index_j; j++)
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = start_index_y_i; i < end_index_y_i; i++)
                     {
                         // Compute indices.
-                        const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                            (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                        const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                            (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                         
-                        const int idx_y_BB = (i + num_ghosts_cell_data[0]) +
-                            (j - 2 + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                        const int idx_cell_data = (i + num_ghosts_0_cell_data) +
+                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                         
-                        const int idx_y_B = (i + num_ghosts_cell_data[0]) +
-                            (j - 1 + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                        const int idx_cell_data_y_BB = (i + num_ghosts_0_cell_data) +
+                            (j - 2 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                         
-                        const int idx_y = (i + num_ghosts_cell_data[0]) +
-                            (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                        const int idx_cell_data_y_B = (i + num_ghosts_0_cell_data) +
+                            (j - 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                         
-                        const int idx_y_T = (i + num_ghosts_cell_data[0]) +
-                            (j + 1 + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                        const int idx_cell_data_y_T = (i + num_ghosts_0_cell_data) +
+                            (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                         
-                        const int idx_y_TT = (i + num_ghosts_cell_data[0]) +
-                            (j + 2 + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                        const int idx_cell_data_y_TT = (i + num_ghosts_0_cell_data) +
+                            (j + 2 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                         
-                        f_y[0][idx] = 1.0/6.0*(-f[idx_y_BB] + 4*f[idx_y_B] + 4*f[idx_y_T] - f[idx_y_TT]);
-                        w_y[0][idx] = 1.0/6.0*(f[idx_y_BB] - 4*f[idx_y_B] + 6*f[idx_y] - 4*f[idx_y_T] + f[idx_y_TT]);
+                        f_y[0][idx] = 1.0/6.0*(-f[idx_cell_data_y_BB] + 4.0*f[idx_cell_data_y_B] +
+                            4.0*f[idx_cell_data_y_T] - f[idx_cell_data_y_TT]);
+                        
+                        w_y[0][idx] = 1.0/6.0*(f[idx_cell_data_y_BB] - 4.0*f[idx_cell_data_y_B] +
+                            6.0*f[idx_cell_data] - 4.0*f[idx_cell_data_y_T] + f[idx_cell_data_y_TT]);
                     }
                 }
                 
                 if (compute_variable_local_means)
                 {
-                    for (int j = 0; j < interior_dims[1]; j++)
+                    for (int j = 0; j < interior_dim_1; j++)
                     {
-                        for (int i = 0; i < interior_dims[0]; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
-                            const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                            const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
-                            const int idx_x_LL = (i - 2 + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                            const int idx_cell_data = (i + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                             
-                            const int idx_x_L = (i - 1 + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                            const int idx_cell_data_x_LL = (i - 2 + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                             
-                            const int idx_x   = (i + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                            const int idx_cell_data_x_L = (i - 1 + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                             
-                            const int idx_x_R = (i + 1 + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                            const int idx_cell_data_x_R = (i + 1 + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                             
-                            const int idx_x_RR = (i + 2 + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                            const int idx_cell_data_x_RR = (i + 2 + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                             
-                            const int idx_y_BB = (i + num_ghosts_cell_data[0]) +
-                                (j - 2 + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                            const int idx_cell_data_y_BB = (i + num_ghosts_0_cell_data) +
+                                (j - 2 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                             
-                            const int idx_y_B = (i + num_ghosts_cell_data[0]) +
-                                (j - 1 + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                            const int idx_cell_data_y_B = (i + num_ghosts_0_cell_data) +
+                                (j - 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                             
-                            const int idx_y = idx_x;
+                            const int idx_cell_data_y_T = (i + num_ghosts_0_cell_data) +
+                                (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                             
-                            const int idx_y_T = (i + num_ghosts_cell_data[0]) +
-                                (j + 1 + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                            const int idx_cell_data_y_TT = (i + num_ghosts_0_cell_data) +
+                                (j + 2 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                             
-                            const int idx_y_TT = (i + num_ghosts_cell_data[0]) +
-                                (j + 2 + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                            double f_mean_x = f[idx_cell_data_x_LL] + 4.0*f[idx_cell_data_x_L] +
+                                6.0*f[idx_cell_data] + 4.0*f[idx_cell_data_x_R] + f[idx_cell_data_x_RR];
                             
-                            f_mean[0][idx] = 1.0/6.0*sqrt(
-                                pow(f[idx_x_LL] + 4*f[idx_x_L] + 6*f[idx_x] + 4*f[idx_x_R] + f[idx_x_RR], 2.0) +
-                                pow(f[idx_y_BB] + 4*f[idx_y_B] + 6*f[idx_y] + 4*f[idx_y_T] + f[idx_y_TT], 2.0));
+                            double f_mean_y = f[idx_cell_data_y_BB] + 4.0*f[idx_cell_data_y_B] +
+                                6.0*f[idx_cell_data] + 4.0*f[idx_cell_data_y_T] + f[idx_cell_data_y_TT];
+                            
+                            f_mean[0][idx] = 1.0/6.0*sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y);
                         }
                     }
                 }
@@ -804,39 +824,43 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
         
         for (int li = 1; li < d_num_level; li++)
         {
+            const int offset = pow(2, li);
+            
             switch (d_k)
             {
                 case 2:
                 {
-                    int start_index_i, end_index_i,
-                        start_index_j, end_index_j;
-                    
                     /*
                      * Compute scaling and wavelet coefficients in the x-direction.
                      */
                     
                     // Compute the starting and ending indices.
-                    start_index_i = -d_num_wavelet_ghosts[0] + pow(2, li);
-                    end_index_i   = interior_dims[0] + d_num_wavelet_ghosts[0] - pow(2, li);
-                    start_index_j = -d_num_wavelet_ghosts[1];
-                    end_index_j   = interior_dims[1] + d_num_wavelet_ghosts[1];
+                    const int start_index_x_i = -d_num_wavelet_ghosts[0] + offset;
+                    const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - offset;
+                    const int start_index_x_j = -d_num_wavelet_ghosts[1];
+                    const int end_index_x_j = interior_dim_1 + d_num_wavelet_ghosts[1];
                     
-                    for (int j = start_index_j; j < end_index_j; j++)
+                    for (int j = start_index_x_j; j < end_index_x_j; j++)
                     {
-                        for (int i = start_index_i; i < end_index_i; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = start_index_x_i; i < end_index_x_i; i++)
                         {
                             // Compute the linear indices.
-                            const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                            const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
-                            const int idx_x_L = (i - pow(2, li) + num_ghosts_wavelet_coeffs[0]) +
-                                (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                            const int idx_x_L = (i - offset + num_ghosts_0_wavelet_coeffs) +
+                                (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
-                            const int idx_x_R = (i + pow(2, li) + num_ghosts_wavelet_coeffs[0]) +
-                                (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                            const int idx_x_R = (i + offset + num_ghosts_0_wavelet_coeffs) +
+                                (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
                             f_x[li][idx] = 0.5*(f_x[li-1][idx_x_L] + f_x[li-1][idx_x_R]);
-                            w_x[li][idx] = -0.5*(f_x[li-1][idx_x_L] - 2*f_x[li-1][idx] + f_x[li-1][idx_x_R]);
+                            
+                            w_x[li][idx] = -0.5*(f_x[li-1][idx_x_L] - 2.0*f_x[li-1][idx] +
+                                f_x[li-1][idx_x_R]);
                         }
                     }
                     
@@ -845,55 +869,67 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                      */
                     
                     // Compute the starting and ending indices.
-                    start_index_i = -d_num_wavelet_ghosts[0];
-                    end_index_i   = interior_dims[0] + d_num_wavelet_ghosts[0];
-                    start_index_j = -d_num_wavelet_ghosts[1] + pow(2, li);
-                    end_index_j   = interior_dims[1] + d_num_wavelet_ghosts[1] - pow(2, li);
+                    const int start_index_y_i = -d_num_wavelet_ghosts[0];
+                    const int end_index_y_i = interior_dim_0 + d_num_wavelet_ghosts[0];
+                    const int start_index_y_j = -d_num_wavelet_ghosts[1] + offset;
+                    const int end_index_y_j = interior_dim_1 + d_num_wavelet_ghosts[1] - offset;
                     
-                    for (int i = start_index_i; i < end_index_i; i++)
+                    for (int j = start_index_y_j; j < end_index_y_j; j++)
                     {
-                        for (int j = start_index_j; j < end_index_j; j++)
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = start_index_y_i; i < end_index_y_i; i++)
                         {
                             // Compute the linear indices.
-                            const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                            const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
-                            const int idx_y_B = (i + num_ghosts_wavelet_coeffs[0]) +
-                                (j - pow(2, li) + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                            const int idx_y_B = (i + num_ghosts_0_wavelet_coeffs) +
+                                (j - offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
-                            const int idx_y_T = (i + num_ghosts_wavelet_coeffs[0]) +
-                                (j + pow(2, li) + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                            const int idx_y_T = (i + num_ghosts_0_wavelet_coeffs) +
+                                (j + offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
                             f_y[li][idx] = 0.5*(f_y[li-1][idx_y_B] + f_y[li-1][idx_y_T]);
-                            w_y[li][idx] = -0.5*(f_y[li-1][idx_y_B] - 2*f_y[li-1][idx] + f_y[li-1][idx_y_T]);
+                            
+                            w_y[li][idx] = -0.5*(f_y[li-1][idx_y_B] - 2.0*f_y[li-1][idx] +
+                                f_y[li-1][idx_y_T]);
                         }
                     }
                     
                     if (compute_variable_local_means)
                     {
-                        for (int j = 0; j < interior_dims[1]; j++)
+                        for (int j = 0; j < interior_dim_1; j++)
                         {
-                            for (int i = 0; i < interior_dims[0]; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute the linear indices.
-                                const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                                const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                                 
-                                const int idx_x_L = (i - pow(2, li) + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                                const int idx_x_L = (i - offset + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                                 
-                                const int idx_x_R = (i + pow(2, li) + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                                const int idx_x_R = (i + offset + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                                 
-                                const int idx_y_B = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j - pow(2, li) + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                                const int idx_y_B = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j - offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                                 
-                                const int idx_y_T = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + pow(2, li) + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                                const int idx_y_T = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                                 
-                                f_mean[li][idx] = 0.5*sqrt(
-                                    pow(f_x[li-1][idx_x_L] + 2*f_x[li-1][idx] + f_x[li-1][idx_x_R], 2.0) +
-                                    pow(f_y[li-1][idx_y_B] + 2*f_y[li-1][idx] + f_y[li-1][idx_y_T], 2.0));
+                                double f_mean_x = f_x[li-1][idx_x_L] + 2.0*f_x[li-1][idx] +
+                                    f_x[li-1][idx_x_R];
+                                
+                                double f_mean_y = f_y[li-1][idx_y_B] + 2.0*f_y[li-1][idx] +
+                                    f_y[li-1][idx_y_T];
+                                
+                                f_mean[li][idx] = 0.5*sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y);
                             }
                         }
                     }
@@ -902,44 +938,44 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 }
                 case 4:
                 {
-                    int start_index_i, end_index_i,
-                        start_index_j, end_index_j;
-                    
                     /*
                      * Compute scaling and wavelet coefficients in the x-direction.
                      */
                     
                     // Compute the starting and ending indices.
-                    start_index_i = -d_num_wavelet_ghosts[0] + 2*pow(2, li);
-                    end_index_i   = interior_dims[0] + d_num_wavelet_ghosts[0] - 2*pow(2, li);
-                    start_index_j = -d_num_wavelet_ghosts[1];
-                    end_index_j   = interior_dims[1] + d_num_wavelet_ghosts[1];
+                    const int start_index_x_i = -d_num_wavelet_ghosts[0] + 2*offset;
+                    const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - 2*offset;
+                    const int start_index_x_j = -d_num_wavelet_ghosts[1];
+                    const int end_index_x_j = interior_dim_1 + d_num_wavelet_ghosts[1];
                     
-                    for (int j = start_index_j; j < end_index_j; j++)
+                    for (int j = start_index_x_j; j < end_index_x_j; j++)
                     {
-                        for (int i = start_index_i; i < end_index_i; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = start_index_x_i; i < end_index_x_i; i++)
                         {
                             // Compute the linear indices.
-                            const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                            const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
-                            const int idx_x_LL = (i - 2*pow(2, li) + num_ghosts_wavelet_coeffs[0]) +
-                                (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                            const int idx_x_LL = (i - 2*offset + num_ghosts_0_wavelet_coeffs) +
+                                (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
-                            const int idx_x_L = (i - pow(2, li) + num_ghosts_wavelet_coeffs[0]) +
-                                (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                            const int idx_x_L = (i - offset + num_ghosts_0_wavelet_coeffs) +
+                                (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
-                            const int idx_x_R = (i + pow(2, li) + num_ghosts_wavelet_coeffs[0]) +
-                                (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                            const int idx_x_R = (i + offset + num_ghosts_0_wavelet_coeffs) +
+                                (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
-                            const int idx_x_RR = (i + 2*pow(2, li) + num_ghosts_wavelet_coeffs[0]) +
-                                (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                            const int idx_x_RR = (i + 2*offset + num_ghosts_0_wavelet_coeffs) +
+                                (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
-                            f_x[li][idx] = 1.0/6.0*(-f_x[li-1][idx_x_LL] + 4*f_x[li-1][idx_x_L] +
-                                4*f_x[li-1][idx_x_R] - f_x[li-1][idx_x_RR]);
+                            f_x[li][idx] = 1.0/6.0*(-f_x[li-1][idx_x_LL] + 4.0*f_x[li-1][idx_x_L] +
+                                4.0*f_x[li-1][idx_x_R] - f_x[li-1][idx_x_RR]);
                             
-                            w_x[li][idx] = 1.0/6.0*(f_x[li-1][idx_x_LL] - 4*f_x[li-1][idx_x_L] +
-                                6*f_x[li-1][idx] - 4*f_x[li-1][idx_x_R] + f_x[li-1][idx_x_RR]);
+                            w_x[li][idx] = 1.0/6.0*(f_x[li-1][idx_x_LL] - 4.0*f_x[li-1][idx_x_L] +
+                                6.0*f_x[li-1][idx] - 4.0*f_x[li-1][idx_x_R] + f_x[li-1][idx_x_RR]);
                         }
                     }
                     
@@ -948,78 +984,86 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                      */
                     
                     // Compute the starting and ending indices.
-                    start_index_i = -d_num_wavelet_ghosts[0];
-                    end_index_i   = interior_dims[0] + d_num_wavelet_ghosts[0];
-                    start_index_j = -d_num_wavelet_ghosts[1] + 2*pow(2, li);
-                    end_index_j   = interior_dims[1] + d_num_wavelet_ghosts[1] - 2*pow(2, li);
+                    const int start_index_y_i = -d_num_wavelet_ghosts[0];
+                    const int end_index_y_i = interior_dim_0 + d_num_wavelet_ghosts[0];
+                    const int start_index_y_j = -d_num_wavelet_ghosts[1] + 2*offset;
+                    const int end_index_y_j = interior_dim_1 + d_num_wavelet_ghosts[1] - 2*offset;
                     
-                    for (int i = start_index_i; i < end_index_i; i++)
+                    for (int j = start_index_y_j; j < end_index_y_j; j++)
                     {
-                        for (int j = start_index_j; j < end_index_j; j++)
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = start_index_y_i; i < end_index_y_i; i++)
                         {
                             // Compute the linear indices.
-                            const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                            const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
-                            const int idx_y_BB = (i + num_ghosts_wavelet_coeffs[0]) +
-                                (j - 2*pow(2, li) + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                            const int idx_y_BB = (i + num_ghosts_0_wavelet_coeffs) +
+                                (j - 2*offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
-                            const int idx_y_B = (i + num_ghosts_wavelet_coeffs[0]) +
-                                (j - pow(2, li) + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                            const int idx_y_B = (i + num_ghosts_0_wavelet_coeffs) +
+                                (j - offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
-                            const int idx_y_T = (i + num_ghosts_wavelet_coeffs[0]) +
-                                (j + pow(2, li) + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                            const int idx_y_T = (i + num_ghosts_0_wavelet_coeffs) +
+                                (j + offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
-                            const int idx_y_TT = (i + num_ghosts_wavelet_coeffs[0]) +
-                                (j + 2*pow(2, li) + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                            const int idx_y_TT = (i + num_ghosts_0_wavelet_coeffs) +
+                                (j + 2*offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
-                            f_y[li][idx] = 1.0/6.0*(-f_y[li-1][idx_y_BB] + 4*f_y[li-1][idx_y_B] +
-                                4*f_y[li-1][idx_y_T] - f_y[li-1][idx_y_TT]);
+                            f_y[li][idx] = 1.0/6.0*(-f_y[li-1][idx_y_BB] + 4.0*f_y[li-1][idx_y_B] +
+                                4.0*f_y[li-1][idx_y_T] - f_y[li-1][idx_y_TT]);
                             
-                            w_y[li][idx] = 1.0/6.0*(f_y[li-1][idx_y_BB] - 4*f_y[li-1][idx_y_B] +
-                                6*f_y[li-1][idx] - 4*f_y[li-1][idx_y_T] + f_y[li-1][idx_y_TT]);
+                            w_y[li][idx] = 1.0/6.0*(f_y[li-1][idx_y_BB] - 4.0*f_y[li-1][idx_y_B] +
+                                6.0*f_y[li-1][idx] - 4.0*f_y[li-1][idx_y_T] + f_y[li-1][idx_y_TT]);
                         }
                     }
                     
                     if (compute_variable_local_means)
                     {
-                        for (int j = 0; j < interior_dims[1]; j++)
+                        for (int j = 0; j < interior_dim_1; j++)
                         {
-                            for (int i = 0; i < interior_dims[0]; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute the linear indices.
-                                const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                                const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                                 
-                                const int idx_x_LL = (i - 2*pow(2, li) + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                                const int idx_x_LL = (i - 2*offset + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                                 
-                                const int idx_x_L = (i - pow(2, li) + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                                const int idx_x_L = (i - offset + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                                 
-                                const int idx_x_R = (i + pow(2, li) + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                                const int idx_x_R = (i + offset + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                                 
-                                const int idx_x_RR = (i + 2*pow(2, li) + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                                const int idx_x_RR = (i + 2*offset + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                                 
-                                const int idx_y_BB = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j - 2*pow(2, li) + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                                const int idx_y_BB = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j - 2*offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                                 
-                                const int idx_y_B = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j - pow(2, li) + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                                const int idx_y_B = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j - offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                                 
-                                const int idx_y_T = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + pow(2, li) + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                                const int idx_y_T = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                                 
-                                const int idx_y_TT = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + 2*pow(2, li) + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                                const int idx_y_TT = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + 2*offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                                 
-                                f_mean[li][idx] = 1.0/6.0*sqrt(
-                                    pow(f_x[li-1][idx_x_LL] + 4*f_x[li-1][idx_x_L] + 6*f_x[li-1][idx] +
-                                        4*f_x[li-1][idx_x_R] + f_x[li-1][idx_x_RR], 2.0) +
-                                    pow(f_y[li-1][idx_y_BB] + 4*f_y[li-1][idx_y_B] + 6*f_y[li-1][idx] +
-                                        4*f_y[li-1][idx_y_T] + f_y[li-1][idx_y_TT], 2.0));
+                                double f_mean_x = f_x[li-1][idx_x_LL] + 4.0*f_x[li-1][idx_x_L] +
+                                    6.0*f_x[li-1][idx] + 4.0*f_x[li-1][idx_x_R] + f_x[li-1][idx_x_RR];
+                                
+                                double f_mean_y = f_y[li-1][idx_y_BB] + 4.0*f_y[li-1][idx_y_B] +
+                                    6.0*f_y[li-1][idx] + 4.0*f_y[li-1][idx_y_T] + f_y[li-1][idx_y_TT];
+                                
+                                f_mean[li][idx] = 1.0/6.0*sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y);
                             }
                         }
                     }
@@ -1044,16 +1088,23 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
         
         for (int li = 0; li < d_num_level; li++)
         {
-            for (int j = -d_p*pow(2, li+1);
-                 j < interior_dims[1] + d_q*pow(2, li+1);
-                 j++)
+            const int offset = pow(2, li + 1);
+            
+            // Compute the starting and ending indices.
+            const int start_index_i = -d_p*offset;
+            const int end_index_i = interior_dim_0 + d_q*offset;
+            const int start_index_j = -d_p*offset;
+            const int end_index_j = interior_dim_1 + d_q*offset;
+            
+            for (int j = start_index_j; j < end_index_j; j++)
             {
-                for (int i = -d_p*pow(2, li+1);
-                     i < interior_dims[0] + d_q*pow(2, li+1);
-                     i++)
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = start_index_i; i < end_index_i; i++)
                 {
-                    const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                        (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0];
+                    const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                        (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                     
                     w[li][idx] = sqrt(w_x[li][idx]*w_x[li][idx] + w_y[li][idx]*w_y[li][idx]);
                 }
@@ -1132,10 +1183,6 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
         {
             case 2:
             {
-                int start_index_i, end_index_i,
-                    start_index_j, end_index_j,
-                    start_index_k, end_index_k;
-                
                 /*
                  * Compute scaling and wavelet coefficients in the x-direction.
                  */
@@ -1151,42 +1198,47 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 }
                 
                 // Compute the starting and ending indices.
-                start_index_i = -d_num_wavelet_ghosts[0] + 1;
-                end_index_i   = interior_dims[0] + d_num_wavelet_ghosts[0] - 1;
-                start_index_j = -d_num_wavelet_ghosts[1];
-                end_index_j   = interior_dims[1] + d_num_wavelet_ghosts[1];
-                start_index_k = -d_num_wavelet_ghosts[2];
-                end_index_k   = interior_dims[2] + d_num_wavelet_ghosts[2];
+                const int start_index_x_i = -d_num_wavelet_ghosts[0] + 1;
+                const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - 1;
+                const int start_index_x_j = -d_num_wavelet_ghosts[1];
+                const int end_index_x_j = interior_dim_1 + d_num_wavelet_ghosts[1];
+                const int start_index_x_k = -d_num_wavelet_ghosts[2];
+                const int end_index_x_k = interior_dim_2 + d_num_wavelet_ghosts[2];
                 
-                for (int k = start_index_k; k < end_index_k; k++)
+                for (int k = start_index_x_k; k < end_index_x_k; k++)
                 {
-                    for (int j = start_index_j; j < end_index_j; j++)
+                    for (int j = start_index_x_j; j < end_index_x_j; j++)
                     {
-                        for (int i = start_index_i; i < end_index_i; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = start_index_x_i; i < end_index_x_i; i++)
                         {
                             // Compute the linear indices.
-                            const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                    ghostcell_dims_wavelet_coeffs[1];
+                            const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                    ghostcell_dim_1_wavelet_coeffs;
                             
-                            const int idx_x_L = (i - 1 + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_cell_data = (i + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                             
-                            const int idx_x   = (i + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_cell_data_x_L = (i - 1 + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                             
-                            const int idx_x_R = (i + 1 + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_cell_data_x_R = (i + 1 + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                             
-                            f_x[0][idx] = 0.5*(f[idx_x_L] + f[idx_x_R]);
-                            w_x[0][idx] = -0.5*(f[idx_x_L] - 2*f[idx_x] + f[idx_x_R]);
+                            f_x[0][idx] = 0.5*(f[idx_cell_data_x_L] + f[idx_cell_data_x_R]);
+                            
+                            w_x[0][idx] = -0.5*(f[idx_cell_data_x_L] - 2.0*f[idx_cell_data] +
+                                f[idx_cell_data_x_R]);
                         }
                     }
                 }
@@ -1206,42 +1258,47 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 }
                 
                 // Compute the starting and ending indices.
-                start_index_i = -d_num_wavelet_ghosts[0];
-                end_index_i   = interior_dims[0] + d_num_wavelet_ghosts[0];
-                start_index_j = -d_num_wavelet_ghosts[1] + 1;
-                end_index_j   = interior_dims[1] + d_num_wavelet_ghosts[1] - 1;
-                start_index_k = -d_num_wavelet_ghosts[2];
-                end_index_k   = interior_dims[2] + d_num_wavelet_ghosts[2];
+                const int start_index_y_i = -d_num_wavelet_ghosts[0];
+                const int end_index_y_i = interior_dim_0 + d_num_wavelet_ghosts[0];
+                const int start_index_y_j = -d_num_wavelet_ghosts[1] + 1;
+                const int end_index_y_j = interior_dim_1 + d_num_wavelet_ghosts[1] - 1;
+                const int start_index_y_k = -d_num_wavelet_ghosts[2];
+                const int end_index_y_k = interior_dim_2 + d_num_wavelet_ghosts[2];
                 
-                for (int k = start_index_k; k < end_index_k; k++)
+                for (int k = start_index_y_k; k < end_index_y_k; k++)
                 {
-                    for (int i = start_index_i; i < end_index_i; i++)
+                    for (int j = start_index_y_j; j < end_index_y_j; j++)
                     {
-                        for (int j = start_index_j; j < end_index_j; j++)
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = start_index_y_i; i < end_index_y_i; i++)
                         {
                             // Compute the linear indices.
-                            const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                    ghostcell_dims_wavelet_coeffs[1];
+                            const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                    ghostcell_dim_1_wavelet_coeffs;
                             
-                            const int idx_y_B = (i + num_ghosts_cell_data[0]) +
-                                (j - 1 + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_cell_data = (i + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                             
-                            const int idx_y   = (i + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_cell_data_y_B = (i + num_ghosts_0_cell_data) +
+                                (j - 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                             
-                            const int idx_y_T = (i + num_ghosts_cell_data[0]) +
-                                (j + 1 + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_cell_data_y_T = (i + num_ghosts_0_cell_data) +
+                                (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                             
-                            f_y[0][idx] = 0.5*(f[idx_y_B] + f[idx_y_T]);
-                            w_y[0][idx] = -0.5*(f[idx_y_B] - 2*f[idx_y] + f[idx_y_T]);
+                            f_y[0][idx] = 0.5*(f[idx_cell_data_y_B] + f[idx_cell_data_y_T]);
+                            
+                            w_y[0][idx] = -0.5*(f[idx_cell_data_y_B] - 2.0*f[idx_cell_data] +
+                                f[idx_cell_data_y_T]);
                         }
                     }
                 }
@@ -1261,103 +1318,114 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 }
                 
                 // Compute the starting and ending indices.
-                start_index_i = -d_num_wavelet_ghosts[0];
-                end_index_i   = interior_dims[0] + d_num_wavelet_ghosts[0];
-                start_index_j = -d_num_wavelet_ghosts[1];
-                end_index_j   = interior_dims[1] + d_num_wavelet_ghosts[1];
-                start_index_k = -d_num_wavelet_ghosts[2] + 1;
-                end_index_k   = interior_dims[2] + d_num_wavelet_ghosts[1] - 1;
+                const int start_index_z_i = -d_num_wavelet_ghosts[0];
+                const int end_index_z_i = interior_dim_0 + d_num_wavelet_ghosts[0];
+                const int start_index_z_j = -d_num_wavelet_ghosts[1];
+                const int end_index_z_j = interior_dim_1 + d_num_wavelet_ghosts[1];
+                const int start_index_z_k = -d_num_wavelet_ghosts[2] + 1;
+                const int end_index_z_k = interior_dim_2 + d_num_wavelet_ghosts[1] - 1;
                 
-                for (int j = start_index_j; j < end_index_j; j++)
+                for (int k = start_index_z_k; k < end_index_z_k; k++)
                 {
-                    for (int i = start_index_i; i < end_index_i; i++)
+                    for (int j = start_index_z_j; j < end_index_z_j; j++)
                     {
-                        for (int k = start_index_k; k < end_index_k; k++)
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = start_index_z_i; i < end_index_z_i; i++)
                         {
                             // Compute the linear indices.
-                            const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                    ghostcell_dims_wavelet_coeffs[1];
+                            const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                    ghostcell_dim_1_wavelet_coeffs;
                             
-                            const int idx_z_B = (i + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (k - 1 + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_cell_data = (i + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                             
-                            const int idx_z   = (i + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_cell_data_z_B = (i + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (k - 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                             
-                            const int idx_z_F = (i + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (k + 1 + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_cell_data_z_F = (i + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (k + 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                             
-                            f_z[0][idx] = 0.5*(f[idx_z_B] + f[idx_z_F]);
-                            w_z[0][idx] = -0.5*(f[idx_z_B] - 2*f[idx_z] + f[idx_z_F]);
+                            f_z[0][idx] = 0.5*(f[idx_cell_data_z_B] + f[idx_cell_data_z_F]);
+                            
+                            w_z[0][idx] = -0.5*(f[idx_cell_data_z_B] - 2.0*f[idx_cell_data] +
+                                f[idx_cell_data_z_F]);
                         }
                     }
                 }
                 
                 if (compute_variable_local_means)
                 {
-                    for (int k = 0; k < interior_dims[2]; k++)
+                    for (int k = 0; k < interior_dim_2; k++)
                     {
-                        for (int j = 0; j < interior_dims[1]; j++)
+                        for (int j = 0; j < interior_dim_1; j++)
                         {
-                            for (int i = 0; i < interior_dims[0]; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute the indices.
-                                const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
-                                const int idx_x_L = (i - 1 + num_ghosts_cell_data[0]) +
-                                    (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                    (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                        ghostcell_dims_cell_data[1];
+                                const int idx_cell_data = (i + num_ghosts_0_cell_data) +
+                                    (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                    (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                        ghostcell_dim_1_cell_data;
                                 
-                                const int idx_x   = (i + num_ghosts_cell_data[0]) +
-                                    (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                    (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                        ghostcell_dims_cell_data[1];
+                                const int idx_cell_data_x_L = (i - 1 + num_ghosts_0_cell_data) +
+                                    (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                    (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                        ghostcell_dim_1_cell_data;
                                 
-                                const int idx_x_R = (i + 1 + num_ghosts_cell_data[0]) +
-                                    (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                    (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                        ghostcell_dims_cell_data[1];
+                                const int idx_cell_data_x_R = (i + 1 + num_ghosts_0_cell_data) +
+                                    (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                    (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                        ghostcell_dim_1_cell_data;
                                 
-                                const int idx_y_B = (i + num_ghosts_cell_data[0]) +
-                                    (j - 1 + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                    (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                        ghostcell_dims_cell_data[1];
+                                const int idx_cell_data_y_B = (i + num_ghosts_0_cell_data) +
+                                    (j - 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                    (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                        ghostcell_dim_1_cell_data;
                                 
-                                const int idx_y   = idx_x;
+                                const int idx_cell_data_y_T = (i + num_ghosts_0_cell_data) +
+                                    (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                    (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                        ghostcell_dim_1_cell_data;
                                 
-                                const int idx_y_T = (i + num_ghosts_cell_data[0]) +
-                                    (j + 1 + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                    (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                        ghostcell_dims_cell_data[1];
+                                const int idx_cell_data_z_B = (i + num_ghosts_0_cell_data) +
+                                    (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                    (k - 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                        ghostcell_dim_1_cell_data;
                                 
-                                const int idx_z_B = (i + num_ghosts_cell_data[0]) +
-                                    (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                    (k - 1 + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                        ghostcell_dims_cell_data[1];
+                                const int idx_cell_data_z_F = (i + num_ghosts_0_cell_data) +
+                                    (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                    (k + 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                        ghostcell_dim_1_cell_data;
                                 
-                                const int idx_z   = idx_x;
+                                double f_mean_x = f[idx_cell_data_x_L] + 2.0*f[idx_cell_data] +
+                                    f[idx_cell_data_x_R];
                                 
-                                const int idx_z_F = (i + num_ghosts_cell_data[0]) +
-                                    (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                    (k + 1 + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                        ghostcell_dims_cell_data[1];
+                                double f_mean_y = f[idx_cell_data_y_B] + 2.0*f[idx_cell_data] +
+                                    f[idx_cell_data_y_T];
                                 
-                                f_mean[0][idx] = 0.5*sqrt(
-                                    pow(f[idx_x_L] + 2*f[idx_x] + f[idx_x_R], 2.0) +
-                                    pow(f[idx_y_B] + 2*f[idx_y] + f[idx_y_T], 2.0) +
-                                    pow(f[idx_z_B] + 2*f[idx_z] + f[idx_z_F], 2.0));
+                                double f_mean_z = f[idx_cell_data_z_B] + 2.0*f[idx_cell_data] +
+                                    f[idx_cell_data_z_F];
+                                
+                                f_mean[0][idx] = 0.5*sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y +
+                                    f_mean_z*f_mean_z);
                             }
                         }
                     }
@@ -1367,10 +1435,6 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
             }
             case 4:
             {
-                int start_index_i, end_index_i,
-                    start_index_j, end_index_j,
-                    start_index_k, end_index_k;
-                
                 /*
                  * Compute scaling and wavelet coefficients in the x-direction.
                  */
@@ -1386,52 +1450,58 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 }
                 
                 // Compute the starting and ending indices.
-                start_index_i = -d_num_wavelet_ghosts[0] + 2;
-                end_index_i   = interior_dims[0] + d_num_wavelet_ghosts[0] - 2;
-                start_index_j = -d_num_wavelet_ghosts[1];
-                end_index_j   = interior_dims[1] + d_num_wavelet_ghosts[1];
-                start_index_k = -d_num_wavelet_ghosts[2];
-                end_index_k   = interior_dims[2] + d_num_wavelet_ghosts[2];
+                const int start_index_x_i = -d_num_wavelet_ghosts[0] + 2;
+                const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - 2;
+                const int start_index_x_j = -d_num_wavelet_ghosts[1];
+                const int end_index_x_j = interior_dim_1 + d_num_wavelet_ghosts[1];
+                const int start_index_x_k = -d_num_wavelet_ghosts[2];
+                const int end_index_x_k = interior_dim_2 + d_num_wavelet_ghosts[2];
                 
-                for (int k = start_index_k; k < end_index_k; k++)
+                for (int k = start_index_x_k; k < end_index_x_k; k++)
                 {
-                    for (int j = start_index_j; j < end_index_j; j++)
+                    for (int j = start_index_x_j; j < end_index_x_j; j++)
                     {
-                        for (int i = start_index_i; i < end_index_i; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = start_index_x_i; i < end_index_x_i; i++)
                         {
                             // Compute the indices.
-                            const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                    ghostcell_dims_wavelet_coeffs[1];;
+                            const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                    ghostcell_dim_1_wavelet_coeffs;
                             
-                            const int idx_x_LL = (i - 2 + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_cell_data = (i + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                             
-                            const int idx_x_L = (i - 1 + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_cell_data_x_LL = (i - 2 + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                             
-                            const int idx_x   = (i + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_cell_data_x_L = (i - 1 + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                             
-                            const int idx_x_R = (i + 1 + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_cell_data_x_R = (i + 1 + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                             
-                            const int idx_x_RR = (i + 2 + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_cell_data_x_RR = (i + 2 + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                             
-                            f_x[0][idx] = 1.0/6.0*(-f[idx_x_LL] + 4*f[idx_x_L] + 4*f[idx_x_R] - f[idx_x_RR]);
-                            w_x[0][idx] = 1.0/6.0*(f[idx_x_LL] - 4*f[idx_x_L] + 6*f[idx_x] - 4*f[idx_x_R] + f[idx_x_RR]);
+                            f_x[0][idx] = 1.0/6.0*(-f[idx_cell_data_x_LL] + 4.0*f[idx_cell_data_x_L] +
+                                4.0*f[idx_cell_data_x_R] - f[idx_cell_data_x_RR]);
+                            
+                            w_x[0][idx] = 1.0/6.0*(f[idx_cell_data_x_LL] - 4.0*f[idx_cell_data_x_L] +
+                                6.0*f[idx_cell_data] - 4.0*f[idx_cell_data_x_R] + f[idx_cell_data_x_RR]);
                         }
                     }
                 }
@@ -1451,52 +1521,58 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 }
                 
                 // Compute the starting and ending indices.
-                start_index_i = -d_num_wavelet_ghosts[0];
-                end_index_i   = interior_dims[0] + d_num_wavelet_ghosts[0];
-                start_index_j = -d_num_wavelet_ghosts[1] + 2;
-                end_index_j   = interior_dims[1] + d_num_wavelet_ghosts[1] - 2;
-                start_index_k = -d_num_wavelet_ghosts[2];
-                end_index_k   = interior_dims[2] + d_num_wavelet_ghosts[2];
+                const int start_index_y_i = -d_num_wavelet_ghosts[0];
+                const int end_index_y_i = interior_dim_0 + d_num_wavelet_ghosts[0];
+                const int start_index_y_j = -d_num_wavelet_ghosts[1] + 2;
+                const int end_index_y_j = interior_dim_1 + d_num_wavelet_ghosts[1] - 2;
+                const int start_index_y_k = -d_num_wavelet_ghosts[2];
+                const int end_index_y_k = interior_dim_2 + d_num_wavelet_ghosts[2];
                 
-                for (int k = start_index_k; k < end_index_k; k++)
+                for (int k = start_index_y_k; k < end_index_y_k; k++)
                 {
-                    for (int i = start_index_i; i < end_index_i; i++)
+                    for (int j = start_index_y_j; j < end_index_y_j; j++)
                     {
-                        for (int j = start_index_j; j < end_index_j; j++)
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = start_index_y_i; i < end_index_y_i; i++)
                         {
                             // Compute the linear indices.
-                            const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                    ghostcell_dims_wavelet_coeffs[1];
+                            const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                    ghostcell_dim_1_wavelet_coeffs;
                             
-                            const int idx_y_BB = (i + num_ghosts_cell_data[0]) +
-                                (j - 2 + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_cell_data = (i + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                             
-                            const int idx_y_B = (i + num_ghosts_cell_data[0]) +
-                                (j - 1 + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_cell_data_y_BB = (i + num_ghosts_0_cell_data) +
+                                (j - 2 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                             
-                            const int idx_y   = (i + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_cell_data_y_B = (i + num_ghosts_0_cell_data) +
+                                (j - 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                             
-                            const int idx_y_T = (i + num_ghosts_cell_data[0]) +
-                                (j + 1 + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_cell_data_y_T = (i + num_ghosts_0_cell_data) +
+                                (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                             
-                            const int idx_y_TT = (i + num_ghosts_cell_data[0]) +
-                                (j + 2 + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_cell_data_y_TT = (i + num_ghosts_0_cell_data) +
+                                (j + 2 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                             
-                            f_y[0][idx] = 1.0/6.0*(-f[idx_y_BB] + 4*f[idx_y_B] + 4*f[idx_y_T] - f[idx_y_TT]);
-                            w_y[0][idx] = 1.0/6.0*(f[idx_y_BB] - 4*f[idx_y_B] + 6*f[idx_y] - 4*f[idx_y_T] + f[idx_y_TT]);
+                            f_y[0][idx] = 1.0/6.0*(-f[idx_cell_data_y_BB] + 4.0*f[idx_cell_data_y_B] +
+                                4.0*f[idx_cell_data_y_T] - f[idx_cell_data_y_TT]);
+                            
+                            w_y[0][idx] = 1.0/6.0*(f[idx_cell_data_y_BB] - 4.0*f[idx_cell_data_y_B] +
+                                6.0*f[idx_cell_data] - 4.0*f[idx_cell_data_y_T] + f[idx_cell_data_y_TT]);
                         }
                     }
                 }
@@ -1516,143 +1592,155 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 }
                 
                 // Compute the starting and ending indices.
-                start_index_i = -d_num_wavelet_ghosts[0];
-                end_index_i   = interior_dims[0] + d_num_wavelet_ghosts[0];
-                start_index_j = -d_num_wavelet_ghosts[1];
-                end_index_j   = interior_dims[1] + d_num_wavelet_ghosts[1];
-                start_index_k = -d_num_wavelet_ghosts[2] + 2;
-                end_index_k   = interior_dims[2] + d_num_wavelet_ghosts[1] - 2;
+                const int start_index_z_i = -d_num_wavelet_ghosts[0];
+                const int end_index_z_i = interior_dim_0 + d_num_wavelet_ghosts[0];
+                const int start_index_z_j = -d_num_wavelet_ghosts[1];
+                const int end_index_z_j = interior_dim_1 + d_num_wavelet_ghosts[1];
+                const int start_index_z_k = -d_num_wavelet_ghosts[2] + 2;
+                const int end_index_z_k = interior_dim_2 + d_num_wavelet_ghosts[1] - 2;
                 
-                for (int j = start_index_j; j < end_index_j; j++)
+                for (int k = start_index_z_k; k < end_index_z_k; k++)
                 {
-                    for (int i = start_index_i; i < end_index_i; i++)
+                    for (int j = start_index_z_j; j < end_index_z_j; j++)
                     {
-                        for (int k = start_index_k; k < end_index_k; k++)
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = start_index_z_i; i < end_index_z_i; i++)
                         {
                             // Compute the linear indices.
-                            const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                    ghostcell_dims_wavelet_coeffs[1];
+                            const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                    ghostcell_dim_1_wavelet_coeffs;
                             
-                            const int idx_z_BB = (i + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (k - 2 + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_cell_data = (i + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                             
-                            const int idx_z_B = (i + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (k - 1 + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_cell_data_z_BB = (i + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (k - 2 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                             
-                            const int idx_z   = (i + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_cell_data_z_B = (i + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (k - 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                             
-                            const int idx_z_F = (i + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (k + 1 + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_cell_data_z_F = (i + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (k + 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                             
-                            const int idx_z_FF = (i + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (k + 2 + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_cell_data_z_FF = (i + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (k + 2 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                             
-                            f_z[0][idx] = 1.0/6.0*(-f[idx_z_BB] + 4*f[idx_z_B] + 4*f[idx_z_F] - f[idx_z_FF]);
-                            w_z[0][idx] = 1.0/6.0*(f[idx_z_BB] - 4*f[idx_z_B] + 6*f[idx_z] - 4*f[idx_z_F] + f[idx_z_FF]);
+                            f_z[0][idx] = 1.0/6.0*(-f[idx_cell_data_z_BB] + 4.0*f[idx_cell_data_z_B] +
+                                4.0*f[idx_cell_data_z_F] - f[idx_cell_data_z_FF]);
+                            
+                            w_z[0][idx] = 1.0/6.0*(f[idx_cell_data_z_BB] - 4.0*f[idx_cell_data_z_B] +
+                                6.0*f[idx_cell_data] - 4.0*f[idx_cell_data_z_F] + f[idx_cell_data_z_FF]);
                         }
                     }
                 }
                 
                 if (compute_variable_local_means)
                 {
-                    for (int k = 0; k < interior_dims[2]; k++)
+                    for (int k = 0; k < interior_dim_2; k++)
                     {
-                        for (int j = 0; j < interior_dims[1]; j++)
+                        for (int j = 0; j < interior_dim_1; j++)
                         {
-                            for (int i = 0; i < interior_dims[0]; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute the linear indices.
-                                const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];;
+                                const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
-                                const int idx_x_LL = (i - 2 + num_ghosts_cell_data[0]) +
-                                    (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                    (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                        ghostcell_dims_cell_data[1];
+                                const int idx_cell_data = (i + num_ghosts_0_cell_data) +
+                                    (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                    (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                        ghostcell_dim_1_cell_data;
                                 
-                                const int idx_x_L = (i - 1 + num_ghosts_cell_data[0]) +
-                                    (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                    (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                        ghostcell_dims_cell_data[1];
+                                const int idx_cell_data_x_LL = (i - 2 + num_ghosts_0_cell_data) +
+                                    (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                    (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                        ghostcell_dim_1_cell_data;
                                 
-                                const int idx_x   = (i + num_ghosts_cell_data[0]) +
-                                    (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                    (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                        ghostcell_dims_cell_data[1];
+                                const int idx_cell_data_x_L = (i - 1 + num_ghosts_0_cell_data) +
+                                    (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                    (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                        ghostcell_dim_1_cell_data;
                                 
-                                const int idx_x_R = (i + 1 + num_ghosts_cell_data[0]) +
-                                    (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                    (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                        ghostcell_dims_cell_data[1];
+                                const int idx_cell_data_x_R = (i + 1 + num_ghosts_0_cell_data) +
+                                    (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                    (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                        ghostcell_dim_1_cell_data;
                                 
-                                const int idx_x_RR = (i + 2 + num_ghosts_cell_data[0]) +
-                                    (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                    (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                        ghostcell_dims_cell_data[1];
+                                const int idx_cell_data_x_RR = (i + 2 + num_ghosts_0_cell_data) +
+                                    (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                    (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                        ghostcell_dim_1_cell_data;
                                 
-                                const int idx_y_BB = (i + num_ghosts_cell_data[0]) +
-                                    (j - 2 + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                    (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                        ghostcell_dims_cell_data[1];
+                                const int idx_cell_data_y_BB = (i + num_ghosts_0_cell_data) +
+                                    (j - 2 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                    (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                        ghostcell_dim_1_cell_data;
                                 
-                                const int idx_y_B = (i + num_ghosts_cell_data[0]) +
-                                    (j - 1 + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                    (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                        ghostcell_dims_cell_data[1];
+                                const int idx_cell_data_y_B = (i + num_ghosts_0_cell_data) +
+                                    (j - 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                    (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                        ghostcell_dim_1_cell_data;
                                 
-                                const int idx_y   = idx_x;
+                                const int idx_cell_data_y_T = (i + num_ghosts_0_cell_data) +
+                                    (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                    (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                        ghostcell_dim_1_cell_data;
                                 
-                                const int idx_y_T = (i + num_ghosts_cell_data[0]) +
-                                    (j + 1 + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                    (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                        ghostcell_dims_cell_data[1];
+                                const int idx_cell_data_y_TT = (i + num_ghosts_0_cell_data) +
+                                    (j + 2 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                    (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                        ghostcell_dim_1_cell_data;
                                 
-                                const int idx_y_TT = (i + num_ghosts_cell_data[0]) +
-                                    (j + 2 + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                    (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                        ghostcell_dims_cell_data[1];
+                                const int idx_cell_data_z_BB = (i + num_ghosts_0_cell_data) +
+                                    (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                    (k - 2 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                        ghostcell_dim_1_cell_data;
                                 
-                                const int idx_z_BB = (i + num_ghosts_cell_data[0]) +
-                                    (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                    (k - 2 + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                        ghostcell_dims_cell_data[1];
+                                const int idx_cell_data_z_B = (i + num_ghosts_0_cell_data) +
+                                    (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                    (k - 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                        ghostcell_dim_1_cell_data;
                                 
-                                const int idx_z_B = (i + num_ghosts_cell_data[0]) +
-                                    (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                    (k - 1 + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                        ghostcell_dims_cell_data[1];
+                                const int idx_cell_data_z_F = (i + num_ghosts_0_cell_data) +
+                                    (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                    (k + 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                        ghostcell_dim_1_cell_data;
                                 
-                                const int idx_z   = idx_x;
+                                const int idx_cell_data_z_FF = (i + num_ghosts_0_cell_data) +
+                                    (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                    (k + 2 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                        ghostcell_dim_1_cell_data;
                                 
-                                const int idx_z_F = (i + num_ghosts_cell_data[0]) +
-                                    (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                    (k + 1 + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                        ghostcell_dims_cell_data[1];
+                                double f_mean_x = f[idx_cell_data_x_LL] + 4.0*f[idx_cell_data_x_L] +
+                                    6.0*f[idx_cell_data] + 4.0*f[idx_cell_data_x_R] + f[idx_cell_data_x_RR];
                                 
-                                const int idx_z_FF = (i + num_ghosts_cell_data[0]) +
-                                    (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                    (k + 2 + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                        ghostcell_dims_cell_data[1];
+                                double f_mean_y = f[idx_cell_data_y_BB] + 4.0*f[idx_cell_data_y_B] +
+                                    6.0*f[idx_cell_data] + 4.0*f[idx_cell_data_y_T] + f[idx_cell_data_y_TT];
                                 
-                                f_mean[0][idx] = 1.0/6.0*sqrt(
-                                    pow(f[idx_x_LL] + 4*f[idx_x_L] + 6*f[idx_x] + 4*f[idx_x_R] + f[idx_x_RR], 2.0) +
-                                    pow(f[idx_y_BB] + 4*f[idx_y_B] + 6*f[idx_y] + 4*f[idx_y_T] + f[idx_y_TT], 2.0) +
-                                    pow(f[idx_z_BB] + 4*f[idx_z_B] + 6*f[idx_z] + 4*f[idx_z_F] + f[idx_z_FF], 2.0));
+                                double f_mean_z = f[idx_cell_data_z_BB] + 4.0*f[idx_cell_data_z_B] +
+                                    6.0*f[idx_cell_data] + 4.0*f[idx_cell_data_z_F] + f[idx_cell_data_z_FF];
+                                
+                                f_mean[0][idx] = 1.0/6.0*sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y +
+                                    f_mean_z*f_mean_z);
                             }
                         }
                     }
@@ -1677,50 +1765,53 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
         
         for (int li = 1; li < d_num_level; li++)
         {
+            const int offset = pow(2, li);
+            
             switch (d_k)
             {
                 case 2:
                 {
-                    int start_index_i, end_index_i,
-                        start_index_j, end_index_j,
-                        start_index_k, end_index_k;
-                    
                     /*
                      * Compute scaling and wavelet coefficients in the x-direction.
                      */
                     
                     // Compute the starting and ending indices.
-                    start_index_i = -d_num_wavelet_ghosts[0] + pow(2, li) ;
-                    end_index_i   = interior_dims[0] + d_num_wavelet_ghosts[0] - pow(2, li);
-                    start_index_j = -d_num_wavelet_ghosts[1];
-                    end_index_j   = interior_dims[1] + d_num_wavelet_ghosts[1];
-                    start_index_k = -d_num_wavelet_ghosts[2];
-                    end_index_k   = interior_dims[2] + d_num_wavelet_ghosts[2];
+                    const int start_index_x_i = -d_num_wavelet_ghosts[0] + offset;
+                    const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - offset;
+                    const int start_index_x_j = -d_num_wavelet_ghosts[1];
+                    const int end_index_x_j = interior_dim_1 + d_num_wavelet_ghosts[1];
+                    const int start_index_x_k = -d_num_wavelet_ghosts[2];
+                    const int end_index_x_k = interior_dim_2 + d_num_wavelet_ghosts[2];
                     
-                    for (int k = start_index_k; k < end_index_k; k++)
+                    for (int k = start_index_x_k; k < end_index_x_k; k++)
                     {
-                        for (int j = start_index_j; j < end_index_j; j++)
+                        for (int j = start_index_x_j; j < end_index_x_j; j++)
                         {
-                            for (int i = start_index_i; i < end_index_i; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = start_index_x_i; i < end_index_x_i; i++)
                             {
                                 // Compute the linear indices.
-                                const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
-                                const int idx_x_L = (i - pow(2, li) + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx_x_L = (i - offset + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
-                                const int idx_x_R = (i + pow(2, li) + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx_x_R = (i + offset + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
                                 f_x[li][idx] = 0.5*(f_x[li-1][idx_x_L] + f_x[li-1][idx_x_R]);
-                                w_x[li][idx] = -0.5*(f_x[li-1][idx_x_L] - 2*f_x[li-1][idx] + f_x[li-1][idx_x_R]);
+                                
+                                w_x[li][idx] = -0.5*(f_x[li-1][idx_x_L] - 2.0*f_x[li-1][idx] +
+                                    f_x[li-1][idx_x_R]);
                             }
                         }
                     }
@@ -1730,37 +1821,42 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                      */
                     
                     // Compute the starting and ending indices.
-                    start_index_i = -d_num_wavelet_ghosts[0];
-                    end_index_i   = interior_dims[0] + d_num_wavelet_ghosts[0];
-                    start_index_j = -d_num_wavelet_ghosts[1] + pow(2, li) ;
-                    end_index_j   = interior_dims[1] + d_num_wavelet_ghosts[1] - pow(2, li);
-                    start_index_k = -d_num_wavelet_ghosts[2];
-                    end_index_k   = interior_dims[2] + d_num_wavelet_ghosts[2];
+                    const int start_index_y_i = -d_num_wavelet_ghosts[0];
+                    const int end_index_y_i = interior_dim_0 + d_num_wavelet_ghosts[0];
+                    const int start_index_y_j = -d_num_wavelet_ghosts[1] + offset ;
+                    const int end_index_y_j = interior_dim_1 + d_num_wavelet_ghosts[1] - offset;
+                    const int start_index_y_k = -d_num_wavelet_ghosts[2];
+                    const int end_index_y_k = interior_dim_2 + d_num_wavelet_ghosts[2];
                     
-                    for (int k = start_index_k; k < end_index_k; k++)
+                    for (int k = start_index_y_k; k < end_index_y_k; k++)
                     {
-                        for (int i = start_index_i; i < end_index_i; i++)
+                        for (int j = start_index_y_j; j < end_index_y_j; j++)
                         {
-                            for (int j = start_index_j; j < end_index_j; j++)
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = start_index_y_i; i < end_index_y_i; i++)
                             {
                                 // Compute the linear indices.
-                                const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
-                                const int idx_y_B = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j - pow(2, li) + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx_y_B = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j - offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
-                                const int idx_y_T = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + pow(2, li) + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx_y_T = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
                                 f_y[li][idx] = 0.5*(f_y[li-1][idx_y_B] + f_y[li-1][idx_y_T]);
-                                w_y[li][idx] = -0.5*(f_y[li-1][idx_y_B] - 2*f_y[li-1][idx] + f_y[li-1][idx_y_T]);
+                                
+                                w_y[li][idx] = -0.5*(f_y[li-1][idx_y_B] - 2.0*f_y[li-1][idx] +
+                                    f_y[li-1][idx_y_T]);
                             }
                         }
                     }
@@ -1770,89 +1866,104 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                      */
                     
                     // Compute the starting and ending indices.
-                    start_index_i = -d_num_wavelet_ghosts[0];
-                    end_index_i   = interior_dims[0] + d_num_wavelet_ghosts[0];
-                    start_index_j = -d_num_wavelet_ghosts[1];
-                    end_index_j   = interior_dims[1] + d_num_wavelet_ghosts[1];
-                    start_index_k = -d_num_wavelet_ghosts[2] + pow(2, li) ;
-                    end_index_k   = interior_dims[2] + d_num_wavelet_ghosts[2] - pow(2, li);
+                    const int start_index_z_i = -d_num_wavelet_ghosts[0];
+                    const int end_index_z_i = interior_dim_0 + d_num_wavelet_ghosts[0];
+                    const int start_index_z_j = -d_num_wavelet_ghosts[1];
+                    const int end_index_z_j = interior_dim_1 + d_num_wavelet_ghosts[1];
+                    const int start_index_z_k = -d_num_wavelet_ghosts[2] + offset ;
+                    const int end_index_z_k = interior_dim_2 + d_num_wavelet_ghosts[2] - offset;
                     
-                    for (int j = start_index_j; j < end_index_j; j++)
+                    for (int k = start_index_z_k; k < end_index_z_k; k++)
                     {
-                        for (int i = start_index_i; i < end_index_i; i++)
+                        for (int j = start_index_z_j; j < end_index_z_j; j++)
                         {
-                            for (int k = start_index_k; k < end_index_k; k++)
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = start_index_z_i; i < end_index_z_i; i++)
                             {
                                 // Compute the linear indices.
-                                const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
-                                const int idx_z_B = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k - pow(2, li) + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx_z_B = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k - offset + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
-                                const int idx_z_F = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + pow(2, li) + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx_z_F = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + offset + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
                                 f_z[li][idx] = 0.5*(f_z[li-1][idx_z_B] + f_z[li-1][idx_z_F]);
-                                w_z[li][idx] = -0.5*(f_z[li-1][idx_z_B] - 2*f_z[li-1][idx] + f_z[li-1][idx_z_F]);
+                                
+                                w_z[li][idx] = -0.5*(f_z[li-1][idx_z_B] - 2.0*f_z[li-1][idx] +
+                                    f_z[li-1][idx_z_F]);
                             }
                         }
                     }
                     
                     if (compute_variable_local_means)
                     {
-                        for (int k = 0; k < interior_dims[2]; k++)
+                        for (int k = 0; k < interior_dim_2; k++)
                         {
-                            for (int j = 0; j < interior_dims[1]; j++)
+                            for (int j = 0; j < interior_dim_1; j++)
                             {
-                                for (int i = 0; i < interior_dims[0]; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                                #pragma omp simd
+#endif
+                                for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute the linear indices.
-                                    const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                        (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                        (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                            ghostcell_dims_wavelet_coeffs[1];
+                                    const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                        (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                        (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                            ghostcell_dim_1_wavelet_coeffs;
                                     
-                                    const int idx_x_L = (i - pow(2, li) + num_ghosts_wavelet_coeffs[0]) +
-                                        (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                        (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                            ghostcell_dims_wavelet_coeffs[1];
+                                    const int idx_x_L = (i - offset + num_ghosts_0_wavelet_coeffs) +
+                                        (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                        (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                            ghostcell_dim_1_wavelet_coeffs;
                                     
-                                    const int idx_x_R = (i + pow(2, li) + num_ghosts_wavelet_coeffs[0]) +
-                                        (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                        (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                            ghostcell_dims_wavelet_coeffs[1];
+                                    const int idx_x_R = (i + offset + num_ghosts_0_wavelet_coeffs) +
+                                        (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                        (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                            ghostcell_dim_1_wavelet_coeffs;
                                     
-                                    const int idx_y_B = (i + num_ghosts_wavelet_coeffs[0]) +
-                                        (j - pow(2, li) + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                        (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                            ghostcell_dims_wavelet_coeffs[1];
+                                    const int idx_y_B = (i + num_ghosts_0_wavelet_coeffs) +
+                                        (j - offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                        (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                            ghostcell_dim_1_wavelet_coeffs;
                                     
-                                    const int idx_y_T = (i + num_ghosts_wavelet_coeffs[0]) +
-                                        (j + pow(2, li) + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                        (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                            ghostcell_dims_wavelet_coeffs[1];
+                                    const int idx_y_T = (i + num_ghosts_0_wavelet_coeffs) +
+                                        (j + offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                        (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                            ghostcell_dim_1_wavelet_coeffs;
                                     
-                                    const int idx_z_B = (i + num_ghosts_wavelet_coeffs[0]) +
-                                        (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                        (k - pow(2, li) + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                            ghostcell_dims_wavelet_coeffs[1];
+                                    const int idx_z_B = (i + num_ghosts_0_wavelet_coeffs) +
+                                        (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                        (k - offset + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                            ghostcell_dim_1_wavelet_coeffs;
                                     
-                                    const int idx_z_F = (i + num_ghosts_wavelet_coeffs[0]) +
-                                        (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                        (k + pow(2, li) + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                            ghostcell_dims_wavelet_coeffs[1];
+                                    const int idx_z_F = (i + num_ghosts_0_wavelet_coeffs) +
+                                        (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                        (k + offset + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                            ghostcell_dim_1_wavelet_coeffs;
                                     
-                                    f_mean[li][idx] = 0.5*sqrt(
-                                        pow(f_x[li-1][idx_x_L] + 2*f_x[li-1][idx] + f_x[li-1][idx_x_R], 2.0) +
-                                        pow(f_y[li-1][idx_y_B] + 2*f_y[li-1][idx] + f_y[li-1][idx_y_T], 2.0) +
-                                        pow(f_z[li-1][idx_z_B] + 2*f_z[li-1][idx] + f_z[li-1][idx_z_F], 2.0));
+                                    double f_mean_x = f_x[li-1][idx_x_L] + 2.0*f_x[li-1][idx] +
+                                        f_x[li-1][idx_x_R];
+                                    
+                                    double f_mean_y = f_y[li-1][idx_y_B] + 2.0*f_y[li-1][idx] +
+                                        f_y[li-1][idx_y_T];
+                                    
+                                    double f_mean_z = f_z[li-1][idx_z_B] + 2.0*f_z[li-1][idx] +
+                                        f_z[li-1][idx_z_F];
+                                    
+                                    f_mean[li][idx] = 0.5*sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y +
+                                        f_mean_z*f_mean_z);
                                 }
                             }
                         }
@@ -1862,59 +1973,58 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 }
                 case 4:
                 {
-                    int start_index_i, end_index_i,
-                        start_index_j, end_index_j,
-                        start_index_k, end_index_k;
-                    
                     /*
                      * Compute scaling and wavelet coefficients in the x-direction.
                      */
                     
                     // Compute the starting and ending indices.
-                    start_index_i = -d_num_wavelet_ghosts[0] + 2*pow(2, li) ;
-                    end_index_i   = interior_dims[0] + d_num_wavelet_ghosts[0] - 2*pow(2, li);
-                    start_index_j = -d_num_wavelet_ghosts[1];
-                    end_index_j   = interior_dims[1] + d_num_wavelet_ghosts[1];
-                    start_index_k = -d_num_wavelet_ghosts[2];
-                    end_index_k   = interior_dims[2] + d_num_wavelet_ghosts[2];
+                    const int start_index_x_i = -d_num_wavelet_ghosts[0] + 2*offset;
+                    const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - 2*offset;
+                    const int start_index_x_j = -d_num_wavelet_ghosts[1];
+                    const int end_index_x_j = interior_dim_1 + d_num_wavelet_ghosts[1];
+                    const int start_index_x_k = -d_num_wavelet_ghosts[2];
+                    const int end_index_x_k = interior_dim_2 + d_num_wavelet_ghosts[2];
                     
-                    for (int k = start_index_k; k < end_index_k; k++)
+                    for (int k = start_index_x_k; k < end_index_x_k; k++)
                     {
-                        for (int j = start_index_j; j < end_index_j; j++)
+                        for (int j = start_index_x_j; j < end_index_x_j; j++)
                         {
-                            for (int i = start_index_i; i < end_index_i; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = start_index_x_i; i < end_index_x_i; i++)
                             {
                                 // Compute the linear indices.
-                                const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
-                                const int idx_x_LL = (i - 2*pow(2, li) + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx_x_LL = (i - 2*offset + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
-                                const int idx_x_L = (i - pow(2, li) + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx_x_L = (i - offset + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
-                                const int idx_x_R = (i + pow(2, li) + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx_x_R = (i + offset + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
-                                const int idx_x_RR = (i + 2*pow(2, li) + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx_x_RR = (i + 2*offset + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
-                                f_x[li][idx] = 1.0/6.0*(-f_x[li-1][idx_x_LL] + 4*f_x[li-1][idx_x_L] +
-                                    4*f_x[li-1][idx_x_R] - f_x[li-1][idx_x_RR]);
+                                f_x[li][idx] = 1.0/6.0*(-f_x[li-1][idx_x_LL] + 4.0*f_x[li-1][idx_x_L] +
+                                    4.0*f_x[li-1][idx_x_R] - f_x[li-1][idx_x_RR]);
                                 
-                                w_x[li][idx] = 1.0/6.0*(f_x[li-1][idx_x_LL] - 4*f_x[li-1][idx_x_L] +
-                                    6*f_x[li-1][idx] - 4*f_x[li-1][idx_x_R] + f_x[li-1][idx_x_RR]);
+                                w_x[li][idx] = 1.0/6.0*(f_x[li-1][idx_x_LL] - 4.0*f_x[li-1][idx_x_L] +
+                                    6.0*f_x[li-1][idx] - 4.0*f_x[li-1][idx_x_R] + f_x[li-1][idx_x_RR]);
                             }
                         }
                     }
@@ -1924,50 +2034,53 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                      */
                     
                     // Compute the starting and ending indices.
-                    start_index_i = -d_num_wavelet_ghosts[0];
-                    end_index_i   = interior_dims[0] + d_num_wavelet_ghosts[0];
-                    start_index_j = -d_num_wavelet_ghosts[1] + 2*pow(2, li) ;
-                    end_index_j   = interior_dims[1] + d_num_wavelet_ghosts[1] - 2*pow(2, li);
-                    start_index_k = -d_num_wavelet_ghosts[2];
-                    end_index_k   = interior_dims[2] + d_num_wavelet_ghosts[2];
+                    const int start_index_y_i = -d_num_wavelet_ghosts[0];
+                    const int end_index_y_i = interior_dim_0 + d_num_wavelet_ghosts[0];
+                    const int start_index_y_j = -d_num_wavelet_ghosts[1] + 2*offset;
+                    const int end_index_y_j = interior_dim_1 + d_num_wavelet_ghosts[1] - 2*offset;
+                    const int start_index_y_k = -d_num_wavelet_ghosts[2];
+                    const int end_index_y_k = interior_dim_2 + d_num_wavelet_ghosts[2];
                     
-                    for (int k = start_index_k; k < end_index_k; k++)
+                    for (int k = start_index_y_k; k < end_index_y_k; k++)
                     {
-                        for (int i = start_index_i; i < end_index_i; i++)
+                        for (int j = start_index_y_j; j < end_index_y_j; j++)
                         {
-                            for (int j = start_index_j; j < end_index_j; j++)
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = start_index_y_i; i < end_index_y_i; i++)
                             {
                                 // Compute the linear indices.
-                                const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
-                                const int idx_y_BB = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j - 2*pow(2, li) + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx_y_BB = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j - 2*offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
-                                const int idx_y_B = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j - pow(2, li) + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx_y_B = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j - offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
-                                const int idx_y_T = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + pow(2, li) + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx_y_T = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
-                                const int idx_y_TT = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + 2*pow(2, li) + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx_y_TT = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + 2*offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
-                                f_y[li][idx] = 1.0/6.0*(-f_y[li-1][idx_y_BB] + 4*f_y[li-1][idx_y_B] +
-                                    4*f_y[li-1][idx_y_T] - f_y[li-1][idx_y_TT]);
+                                f_y[li][idx] = 1.0/6.0*(-f_y[li-1][idx_y_BB] + 4.0*f_y[li-1][idx_y_B] +
+                                    4.0*f_y[li-1][idx_y_T] - f_y[li-1][idx_y_TT]);
                                 
-                                w_y[li][idx] = 1.0/6.0*(f_y[li-1][idx_y_BB] - 4*f_y[li-1][idx_y_B] +
-                                    6*f_y[li-1][idx] - 4*f_y[li-1][idx_y_T] + f_y[li-1][idx_y_TT]);
+                                w_y[li][idx] = 1.0/6.0*(f_y[li-1][idx_y_BB] - 4.0*f_y[li-1][idx_y_B] +
+                                    6.0*f_y[li-1][idx] - 4.0*f_y[li-1][idx_y_T] + f_y[li-1][idx_y_TT]);
                             }
                         }
                     }
@@ -1977,135 +2090,145 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                      */
                     
                     // Compute the starting and ending indices.
-                    start_index_i = -d_num_wavelet_ghosts[0];
-                    end_index_i   = interior_dims[0] + d_num_wavelet_ghosts[0];
-                    start_index_j = -d_num_wavelet_ghosts[1];
-                    end_index_j   = interior_dims[1] + d_num_wavelet_ghosts[1];
-                    start_index_k = -d_num_wavelet_ghosts[2] + 2*pow(2, li) ;
-                    end_index_k   = interior_dims[2] + d_num_wavelet_ghosts[2] - 2*pow(2, li);
+                    const int start_index_z_i = -d_num_wavelet_ghosts[0];
+                    const int end_index_z_i = interior_dim_0 + d_num_wavelet_ghosts[0];
+                    const int start_index_z_j = -d_num_wavelet_ghosts[1];
+                    const int end_index_z_j = interior_dim_1 + d_num_wavelet_ghosts[1];
+                    const int start_index_z_k = -d_num_wavelet_ghosts[2] + 2*offset;
+                    const int end_index_z_k = interior_dim_2 + d_num_wavelet_ghosts[2] - 2*offset;
                     
-                    for (int j = start_index_j; j < end_index_j; j++)
+                    for (int k = start_index_z_k; k < end_index_z_k; k++)
                     {
-                        for (int i = start_index_i; i < end_index_i; i++)
+                        for (int j = start_index_z_j; j < end_index_z_j; j++)
                         {
-                            for (int k = start_index_k; k < end_index_k; k++)
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = start_index_z_i; i < end_index_z_i; i++)
                             {
                                 // Compute indices.
-                                const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
-                                const int idx_z_BB = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k - 2*pow(2, li) + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx_z_BB = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k - 2*offset + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
-                                const int idx_z_B = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k - pow(2, li) + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx_z_B = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k - offset + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
-                                const int idx_z_F = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + pow(2, li) + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx_z_F = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + offset + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
-                                const int idx_z_FF = (i + num_ghosts_wavelet_coeffs[0]) +
-                                    (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                    (k + 2*pow(2, li) + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                        ghostcell_dims_wavelet_coeffs[1];
+                                const int idx_z_FF = (i + num_ghosts_0_wavelet_coeffs) +
+                                    (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                    (k + 2*offset + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                        ghostcell_dim_1_wavelet_coeffs;
                                 
-                                f_z[li][idx] = 1.0/6.0*(-f_z[li-1][idx_z_BB] + 4*f_z[li-1][idx_z_B] +
-                                    4*f_z[li-1][idx_z_F] - f_z[li-1][idx_z_FF]);
+                                f_z[li][idx] = 1.0/6.0*(-f_z[li-1][idx_z_BB] + 4.0*f_z[li-1][idx_z_B] +
+                                    4.0*f_z[li-1][idx_z_F] - f_z[li-1][idx_z_FF]);
                                 
-                                w_z[li][idx] = 1.0/6.0*(f_z[li-1][idx_z_BB] - 4*f_z[li-1][idx_z_B] +
-                                    6*f_z[li-1][idx] - 4*f_z[li-1][idx_z_F] + f_z[li-1][idx_z_FF]);
+                                w_z[li][idx] = 1.0/6.0*(f_z[li-1][idx_z_BB] - 4.0*f_z[li-1][idx_z_B] +
+                                    6.0*f_z[li-1][idx] - 4.0*f_z[li-1][idx_z_F] + f_z[li-1][idx_z_FF]);
                             }
                         }
                     }
                     
                     if (compute_variable_local_means)
                     {
-                        for (int k = 0; k < interior_dims[2]; k++)
+                        for (int k = 0; k < interior_dim_2; k++)
                         {
-                            for (int j = 0; j < interior_dims[1]; j++)
+                            for (int j = 0; j < interior_dim_1; j++)
                             {
-                                for (int i = 0; i < interior_dims[0]; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                                #pragma omp simd
+#endif
+                                for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute the linear indices.
-                                    const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                                        (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                        (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                            ghostcell_dims_wavelet_coeffs[1];
+                                    const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                                        (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                        (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                            ghostcell_dim_1_wavelet_coeffs;
                                     
-                                    const int idx_x_LL = (i - 2*pow(2, li) + num_ghosts_wavelet_coeffs[0]) +
-                                        (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                        (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                            ghostcell_dims_wavelet_coeffs[1];
+                                    const int idx_x_LL = (i - 2*offset + num_ghosts_0_wavelet_coeffs) +
+                                        (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                        (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                            ghostcell_dim_1_wavelet_coeffs;
                                     
-                                    const int idx_x_L = (i - pow(2, li) + num_ghosts_wavelet_coeffs[0]) +
-                                        (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                        (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                            ghostcell_dims_wavelet_coeffs[1];
+                                    const int idx_x_L = (i - offset + num_ghosts_0_wavelet_coeffs) +
+                                        (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                        (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                            ghostcell_dim_1_wavelet_coeffs;
                                     
-                                    const int idx_x_R = (i + pow(2, li) + num_ghosts_wavelet_coeffs[0]) +
-                                        (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                        (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                            ghostcell_dims_wavelet_coeffs[1];
+                                    const int idx_x_R = (i + offset + num_ghosts_0_wavelet_coeffs) +
+                                        (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                        (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                            ghostcell_dim_1_wavelet_coeffs;
                                     
-                                    const int idx_x_RR = (i + 2*pow(2, li) + num_ghosts_wavelet_coeffs[0]) +
-                                        (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                        (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                            ghostcell_dims_wavelet_coeffs[1];
+                                    const int idx_x_RR = (i + 2*offset + num_ghosts_0_wavelet_coeffs) +
+                                        (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                        (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                            ghostcell_dim_1_wavelet_coeffs;
                                     
-                                    const int idx_y_BB = (i + num_ghosts_wavelet_coeffs[0]) +
-                                        (j - 2*pow(2, li) + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                        (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                            ghostcell_dims_wavelet_coeffs[1];
+                                    const int idx_y_BB = (i + num_ghosts_0_wavelet_coeffs) +
+                                        (j - 2*offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                        (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                            ghostcell_dim_1_wavelet_coeffs;
                                     
-                                    const int idx_y_B = (i + num_ghosts_wavelet_coeffs[0]) +
-                                        (j - pow(2, li) + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                        (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                            ghostcell_dims_wavelet_coeffs[1];
+                                    const int idx_y_B = (i + num_ghosts_0_wavelet_coeffs) +
+                                        (j - offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                        (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                            ghostcell_dim_1_wavelet_coeffs;
                                     
-                                    const int idx_y_T = (i + num_ghosts_wavelet_coeffs[0]) +
-                                        (j + pow(2, li) + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                        (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                            ghostcell_dims_wavelet_coeffs[1];
+                                    const int idx_y_T = (i + num_ghosts_0_wavelet_coeffs) +
+                                        (j + offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                        (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                            ghostcell_dim_1_wavelet_coeffs;
                                     
-                                    const int idx_y_TT = (i + num_ghosts_wavelet_coeffs[0]) +
-                                        (j + 2*pow(2, li) + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                        (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                            ghostcell_dims_wavelet_coeffs[1];
+                                    const int idx_y_TT = (i + num_ghosts_0_wavelet_coeffs) +
+                                        (j + 2*offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                        (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                            ghostcell_dim_1_wavelet_coeffs;
                                     
-                                    const int idx_z_BB = (i + num_ghosts_wavelet_coeffs[0]) +
-                                        (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                        (k - 2*pow(2, li) + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                            ghostcell_dims_wavelet_coeffs[1];
+                                    const int idx_z_BB = (i + num_ghosts_0_wavelet_coeffs) +
+                                        (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                        (k - 2*offset + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                            ghostcell_dim_1_wavelet_coeffs;
                                     
-                                    const int idx_z_B = (i + num_ghosts_wavelet_coeffs[0]) +
-                                        (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                        (k - pow(2, li) + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                            ghostcell_dims_wavelet_coeffs[1];
+                                    const int idx_z_B = (i + num_ghosts_0_wavelet_coeffs) +
+                                        (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                        (k - offset + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                            ghostcell_dim_1_wavelet_coeffs;
                                     
-                                    const int idx_z_F = (i + num_ghosts_wavelet_coeffs[0]) +
-                                        (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                        (k + pow(2, li) + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                            ghostcell_dims_wavelet_coeffs[1];
+                                    const int idx_z_F = (i + num_ghosts_0_wavelet_coeffs) +
+                                        (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                        (k + offset + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                            ghostcell_dim_1_wavelet_coeffs;
                                     
-                                    const int idx_z_FF = (i + num_ghosts_wavelet_coeffs[0]) +
-                                        (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                                        (k + 2*pow(2, li) + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                            ghostcell_dims_wavelet_coeffs[1];
+                                    const int idx_z_FF = (i + num_ghosts_0_wavelet_coeffs) +
+                                        (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                                        (k + 2*offset + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                            ghostcell_dim_1_wavelet_coeffs;
                                     
-                                    f_mean[li][idx] = 1.0/6.0*sqrt(
-                                        pow(f_x[li-1][idx_x_LL] + 4*f_x[li-1][idx_x_L] + 6*f_x[li-1][idx] +
-                                            4*f_x[li-1][idx_x_R] + f_x[li-1][idx_x_RR], 2.0) +
-                                        pow(f_y[li-1][idx_y_BB] + 4*f_y[li-1][idx_y_B] + 6*f_y[li-1][idx] +
-                                            4*f_y[li-1][idx_y_T] + f_y[li-1][idx_y_TT], 2.0) +
-                                        pow(f_z[li-1][idx_z_BB] + 4*f_z[li-1][idx_z_B] + 6*f_z[li-1][idx] +
-                                            4*f_z[li-1][idx_z_F] + f_z[li-1][idx_z_FF], 2.0));
+                                    double f_mean_x = f_x[li-1][idx_x_LL] + 4.0*f_x[li-1][idx_x_L] +
+                                        6.0*f_x[li-1][idx] + 4.0*f_x[li-1][idx_x_R] + f_x[li-1][idx_x_RR];
+                                    
+                                    double f_mean_y = f_y[li-1][idx_y_BB] + 4.0*f_y[li-1][idx_y_B] +
+                                        6.0*f_y[li-1][idx] + 4.0*f_y[li-1][idx_y_T] + f_y[li-1][idx_y_TT];
+                                    
+                                    double f_mean_z = f_z[li-1][idx_z_BB] + 4.0*f_z[li-1][idx_z_B] +
+                                        6.0*f_z[li-1][idx] + 4.0*f_z[li-1][idx_z_F] + f_z[li-1][idx_z_FF];
+                                    
+                                    f_mean[li][idx] = 1.0/6.0*sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y +
+                                        f_mean_z*f_mean_z);
                                 }
                             }
                         }
@@ -2132,24 +2255,32 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
         
         for (int li = 0; li < d_num_level; li++)
         {
-            for (int k = -d_p*pow(2, li+1);
-                 k < interior_dims[2] + d_q*pow(2, li+1);
-                 k++)
+            const int offset = pow(2, li + 1);
+            
+            // Compute the starting and ending indices.
+            const int start_index_i = -d_p*offset;
+            const int end_index_i = interior_dim_0 + d_q*offset;
+            const int start_index_j = -d_p*offset;
+            const int end_index_j = interior_dim_1 + d_q*offset;
+            const int start_index_k = -d_p*offset;
+            const int end_index_k = interior_dim_2 + d_q*offset;
+            
+            for (int k = start_index_k; k < end_index_k; k++)
             {
-                for (int j = -d_p*pow(2, li+1);
-                     j < interior_dims[1] + d_q*pow(2, li+1);
-                     j++)
+                for (int j = start_index_j; j < end_index_j; j++)
                 {
-                    for (int i = -d_p*pow(2, li+1);
-                         i < interior_dims[0] + d_q*pow(2, li+1);
-                         i++)
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = start_index_i; i < end_index_i; i++)
                     {
-                        const int idx = (i + num_ghosts_wavelet_coeffs[0]) +
-                            (j + num_ghosts_wavelet_coeffs[1])*ghostcell_dims_wavelet_coeffs[0] +
-                            (k + num_ghosts_wavelet_coeffs[2])*ghostcell_dims_wavelet_coeffs[0]*
-                                ghostcell_dims_wavelet_coeffs[1];
+                        const int idx = (i + num_ghosts_0_wavelet_coeffs) +
+                            (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs +
+                            (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
+                                ghostcell_dim_1_wavelet_coeffs;
                         
-                        w[li][idx] = sqrt(w_x[li][idx]*w_x[li][idx] + w_y[li][idx]*w_y[li][idx] + w_z[li][idx]*w_z[li][idx]);
+                        w[li][idx] = sqrt(w_x[li][idx]*w_x[li][idx] + w_y[li][idx]*w_y[li][idx] +
+                            w_z[li][idx]*w_z[li][idx]);
                     }
                 }
             }
@@ -2187,26 +2318,26 @@ WaveletTransformHarten::smoothCellData(
     
     if (d_dim == tbox::Dimension(1))
     {
-        int start_index_i, end_index_i;
+        const int num_ghosts_0_cell_data = num_ghosts_cell_data[0];
         
         // Get the pointer to the cell data smoothed in the x-direction.
         double* f_smoothed = smoothed_cell_data->getPointer(0);
         
         // Compute the starting and ending indices.
-        start_index_i = -num_ghosts_cell_data[0];
-        end_index_i   = interior_dims[0] + num_ghosts_cell_data[0];
+        const int start_index_x_i = -num_ghosts_cell_data[0];
+        const int end_index_x_i = interior_dims[0] + num_ghosts_cell_data[0];
         
-        for (int i = start_index_i; i < end_index_i; i++)
+        for (int i = start_index_x_i; i < end_index_x_i; i++)
         {
             // Compute the linear index.
-            const int idx = i + num_ghosts_cell_data[0];
+            const int idx = i + num_ghosts_0_cell_data;
             
             f_smoothed[idx] = f[idx];
             
             int count = 1;
             
             // Sum over the neighboring cells.
-            for (int ii = fmax(i - 1, start_index_i); ii < fmin(i + 2, end_index_i); ii++)
+            for (int ii = fmax(i - 1, start_index_x_i); ii < fmin(i + 2, end_index_x_i); ii++)
             {
                 if (ii != i)
                 {
