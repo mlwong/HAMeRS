@@ -2,6 +2,7 @@
 
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 
+#include <algorithm>
 #include <cfloat>
 
 WaveletTransformHarten::WaveletTransformHarten(
@@ -2327,6 +2328,9 @@ WaveletTransformHarten::smoothCellData(
         const int start_index_x_i = -num_ghosts_cell_data[0];
         const int end_index_x_i = interior_dims[0] + num_ghosts_cell_data[0];
         
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
         for (int i = start_index_x_i; i < end_index_x_i; i++)
         {
             // Compute the linear index.
@@ -2336,8 +2340,11 @@ WaveletTransformHarten::smoothCellData(
             
             int count = 1;
             
+            const int ii_bound_lo = std::max(i - 1, start_index_x_i);
+            const int ii_bound_up = std::min(i + 2, end_index_x_i);
+            
             // Sum over the neighboring cells.
-            for (int ii = fmax(i - 1, start_index_x_i); ii < fmin(i + 2, end_index_x_i); ii++)
+            for (int ii = ii_bound_lo; ii < ii_bound_up; ii++)
             {
                 if (ii != i)
                 {
@@ -2379,7 +2386,7 @@ WaveletTransformHarten::smoothCellData(
                 int count = 1;
                 
                 // Sum over the neighboring cells.
-                for (int ii = fmax(i - 1, start_index_i); ii < fmin(i + 2, end_index_i); ii++)
+                for (int ii = std::max(i - 1, start_index_i); ii < std::min(i + 2, end_index_i); ii++)
                 {
                     if (ii != i)
                     {
@@ -2418,7 +2425,7 @@ WaveletTransformHarten::smoothCellData(
                 int count = 1;
                 
                 // Sum over the neighboring cells.
-                for (int jj = fmax(j - 1, start_index_j); jj < fmin(j + 2, end_index_j); jj++)
+                for (int jj = std::max(j - 1, start_index_j); jj < std::min(j + 2, end_index_j); jj++)
                 {
                     if (jj != j)
                     {
@@ -2469,7 +2476,7 @@ WaveletTransformHarten::smoothCellData(
                     int count = 1;
                     
                     // Sum over the neighboring cells.
-                    for (int ii = fmax(i - 1, start_index_i); ii < fmin(i + 2, end_index_i); ii++)
+                    for (int ii = std::max(i - 1, start_index_i); ii < std::min(i + 2, end_index_i); ii++)
                     {
                         if (ii != i)
                         {
@@ -2516,7 +2523,7 @@ WaveletTransformHarten::smoothCellData(
                     
                     int count = 1;
                     
-                    for (int jj = fmax(j - 1, start_index_j); jj < fmin(j + 2, end_index_j); jj++)
+                    for (int jj = std::max(j - 1, start_index_j); jj < std::min(j + 2, end_index_j); jj++)
                     {
                         if (jj != j)
                         {
@@ -2563,7 +2570,7 @@ WaveletTransformHarten::smoothCellData(
                     
                     int count = 1;
                     
-                    for (int kk = fmax(k - 1, start_index_k); kk < fmin(k + 2, end_index_k); kk++)
+                    for (int kk = std::max(k - 1, start_index_k); kk < std::min(k + 2, end_index_k); kk++)
                     {
                         if (kk != k)
                         {
