@@ -2341,10 +2341,10 @@ WaveletTransformHarten::smoothCellData(
             int count = 1;
             
             const int ii_bound_lo = std::max(i - 1, start_index_x_i);
-            const int ii_bound_up = std::min(i + 2, end_index_x_i);
+            const int ii_bound_hi = std::min(i + 2, end_index_x_i);
             
             // Sum over the neighboring cells.
-            for (int ii = ii_bound_lo; ii < ii_bound_up; ii++)
+            for (int ii = ii_bound_lo; ii < ii_bound_hi; ii++)
             {
                 if (ii != i)
                 {
@@ -2361,37 +2361,44 @@ WaveletTransformHarten::smoothCellData(
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        int start_index_i, end_index_i,
-            start_index_j, end_index_j;
+        const int num_ghosts_0_cell_data = num_ghosts_cell_data[0];
+        const int num_ghosts_1_cell_data = num_ghosts_cell_data[1];
+        const int ghostcell_dim_0_cell_data = ghostcell_dims_cell_data[0];
         
         // Get the pointer to the cell data smoothed in the x-direction.
         double* f_smoothed = smoothed_cell_data->getPointer(0);
         
         // Compute the starting and ending indices.
-        start_index_i = -num_ghosts_cell_data[0];
-        end_index_i   = interior_dims[0] + num_ghosts_cell_data[0];
-        start_index_j = -num_ghosts_cell_data[1];
-        end_index_j   = interior_dims[1] + num_ghosts_cell_data[1];
+        const int start_index_x_i = -num_ghosts_cell_data[0];
+        const int end_index_x_i = interior_dims[0] + num_ghosts_cell_data[0];
+        const int start_index_x_j = -num_ghosts_cell_data[1];
+        const int end_index_x_j = interior_dims[1] + num_ghosts_cell_data[1];
         
-        for (int j = start_index_j; j < end_index_j; j++)
+        for (int j = start_index_x_j; j < end_index_x_j; j++)
         {
-            for (int i = start_index_i; i < end_index_i; i++)
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = start_index_x_i; i < end_index_x_i; i++)
             {
                 // Compute the linear index.
-                const int idx = (i + num_ghosts_cell_data[0]) +
-                    (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                const int idx = (i + num_ghosts_0_cell_data) +
+                    (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                 
                 f_smoothed[idx] = f[idx];
                 
                 int count = 1;
                 
+                const int ii_bound_lo = std::max(i - 1, start_index_x_i);
+                const int ii_bound_hi = std::min(i + 2, end_index_x_i);
+                
                 // Sum over the neighboring cells.
-                for (int ii = std::max(i - 1, start_index_i); ii < std::min(i + 2, end_index_i); ii++)
+                for (int ii = ii_bound_lo; ii < ii_bound_hi; ii++)
                 {
                     if (ii != i)
                     {
-                        const int idx_ii = (ii + num_ghosts_cell_data[0]) +
-                            (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                        const int idx_ii = (ii + num_ghosts_0_cell_data) +
+                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                             
                         f_smoothed[idx] += f[idx_ii];
                         count++;
@@ -2407,30 +2414,36 @@ WaveletTransformHarten::smoothCellData(
         f_smoothed = smoothed_cell_data->getPointer(1);
         
         // Compute the starting and ending indices.
-        start_index_i = -num_ghosts_cell_data[0];
-        end_index_i   = interior_dims[0] + num_ghosts_cell_data[0];
-        start_index_j = -num_ghosts_cell_data[1];
-        end_index_j   = interior_dims[1] + num_ghosts_cell_data[1];
+        const int start_index_y_i = -num_ghosts_cell_data[0];
+        const int end_index_y_i = interior_dims[0] + num_ghosts_cell_data[0];
+        const int start_index_y_j = -num_ghosts_cell_data[1];
+        const int end_index_y_j = interior_dims[1] + num_ghosts_cell_data[1];
         
-        for (int i = start_index_i; i < end_index_i; i++)
+        for (int j = start_index_y_j; j < end_index_y_j; j++)
         {
-            for (int j = start_index_j; j < end_index_j; j++)
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = start_index_y_i; i < end_index_y_i; i++)
             {
                 // Compute the linear index.
-                const int idx = (i + num_ghosts_cell_data[0]) +
-                    (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                const int idx = (i + num_ghosts_0_cell_data) +
+                    (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                 
                 f_smoothed[idx] = f[idx];
                 
                 int count = 1;
                 
+                const int jj_bound_lo = std::max(j - 1, start_index_y_j);
+                const int jj_bound_hi = std::min(j + 2, end_index_y_j);
+                
                 // Sum over the neighboring cells.
-                for (int jj = std::max(j - 1, start_index_j); jj < std::min(j + 2, end_index_j); jj++)
+                for (int jj = jj_bound_lo; jj < jj_bound_hi; jj++)
                 {
                     if (jj != j)
                     {
-                        const int idx_jj = (i + num_ghosts_cell_data[0]) +
-                            (jj + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0];
+                        const int idx_jj = (i + num_ghosts_0_cell_data) +
+                            (jj + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                             
                         f_smoothed[idx] += f[idx_jj];
                         count++;
@@ -2444,46 +2457,54 @@ WaveletTransformHarten::smoothCellData(
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        int start_index_i, end_index_i,
-            start_index_j, end_index_j,
-            start_index_k, end_index_k;
+        const int num_ghosts_0_cell_data = num_ghosts_cell_data[0];
+        const int num_ghosts_1_cell_data = num_ghosts_cell_data[1];
+        const int num_ghosts_2_cell_data = num_ghosts_cell_data[2];
+        const int ghostcell_dim_0_cell_data = ghostcell_dims_cell_data[0];
+        const int ghostcell_dim_1_cell_data = ghostcell_dims_cell_data[1];
         
         // Get the pointer to the cell data smoothed in the x-direction.
         double* f_smoothed = smoothed_cell_data->getPointer(0);
         
         // Compute the starting and ending indices.
-        start_index_i = -num_ghosts_cell_data[0];
-        end_index_i   = interior_dims[0] + num_ghosts_cell_data[0];
-        start_index_j = -num_ghosts_cell_data[1];
-        end_index_j   = interior_dims[1] + num_ghosts_cell_data[1];
-        start_index_k = -num_ghosts_cell_data[2];
-        end_index_k   = interior_dims[2] + num_ghosts_cell_data[2];
+        const int start_index_x_i = -num_ghosts_cell_data[0];
+        const int end_index_x_i = interior_dims[0] + num_ghosts_cell_data[0];
+        const int start_index_x_j = -num_ghosts_cell_data[1];
+        const int end_index_x_j = interior_dims[1] + num_ghosts_cell_data[1];
+        const int start_index_x_k = -num_ghosts_cell_data[2];
+        const int end_index_x_k = interior_dims[2] + num_ghosts_cell_data[2];
         
-        for (int k = start_index_k; k < end_index_k; k++)
+        for (int k = start_index_x_k; k < end_index_x_k; k++)
         {
-            for (int j = start_index_j; j < end_index_j; j++)
+            for (int j = start_index_x_j; j < end_index_x_j; j++)
             {
-                for (int i = start_index_i; i < end_index_i; i++)
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = start_index_x_i; i < end_index_x_i; i++)
                 {
                     // Compute the linear index.
-                    const int idx = (i + num_ghosts_cell_data[0]) +
-                        (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                        (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                            ghostcell_dims_cell_data[1];
+                    const int idx = (i + num_ghosts_0_cell_data) +
+                        (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                        (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                            ghostcell_dim_1_cell_data;
                     
                     f_smoothed[idx] = f[idx];
                     
                     int count = 1;
                     
+                    const int ii_bound_lo = std::max(i - 1, start_index_x_i);
+                    const int ii_bound_hi = std::min(i + 2, end_index_x_i);
+                    
                     // Sum over the neighboring cells.
-                    for (int ii = std::max(i - 1, start_index_i); ii < std::min(i + 2, end_index_i); ii++)
+                    for (int ii = ii_bound_lo; ii < ii_bound_hi; ii++)
                     {
                         if (ii != i)
                         {
-                            const int idx_ii = (ii + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_ii = (ii + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                                 
                             f_smoothed[idx] += f[idx_ii];
                             count++;
@@ -2500,37 +2521,43 @@ WaveletTransformHarten::smoothCellData(
         f_smoothed = smoothed_cell_data->getPointer(1);
         
         // Compute the starting and ending indices.
-        start_index_i = -num_ghosts_cell_data[0];
-        end_index_i   = interior_dims[0] + num_ghosts_cell_data[0];
-        start_index_j = -num_ghosts_cell_data[1];
-        end_index_j   = interior_dims[1] + num_ghosts_cell_data[1];
-        start_index_k = -num_ghosts_cell_data[2];
-        end_index_k   = interior_dims[2] + num_ghosts_cell_data[2];
+        const int start_index_y_i = -num_ghosts_cell_data[0];
+        const int end_index_y_i = interior_dims[0] + num_ghosts_cell_data[0];
+        const int start_index_y_j = -num_ghosts_cell_data[1];
+        const int end_index_y_j = interior_dims[1] + num_ghosts_cell_data[1];
+        const int start_index_y_k = -num_ghosts_cell_data[2];
+        const int end_index_y_k = interior_dims[2] + num_ghosts_cell_data[2];
         
-        for (int i = start_index_i; i < end_index_i; i++)
+        for (int k = start_index_y_k; k < end_index_y_k; k++)
         {
-            for (int k = start_index_k; k < end_index_k; k++)
+            for (int j = start_index_y_j; j < end_index_y_j; j++)
             {
-                for (int j = start_index_j; j < end_index_j; j++)
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = start_index_y_i; i < end_index_y_i; i++)
                 {
                     // Compute the linear index.
-                    const int idx = (i + num_ghosts_cell_data[0]) +
-                        (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                        (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                            ghostcell_dims_cell_data[1];
+                    const int idx = (i + num_ghosts_0_cell_data) +
+                        (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                        (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                            ghostcell_dim_1_cell_data;
                     
                     f_smoothed[idx] = f[idx];
                     
                     int count = 1;
                     
-                    for (int jj = std::max(j - 1, start_index_j); jj < std::min(j + 2, end_index_j); jj++)
+                    const int jj_bound_lo = std::max(j - 1, start_index_y_j);
+                    const int jj_bound_hi = std::min(j + 2, end_index_y_j);
+                    
+                    for (int jj = jj_bound_lo; jj < jj_bound_hi; jj++)
                     {
                         if (jj != j)
                         {
-                            const int idx_jj = (i + num_ghosts_cell_data[0]) +
-                                (jj + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_jj = (i + num_ghosts_0_cell_data) +
+                                (jj + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                                 
                             f_smoothed[idx] += f[idx_jj];
                             count++;
@@ -2547,37 +2574,43 @@ WaveletTransformHarten::smoothCellData(
         f_smoothed = smoothed_cell_data->getPointer(2);
         
         // Compute the starting and ending indices.
-        start_index_i = -num_ghosts_cell_data[0];
-        end_index_i   = interior_dims[0] + num_ghosts_cell_data[0];
-        start_index_j = -num_ghosts_cell_data[1];
-        end_index_j   = interior_dims[1] + num_ghosts_cell_data[1];
-        start_index_k = -num_ghosts_cell_data[2];
-        end_index_k   = interior_dims[2] + num_ghosts_cell_data[2];
+        const int start_index_z_i = -num_ghosts_cell_data[0];
+        const int end_index_z_i = interior_dims[0] + num_ghosts_cell_data[0];
+        const int start_index_z_j = -num_ghosts_cell_data[1];
+        const int end_index_z_j = interior_dims[1] + num_ghosts_cell_data[1];
+        const int start_index_z_k = -num_ghosts_cell_data[2];
+        const int end_index_z_k = interior_dims[2] + num_ghosts_cell_data[2];
         
-        for (int j = start_index_j; j < end_index_j; j++)
+        for (int k = start_index_z_k; k < end_index_z_k; k++)
         {
-            for (int i = start_index_i; i < end_index_i; i++)
+            for (int j = start_index_z_j; j < end_index_z_j; j++)
             {
-                for (int k = start_index_k; k < end_index_k; k++)
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = start_index_z_i; i < end_index_z_i; i++)
                 {
                     // Compute the linear index.
-                    const int idx = (i + num_ghosts_cell_data[0]) +
-                        (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                        (k + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                            ghostcell_dims_cell_data[1];
+                    const int idx = (i + num_ghosts_0_cell_data) +
+                        (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                        (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                            ghostcell_dim_1_cell_data;
                     
                     f_smoothed[idx] = f[idx];
                     
                     int count = 1;
                     
-                    for (int kk = std::max(k - 1, start_index_k); kk < std::min(k + 2, end_index_k); kk++)
+                    const int kk_bound_lo = std::max(k - 1, start_index_z_k);
+                    const int kk_bound_hi = std::min(k + 2, end_index_z_k);
+                    
+                    for (int kk = kk_bound_lo; kk < kk_bound_hi; kk++)
                     {
                         if (kk != k)
                         {
-                            const int idx_kk = (i + num_ghosts_cell_data[0]) +
-                                (j + num_ghosts_cell_data[1])*ghostcell_dims_cell_data[0] +
-                                (kk + num_ghosts_cell_data[2])*ghostcell_dims_cell_data[0]*
-                                    ghostcell_dims_cell_data[1];
+                            const int idx_kk = (i + num_ghosts_0_cell_data) +
+                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
+                                (kk + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
+                                    ghostcell_dim_1_cell_data;
                                 
                             f_smoothed[idx] += f[idx_kk];
                             count++;
