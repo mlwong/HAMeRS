@@ -16,19 +16,23 @@ DifferenceSecondDerivative::DifferenceSecondDerivative(
  */
 void
 DifferenceSecondDerivative::computeDifference(
+    boost::shared_ptr<pdat::CellData<double> >& difference,
+    const boost::shared_ptr<pdat::CellData<double> >& cell_data,
     hier::Patch& patch,
-    boost::shared_ptr<pdat::CellData<double> > cell_data,
-    boost::shared_ptr<pdat::CellData<double> > difference,
-    int depth)
+    const int depth)
 {
+    TBOX_ASSERT(difference);
+    TBOX_ASSERT(cell_data);
+    TBOX_ASSERT(depth < cell_data->getDepth());
+    
     // Declare a null pointer.
     boost::shared_ptr<pdat::CellData<double> > variable_local_mean;
     
     computeDifferenceWithVariableLocalMean(
-        patch,
-        cell_data,
         difference,
         variable_local_mean,
+        cell_data,
+        patch,
         depth);
 }
 
@@ -38,19 +42,15 @@ DifferenceSecondDerivative::computeDifference(
  */
 void
 DifferenceSecondDerivative::computeDifferenceWithVariableLocalMean(
+    boost::shared_ptr<pdat::CellData<double> >& difference,
+    boost::shared_ptr<pdat::CellData<double> >& variable_local_mean,
+    const boost::shared_ptr<pdat::CellData<double> >& cell_data,
     hier::Patch& patch,
-    boost::shared_ptr<pdat::CellData<double> > cell_data,
-    boost::shared_ptr<pdat::CellData<double> > difference,
-    boost::shared_ptr<pdat::CellData<double> > variable_local_mean,
-    int depth)
+    const int depth)
 {
-    if (cell_data->getGhostCellWidth() < d_num_difference_ghosts)
-    {
-        TBOX_ERROR(d_object_name
-            << ": "
-            << "The ghost cell width is smaller than required."
-            << std::endl);
-    }
+    TBOX_ASSERT(difference);
+    TBOX_ASSERT(cell_data);
+    TBOX_ASSERT(depth < cell_data->getDepth());
     
     // Get the dimensions of box that covers the interior of patch.
     const hier::Box interior_box = patch.getBox();
@@ -67,13 +67,33 @@ DifferenceSecondDerivative::computeDifferenceWithVariableLocalMean(
     const hier::Box ghost_box_difference = difference->getGhostBox();
     const hier::IntVector ghostcell_dims_difference = ghost_box_difference.numberCells();
     
-    // Determine whether local mean is requred to be compted.
+    /*
+     * Check potential failures.
+     */
+    
+    if (num_ghosts_cell_data < d_num_difference_ghosts)
+    {
+        TBOX_ERROR(d_object_name
+            << ": DifferenceSecondDerivative::computeDifferenceWithVariableLocalMean()\n"
+            << "The ghost cell width of cell data is smaller than required."
+            << std::endl);
+    }
+    
+    // Determine whether local mean is requred to be completed.
     bool compute_variable_local_mean = false;
     if (variable_local_mean)
     {
         compute_variable_local_mean = true;
         
-        TBOX_ASSERT(variable_local_mean->getGhostBox().numberCells() == ghostcell_dims_difference);
+        const hier::IntVector num_ghosts_local_means = variable_local_mean->getGhostCellWidth();
+        
+        if (num_ghosts_local_means != num_ghosts_difference)
+        {
+            TBOX_ERROR(d_object_name
+                << ": DifferenceSecondDerivative::computeDifferenceWithVariableLocalMean()\n"
+                << "The number of ghost cells of variable local means doesn't match that of difference."
+                << std::endl);
+        }
     }
     
     // Get the pointer to the current depth component of the given cell data.

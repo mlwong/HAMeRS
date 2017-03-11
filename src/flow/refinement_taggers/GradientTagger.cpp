@@ -1521,10 +1521,10 @@ GradientTagger::putToRestart(
 
 
 /*
- * Compute values of gradient sensors.
+ * Compute values of gradient sensors on patch.
  */
 void
-GradientTagger::computeGradientSensorValues(
+GradientTagger::computeGradientSensorValuesOnPatch(
     hier::Patch& patch,
     const boost::shared_ptr<hier::VariableContext>& data_context)
 {
@@ -1580,17 +1580,17 @@ GradientTagger::computeGradientSensorValues(
                                     data_context)));
                         
                         d_difference_first_derivative->computeDifferenceWithVariableLocalMean(
-                            patch,
-                            data_density,
                             difference,
-                            variable_local_mean);
+                            variable_local_mean,
+                            data_density,
+                            patch);
                     }
                     else
                     {
                         d_difference_first_derivative->computeDifference(
-                            patch,
+                            difference,
                             data_density,
-                            difference);
+                            patch);
                     }
                     
                     /*
@@ -1641,17 +1641,17 @@ GradientTagger::computeGradientSensorValues(
                                     data_context)));
                         
                         d_difference_first_derivative->computeDifferenceWithVariableLocalMean(
-                            patch,
-                            data_total_energy,
                             difference,
-                            variable_local_mean);
+                            variable_local_mean,
+                            data_total_energy,
+                            patch);
                     }
                     else
                     {
                         d_difference_first_derivative->computeDifference(
-                            patch,
+                            difference,
                             data_total_energy,
-                            difference);
+                            patch);
                     }
                     
                     /*
@@ -1702,17 +1702,17 @@ GradientTagger::computeGradientSensorValues(
                                     data_context)));
                         
                         d_difference_first_derivative->computeDifferenceWithVariableLocalMean(
-                            patch,
-                            data_pressure,
                             difference,
-                            variable_local_mean);
+                            variable_local_mean,
+                            data_pressure,
+                            patch);
                     }
                     else
                     {
                         d_difference_first_derivative->computeDifference(
-                            patch,
+                            difference,
                             data_pressure,
-                            difference);
+                            patch);
                     }
                     
                     /*
@@ -1783,17 +1783,17 @@ GradientTagger::computeGradientSensorValues(
                                     data_context)));
                         
                         d_difference_second_derivative->computeDifferenceWithVariableLocalMean(
-                            patch,
-                            data_density,
                             difference,
-                            variable_local_mean);
+                            variable_local_mean,
+                            data_density,
+                            patch);
                     }
                     else
                     {
                         d_difference_second_derivative->computeDifference(
-                            patch,
+                            difference,
                             data_density,
-                            difference);
+                            patch);
                     }
                     
                     /*
@@ -1844,17 +1844,17 @@ GradientTagger::computeGradientSensorValues(
                                     data_context)));
                         
                         d_difference_second_derivative->computeDifferenceWithVariableLocalMean(
-                            patch,
-                            data_total_energy,
                             difference,
-                            variable_local_mean);
+                            variable_local_mean,
+                            data_total_energy,
+                            patch);
                     }
                     else
                     {
                         d_difference_second_derivative->computeDifference(
-                            patch,
+                            difference,
                             data_total_energy,
-                            difference);
+                            patch);
                     }
                     
                     /*
@@ -1905,17 +1905,17 @@ GradientTagger::computeGradientSensorValues(
                                     data_context)));
                         
                         d_difference_second_derivative->computeDifferenceWithVariableLocalMean(
-                            patch,
-                            data_pressure,
                             difference,
-                            variable_local_mean);
+                            variable_local_mean,
+                            data_pressure,
+                            patch);
                     }
                     else
                     {
                         d_difference_second_derivative->computeDifference(
-                            patch,
+                            difference,
                             data_pressure,
-                            difference);
+                            patch);
                     }
                     
                     /*
@@ -2092,10 +2092,10 @@ GradientTagger::getSensorValueStatistics(
 
 
 /*
- * Tag cells for refinement using gradient sensors.
+ * Tag cells on patch for refinement using gradient sensors.
  */
 void
-GradientTagger::tagCells(
+GradientTagger::tagCellsOnPatch(
    hier::Patch& patch,
    const boost::shared_ptr<pdat::CellData<int> >& tags,
    const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -2161,7 +2161,7 @@ GradientTagger::tagCells(
                                 data_context));
                     }
                     
-                    tagCellsWithDifferenceSensor(
+                    tagCellsOnPatchWithDifferenceSensor(
                         patch,
                         tags,
                         difference,
@@ -2191,7 +2191,7 @@ GradientTagger::tagCells(
                                 data_context));
                     }
                     
-                    tagCellsWithDifferenceSensor(
+                    tagCellsOnPatchWithDifferenceSensor(
                         patch,
                         tags,
                         difference,
@@ -2221,7 +2221,7 @@ GradientTagger::tagCells(
                                 data_context));
                     }
                     
-                    tagCellsWithDifferenceSensor(
+                    tagCellsOnPatchWithDifferenceSensor(
                         patch,
                         tags,
                         difference,
@@ -2299,7 +2299,7 @@ GradientTagger::tagCells(
                                 data_context));
                     }
                     
-                    tagCellsWithDifferenceSensor(
+                    tagCellsOnPatchWithDifferenceSensor(
                         patch,
                         tags,
                         difference,
@@ -2329,7 +2329,7 @@ GradientTagger::tagCells(
                                 data_context));
                     }
                     
-                    tagCellsWithDifferenceSensor(
+                    tagCellsOnPatchWithDifferenceSensor(
                         patch,
                         tags,
                         difference,
@@ -2359,7 +2359,7 @@ GradientTagger::tagCells(
                                 data_context));
                     }
                     
-                    tagCellsWithDifferenceSensor(
+                    tagCellsOnPatchWithDifferenceSensor(
                         patch,
                         tags,
                         difference,
@@ -2427,14 +2427,14 @@ GradientTagger::tagCells(
                                 data_context)));
                     
                     // Compute the gradient.
-                    d_gradient_sensor_Jameson->computeGradient(patch, data_density, gradient);
+                    d_gradient_sensor_Jameson->computeGradient(gradient, data_density, patch);
                     
                     // Tag the cells.
-                    tagCellsWithGradientSensor(
+                    tagCellsOnPatchWithGradientSensor(
                         patch,
-                        sensor_key,
                         tags,
                         gradient,
+                        sensor_key,
                         tol);
                     
                     /*
@@ -2478,14 +2478,14 @@ GradientTagger::tagCells(
                                 data_context)));
                     
                     // Compute the gradient.
-                    d_gradient_sensor_Jameson->computeGradient(patch, data_total_energy, gradient);
+                    d_gradient_sensor_Jameson->computeGradient(gradient, data_total_energy, patch);
                     
                     // Tag the cells.
-                    tagCellsWithGradientSensor(
+                    tagCellsOnPatchWithGradientSensor(
                         patch,
-                        sensor_key,
                         tags,
                         gradient,
+                        sensor_key,
                         tol);
                     
                     /*
@@ -2529,14 +2529,14 @@ GradientTagger::tagCells(
                                 data_context)));
                     
                     // Compute the gradient.
-                    d_gradient_sensor_Jameson->computeGradient(patch, data_pressure, gradient);
+                    d_gradient_sensor_Jameson->computeGradient(gradient, data_pressure, patch);
                     
                     // Tag the cells.
-                    tagCellsWithGradientSensor(
+                    tagCellsOnPatchWithGradientSensor(
                         patch,
-                        sensor_key,
                         tags,
                         gradient,
+                        sensor_key,
                         tol);
                     
                     /*
@@ -2563,14 +2563,14 @@ GradientTagger::tagCells(
 
 
 /*
- * Tag cells using value of gradient sensor.
+ * Tag cells on patch using value of gradient sensor.
  */
 void
-GradientTagger::tagCellsWithGradientSensor(
+GradientTagger::tagCellsOnPatchWithGradientSensor(
     hier::Patch& patch,
-    const std::string& sensor_key,
     const boost::shared_ptr<pdat::CellData<int> >& tags,
     const boost::shared_ptr<pdat::CellData<double> >& gradient,
+    const std::string& sensor_key,
     const double tol)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -2689,19 +2689,19 @@ GradientTagger::tagCellsWithGradientSensor(
 
 
 /*
- * Tag cells using difference sensor.
+ * Tag cells on patch using difference sensor.
  */
 void
-GradientTagger::tagCellsWithDifferenceSensor(
+GradientTagger::tagCellsOnPatchWithDifferenceSensor(
     hier::Patch& patch,
     const boost::shared_ptr<pdat::CellData<int> >& tags,
     const boost::shared_ptr<pdat::CellData<double> >& difference,
-    const double& difference_max,
+    const double difference_max,
     const boost::shared_ptr<pdat::CellData<double> >& variable_local_mean,
-    const bool& uses_global_tol,
-    const bool& uses_local_tol,
-    const double& global_tol,
-    const double& local_tol)
+    const bool uses_global_tol,
+    const bool uses_local_tol,
+    const double global_tol,
+    const double local_tol)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(tags->getGhostCellWidth() == hier::IntVector::getZero(d_dim));

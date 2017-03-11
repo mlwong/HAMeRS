@@ -575,7 +575,7 @@ RungeKuttaLevelIntegrator::applyValueDetector(
     }
     t_error_bdry_fill_comm->stop();
     
-    d_patch_strategy->preprocessTagValueDetectorCells(
+    d_patch_strategy->preprocessTagCellsValueDetector(
         hierarchy,
         level_number,
         error_data_time,
@@ -591,7 +591,7 @@ RungeKuttaLevelIntegrator::applyValueDetector(
          ip++)
     {
         const boost::shared_ptr<hier::Patch>& patch = *ip;
-        d_patch_strategy->tagValueDetectorCells(
+        d_patch_strategy->tagCellsOnPatchValueDetector(
             *patch,
             error_data_time,
             initial_time,
@@ -603,7 +603,7 @@ RungeKuttaLevelIntegrator::applyValueDetector(
     }
     t_tag_cells->stop();
     
-    d_patch_strategy->postprocessTagValueDetectorCells(
+    d_patch_strategy->postprocessTagCellsValueDetector(
         hierarchy,
         level_number,
         error_data_time,
@@ -664,7 +664,7 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
     }
     t_error_bdry_fill_comm->stop();
     
-    d_patch_strategy->preprocessTagGradientDetectorCells(
+    d_patch_strategy->preprocessTagCellsGradientDetector(
         hierarchy,
         level_number,
         error_data_time,
@@ -680,7 +680,7 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
          ip++)
     {
         const boost::shared_ptr<hier::Patch>& patch = *ip;
-        d_patch_strategy->tagGradientDetectorCells(
+        d_patch_strategy->tagCellsOnPatchGradientDetector(
             *patch,
             error_data_time,
             initial_time,
@@ -692,7 +692,7 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
     }
     t_tag_cells->stop();
     
-    d_patch_strategy->postprocessTagGradientDetectorCells(
+    d_patch_strategy->postprocessTagCellsGradientDetector(
         hierarchy,
         level_number,
         error_data_time,
@@ -761,7 +761,7 @@ RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
     }
     t_error_bdry_fill_comm->stop();
     
-    d_patch_strategy->preprocessTagMultiresolutionDetectorCells(
+    d_patch_strategy->preprocessTagCellsMultiresolutionDetector(
         hierarchy,
         level_number,
         error_data_time,
@@ -777,7 +777,7 @@ RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
          ip++)
     {
         const boost::shared_ptr<hier::Patch>& patch = *ip;
-        d_patch_strategy->tagMultiresolutionDetectorCells(
+        d_patch_strategy->tagCellsOnPatchMultiresolutionDetector(
             *patch,
             error_data_time,
             initial_time,
@@ -789,7 +789,7 @@ RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
     }
     t_tag_cells->stop();
     
-    d_patch_strategy->postprocessTagMultiresolutionDetectorCells(
+    d_patch_strategy->postprocessTagCellsMultiresolutionDetector(
         hierarchy,
         level_number,
         error_data_time,
@@ -858,7 +858,7 @@ RungeKuttaLevelIntegrator::applyIntegralDetector(
     }
     t_error_bdry_fill_comm->stop();
     
-    d_patch_strategy->preprocessTagIntegralDetectorCells(
+    d_patch_strategy->preprocessTagCellsIntegralDetector(
         hierarchy,
         level_number,
         error_data_time,
@@ -874,7 +874,7 @@ RungeKuttaLevelIntegrator::applyIntegralDetector(
          ip++)
     {
         const boost::shared_ptr<hier::Patch>& patch = *ip;
-        d_patch_strategy->tagIntegralDetectorCells(
+        d_patch_strategy->tagCellsOnPatchIntegralDetector(
             *patch,
             error_data_time,
             initial_time,
@@ -886,7 +886,7 @@ RungeKuttaLevelIntegrator::applyIntegralDetector(
     }
     t_tag_cells->stop();
     
-    d_patch_strategy->postprocessTagIntegralDetectorCells(
+    d_patch_strategy->postprocessTagCellsIntegralDetector(
         hierarchy,
         level_number,
         error_data_time,
@@ -950,7 +950,7 @@ RungeKuttaLevelIntegrator::applyRichardsonExtrapolation(
     {
         const boost::shared_ptr<hier::Patch>& patch = *ip;
         
-        d_patch_strategy->tagRichardsonExtrapolationCells(
+        d_patch_strategy->tagCellsOnPatchRichardsonExtrapolation(
             *patch,
             error_level_number,
             d_new,                                     //  finer context
@@ -1692,7 +1692,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
             d_patch_strategy->setDataContext(d_scratch);
             
             // Advance a single Runge-Kutta step.
-            d_patch_strategy->advanceSingleStep(
+            d_patch_strategy->advanceSingleStepOnPatch(
                 *patch,
                 current_time,
                 dt,

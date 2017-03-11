@@ -70,12 +70,12 @@ class RungeKuttaPatchStrategy:
          * Blank constructor for RungeKuttaPatchStrategy.
          */
         RungeKuttaPatchStrategy();
-    
+        
         /**
          * Virtual destructor for RungeKuttaPatchStrategy.
          */
         virtual ~RungeKuttaPatchStrategy();
-    
+        
         /**
          * Register specific variables needed in the numerical routines with the
          * Runge-Kutta level integrator using the registerVariable() function in that
@@ -146,7 +146,7 @@ class RungeKuttaPatchStrategy:
          * faces multiplied by the time increment.  Typically, the numerical flux
          * is the normal flux at the cell face.  The flux integrals will be used in
          * the computing intermediate fluxes that updates the conserved quantities
-         * in advanceSingleStep().
+         * in advanceSingleStepOnPatch().
          *
          * If the equations are in non-conservative form, the TIME INTEGRALS of the
          * correspoinding sources are also computed after the equation is hyperolized.
@@ -178,7 +178,7 @@ class RungeKuttaPatchStrategy:
          * @param intermediate_context  vector of data context for intermediate solution/flux at different stages
          */
         virtual void
-        advanceSingleStep(
+        advanceSingleStepOnPatch(
             hier::Patch& patch,
             const double time,
             const double dt,
@@ -238,7 +238,7 @@ class RungeKuttaPatchStrategy:
         /**
          * This is an optional routine for user to process any application-specific
          * patch strategy data AFTER patches are advanced on the given level.
-         * This routine is called after looping over advanceSingleStep() is completed
+         * This routine is called after looping over advanceSingleStepOnPatch() is completed
          * and before computeStableDtOnPatch().  The arguments are:
          * level -- level that will be advanced, current_time -- current
          * integration time, dt -- current time increment, first_step -- boolean
@@ -271,6 +271,38 @@ class RungeKuttaPatchStrategy:
             bool regrid_advance);
         
         /**
+         * This is an optional routine for user to process any application-specific
+         * patch strategy data BEFORE cells are tagged on the given level using
+         * value detector.
+         */
+        virtual void
+        preprocessTagCellsValueDetector(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const int level_number,
+            const double regrid_time,
+            const bool initial_error,
+            const bool uses_gradient_detector_too,
+            const bool uses_multiresolution_detector_too,
+            const bool uses_integral_detector_too,
+            const bool uses_richardson_extrapolation_too);
+        
+        /**
+         * This is an optional routine for user to process any application-specific
+         * patch strategy data AFTER cells are tagged on the given level using
+         * value detector.
+         */
+        virtual void
+        postprocessTagCellsValueDetector(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const int level_number,
+            const double regrid_time,
+            const bool initial_error,
+            const bool uses_gradient_detector_too,
+            const bool uses_multiresolution_detector_too,
+            const bool uses_integral_detector_too,
+            const bool uses_richardson_extrapolation_too);
+        
+        /**
          * Tag cells on the given patch that require refinement based on
          * application-specific numerical quantities.  The tag index argument
          * indicates the index of the tag data on the patch data array.  The
@@ -292,7 +324,7 @@ class RungeKuttaPatchStrategy:
          * inheriting from this class.
          */
         virtual void
-        tagValueDetectorCells(
+        tagCellsOnPatchValueDetector(
            hier::Patch& patch,
            const double regrid_time,
            const bool initial_error,
@@ -305,15 +337,15 @@ class RungeKuttaPatchStrategy:
         /**
          * This is an optional routine for user to process any application-specific
          * patch strategy data BEFORE cells are tagged on the given level using
-         * value detector.
+         * gradient detector.
          */
         virtual void
-        preprocessTagValueDetectorCells(
+        preprocessTagCellsGradientDetector(
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const int level_number,
             const double regrid_time,
             const bool initial_error,
-            const bool uses_gradient_detector_too,
+            const bool uses_value_detector_too,
             const bool uses_multiresolution_detector_too,
             const bool uses_integral_detector_too,
             const bool uses_richardson_extrapolation_too);
@@ -321,15 +353,15 @@ class RungeKuttaPatchStrategy:
         /**
          * This is an optional routine for user to process any application-specific
          * patch strategy data AFTER cells are tagged on the given level using
-         * value detector.
+         * gradient detector.
          */
         virtual void
-        postprocessTagValueDetectorCells(
+        postprocessTagCellsGradientDetector(
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const int level_number,
             const double regrid_time,
             const bool initial_error,
-            const bool uses_gradient_detector_too,
+            const bool uses_value_detector_too,
             const bool uses_multiresolution_detector_too,
             const bool uses_integral_detector_too,
             const bool uses_richardson_extrapolation_too);
@@ -356,7 +388,7 @@ class RungeKuttaPatchStrategy:
          * inheriting from this class.
          */
         virtual void
-        tagGradientDetectorCells(
+        tagCellsOnPatchGradientDetector(
            hier::Patch& patch,
            const double regrid_time,
            const bool initial_error,
@@ -369,32 +401,32 @@ class RungeKuttaPatchStrategy:
         /**
          * This is an optional routine for user to process any application-specific
          * patch strategy data BEFORE cells are tagged on the given level using
-         * gradient detector.
+         * multiresolution detector.
          */
         virtual void
-        preprocessTagGradientDetectorCells(
+        preprocessTagCellsMultiresolutionDetector(
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const int level_number,
             const double regrid_time,
             const bool initial_error,
             const bool uses_value_detector_too,
-            const bool uses_multiresolution_detector_too,
+            const bool uses_gradient_detector_too,
             const bool uses_integral_detector_too,
             const bool uses_richardson_extrapolation_too);
         
         /**
          * This is an optional routine for user to process any application-specific
          * patch strategy data AFTER cells are tagged on the given level using
-         * gradient detector.
+         * multiresolution detector.
          */
         virtual void
-        postprocessTagGradientDetectorCells(
+        postprocessTagCellsMultiresolutionDetector(
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const int level_number,
             const double regrid_time,
             const bool initial_error,
             const bool uses_value_detector_too,
-            const bool uses_multiresolution_detector_too,
+            const bool uses_gradient_detector_too,
             const bool uses_integral_detector_too,
             const bool uses_richardson_extrapolation_too);
         
@@ -420,7 +452,7 @@ class RungeKuttaPatchStrategy:
          * inheriting from this class.
          */
         virtual void
-        tagMultiresolutionDetectorCells(
+        tagCellsOnPatchMultiresolutionDetector(
            hier::Patch& patch,
            const double regrid_time,
            const bool initial_error,
@@ -433,33 +465,33 @@ class RungeKuttaPatchStrategy:
         /**
          * This is an optional routine for user to process any application-specific
          * patch strategy data BEFORE cells are tagged on the given level using
-         * multiresolution detector.
+         * integral detector.
          */
         virtual void
-        preprocessTagMultiresolutionDetectorCells(
+        preprocessTagCellsIntegralDetector(
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const int level_number,
             const double regrid_time,
             const bool initial_error,
             const bool uses_value_detector_too,
             const bool uses_gradient_detector_too,
-            const bool uses_integral_detector_too,
+            const bool uses_multiresolution_detector_too,
             const bool uses_richardson_extrapolation_too);
         
         /**
          * This is an optional routine for user to process any application-specific
          * patch strategy data AFTER cells are tagged on the given level using
-         * multiresolution detector.
+         * integral detector.
          */
         virtual void
-        postprocessTagMultiresolutionDetectorCells(
+        postprocessTagCellsIntegralDetector(
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const int level_number,
             const double regrid_time,
             const bool initial_error,
             const bool uses_value_detector_too,
             const bool uses_gradient_detector_too,
-            const bool uses_integral_detector_too,
+            const bool uses_multiresolution_detector_too,
             const bool uses_richardson_extrapolation_too);
         
         /**
@@ -484,7 +516,7 @@ class RungeKuttaPatchStrategy:
          * inheriting from this class.
          */
         virtual void
-        tagIntegralDetectorCells(
+        tagCellsOnPatchIntegralDetector(
            hier::Patch& patch,
            const double regrid_time,
            const bool initial_error,
@@ -493,38 +525,6 @@ class RungeKuttaPatchStrategy:
            const bool uses_gradient_detector_too,
            const bool uses_multiresolution_detector_too,
            const bool uses_richardson_extrapolation_too);
-        
-        /**
-         * This is an optional routine for user to process any application-specific
-         * patch strategy data BEFORE cells are tagged on the given level using
-         * integral detector.
-         */
-        virtual void
-        preprocessTagIntegralDetectorCells(
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const int level_number,
-            const double regrid_time,
-            const bool initial_error,
-            const bool uses_value_detector_too,
-            const bool uses_gradient_detector_too,
-            const bool uses_multiresolution_detector_too,
-            const bool uses_richardson_extrapolation_too);
-        
-        /**
-         * This is an optional routine for user to process any application-specific
-         * patch strategy data AFTER cells are tagged on the given level using
-         * integral detector.
-         */
-        virtual void
-        postprocessTagIntegralDetectorCells(
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const int level_number,
-            const double regrid_time,
-            const bool initial_error,
-            const bool uses_value_detector_too,
-            const bool uses_gradient_detector_too,
-            const bool uses_multiresolution_detector_too,
-            const bool uses_richardson_extrapolation_too);
         
         /**
          * Tag cells based from differences computed in the Richardson
@@ -578,7 +578,7 @@ class RungeKuttaPatchStrategy:
          * inheriting from this class.
          */
         virtual void
-        tagRichardsonExtrapolationCells(
+        tagCellsOnPatchRichardsonExtrapolation(
             hier::Patch& patch,
             const int error_level_number,
             const boost::shared_ptr<hier::VariableContext>& coarsened_fine,
@@ -635,6 +635,7 @@ class RungeKuttaPatchStrategy:
         
     private:
         boost::shared_ptr<hier::VariableContext> d_data_context;
+        
 };
 
 #endif /* RUNGE_KUTTA_PATCH_STRATEGY_HPP */

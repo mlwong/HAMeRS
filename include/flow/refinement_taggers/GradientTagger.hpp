@@ -71,10 +71,10 @@ class GradientTagger
             const boost::shared_ptr<tbox::Database>& restart_db) const;
         
         /*
-         * Compute values of gradient sensors.
+         * Compute values of gradient sensors on patch.
          */
         void
-        computeGradientSensorValues(
+        computeGradientSensorValuesOnPatch(
             hier::Patch& patch,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
@@ -89,40 +89,40 @@ class GradientTagger
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
-         * Tag cells for refinement using gradient sensors.
+         * Tag cells on patch for refinement using gradient sensors.
          */
         void
-        tagCells(
+        tagCellsOnPatch(
             hier::Patch& patch,
             const boost::shared_ptr<pdat::CellData<int> >& tags,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
     private:
         /*
-         * Tag cells using value of gradient sensor.
+         * Tag cells on patch using value of gradient sensor.
          */
         void
-        tagCellsWithGradientSensor(
+        tagCellsOnPatchWithGradientSensor(
             hier::Patch& patch,
-            const std::string& sensor_key,
             const boost::shared_ptr<pdat::CellData<int> >& tags,
             const boost::shared_ptr<pdat::CellData<double> >& gradient,
+            const std::string& sensor_key,
             const double tol);
         
         /*
-         * Tag cells using difference sensor.
+         * Tag cells on patch using difference sensor.
          */
         void
-        tagCellsWithDifferenceSensor(
+        tagCellsOnPatchWithDifferenceSensor(
             hier::Patch& patch,
             const boost::shared_ptr<pdat::CellData<int> >& tags,
             const boost::shared_ptr<pdat::CellData<double> >& difference,
-            const double& difference_max,
+            const double difference_max,
             const boost::shared_ptr<pdat::CellData<double> >& variable_local_mean,
-            const bool& uses_global_tol,
-            const bool& uses_local_tol,
-            const double& global_tol,
-            const double& local_tol);
+            const bool uses_global_tol,
+            const bool uses_local_tol,
+            const double global_tol,
+            const double local_tol);
         
         /*
          * The object name is used for error/warning reporting.

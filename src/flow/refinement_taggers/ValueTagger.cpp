@@ -662,10 +662,10 @@ ValueTagger::putToRestart(
 
 
 /*
- * Compute values for value tagger.
+ * Compute values on patch for value tagger.
  */
 void
-ValueTagger::computeValueTaggerValues(
+ValueTagger::computeValueTaggerValuesOnPatch(
     hier::Patch& patch,
     const boost::shared_ptr<hier::VariableContext>& data_context)
 {
@@ -703,7 +703,7 @@ ValueTagger::computeValueTaggerValues(
              * Transfer data from flow model to the class variable.
              */
             
-            transferDataToClassVariable(
+            transferDataOnPatchToClassVariable(
                 patch,
                 data_context,
                 flow_model_data_density,
@@ -744,7 +744,7 @@ ValueTagger::computeValueTaggerValues(
              * Transfer data from flow model to the class variable.
              */
             
-            transferDataToClassVariable(
+            transferDataOnPatchToClassVariable(
                 patch,
                 data_context,
                 flow_model_data_total_energy,
@@ -785,7 +785,7 @@ ValueTagger::computeValueTaggerValues(
              * Transfer data from flow model to the class variable.
              */
             
-            transferDataToClassVariable(
+            transferDataOnPatchToClassVariable(
                 patch,
                 data_context,
                 flow_model_data_pressure,
@@ -826,7 +826,7 @@ ValueTagger::computeValueTaggerValues(
              * Transfer data from flow model to the class variable.
              */
             
-            transferDataToClassVariable(
+            transferDataOnPatchToClassVariable(
                 patch,
                 data_context,
                 flow_model_data_dilatation,
@@ -867,7 +867,7 @@ ValueTagger::computeValueTaggerValues(
              * Transfer data from flow model to the class variable.
              */
             
-            transferDataToClassVariable(
+            transferDataOnPatchToClassVariable(
                 patch,
                 data_context,
                 flow_model_data_enstrophy,
@@ -910,7 +910,7 @@ ValueTagger::computeValueTaggerValues(
             
             for (int si = 0; si < d_num_species; si++)
             {
-                transferDataToClassVariable(
+                transferDataOnPatchToClassVariable(
                     patch,
                     data_context,
                     flow_model_data_mass_fraction,
@@ -1056,10 +1056,10 @@ ValueTagger::getValueStatistics(
 
 
 /*
- * Tag cells for refinement using value tagger.
+ * Tag cells on patch for refinement using value tagger.
  */
 void
-ValueTagger::tagCells(
+ValueTagger::tagCellsOnPatch(
    hier::Patch& patch,
    const boost::shared_ptr<pdat::CellData<int> >& tags,
    const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -1111,7 +1111,8 @@ ValueTagger::tagCells(
         
         if (variable_key == "DENSITY")
         {
-            tagCellsWithValue(patch,
+            tagCellsOnPatchWithValue(
+                patch,
                 data_context,
                 tags,
                 d_value_tagger_variable_density,
@@ -1127,7 +1128,8 @@ ValueTagger::tagCells(
         }
         else if (variable_key == "TOTAL_ENERGY")
         {
-            tagCellsWithValue(patch,
+            tagCellsOnPatchWithValue(
+                patch,
                 data_context,
                 tags,
                 d_value_tagger_variable_total_energy,
@@ -1143,7 +1145,8 @@ ValueTagger::tagCells(
         }
         else if (variable_key == "PRESSURE")
         {
-            tagCellsWithValue(patch,
+            tagCellsOnPatchWithValue(
+                patch,
                 data_context,
                 tags,
                 d_value_tagger_variable_pressure,
@@ -1159,7 +1162,8 @@ ValueTagger::tagCells(
         }
         else if (variable_key == "DILATATION")
         {
-            tagCellsWithValue(patch,
+            tagCellsOnPatchWithValue(
+                patch,
                 data_context,
                 tags,
                 d_value_tagger_variable_dilatation,
@@ -1175,7 +1179,8 @@ ValueTagger::tagCells(
         }
         else if (variable_key == "ENSTROPHY")
         {
-            tagCellsWithValue(patch,
+            tagCellsOnPatchWithValue(
+                patch,
                 data_context,
                 tags,
                 d_value_tagger_variable_enstrophy,
@@ -1193,7 +1198,8 @@ ValueTagger::tagCells(
         {
             for (int si = 0; si < d_num_species; si++)
             {
-                tagCellsWithValue(patch,
+                tagCellsOnPatchWithValue(
+                    patch,
                     data_context,
                     tags,
                     d_value_tagger_variable_mass_fraction[si],
@@ -1213,23 +1219,23 @@ ValueTagger::tagCells(
 
 
 /*
- * Tag cells for refinement using data values.
+ * Tag cells on patch for refinement using data values.
  */
 void
-ValueTagger::tagCellsWithValue(
+ValueTagger::tagCellsOnPatchWithValue(
     hier::Patch& patch,
     const boost::shared_ptr<hier::VariableContext>& data_context,
     const boost::shared_ptr<pdat::CellData<int> >& tags,
     const boost::shared_ptr<pdat::CellVariable<double> >& variable_value_tagger,
-    const double& value_max,
-    const bool& uses_global_tol_up,
-    const bool& uses_global_tol_lo,
-    const bool& uses_local_tol_up,
-    const bool& uses_local_tol_lo,
-    const double& global_tol_up,
-    const double& global_tol_lo,
-    const double& local_tol_up,
-    const double& local_tol_lo)
+    const double value_max,
+    const bool uses_global_tol_up,
+    const bool uses_global_tol_lo,
+    const bool uses_local_tol_up,
+    const bool uses_local_tol_lo,
+    const double global_tol_up,
+    const double global_tol_lo,
+    const double local_tol_up,
+    const double local_tol_lo)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(tags->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
@@ -1673,15 +1679,15 @@ ValueTagger::tagCellsWithValue(
 
 
 /*
- * Transfer data input to data in class variable.
+ * Transfer data input on patch to data in class variable.
  */
 void
-ValueTagger::transferDataToClassVariable(
+ValueTagger::transferDataOnPatchToClassVariable(
     hier::Patch& patch,
     const boost::shared_ptr<hier::VariableContext>& data_context,
     const boost::shared_ptr<pdat::CellData<double> >& data_input,
     const boost::shared_ptr<pdat::CellVariable<double> >& variable_value_tagger,
-    const int& depth)
+    const int depth)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(data_input->getDepth() > depth);

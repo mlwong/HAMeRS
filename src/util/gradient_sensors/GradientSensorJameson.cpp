@@ -20,10 +20,10 @@ GradientSensorJameson::GradientSensorJameson(
  */
 void
 GradientSensorJameson::computeGradient(
+    boost::shared_ptr<pdat::CellData<double> >& gradient,
+    const boost::shared_ptr<pdat::CellData<double> >& cell_data,
     hier::Patch& patch,
-    boost::shared_ptr<pdat::CellData<double> > cell_data,
-    boost::shared_ptr<pdat::CellData<double> > gradient,
-    int depth)
+    const int depth)
 {
     if (cell_data->getGhostCellWidth() < d_num_gradient_ghosts)
     {
@@ -359,23 +359,4 @@ GradientSensorJameson::computeGradient(
             }
         }
     }
-}
-
-
-/*
- * Compute the gradient and the local mean of the given cell data.
- */
-void
-GradientSensorJameson::computeGradientWithVariableLocalMean(
-    hier::Patch& patch,
-    boost::shared_ptr<pdat::CellData<double> > cell_data,
-    boost::shared_ptr<pdat::CellData<double> > gradient,
-    boost::shared_ptr<pdat::CellData<double> > variable_local_mean,
-    int depth)
-{
-    NULL_USE(patch);
-    NULL_USE(cell_data);
-    NULL_USE(gradient);
-    NULL_USE(variable_local_mean);
-    NULL_USE(depth);
 }

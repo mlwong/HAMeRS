@@ -61,23 +61,23 @@ class WaveletTransform
          */
         virtual void
         computeWaveletCoefficients(
-            hier::Patch& patch,
-            boost::shared_ptr<pdat::CellData<double> > cell_data,
             std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
-            int depth = 0,
-            bool smooth_cell_data = false) = 0;
+            const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+            hier::Patch& patch,
+            const int depth = 0,
+            const bool smooth_cell_data = false) = 0;
         
         /*
          * Perform the wavelet transformation and compute the local mean of the given cell data.
          */
         virtual void
         computeWaveletCoefficientsWithVariableLocalMeans(
-            hier::Patch& patch,
-            boost::shared_ptr<pdat::CellData<double> > cell_data,
             std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
             std::vector<boost::shared_ptr<pdat::CellData<double> > >& variable_local_means,
-            int depth = 0,
-            bool smooth_cell_data = false) = 0;
+            const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+            hier::Patch& patch,
+            const int depth = 0,
+            const bool smooth_cell_data = false) = 0;
         
     protected:
         /*

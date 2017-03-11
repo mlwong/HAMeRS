@@ -41,21 +41,10 @@ class GradientSensor
          */
         virtual void
         computeGradient(
+            boost::shared_ptr<pdat::CellData<double> >& gradient,
+            const boost::shared_ptr<pdat::CellData<double> >& cell_data,
             hier::Patch& patch,
-            boost::shared_ptr<pdat::CellData<double> > cell_data,
-            boost::shared_ptr<pdat::CellData<double> > gradient,
-            int depth = 0) = 0;
-        
-        /*
-         * Compute the gradient and the local mean of the given cell data.
-         */
-        virtual void
-        computeGradientWithVariableLocalMean(
-            hier::Patch& patch,
-            boost::shared_ptr<pdat::CellData<double> > cell_data,
-            boost::shared_ptr<pdat::CellData<double> > gradient,
-            boost::shared_ptr<pdat::CellData<double> > variable_local_mean,
-            int depth = 0) = 0;
+            const int depth = 0) = 0;
         
     protected:
         /*

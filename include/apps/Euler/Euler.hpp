@@ -134,7 +134,7 @@ class Euler:
          * is hyperolized.
          *
          * The finite difference used to update the integrated quantities
-         * through the Runge-Kutta steps is implemented in the advanceSingleStep()
+         * through the Runge-Kutta steps is implemented in the advanceSingleStepOnPatch()
          * routine.
          */
         void
@@ -150,7 +150,7 @@ class Euler:
          * in computeHyperbolicFluxesAndSourcesOnPatch()
          */
         void
-        advanceSingleStep(
+        advanceSingleStepOnPatch(
             hier::Patch& patch,
             const double time,
             const double dt,
@@ -173,7 +173,7 @@ class Euler:
          * Preprocess before tagging cells using value detector.
          */
         void
-        preprocessTagValueDetectorCells(
+        preprocessTagCellsValueDetector(
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const int level_number,
             const double regrid_time,
@@ -187,7 +187,7 @@ class Euler:
          * Tag cells for refinement using value detector.
          */
         void
-        tagValueDetectorCells(
+        tagCellsOnPatchValueDetector(
             hier::Patch& patch,
             const double regrid_time,
             const bool initial_error,
@@ -201,7 +201,7 @@ class Euler:
          * Preprocess before tagging cells using gradient detector.
          */
         void
-        preprocessTagGradientDetectorCells(
+        preprocessTagCellsGradientDetector(
            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
            const int level_number,
            const double regrid_time,
@@ -215,7 +215,7 @@ class Euler:
          * Tag cells for refinement using gradient detector.
          */
         void
-        tagGradientDetectorCells(
+        tagCellsOnPatchGradientDetector(
             hier::Patch& patch,
             const double regrid_time,
             const bool initial_error,
@@ -229,7 +229,7 @@ class Euler:
          * Preprocess before tagging cells using multiresolution detector.
          */
         void
-        preprocessTagMultiresolutionDetectorCells(
+        preprocessTagCellsMultiresolutionDetector(
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const int level_number,
             const double regrid_time,
@@ -243,7 +243,7 @@ class Euler:
          * Tag cells for refinement using multiresolution detector.
          */
         void
-        tagMultiresolutionDetectorCells(
+        tagCellsOnPatchMultiresolutionDetector(
             hier::Patch& patch,
             const double regrid_time,
             const bool initial_error,

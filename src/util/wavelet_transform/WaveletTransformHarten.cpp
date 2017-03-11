@@ -73,20 +73,27 @@ WaveletTransformHarten::WaveletTransformHarten(
  */
 void
 WaveletTransformHarten::computeWaveletCoefficients(
-    hier::Patch& patch,
-    boost::shared_ptr<pdat::CellData<double> > cell_data,
     std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
-    int depth,
-    bool smooth_cell_data)
+    const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+    hier::Patch& patch,
+    const int depth,
+    const bool smooth_cell_data)
 {
+    TBOX_ASSERT(static_cast<int>(wavelet_coeffs.size()) == d_num_level);
+    for (int li = 0; li < d_num_level; li++)
+    {
+        TBOX_ASSERT(wavelet_coeffs[li]);
+    }
+    TBOX_ASSERT(cell_data);
+    
     // Declare an empty vector.
     std::vector<boost::shared_ptr<pdat::CellData<double> > > variable_local_means;
     
     computeWaveletCoefficientsWithVariableLocalMeans(
-        patch,
-        cell_data,
         wavelet_coeffs,
         variable_local_means,
+        cell_data,
+        patch,
         depth,
         smooth_cell_data);
 }
@@ -97,14 +104,19 @@ WaveletTransformHarten::computeWaveletCoefficients(
  */
 void
 WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
-    hier::Patch& patch,
-    boost::shared_ptr<pdat::CellData<double> > cell_data,
     std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
     std::vector<boost::shared_ptr<pdat::CellData<double> > >& variable_local_means,
-    int depth,
-    bool smooth_cell_data)
+    const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+    hier::Patch& patch,
+    const int depth,
+    const bool smooth_cell_data)
 {
-    TBOX_ASSERT(wavelet_coeffs.size() == variable_local_means.size());
+    TBOX_ASSERT(static_cast<int>(wavelet_coeffs.size()) == d_num_level);
+    for (int li = 0; li < d_num_level; li++)
+    {
+        TBOX_ASSERT(wavelet_coeffs[li]);
+    }
+    TBOX_ASSERT(cell_data);
     
     // Get the dimensions of box that covers the interior of patch.
     const hier::Box interior_box = patch.getBox();
@@ -114,9 +126,6 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
     const hier::IntVector num_ghosts_cell_data = cell_data->getGhostCellWidth();
     const hier::IntVector num_ghosts_wavelet_coeffs = wavelet_coeffs[0]->getGhostCellWidth();
     
-    TBOX_ASSERT(num_ghosts_cell_data >= num_ghosts_wavelet_coeffs);
-    TBOX_ASSERT(num_ghosts_wavelet_coeffs >= d_num_wavelet_ghosts);
-    
     // Get the dimensions of boxes that cover interior of patch plus ghost cells.
     const hier::Box ghost_box_cell_data = cell_data->getGhostBox();
     const hier::IntVector ghostcell_dims_cell_data = ghost_box_cell_data.numberCells();
@@ -124,9 +133,35 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
     const hier::Box ghost_box_wavelet_coeffs = wavelet_coeffs[0]->getGhostBox();
     const hier::IntVector ghostcell_dims_wavelet_coeffs = ghost_box_wavelet_coeffs.numberCells();
     
-    for (int li = 0; li < static_cast<int>(wavelet_coeffs.size()); li++)
+    /*
+     * Check potential failures.
+     */
+    
+    if (num_ghosts_wavelet_coeffs < d_num_wavelet_ghosts)
     {
-        TBOX_ASSERT(wavelet_coeffs[li]->getGhostBox().numberCells() == ghostcell_dims_wavelet_coeffs);
+        TBOX_ERROR(d_object_name
+            << ": WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans()\n"
+            << "The ghost cell width of wavelet coefficients is smaller than required."
+            << std::endl);
+    }
+    
+    if (num_ghosts_cell_data < num_ghosts_wavelet_coeffs)
+    {
+        TBOX_ERROR(d_object_name
+            << ": WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans()\n"
+            << "The ghost cell width of cell data is smaller than required."
+            << std::endl);
+    }
+    
+    for (int li = 1; li < static_cast<int>(wavelet_coeffs.size()); li++)
+    {
+        if (num_ghosts_wavelet_coeffs != wavelet_coeffs[li]->getGhostCellWidth())
+        {
+            TBOX_ERROR(d_object_name
+                << ": WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans()\n"
+                << "The wavelet coefficients don't have same ghost cell width."
+                << std::endl);
+        }
     }
     
     // Determine whether local means at different levels are required to be computed.
@@ -135,9 +170,39 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
     {
         compute_variable_local_means = true;
         
-        for (int li = 0; li < static_cast<int>(wavelet_coeffs.size()); li++)
+        if (static_cast<int>(wavelet_coeffs.size()) != static_cast<int>(variable_local_means.size()))
         {
-            TBOX_ASSERT(variable_local_means[li]->getGhostBox().numberCells() == ghostcell_dims_wavelet_coeffs);
+            TBOX_ERROR(d_object_name
+                << ": WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans()\n"
+                << "The number of levels of wavelet coefficients doesn't match that of variable local means."
+                << std::endl);
+        }
+        
+        for (int li = 0; li < d_num_level; li++)
+        {
+            TBOX_ASSERT(variable_local_means[li]);
+        }
+    
+        const hier::IntVector num_ghosts_local_means = variable_local_means[0]->getGhostCellWidth();
+        
+        if (num_ghosts_local_means != num_ghosts_wavelet_coeffs)
+        {
+            TBOX_ERROR(d_object_name
+                << ": WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans()\n"
+                << "The number of ghost cells of variable local means doesn't match that of wavelet"
+                << " coefficients."
+                << std::endl);
+        }
+        
+        for (int li = 1; li < static_cast<int>(variable_local_means.size()); li++)
+        {
+            if (num_ghosts_local_means != variable_local_means[li]->getGhostCellWidth())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans()\n"
+                    << "The variable local means don't have same ghost cell width."
+                    << std::endl);
+            }
         }
     }
     
@@ -170,8 +235,8 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
     if (smooth_cell_data)
     {
         smoothed_cell_data = smoothCellData(
-            patch,
             cell_data,
+            patch,
             depth);
     }
     
@@ -221,13 +286,13 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 }
                 
                 // Compute the starting and ending indices.
-                const int start_index_x_i = -d_num_wavelet_ghosts[0] + 1;
-                const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - 1;
+                const int i_bound_lo_x = -d_num_wavelet_ghosts[0] + 1;
+                const int i_bound_hi_x = interior_dim_0 + d_num_wavelet_ghosts[0] - 1;
                 
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
-                for (int i = start_index_x_i; i < end_index_x_i; i++)
+                for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
                 {
                     // Compute the linear indices.
                     const int idx = i + num_ghosts_0_wavelet_coeffs;
@@ -280,13 +345,13 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 }
                 
                 // Compute the starting and ending indices.
-                const int start_index_x_i = -d_num_wavelet_ghosts[0] + 2;
-                const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - 2;
+                const int i_bound_lo_x = -d_num_wavelet_ghosts[0] + 2;
+                const int i_bound_hi_x = interior_dim_0 + d_num_wavelet_ghosts[0] - 2;
                 
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
-                for (int i = start_index_x_i; i < end_index_x_i; i++)
+                for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
                 {
                     // Compute the linear indices.
                     const int idx = i + num_ghosts_0_wavelet_coeffs;
@@ -330,7 +395,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": "
+                    << ": WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans()\n"
                     << "number of vanishing moments = "
                     << d_k
                     << " not supported."
@@ -355,13 +420,13 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                      */
                     
                     // Compute the starting and ending indices.
-                    const int start_index_x_i = -d_num_wavelet_ghosts[0] + offset;
-                    const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - offset;
+                    const int i_bound_lo_x = -d_num_wavelet_ghosts[0] + offset;
+                    const int i_bound_hi_x = interior_dim_0 + d_num_wavelet_ghosts[0] - offset;
                     
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
-                    for (int i = start_index_x_i; i < end_index_x_i; i++)
+                    for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
                     {
                         // Compute the linear indices.
                         const int idx     = i + num_ghosts_0_wavelet_coeffs;
@@ -400,13 +465,13 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                      */
                     
                     // Compute the starting and ending indices.
-                    const int start_index_x_i = -d_num_wavelet_ghosts[0] + 2*offset;
-                    const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - 2*offset;
+                    const int i_bound_lo_x = -d_num_wavelet_ghosts[0] + 2*offset;
+                    const int i_bound_hi_x = interior_dim_0 + d_num_wavelet_ghosts[0] - 2*offset;
                     
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
-                    for (int i = start_index_x_i; i < end_index_x_i; i++)
+                    for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
                     {
                         // Compute indices.
                         const int idx      = i + num_ghosts_0_wavelet_coeffs;
@@ -446,7 +511,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 default:
                 {
                     TBOX_ERROR(d_object_name
-                        << ": "
+                        << ": WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans()\n"
                         << "number of vanishing moments = "
                         << d_k
                         << " not supported."
@@ -526,17 +591,17 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 }
                 
                 // Compute the starting and ending indices.
-                const int start_index_x_i = -d_num_wavelet_ghosts[0] + 1;
-                const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - 1;
-                const int start_index_x_j = -d_num_wavelet_ghosts[1];
-                const int end_index_x_j = interior_dim_1 + d_num_wavelet_ghosts[1];
+                const int i_bound_lo_x = -d_num_wavelet_ghosts[0] + 1;
+                const int i_bound_hi_x = interior_dim_0 + d_num_wavelet_ghosts[0] - 1;
+                const int j_bound_lo_x = -d_num_wavelet_ghosts[1];
+                const int j_bound_hi_x = interior_dim_1 + d_num_wavelet_ghosts[1];
                 
-                for (int j = start_index_x_j; j < end_index_x_j; j++)
+                for (int j = j_bound_lo_x; j < j_bound_hi_x; j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
-                    for (int i = start_index_x_i; i < end_index_x_i; i++)
+                    for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
                     {
                         // Compute the linear indices.
                         const int idx = (i + num_ghosts_0_wavelet_coeffs) +
@@ -573,17 +638,17 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 }
                 
                 // Compute the starting and ending indices.
-                const int start_index_y_i = -d_num_wavelet_ghosts[0];
-                const int end_index_y_i = interior_dim_0 + d_num_wavelet_ghosts[0];
-                const int start_index_y_j = -d_num_wavelet_ghosts[1] + 1;
-                const int end_index_y_j = interior_dim_1 + d_num_wavelet_ghosts[1] - 1;
+                const int i_bound_lo_y = -d_num_wavelet_ghosts[0];
+                const int i_bound_hi_y = interior_dim_0 + d_num_wavelet_ghosts[0];
+                const int j_bound_lo_y = -d_num_wavelet_ghosts[1] + 1;
+                const int j_bound_hi_y = interior_dim_1 + d_num_wavelet_ghosts[1] - 1;
                 
-                for (int j = start_index_y_j; j < end_index_y_j; j++)
+                for (int j = j_bound_lo_y; j < j_bound_hi_y; j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
-                    for (int i = start_index_y_i; i < end_index_y_i; i++)
+                    for (int i = i_bound_lo_y; i < i_bound_hi_y; i++)
                     {
                         // Compute the linear indices.
                         const int idx = (i + num_ghosts_0_wavelet_coeffs) +
@@ -662,17 +727,17 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 }
                 
                 // Compute the starting and ending indices.
-                const int start_index_x_i = -d_num_wavelet_ghosts[0] + 2;
-                const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - 2;
-                const int start_index_x_j = -d_num_wavelet_ghosts[1];
-                const int end_index_x_j = interior_dim_1 + d_num_wavelet_ghosts[1];
+                const int i_bound_lo_x = -d_num_wavelet_ghosts[0] + 2;
+                const int i_bound_hi_x = interior_dim_0 + d_num_wavelet_ghosts[0] - 2;
+                const int j_bound_lo_x = -d_num_wavelet_ghosts[1];
+                const int j_bound_hi_x = interior_dim_1 + d_num_wavelet_ghosts[1];
                 
-                for (int j = start_index_x_j; j < end_index_x_j; j++)
+                for (int j = j_bound_lo_x; j < j_bound_hi_x; j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
-                    for (int i = start_index_x_i; i < end_index_x_i; i++)
+                    for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
                     {
                         // Compute the linear indices.
                         const int idx = (i + num_ghosts_0_wavelet_coeffs) +
@@ -716,17 +781,17 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 }
                 
                 // Compute the starting and ending indices.
-                const int start_index_y_i = -d_num_wavelet_ghosts[0];
-                const int end_index_y_i = interior_dim_0 + d_num_wavelet_ghosts[0];
-                const int start_index_y_j = -d_num_wavelet_ghosts[1] + 2;
-                const int end_index_y_j = interior_dim_1 + d_num_wavelet_ghosts[1] - 2;
+                const int i_bound_lo_y = -d_num_wavelet_ghosts[0];
+                const int i_bound_hi_y = interior_dim_0 + d_num_wavelet_ghosts[0];
+                const int j_bound_lo_y = -d_num_wavelet_ghosts[1] + 2;
+                const int j_bound_hi_y = interior_dim_1 + d_num_wavelet_ghosts[1] - 2;
                 
-                for (int j = start_index_y_j; j < end_index_y_j; j++)
+                for (int j = j_bound_lo_y; j < j_bound_hi_y; j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
-                    for (int i = start_index_y_i; i < end_index_y_i; i++)
+                    for (int i = i_bound_lo_y; i < i_bound_hi_y; i++)
                     {
                         // Compute indices.
                         const int idx = (i + num_ghosts_0_wavelet_coeffs) +
@@ -811,7 +876,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": "
+                    << ": WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans()\n"
                     << "number of vanishing moments = "
                     << d_k
                     << " not supported."
@@ -836,17 +901,17 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                      */
                     
                     // Compute the starting and ending indices.
-                    const int start_index_x_i = -d_num_wavelet_ghosts[0] + offset;
-                    const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - offset;
-                    const int start_index_x_j = -d_num_wavelet_ghosts[1];
-                    const int end_index_x_j = interior_dim_1 + d_num_wavelet_ghosts[1];
+                    const int i_bound_lo_x = -d_num_wavelet_ghosts[0] + offset;
+                    const int i_bound_hi_x = interior_dim_0 + d_num_wavelet_ghosts[0] - offset;
+                    const int j_bound_lo_x = -d_num_wavelet_ghosts[1];
+                    const int j_bound_hi_x = interior_dim_1 + d_num_wavelet_ghosts[1];
                     
-                    for (int j = start_index_x_j; j < end_index_x_j; j++)
+                    for (int j = j_bound_lo_x; j < j_bound_hi_x; j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
-                        for (int i = start_index_x_i; i < end_index_x_i; i++)
+                        for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
                         {
                             // Compute the linear indices.
                             const int idx = (i + num_ghosts_0_wavelet_coeffs) +
@@ -870,17 +935,17 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                      */
                     
                     // Compute the starting and ending indices.
-                    const int start_index_y_i = -d_num_wavelet_ghosts[0];
-                    const int end_index_y_i = interior_dim_0 + d_num_wavelet_ghosts[0];
-                    const int start_index_y_j = -d_num_wavelet_ghosts[1] + offset;
-                    const int end_index_y_j = interior_dim_1 + d_num_wavelet_ghosts[1] - offset;
+                    const int i_bound_lo_y = -d_num_wavelet_ghosts[0];
+                    const int i_bound_hi_y = interior_dim_0 + d_num_wavelet_ghosts[0];
+                    const int j_bound_lo_y = -d_num_wavelet_ghosts[1] + offset;
+                    const int j_bound_hi_y = interior_dim_1 + d_num_wavelet_ghosts[1] - offset;
                     
-                    for (int j = start_index_y_j; j < end_index_y_j; j++)
+                    for (int j = j_bound_lo_y; j < j_bound_hi_y; j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
-                        for (int i = start_index_y_i; i < end_index_y_i; i++)
+                        for (int i = i_bound_lo_y; i < i_bound_hi_y; i++)
                         {
                             // Compute the linear indices.
                             const int idx = (i + num_ghosts_0_wavelet_coeffs) +
@@ -944,17 +1009,17 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                      */
                     
                     // Compute the starting and ending indices.
-                    const int start_index_x_i = -d_num_wavelet_ghosts[0] + 2*offset;
-                    const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - 2*offset;
-                    const int start_index_x_j = -d_num_wavelet_ghosts[1];
-                    const int end_index_x_j = interior_dim_1 + d_num_wavelet_ghosts[1];
+                    const int i_bound_lo_x = -d_num_wavelet_ghosts[0] + 2*offset;
+                    const int i_bound_hi_x = interior_dim_0 + d_num_wavelet_ghosts[0] - 2*offset;
+                    const int j_bound_lo_x = -d_num_wavelet_ghosts[1];
+                    const int j_bound_hi_x = interior_dim_1 + d_num_wavelet_ghosts[1];
                     
-                    for (int j = start_index_x_j; j < end_index_x_j; j++)
+                    for (int j = j_bound_lo_x; j < j_bound_hi_x; j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
-                        for (int i = start_index_x_i; i < end_index_x_i; i++)
+                        for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
                         {
                             // Compute the linear indices.
                             const int idx = (i + num_ghosts_0_wavelet_coeffs) +
@@ -985,17 +1050,17 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                      */
                     
                     // Compute the starting and ending indices.
-                    const int start_index_y_i = -d_num_wavelet_ghosts[0];
-                    const int end_index_y_i = interior_dim_0 + d_num_wavelet_ghosts[0];
-                    const int start_index_y_j = -d_num_wavelet_ghosts[1] + 2*offset;
-                    const int end_index_y_j = interior_dim_1 + d_num_wavelet_ghosts[1] - 2*offset;
+                    const int i_bound_lo_y = -d_num_wavelet_ghosts[0];
+                    const int i_bound_hi_y = interior_dim_0 + d_num_wavelet_ghosts[0];
+                    const int j_bound_lo_y = -d_num_wavelet_ghosts[1] + 2*offset;
+                    const int j_bound_hi_y = interior_dim_1 + d_num_wavelet_ghosts[1] - 2*offset;
                     
-                    for (int j = start_index_y_j; j < end_index_y_j; j++)
+                    for (int j = j_bound_lo_y; j < j_bound_hi_y; j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
-                        for (int i = start_index_y_i; i < end_index_y_i; i++)
+                        for (int i = i_bound_lo_y; i < i_bound_hi_y; i++)
                         {
                             // Compute the linear indices.
                             const int idx = (i + num_ghosts_0_wavelet_coeffs) +
@@ -1074,7 +1139,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 default:
                 {
                     TBOX_ERROR(d_object_name
-                        << ": "
+                        << ": WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans()\n"
                         << "number of vanishing moments = "
                         << d_k
                         << " not supported."
@@ -1199,21 +1264,21 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 }
                 
                 // Compute the starting and ending indices.
-                const int start_index_x_i = -d_num_wavelet_ghosts[0] + 1;
-                const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - 1;
-                const int start_index_x_j = -d_num_wavelet_ghosts[1];
-                const int end_index_x_j = interior_dim_1 + d_num_wavelet_ghosts[1];
-                const int start_index_x_k = -d_num_wavelet_ghosts[2];
-                const int end_index_x_k = interior_dim_2 + d_num_wavelet_ghosts[2];
+                const int i_bound_lo_x = -d_num_wavelet_ghosts[0] + 1;
+                const int i_bound_hi_x = interior_dim_0 + d_num_wavelet_ghosts[0] - 1;
+                const int j_bound_lo_x = -d_num_wavelet_ghosts[1];
+                const int j_bound_hi_x = interior_dim_1 + d_num_wavelet_ghosts[1];
+                const int k_bound_lo_x = -d_num_wavelet_ghosts[2];
+                const int k_bound_hi_x = interior_dim_2 + d_num_wavelet_ghosts[2];
                 
-                for (int k = start_index_x_k; k < end_index_x_k; k++)
+                for (int k = k_bound_lo_x; k < k_bound_hi_x; k++)
                 {
-                    for (int j = start_index_x_j; j < end_index_x_j; j++)
+                    for (int j = j_bound_lo_x; j < j_bound_hi_x; j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
-                        for (int i = start_index_x_i; i < end_index_x_i; i++)
+                        for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
                         {
                             // Compute the linear indices.
                             const int idx = (i + num_ghosts_0_wavelet_coeffs) +
@@ -1259,21 +1324,21 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 }
                 
                 // Compute the starting and ending indices.
-                const int start_index_y_i = -d_num_wavelet_ghosts[0];
-                const int end_index_y_i = interior_dim_0 + d_num_wavelet_ghosts[0];
-                const int start_index_y_j = -d_num_wavelet_ghosts[1] + 1;
-                const int end_index_y_j = interior_dim_1 + d_num_wavelet_ghosts[1] - 1;
-                const int start_index_y_k = -d_num_wavelet_ghosts[2];
-                const int end_index_y_k = interior_dim_2 + d_num_wavelet_ghosts[2];
+                const int i_bound_lo_y = -d_num_wavelet_ghosts[0];
+                const int i_bound_hi_y = interior_dim_0 + d_num_wavelet_ghosts[0];
+                const int j_bound_lo_y = -d_num_wavelet_ghosts[1] + 1;
+                const int j_bound_hi_y = interior_dim_1 + d_num_wavelet_ghosts[1] - 1;
+                const int k_bound_lo_y = -d_num_wavelet_ghosts[2];
+                const int k_bound_hi_y = interior_dim_2 + d_num_wavelet_ghosts[2];
                 
-                for (int k = start_index_y_k; k < end_index_y_k; k++)
+                for (int k = k_bound_lo_y; k < k_bound_hi_y; k++)
                 {
-                    for (int j = start_index_y_j; j < end_index_y_j; j++)
+                    for (int j = j_bound_lo_y; j < j_bound_hi_y; j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
-                        for (int i = start_index_y_i; i < end_index_y_i; i++)
+                        for (int i = i_bound_lo_y; i < i_bound_hi_y; i++)
                         {
                             // Compute the linear indices.
                             const int idx = (i + num_ghosts_0_wavelet_coeffs) +
@@ -1319,21 +1384,21 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 }
                 
                 // Compute the starting and ending indices.
-                const int start_index_z_i = -d_num_wavelet_ghosts[0];
-                const int end_index_z_i = interior_dim_0 + d_num_wavelet_ghosts[0];
-                const int start_index_z_j = -d_num_wavelet_ghosts[1];
-                const int end_index_z_j = interior_dim_1 + d_num_wavelet_ghosts[1];
-                const int start_index_z_k = -d_num_wavelet_ghosts[2] + 1;
-                const int end_index_z_k = interior_dim_2 + d_num_wavelet_ghosts[1] - 1;
+                const int i_bound_lo_z = -d_num_wavelet_ghosts[0];
+                const int i_bound_hi_z = interior_dim_0 + d_num_wavelet_ghosts[0];
+                const int j_bound_lo_z = -d_num_wavelet_ghosts[1];
+                const int j_bound_hi_z = interior_dim_1 + d_num_wavelet_ghosts[1];
+                const int k_bound_lo_z = -d_num_wavelet_ghosts[2] + 1;
+                const int k_bound_hi_z = interior_dim_2 + d_num_wavelet_ghosts[1] - 1;
                 
-                for (int k = start_index_z_k; k < end_index_z_k; k++)
+                for (int k = k_bound_lo_z; k < k_bound_hi_z; k++)
                 {
-                    for (int j = start_index_z_j; j < end_index_z_j; j++)
+                    for (int j = j_bound_lo_z; j < j_bound_hi_z; j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
-                        for (int i = start_index_z_i; i < end_index_z_i; i++)
+                        for (int i = i_bound_lo_z; i < i_bound_hi_z; i++)
                         {
                             // Compute the linear indices.
                             const int idx = (i + num_ghosts_0_wavelet_coeffs) +
@@ -1451,21 +1516,21 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 }
                 
                 // Compute the starting and ending indices.
-                const int start_index_x_i = -d_num_wavelet_ghosts[0] + 2;
-                const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - 2;
-                const int start_index_x_j = -d_num_wavelet_ghosts[1];
-                const int end_index_x_j = interior_dim_1 + d_num_wavelet_ghosts[1];
-                const int start_index_x_k = -d_num_wavelet_ghosts[2];
-                const int end_index_x_k = interior_dim_2 + d_num_wavelet_ghosts[2];
+                const int i_bound_lo_x = -d_num_wavelet_ghosts[0] + 2;
+                const int i_bound_hi_x = interior_dim_0 + d_num_wavelet_ghosts[0] - 2;
+                const int j_bound_lo_x = -d_num_wavelet_ghosts[1];
+                const int j_bound_hi_x = interior_dim_1 + d_num_wavelet_ghosts[1];
+                const int k_bound_lo_x = -d_num_wavelet_ghosts[2];
+                const int k_bound_hi_x = interior_dim_2 + d_num_wavelet_ghosts[2];
                 
-                for (int k = start_index_x_k; k < end_index_x_k; k++)
+                for (int k = k_bound_lo_x; k < k_bound_hi_x; k++)
                 {
-                    for (int j = start_index_x_j; j < end_index_x_j; j++)
+                    for (int j = j_bound_lo_x; j < j_bound_hi_x; j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
-                        for (int i = start_index_x_i; i < end_index_x_i; i++)
+                        for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
                         {
                             // Compute the indices.
                             const int idx = (i + num_ghosts_0_wavelet_coeffs) +
@@ -1522,21 +1587,21 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 }
                 
                 // Compute the starting and ending indices.
-                const int start_index_y_i = -d_num_wavelet_ghosts[0];
-                const int end_index_y_i = interior_dim_0 + d_num_wavelet_ghosts[0];
-                const int start_index_y_j = -d_num_wavelet_ghosts[1] + 2;
-                const int end_index_y_j = interior_dim_1 + d_num_wavelet_ghosts[1] - 2;
-                const int start_index_y_k = -d_num_wavelet_ghosts[2];
-                const int end_index_y_k = interior_dim_2 + d_num_wavelet_ghosts[2];
+                const int i_bound_lo_y = -d_num_wavelet_ghosts[0];
+                const int i_bound_hi_y = interior_dim_0 + d_num_wavelet_ghosts[0];
+                const int j_bound_lo_y = -d_num_wavelet_ghosts[1] + 2;
+                const int j_bound_hi_y = interior_dim_1 + d_num_wavelet_ghosts[1] - 2;
+                const int k_bound_lo_y = -d_num_wavelet_ghosts[2];
+                const int k_bound_hi_y = interior_dim_2 + d_num_wavelet_ghosts[2];
                 
-                for (int k = start_index_y_k; k < end_index_y_k; k++)
+                for (int k = k_bound_lo_y; k < k_bound_hi_y; k++)
                 {
-                    for (int j = start_index_y_j; j < end_index_y_j; j++)
+                    for (int j = j_bound_lo_y; j < j_bound_hi_y; j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
-                        for (int i = start_index_y_i; i < end_index_y_i; i++)
+                        for (int i = i_bound_lo_y; i < i_bound_hi_y; i++)
                         {
                             // Compute the linear indices.
                             const int idx = (i + num_ghosts_0_wavelet_coeffs) +
@@ -1593,21 +1658,21 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 }
                 
                 // Compute the starting and ending indices.
-                const int start_index_z_i = -d_num_wavelet_ghosts[0];
-                const int end_index_z_i = interior_dim_0 + d_num_wavelet_ghosts[0];
-                const int start_index_z_j = -d_num_wavelet_ghosts[1];
-                const int end_index_z_j = interior_dim_1 + d_num_wavelet_ghosts[1];
-                const int start_index_z_k = -d_num_wavelet_ghosts[2] + 2;
-                const int end_index_z_k = interior_dim_2 + d_num_wavelet_ghosts[1] - 2;
+                const int i_bound_lo_z = -d_num_wavelet_ghosts[0];
+                const int i_bound_hi_z = interior_dim_0 + d_num_wavelet_ghosts[0];
+                const int j_bound_lo_z = -d_num_wavelet_ghosts[1];
+                const int j_bound_hi_z = interior_dim_1 + d_num_wavelet_ghosts[1];
+                const int k_bound_lo_z = -d_num_wavelet_ghosts[2] + 2;
+                const int k_bound_hi_z = interior_dim_2 + d_num_wavelet_ghosts[1] - 2;
                 
-                for (int k = start_index_z_k; k < end_index_z_k; k++)
+                for (int k = k_bound_lo_z; k < k_bound_hi_z; k++)
                 {
-                    for (int j = start_index_z_j; j < end_index_z_j; j++)
+                    for (int j = j_bound_lo_z; j < j_bound_hi_z; j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
-                        for (int i = start_index_z_i; i < end_index_z_i; i++)
+                        for (int i = i_bound_lo_z; i < i_bound_hi_z; i++)
                         {
                             // Compute the linear indices.
                             const int idx = (i + num_ghosts_0_wavelet_coeffs) +
@@ -1752,7 +1817,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
             default:
             {
                 TBOX_ERROR(d_object_name
-                    << ": "
+                    << ": WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans()\n"
                     << "number of vanishing moments = "
                     << d_k
                     << " not supported."
@@ -1777,21 +1842,21 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                      */
                     
                     // Compute the starting and ending indices.
-                    const int start_index_x_i = -d_num_wavelet_ghosts[0] + offset;
-                    const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - offset;
-                    const int start_index_x_j = -d_num_wavelet_ghosts[1];
-                    const int end_index_x_j = interior_dim_1 + d_num_wavelet_ghosts[1];
-                    const int start_index_x_k = -d_num_wavelet_ghosts[2];
-                    const int end_index_x_k = interior_dim_2 + d_num_wavelet_ghosts[2];
+                    const int i_bound_lo_x = -d_num_wavelet_ghosts[0] + offset;
+                    const int i_bound_hi_x = interior_dim_0 + d_num_wavelet_ghosts[0] - offset;
+                    const int j_bound_lo_x = -d_num_wavelet_ghosts[1];
+                    const int j_bound_hi_x = interior_dim_1 + d_num_wavelet_ghosts[1];
+                    const int k_bound_lo_x = -d_num_wavelet_ghosts[2];
+                    const int k_bound_hi_x = interior_dim_2 + d_num_wavelet_ghosts[2];
                     
-                    for (int k = start_index_x_k; k < end_index_x_k; k++)
+                    for (int k = k_bound_lo_x; k < k_bound_hi_x; k++)
                     {
-                        for (int j = start_index_x_j; j < end_index_x_j; j++)
+                        for (int j = j_bound_lo_x; j < j_bound_hi_x; j++)
                         {
 #ifdef HAMERS_ENABLE_SIMD
                             #pragma omp simd
 #endif
-                            for (int i = start_index_x_i; i < end_index_x_i; i++)
+                            for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
                             {
                                 // Compute the linear indices.
                                 const int idx = (i + num_ghosts_0_wavelet_coeffs) +
@@ -1822,21 +1887,21 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                      */
                     
                     // Compute the starting and ending indices.
-                    const int start_index_y_i = -d_num_wavelet_ghosts[0];
-                    const int end_index_y_i = interior_dim_0 + d_num_wavelet_ghosts[0];
-                    const int start_index_y_j = -d_num_wavelet_ghosts[1] + offset ;
-                    const int end_index_y_j = interior_dim_1 + d_num_wavelet_ghosts[1] - offset;
-                    const int start_index_y_k = -d_num_wavelet_ghosts[2];
-                    const int end_index_y_k = interior_dim_2 + d_num_wavelet_ghosts[2];
+                    const int i_bound_lo_y = -d_num_wavelet_ghosts[0];
+                    const int i_bound_hi_y = interior_dim_0 + d_num_wavelet_ghosts[0];
+                    const int j_bound_lo_y = -d_num_wavelet_ghosts[1] + offset ;
+                    const int j_bound_hi_y = interior_dim_1 + d_num_wavelet_ghosts[1] - offset;
+                    const int k_bound_lo_y = -d_num_wavelet_ghosts[2];
+                    const int k_bound_hi_y = interior_dim_2 + d_num_wavelet_ghosts[2];
                     
-                    for (int k = start_index_y_k; k < end_index_y_k; k++)
+                    for (int k = k_bound_lo_y; k < k_bound_hi_y; k++)
                     {
-                        for (int j = start_index_y_j; j < end_index_y_j; j++)
+                        for (int j = j_bound_lo_y; j < j_bound_hi_y; j++)
                         {
 #ifdef HAMERS_ENABLE_SIMD
                             #pragma omp simd
 #endif
-                            for (int i = start_index_y_i; i < end_index_y_i; i++)
+                            for (int i = i_bound_lo_y; i < i_bound_hi_y; i++)
                             {
                                 // Compute the linear indices.
                                 const int idx = (i + num_ghosts_0_wavelet_coeffs) +
@@ -1867,21 +1932,21 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                      */
                     
                     // Compute the starting and ending indices.
-                    const int start_index_z_i = -d_num_wavelet_ghosts[0];
-                    const int end_index_z_i = interior_dim_0 + d_num_wavelet_ghosts[0];
-                    const int start_index_z_j = -d_num_wavelet_ghosts[1];
-                    const int end_index_z_j = interior_dim_1 + d_num_wavelet_ghosts[1];
-                    const int start_index_z_k = -d_num_wavelet_ghosts[2] + offset ;
-                    const int end_index_z_k = interior_dim_2 + d_num_wavelet_ghosts[2] - offset;
+                    const int i_bound_lo_z = -d_num_wavelet_ghosts[0];
+                    const int i_bound_hi_z = interior_dim_0 + d_num_wavelet_ghosts[0];
+                    const int j_bound_lo_z = -d_num_wavelet_ghosts[1];
+                    const int j_bound_hi_z = interior_dim_1 + d_num_wavelet_ghosts[1];
+                    const int k_bound_lo_z = -d_num_wavelet_ghosts[2] + offset ;
+                    const int k_bound_hi_z = interior_dim_2 + d_num_wavelet_ghosts[2] - offset;
                     
-                    for (int k = start_index_z_k; k < end_index_z_k; k++)
+                    for (int k = k_bound_lo_z; k < k_bound_hi_z; k++)
                     {
-                        for (int j = start_index_z_j; j < end_index_z_j; j++)
+                        for (int j = j_bound_lo_z; j < j_bound_hi_z; j++)
                         {
 #ifdef HAMERS_ENABLE_SIMD
                             #pragma omp simd
 #endif
-                            for (int i = start_index_z_i; i < end_index_z_i; i++)
+                            for (int i = i_bound_lo_z; i < i_bound_hi_z; i++)
                             {
                                 // Compute the linear indices.
                                 const int idx = (i + num_ghosts_0_wavelet_coeffs) +
@@ -1979,21 +2044,21 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                      */
                     
                     // Compute the starting and ending indices.
-                    const int start_index_x_i = -d_num_wavelet_ghosts[0] + 2*offset;
-                    const int end_index_x_i = interior_dim_0 + d_num_wavelet_ghosts[0] - 2*offset;
-                    const int start_index_x_j = -d_num_wavelet_ghosts[1];
-                    const int end_index_x_j = interior_dim_1 + d_num_wavelet_ghosts[1];
-                    const int start_index_x_k = -d_num_wavelet_ghosts[2];
-                    const int end_index_x_k = interior_dim_2 + d_num_wavelet_ghosts[2];
+                    const int i_bound_lo_x = -d_num_wavelet_ghosts[0] + 2*offset;
+                    const int i_bound_hi_x = interior_dim_0 + d_num_wavelet_ghosts[0] - 2*offset;
+                    const int j_bound_lo_x = -d_num_wavelet_ghosts[1];
+                    const int j_bound_hi_x = interior_dim_1 + d_num_wavelet_ghosts[1];
+                    const int k_bound_lo_x = -d_num_wavelet_ghosts[2];
+                    const int k_bound_hi_x = interior_dim_2 + d_num_wavelet_ghosts[2];
                     
-                    for (int k = start_index_x_k; k < end_index_x_k; k++)
+                    for (int k = k_bound_lo_x; k < k_bound_hi_x; k++)
                     {
-                        for (int j = start_index_x_j; j < end_index_x_j; j++)
+                        for (int j = j_bound_lo_x; j < j_bound_hi_x; j++)
                         {
 #ifdef HAMERS_ENABLE_SIMD
                             #pragma omp simd
 #endif
-                            for (int i = start_index_x_i; i < end_index_x_i; i++)
+                            for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
                             {
                                 // Compute the linear indices.
                                 const int idx = (i + num_ghosts_0_wavelet_coeffs) +
@@ -2035,21 +2100,21 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                      */
                     
                     // Compute the starting and ending indices.
-                    const int start_index_y_i = -d_num_wavelet_ghosts[0];
-                    const int end_index_y_i = interior_dim_0 + d_num_wavelet_ghosts[0];
-                    const int start_index_y_j = -d_num_wavelet_ghosts[1] + 2*offset;
-                    const int end_index_y_j = interior_dim_1 + d_num_wavelet_ghosts[1] - 2*offset;
-                    const int start_index_y_k = -d_num_wavelet_ghosts[2];
-                    const int end_index_y_k = interior_dim_2 + d_num_wavelet_ghosts[2];
+                    const int i_bound_lo_y = -d_num_wavelet_ghosts[0];
+                    const int i_bound_hi_y = interior_dim_0 + d_num_wavelet_ghosts[0];
+                    const int j_bound_lo_y = -d_num_wavelet_ghosts[1] + 2*offset;
+                    const int j_bound_hi_y = interior_dim_1 + d_num_wavelet_ghosts[1] - 2*offset;
+                    const int k_bound_lo_y = -d_num_wavelet_ghosts[2];
+                    const int k_bound_hi_y = interior_dim_2 + d_num_wavelet_ghosts[2];
                     
-                    for (int k = start_index_y_k; k < end_index_y_k; k++)
+                    for (int k = k_bound_lo_y; k < k_bound_hi_y; k++)
                     {
-                        for (int j = start_index_y_j; j < end_index_y_j; j++)
+                        for (int j = j_bound_lo_y; j < j_bound_hi_y; j++)
                         {
 #ifdef HAMERS_ENABLE_SIMD
                             #pragma omp simd
 #endif
-                            for (int i = start_index_y_i; i < end_index_y_i; i++)
+                            for (int i = i_bound_lo_y; i < i_bound_hi_y; i++)
                             {
                                 // Compute the linear indices.
                                 const int idx = (i + num_ghosts_0_wavelet_coeffs) +
@@ -2091,21 +2156,21 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                      */
                     
                     // Compute the starting and ending indices.
-                    const int start_index_z_i = -d_num_wavelet_ghosts[0];
-                    const int end_index_z_i = interior_dim_0 + d_num_wavelet_ghosts[0];
-                    const int start_index_z_j = -d_num_wavelet_ghosts[1];
-                    const int end_index_z_j = interior_dim_1 + d_num_wavelet_ghosts[1];
-                    const int start_index_z_k = -d_num_wavelet_ghosts[2] + 2*offset;
-                    const int end_index_z_k = interior_dim_2 + d_num_wavelet_ghosts[2] - 2*offset;
+                    const int i_bound_lo_z = -d_num_wavelet_ghosts[0];
+                    const int i_bound_hi_z = interior_dim_0 + d_num_wavelet_ghosts[0];
+                    const int j_bound_lo_z = -d_num_wavelet_ghosts[1];
+                    const int j_bound_hi_z = interior_dim_1 + d_num_wavelet_ghosts[1];
+                    const int k_bound_lo_z = -d_num_wavelet_ghosts[2] + 2*offset;
+                    const int k_bound_hi_z = interior_dim_2 + d_num_wavelet_ghosts[2] - 2*offset;
                     
-                    for (int k = start_index_z_k; k < end_index_z_k; k++)
+                    for (int k = k_bound_lo_z; k < k_bound_hi_z; k++)
                     {
-                        for (int j = start_index_z_j; j < end_index_z_j; j++)
+                        for (int j = j_bound_lo_z; j < j_bound_hi_z; j++)
                         {
 #ifdef HAMERS_ENABLE_SIMD
                             #pragma omp simd
 #endif
-                            for (int i = start_index_z_i; i < end_index_z_i; i++)
+                            for (int i = i_bound_lo_z; i < i_bound_hi_z; i++)
                             {
                                 // Compute indices.
                                 const int idx = (i + num_ghosts_0_wavelet_coeffs) +
@@ -2240,7 +2305,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                 default:
                 {
                     TBOX_ERROR(d_object_name
-                        << ": "
+                        << ": WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans()\n"
                         << "number of vanishing moments = "
                         << d_k
                         << " not supported."
@@ -2295,9 +2360,9 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
  */
 boost::shared_ptr<pdat::CellData<double> >
 WaveletTransformHarten::smoothCellData(
+    const boost::shared_ptr<pdat::CellData<double> >& cell_data,
     hier::Patch& patch,
-    boost::shared_ptr<pdat::CellData<double> > cell_data,
-    int depth)
+    const int depth)
 {
     // Get the dimensions of box that covers the interior of patch.
     const hier::Box interior_box = patch.getBox();
@@ -2325,13 +2390,13 @@ WaveletTransformHarten::smoothCellData(
         double* f_smoothed = smoothed_cell_data->getPointer(0);
         
         // Compute the starting and ending indices.
-        const int start_index_x_i = -num_ghosts_cell_data[0];
-        const int end_index_x_i = interior_dims[0] + num_ghosts_cell_data[0];
+        const int i_bound_lo_x = -num_ghosts_cell_data[0];
+        const int i_bound_hi_x = interior_dims[0] + num_ghosts_cell_data[0];
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
 #endif
-        for (int i = start_index_x_i; i < end_index_x_i; i++)
+        for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
         {
             // Compute the linear index.
             const int idx = i + num_ghosts_0_cell_data;
@@ -2340,8 +2405,8 @@ WaveletTransformHarten::smoothCellData(
             
             int count = 1;
             
-            const int ii_bound_lo = std::max(i - 1, start_index_x_i);
-            const int ii_bound_hi = std::min(i + 2, end_index_x_i);
+            const int ii_bound_lo = std::max(i - 1, i_bound_lo_x);
+            const int ii_bound_hi = std::min(i + 2, i_bound_hi_x);
             
             // Sum over the neighboring cells.
             for (int ii = ii_bound_lo; ii < ii_bound_hi; ii++)
@@ -2356,7 +2421,7 @@ WaveletTransformHarten::smoothCellData(
             }
             
             // Compute the average value.
-            f_smoothed[idx] = f_smoothed[idx]/count;
+            f_smoothed[idx] = f_smoothed[idx]/(static_cast<double>(count));
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -2369,17 +2434,17 @@ WaveletTransformHarten::smoothCellData(
         double* f_smoothed = smoothed_cell_data->getPointer(0);
         
         // Compute the starting and ending indices.
-        const int start_index_x_i = -num_ghosts_cell_data[0];
-        const int end_index_x_i = interior_dims[0] + num_ghosts_cell_data[0];
-        const int start_index_x_j = -num_ghosts_cell_data[1];
-        const int end_index_x_j = interior_dims[1] + num_ghosts_cell_data[1];
+        const int i_bound_lo_x = -num_ghosts_cell_data[0];
+        const int i_bound_hi_x = interior_dims[0] + num_ghosts_cell_data[0];
+        const int j_bound_lo_x = -num_ghosts_cell_data[1];
+        const int j_bound_hi_x = interior_dims[1] + num_ghosts_cell_data[1];
         
-        for (int j = start_index_x_j; j < end_index_x_j; j++)
+        for (int j = j_bound_lo_x; j < j_bound_hi_x; j++)
         {
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
 #endif
-            for (int i = start_index_x_i; i < end_index_x_i; i++)
+            for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
             {
                 // Compute the linear index.
                 const int idx = (i + num_ghosts_0_cell_data) +
@@ -2389,8 +2454,8 @@ WaveletTransformHarten::smoothCellData(
                 
                 int count = 1;
                 
-                const int ii_bound_lo = std::max(i - 1, start_index_x_i);
-                const int ii_bound_hi = std::min(i + 2, end_index_x_i);
+                const int ii_bound_lo = std::max(i - 1, i_bound_lo_x);
+                const int ii_bound_hi = std::min(i + 2, i_bound_hi_x);
                 
                 // Sum over the neighboring cells.
                 for (int ii = ii_bound_lo; ii < ii_bound_hi; ii++)
@@ -2406,7 +2471,7 @@ WaveletTransformHarten::smoothCellData(
                 }
                 
                 // Compute the average value.
-                f_smoothed[idx] = f_smoothed[idx]/count;
+                f_smoothed[idx] = f_smoothed[idx]/(static_cast<double>(count));
             }
         }
         
@@ -2414,17 +2479,17 @@ WaveletTransformHarten::smoothCellData(
         f_smoothed = smoothed_cell_data->getPointer(1);
         
         // Compute the starting and ending indices.
-        const int start_index_y_i = -num_ghosts_cell_data[0];
-        const int end_index_y_i = interior_dims[0] + num_ghosts_cell_data[0];
-        const int start_index_y_j = -num_ghosts_cell_data[1];
-        const int end_index_y_j = interior_dims[1] + num_ghosts_cell_data[1];
+        const int i_bound_lo_y = -num_ghosts_cell_data[0];
+        const int i_bound_hi_y = interior_dims[0] + num_ghosts_cell_data[0];
+        const int j_bound_lo_y = -num_ghosts_cell_data[1];
+        const int j_bound_hi_y = interior_dims[1] + num_ghosts_cell_data[1];
         
-        for (int j = start_index_y_j; j < end_index_y_j; j++)
+        for (int j = j_bound_lo_y; j < j_bound_hi_y; j++)
         {
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
 #endif
-            for (int i = start_index_y_i; i < end_index_y_i; i++)
+            for (int i = i_bound_lo_y; i < i_bound_hi_y; i++)
             {
                 // Compute the linear index.
                 const int idx = (i + num_ghosts_0_cell_data) +
@@ -2434,8 +2499,8 @@ WaveletTransformHarten::smoothCellData(
                 
                 int count = 1;
                 
-                const int jj_bound_lo = std::max(j - 1, start_index_y_j);
-                const int jj_bound_hi = std::min(j + 2, end_index_y_j);
+                const int jj_bound_lo = std::max(j - 1, j_bound_lo_y);
+                const int jj_bound_hi = std::min(j + 2, j_bound_hi_y);
                 
                 // Sum over the neighboring cells.
                 for (int jj = jj_bound_lo; jj < jj_bound_hi; jj++)
@@ -2451,7 +2516,7 @@ WaveletTransformHarten::smoothCellData(
                 }
                 
                 // Compute the average value.
-                f_smoothed[idx] = f_smoothed[idx]/count;
+                f_smoothed[idx] = f_smoothed[idx]/(static_cast<double>(count));
             }
         }
     }
@@ -2467,21 +2532,21 @@ WaveletTransformHarten::smoothCellData(
         double* f_smoothed = smoothed_cell_data->getPointer(0);
         
         // Compute the starting and ending indices.
-        const int start_index_x_i = -num_ghosts_cell_data[0];
-        const int end_index_x_i = interior_dims[0] + num_ghosts_cell_data[0];
-        const int start_index_x_j = -num_ghosts_cell_data[1];
-        const int end_index_x_j = interior_dims[1] + num_ghosts_cell_data[1];
-        const int start_index_x_k = -num_ghosts_cell_data[2];
-        const int end_index_x_k = interior_dims[2] + num_ghosts_cell_data[2];
+        const int i_bound_lo_x = -num_ghosts_cell_data[0];
+        const int i_bound_hi_x = interior_dims[0] + num_ghosts_cell_data[0];
+        const int j_bound_lo_x = -num_ghosts_cell_data[1];
+        const int j_bound_hi_x = interior_dims[1] + num_ghosts_cell_data[1];
+        const int k_bound_lo_x = -num_ghosts_cell_data[2];
+        const int k_bound_hi_x = interior_dims[2] + num_ghosts_cell_data[2];
         
-        for (int k = start_index_x_k; k < end_index_x_k; k++)
+        for (int k = k_bound_lo_x; k < k_bound_hi_x; k++)
         {
-            for (int j = start_index_x_j; j < end_index_x_j; j++)
+            for (int j = j_bound_lo_x; j < j_bound_hi_x; j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
-                for (int i = start_index_x_i; i < end_index_x_i; i++)
+                for (int i = i_bound_lo_x; i < i_bound_hi_x; i++)
                 {
                     // Compute the linear index.
                     const int idx = (i + num_ghosts_0_cell_data) +
@@ -2493,8 +2558,8 @@ WaveletTransformHarten::smoothCellData(
                     
                     int count = 1;
                     
-                    const int ii_bound_lo = std::max(i - 1, start_index_x_i);
-                    const int ii_bound_hi = std::min(i + 2, end_index_x_i);
+                    const int ii_bound_lo = std::max(i - 1, i_bound_lo_x);
+                    const int ii_bound_hi = std::min(i + 2, i_bound_hi_x);
                     
                     // Sum over the neighboring cells.
                     for (int ii = ii_bound_lo; ii < ii_bound_hi; ii++)
@@ -2512,7 +2577,7 @@ WaveletTransformHarten::smoothCellData(
                     }
                     
                     // Compute the average value.
-                    f_smoothed[idx] = f_smoothed[idx]/count;
+                    f_smoothed[idx] = f_smoothed[idx]/(static_cast<double>(count));
                 }
             }
         }
@@ -2521,21 +2586,21 @@ WaveletTransformHarten::smoothCellData(
         f_smoothed = smoothed_cell_data->getPointer(1);
         
         // Compute the starting and ending indices.
-        const int start_index_y_i = -num_ghosts_cell_data[0];
-        const int end_index_y_i = interior_dims[0] + num_ghosts_cell_data[0];
-        const int start_index_y_j = -num_ghosts_cell_data[1];
-        const int end_index_y_j = interior_dims[1] + num_ghosts_cell_data[1];
-        const int start_index_y_k = -num_ghosts_cell_data[2];
-        const int end_index_y_k = interior_dims[2] + num_ghosts_cell_data[2];
+        const int i_bound_lo_y = -num_ghosts_cell_data[0];
+        const int i_bound_hi_y = interior_dims[0] + num_ghosts_cell_data[0];
+        const int j_bound_lo_y = -num_ghosts_cell_data[1];
+        const int j_bound_hi_y = interior_dims[1] + num_ghosts_cell_data[1];
+        const int k_bound_lo_y = -num_ghosts_cell_data[2];
+        const int k_bound_hi_y = interior_dims[2] + num_ghosts_cell_data[2];
         
-        for (int k = start_index_y_k; k < end_index_y_k; k++)
+        for (int k = k_bound_lo_y; k < k_bound_hi_y; k++)
         {
-            for (int j = start_index_y_j; j < end_index_y_j; j++)
+            for (int j = j_bound_lo_y; j < j_bound_hi_y; j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
-                for (int i = start_index_y_i; i < end_index_y_i; i++)
+                for (int i = i_bound_lo_y; i < i_bound_hi_y; i++)
                 {
                     // Compute the linear index.
                     const int idx = (i + num_ghosts_0_cell_data) +
@@ -2547,8 +2612,8 @@ WaveletTransformHarten::smoothCellData(
                     
                     int count = 1;
                     
-                    const int jj_bound_lo = std::max(j - 1, start_index_y_j);
-                    const int jj_bound_hi = std::min(j + 2, end_index_y_j);
+                    const int jj_bound_lo = std::max(j - 1, j_bound_lo_y);
+                    const int jj_bound_hi = std::min(j + 2, j_bound_hi_y);
                     
                     for (int jj = jj_bound_lo; jj < jj_bound_hi; jj++)
                     {
@@ -2565,7 +2630,7 @@ WaveletTransformHarten::smoothCellData(
                     }
                     
                     // Compute the average value.
-                    f_smoothed[idx] = f_smoothed[idx]/count;
+                    f_smoothed[idx] = f_smoothed[idx]/(static_cast<double>(count));
                 }
             }
         }
@@ -2574,21 +2639,21 @@ WaveletTransformHarten::smoothCellData(
         f_smoothed = smoothed_cell_data->getPointer(2);
         
         // Compute the starting and ending indices.
-        const int start_index_z_i = -num_ghosts_cell_data[0];
-        const int end_index_z_i = interior_dims[0] + num_ghosts_cell_data[0];
-        const int start_index_z_j = -num_ghosts_cell_data[1];
-        const int end_index_z_j = interior_dims[1] + num_ghosts_cell_data[1];
-        const int start_index_z_k = -num_ghosts_cell_data[2];
-        const int end_index_z_k = interior_dims[2] + num_ghosts_cell_data[2];
+        const int i_bound_lo_z = -num_ghosts_cell_data[0];
+        const int i_bound_hi_z = interior_dims[0] + num_ghosts_cell_data[0];
+        const int j_bound_lo_z = -num_ghosts_cell_data[1];
+        const int j_bound_hi_z = interior_dims[1] + num_ghosts_cell_data[1];
+        const int k_bound_lo_z = -num_ghosts_cell_data[2];
+        const int k_bound_hi_z = interior_dims[2] + num_ghosts_cell_data[2];
         
-        for (int k = start_index_z_k; k < end_index_z_k; k++)
+        for (int k = k_bound_lo_z; k < k_bound_hi_z; k++)
         {
-            for (int j = start_index_z_j; j < end_index_z_j; j++)
+            for (int j = j_bound_lo_z; j < j_bound_hi_z; j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
-                for (int i = start_index_z_i; i < end_index_z_i; i++)
+                for (int i = i_bound_lo_z; i < i_bound_hi_z; i++)
                 {
                     // Compute the linear index.
                     const int idx = (i + num_ghosts_0_cell_data) +
@@ -2600,8 +2665,8 @@ WaveletTransformHarten::smoothCellData(
                     
                     int count = 1;
                     
-                    const int kk_bound_lo = std::max(k - 1, start_index_z_k);
-                    const int kk_bound_hi = std::min(k + 2, end_index_z_k);
+                    const int kk_bound_lo = std::max(k - 1, k_bound_lo_z);
+                    const int kk_bound_hi = std::min(k + 2, k_bound_hi_z);
                     
                     for (int kk = kk_bound_lo; kk < kk_bound_hi; kk++)
                     {
@@ -2618,7 +2683,7 @@ WaveletTransformHarten::smoothCellData(
                     }
                     
                     // Compute the average value.
-                    f_smoothed[idx] = f_smoothed[idx]/count;
+                    f_smoothed[idx] = f_smoothed[idx]/(static_cast<double>(count));
                 }
             }
         }

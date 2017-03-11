@@ -69,10 +69,10 @@ class MultiresolutionTagger
             const boost::shared_ptr<tbox::Database>& restart_db) const;
         
         /*
-         * Compute values of multiresolution sensors.
+         * Compute values of multiresolution sensors on patch.
          */
         void
-        computeMultiresolutionSensorValues(
+        computeMultiresolutionSensorValuesOnPatch(
             hier::Patch& patch,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
@@ -87,48 +87,48 @@ class MultiresolutionTagger
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
-         * Tag cells for refinement using multiresolution sensors.
+         * Tag cells on patch for refinement using multiresolution sensors.
          */
         void
-        tagCells(
+        tagCellsOnPatch(
             hier::Patch& patch,
             const boost::shared_ptr<pdat::CellData<int> >& tags,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
     private:
         /*
-         * Tag cells using wavelet sensor with the combination of three possible criteria:
+         * Tag cells on patch using wavelet sensor with the combination of three possible criteria:
          * 1. When ratio between wavelet coefficient and global maximum at any level is greater than the tolerance.
          * 2. When ratio between wavelet coefficient and local mean at any level is greater than the tolerance.
          * 3. When the Lipschitz's exponent is smaller than the tolerance.
          */
         void
-        tagCellsWithWaveletSensor(
+        tagCellsOnPatchWithWaveletSensor(
             hier::Patch& patch,
-            const std::string& sensor_key,
             const boost::shared_ptr<pdat::CellData<int> >& tags,
             const std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
             const std::vector<double>& wavelet_coeffs_maxs,
             const std::vector<boost::shared_ptr<pdat::CellData<double> > >& variable_local_means,
             const boost::shared_ptr<pdat::CellData<double> >& Lipschitz_exponent,
-            const bool& uses_global_tol,
-            const bool& uses_local_tol,
-            const bool& uses_alpha_tol,
-            const double& global_tol,
-            const double& local_tol,
-            const double& alpha_tol);
+            const std::string& sensor_key,
+            const bool uses_global_tol,
+            const bool uses_local_tol,
+            const bool uses_alpha_tol,
+            const double global_tol,
+            const double local_tol,
+            const double alpha_tol);
         
         /*
-         * Compute the Lipschitz's exponent. There are two steps:
+         * Compute the Lipschitz's exponent on patch. There are two steps:
          * 1. Find the maximum wavelet coefficients in the domain of dependence.
          * 2. Compute Lipschitz's exponent.
          */
         void
-        computeLipschitzExponent(
+        computeLipschitzExponentOnPatch(
             hier::Patch& patch,
-            const std::string& sensor_key,
+            const boost::shared_ptr<pdat::CellData<double> >& Lipschitz_exponent,
             const std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
-            const boost::shared_ptr<pdat::CellData<double> >& Lipschitz_exponent);
+            const std::string& sensor_key);
         
         /*
          * The object name is used for error/warning reporting.

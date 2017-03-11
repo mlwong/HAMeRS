@@ -68,10 +68,10 @@ class ValueTagger
             const boost::shared_ptr<tbox::Database>& restart_db) const;
         
         /*
-         * Compute values for value tagger.
+         * Compute values on patch for value tagger.
          */
         void
-        computeValueTaggerValues(
+        computeValueTaggerValuesOnPatch(
             hier::Patch& patch,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
@@ -85,43 +85,43 @@ class ValueTagger
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
-         * Tag cells for refinement using value tagger.
+         * Tag cells on patch for refinement using value tagger.
          */
         void
-        tagCells(
+        tagCellsOnPatch(
             hier::Patch& patch,
             const boost::shared_ptr<pdat::CellData<int> >& tags,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
     private:
         /*
-         * Tag cells for refinement using data values.
+         * Tag cells on patch for refinement using data values.
          */
         void
-        tagCellsWithValue(
+        tagCellsOnPatchWithValue(
             hier::Patch& patch,
             const boost::shared_ptr<hier::VariableContext>& data_context,
             const boost::shared_ptr<pdat::CellData<int> >& tags,
             const boost::shared_ptr<pdat::CellVariable<double> >& variable_value_tagger,
-            const double& value_max,
-            const bool& uses_global_tol_up,
-            const bool& uses_global_tol_lo,
-            const bool& uses_local_tol_up,
-            const bool& uses_local_tol_lo,
-            const double& global_tol_up,
-            const double& global_tol_lo,
-            const double& local_tol_up,
-            const double& local_tol_lo);
+            const double value_max,
+            const bool uses_global_tol_up,
+            const bool uses_global_tol_lo,
+            const bool uses_local_tol_up,
+            const bool uses_local_tol_lo,
+            const double global_tol_up,
+            const double global_tol_lo,
+            const double local_tol_up,
+            const double local_tol_lo);
         
         /*
-         * Transfer data input to data in class variable.
+         * Transfer data input on patch to data in class variable.
          */
-        void transferDataToClassVariable(
+        void transferDataOnPatchToClassVariable(
             hier::Patch& patch,
             const boost::shared_ptr<hier::VariableContext>& data_context,
             const boost::shared_ptr<pdat::CellData<double> >& data_input,
             const boost::shared_ptr<pdat::CellVariable<double> >& variable_value_tagger,
-            const int& depth);
+            const int depth);
         
         /*
          * The object name is used for error/warning reporting.

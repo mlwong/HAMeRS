@@ -41,21 +41,21 @@ class Difference
          */
         virtual void
         computeDifference(
+            boost::shared_ptr<pdat::CellData<double> >& difference,
+            const boost::shared_ptr<pdat::CellData<double> >& cell_data,
             hier::Patch& patch,
-            boost::shared_ptr<pdat::CellData<double> > cell_data,
-            boost::shared_ptr<pdat::CellData<double> > difference,
-            int depth = 0) = 0;
+            const int depth = 0) = 0;
         
         /*
          * Compute the difference and the local mean of the given cell data.
          */
         virtual void
         computeDifferenceWithVariableLocalMean(
+            boost::shared_ptr<pdat::CellData<double> >& difference,
+            boost::shared_ptr<pdat::CellData<double> >& variable_local_mean,
+            const boost::shared_ptr<pdat::CellData<double> >& cell_data,
             hier::Patch& patch,
-            boost::shared_ptr<pdat::CellData<double> > cell_data,
-            boost::shared_ptr<pdat::CellData<double> > difference,
-            boost::shared_ptr<pdat::CellData<double> > variable_local_mean,
-            int depth = 0) = 0;
+            const int depth = 0) = 0;
         
     protected:
         /*

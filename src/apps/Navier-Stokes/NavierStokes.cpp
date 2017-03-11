@@ -79,7 +79,7 @@ NavierStokes::NavierStokes(
         t_compute_hyperbolicfluxes = tbox::TimerManager::getManager()->
             getTimer("NavierStokes::computeHyperbolicFluxesOnPatch()");
         t_advance_steps = tbox::TimerManager::getManager()->
-            getTimer("NavierStokes::advanceSingleStep()");
+            getTimer("NavierStokes::advanceSingleStepOnPatch()");
         t_synchronize_hyperbloicfluxes = tbox::TimerManager::getManager()->
             getTimer("NavierStokes::synchronizeHyperbolicFluxes()");
         t_setphysbcs = tbox::TimerManager::getManager()->
@@ -837,7 +837,7 @@ NavierStokes::computeHyperbolicFluxesAndSourcesOnPatch(
 
 
 void
-NavierStokes::advanceSingleStep(
+NavierStokes::advanceSingleStepOnPatch(
     hier::Patch& patch,
     const double time,
     const double dt,
@@ -1751,7 +1751,7 @@ NavierStokes::synchronizeHyperbolicFluxes(
  * Preprocess before tagging cells using value detector.
  */
 void
-NavierStokes::preprocessTagValueDetectorCells(
+NavierStokes::preprocessTagCellsValueDetector(
    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
    const int level_number,
    const double regrid_time,
@@ -1779,7 +1779,7 @@ NavierStokes::preprocessTagValueDetectorCells(
         {
             const boost::shared_ptr<hier::Patch>& patch = *ip;
             
-            d_value_tagger->computeValueTaggerValues(
+            d_value_tagger->computeValueTaggerValuesOnPatch(
                 *patch,
                 getDataContext());
         }
@@ -1796,7 +1796,7 @@ NavierStokes::preprocessTagValueDetectorCells(
  * Tag cells for refinement using value detector.
  */
 void
-NavierStokes::tagValueDetectorCells(
+NavierStokes::tagCellsOnPatchValueDetector(
     hier::Patch& patch,
     const double regrid_time,
     const bool initial_error,
@@ -1833,7 +1833,7 @@ NavierStokes::tagValueDetectorCells(
     // Tag the cells by using d_value_tagger.
     if (d_value_tagger != nullptr)
     {
-        d_value_tagger->tagCells(
+        d_value_tagger->tagCellsOnPatch(
             patch,
             tags,
             getDataContext());
@@ -1847,7 +1847,7 @@ NavierStokes::tagValueDetectorCells(
  * Preprocess before tagging cells using gradient detector.
  */
 void
-NavierStokes::preprocessTagGradientDetectorCells(
+NavierStokes::preprocessTagCellsGradientDetector(
    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
    const int level_number,
    const double regrid_time,
@@ -1875,7 +1875,7 @@ NavierStokes::preprocessTagGradientDetectorCells(
         {
             const boost::shared_ptr<hier::Patch>& patch = *ip;
             
-            d_gradient_tagger->computeGradientSensorValues(
+            d_gradient_tagger->computeGradientSensorValuesOnPatch(
                 *patch,
                 getDataContext());
         }
@@ -1892,7 +1892,7 @@ NavierStokes::preprocessTagGradientDetectorCells(
  * Tag cells for refinement using gradient detector.
  */
 void
-NavierStokes::tagGradientDetectorCells(
+NavierStokes::tagCellsOnPatchGradientDetector(
     hier::Patch& patch,
     const double regrid_time,
     const bool initial_error,
@@ -1929,7 +1929,7 @@ NavierStokes::tagGradientDetectorCells(
     // Tag the cells by using d_gradient_tagger.
     if (d_gradient_tagger != nullptr)
     {
-        d_gradient_tagger->tagCells(
+        d_gradient_tagger->tagCellsOnPatch(
             patch,
             tags,
             getDataContext());
@@ -1943,7 +1943,7 @@ NavierStokes::tagGradientDetectorCells(
  * Preprocess before tagging cells using multiresolution detector.
  */
 void
-NavierStokes::preprocessTagMultiresolutionDetectorCells(
+NavierStokes::preprocessTagCellsMultiresolutionDetector(
    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
    const int level_number,
    const double regrid_time,
@@ -1971,7 +1971,7 @@ NavierStokes::preprocessTagMultiresolutionDetectorCells(
         {
             const boost::shared_ptr<hier::Patch>& patch = *ip;
             
-            d_multiresolution_tagger->computeMultiresolutionSensorValues(
+            d_multiresolution_tagger->computeMultiresolutionSensorValuesOnPatch(
                 *patch,
                 getDataContext());
         }
@@ -1988,7 +1988,7 @@ NavierStokes::preprocessTagMultiresolutionDetectorCells(
  * Tag cells for refinement using multiresolution detector.
  */
 void
-NavierStokes::tagMultiresolutionDetectorCells(
+NavierStokes::tagCellsOnPatchMultiresolutionDetector(
     hier::Patch& patch,
     const double regrid_time,
     const bool initial_error,
@@ -2025,7 +2025,7 @@ NavierStokes::tagMultiresolutionDetectorCells(
     // Tag the cells by using d_multiresolution_tagger.
     if (d_multiresolution_tagger != nullptr)
     {
-        d_multiresolution_tagger->tagCells(
+        d_multiresolution_tagger->tagCellsOnPatch(
             patch,
             tags,
             getDataContext());

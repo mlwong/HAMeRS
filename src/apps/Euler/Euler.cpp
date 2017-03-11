@@ -79,7 +79,7 @@ Euler::Euler(
         t_compute_hyperbolicfluxes = tbox::TimerManager::getManager()->
             getTimer("Euler::computeHyperbolicFluxesOnPatch()");
         t_advance_steps = tbox::TimerManager::getManager()->
-            getTimer("Euler::advanceSingleStep()");
+            getTimer("Euler::advanceSingleStepOnPatch()");
         t_synchronize_hyperbloicfluxes = tbox::TimerManager::getManager()->
             getTimer("Euler::synchronizeHyperbolicFluxes()");
         t_setphysbcs = tbox::TimerManager::getManager()->
@@ -794,7 +794,7 @@ Euler::computeHyperbolicFluxesAndSourcesOnPatch(
 
 
 void
-Euler::advanceSingleStep(
+Euler::advanceSingleStepOnPatch(
     hier::Patch& patch,
     const double time,
     const double dt,
@@ -1642,7 +1642,7 @@ Euler::synchronizeHyperbolicFluxes(
  * Preprocess before tagging cells using value detector.
  */
 void
-Euler::preprocessTagValueDetectorCells(
+Euler::preprocessTagCellsValueDetector(
    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
    const int level_number,
    const double regrid_time,
@@ -1670,7 +1670,7 @@ Euler::preprocessTagValueDetectorCells(
         {
             const boost::shared_ptr<hier::Patch>& patch = *ip;
             
-            d_value_tagger->computeValueTaggerValues(
+            d_value_tagger->computeValueTaggerValuesOnPatch(
                 *patch,
                 getDataContext());
         }
@@ -1687,7 +1687,7 @@ Euler::preprocessTagValueDetectorCells(
  * Tag cells for refinement using value detector.
  */
 void
-Euler::tagValueDetectorCells(
+Euler::tagCellsOnPatchValueDetector(
     hier::Patch& patch,
     const double regrid_time,
     const bool initial_error,
@@ -1724,7 +1724,7 @@ Euler::tagValueDetectorCells(
     // Tag the cells by using d_value_tagger.
     if (d_value_tagger != nullptr)
     {
-        d_value_tagger->tagCells(
+        d_value_tagger->tagCellsOnPatch(
             patch,
             tags,
             getDataContext());
@@ -1738,7 +1738,7 @@ Euler::tagValueDetectorCells(
  * Preprocess before tagging cells using gradient detector.
  */
 void
-Euler::preprocessTagGradientDetectorCells(
+Euler::preprocessTagCellsGradientDetector(
    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
    const int level_number,
    const double regrid_time,
@@ -1766,7 +1766,7 @@ Euler::preprocessTagGradientDetectorCells(
         {
             const boost::shared_ptr<hier::Patch>& patch = *ip;
             
-            d_gradient_tagger->computeGradientSensorValues(
+            d_gradient_tagger->computeGradientSensorValuesOnPatch(
                 *patch,
                 getDataContext());
         }
@@ -1783,7 +1783,7 @@ Euler::preprocessTagGradientDetectorCells(
  * Tag cells for refinement using gradient detector.
  */
 void
-Euler::tagGradientDetectorCells(
+Euler::tagCellsOnPatchGradientDetector(
     hier::Patch& patch,
     const double regrid_time,
     const bool initial_error,
@@ -1820,7 +1820,7 @@ Euler::tagGradientDetectorCells(
     // Tag the cells by using d_gradient_tagger.
     if (d_gradient_tagger != nullptr)
     {
-        d_gradient_tagger->tagCells(
+        d_gradient_tagger->tagCellsOnPatch(
             patch,
             tags,
             getDataContext());
@@ -1834,7 +1834,7 @@ Euler::tagGradientDetectorCells(
  * Preprocess before tagging cells using multiresolution detector.
  */
 void
-Euler::preprocessTagMultiresolutionDetectorCells(
+Euler::preprocessTagCellsMultiresolutionDetector(
    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
    const int level_number,
    const double regrid_time,
@@ -1862,7 +1862,7 @@ Euler::preprocessTagMultiresolutionDetectorCells(
         {
             const boost::shared_ptr<hier::Patch>& patch = *ip;
             
-            d_multiresolution_tagger->computeMultiresolutionSensorValues(
+            d_multiresolution_tagger->computeMultiresolutionSensorValuesOnPatch(
                 *patch,
                 getDataContext());
         }
@@ -1879,7 +1879,7 @@ Euler::preprocessTagMultiresolutionDetectorCells(
  * Tag cells for refinement using multiresolution detector.
  */
 void
-Euler::tagMultiresolutionDetectorCells(
+Euler::tagCellsOnPatchMultiresolutionDetector(
     hier::Patch& patch,
     const double regrid_time,
     const bool initial_error,
@@ -1916,7 +1916,7 @@ Euler::tagMultiresolutionDetectorCells(
     // Tag the cells by using d_multiresolution_tagger.
     if (d_multiresolution_tagger != nullptr)
     {
-        d_multiresolution_tagger->tagCells(
+        d_multiresolution_tagger->tagCellsOnPatch(
             patch,
             tags,
             getDataContext());

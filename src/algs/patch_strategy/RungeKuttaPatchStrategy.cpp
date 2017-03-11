@@ -36,7 +36,51 @@ RungeKuttaPatchStrategy::~RungeKuttaPatchStrategy()
  */
 
 void
-RungeKuttaPatchStrategy::tagValueDetectorCells(
+RungeKuttaPatchStrategy::preprocessTagCellsValueDetector(
+   const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+   const int level_number,
+   const double regrid_time,
+   const bool initial_error,
+   const bool uses_gradient_detector_too,
+   const bool uses_multiresolution_detector_too,
+   const bool uses_integral_detector_too,
+   const bool uses_richardson_extrapolation_too)
+{
+   NULL_USE(patch_hierarchy);
+   NULL_USE(level_number);
+   NULL_USE(regrid_time);
+   NULL_USE(initial_error);
+   NULL_USE(uses_gradient_detector_too);
+   NULL_USE(uses_multiresolution_detector_too);
+   NULL_USE(uses_integral_detector_too);
+   NULL_USE(uses_richardson_extrapolation_too);
+}
+
+
+void
+RungeKuttaPatchStrategy::postprocessTagCellsValueDetector(
+   const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+   const int level_number,
+   const double regrid_time,
+   const bool initial_error,
+   const bool uses_gradient_detector_too,
+   const bool uses_multiresolution_detector_too,
+   const bool uses_integral_detector_too,
+   const bool uses_richardson_extrapolation_too)
+{
+   NULL_USE(patch_hierarchy);
+   NULL_USE(level_number);
+   NULL_USE(regrid_time);
+   NULL_USE(initial_error);
+   NULL_USE(uses_gradient_detector_too);
+   NULL_USE(uses_multiresolution_detector_too);
+   NULL_USE(uses_integral_detector_too);
+   NULL_USE(uses_richardson_extrapolation_too);
+}
+
+
+void
+RungeKuttaPatchStrategy::tagCellsOnPatchValueDetector(
    hier::Patch& patch,
    const double regrid_time,
    const bool initial_error,
@@ -54,7 +98,7 @@ RungeKuttaPatchStrategy::tagValueDetectorCells(
    NULL_USE(uses_multiresolution_detector_too);
    NULL_USE(uses_integral_detector_too);
    NULL_USE(uses_richardson_extrapolation_too);
-   TBOX_ERROR("RungeKuttaPatchStrategy::tagValueDetectorCells()"
+   TBOX_ERROR("RungeKuttaPatchStrategy::tagCellsOnPatchValueDetector()"
       << "\nNo derived class supplies a concrete implementation for "
       << "\nthis method."
       << std::endl);
@@ -62,12 +106,12 @@ RungeKuttaPatchStrategy::tagValueDetectorCells(
 
 
 void
-RungeKuttaPatchStrategy::preprocessTagValueDetectorCells(
+RungeKuttaPatchStrategy::preprocessTagCellsGradientDetector(
    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
    const int level_number,
    const double regrid_time,
    const bool initial_error,
-   const bool uses_gradient_detector_too,
+   const bool uses_value_detector_too,
    const bool uses_multiresolution_detector_too,
    const bool uses_integral_detector_too,
    const bool uses_richardson_extrapolation_too)
@@ -76,7 +120,7 @@ RungeKuttaPatchStrategy::preprocessTagValueDetectorCells(
    NULL_USE(level_number);
    NULL_USE(regrid_time);
    NULL_USE(initial_error);
-   NULL_USE(uses_gradient_detector_too);
+   NULL_USE(uses_value_detector_too);
    NULL_USE(uses_multiresolution_detector_too);
    NULL_USE(uses_integral_detector_too);
    NULL_USE(uses_richardson_extrapolation_too);
@@ -84,12 +128,12 @@ RungeKuttaPatchStrategy::preprocessTagValueDetectorCells(
 
 
 void
-RungeKuttaPatchStrategy::postprocessTagValueDetectorCells(
+RungeKuttaPatchStrategy::postprocessTagCellsGradientDetector(
    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
    const int level_number,
    const double regrid_time,
    const bool initial_error,
-   const bool uses_gradient_detector_too,
+   const bool uses_value_detector_too,
    const bool uses_multiresolution_detector_too,
    const bool uses_integral_detector_too,
    const bool uses_richardson_extrapolation_too)
@@ -98,7 +142,7 @@ RungeKuttaPatchStrategy::postprocessTagValueDetectorCells(
    NULL_USE(level_number);
    NULL_USE(regrid_time);
    NULL_USE(initial_error);
-   NULL_USE(uses_gradient_detector_too);
+   NULL_USE(uses_value_detector_too);
    NULL_USE(uses_multiresolution_detector_too);
    NULL_USE(uses_integral_detector_too);
    NULL_USE(uses_richardson_extrapolation_too);
@@ -106,7 +150,7 @@ RungeKuttaPatchStrategy::postprocessTagValueDetectorCells(
 
 
 void
-RungeKuttaPatchStrategy::tagGradientDetectorCells(
+RungeKuttaPatchStrategy::tagCellsOnPatchGradientDetector(
    hier::Patch& patch,
    const double regrid_time,
    const bool initial_error,
@@ -124,7 +168,7 @@ RungeKuttaPatchStrategy::tagGradientDetectorCells(
    NULL_USE(uses_multiresolution_detector_too);
    NULL_USE(uses_integral_detector_too);
    NULL_USE(uses_richardson_extrapolation_too);
-   TBOX_ERROR("RungeKuttaPatchStrategy::tagGradientDetectorCells()"
+   TBOX_ERROR("RungeKuttaPatchStrategy::tagCellsOnPatchGradientDetector()"
       << "\nNo derived class supplies a concrete implementation for "
       << "\nthis method."
       << std::endl);
@@ -132,13 +176,13 @@ RungeKuttaPatchStrategy::tagGradientDetectorCells(
 
 
 void
-RungeKuttaPatchStrategy::preprocessTagGradientDetectorCells(
+RungeKuttaPatchStrategy::preprocessTagCellsMultiresolutionDetector(
    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
    const int level_number,
    const double regrid_time,
    const bool initial_error,
    const bool uses_value_detector_too,
-   const bool uses_multiresolution_detector_too,
+   const bool uses_gradient_detector_too,
    const bool uses_integral_detector_too,
    const bool uses_richardson_extrapolation_too)
 {
@@ -147,20 +191,20 @@ RungeKuttaPatchStrategy::preprocessTagGradientDetectorCells(
    NULL_USE(regrid_time);
    NULL_USE(initial_error);
    NULL_USE(uses_value_detector_too);
-   NULL_USE(uses_multiresolution_detector_too);
+   NULL_USE(uses_gradient_detector_too);
    NULL_USE(uses_integral_detector_too);
    NULL_USE(uses_richardson_extrapolation_too);
 }
 
 
 void
-RungeKuttaPatchStrategy::postprocessTagGradientDetectorCells(
+RungeKuttaPatchStrategy::postprocessTagCellsMultiresolutionDetector(
    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
    const int level_number,
    const double regrid_time,
    const bool initial_error,
    const bool uses_value_detector_too,
-   const bool uses_multiresolution_detector_too,
+   const bool uses_gradient_detector_too,
    const bool uses_integral_detector_too,
    const bool uses_richardson_extrapolation_too)
 {
@@ -169,14 +213,14 @@ RungeKuttaPatchStrategy::postprocessTagGradientDetectorCells(
    NULL_USE(regrid_time);
    NULL_USE(initial_error);
    NULL_USE(uses_value_detector_too);
-   NULL_USE(uses_multiresolution_detector_too);
+   NULL_USE(uses_gradient_detector_too);
    NULL_USE(uses_integral_detector_too);
    NULL_USE(uses_richardson_extrapolation_too);
 }
 
 
 void
-RungeKuttaPatchStrategy::tagMultiresolutionDetectorCells(
+RungeKuttaPatchStrategy::tagCellsOnPatchMultiresolutionDetector(
    hier::Patch& patch,
    const double regrid_time,
    const bool initial_error,
@@ -194,7 +238,7 @@ RungeKuttaPatchStrategy::tagMultiresolutionDetectorCells(
    NULL_USE(uses_gradient_detector_too);
    NULL_USE(uses_integral_detector_too);
    NULL_USE(uses_richardson_extrapolation_too);
-   TBOX_ERROR("RungeKuttaPatchStrategy::tagMultiresolutionDetectorCells()"
+   TBOX_ERROR("RungeKuttaPatchStrategy::tagCellsOnPatchMultiresolutionDetector()"
       << "\nNo derived class supplies a concrete implementation for "
       << "\nthis method."
       << std::endl);
@@ -202,14 +246,14 @@ RungeKuttaPatchStrategy::tagMultiresolutionDetectorCells(
 
 
 void
-RungeKuttaPatchStrategy::preprocessTagMultiresolutionDetectorCells(
+RungeKuttaPatchStrategy::preprocessTagCellsIntegralDetector(
    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
    const int level_number,
    const double regrid_time,
    const bool initial_error,
    const bool uses_value_detector_too,
    const bool uses_gradient_detector_too,
-   const bool uses_integral_detector_too,
+   const bool uses_multiresolution_detector_too,
    const bool uses_richardson_extrapolation_too)
 {
    NULL_USE(patch_hierarchy);
@@ -218,20 +262,20 @@ RungeKuttaPatchStrategy::preprocessTagMultiresolutionDetectorCells(
    NULL_USE(initial_error);
    NULL_USE(uses_value_detector_too);
    NULL_USE(uses_gradient_detector_too);
-   NULL_USE(uses_integral_detector_too);
+   NULL_USE(uses_multiresolution_detector_too);
    NULL_USE(uses_richardson_extrapolation_too);
 }
 
 
 void
-RungeKuttaPatchStrategy::postprocessTagMultiresolutionDetectorCells(
+RungeKuttaPatchStrategy::postprocessTagCellsIntegralDetector(
    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
    const int level_number,
    const double regrid_time,
    const bool initial_error,
    const bool uses_value_detector_too,
    const bool uses_gradient_detector_too,
-   const bool uses_integral_detector_too,
+   const bool uses_multiresolution_detector_too,
    const bool uses_richardson_extrapolation_too)
 {
    NULL_USE(patch_hierarchy);
@@ -240,13 +284,13 @@ RungeKuttaPatchStrategy::postprocessTagMultiresolutionDetectorCells(
    NULL_USE(initial_error);
    NULL_USE(uses_value_detector_too);
    NULL_USE(uses_gradient_detector_too);
-   NULL_USE(uses_integral_detector_too);
+   NULL_USE(uses_multiresolution_detector_too);
    NULL_USE(uses_richardson_extrapolation_too);
 }
 
 
 void
-RungeKuttaPatchStrategy::tagIntegralDetectorCells(
+RungeKuttaPatchStrategy::tagCellsOnPatchIntegralDetector(
    hier::Patch& patch,
    const double regrid_time,
    const bool initial_error,
@@ -264,7 +308,7 @@ RungeKuttaPatchStrategy::tagIntegralDetectorCells(
    NULL_USE(uses_gradient_detector_too);
    NULL_USE(uses_multiresolution_detector_too);
    NULL_USE(uses_richardson_extrapolation_too);
-   TBOX_ERROR("RungeKuttaPatchStrategy::tagIntegralDetectorCells()"
+   TBOX_ERROR("RungeKuttaPatchStrategy::tagCellsOnPatchIntegralDetector()"
       << "\nNo derived class supplies a concrete implementation for "
       << "\nthis method."
       << std::endl);
@@ -272,51 +316,7 @@ RungeKuttaPatchStrategy::tagIntegralDetectorCells(
 
 
 void
-RungeKuttaPatchStrategy::preprocessTagIntegralDetectorCells(
-   const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-   const int level_number,
-   const double regrid_time,
-   const bool initial_error,
-   const bool uses_value_detector_too,
-   const bool uses_gradient_detector_too,
-   const bool uses_multiresolution_detector_too,
-   const bool uses_richardson_extrapolation_too)
-{
-   NULL_USE(patch_hierarchy);
-   NULL_USE(level_number);
-   NULL_USE(regrid_time);
-   NULL_USE(initial_error);
-   NULL_USE(uses_value_detector_too);
-   NULL_USE(uses_gradient_detector_too);
-   NULL_USE(uses_multiresolution_detector_too);
-   NULL_USE(uses_richardson_extrapolation_too);
-}
-
-
-void
-RungeKuttaPatchStrategy::postprocessTagIntegralDetectorCells(
-   const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-   const int level_number,
-   const double regrid_time,
-   const bool initial_error,
-   const bool uses_value_detector_too,
-   const bool uses_gradient_detector_too,
-   const bool uses_multiresolution_detector_too,
-   const bool uses_richardson_extrapolation_too)
-{
-   NULL_USE(patch_hierarchy);
-   NULL_USE(level_number);
-   NULL_USE(regrid_time);
-   NULL_USE(initial_error);
-   NULL_USE(uses_value_detector_too);
-   NULL_USE(uses_gradient_detector_too);
-   NULL_USE(uses_multiresolution_detector_too);
-   NULL_USE(uses_richardson_extrapolation_too);
-}
-
-
-void
-RungeKuttaPatchStrategy::tagRichardsonExtrapolationCells(
+RungeKuttaPatchStrategy::tagCellsOnPatchRichardsonExtrapolation(
    hier::Patch& patch,
    const int error_level_number,
    const boost::shared_ptr<hier::VariableContext>& coarsened_fine,
