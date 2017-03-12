@@ -662,7 +662,7 @@ ValueTagger::putToRestart(
 
 
 /*
- * Compute values on patch for value tagger.
+ * Compute values on a patch for value tagger.
  */
 void
 ValueTagger::computeValueTaggerValuesOnPatch(
@@ -1056,7 +1056,7 @@ ValueTagger::getValueStatistics(
 
 
 /*
- * Tag cells on patch for refinement using value tagger.
+ * Tag cells on a patch for refinement using value tagger.
  */
 void
 ValueTagger::tagCellsOnPatch(
@@ -1219,7 +1219,7 @@ ValueTagger::tagCellsOnPatch(
 
 
 /*
- * Tag cells on patch for refinement using data values.
+ * Tag cells on a patch for refinement using data values.
  */
 void
 ValueTagger::tagCellsOnPatchWithValue(
@@ -1679,7 +1679,7 @@ ValueTagger::tagCellsOnPatchWithValue(
 
 
 /*
- * Transfer data input on patch to data in class variable.
+ * Transfer data input on a patch to data in class variable.
  */
 void
 ValueTagger::transferDataOnPatchToClassVariable(

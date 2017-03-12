@@ -71,7 +71,7 @@ class GradientTagger
             const boost::shared_ptr<tbox::Database>& restart_db) const;
         
         /*
-         * Compute values of gradient sensors on patch.
+         * Compute values of gradient sensors on a patch.
          */
         void
         computeGradientSensorValuesOnPatch(
@@ -89,7 +89,7 @@ class GradientTagger
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
-         * Tag cells on patch for refinement using gradient sensors.
+         * Tag cells on a patch for refinement using gradient sensors.
          */
         void
         tagCellsOnPatch(
@@ -99,7 +99,7 @@ class GradientTagger
         
     private:
         /*
-         * Tag cells on patch using value of gradient sensor.
+         * Tag cells on a patch using value of gradient sensor.
          */
         void
         tagCellsOnPatchWithGradientSensor(
@@ -110,7 +110,7 @@ class GradientTagger
             const double tol);
         
         /*
-         * Tag cells on patch using difference sensor.
+         * Tag cells on a patch using difference sensor.
          */
         void
         tagCellsOnPatchWithDifferenceSensor(

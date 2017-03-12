@@ -32,15 +32,15 @@ class DiffusiveFluxReconstructorSixthOrder: public DiffusiveFluxReconstructor
             const boost::shared_ptr<tbox::Database>& restart_db) const;
         
         /*
-         * Compute the diffusive fluxes.
+         * Compute the diffusive flux on a patch.
          */
-        void computeDiffusiveFluxes(
+        void computeDiffusiveFluxOnPatch(
             hier::Patch& patch,
+            const boost::shared_ptr<pdat::FaceVariable<double> >& variable_diffusive_flux,
+            const boost::shared_ptr<hier::VariableContext>& data_context,
             const double time,
             const double dt,
-            const int RK_step_number,
-            const boost::shared_ptr<pdat::FaceVariable<double> >& variable_diffusive_flux,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const int RK_step_number);
         
     private:
         /*

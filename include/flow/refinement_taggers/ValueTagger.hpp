@@ -68,7 +68,7 @@ class ValueTagger
             const boost::shared_ptr<tbox::Database>& restart_db) const;
         
         /*
-         * Compute values on patch for value tagger.
+         * Compute values on a patch for value tagger.
          */
         void
         computeValueTaggerValuesOnPatch(
@@ -85,7 +85,7 @@ class ValueTagger
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
-         * Tag cells on patch for refinement using value tagger.
+         * Tag cells on a patch for refinement using value tagger.
          */
         void
         tagCellsOnPatch(
@@ -95,7 +95,7 @@ class ValueTagger
         
     private:
         /*
-         * Tag cells on patch for refinement using data values.
+         * Tag cells on a patch for refinement using data values.
          */
         void
         tagCellsOnPatchWithValue(
@@ -114,7 +114,7 @@ class ValueTagger
             const double local_tol_lo);
         
         /*
-         * Transfer data input on patch to data in class variable.
+         * Transfer data input on a patch to data in class variable.
          */
         void transferDataOnPatchToClassVariable(
             hier::Patch& patch,

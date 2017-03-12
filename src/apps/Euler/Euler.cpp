@@ -43,9 +43,9 @@
 
 boost::shared_ptr<tbox::Timer> Euler::t_init;
 boost::shared_ptr<tbox::Timer> Euler::t_compute_dt;
-boost::shared_ptr<tbox::Timer> Euler::t_compute_hyperbolicfluxes;
-boost::shared_ptr<tbox::Timer> Euler::t_advance_steps;
-boost::shared_ptr<tbox::Timer> Euler::t_synchronize_hyperbloicfluxes;
+boost::shared_ptr<tbox::Timer> Euler::t_compute_fluxes_sources;
+boost::shared_ptr<tbox::Timer> Euler::t_advance_step;
+boost::shared_ptr<tbox::Timer> Euler::t_synchronize_fluxes;
 boost::shared_ptr<tbox::Timer> Euler::t_setphysbcs;
 boost::shared_ptr<tbox::Timer> Euler::t_tagvalue;
 boost::shared_ptr<tbox::Timer> Euler::t_taggradient;
@@ -76,11 +76,11 @@ Euler::Euler(
             getTimer("Euler::initializeDataOnPatch()");
         t_compute_dt = tbox::TimerManager::getManager()->
             getTimer("Euler::computeStableDtOnPatch()");
-        t_compute_hyperbolicfluxes = tbox::TimerManager::getManager()->
+        t_compute_fluxes_sources = tbox::TimerManager::getManager()->
             getTimer("Euler::computeHyperbolicFluxesOnPatch()");
-        t_advance_steps = tbox::TimerManager::getManager()->
+        t_advance_step = tbox::TimerManager::getManager()->
             getTimer("Euler::advanceSingleStepOnPatch()");
-        t_synchronize_hyperbloicfluxes = tbox::TimerManager::getManager()->
+        t_synchronize_fluxes = tbox::TimerManager::getManager()->
             getTimer("Euler::synchronizeHyperbolicFluxes()");
         t_setphysbcs = tbox::TimerManager::getManager()->
             getTimer("Euler::setPhysicalBoundaryConditions()");
@@ -266,9 +266,9 @@ Euler::~Euler()
 {
     t_init.reset();
     t_compute_dt.reset();
-    t_compute_hyperbolicfluxes.reset();
-    t_advance_steps.reset();
-    t_synchronize_hyperbloicfluxes.reset();
+    t_compute_fluxes_sources.reset();
+    t_advance_step.reset();
+    t_synchronize_fluxes.reset();
     t_setphysbcs.reset();
     t_tagvalue.reset();
     t_taggradient.reset();
@@ -294,7 +294,7 @@ Euler::registerModelVariables(
     integrator->registerVariable(
         d_variable_convective_flux,
         hier::IntVector::getZero(d_dim),
-        RungeKuttaLevelIntegrator::HYP_FLUX,
+        RungeKuttaLevelIntegrator::FLUX,
         d_grid_geometry,
         "CONSERVATIVE_COARSEN",
         "NO_REFINE");
@@ -756,15 +756,13 @@ Euler::computeStableDtOnPatch(
 
 
 void
-Euler::computeHyperbolicFluxesAndSourcesOnPatch(
+Euler::computeFluxesAndSourcesOnPatch(
     hier::Patch& patch,
     const double time,
     const double dt,
     const int RK_step_number)
 {
-    NULL_USE(time);
-    
-    t_compute_hyperbolicfluxes->start();
+    t_compute_fluxes_sources->start();
     
     /*
      * Set zero for the source.
@@ -777,19 +775,19 @@ Euler::computeHyperbolicFluxesAndSourcesOnPatch(
     data_source->fillAll(0.0);
     
     /*
-     * Compute the fluxes and sources.
+     * Compute the convective flux and source due to splitting of convective term.
      */
     
-    d_convective_flux_reconstructor->computeConvectiveFluxesAndSources(
+    d_convective_flux_reconstructor->computeConvectiveFluxAndSourceOnPatch(
         patch,
-        time,
-        dt,
-        RK_step_number,
         d_variable_convective_flux,
         d_variable_source,
-        getDataContext());
+        getDataContext(),
+        time,
+        dt,
+        RK_step_number);
     
-    t_compute_hyperbolicfluxes->stop();
+    t_compute_fluxes_sources->stop();
 }
 
 
@@ -806,7 +804,7 @@ Euler::advanceSingleStepOnPatch(
     NULL_USE(time);
     NULL_USE(dt);
     
-    t_advance_steps->start();
+    t_advance_step->start();
     
     const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
         BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
@@ -1399,12 +1397,12 @@ Euler::advanceSingleStepOnPatch(
         }
     }
     
-    t_advance_steps->stop();
+    t_advance_step->stop();
 }
 
 
 void
-Euler::synchronizeHyperbolicFluxes(
+Euler::synchronizeFluxes(
     hier::Patch& patch,
     const double time,
     const double dt)
@@ -1412,7 +1410,7 @@ Euler::synchronizeHyperbolicFluxes(
     NULL_USE(time);
     NULL_USE(dt);
     
-    t_synchronize_hyperbloicfluxes->start();
+    t_synchronize_fluxes->start();
     
     const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
         BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
@@ -1634,7 +1632,7 @@ Euler::synchronizeHyperbolicFluxes(
     
     d_flow_model->unregisterPatch();
     
-    t_synchronize_hyperbloicfluxes->stop();
+    t_synchronize_fluxes->stop();
 }
 
 

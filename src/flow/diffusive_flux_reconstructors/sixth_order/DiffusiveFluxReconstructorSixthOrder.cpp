@@ -59,16 +59,16 @@ DiffusiveFluxReconstructorSixthOrder::putToRestart(
 
 
 /*
- * Compute the diffusive fluxes.
+ * Compute the diffusive flux on a patch.
  */
 void
-DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxes(
+DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
     hier::Patch& patch,
+    const boost::shared_ptr<pdat::FaceVariable<double> >& variable_diffusive_flux,
+    const boost::shared_ptr<hier::VariableContext>& data_context,
     const double time,
     const double dt,
-    const int RK_step_number,
-    const boost::shared_ptr<pdat::FaceVariable<double> >& variable_diffusive_flux,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const int RK_step_number)
 {
     NULL_USE(time);
     NULL_USE(RK_step_number);

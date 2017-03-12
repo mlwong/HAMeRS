@@ -1521,7 +1521,7 @@ GradientTagger::putToRestart(
 
 
 /*
- * Compute values of gradient sensors on patch.
+ * Compute values of gradient sensors on a patch.
  */
 void
 GradientTagger::computeGradientSensorValuesOnPatch(
@@ -2092,7 +2092,7 @@ GradientTagger::getSensorValueStatistics(
 
 
 /*
- * Tag cells on patch for refinement using gradient sensors.
+ * Tag cells on a patch for refinement using gradient sensors.
  */
 void
 GradientTagger::tagCellsOnPatch(
@@ -2563,7 +2563,7 @@ GradientTagger::tagCellsOnPatch(
 
 
 /*
- * Tag cells on patch using value of gradient sensor.
+ * Tag cells on a patch using value of gradient sensor.
  */
 void
 GradientTagger::tagCellsOnPatchWithGradientSensor(
@@ -2689,7 +2689,7 @@ GradientTagger::tagCellsOnPatchWithGradientSensor(
 
 
 /*
- * Tag cells on patch using difference sensor.
+ * Tag cells on a patch using difference sensor.
  */
 void
 GradientTagger::tagCellsOnPatchWithDifferenceSensor(

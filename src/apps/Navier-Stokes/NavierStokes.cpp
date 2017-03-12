@@ -43,9 +43,9 @@
 
 boost::shared_ptr<tbox::Timer> NavierStokes::t_init;
 boost::shared_ptr<tbox::Timer> NavierStokes::t_compute_dt;
-boost::shared_ptr<tbox::Timer> NavierStokes::t_compute_hyperbolicfluxes;
-boost::shared_ptr<tbox::Timer> NavierStokes::t_advance_steps;
-boost::shared_ptr<tbox::Timer> NavierStokes::t_synchronize_hyperbloicfluxes;
+boost::shared_ptr<tbox::Timer> NavierStokes::t_compute_fluxes_sources;
+boost::shared_ptr<tbox::Timer> NavierStokes::t_advance_step;
+boost::shared_ptr<tbox::Timer> NavierStokes::t_synchronize_fluxes;
 boost::shared_ptr<tbox::Timer> NavierStokes::t_setphysbcs;
 boost::shared_ptr<tbox::Timer> NavierStokes::t_tagvalue;
 boost::shared_ptr<tbox::Timer> NavierStokes::t_taggradient;
@@ -76,11 +76,11 @@ NavierStokes::NavierStokes(
             getTimer("NavierStokes::initializeDataOnPatch()");
         t_compute_dt = tbox::TimerManager::getManager()->
             getTimer("NavierStokes::computeStableDtOnPatch()");
-        t_compute_hyperbolicfluxes = tbox::TimerManager::getManager()->
+        t_compute_fluxes_sources = tbox::TimerManager::getManager()->
             getTimer("NavierStokes::computeHyperbolicFluxesOnPatch()");
-        t_advance_steps = tbox::TimerManager::getManager()->
+        t_advance_step = tbox::TimerManager::getManager()->
             getTimer("NavierStokes::advanceSingleStepOnPatch()");
-        t_synchronize_hyperbloicfluxes = tbox::TimerManager::getManager()->
+        t_synchronize_fluxes = tbox::TimerManager::getManager()->
             getTimer("NavierStokes::synchronizeHyperbolicFluxes()");
         t_setphysbcs = tbox::TimerManager::getManager()->
             getTimer("NavierStokes::setPhysicalBoundaryConditions()");
@@ -293,9 +293,9 @@ NavierStokes::~NavierStokes()
 {
     t_init.reset();
     t_compute_dt.reset();
-    t_compute_hyperbolicfluxes.reset();
-    t_advance_steps.reset();
-    t_synchronize_hyperbloicfluxes.reset();
+    t_compute_fluxes_sources.reset();
+    t_advance_step.reset();
+    t_synchronize_fluxes.reset();
     t_setphysbcs.reset();
     t_tagvalue.reset();
     t_taggradient.reset();
@@ -321,7 +321,7 @@ NavierStokes::registerModelVariables(
     integrator->registerVariable(
         d_variable_convective_flux,
         hier::IntVector::getZero(d_dim),
-        RungeKuttaLevelIntegrator::HYP_FLUX,
+        RungeKuttaLevelIntegrator::FLUX,
         d_grid_geometry,
         "CONSERVATIVE_COARSEN",
         "NO_REFINE");
@@ -329,7 +329,7 @@ NavierStokes::registerModelVariables(
     integrator->registerVariable(
         d_variable_diffusive_flux,
         hier::IntVector::getZero(d_dim),
-        RungeKuttaLevelIntegrator::HYP_FLUX,
+        RungeKuttaLevelIntegrator::FLUX,
         d_grid_geometry,
         "CONSERVATIVE_COARSEN",
         "NO_REFINE");
@@ -791,15 +791,13 @@ NavierStokes::computeStableDtOnPatch(
 
 
 void
-NavierStokes::computeHyperbolicFluxesAndSourcesOnPatch(
+NavierStokes::computeFluxesAndSourcesOnPatch(
     hier::Patch& patch,
     const double time,
     const double dt,
     const int RK_step_number)
 {
-    NULL_USE(time);
-    
-    t_compute_hyperbolicfluxes->start();
+    t_compute_fluxes_sources->start();
     
     /*
      * Set zero for the source.
@@ -812,27 +810,27 @@ NavierStokes::computeHyperbolicFluxesAndSourcesOnPatch(
     data_source->fillAll(0.0);
     
     /*
-     * Compute the fluxes and sources.
+     * Compute the convective flux, source due to splitting of convective term and diffusive flux.
      */
     
-    d_convective_flux_reconstructor->computeConvectiveFluxesAndSources(
+    d_convective_flux_reconstructor->computeConvectiveFluxAndSourceOnPatch(
         patch,
-        time,
-        dt,
-        RK_step_number,
         d_variable_convective_flux,
         d_variable_source,
-        getDataContext());
-    
-    d_diffusive_flux_reconstructor->computeDiffusiveFluxes(
-        patch,
+        getDataContext(),
         time,
         dt,
-        RK_step_number,
-        d_variable_diffusive_flux,
-        getDataContext());
+        RK_step_number);
     
-    t_compute_hyperbolicfluxes->stop();
+    d_diffusive_flux_reconstructor->computeDiffusiveFluxOnPatch(
+        patch,
+        d_variable_diffusive_flux,
+        getDataContext(),
+        time,
+        dt,
+        RK_step_number);
+    
+    t_compute_fluxes_sources->stop();
 }
 
 
@@ -849,7 +847,7 @@ NavierStokes::advanceSingleStepOnPatch(
     NULL_USE(time);
     NULL_USE(dt);
     
-    t_advance_steps->start();
+    t_advance_step->start();
     
     const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
         BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
@@ -1490,12 +1488,12 @@ NavierStokes::advanceSingleStepOnPatch(
         }
     }
     
-    t_advance_steps->stop();
+    t_advance_step->stop();
 }
 
 
 void
-NavierStokes::synchronizeHyperbolicFluxes(
+NavierStokes::synchronizeFluxes(
     hier::Patch& patch,
     const double time,
     const double dt)
@@ -1503,7 +1501,7 @@ NavierStokes::synchronizeHyperbolicFluxes(
     NULL_USE(time);
     NULL_USE(dt);
     
-    t_synchronize_hyperbloicfluxes->start();
+    t_synchronize_fluxes->start();
     
     const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
         BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
@@ -1743,7 +1741,7 @@ NavierStokes::synchronizeHyperbolicFluxes(
     
     d_flow_model->unregisterPatch();
     
-    t_synchronize_hyperbloicfluxes->stop();
+    t_synchronize_fluxes->stop();
 }
 
 

@@ -67,18 +67,17 @@ class ConvectiveFluxReconstructor
             const boost::shared_ptr<tbox::Database>& restart_db) const = 0;
         
         /*
-         * Compute the convective fluxes and sources due to hyperbolization
-         * of the equations.
+         * Compute the convective flux and source due to splitting of convective term on a patch.
          */
         virtual void
-        computeConvectiveFluxesAndSources(
+        computeConvectiveFluxAndSourceOnPatch(
             hier::Patch& patch,
-            const double time,
-            const double dt,
-            const int RK_step_number,
             const boost::shared_ptr<pdat::FaceVariable<double> >& variable_convective_flux,
             const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
-            const boost::shared_ptr<hier::VariableContext>& data_context) = 0;
+            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const double time,
+            const double dt,
+            const int RK_step_number) = 0;
     
     protected:
         /*

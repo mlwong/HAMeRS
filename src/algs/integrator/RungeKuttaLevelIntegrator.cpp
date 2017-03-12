@@ -43,12 +43,12 @@
 #include <string>
 
 /*
- *************************************************************************
+ **************************************************************************************************
  *
- * External declarations for FORTRAN 77 routines used in hyperbolic flux
- * synchronization process between hierarchy levels.
+ * External declarations for FORTRAN 77 routines used in flux synchronization process between
+ * hierarchy levels.
  *
- *************************************************************************
+ **************************************************************************************************
  */
 extern "C"
 {
@@ -229,8 +229,8 @@ boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_sync_new_levels;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_barrier_after_error_bdry_fill_comm;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_sync_initial_comm;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_sync_initial_create;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_coarsen_hyp_fluxsum_create;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_coarsen_hyp_fluxsum_comm;
+boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_coarsen_fluxsum_create;
+boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_coarsen_fluxsum_comm;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_coarsen_sync_create;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_coarsen_sync_comm;
 
@@ -244,15 +244,13 @@ std::vector<boost::shared_ptr<tbox::Statistic> > RungeKuttaLevelIntegrator::s_ti
 #endif
 
 /*
- *************************************************************************
+ **************************************************************************************************
  *
- * This constructor sets the RungeKuttaPatchStrategy pointer and
- * initializes integration parameters to default values.  Communication
- * algorithms are created here too.  Other data members are read in
- * from the input database or from the restart database corresponding
- * to the specified object_name.
+ * This constructor sets the RungeKuttaPatchStrategy pointer and initializes integration parameters
+ * to default values. Communication algorithms are created here too. Other data members are read
+ * in from the input database or from the restart database corresponding to the specified object_name.
  *
- *************************************************************************
+ **************************************************************************************************
  */
 RungeKuttaLevelIntegrator::RungeKuttaLevelIntegrator(
     const std::string& object_name,
@@ -266,15 +264,15 @@ RungeKuttaLevelIntegrator::RungeKuttaLevelIntegrator(
     d_cfl_init(tbox::MathUtilities<double>::getSignalingNaN()),
     d_lag_dt_computation(true),
     d_use_ghosts_for_dt(false),
-    d_hyp_flux_is_face(true),
-    d_hyp_flux_face_registered(false),
-    d_hyp_flux_side_registered(false),
+    d_flux_is_face(true),
+    d_flux_face_registered(false),
+    d_flux_side_registered(false),
     d_number_time_data_levels(2),
     d_scratch(hier::VariableDatabase::getDatabase()->getContext("SCRATCH")),
     d_current(hier::VariableDatabase::getDatabase()->getContext("CURRENT")),
     d_new(hier::VariableDatabase::getDatabase()->getContext("NEW")),
     d_plot_context(d_current),
-    d_have_hyp_flux_on_level_zero(false),
+    d_have_flux_on_level_zero(false),
     d_distinguish_mpi_reduction_costs(false)
 {
     TBOX_ASSERT(!object_name.empty());
@@ -295,7 +293,7 @@ RungeKuttaLevelIntegrator::RungeKuttaLevelIntegrator(
     
     d_intermediate.resize(d_number_steps);
     d_intermediate_time_dep_data.resize(d_number_steps);
-    d_intermediate_hyp_flux_var_data.resize(d_number_steps);
+    d_intermediate_flux_var_data.resize(d_number_steps);
     d_intermediate_source_var_data.resize(d_number_steps);
     for (int sn = 0; sn < d_number_steps; sn++)
     {
@@ -306,12 +304,11 @@ RungeKuttaLevelIntegrator::RungeKuttaLevelIntegrator(
 
 
 /*
- *************************************************************************
+ **************************************************************************************************
  *
- * Destructor tells the tbox::RestartManager to remove this object from
- * the list of restart items.
+ * Destructor tells the tbox::RestartManager to remove this object from the list of restart items.
  *
- *************************************************************************
+ **************************************************************************************************
  */
 RungeKuttaLevelIntegrator::~RungeKuttaLevelIntegrator()
 {
@@ -320,23 +317,19 @@ RungeKuttaLevelIntegrator::~RungeKuttaLevelIntegrator()
 
 
 /*
- *************************************************************************
+ **************************************************************************************************
  *
- * Initialize integration data on all patches on level.  This process
- * is used at the start of the simulation to set the initial hierarchy
- * data and after adaptive regridding.  In the second case, the old
- * level pointer points to the level that existed in the hierarchy
- * before regridding.  This pointer may be null, in which case it is
- * ignored.  If it is non-null, then data is copied from the old level
- * to the new level before the old level is discarded.
+ * Initialize integration data on all patches on level. This process is used at the start of the
+ * simulation to set the initial hierarchy data and after adaptive regridding. In the second case,
+ * the old level pointer points to the level that existed in the hierarchy before regridding. This
+ * pointer may be null, in which case it is ignored. If it is non-null, then data is copied from the
+ * old level to the new level before the old level is discarded.
  *
- * Note that we also allocate flux storage for the coarsest AMR
- * hierarchy level here (i.e., level 0).  The time step sequence on
- * level 0 is dictated by the user code; so to avoid any memory
- * management errors, flux storage on level 0 persists as long as the
- * level does.
+ * Note that we also allocate flux storage for the coarsest AMR hierarchy level here (i.e., level 0).
+ * The time step sequence on level 0 is dictated by the user code; so to avoid any memory management
+ * errors, flux storage on level 0 persists as long as the level does.
  *
- *************************************************************************
+ **************************************************************************************************
  */
 void
 RungeKuttaLevelIntegrator::initializeLevelData(
@@ -465,13 +458,12 @@ RungeKuttaLevelIntegrator::initializeLevelData(
 
 
 /*
- *************************************************************************
+ **************************************************************************************************
  *
- * Reset hierarchy configuration information where the range of new
- * hierarchy levels is specified.   The information updated involves
- * the cached communication schedules maintained by the algorithm.
+ * Reset hierarchy configuration information where the range of new hierarchy levels is specified.
+ * The information updated involves the cached communication schedules maintained by the algorithm.
  *
- *************************************************************************
+ **************************************************************************************************
  */
 void
 RungeKuttaLevelIntegrator::resetHierarchyConfiguration(
@@ -528,12 +520,11 @@ RungeKuttaLevelIntegrator::resetHierarchyConfiguration(
 
 
 /*
- *************************************************************************
+ **************************************************************************************************
  *
- * Call patch routines to tag cells near large gradients.
- * These cells will be refined.
+ * Call patch routines to tag cells near large gradients. These cells will be refined.
  *
- *************************************************************************
+ **************************************************************************************************
  */
 void
 RungeKuttaLevelIntegrator::applyValueDetector(
@@ -714,12 +705,11 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
 
 
 /*
- *************************************************************************
+ **************************************************************************************************
  *
- * Call patch routines to tag cells with multiresolution detector.
- * These cells will be refined.
+ * Call patch routines to tag cells with multiresolution detector. These cells will be refined.
  *
- *************************************************************************
+ **************************************************************************************************
  */
 void
 RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
@@ -811,12 +801,11 @@ RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
 
 
 /*
- *************************************************************************
+ **************************************************************************************************
  *
- * Call patch routines to tag cells with integral detector.
- * These cells will be refined.
+ * Call patch routines to tag cells with integral detector. These cells will be refined.
  *
- *************************************************************************
+ **************************************************************************************************
  */
 void
 RungeKuttaLevelIntegrator::applyIntegralDetector(
@@ -908,16 +897,14 @@ RungeKuttaLevelIntegrator::applyIntegralDetector(
 
 
 /*
- *************************************************************************
+ **************************************************************************************************
  *
- * Call patch routines to tag cells for refinement using Richardson
- * extrapolation. Richardson extrapolation requires two copies of
- * the solution to compare.  The NEW context holds the solution
- * computed on the fine level and coarsened, whereas the CURRENT
- * context holds the solution integrated on the coarse level after
- * coarsening the initial data from the fine level.
+ * Call patch routines to tag cells for refinement using Richardson extrapolation. Richardson
+ * extrapolation requires two copies of the solution to compare. The NEW context holds the solution
+ * computed on the fine level and coarsened, whereas the CURRENT context holds the solution integrated
+ * on the coarse level after coarsening the initial data from the fine level.
  *
- *************************************************************************
+ **************************************************************************************************
  */
 void
 RungeKuttaLevelIntegrator::applyRichardsonExtrapolation(
@@ -937,7 +924,7 @@ RungeKuttaLevelIntegrator::applyRichardsonExtrapolation(
     /*
      * Compare solutions computed on level (stored in NEW context) and on
      * the coarser level (stored in CURR context) on the patches of the
-     * coarser level.  The patch strategy implements the compare operations
+     * coarser level. The patch strategy implements the compare operations
      * performed on each patch.
      */
     
@@ -969,32 +956,27 @@ RungeKuttaLevelIntegrator::applyRichardsonExtrapolation(
 
 
 /*
- *************************************************************************
+ **************************************************************************************************
  *
- * The Richardson extrapolation algorithm requires a coarsened version
- * of the level on which error estiamtion is performed.  This routine
- * is used to coarsen data from a level in the AMR hierarchy to some
- * coarsened version of it.  Note that this routine will be called twice
- * The before_advance boolean argument indicates whether data is
- * set on the coarse level by coarsening the "old" time level solution
- * or by coarsening the "new" solution on the fine level (i.e., after
- * it has been advanced).
+ * The Richardson extrapolation algorithm requires a coarsened version of the level on which error
+ * estiamtion is performed. This routine is used to coarsen data from a level in the AMR hierarchy
+ * to some coarsened version of it. Note that this routine will be called twice. The before_advance
+ * boolean argument indicates whether data is set on the coarse level by coarsening the "old" time
+ * level solution or by coarsening the "new" solution on the fine level (i.e., after it has been
+ * advanced).
  *
- * The contexts used for coarsening old data depend on the number of
- * time levels.  We always want to use data at the oldest time on the
- * fine level, coarsened to the CURRENT context on the coarse level.
- * Thus, if the problem uses two time levels, we coarsen data from
- * CURRENT on fine level (since CURRENT is the oldest time maintained)
- * to CURRENT on the coarse level.  If the problem uses three time
- * levels, we coarsen from OLD on the fine level (since OLD is the
- * time maintained) to CURRENT on the coarse level.
+ * The contexts used for coarsening old data depend on the number of time levels. We always want to
+ * use data at the oldest time on the fine level, coarsened to the CURRENT context on the coarse
+ * level. Thus, if the problem uses two time levels, we coarsen data from CURRENT on fine level
+ * (since CURRENT is the oldest time maintained) to CURRENT on the coarse level. If the problem uses
+ * three time levels, we coarsen from OLD on the fine level (since OLD is the time maintained) to
+ * CURRENT on the coarse level.
  *
- * When the boolean is false, indicating we are operating at the new
- * time, we coarsen the time advanced solution at the NEW context on
- * the fine level to the NEW context on the coarse level so that they
- * may be compared later.
+ * When the boolean is false, indicating we are operating at the new time, we coarsen the time
+ * advanced solution at the NEW context on the fine level to the NEW context on the coarse level so
+ * that they may be compared later.
  *
- *************************************************************************
+ **************************************************************************************************
  */
 void
 RungeKuttaLevelIntegrator::coarsenDataForRichardsonExtrapolation(
@@ -1048,11 +1030,10 @@ RungeKuttaLevelIntegrator::coarsenDataForRichardsonExtrapolation(
     }
     
     /*
-     * Compute the width needed for Connectors.  The peer width for
-     * coarse<==>fine can be equivalent to the width for fine<==>fine in
-     * the hierarcy, because the coarse level is just the coarsened fine
-     * level.  We just have to convert the width to the correct refinement
-     * ratio before initializing the Connectors.
+     * Compute the width needed for Connectors. The peer width for coarse<==>fine can be equivalent
+     * to the width for fine<==>fine in the hierarcy, because the coarse level is just the coarsened
+     * fine level. We just have to convert the width to the correct refinement ratio before initializing
+     * the Connectors.
      */
     const hier::IntVector peer_connector_width =
         hierarchy->getRequiredConnectorWidth(
@@ -1115,15 +1096,14 @@ RungeKuttaLevelIntegrator::coarsenDataForRichardsonExtrapolation(
 
 
 /*
- *************************************************************************
+ **************************************************************************************************
  *
  * Initialize level integrator by:
  *
- *   (1) Setting the number of time data levels based on needs of
- *       the gridding algorithm.
+ *   (1) Setting the number of time data levels based on needs of the gridding algorithm.
  *   (2) Invoking variable registration in patch strategy.
  *
- *************************************************************************
+ **************************************************************************************************
  */
 void
 RungeKuttaLevelIntegrator::initializeLevelIntegrator(
@@ -1162,16 +1142,14 @@ RungeKuttaLevelIntegrator::initializeLevelIntegrator(
 
 
 /*
- *************************************************************************
+ **************************************************************************************************
  *
- * Invoke dt calculation routines in patch strategy and take a min
- * over all patches on the level.  The result will be the max of the
- * next timestep on the level. If the boolean recompute_dt is true,
- * the max timestep on the level will be computed.  If it is false,
- * the method will simply access the latest dt stored in the time
- * refinement integrator.
+ * Invoke dt calculation routines in patch strategy and take a min over all patches on the level.
+ * The result will be the max of the next timestep on the level. If the boolean recompute_dt is true,
+ * the max timestep on the level will be computed. If it is false, the method will simply access the
+ * latest dt stored in the time refinement integrator.
  *
- *************************************************************************
+ **************************************************************************************************
  */
 double
 RungeKuttaLevelIntegrator::getLevelDt(
@@ -1264,11 +1242,9 @@ RungeKuttaLevelIntegrator::getLevelDt(
         d_patch_strategy->clearDataContext();
         
         /*
-         * Copy data from scratch to current and de-allocate scratch storage.
-         * This may be excessive here, but seems necessary if the
-         * computation of dt affects the state of the problem solution.
-         * Also, this getLevelDt() routine is called at initialization only
-         * in most cases.
+         * Copy data from scratch to current and de-allocate scratch storage. This may be excessive
+         * here, but seems necessary if the computation of dt affects the state of the problem
+         * solution. Also, this getLevelDt() routine is called at initialization only in most cases.
          */
      
         copyTimeDependentData(level, d_scratch, d_current);
@@ -1312,13 +1288,12 @@ RungeKuttaLevelIntegrator::getLevelDt(
 
 
 /*
- *************************************************************************
+ **************************************************************************************************
  *
- * For the standard explicit integration algorithm for hyperbolic
- * conservation laws, the fine time increment is the coarse increment
- * divided by the maximum mesh ratio (independent of level number).
+ * For the standard explicit integration algorithm for  conservation laws, the fine time increment
+ * is the coarse increment divided by the maximum mesh ratio (independent of level number).
  *
- *************************************************************************
+ **************************************************************************************************
  */
 double
 RungeKuttaLevelIntegrator::getMaxFinerLevelDt(
@@ -1339,35 +1314,32 @@ RungeKuttaLevelIntegrator::getMaxFinerLevelDt(
 
 
 /*
- *************************************************************************
+ **************************************************************************************************
  *
- * Integrate data on all patches in patch level from current time
- * to new time (new_time) using a single time step.  Before the advance
- * can occur, proper ghost cell information is obtained for all patches
- * on the level.  Then, local patches are advanced sequentially in the
- * loop over patches.  The details of the routine are as follows:
+ * Integrate data on all patches in patch level from current time to new time (new_time) using a
+ * single time step. Before the advance can occur, proper ghost cell information is obtained for all
+ * patches on the level. Then, local patches are advanced sequentially in the loop over patches. The
+ * details of the routine are as follows:
  *
- *  0) Allocate storage for new time level data. Also, allocate
- *     necessary HYP_FLUX, hyperbolic flux integral and SOURCE storage
- *     if needed. (i.e., if regrid_advance is false, first_step is true,
- *     and coarser or finer level than current level exists in hierarchy.)
+ *  0) Allocate storage for new time level data. Also, allocate necessary FLUX, flux integral and
+ *     SOURCE storage if needed. (i.e., if regrid_advance is false, first_step is true, and coarser
+ *     or finer level than current level exists in hierarchy.)
  *
- *  1) Scratch space is filled so that, for each patch, interior data
- *     and ghost cell bdry data correspond to specified time.
+ *  1) Scratch space is filled so that, for each patch, interior data and ghost cell bdry data
+ *     correspond to specified time.
  *
  *  1a) Call user routines to pre-process advance data, if needed.
  *
  *  2) Advance in time by looping throught Runge-Kutta steps. In each step,
  *
- *  2a) Copy time-dependent data from scratch space to corresponding
- *      intermediate space.
+ *  2a) Copy time-dependent data from scratch space to corresponding intermediate space.
  *      
- *  2b) Compute next intermediate hyperbolic fluxes in corresponding
- *      intermediate space using data on patch + ghosts at given time.
+ *  2b) Compute next intermediate fluxes in corresponding intermediate space using data on patch +
+ *      ghosts at given time.
  *
- *  2c) Advance one single Runge-Kutta step in scratch space and accumulate
- *      hyperbolic fluxs from intermediate fluxes using suitable weights for
- *      hyperbolic flux correction in flux synchronization later.
+ *  2c) Advance one single Runge-Kutta step in scratch space and accumulate fluxs from intermediate
+ *      fluxes using suitable weights for flux
+ *      correction in flux synchronization later.
  *
  *  3) At the end of the loop, interior data is advanced to time = new_time.
  *
@@ -1377,51 +1349,44 @@ RungeKuttaLevelIntegrator::getMaxFinerLevelDt(
  *
  *     4a) If (d_lag_dt_computation == true)
  *         {
- *            DO NOT RECOMPUTE characteristic data after advancing
- *            data on patch. Use characteristic data corresponding
- *            to current time level, computed prior to hyperbolic flux
- *            computation in dt calculation.
+ *            DO NOT RECOMPUTE characteristic data after advancing data on patch. Use characteristic
+ *            data corresponding to current time level, computed prior to flux computation in dt
+ *            calculation.
  *            If (d_use_ghosts_for_dt == true)
  *               - Compute dt using data on patch+ghosts at time.
  *            Else
  *               - Compute dt using data on patch interior ONLY.
  *         }
  *
- *     4b) Copy data from scratch space patch interior to new data
- *         storage for patch (i.e., at time = new_time).
+ *     4b) Copy data from scratch space patch interior to new data storage for patch (i.e., at time =
+ *         new_time).
  *
  *     4a) If (d_lag_dt_computation == false)
  *         {
- *            RECOMPUTE characteristic data after advancing data on
- *            patch. Use characteristic data corresponding to new time
- *            level in dt calculation.
+ *            RECOMPUTE characteristic data after advancing data on patch. Use characteristic data
+ *            corresponding to new time level in dt calculation.
  *            If (d_use_ghosts_for_dt == true)
- *               - Refill scratch space with new interior patch data
- *                 and ghost cell bdry data correspond to new time.
- *                 (NOTE: This requires a new boundary schedule.)
+ *               - Refill scratch space with new interior patch data and ghost cell bdry data
+ *                  correspond to new time. (NOTE: This requires a new boundary schedule.)
  *               - Compute dt using data on patch+ghosts at new_time.
  *            Else
- *               - Compute dt using data on patch interior ONLY.
- *                 (using patch interior data at new_time)
+ *               - Compute dt using data on patch interior ONLY. (using patch interior data at
+ *                 new_time)
  *         }
  *
- *  5) If (ln > 0), update hyperbolic flux integrals by adding patch bdry
- *     HYP_FLUXes to hyperbolic flux sums.
+ *  5) If (ln > 0), update flux integrals by adding patch bdry FLUXes to flux sums.
  *
  * Important Notes:
- *    1) In order to advance finer levels (if they exist), both old
- *       and new data for each patch on the level must be maintained.
- *    2) If the timestep is the first in the timestep loop on the level
- *       (indicated by first_step), then time interpolation is
- *       is unnecessary to fill ghost cells from the next coarser level.
- *    3) The new dt is not calculated if regrid_advance is true.
- *       If this is the case, it is assumed that the results of the
- *       advance and the timestep calculation will be discarded
- *       (e.g., during regridding, or initialization).  Also, allocation
- *       and post-processing of HYP_FLUX/hyperbolic flux integral data is
- *       not performed in this case.
+ *    1) In order to advance finer levels (if they exist), both old and new data for each patch on
+ *       the level must be maintained.
+ *    2) If the timestep is the first in the timestep loop on the level (indicated by first_step),
+ *       then time interpolation is is unnecessary to fill ghost cells from the next coarser level.
+ *    3) The new dt is not calculated if regrid_advance is true. If this is the case, it is assumed
+ *       that the results of the advance and the timestep calculation will be discarded (e.g., during
+ *       regridding, or initialization). Also, allocation and post-processing of FLUX/flux integral
+ *       data is not performed in this case.
  *
- *************************************************************************
+ **************************************************************************************************
  */
 double
 RungeKuttaLevelIntegrator::advanceLevel(
@@ -1450,10 +1415,9 @@ RungeKuttaLevelIntegrator::advanceLevel(
     
     /*
      * (1) Allocate data needed for advancing level.
-     * (2) Generate temporary communication schedule to fill ghost
-     *     cells, if needed.
+     * (2) Generate temporary communication schedule to fill ghost cells, if needed.
      * (3) Fill ghost cell data.
-     * (4) Process hyperbolic flux and source storage before the advance.
+     * (4) Process flux and source storage before the advance.
      */
     
     level->allocatePatchData(d_new_time_dep_data, new_time);
@@ -1462,7 +1426,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
     for (int sn = 0; sn < d_number_steps; sn++)
     {
         level->allocatePatchData(d_intermediate_time_dep_data[sn], current_time);
-        level->allocatePatchData(d_intermediate_hyp_flux_var_data[sn], current_time);
+        level->allocatePatchData(d_intermediate_flux_var_data[sn], current_time);
         level->allocatePatchData(d_intermediate_source_var_data[sn], current_time);
     }
     
@@ -1553,7 +1517,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
     d_patch_strategy->clearDataContext();
     fill_schedule.reset();
     
-    preprocessHyperbolicFluxAndSourceData(
+    preprocessFluxAndSourceData(
         level,
         current_time,
         new_time,
@@ -1563,18 +1527,15 @@ RungeKuttaLevelIntegrator::advanceLevel(
     
     /*
      * (5) Call user-routine to pre-process state data, if needed.
-     * (6) Initialize all hyperbolic fluxes with zero values
+     * (6) Initialize all fluxes with zero values
      * (6) Advance solution on all level patches (scratch storage).
      *     In looping over Runge-Kutta steps,
      *     (6a) Copy data from scatch data to the intermediate data.
-     *          Dirchlet boundary conditions are applied at the coarse-fine
-     *          boundaries of patches.
-     *     (6b) Compute intermediate hyperbolic fluxes of current step.
-     *     (6c) Advance one single Runge-Kutta step and accumulate the
-     *          intermediate hyperbolic flux to the total hyperbolic flux
-     *          during this whole Runge-Kutta step. Time-independent
-     *          intermediate data of next Runge-Kutta step is stored in
-     *          scratch context.
+     *          Dirchlet boundary conditions are applied at the coarse-fine boundaries of patches.
+     *     (6b) Compute intermediate fluxes of current step.
+     *     (6c) Advance one single Runge-Kutta step and accumulate the intermediate flux to the total
+     *          flux during this whole Runge-Kutta step. Time-independent intermediate data of next
+     *          Runge-Kutta step is stored in scratch context.
      * (7) Copy new solution to from scratch to new storage.
      * (8) Call user-routine to post-process state data, if needed.
      */
@@ -1603,18 +1564,18 @@ RungeKuttaLevelIntegrator::advanceLevel(
         
         patch->allocatePatchData(d_temp_var_scratch_data, current_time);
         
-        // Fill all hyperbolic fluxes with zero values.
+        // Fill all fluxes with zero values.
         
-        std::list<boost::shared_ptr<hier::Variable> >::iterator hyp_flux_var =
-            d_hyp_flux_variables.begin();
+        std::list<boost::shared_ptr<hier::Variable> >::iterator flux_var =
+            d_flux_variables.begin();
         
-        while (hyp_flux_var != d_hyp_flux_variables.end())
+        while (flux_var != d_flux_variables.end())
         {            
-            if (d_hyp_flux_is_face)
+            if (d_flux_is_face)
             {
                 boost::shared_ptr<pdat::FaceData<double> > flux_data(
                     BOOST_CAST<pdat::FaceData<double>, hier::PatchData>(
-                        patch->getPatchData(*hyp_flux_var, d_scratch)));
+                        patch->getPatchData(*flux_var, d_scratch)));
                 
                 TBOX_ASSERT(flux_data);
                 flux_data->fillAll(0.0);
@@ -1623,13 +1584,13 @@ RungeKuttaLevelIntegrator::advanceLevel(
             {
                 boost::shared_ptr<pdat::SideData<double> > flux_data(
                     BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
-                        patch->getPatchData(*hyp_flux_var, d_scratch)));
+                        patch->getPatchData(*flux_var, d_scratch)));
                 
                 TBOX_ASSERT(flux_data);
                 flux_data->fillAll(0.0);
             }
             
-            hyp_flux_var++;
+            flux_var++;
         }
         
         // Fill all sources with zero values.
@@ -1683,7 +1644,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
             d_patch_strategy->setDataContext(d_intermediate[sn]);
             
             // Compute flux corresponding to the previous step.
-            d_patch_strategy->computeHyperbolicFluxesAndSourcesOnPatch(
+            d_patch_strategy->computeFluxesAndSourcesOnPatch(
                 *patch,
                 current_time,
                 dt,
@@ -1719,7 +1680,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
     d_patch_strategy->clearDataContext();
     
     level->setTime(new_time, d_saved_var_scratch_data);
-    level->setTime(new_time, d_hyp_flux_var_data);
+    level->setTime(new_time, d_flux_var_data);
     
     copyTimeDependentData(level, d_scratch, d_new);
     
@@ -1736,15 +1697,13 @@ RungeKuttaLevelIntegrator::advanceLevel(
     /*
     * (9) If the level advance is for regridding, we compute the next timestep:
     *
-    * (a) If the dt computation is lagged (i.e., we use pre-advance data
-    *     to compute timestep), we reset scratch space on patch interiors
-    *     if needed.  Then, we set the strategy context to current or scratch
-    *     depending on whether ghost values are used to compute dt.
-    * (b) If the dt computation is not lagged (i.e., we use advanced data
-    *     to compute timestep), we refill scratch space, including ghost
-    *     data with new solution values if needed.  Then, we set the strategy
-    *     context to new or scratch depending on whether ghost values are
-    *     used to compute dt.
+    * (a) If the dt computation is lagged (i.e., we use pre-advance data to compute timestep), we
+    *     reset scratch space on patch interiors if needed. Then, we set the strategy context to
+    *     current or scratch depending on whether ghost values are used to compute dt.
+    * (b) If the dt computation is not lagged (i.e., we use advanced data to compute timestep), we
+    *     refill scratch space, including ghost data with new solution values if needed. Then, we
+    *     set the strategy context to new or scratch depending on whether ghost values are used to
+    *     compute dt.
     * (c) Then, we loop over patches and compute the dt on each patch.
     */
     
@@ -1816,11 +1775,11 @@ RungeKuttaLevelIntegrator::advanceLevel(
     for (int sn = 0; sn < d_number_steps; sn++)
     {
       level->deallocatePatchData(d_intermediate_time_dep_data[sn]);
-      level->deallocatePatchData(d_intermediate_hyp_flux_var_data[sn]);
+      level->deallocatePatchData(d_intermediate_flux_var_data[sn]);
       level->deallocatePatchData(d_intermediate_source_var_data[sn]);
     }
     
-    postprocessHyperbolicFluxAndSourceData(
+    postprocessFluxAndSourceData(
         level,
         regrid_advance,
         first_step,
@@ -1859,12 +1818,11 @@ RungeKuttaLevelIntegrator::advanceLevel(
 
 
 /*
- *************************************************************************
- *                                                                       *
- * Synchronize data between patch levels according to the standard       *
- * hyperbolic flux correction algorithm.                                 *
- *                                                                       *
- *************************************************************************
+ **************************************************************************************************
+ * 
+ * Synchronize data between patch levels according to the standard flux correction algorithm.
+ * 
+ **************************************************************************************************
  */
 void
 RungeKuttaLevelIntegrator::standardLevelSynchronization(
@@ -1931,21 +1889,21 @@ RungeKuttaLevelIntegrator::standardLevelSynchronization(
             sync_time,
             old_times[coarse_ln]);
         
-        fine_level->deallocatePatchData(d_hyp_fluxsum_data);
-        fine_level->deallocatePatchData(d_hyp_flux_var_data);
+        fine_level->deallocatePatchData(d_fluxsum_data);
+        fine_level->deallocatePatchData(d_flux_var_data);
         fine_level->deallocatePatchData(d_source_var_data);
         
         if (coarse_ln > coarsest_level)
         {
-            coarse_level->deallocatePatchData(d_hyp_flux_var_data);
+            coarse_level->deallocatePatchData(d_flux_var_data);
             coarse_level->deallocatePatchData(d_source_var_data);
         }
         else
         {
             if (coarsest_level == 0)
             {
-                coarse_level->deallocatePatchData(d_hyp_flux_var_data);
-                d_have_hyp_flux_on_level_zero = false;
+                coarse_level->deallocatePatchData(d_flux_var_data);
+                d_have_flux_on_level_zero = false;
                 coarse_level->deallocatePatchData(d_source_var_data);
             }
         }
@@ -1956,23 +1914,21 @@ RungeKuttaLevelIntegrator::standardLevelSynchronization(
 
 
 /*
- *************************************************************************
- *                                                                       *
- * Coarsen current solution data from finest hierarchy level specified   *
- * down through the coarsest hierarchy level specified, if initial_time  *
- * is true (i.e., hierarchy is being constructed at initial simulation   *
- * time).  After data is coarsened, the user's initialization routine    *
- * is called to reset data (as needed by the application) before         *
- * that solution is further coarsened to the next coarser level in the   *
- * hierarchy.  If initial_time is false, then this routine does nothing  *
- * In that case, interpolation of data from coarser levels is sufficient *
- * to set data on new levels in the hierarchy during regridding.         *
- *                                                                       *
- * NOTE: The fact that this routine does nothing when called at any      *
- *       time later than when the AMR hierarchy is constructed initially *
- *        may need to change at some point based on application needs.   *
- *                                                                       *
- *************************************************************************
+ **************************************************************************************************
+ *                                                                       
+ * Coarsen current solution data from finest hierarchy level specified down through the coarsest
+ * hierarchy level specified, if initial_time is true (i.e., hierarchy is being constructed at
+ * initial simulation time). After data is coarsened, the user's initialization routine is called
+ * to reset data (as needed by the application) before that solution is further coarsened to the
+ * next coarser level in the hierarchy. If initial_time is false, then this routine does nothing
+ * In that case, interpolation of data from coarser levels is sufficient to set data on new levels
+ * in the hierarchy during regridding.
+ * 
+ * NOTE: The fact that this routine does nothing when called at any time later than when the AMR
+ *       hierarchy is constructed initially may need to change at some point based on application
+ *       needs.
+ * 
+ **************************************************************************************************
  */
 void
 RungeKuttaLevelIntegrator::synchronizeNewLevels(
@@ -2047,21 +2003,17 @@ RungeKuttaLevelIntegrator::synchronizeNewLevels(
 
 
 /*
- *************************************************************************
+ **************************************************************************************************
  *
- * Synchronize data between coarse and fine patch levels according to
- * the standard hyperbolic flux correction algorithm.  The steps of
- * the algorithm are:
+ * Synchronize data between coarse and fine patch levels according to the standard flux correction
+ * algorithm. The steps of the algorithm are:
  *
- *    (1) Replace coarse time-space hyperbolic flux integrals at coarse-fine
- *        boundaries with time-space hyperbolic flux integrals computed on
- *        fine level.
- *    (2) Repeat conservative difference on coarse level with corrected
- *        hyperbolic fluxes.
- *    (3) Conservatively coarsen solution on interior of fine level to
- *        coarse level.
+ *    (1) Replace coarse time-space flux integrals at coarse-fine boundaries with time-space flux
+ *    integrals computed on fine level.
+ *    (2) Repeat conservative difference on coarse level with corrected fluxes.
+ *    (3) Conservatively coarsen solution on interior of fine level to coarse level.
  *
- *************************************************************************
+ **************************************************************************************************
  */
 void
 RungeKuttaLevelIntegrator::synchronizeLevelWithCoarser(
@@ -2078,29 +2030,28 @@ RungeKuttaLevelIntegrator::synchronizeLevelWithCoarser(
     TBOX_ASSERT(sync_time > coarse_sim_time);
     
     /*
-     * Coarsen hyperbolic flux integrals around fine patch boundaries to coarser
-     * level and replace coarse hyperbolic flux information where appropriate. NULL
-     * patch model is passed in to avoid over complicating coarsen process;
-     * i.e. patch model is not needed in coarsening of hyperbolic flux integrals.
+     * Coarsen flux integrals around fine patch boundaries to coarser level and replace coarse flux
+     * information where appropriate. NULL patch model is passed in to avoid over complicating coarsen
+     * process; i.e. patch model is not needed in coarsening of flux integrals.
      */
     
-    t_coarsen_hyp_fluxsum_create->start();
+    t_coarsen_fluxsum_create->start();
     boost::shared_ptr<xfer::CoarsenSchedule> sched(
-        d_coarsen_hyp_fluxsum->createSchedule(
+        d_coarsen_fluxsum->createSchedule(
             coarse_level,
             fine_level,
             0));
-    t_coarsen_hyp_fluxsum_create->stop();
+    t_coarsen_fluxsum_create->stop();
     
-    t_coarsen_hyp_fluxsum_comm->start();
+    t_coarsen_fluxsum_comm->start();
     sched->coarsenData();
-    t_coarsen_hyp_fluxsum_comm->stop();
+    t_coarsen_fluxsum_comm->stop();
     
     /*
      * Repeat conservative difference on coarser level.
      */
     coarse_level->allocatePatchData(d_saved_var_scratch_data, coarse_sim_time);
-    coarse_level->setTime(coarse_sim_time, d_hyp_flux_var_data);
+    coarse_level->setTime(coarse_sim_time, d_flux_var_data);
     
     d_patch_strategy->setDataContext(d_scratch);
     
@@ -2119,7 +2070,7 @@ RungeKuttaLevelIntegrator::synchronizeLevelWithCoarser(
         
         patch->allocatePatchData(d_temp_var_scratch_data, coarse_sim_time);
             
-        d_patch_strategy->synchronizeHyperbolicFluxes(*patch,
+        d_patch_strategy->synchronizeFluxes(*patch,
            coarse_sim_time,
            reflux_dt);
         patch->deallocatePatchData(d_temp_var_scratch_data);
@@ -2153,13 +2104,12 @@ RungeKuttaLevelIntegrator::synchronizeLevelWithCoarser(
 
 
 /*
- *************************************************************************
+ **************************************************************************************************
  *
- * Reset time-dependent data on patch level by replacing current data
- * with new.  The boolean argument is used for odd refinement ratios
- * (in particular 3 used in certain applications).
+ * Reset time-dependent data on patch level by replacing current data with new. The boolean argument
+ * is used for odd refinement ratios (in particular 3 used in certain applications).
  *
- *************************************************************************
+ **************************************************************************************************
  */
 void
 RungeKuttaLevelIntegrator::resetTimeDependentData(
@@ -2235,12 +2185,12 @@ RungeKuttaLevelIntegrator::resetTimeDependentData(
 
 
 /*
- *************************************************************************
+ **************************************************************************************************
  *
- * Discard new data on level.  This is used primarily to reset patch
- * data after error estimation (e.g., Richardson extrapolation.)
+ * Discard new data on level. This is used primarily to reset patch data after error estimation
+ * (e.g., Richardson extrapolation.)
  *
- *************************************************************************
+ **************************************************************************************************
  */
 void
 RungeKuttaLevelIntegrator::resetDataToPreadvanceState(
@@ -2256,41 +2206,36 @@ RungeKuttaLevelIntegrator::resetDataToPreadvanceState(
 
 
 /*
- *************************************************************************
+ **************************************************************************************************
  *
- * Register given variable with algorithm according to specified
- * algorithm role (i.e., RK_VAR_TYPE).  Assignment of descriptor
- * indices to variable lists, component selectors, and communication
- * algorithms takes place here.  The different cases are:
+ * Register given variable with algorithm according to specified algorithm role (i.e., RK_VAR_TYPE).
+ * Assignment of descriptor indices to variable lists, component selectors, and communication
+ * algorithms takes place here. The different cases are:
  *
  * TIME_DEP:
- *             The number of factories depends on the number of time
- *             levels of data that must be stored on patches to satisfy
- *             regridding reqs.  Currently, there are two possibilities:
+ *             The number of factories depends on the number of time levels of data that must be
+ *             stored on patches to satisfy regridding reqs. Currently, there are two possibilities:
  *
- *             (1) If the coarsen ratios between levels are even, the
- *                 error coarsening ratio will be two and so only two
- *                 time levels of data must be maintained on every level
- *                 but the finest as usual.
+ *             (1) If the coarsen ratios between levels are even, the error coarsening ratio will
+ *                 be two and so only two time levels of data must be maintained on every level but
+ *                 the finest as usual.
  *
- *             (2) If the coarsen ratios between levels are three, and
- *                 time integration is used during regridding (e.g., Rich-
- *                 ardson extrapolation), then three time levels of data
- *                 must be maintained on every level but the finest so
- *                 that error estimation can be executed properly.
+ *             (2) If the coarsen ratios between levels are three, and time integration is used
+ *                 during regridding (e.g., Richardson extrapolation), then three time levels of data
+ *                 must be maintained on every level but the finest so that error estimation can be
+ *                 executed properly.
  *
  *             In case (1), three factories are needed:
  *                          SCRATCH, CURRENT, NEW.
  *             In case (2), four factories are needed:
  *                          SCRATCH, OLD, CURRENT, NEW.
  *
- *             SCRATCH index is added to d_saved_var_scratch_data.
- *             CURRENT index is added to d_new_patch_init_data.
- *             NEW index is added to d_new_time_dep_data.
+ *             SCRATCH index is added to d_saved_var_scratch_data. CURRENT index is added to
+ *             d_new_patch_init_data. NEW index is added to d_new_time_dep_data.
  *
  * INPUT:
- *             Only one time level of data is maintained and once values
- *             are set on patches, they do not change in time.
+ *             Only one time level of data is maintained and once values are set on patches, they
+ *             do not change in time.
  *
  *             Two factories are needed: SCRATCH, CURRENT.
  *
@@ -2298,25 +2243,22 @@ RungeKuttaLevelIntegrator::resetDataToPreadvanceState(
  *             CURRENT index is added to d_new_patch_init_data.
  *
  * NO_FILL:
- *             Only one time level of data is stored and no scratch space
- *             is used.  Data may be set and manipulated at will in user
- *             routines.  Data (including ghost values) is never touched
- *             outside of user routines.
+ *             Only one time level of data is stored and no scratch space is used. Data may be set
+ *             and manipulated at will in user routines. Data (including ghost values) is never
+ *             touched outside of user routines.
  *
  *             Two factories are needed: CURRENT, SCRATCH.
  *
  *             CURRENT index is added to d_new_patch_init_data.
- *             SCRATCH index is needed only for temporary work space to
- *             fill new patch levels.
+ *             SCRATCH index is needed only for temporary work space to fill new patch levels.
  *
- * HYP_FLUX:
+ * FLUX:
  *             One factory is needed: SCRATCH.
  *
- *             SCRATCH index is added to d_hyp_flux_var_data.
+ *             SCRATCH index is added to d_flux_var_data.
  *
- *             Additionally, a variable for hyperbolic flux integral data
- *             is created for each HYP_FLUX variable. It has a single
- *             factory, SCRATCH, which is added to d_hyp_fluxsum_data.
+ *             Additionally, a variable for flux integral data is created for each FLUX variable. It
+ *             has a single factory, SCRATCH, which is added to d_fluxsum_data.
  *
  * SOURCE:
  *             One factory is needed: SCRATCH.
@@ -2327,7 +2269,7 @@ RungeKuttaLevelIntegrator::resetDataToPreadvanceState(
  *             One factory is needed: SCRATCH.
  *             SCRATCH index is added to d_temp_var_scratch_data.
  *             
- *************************************************************************
+ **************************************************************************************************
  */
 void
 RungeKuttaLevelIntegrator::registerVariable(
@@ -2361,7 +2303,7 @@ RungeKuttaLevelIntegrator::registerVariable(
         }
         
         d_fill_new_level.reset(new xfer::RefineAlgorithm());
-        d_coarsen_hyp_fluxsum.reset(new xfer::CoarsenAlgorithm(dim));
+        d_coarsen_fluxsum.reset(new xfer::CoarsenAlgorithm(dim));
         d_coarsen_sync_data.reset(new xfer::CoarsenAlgorithm(dim));
         d_sync_initial_data.reset(new xfer::CoarsenAlgorithm(dim));
         
@@ -2420,15 +2362,12 @@ RungeKuttaLevelIntegrator::registerVariable(
                 registerPatchDataForRestart(cur_id);
             
             /*
-             * Set boundary fill schedules for time-dependent variable.
-             * If time interpolation operator is non-NULL, regular advance
-             * bdry fill algorithm will time interpolate between current and
-             * new data on coarser levels, and fill from current data on
-             * same level.  New advance bdry fill algorithm will time interpolate
-             * between current and new data on coarser levels, and fill from new
-             * data on same level.  If time interpolation operator is NULL,
-             * regular and new bdry fill algorithms will use current and new
-             * data, respectively.
+             * Set boundary fill schedules for time-dependent variable. If time interpolation operator
+             * is non-NULL, regular advance bdry fill algorithm will time interpolate between current
+             * and new data on coarser levels, and fill from current data on same level. New advance
+             * bdry fill algorithm will time interpolate between current and new data on coarser
+             * levels, and fill from new data on same level. If time interpolation operator is NULL,
+             * regular and new bdry fill algorithms will use current and new data, respectively.
              */
             boost::shared_ptr<hier::RefineOperator> refine_op(
                 transfer_geom->lookupRefineOperator(var, refine_name));
@@ -2444,8 +2383,8 @@ RungeKuttaLevelIntegrator::registerVariable(
                 cur_id, cur_id, cur_id, new_id, scr_id, refine_op, time_int);
             
             /*
-             * Set boundary fill schedules for data used in the intermediate steps
-             * of the Runge-Kutta integration.
+             * Set boundary fill schedules for data used in the intermediate steps of the Runge-Kutta
+             * integration.
              */
             for (int sn = 0; sn < d_number_steps; sn++)
             {
@@ -2457,11 +2396,10 @@ RungeKuttaLevelIntegrator::registerVariable(
             }
             
             /*
-             * For data synchronization between levels, the coarsen algorithm
-             * will coarsen new data on finer level to new data on coarser.
-             * Recall that coarser level data pointers will not be reset until
-             * after synchronization so we always coarsen to new
-             * (see synchronizeLevelWithCoarser routine).
+             * For data synchronization between levels, the coarsen algorithm will coarsen new data
+             * on finer level to new data on coarser. Recall that coarser level data pointers will
+             * not be reset until after synchronization so we always coarsen to new (see
+             * synchronizeLevelWithCoarser routine).
              */
             
             boost::shared_ptr<hier::CoarsenOperator> coarsen_op(
@@ -2472,14 +2410,12 @@ RungeKuttaLevelIntegrator::registerVariable(
             d_sync_initial_data->registerCoarsen(cur_id, cur_id, coarsen_op);
             
             /*
-             * Coarsen operations used in Richardson extrapolation.  The init
-             * initializes data on coarser level, before the coarse level
-             * advance.  If two time levels are used, coarsening occurs between
-             * the CURRENT context on both levels.  If three levels are used,
-             * coarsening occurs between the OLD context on the fine level and
-             * the CURRENT context on the coarse level.  The final coarsen
-             * algorithm coarsens data after it has been advanced on the fine
-             * level to the NEW context on the coarser level.
+             * Coarsen operations used in Richardson extrapolation. The init initializes data on
+             * coarser level, before the coarse level advance. If two time levels are used, coarsening
+             * occurs between the CURRENT context on both levels. If three levels are used, coarsening
+             * occurs between the OLD context on the fine level and the CURRENT context on the coarse
+             * level. The final coarsen algorithm coarsens data after it has been advanced on the
+             * fine level to the NEW context on the coarser level.
              */
             
             if (d_number_time_data_levels == 3)
@@ -2539,8 +2475,8 @@ RungeKuttaLevelIntegrator::registerVariable(
                 cur_id, cur_id, scr_id, refine_op);
             
             /*
-             * At initialization, it may be necessary to coarsen INPUT data
-             * up through the hierarchy so that all levels are consistent.
+             * At initialization, it may be necessary to coarsen INPUT data up through the hierarchy
+             * so that all levels are consistent.
              */
             
             boost::shared_ptr<hier::CoarsenOperator> coarsen_op(
@@ -2549,8 +2485,8 @@ RungeKuttaLevelIntegrator::registerVariable(
             d_sync_initial_data->registerCoarsen(cur_id, cur_id, coarsen_op);
             
             /*
-             * Coarsen operation for setting initial data on coarser level
-             * in the Richardson extrapolation algorithm.
+             * Coarsen operation for setting initial data on coarser level in the Richardson
+             * extrapolation algorithm.
              */
             
             d_coarsen_rich_extrap_init->
@@ -2596,13 +2532,12 @@ RungeKuttaLevelIntegrator::registerVariable(
             
             break;
         }
-        case HYP_FLUX:
+        case FLUX:
         {
             /*
-             * Note that we force all hyperbolic flux variables to hold double precision
-             * data and be face- or side-centered.  Also, for each hyperbolic flux variable,
-             * a corresponding "hyp_fluxsum" variable is created to manage
-             * synchronization of data betweeen patch levels in the hierarchy.
+             * Note that we force all flux variables to hold double precision data and be face- or
+             * side-centered. Also, for each flux variable, a corresponding "fluxsum" variable is
+             * created to manage synchronization of data betweeen patch levels in the hierarchy.
              */
             const boost::shared_ptr<pdat::FaceVariable<double> > face_var(
                 boost::dynamic_pointer_cast<pdat::FaceVariable<double>,
@@ -2614,7 +2549,7 @@ RungeKuttaLevelIntegrator::registerVariable(
             
             if (face_var)
             {
-                if (d_hyp_flux_side_registered)
+                if (d_flux_side_registered)
                 {
                     TBOX_ERROR(d_object_name
                                << ":  "
@@ -2623,11 +2558,11 @@ RungeKuttaLevelIntegrator::registerVariable(
                                << std::endl);
                 }
                 
-                d_hyp_flux_is_face = true;
+                d_flux_is_face = true;
             }
             else if(side_var)
             {
-                if (d_hyp_flux_face_registered)
+                if (d_flux_face_registered)
                 {
                     TBOX_ERROR(d_object_name
                                << ":  "
@@ -2636,7 +2571,7 @@ RungeKuttaLevelIntegrator::registerVariable(
                                << std::endl);
                 }
                 
-               d_hyp_flux_is_face = false;
+               d_flux_is_face = false;
             }
             else
             {
@@ -2646,14 +2581,14 @@ RungeKuttaLevelIntegrator::registerVariable(
                           << std::endl);
             }
             
-            d_hyp_flux_variables.push_back(var);
+            d_flux_variables.push_back(var);
             
             int scr_id = variable_db->registerVariableAndContext(
                 var,
                 d_scratch,
                 ghosts);
             
-            d_hyp_flux_var_data.setFlag(scr_id);
+            d_flux_var_data.setFlag(scr_id);
             
             std::vector<int> intermediate_id(d_number_steps);
             for (int sn = 0; sn < d_number_steps; sn++)
@@ -2666,27 +2601,27 @@ RungeKuttaLevelIntegrator::registerVariable(
             
             for (int sn = 0; sn < d_number_steps; sn++)
             {
-                d_intermediate_hyp_flux_var_data[sn].setFlag(intermediate_id[sn]);
+                d_intermediate_flux_var_data[sn].setFlag(intermediate_id[sn]);
             }
                 
             std::string var_name = var->getName();
-            std::string fs_suffix = "_hyp_fluxsum";
+            std::string fs_suffix = "_fluxsum";
             std::string fsum_name = var_name;
             fsum_name += fs_suffix;
             
-            boost::shared_ptr<hier::Variable> hyp_fluxsum;
+            boost::shared_ptr<hier::Variable> fluxsum;
             
-            if (d_hyp_flux_is_face)
+            if (d_flux_is_face)
             {
                 boost::shared_ptr<pdat::FaceDataFactory<double> > fdf(
                     BOOST_CAST<pdat::FaceDataFactory<double>,
                     hier::PatchDataFactory>(var->getPatchDataFactory()));
                 TBOX_ASSERT(fdf);
-                hyp_fluxsum.reset(new pdat::OuterfaceVariable<double>(
+                fluxsum.reset(new pdat::OuterfaceVariable<double>(
                     dim,
                     fsum_name,
                     fdf->getDepth()));
-                d_hyp_flux_face_registered = true;
+                d_flux_face_registered = true;
             }
             else
             {
@@ -2694,26 +2629,26 @@ RungeKuttaLevelIntegrator::registerVariable(
                     BOOST_CAST<pdat::SideDataFactory<double>,
                     hier::PatchDataFactory>(var->getPatchDataFactory()));
                 TBOX_ASSERT(sdf);
-                hyp_fluxsum.reset(new pdat::OutersideVariable<double>(
+                fluxsum.reset(new pdat::OutersideVariable<double>(
                     dim,
                     fsum_name,
                     sdf->getDepth()));
-                d_hyp_flux_side_registered = true;
+                d_flux_side_registered = true;
             }
             
-            d_hyp_fluxsum_variables.push_back(hyp_fluxsum);
+            d_fluxsum_variables.push_back(fluxsum);
             
             int fs_id = variable_db->registerVariableAndContext(
-                hyp_fluxsum,
+                fluxsum,
                 d_scratch,
                 zero_ghosts);
             
-            d_hyp_fluxsum_data.setFlag(fs_id);
+            d_fluxsum_data.setFlag(fs_id);
             
             boost::shared_ptr<hier::CoarsenOperator> coarsen_op(
-                transfer_geom->lookupCoarsenOperator(hyp_fluxsum, coarsen_name));
+                transfer_geom->lookupCoarsenOperator(fluxsum, coarsen_name));
             
-            d_coarsen_hyp_fluxsum->registerCoarsen(scr_id, fs_id, coarsen_op);
+            d_coarsen_fluxsum->registerCoarsen(scr_id, fs_id, coarsen_op);
             
             break;
         }
@@ -2768,20 +2703,19 @@ RungeKuttaLevelIntegrator::registerVariable(
 
 
 /*
- *************************************************************************
+ **************************************************************************************************
  *
- * Process HYP_FLUX, HYP_FLUX INTEGRAL, SOURCE data before integration on
- * the level.
+ * Process FLUX, FLUX INTEGRAL, SOURCE data before integration on the level.
  *
- * We allocate HYP_FLUX and SOURCE storage if appropriate.
+ * We allocate FLUX and SOURCE storage if appropriate.
  *
- * If the advance is not temporary, we also zero out the HYP_FLUX INTEGRALS
- * on the first step of any level finer than level zero.
+ * If the advance is not temporary, we also zero out the FLUX INTEGRALS on the first step of any
+ * level finer than level zero.
  *
- *************************************************************************
+ **************************************************************************************************
  */
 void
-RungeKuttaLevelIntegrator::preprocessHyperbolicFluxAndSourceData(
+RungeKuttaLevelIntegrator::preprocessFluxAndSourceData(
     const boost::shared_ptr<hier::PatchLevel>& level,
     const double cur_time,
     const double new_time,
@@ -2802,12 +2736,12 @@ RungeKuttaLevelIntegrator::preprocessHyperbolicFluxAndSourceData(
     if (!regrid_advance)
     {
         if (((level_number > 0) && first_step) ||
-            ((level_number == 0) && !d_have_hyp_flux_on_level_zero))
+            ((level_number == 0) && !d_have_flux_on_level_zero))
         {
-            level->allocatePatchData(d_hyp_flux_var_data, new_time);
+            level->allocatePatchData(d_flux_var_data, new_time);
             if (level_number == 0)
             {
-                d_have_hyp_flux_on_level_zero = true;
+                d_have_flux_on_level_zero = true;
             }
             level->allocatePatchData(d_source_var_data, new_time);
         }
@@ -2816,7 +2750,7 @@ RungeKuttaLevelIntegrator::preprocessHyperbolicFluxAndSourceData(
     {
         if (first_step)
         {
-            level->allocatePatchData(d_hyp_flux_var_data, new_time);
+            level->allocatePatchData(d_flux_var_data, new_time);
             level->allocatePatchData(d_source_var_data, new_time);
         }
     }
@@ -2825,7 +2759,7 @@ RungeKuttaLevelIntegrator::preprocessHyperbolicFluxAndSourceData(
     {
         if (first_step)
         {
-            level->allocatePatchData(d_hyp_fluxsum_data, new_time);
+            level->allocatePatchData(d_fluxsum_data, new_time);
             
             for (hier::PatchLevel::iterator p(level->begin());
                  p != level->end();
@@ -2834,16 +2768,16 @@ RungeKuttaLevelIntegrator::preprocessHyperbolicFluxAndSourceData(
                 const boost::shared_ptr<hier::Patch>& patch = *p;
                 
                 std::list<boost::shared_ptr<hier::Variable> >::iterator fs_var =
-                    d_hyp_fluxsum_variables.begin();
+                    d_fluxsum_variables.begin();
                 
-                while (fs_var != d_hyp_fluxsum_variables.end())
+                while (fs_var != d_fluxsum_variables.end())
                 {
                     int fsum_id =
                         variable_db->mapVariableAndContextToIndex(
                             *fs_var,
                             d_scratch);
                     
-                    if (d_hyp_flux_is_face)
+                    if (d_flux_is_face)
                     {
                         boost::shared_ptr<pdat::OuterfaceData<double> > fsum_data(
                             BOOST_CAST<pdat::OuterfaceData<double>, hier::PatchData>(
@@ -2868,7 +2802,7 @@ RungeKuttaLevelIntegrator::preprocessHyperbolicFluxAndSourceData(
         }
         else
         {
-            level->setTime(new_time, d_hyp_fluxsum_data);
+            level->setTime(new_time, d_fluxsum_data);
         }
     
     } // if ( !regrid_advance && (level_number > 0) )
@@ -2876,29 +2810,25 @@ RungeKuttaLevelIntegrator::preprocessHyperbolicFluxAndSourceData(
 
 
 /*
- *************************************************************************
+ **************************************************************************************************
  *
- * Process HYP_FLUX, HYP_FLUX INTEGRAL and SOURCE data after advancing the 
- * solution on the level.  During normal integration steps, the hyperbolic flux
- * integrals are updated for subsequent synchronization by adding HYP_FLUX values
- * to hyperbolic flux integrals.
+ * Process FLUX, FLUX INTEGRAL and SOURCE data after advancing the solution on the level. During
+ * normal integration steps, the flux integrals are updated for subsequent synchronization by adding
+ * FLUX values to flux integrals.
  *
  * If the advance is not temporary (regular integration step):
- * 1) If the level is the finest in the hierarchy, HYP_FLUX and SOURCE data is
- *    deallocated.  It is not used during synchronization, and is only
- *    maintained if needed for the advance.
+ * 1) If the level is the finest in the hierarchy, FLUX and SOURCE data is deallocated. It is not
+ *    used during synchronization, and is only maintained if needed for the advance.
  *
- * 2) If the level is not the coarsest in the hierarchy, update the hyperbolic
- *    flux integrals for later synchronization by adding HYP_FLUX values to
- *    hyperbolic flux integrals.
+ * 2) If the level is not the coarsest in the hierarchy, update the  flux integrals for later
+ *    synchronization by adding FLUX values to flux integrals.
  *
- * If the advance is temporary, deallocate the hyperbolic flux and sourc data
- * if first step.
+ * If the advance is temporary, deallocate the flux and sourc data if first step.
  *
- *************************************************************************
+ **************************************************************************************************
  */
 void
-RungeKuttaLevelIntegrator::postprocessHyperbolicFluxAndSourceData(
+RungeKuttaLevelIntegrator::postprocessFluxAndSourceData(
     const boost::shared_ptr<hier::PatchLevel>& level,
     const bool regrid_advance,
     const bool first_step,
@@ -2910,13 +2840,13 @@ RungeKuttaLevelIntegrator::postprocessHyperbolicFluxAndSourceData(
     
     if (level->getDim() > tbox::Dimension(3))
     {
-        TBOX_ERROR("RungeKuttaLevelIntegrator::postprocessHyperbolicFluxAndSourceData : DIM > 3 not implemented"
-                   << std::endl);
+        TBOX_ERROR("RungeKuttaLevelIntegrator::postprocessFluxAndSourceData : DIM > 3 not implemented"
+            << std::endl);
     }
     
     if (regrid_advance && first_step)
     {
-        level->deallocatePatchData(d_hyp_flux_var_data);
+        level->deallocatePatchData(d_flux_var_data);
         level->deallocatePatchData(d_source_var_data);
     }
     
@@ -2928,20 +2858,20 @@ RungeKuttaLevelIntegrator::postprocessHyperbolicFluxAndSourceData(
         {
             const boost::shared_ptr<hier::Patch>& patch = *p;
             
-            std::list<boost::shared_ptr<hier::Variable> >::iterator hyp_flux_var =
-                d_hyp_flux_variables.begin();
-            std::list<boost::shared_ptr<hier::Variable> >::iterator hyp_fluxsum_var =
-                d_hyp_fluxsum_variables.begin();
+            std::list<boost::shared_ptr<hier::Variable> >::iterator flux_var =
+                d_flux_variables.begin();
+            std::list<boost::shared_ptr<hier::Variable> >::iterator fluxsum_var =
+                d_fluxsum_variables.begin();
             
             const hier::Index& ilo = patch->getBox().lower();
             const hier::Index& ihi = patch->getBox().upper();
             
-            while (hyp_flux_var != d_hyp_flux_variables.end())
+            while (flux_var != d_flux_variables.end())
             {
-                boost::shared_ptr<hier::PatchData> hyp_flux_data(
-                    patch->getPatchData(*hyp_flux_var, d_scratch));
-                boost::shared_ptr<hier::PatchData> hyp_fsum_data(
-                   patch->getPatchData(*hyp_fluxsum_var, d_scratch));
+                boost::shared_ptr<hier::PatchData> flux_data(
+                    patch->getPatchData(*flux_var, d_scratch));
+                boost::shared_ptr<hier::PatchData> fsum_data(
+                   patch->getPatchData(*fluxsum_var, d_scratch));
                 
                 boost::shared_ptr<pdat::FaceData<double> > fflux_data;
                 boost::shared_ptr<pdat::OuterfaceData<double> > ffsum_data;
@@ -2950,40 +2880,40 @@ RungeKuttaLevelIntegrator::postprocessHyperbolicFluxAndSourceData(
                 boost::shared_ptr<pdat::OutersideData<double> > sfsum_data;
                 
                 int ddepth;
-                hier::IntVector hyp_flux_num_ghosts(level->getDim());
+                hier::IntVector flux_num_ghosts(level->getDim());
                 
-                if (d_hyp_flux_is_face)
+                if (d_flux_is_face)
                 {
                     fflux_data =
                         BOOST_CAST<pdat::FaceData<double>, hier::PatchData>(
-                            hyp_flux_data);
+                            flux_data);
                     ffsum_data =
                         BOOST_CAST<pdat::OuterfaceData<double>, hier::PatchData>(
-                            hyp_fsum_data);
+                            fsum_data);
                     
                     TBOX_ASSERT(fflux_data && ffsum_data);
                     TBOX_ASSERT(fflux_data->getDepth() == ffsum_data->getDepth());
                     ddepth = fflux_data->getDepth();
-                    hyp_flux_num_ghosts = fflux_data->getGhostCellWidth();
+                    flux_num_ghosts = fflux_data->getGhostCellWidth();
                 }
                 else
                 {
                     sflux_data =
                         BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
-                            hyp_flux_data);
+                            flux_data);
                     sfsum_data =
                         BOOST_CAST<pdat::OutersideData<double>, hier::PatchData>(
-                            hyp_fsum_data);
+                            fsum_data);
                     
                     TBOX_ASSERT(sflux_data && sfsum_data);
                     TBOX_ASSERT(sflux_data->getDepth() == sfsum_data->getDepth());
                     ddepth = sflux_data->getDepth();
-                    hyp_flux_num_ghosts = sflux_data->getGhostCellWidth();
+                    flux_num_ghosts = sflux_data->getGhostCellWidth();
                 }
                 
                 for (int d = 0; d < ddepth; d++)
                 {
-                    // loop over lower and upper parts of outer face/side arrays
+                    // Loop over lower and upper parts of outer face/side arrays.
                     for (int ifs = 0; ifs < 2; ifs++)
                     {
                         if (level->getDim() == tbox::Dimension(1))
@@ -2991,14 +2921,14 @@ RungeKuttaLevelIntegrator::postprocessHyperbolicFluxAndSourceData(
                             SAMRAI_F77_FUNC(upfluxsum1d, UPFLUXSUM1D) (
                                 ilo(0),
                                 ihi(0),
-                                hyp_flux_num_ghosts(0),
+                                flux_num_ghosts(0),
                                 ifs,
                                 fflux_data->getPointer(0, d),
                                 ffsum_data->getPointer(0, ifs, d));
                         }
                         else
                         {
-                            if (d_hyp_flux_is_face)
+                            if (d_flux_is_face)
                             {
                                 if (level->getDim() == tbox::Dimension(2))
                                 {
@@ -3007,8 +2937,8 @@ RungeKuttaLevelIntegrator::postprocessHyperbolicFluxAndSourceData(
                                         ilo(1),
                                         ihi(0),
                                         ihi(1),
-                                        hyp_flux_num_ghosts(0),
-                                        hyp_flux_num_ghosts(1),
+                                        flux_num_ghosts(0),
+                                        flux_num_ghosts(1),
                                         ifs,
                                         fflux_data->getPointer(0, d),
                                         ffsum_data->getPointer(0, ifs, d));
@@ -3017,8 +2947,8 @@ RungeKuttaLevelIntegrator::postprocessHyperbolicFluxAndSourceData(
                                         ilo(1),
                                         ihi(0),
                                         ihi(1),
-                                        hyp_flux_num_ghosts(0),
-                                        hyp_flux_num_ghosts(1),
+                                        flux_num_ghosts(0),
+                                        flux_num_ghosts(1),
                                         ifs,
                                         fflux_data->getPointer(1, d),
                                         ffsum_data->getPointer(1, ifs, d));
@@ -3032,9 +2962,9 @@ RungeKuttaLevelIntegrator::postprocessHyperbolicFluxAndSourceData(
                                         ihi(0),
                                         ihi(1),
                                         ihi(2),
-                                        hyp_flux_num_ghosts(0),
-                                        hyp_flux_num_ghosts(1),
-                                        hyp_flux_num_ghosts(2),
+                                        flux_num_ghosts(0),
+                                        flux_num_ghosts(1),
+                                        flux_num_ghosts(2),
                                         ifs,
                                         fflux_data->getPointer(0, d),
                                         ffsum_data->getPointer(0, ifs, d));
@@ -3045,9 +2975,9 @@ RungeKuttaLevelIntegrator::postprocessHyperbolicFluxAndSourceData(
                                         ihi(0),
                                         ihi(1),
                                         ihi(2),
-                                        hyp_flux_num_ghosts(0),
-                                        hyp_flux_num_ghosts(1),
-                                        hyp_flux_num_ghosts(2),
+                                        flux_num_ghosts(0),
+                                        flux_num_ghosts(1),
+                                        flux_num_ghosts(2),
                                         ifs,
                                         fflux_data->getPointer(1, d),
                                         ffsum_data->getPointer(1, ifs, d));
@@ -3058,9 +2988,9 @@ RungeKuttaLevelIntegrator::postprocessHyperbolicFluxAndSourceData(
                                         ihi(0),
                                         ihi(1),
                                         ihi(2),
-                                        hyp_flux_num_ghosts(0),
-                                        hyp_flux_num_ghosts(1),
-                                        hyp_flux_num_ghosts(2),
+                                        flux_num_ghosts(0),
+                                        flux_num_ghosts(1),
+                                        flux_num_ghosts(2),
                                         ifs,
                                         fflux_data->getPointer(2, d),
                                         ffsum_data->getPointer(2, ifs, d));
@@ -3073,16 +3003,16 @@ RungeKuttaLevelIntegrator::postprocessHyperbolicFluxAndSourceData(
                                     SAMRAI_F77_FUNC(upfluxsumside2d0, UPFLUXSUMSIDE2D0) (
                                         ilo(0),
                                         ilo(1), ihi(0), ihi(1),
-                                        hyp_flux_num_ghosts(0),
-                                        hyp_flux_num_ghosts(1),
+                                        flux_num_ghosts(0),
+                                        flux_num_ghosts(1),
                                         ifs,
                                         sflux_data->getPointer(0, d),
                                         sfsum_data->getPointer(0, ifs, d));
                                     SAMRAI_F77_FUNC(upfluxsumside2d1, UPFLUXSUMSIDE2D1) (
                                         ilo(0),
                                         ilo(1), ihi(0), ihi(1),
-                                        hyp_flux_num_ghosts(0),
-                                        hyp_flux_num_ghosts(1),
+                                        flux_num_ghosts(0),
+                                        flux_num_ghosts(1),
                                         ifs,
                                         sflux_data->getPointer(1, d),
                                         sfsum_data->getPointer(1, ifs, d));
@@ -3093,9 +3023,9 @@ RungeKuttaLevelIntegrator::postprocessHyperbolicFluxAndSourceData(
                                         ilo(0),
                                         ilo(1), ilo(2),
                                         ihi(0), ihi(1), ihi(2),
-                                        hyp_flux_num_ghosts(0),
-                                        hyp_flux_num_ghosts(1),
-                                        hyp_flux_num_ghosts(2),
+                                        flux_num_ghosts(0),
+                                        flux_num_ghosts(1),
+                                        flux_num_ghosts(2),
                                         ifs,
                                         sflux_data->getPointer(0, d),
                                         sfsum_data->getPointer(0, ifs, d));
@@ -3103,9 +3033,9 @@ RungeKuttaLevelIntegrator::postprocessHyperbolicFluxAndSourceData(
                                         ilo(0),
                                         ilo(1), ilo(2),
                                         ihi(0), ihi(1), ihi(2),
-                                        hyp_flux_num_ghosts(0),
-                                        hyp_flux_num_ghosts(1),
-                                        hyp_flux_num_ghosts(2),
+                                        flux_num_ghosts(0),
+                                        flux_num_ghosts(1),
+                                        flux_num_ghosts(2),
                                         ifs,
                                         sflux_data->getPointer(1, d),
                                         sfsum_data->getPointer(1, ifs, d));
@@ -3113,9 +3043,9 @@ RungeKuttaLevelIntegrator::postprocessHyperbolicFluxAndSourceData(
                                         ilo(0),
                                         ilo(1), ilo(2),
                                         ihi(0), ihi(1), ihi(2),
-                                        hyp_flux_num_ghosts(0),
-                                        hyp_flux_num_ghosts(1),
-                                        hyp_flux_num_ghosts(2),
+                                        flux_num_ghosts(0),
+                                        flux_num_ghosts(1),
+                                        flux_num_ghosts(2),
                                         ifs,
                                         sflux_data->getPointer(2, d),
                                         sfsum_data->getPointer(2, ifs, d));
@@ -3125,8 +3055,8 @@ RungeKuttaLevelIntegrator::postprocessHyperbolicFluxAndSourceData(
                     }  // loop over lower and upper sides/faces
                 }  // loop over depth
                 
-                hyp_flux_var++;
-                hyp_fluxsum_var++;
+                flux_var++;
+                fluxsum_var++;
             }  // loop over flux variables
         }  // loop over patches
     }  // if !regrid_advance and level number > 0 ....
@@ -3134,11 +3064,11 @@ RungeKuttaLevelIntegrator::postprocessHyperbolicFluxAndSourceData(
 
 
 /*
- *************************************************************************
+ **************************************************************************************************
  *
  * Copy time-dependent data from source to destination on level.
  *
- *************************************************************************
+ **************************************************************************************************
  */
 void
 RungeKuttaLevelIntegrator::copyTimeDependentData(
@@ -3176,10 +3106,8 @@ RungeKuttaLevelIntegrator::copyTimeDependentData(
 
 
 /*
- *************************************************************************
- *
- *
- *************************************************************************
+ **************************************************************************************************
+ **************************************************************************************************
  */
 void
 RungeKuttaLevelIntegrator::recordStatistics(
@@ -3219,9 +3147,9 @@ RungeKuttaLevelIntegrator::recordStatistics(
 }
 
 /*
- *************************************************************************
- * Write out gridding statistics collected by advanceLevel
- *************************************************************************
+ **************************************************************************************************
+ * Write out gridding statistics collected by advanceLevel.
+ **************************************************************************************************
  */
 void
 RungeKuttaLevelIntegrator::printStatistics(
@@ -3252,7 +3180,8 @@ RungeKuttaLevelIntegrator::printStatistics(
                 s << "Global: \n";
                 statn->printGlobalProcStatDataFormatted(cstat.getInstanceId(), s);
             }
-            s << "Seq#   SimTime           C-Sum   C-Avg   C-Min ->      C-Max  C-Max/Avg     B-Sum    B-Avg B-Min -> B-Max B-Max/Avg  C/B-Avg\n";
+            s << "Seq#   SimTime           C-Sum   C-Avg   C-Min ->      C-Max  C-Max/Avg     B-Sum    "
+              << "B-Avg B-Min -> B-Max B-Max/Avg  C/B-Avg\n";
 #ifdef __INTEL_COMPILER
 #pragma warning (disable:1572)
 #endif
@@ -3319,11 +3248,11 @@ RungeKuttaLevelIntegrator::printStatistics(
 
 
 /*
- *************************************************************************
+ **************************************************************************************************
  *
  * Print all class data for RungeKuttaLevelIntegrator object.
  *
- *************************************************************************
+ **************************************************************************************************
  */
 void
 RungeKuttaLevelIntegrator::printClassData(
@@ -3407,12 +3336,12 @@ RungeKuttaLevelIntegrator::printClassData(
 
 
 /*
- *************************************************************************
+ **************************************************************************************************
  *
- * Writes out the class version number, d_cfl, d_cfl_init,
- * d_lag_dt_computation, and d_use_ghosts_for_dt to the restart database.
+ * Writes out the class version number, d_cfl, d_cfl_init, d_lag_dt_computation, and d_use_ghosts_for_dt
+ * to the restart database.
  *
- *************************************************************************
+ **************************************************************************************************
  */
 void
 RungeKuttaLevelIntegrator::putToRestart(
@@ -3481,14 +3410,12 @@ RungeKuttaLevelIntegrator::putToRestart(
 
 
 /*
- *************************************************************************
+ **************************************************************************************************
  *
- * Reads in cfl, cfl_init, lag_dt_computation, and
- * use_ghosts_to_compute_dt from the input database.
- * Note all restart values are overriden with values from the input
- * database.
+ * Reads in cfl, cfl_init, lag_dt_computation, and use_ghosts_to_compute_dt from the input database.
+ * Note all restart values are overriden with values from the input database.
  *
- *************************************************************************
+ **************************************************************************************************
  */
 void
 RungeKuttaLevelIntegrator::getFromInput(
@@ -3675,18 +3602,15 @@ RungeKuttaLevelIntegrator::getFromInput(
 
 
 /*
- *************************************************************************
+ **************************************************************************************************
  *
- * First, gets the database corresponding to the object_name from the
- * restart file.   If this database exists, this method checks to make
- * sure that the version number of the class matches the version number
- * of the restart file.  If they match, then d_cfl, d_cfl_init,
- * d_lag_dt_computation, and d_use_ghosts_to_compute_dt are read from
- * restart database.
- * Note all restart values can be overriden with values from the input
- * database.
+ * First, gets the database corresponding to the object_name from the restart file. If this database
+ * exists, this method checks to make sure that the version number of the class matches the version
+ * number of the restart file. If they match, then d_cfl, d_cfl_init, d_lag_dt_computation, and
+ * d_use_ghosts_to_compute_dt are read from restart database. Note all restart values can be overriden
+ * with values from the input database.
  *
- *************************************************************************
+ **************************************************************************************************
  */
 void
 RungeKuttaLevelIntegrator::getFromRestart()
@@ -3740,8 +3664,8 @@ RungeKuttaLevelIntegrator::getFromRestart()
 
 
 /*
- *************************************************************************
- *************************************************************************
+ **************************************************************************************************
+ **************************************************************************************************
  */
 void
 RungeKuttaLevelIntegrator::initializeCallback()
@@ -3804,10 +3728,10 @@ RungeKuttaLevelIntegrator::initializeCallback()
         getTimer("RungeKuttaLevelIntegrator::sync_initial_create");
     t_sync_initial_comm = tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::sync_initial_comm");
-    t_coarsen_hyp_fluxsum_create = tbox::TimerManager::getManager()->
-        getTimer("RungeKuttaLevelIntegrator::coarsen_hyp_fluxsum_create");
-    t_coarsen_hyp_fluxsum_comm = tbox::TimerManager::getManager()->
-        getTimer("RungeKuttaLevelIntegrator::coarsen_hyp_fluxsum_comm");
+    t_coarsen_fluxsum_create = tbox::TimerManager::getManager()->
+        getTimer("RungeKuttaLevelIntegrator::coarsen_fluxsum_create");
+    t_coarsen_fluxsum_comm = tbox::TimerManager::getManager()->
+        getTimer("RungeKuttaLevelIntegrator::coarsen_fluxsum_comm");
     t_coarsen_sync_create = tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::coarsen_sync_create");
     t_coarsen_sync_comm = tbox::TimerManager::getManager()->
@@ -3816,8 +3740,8 @@ RungeKuttaLevelIntegrator::initializeCallback()
 
 
 /*
- *************************************************************************
- *************************************************************************
+ **************************************************************************************************
+ **************************************************************************************************
  */
 void
 RungeKuttaLevelIntegrator::finalizeCallback()
@@ -3849,8 +3773,8 @@ RungeKuttaLevelIntegrator::finalizeCallback()
     t_sync_new_levels.reset();
     t_sync_initial_create.reset();
     t_sync_initial_comm.reset();
-    t_coarsen_hyp_fluxsum_create.reset();
-    t_coarsen_hyp_fluxsum_comm.reset();
+    t_coarsen_fluxsum_create.reset();
+    t_coarsen_fluxsum_comm.reset();
     t_coarsen_sync_create.reset();
     t_coarsen_sync_comm.reset();
 

@@ -69,7 +69,7 @@ class MultiresolutionTagger
             const boost::shared_ptr<tbox::Database>& restart_db) const;
         
         /*
-         * Compute values of multiresolution sensors on patch.
+         * Compute values of multiresolution sensors on a patch.
          */
         void
         computeMultiresolutionSensorValuesOnPatch(
@@ -87,7 +87,7 @@ class MultiresolutionTagger
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
-         * Tag cells on patch for refinement using multiresolution sensors.
+         * Tag cells on a patch for refinement using multiresolution sensors.
          */
         void
         tagCellsOnPatch(
@@ -97,7 +97,7 @@ class MultiresolutionTagger
         
     private:
         /*
-         * Tag cells on patch using wavelet sensor with the combination of three possible criteria:
+         * Tag cells on a patch using wavelet sensor with the combination of three possible criteria:
          * 1. When ratio between wavelet coefficient and global maximum at any level is greater than the tolerance.
          * 2. When ratio between wavelet coefficient and local mean at any level is greater than the tolerance.
          * 3. When the Lipschitz's exponent is smaller than the tolerance.
@@ -119,7 +119,7 @@ class MultiresolutionTagger
             const double alpha_tol);
         
         /*
-         * Compute the Lipschitz's exponent on patch. There are two steps:
+         * Compute the Lipschitz's exponent on a patch. There are two steps:
          * 1. Find the maximum wavelet coefficients in the domain of dependence.
          * 2. Compute Lipschitz's exponent.
          */
