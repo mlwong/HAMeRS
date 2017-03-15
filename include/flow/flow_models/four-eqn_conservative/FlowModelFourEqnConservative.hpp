@@ -16,7 +16,6 @@ class FlowModelFourEqnConservative: public FlowModel
             const std::string& object_name,
             const tbox::Dimension& dim,
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
-            const hier::IntVector& num_ghosts,
             const int& num_species,
             const boost::shared_ptr<tbox::Database>& flow_model_db);
         
@@ -37,7 +36,9 @@ class FlowModelFourEqnConservative: public FlowModel
          * Register the conservative variables.
          */
         void
-        registerConservativeVariables(RungeKuttaLevelIntegrator* integrator);
+        registerConservativeVariables(
+            RungeKuttaLevelIntegrator* integrator,
+            const hier::IntVector& num_ghosts);
         
         /*
          * Get the names of conservative variables.

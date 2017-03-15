@@ -6,14 +6,12 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
     const std::string& object_name,
     const tbox::Dimension& dim,
     const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
-    const hier::IntVector& num_ghosts,
     const int& num_species,
     const boost::shared_ptr<tbox::Database>& flow_model_db):
         FlowModel(
             object_name,
             dim,
             grid_geometry,
-            num_ghosts,
             num_species,
             dim.getValue() + 2*num_species,
             flow_model_db),
@@ -371,11 +369,13 @@ FlowModelFiveEqnAllaire::putToRestart(
  * Register the conservative variables.
  */
 void
-FlowModelFiveEqnAllaire::registerConservativeVariables(RungeKuttaLevelIntegrator* integrator)
+FlowModelFiveEqnAllaire::registerConservativeVariables(
+    RungeKuttaLevelIntegrator* integrator,
+    const hier::IntVector& num_ghosts)
 {
     integrator->registerVariable(
         d_variable_partial_density,
-        d_num_ghosts,
+        num_ghosts,
         RungeKuttaLevelIntegrator::TIME_DEP,
         d_grid_geometry,
         "CONSERVATIVE_COARSEN",
@@ -383,7 +383,7 @@ FlowModelFiveEqnAllaire::registerConservativeVariables(RungeKuttaLevelIntegrator
     
     integrator->registerVariable(
         d_variable_momentum,
-        d_num_ghosts,
+        num_ghosts,
         RungeKuttaLevelIntegrator::TIME_DEP,
         d_grid_geometry,
         "CONSERVATIVE_COARSEN",
@@ -391,7 +391,7 @@ FlowModelFiveEqnAllaire::registerConservativeVariables(RungeKuttaLevelIntegrator
     
     integrator->registerVariable(
         d_variable_total_energy,
-        d_num_ghosts,
+        num_ghosts,
         RungeKuttaLevelIntegrator::TIME_DEP,
         d_grid_geometry,
         "CONSERVATIVE_COARSEN",
@@ -399,12 +399,13 @@ FlowModelFiveEqnAllaire::registerConservativeVariables(RungeKuttaLevelIntegrator
     
     integrator->registerVariable(
         d_variable_volume_fraction,
-        d_num_ghosts,
+        num_ghosts,
         RungeKuttaLevelIntegrator::TIME_DEP,
         d_grid_geometry,
         "CONSERVATIVE_COARSEN",
         "CONSERVATIVE_LINEAR_REFINE");
 }
+
 
 /*
  * Get the names of conservative variables.
@@ -536,6 +537,16 @@ FlowModelFiveEqnAllaire::registerPatchWithDataContext(
     d_patch = &patch;
     
     setDataContext(data_context);
+    
+    /*
+     * Set the number of ghost cells of conservative variables.
+     */
+    
+    boost::shared_ptr<pdat::CellData<double> > data_partial_density(
+        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+            d_patch->getPatchData(d_variable_partial_density, getDataContext())));
+    
+    d_num_ghosts = data_partial_density->getGhostCellWidth();
     
     /*
      * Set the interior and ghost boxes with their dimensions for the conservative cell variables.
@@ -824,6 +835,7 @@ void FlowModelFiveEqnAllaire::unregisterPatch()
     
     d_patch = nullptr;
     
+    d_num_ghosts                      = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_density           = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_mass_fraction     = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_velocity          = -hier::IntVector::getOne(d_dim);

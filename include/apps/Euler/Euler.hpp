@@ -474,11 +474,6 @@ class Euler:
         bool d_use_nonuniform_workload;
         
         /*
-         * Number of ghost cells for time-independent variables.
-         */
-        hier::IntVector d_num_ghosts;
-        
-        /*
          * A string variable to describe the flow model used.
          */
         std::string d_flow_model_str;

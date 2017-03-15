@@ -1330,16 +1330,15 @@ RungeKuttaLevelIntegrator::getMaxFinerLevelDt(
  *
  *  1a) Call user routines to pre-process advance data, if needed.
  *
- *  2) Advance in time by looping throught Runge-Kutta steps. In each step,
+ *  2) Advance in time by looping through Runge-Kutta sub-steps. In each sub-step,
  *
  *  2a) Copy time-dependent data from scratch space to corresponding intermediate space.
  *      
  *  2b) Compute next intermediate fluxes in corresponding intermediate space using data on patch +
  *      ghosts at given time.
  *
- *  2c) Advance one single Runge-Kutta step in scratch space and accumulate fluxs from intermediate
- *      fluxes using suitable weights for flux
- *      correction in flux synchronization later.
+ *  2c) Advance one Runge-Kutta sub-step in scratch space and accumulate fluxs from intermediate
+ *      fluxes using suitable weights for flux correction in flux synchronization later.
  *
  *  3) At the end of the loop, interior data is advanced to time = new_time.
  *
@@ -1353,7 +1352,7 @@ RungeKuttaLevelIntegrator::getMaxFinerLevelDt(
  *            data corresponding to current time level, computed prior to flux computation in dt
  *            calculation.
  *            If (d_use_ghosts_for_dt == true)
- *               - Compute dt using data on patch+ghosts at time.
+ *               - Compute dt using data on patch + ghosts at time.
  *            Else
  *               - Compute dt using data on patch interior ONLY.
  *         }
@@ -1380,7 +1379,7 @@ RungeKuttaLevelIntegrator::getMaxFinerLevelDt(
  *    1) In order to advance finer levels (if they exist), both old and new data for each patch on
  *       the level must be maintained.
  *    2) If the timestep is the first in the timestep loop on the level (indicated by first_step),
- *       then time interpolation is is unnecessary to fill ghost cells from the next coarser level.
+ *       then time interpolation is unnecessary to fill ghost cells from the next coarser level.
  *    3) The new dt is not calculated if regrid_advance is true. If this is the case, it is assumed
  *       that the results of the advance and the timestep calculation will be discarded (e.g., during
  *       regridding, or initialization). Also, allocation and post-processing of FLUX/flux integral
@@ -1529,11 +1528,11 @@ RungeKuttaLevelIntegrator::advanceLevel(
      * (5) Call user-routine to pre-process state data, if needed.
      * (6) Initialize all fluxes with zero values
      * (6) Advance solution on all level patches (scratch storage).
-     *     In looping over Runge-Kutta steps,
+     *     In looping over Runge-Kutta sub-steps,
      *     (6a) Copy data from scatch data to the intermediate data.
      *          Dirchlet boundary conditions are applied at the coarse-fine boundaries of patches.
      *     (6b) Compute intermediate fluxes of current step.
-     *     (6c) Advance one single Runge-Kutta step and accumulate the intermediate flux to the total
+     *     (6c) Advance one Runge-Kutta sub-step and accumulate the intermediate flux to the total
      *          flux during this whole Runge-Kutta step. Time-independent intermediate data of next
      *          Runge-Kutta step is stored in scratch context.
      * (7) Copy new solution to from scratch to new storage.
@@ -1652,7 +1651,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
             
             d_patch_strategy->setDataContext(d_scratch);
             
-            // Advance a single Runge-Kutta step.
+            // Advance a Runge-Kutta sub-step.
             d_patch_strategy->advanceSingleStepOnPatch(
                 *patch,
                 current_time,
@@ -1730,10 +1729,10 @@ RungeKuttaLevelIntegrator::advanceLevel(
                 if (!d_bdry_sched_advance_new[level_number])
                 {
                     TBOX_ERROR(d_object_name
-                               << ":  "
-                               << "Attempt to fill new ghost data for timestep "
-                               << "computation, but schedule not defined."
-                               << std::endl);
+                        << ":  "
+                        << "Attempt to fill new ghost data for timestep "
+                        << "computation, but schedule not defined."
+                        << std::endl);
                 }
                 d_patch_strategy->setDataContext(d_scratch);
                 t_new_advance_bdry_fill_comm->start();
@@ -2153,15 +2152,14 @@ RungeKuttaLevelIntegrator::resetTimeDependentData(
                 patch->setPatchData(old_indx, patch->getPatchData(cur_indx));
                 
                 patch->setPatchData(cur_indx, patch->getPatchData(new_indx));
-      
             }
             else
             {
                 if (d_number_time_data_levels == 3)
                 {
-                    int old_indx =
-                        variable_db->mapVariableAndContextToIndex(*time_dep_var,
-                            d_old);
+                    int old_indx = variable_db->mapVariableAndContextToIndex(
+                        *time_dep_var,
+                        d_old);
                     
                     patch->setPatchData(old_indx, patch->getPatchData(cur_indx));
                 }
@@ -2339,7 +2337,8 @@ RungeKuttaLevelIntegrator::registerVariable(
             std::vector<int> intermediate_id(d_number_steps);
             for (int sn = 0; sn < d_number_steps; sn++)
             {
-                intermediate_id[sn] = variable_db->registerVariableAndContext(var,
+                intermediate_id[sn] = variable_db->registerVariableAndContext(
+                    var,
                     d_intermediate[sn],
                     ghosts);
             }

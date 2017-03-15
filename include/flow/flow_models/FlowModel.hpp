@@ -62,16 +62,15 @@ class FlowModel:
             const std::string& object_name,
             const tbox::Dimension& dim,
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
-            const hier::IntVector& num_ghosts,
             const int& num_species,
             const int& num_eqn,
             const boost::shared_ptr<tbox::Database>& flow_model_db):
                 d_object_name(object_name),
                 d_dim(dim),
                 d_grid_geometry(grid_geometry),
-                d_num_ghosts(num_ghosts),
                 d_num_species(num_species),
                 d_num_eqn(num_eqn),
+                d_num_ghosts(-hier::IntVector::getOne(d_dim)),
                 d_patch(nullptr),
                 d_patch_registered(false),
                 d_interior_box(hier::Box::getEmptyBox(dim)),
@@ -90,7 +89,7 @@ class FlowModel:
         /*
          * Get the total number of equations.
          */
-        const int& getNumberOfEquations() const
+        const int getNumberOfEquations() const
         {
             return d_num_eqn;
         }
@@ -101,6 +100,24 @@ class FlowModel:
         const std::vector<EQN_FORM::TYPE>& getEquationsForm() const
         {
             return d_eqn_form;
+        }
+        
+        /*
+         * Get the number of ghost cells of conservative variables.
+         */
+        const hier::IntVector&
+        getNumberOfGhostCells()
+        {
+            // Check whether a patch is already registered.
+            if (!d_patch)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModel::getNumberOfGhostCells()\n"
+                    << "No patch is registered yet."
+                    << std::endl);
+            }
+            
+            return d_num_ghosts;
         }
         
         /*
@@ -137,7 +154,9 @@ class FlowModel:
          * Register the conservative variables.
          */
         virtual void
-        registerConservativeVariables(RungeKuttaLevelIntegrator* integrator) = 0;
+        registerConservativeVariables(
+            RungeKuttaLevelIntegrator* integrator,
+            const hier::IntVector& num_ghosts) = 0;
         
         /*
          * Get the names of conservative variables.
@@ -441,15 +460,6 @@ class FlowModel:
             const boost::shared_ptr<appu::VisItDataWriter>& visit_writer) = 0;
 #endif
         
-        /*
-         * Set the number of ghost cells needed.
-         */
-        void
-        setNumberOfGhostCells(const hier::IntVector& num_ghosts)
-        {
-            d_num_ghosts = num_ghosts;
-        }
-        
     protected:
         /*
          * Set the context for data on a patch.
@@ -494,11 +504,6 @@ class FlowModel:
         const boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
         
         /*
-         * Number of ghost cells for registered variables.
-         */
-        hier::IntVector d_num_ghosts;
-        
-        /*
          * A string variable to describe the equation of state used.
          */
         std::string d_equation_of_state_str;
@@ -527,6 +532,11 @@ class FlowModel:
          * Form of each equation.
          */
         std::vector<EQN_FORM::TYPE> d_eqn_form;
+        
+        /*
+         * Number of ghost cells for registered variables.
+         */
+        hier::IntVector d_num_ghosts;
         
         /*
          * Pointer to registered patch.

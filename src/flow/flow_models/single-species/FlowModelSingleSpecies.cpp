@@ -6,14 +6,12 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
     const std::string& object_name,
     const tbox::Dimension& dim,
     const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
-    const hier::IntVector& num_ghosts,
     const int& num_species,
     const boost::shared_ptr<tbox::Database>& flow_model_db):
         FlowModel(
             object_name,
             dim,
             grid_geometry,
-            num_ghosts,
             num_species,
             2 + dim.getValue(),
             flow_model_db),
@@ -477,11 +475,13 @@ FlowModelSingleSpecies::putToRestart(
  * Register the conservative variables.
  */
 void
-FlowModelSingleSpecies::registerConservativeVariables(RungeKuttaLevelIntegrator* integrator)
+FlowModelSingleSpecies::registerConservativeVariables(
+    RungeKuttaLevelIntegrator* integrator,
+    const hier::IntVector& num_ghosts)
 {
     integrator->registerVariable(
         d_variable_density,
-        d_num_ghosts,
+        num_ghosts,
         RungeKuttaLevelIntegrator::TIME_DEP,
         d_grid_geometry,
         "CONSERVATIVE_COARSEN",
@@ -489,7 +489,7 @@ FlowModelSingleSpecies::registerConservativeVariables(RungeKuttaLevelIntegrator*
     
     integrator->registerVariable(
         d_variable_momentum,
-        d_num_ghosts,
+        num_ghosts,
         RungeKuttaLevelIntegrator::TIME_DEP,
         d_grid_geometry,
         "CONSERVATIVE_COARSEN",
@@ -497,7 +497,7 @@ FlowModelSingleSpecies::registerConservativeVariables(RungeKuttaLevelIntegrator*
     
     integrator->registerVariable(
         d_variable_total_energy,
-        d_num_ghosts,
+        num_ghosts,
         RungeKuttaLevelIntegrator::TIME_DEP,
         d_grid_geometry,
         "CONSERVATIVE_COARSEN",
@@ -621,6 +621,16 @@ FlowModelSingleSpecies::registerPatchWithDataContext(
     d_patch = &patch;
     
     setDataContext(data_context);
+    
+    /*
+     * Set the number of ghost cells of conservative variables.
+     */
+    
+    boost::shared_ptr<pdat::CellData<double> > data_density(
+        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+            d_patch->getPatchData(d_variable_density, getDataContext())));
+    
+    d_num_ghosts = data_density->getGhostCellWidth();
     
     /*
      * Set the interior and ghost boxes with their dimensions for the conservative cell variables.
@@ -896,6 +906,7 @@ FlowModelSingleSpecies::unregisterPatch()
     
     d_patch = nullptr;
     
+    d_num_ghosts                      = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_velocity          = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_internal_energy   = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_pressure          = -hier::IntVector::getOne(d_dim);

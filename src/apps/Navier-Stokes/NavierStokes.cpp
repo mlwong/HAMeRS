@@ -61,7 +61,6 @@ NavierStokes::NavierStokes(
         d_dim(dim),
         d_grid_geometry(grid_geometry),
         d_use_nonuniform_workload(false),
-        d_num_ghosts(hier::IntVector::getZero(d_dim)),
         d_Navier_Stokes_boundary_conditions_db_is_from_restart(false)
 {
     TBOX_ASSERT(!object_name.empty());
@@ -223,50 +222,6 @@ NavierStokes::NavierStokes(
     }
     
     /*
-     * Determine the number of ghost cells needed.
-     */
-    
-    if (!is_from_restart)
-    {
-        d_num_ghosts = hier::IntVector::getZero(d_dim);
-        
-        d_num_ghosts = hier::IntVector::max(
-            d_num_ghosts,
-            d_convective_flux_reconstructor->getConvectiveFluxNumberOfGhostCells());
-        
-        d_num_ghosts = hier::IntVector::max(
-            d_num_ghosts,
-            d_diffusive_flux_reconstructor->getDiffusiveFluxNumberOfGhostCells());
-        
-        if (d_value_tagger != nullptr)
-        {
-            d_num_ghosts = hier::IntVector::max(
-                d_num_ghosts,
-                d_value_tagger->getValueTaggerNumberOfGhostCells());
-        }
-        
-        if (d_gradient_tagger != nullptr)
-        {
-            d_num_ghosts = hier::IntVector::max(
-                d_num_ghosts,
-                d_gradient_tagger->getGradientTaggerNumberOfGhostCells());
-        }
-        
-        if (d_multiresolution_tagger != nullptr)
-        {
-            d_num_ghosts = hier::IntVector::max(
-                d_num_ghosts,
-                d_multiresolution_tagger->getMultiresolutionTaggerNumberOfGhostCells());
-        }
-    }
-    
-    /*
-     * Set the number of ghost cells needed in d_flow_model.
-     */
-    
-    d_flow_model->setNumberOfGhostCells(d_num_ghosts);
-    
-    /*
      * Initialize the face variable of convective flux.
      */
     
@@ -309,10 +264,47 @@ NavierStokes::registerModelVariables(
 {
     TBOX_ASSERT(integrator != 0);
     
+  /*
+     * Determine the number of ghost cells needed.
+     */
+    
+    hier::IntVector num_ghosts = hier::IntVector::getZero(d_dim);
+    
+    num_ghosts = hier::IntVector::max(
+        num_ghosts,
+        d_convective_flux_reconstructor->getConvectiveFluxNumberOfGhostCells());
+    
+    num_ghosts = hier::IntVector::max(
+        num_ghosts,
+        d_diffusive_flux_reconstructor->getDiffusiveFluxNumberOfGhostCells());
+    
+    if (d_value_tagger != nullptr)
+    {
+        num_ghosts = hier::IntVector::max(
+            num_ghosts,
+            d_value_tagger->getValueTaggerNumberOfGhostCells());
+    }
+    
+    if (d_gradient_tagger != nullptr)
+    {
+        num_ghosts = hier::IntVector::max(
+            num_ghosts,
+            d_gradient_tagger->getGradientTaggerNumberOfGhostCells());
+    }
+    
+    if (d_multiresolution_tagger != nullptr)
+    {
+        num_ghosts = hier::IntVector::max(
+            num_ghosts,
+            d_multiresolution_tagger->getMultiresolutionTaggerNumberOfGhostCells());
+    }
+    
     /*
      * Register the conservative variables of d_flow_model.
      */
-    d_flow_model->registerConservativeVariables(integrator);
+    d_flow_model->registerConservativeVariables(
+        integrator,
+        num_ghosts);
     
     /*
      * Register the fluxes and sources.
@@ -505,7 +497,7 @@ NavierStokes::computeStableDtOnPatch(
         BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
             patch.getPatchGeometry()));
     
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+#ifdef DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(patch_geom);
 #endif
     
@@ -533,10 +525,12 @@ NavierStokes::computeStableDtOnPatch(
         
         d_flow_model->registerPatchWithDataContext(patch, getDataContext());
         
+        hier::IntVector num_ghosts = d_flow_model->getNumberOfGhostCells();
+        
         std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
         num_subghosts_of_data.insert(
             std::pair<std::string, hier::IntVector>(
-                "MAX_WAVE_SPEED_X", hier::IntVector::getZero(d_dim)));
+                "MAX_WAVE_SPEED_X", num_ghosts));
         
         d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
         
@@ -552,19 +546,23 @@ NavierStokes::computeStableDtOnPatch(
         
         hier::IntVector num_subghosts_max_wave_speed_x = max_wave_speed_x->getGhostCellWidth();
         
-        const int num_subghosts_0_max_wave_speed_x = num_subghosts_max_wave_speed_x[0];
+        TBOX_ASSERT(num_subghosts_max_wave_speed_x == num_ghosts);
+        
+        const int num_ghosts_0 = num_ghosts[0];
         
         double* max_lambda_x = max_wave_speed_x->getPointer(0);
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd reduction(max:stable_spectral_radius)
 #endif
-        for (int i = 0; i < interior_dim_0; i++)
+        for (int i = -num_ghosts_0;
+             i < interior_dim_0 + num_ghosts_0;
+             i++)
         {
             // Compute the linear index.
-            const int idx_max_wave_speed_x = i + num_subghosts_0_max_wave_speed_x;
+            const int idx = i + num_ghosts_0;
             
-            const double spectral_radius = max_lambda_x[idx_max_wave_speed_x]/dx_0;
+            const double spectral_radius = max_lambda_x[idx]/dx_0;
             stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius);
         }
         
@@ -593,13 +591,19 @@ NavierStokes::computeStableDtOnPatch(
         
         d_flow_model->registerPatchWithDataContext(patch, getDataContext());
         
+        hier::IntVector num_ghosts = d_flow_model->getNumberOfGhostCells();
+        
+        hier::Box ghost_box = interior_box;
+        ghost_box.grow(num_ghosts);
+        const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+        
         std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
         num_subghosts_of_data.insert(
             std::pair<std::string, hier::IntVector>(
-                "MAX_WAVE_SPEED_X", hier::IntVector::getZero(d_dim)));
+                "MAX_WAVE_SPEED_X", num_ghosts));
         num_subghosts_of_data.insert(
             std::pair<std::string, hier::IntVector>(
-                "MAX_WAVE_SPEED_Y", hier::IntVector::getZero(d_dim)));
+                "MAX_WAVE_SPEED_Y", num_ghosts));
         
         d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
         
@@ -617,38 +621,35 @@ NavierStokes::computeStableDtOnPatch(
             d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_Y");
         
         hier::IntVector num_subghosts_max_wave_speed_x = max_wave_speed_x->getGhostCellWidth();
-        hier::IntVector subghostcell_dims_max_wave_speed_x = max_wave_speed_x->getGhostBox().numberCells();
-        
         hier::IntVector num_subghosts_max_wave_speed_y = max_wave_speed_y->getGhostCellWidth();
-        hier::IntVector subghostcell_dims_max_wave_speed_y = max_wave_speed_y->getGhostBox().numberCells();
         
-        const int num_subghosts_0_max_wave_speed_x = num_subghosts_max_wave_speed_x[0];
-        const int num_subghosts_1_max_wave_speed_x = num_subghosts_max_wave_speed_x[1];
-        const int subghostcell_dim_0_max_wave_speed_x = subghostcell_dims_max_wave_speed_x[0];
+        TBOX_ASSERT(num_subghosts_max_wave_speed_x == num_ghosts);
+        TBOX_ASSERT(num_subghosts_max_wave_speed_y == num_ghosts);
         
-        const int num_subghosts_0_max_wave_speed_y = num_subghosts_max_wave_speed_y[0];
-        const int num_subghosts_1_max_wave_speed_y = num_subghosts_max_wave_speed_y[1];
-        const int subghostcell_dim_0_max_wave_speed_y = subghostcell_dims_max_wave_speed_y[0];
+        const int num_ghosts_0 = num_ghosts[0];
+        const int num_ghosts_1 = num_ghosts[1];
+        const int ghostcell_dim_0 = ghostcell_dims[0];
         
         double* max_lambda_x = max_wave_speed_x->getPointer(0);
         double* max_lambda_y = max_wave_speed_y->getPointer(0);
         
-        for (int j = 0; j < interior_dim_1; j++)
+        for (int j = -num_ghosts_1;
+             j < interior_dim_1 + num_ghosts_1;
+             j++)
         {
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd reduction(max:stable_spectral_radius)
 #endif
-            for (int i = 0; i < interior_dim_0; i++)
+            for (int i = -num_ghosts_0;
+                 i < interior_dim_0 + num_ghosts_0;
+                 i++)
             {
                 // Compute the linear indices.
-                const int idx_max_wave_speed_x = (i + num_subghosts_0_max_wave_speed_x) +
-                    (j + num_subghosts_1_max_wave_speed_x)*subghostcell_dim_0_max_wave_speed_x;
+                const int idx = (i + num_ghosts_0) +
+                    (j + num_ghosts_1)*ghostcell_dim_0;
                 
-                const int idx_max_wave_speed_y = (i + num_subghosts_0_max_wave_speed_y) +
-                    (j + num_subghosts_1_max_wave_speed_y)*subghostcell_dim_0_max_wave_speed_y;
-                
-                const double spectral_radius = max_lambda_x[idx_max_wave_speed_x]/dx_0 +
-                    max_lambda_y[idx_max_wave_speed_y]/dx_1;
+                const double spectral_radius = max_lambda_x[idx]/dx_0 +
+                    max_lambda_y[idx]/dx_1;
                 
                 stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius);
             }
@@ -681,16 +682,22 @@ NavierStokes::computeStableDtOnPatch(
         
         d_flow_model->registerPatchWithDataContext(patch, getDataContext());
         
+        hier::IntVector num_ghosts = d_flow_model->getNumberOfGhostCells();
+        
+        hier::Box ghost_box = interior_box;
+        ghost_box.grow(num_ghosts);
+        const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+        
         std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
         num_subghosts_of_data.insert(
             std::pair<std::string, hier::IntVector>(
-                "MAX_WAVE_SPEED_X", hier::IntVector::getZero(d_dim)));
+                "MAX_WAVE_SPEED_X", num_ghosts));
         num_subghosts_of_data.insert(
             std::pair<std::string, hier::IntVector>(
-                "MAX_WAVE_SPEED_Y", hier::IntVector::getZero(d_dim)));
+                "MAX_WAVE_SPEED_Y", num_ghosts));
         num_subghosts_of_data.insert(
             std::pair<std::string, hier::IntVector>(
-                "MAX_WAVE_SPEED_Z", hier::IntVector::getZero(d_dim)));
+                "MAX_WAVE_SPEED_Z", num_ghosts));
         
         d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
         
@@ -711,64 +718,47 @@ NavierStokes::computeStableDtOnPatch(
             d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_Z");
         
         hier::IntVector num_subghosts_max_wave_speed_x = max_wave_speed_x->getGhostCellWidth();
-        hier::IntVector subghostcell_dims_max_wave_speed_x = max_wave_speed_x->getGhostBox().numberCells();
-        
         hier::IntVector num_subghosts_max_wave_speed_y = max_wave_speed_y->getGhostCellWidth();
-        hier::IntVector subghostcell_dims_max_wave_speed_y = max_wave_speed_y->getGhostBox().numberCells();
-        
         hier::IntVector num_subghosts_max_wave_speed_z = max_wave_speed_z->getGhostCellWidth();
-        hier::IntVector subghostcell_dims_max_wave_speed_z = max_wave_speed_z->getGhostBox().numberCells();
         
-        const int num_subghosts_0_max_wave_speed_x = num_subghosts_max_wave_speed_x[0];
-        const int num_subghosts_1_max_wave_speed_x = num_subghosts_max_wave_speed_x[1];
-        const int num_subghosts_2_max_wave_speed_x = num_subghosts_max_wave_speed_x[2];
-        const int subghostcell_dim_0_max_wave_speed_x = subghostcell_dims_max_wave_speed_x[0];
-        const int subghostcell_dim_1_max_wave_speed_x = subghostcell_dims_max_wave_speed_x[1];
+        TBOX_ASSERT(num_subghosts_max_wave_speed_x == num_ghosts);
+        TBOX_ASSERT(num_subghosts_max_wave_speed_y == num_ghosts);
+        TBOX_ASSERT(num_subghosts_max_wave_speed_z == num_ghosts);
         
-        const int num_subghosts_0_max_wave_speed_y = num_subghosts_max_wave_speed_y[0];
-        const int num_subghosts_1_max_wave_speed_y = num_subghosts_max_wave_speed_y[1];
-        const int num_subghosts_2_max_wave_speed_y = num_subghosts_max_wave_speed_y[2];
-        const int subghostcell_dim_0_max_wave_speed_y = subghostcell_dims_max_wave_speed_y[0];
-        const int subghostcell_dim_1_max_wave_speed_y = subghostcell_dims_max_wave_speed_y[1];
-        
-        const int num_subghosts_0_max_wave_speed_z = num_subghosts_max_wave_speed_z[0];
-        const int num_subghosts_1_max_wave_speed_z = num_subghosts_max_wave_speed_z[1];
-        const int num_subghosts_2_max_wave_speed_z = num_subghosts_max_wave_speed_z[2];
-        const int subghostcell_dim_0_max_wave_speed_z = subghostcell_dims_max_wave_speed_z[0];
-        const int subghostcell_dim_1_max_wave_speed_z = subghostcell_dims_max_wave_speed_z[1];
+        const int num_ghosts_0 = num_ghosts[0];
+        const int num_ghosts_1 = num_ghosts[1];
+        const int num_ghosts_2 = num_ghosts[2];
+        const int ghostcell_dim_0 = ghostcell_dims[0];
+        const int ghostcell_dim_1 = ghostcell_dims[1];
         
         double* max_lambda_x = max_wave_speed_x->getPointer(0);
         double* max_lambda_y = max_wave_speed_y->getPointer(0);
         double* max_lambda_z = max_wave_speed_z->getPointer(0);
         
-        for (int k = 0; k < interior_dim_2; k++)
+        for (int k = -num_ghosts_2;
+             k < interior_dim_2 + num_ghosts_2;
+             k++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = -num_ghosts_1;
+                 j < interior_dim_1 + num_ghosts_1;
+                 j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd reduction(max:stable_spectral_radius)
 #endif
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = -num_ghosts_0;
+                     i < interior_dim_0 + num_ghosts_0;
+                     i++)
                 {
                     // Compute the linear indices.
-                    const int idx_max_wave_speed_x = (i + num_subghosts_0_max_wave_speed_x) +
-                        (j + num_subghosts_1_max_wave_speed_x)*subghostcell_dim_0_max_wave_speed_x +
-                        (k + num_subghosts_2_max_wave_speed_x)*subghostcell_dim_0_max_wave_speed_x*
-                            subghostcell_dim_1_max_wave_speed_x;
+                    const int idx = (i + num_ghosts_0) +
+                        (j + num_ghosts_1)*ghostcell_dim_0 +
+                        (k + num_ghosts_2)*ghostcell_dim_0*
+                            ghostcell_dim_1;
                     
-                    const int idx_max_wave_speed_y = (i + num_subghosts_0_max_wave_speed_y) +
-                        (j + num_subghosts_1_max_wave_speed_y)*subghostcell_dim_0_max_wave_speed_y +
-                        (k + num_subghosts_2_max_wave_speed_y)*subghostcell_dim_0_max_wave_speed_y*
-                            subghostcell_dim_1_max_wave_speed_y;
-                    
-                    const int idx_max_wave_speed_z = (i + num_subghosts_0_max_wave_speed_z) +
-                        (j + num_subghosts_1_max_wave_speed_z)*subghostcell_dim_0_max_wave_speed_z +
-                        (k + num_subghosts_2_max_wave_speed_z)*subghostcell_dim_0_max_wave_speed_z*
-                            subghostcell_dim_1_max_wave_speed_z;
-                    
-                    const double spectral_radius = max_lambda_x[idx_max_wave_speed_x]/dx_0 +
-                        max_lambda_y[idx_max_wave_speed_y]/dx_1 +
-                        max_lambda_z[idx_max_wave_speed_z]/dx_2;
+                    const double spectral_radius = max_lambda_x[idx]/dx_0 +
+                        max_lambda_y[idx]/dx_1 +
+                        max_lambda_z[idx]/dx_2;
                     
                     stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius);
                 }
@@ -2059,8 +2049,6 @@ NavierStokes::putToRestart(
     
     restart_db->putString("d_project_name", d_project_name);
     
-    restart_db->putIntegerArray("d_num_ghosts", &d_num_ghosts[0], d_dim.getValue());
-    
     restart_db->putInteger("d_num_species", d_num_species);
     
     restart_db->putString("d_flow_model_str", d_flow_model_str);
@@ -2158,7 +2146,6 @@ void NavierStokes::printClassData(std::ostream& os) const
     os << "d_project_name = " << d_project_name << std::endl;
     os << "d_dim = " << d_dim.getValue() << std::endl;
     os << "d_grid_geometry = " << d_grid_geometry.get() << std::endl;
-    os << "d_num_ghosts = " << d_num_ghosts << std::endl;
     
     // Print all characteristics of d_flow_model.
     d_flow_model_manager->printClassData(os);
@@ -2528,9 +2515,6 @@ void NavierStokes::getFromRestart()
     boost::shared_ptr<tbox::Database> db(root_db->getDatabase(d_object_name));
     
     d_project_name = db->getString("d_project_name");
-    
-    int* tmp_num_ghosts = &d_num_ghosts[0];
-    db->getIntegerArray("d_num_ghosts", tmp_num_ghosts, d_dim.getValue());
     
     d_num_species = db->getInteger("d_num_species");
     
