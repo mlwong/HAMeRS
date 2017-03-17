@@ -960,6 +960,12 @@ NavierStokes::advanceSingleStepOnPatch(
         std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables_intermediate =
             d_flow_model->getGlobalCellDataConservativeVariables();
         
+        std::vector<hier::IntVector> num_ghosts_conservative_var_intermediate;
+        num_ghosts_conservative_var_intermediate.reserve(d_flow_model->getNumberOfEquations());
+        
+        std::vector<hier::IntVector> ghostcell_dims_conservative_var_intermediate;
+        ghostcell_dims_conservative_var_intermediate.reserve(d_flow_model->getNumberOfEquations());
+        
         std::vector<double*> Q_intermediate;
         Q_intermediate.reserve(d_flow_model->getNumberOfEquations());
         
@@ -976,6 +982,10 @@ NavierStokes::advanceSingleStepOnPatch(
                     break;
                 
                 Q_intermediate.push_back(conservative_variables_intermediate[vi]->getPointer(di));
+                num_ghosts_conservative_var_intermediate.push_back(
+                    conservative_variables_intermediate[vi]->getGhostCellWidth());
+                ghostcell_dims_conservative_var_intermediate.push_back(
+                    conservative_variables_intermediate[vi]->getGhostBox().numberCells());
                 
                 count_eqn++;
             }
@@ -999,16 +1009,19 @@ NavierStokes::advanceSingleStepOnPatch(
                 for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                 {
                     const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
+                    const int num_ghosts_0_conservative_var_intermediate =
+                        num_ghosts_conservative_var_intermediate[ei][0];
                     
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
-                        // Compute linear index of conservative variable data.
-                        const int idx_cell = i + num_ghosts_0_conservative_var;
+                        // Compute linear indices of conservative variable data.
+                        const int idx = i + num_ghosts_0_conservative_var;
+                        const int idx_intermediate = i + num_ghosts_0_conservative_var_intermediate;
                         
-                        Q[ei][idx_cell] += alpha[n]*Q_intermediate[ei][idx_cell];
+                        Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
                     }
                 }
             }
@@ -1029,14 +1042,14 @@ NavierStokes::advanceSingleStepOnPatch(
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute linear indices.
-                        const int idx_cell = i + num_ghosts_0_conservative_var;
+                        const int idx = i + num_ghosts_0_conservative_var;
                         const int idx_source = i;
                         const int idx_flux_x = i + 1;
                         
-                        Q[ei][idx_cell] += beta[n]*
+                        Q[ei][idx] += beta[n]*
                             (-(F_c_x_intermediate[idx_flux_x] - F_c_x_intermediate[idx_flux_x - 1] +
                                F_d_x_intermediate[idx_flux_x] - F_d_x_intermediate[idx_flux_x - 1])/dx_0 +
-                            S_intermediate[idx_source]);
+                             S_intermediate[idx_source]);
                     }
                 }
             }
@@ -1077,9 +1090,9 @@ NavierStokes::advanceSingleStepOnPatch(
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute linear index.
-                        const int idx_cell = i;
+                        const int idx = i;
                         
-                        S[idx_cell] += gamma[n]*S_intermediate[idx_cell];
+                        S[idx] += gamma[n]*S_intermediate[idx];
                     }
                 }
             } // if (gamma[n] != 0.0)
@@ -1104,6 +1117,13 @@ NavierStokes::advanceSingleStepOnPatch(
                     const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
                     const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[ei][0];
                     
+                    const int num_ghosts_0_conservative_var_intermediate =
+                        num_ghosts_conservative_var_intermediate[ei][0];
+                    const int num_ghosts_1_conservative_var_intermediate =
+                        num_ghosts_conservative_var_intermediate[ei][1];
+                    const int ghostcell_dim_0_conservative_var_intermediate =
+                        ghostcell_dims_conservative_var_intermediate[ei][0];
+                    
                     for (int j = 0; j < interior_dim_1; j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
@@ -1111,11 +1131,15 @@ NavierStokes::advanceSingleStepOnPatch(
 #endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
-                            // Compute linear index of conservative data.
-                            const int idx_cell = (i + num_ghosts_0_conservative_var) +
+                            // Compute linear indices of conservative data.
+                            const int idx = (i + num_ghosts_0_conservative_var) +
                                 (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
                             
-                            Q[ei][idx_cell] += alpha[n]*Q_intermediate[ei][idx_cell];
+                            const int idx_intermediate = (i + num_ghosts_0_conservative_var_intermediate) +
+                                (j + num_ghosts_1_conservative_var_intermediate)*
+                                    ghostcell_dim_0_conservative_var_intermediate;
+                            
+                            Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
                         }
                     }
                 }
@@ -1143,19 +1167,19 @@ NavierStokes::advanceSingleStepOnPatch(
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute linear indices.
-                            const int idx_cell = (i + num_ghosts_0_conservative_var) +
+                            const int idx = (i + num_ghosts_0_conservative_var) +
                                 (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
                             
                             const int idx_source = i + j*interior_dim_0;
                             const int idx_flux_x = (i + 1) + j*(interior_dim_0 + 1);
                             const int idx_flux_y = (j + 1) + i*(interior_dim_1 + 1);
                             
-                            Q[ei][idx_cell] += beta[n]*
+                            Q[ei][idx] += beta[n]*
                                 (-(F_c_x_intermediate[idx_flux_x] - F_c_x_intermediate[idx_flux_x - 1] +
                                    F_d_x_intermediate[idx_flux_x] - F_d_x_intermediate[idx_flux_x - 1])/dx_0 -
-                                (F_c_y_intermediate[idx_flux_y] - F_c_y_intermediate[idx_flux_y - 1] +
-                                 F_d_y_intermediate[idx_flux_y] - F_d_y_intermediate[idx_flux_y - 1])/dx_1 +
-                                S_intermediate[idx_source]);
+                                 (F_c_y_intermediate[idx_flux_y] - F_c_y_intermediate[idx_flux_y - 1] +
+                                  F_d_y_intermediate[idx_flux_y] - F_d_y_intermediate[idx_flux_y - 1])/dx_1 +
+                                 S_intermediate[idx_source]);
                         }
                     }
                 }
@@ -1227,9 +1251,9 @@ NavierStokes::advanceSingleStepOnPatch(
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute linear index.
-                            const int idx_cell = i + j*interior_dim_0;
+                            const int idx = i + j*interior_dim_0;
                             
-                            S[idx_cell] += gamma[n]*S_intermediate[idx_cell];
+                            S[idx] += gamma[n]*S_intermediate[idx];
                         }
                     }
                 }
@@ -1259,6 +1283,17 @@ NavierStokes::advanceSingleStepOnPatch(
                     const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[ei][0];
                     const int ghostcell_dim_1_conservative_var = ghostcell_dims_conservative_var[ei][1];
                     
+                    const int num_ghosts_0_conservative_var_intermediate =
+                        num_ghosts_conservative_var_intermediate[ei][0];
+                    const int num_ghosts_1_conservative_var_intermediate =
+                        num_ghosts_conservative_var_intermediate[ei][1];
+                    const int num_ghosts_2_conservative_var_intermediate =
+                        num_ghosts_conservative_var_intermediate[ei][2];
+                    const int ghostcell_dim_0_conservative_var_intermediate =
+                        ghostcell_dims_conservative_var_intermediate[ei][0];
+                    const int ghostcell_dim_1_conservative_var_intermediate =
+                        ghostcell_dims_conservative_var_intermediate[ei][1];
+                    
                     for (int k = 0; k < interior_dim_2; k++)
                     {
                         for (int j = 0; j < interior_dim_1; j++)
@@ -1268,13 +1303,20 @@ NavierStokes::advanceSingleStepOnPatch(
 #endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
-                                // Compute linear index of conservative variable data.
-                                const int idx_cell = (i + num_ghosts_0_conservative_var) +
+                                // Compute linear indices of conservative variable data.
+                                const int idx = (i + num_ghosts_0_conservative_var) +
                                     (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
                                     (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
                                         ghostcell_dim_1_conservative_var;
                                 
-                                Q[ei][idx_cell] += alpha[n]*Q_intermediate[ei][idx_cell];
+                                const int idx_intermediate = (i + num_ghosts_0_conservative_var_intermediate) +
+                                    (j + num_ghosts_1_conservative_var_intermediate)*
+                                        ghostcell_dim_0_conservative_var_intermediate +
+                                    (k + num_ghosts_2_conservative_var_intermediate)*
+                                        ghostcell_dim_0_conservative_var_intermediate*
+                                            ghostcell_dim_1_conservative_var_intermediate;
+                                
+                                Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
                             }
                         }
                     }
@@ -1309,7 +1351,7 @@ NavierStokes::advanceSingleStepOnPatch(
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear indices.
-                                const int idx_cell = (i + num_ghosts_0_conservative_var) +
+                                const int idx = (i + num_ghosts_0_conservative_var) +
                                     (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
                                     (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
                                         ghostcell_dim_1_conservative_var;
@@ -1330,14 +1372,14 @@ NavierStokes::advanceSingleStepOnPatch(
                                     i*(interior_dim_2 + 1) +
                                     j*(interior_dim_2 + 1)*interior_dim_0;
                                 
-                                Q[ei][idx_cell] += beta[n]*
+                                Q[ei][idx] += beta[n]*
                                     (-(F_c_x_intermediate[idx_flux_x] - F_c_x_intermediate[idx_flux_x - 1] +
                                        F_d_x_intermediate[idx_flux_x] - F_d_x_intermediate[idx_flux_x - 1])/dx_0 -
-                                    (F_c_y_intermediate[idx_flux_y] - F_c_y_intermediate[idx_flux_y - 1] +
-                                     F_d_y_intermediate[idx_flux_y] - F_d_y_intermediate[idx_flux_y - 1])/dx_1 -
-                                    (F_c_z_intermediate[idx_flux_z] - F_c_z_intermediate[idx_flux_z - 1] +
-                                     F_d_z_intermediate[idx_flux_z] - F_d_z_intermediate[idx_flux_z - 1])/dx_2 +
-                                    S_intermediate[idx_source]);
+                                       (F_c_y_intermediate[idx_flux_y] - F_c_y_intermediate[idx_flux_y - 1] +
+                                        F_d_y_intermediate[idx_flux_y] - F_d_y_intermediate[idx_flux_y - 1])/dx_1 -
+                                       (F_c_z_intermediate[idx_flux_z] - F_c_z_intermediate[idx_flux_z - 1] +
+                                        F_d_z_intermediate[idx_flux_z] - F_d_z_intermediate[idx_flux_z - 1])/dx_2 +
+                                     S_intermediate[idx_source]);
                             }
                         }
                     }
@@ -1452,11 +1494,11 @@ NavierStokes::advanceSingleStepOnPatch(
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear index.
-                                const int idx_cell = i +
+                                const int idx = i +
                                     j*interior_dim_0 +
                                     k*interior_dim_0*interior_dim_1;
                                 
-                                S[idx_cell] += gamma[n]*S_intermediate[idx_cell];
+                                S[idx] += gamma[n]*S_intermediate[idx];
                             }
                         }
                     }
@@ -1589,17 +1631,30 @@ NavierStokes::synchronizeFluxes(
             
             const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
             
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute linear indices.
-                const int idx_source = i;
-                const int idx_flux_x = i + 1;
-                const int idx_cell = i + num_ghosts_0_conservative_var;
+                const int idx = i + num_ghosts_0_conservative_var;
+                const int idx_flux_x_L = i;
+                const int idx_flux_x_R = i + 1;
                 
-                Q[ei][idx_cell] +=
-                    (-(F_c_x[idx_flux_x] - F_c_x[idx_flux_x - 1] +
-                    F_d_x[idx_flux_x] - F_d_x[idx_flux_x - 1])/dx_0 +
-                    S[idx_source]);
+                Q[ei][idx] -= ((F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L] +
+                                F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])/dx_0);
+            }
+            
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = 0; i < interior_dim_0; i++)
+            {
+                // Compute linear indices.
+                const int idx = i + num_ghosts_0_conservative_var;
+                const int idx_source = i;
+                
+                Q[ei][idx] += S[idx_source];
             }
         }
     }
@@ -1629,22 +1684,56 @@ NavierStokes::synchronizeFluxes(
             
             for (int j = 0; j < interior_dim_1; j++)
             {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute linear indices.
-                    const int idx_cell = (i + num_ghosts_0_conservative_var) +
+                    const int idx = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
+                    
+                    const int idx_flux_x_L = i + j*(interior_dim_0 + 1);
+                    const int idx_flux_x_R = (i + 1) + j*(interior_dim_0 + 1);
+                    
+                    Q[ei][idx] -= ((F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L] +
+                                    F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])/dx_0);
+                }
+            }
+            
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute linear indices.
+                    const int idx = (i + num_ghosts_0_conservative_var) +
+                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
+                    
+                    const int idx_flux_y_B = j + i*(interior_dim_1 + 1);
+                    const int idx_flux_y_T = (j + 1) + i*(interior_dim_1 + 1);
+                    
+                    Q[ei][idx] -= ((F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B] +
+                                    F_d_y[idx_flux_y_T] - F_d_y[idx_flux_y_B])/dx_1);
+                }
+            }
+            
+            for (int j = 0; j < interior_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute linear indices.
+                    const int idx = (i + num_ghosts_0_conservative_var) +
                         (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
                     
                     const int idx_source = i + j*interior_dim_0;
-                    const int idx_flux_x = (i + 1) + j*(interior_dim_0 + 1);
-                    const int idx_flux_y = (j + 1) + i*(interior_dim_1 + 1);
                     
-                    Q[ei][idx_cell] +=
-                        (-(F_c_x[idx_flux_x] - F_c_x[idx_flux_x - 1] +
-                         F_d_x[idx_flux_x] - F_d_x[idx_flux_x - 1])/dx_0 -
-                        (F_c_y[idx_flux_y] - F_c_y[idx_flux_y - 1] +
-                         F_d_y[idx_flux_y] - F_d_y[idx_flux_y - 1])/dx_1 +
-                        S[idx_source]);
+                    Q[ei][idx] += S[idx_source];
                 }
             }
         }
@@ -1683,10 +1772,100 @@ NavierStokes::synchronizeFluxes(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute linear indices.
-                        const int idx_cell = (i + num_ghosts_0_conservative_var) +
+                        const int idx = (i + num_ghosts_0_conservative_var) +
+                            (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                            (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                                ghostcell_dim_1_conservative_var;
+                        
+                        const int idx_flux_x_L = i +
+                            j*(interior_dim_0 + 1) +
+                            k*(interior_dim_0 + 1)*interior_dim_1;
+                        
+                        const int idx_flux_x_R = (i + 1) +
+                            j*(interior_dim_0 + 1) +
+                            k*(interior_dim_0 + 1)*interior_dim_1;
+                        
+                        Q[ei][idx] -= ((F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L] +
+                                        F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])/dx_0);
+                    }
+                }
+            }
+            
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute linear indices.
+                        const int idx = (i + num_ghosts_0_conservative_var) +
+                            (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                            (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                                ghostcell_dim_1_conservative_var;
+                        
+                        const int idx_flux_y_B = j +
+                            k*(interior_dim_1 + 1) +
+                            i*(interior_dim_1 + 1)*interior_dim_2;
+                        
+                        const int idx_flux_y_T = (j + 1) +
+                            k*(interior_dim_1 + 1) +
+                            i*(interior_dim_1 + 1)*interior_dim_2;
+                        
+                        Q[ei][idx] -= ((F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B] +
+                                        F_d_y[idx_flux_y_T] - F_d_y[idx_flux_y_B])/dx_1);
+                    }
+                }
+            }
+            
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute linear indices.
+                        const int idx = (i + num_ghosts_0_conservative_var) +
+                            (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                            (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                                ghostcell_dim_1_conservative_var;
+                        
+                        const int idx_flux_z_B = k +
+                            i*(interior_dim_2 + 1) +
+                            j*(interior_dim_2 + 1)*interior_dim_0;
+                        
+                        const int idx_flux_z_F = (k + 1) +
+                            i*(interior_dim_2 + 1) +
+                            j*(interior_dim_2 + 1)*interior_dim_0;
+                        
+                        Q[ei][idx] -= ((F_c_z[idx_flux_z_F] - F_c_z[idx_flux_z_B] +
+                                        F_d_z[idx_flux_z_F] - F_d_z[idx_flux_z_B])/dx_2);
+                    }
+                }
+            }
+            
+            for (int k = 0; k < interior_dim_2; k++)
+            {
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute linear indices.
+                        const int idx = (i + num_ghosts_0_conservative_var) +
                             (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
                             (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
                                 ghostcell_dim_1_conservative_var;
@@ -1695,26 +1874,7 @@ NavierStokes::synchronizeFluxes(
                             j*interior_dim_0 +
                             k*interior_dim_0*interior_dim_1;
                         
-                        const int idx_flux_x = (i + 1) +
-                            j*(interior_dim_0 + 1) +
-                            k*(interior_dim_0 + 1)*interior_dim_1;
-                        
-                        const int idx_flux_y = (j + 1) +
-                            k*(interior_dim_1 + 1) +
-                            i*(interior_dim_1 + 1)*interior_dim_2;
-                        
-                        const int idx_flux_z = (k + 1) +
-                            i*(interior_dim_2 + 1) +
-                            j*(interior_dim_2 + 1)*interior_dim_0;
-                        
-                        Q[ei][idx_cell] +=
-                            (-(F_c_x[idx_flux_x] - F_c_x[idx_flux_x - 1] +
-                             F_d_x[idx_flux_x] - F_d_x[idx_flux_x - 1])/dx_0 -
-                            (F_c_y[idx_flux_y] - F_c_y[idx_flux_y - 1] +
-                             F_d_y[idx_flux_y] - F_d_y[idx_flux_y - 1])/dx_1 -
-                            (F_c_z[idx_flux_z] - F_c_z[idx_flux_z - 1] +
-                             F_d_z[idx_flux_z] - F_d_z[idx_flux_z - 1])/dx_2 +
-                            S[idx_source]);
+                        Q[ei][idx] +=  S[idx_source];
                     }
                 }
             }
