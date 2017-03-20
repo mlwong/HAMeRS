@@ -1641,7 +1641,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
             
             d_patch_strategy->setDataContext(d_intermediate[sn]);
             
-            // Compute flux corresponding to the previous step.
+            // Compute flux corresponding to this sub-step.
             d_patch_strategy->computeFluxesAndSourcesOnPatch(
                 *patch,
                 current_time,
