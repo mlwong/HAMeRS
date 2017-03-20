@@ -1623,16 +1623,15 @@ RungeKuttaLevelIntegrator::advanceLevel(
         
         boost::shared_ptr<xfer::RefineSchedule> fill_schedule_intermediate;
         
-        fill_schedule_intermediate = 
-            d_bdry_fill_intermediate[sn]->createSchedule(
-                level,
-                d_patch_strategy);
-        
-        mpi.Barrier(); // Redundant to add the mpi barrier?
-        
-        fill_schedule_intermediate->fillData(current_time);
-        
-        mpi.Barrier(); // Redundant to add the mpi barrier?
+        if (sn > 0)
+        {
+            fill_schedule_intermediate = 
+                d_bdry_fill_intermediate[sn]->createSchedule(
+                    level,
+                    d_patch_strategy);
+            
+            fill_schedule_intermediate->fillData(current_time);
+        }
         
         for (hier::PatchLevel::iterator ip(level->begin());
              ip != level->end();
@@ -2272,8 +2271,9 @@ RungeKuttaLevelIntegrator::resetDataToPreadvanceState(
 void
 RungeKuttaLevelIntegrator::registerVariable(
     const boost::shared_ptr<hier::Variable>& var,
-    const hier::IntVector ghosts,
-    const RK_VAR_TYPE RK_v_type,
+    const hier::IntVector& ghosts,
+    const hier::IntVector& ghosts_intermediate,
+    const RK_VAR_TYPE& RK_v_type,
     const boost::shared_ptr<hier::BaseGridGeometry>& transfer_geom,
     const std::string& coarsen_name,
     const std::string& refine_name)
@@ -2283,6 +2283,9 @@ RungeKuttaLevelIntegrator::registerVariable(
     TBOX_ASSERT(var);
     TBOX_ASSERT(transfer_geom);
     TBOX_ASSERT_DIM_OBJDIM_EQUALITY1(dim, *var);
+    
+    TBOX_ASSERT(ghosts >= ghosts_intermediate);
+    TBOX_ASSERT(ghosts.getDim() == ghosts_intermediate.getDim());
     
     if (!d_bdry_fill_advance)
     {
@@ -2340,7 +2343,7 @@ RungeKuttaLevelIntegrator::registerVariable(
                 intermediate_id[sn] = variable_db->registerVariableAndContext(
                     var,
                     d_intermediate[sn],
-                    ghosts);
+                    ghosts_intermediate);
             }
             
             d_saved_var_scratch_data.setFlag(scr_id);
@@ -2576,7 +2579,7 @@ RungeKuttaLevelIntegrator::registerVariable(
             {
                TBOX_ERROR(d_object_name
                           << ":  "
-                          << "Hyperbolic flux is neither face- or side-centered."
+                          << "Flux is neither face- or side-centered."
                           << std::endl);
             }
             
@@ -2595,7 +2598,7 @@ RungeKuttaLevelIntegrator::registerVariable(
                 intermediate_id[sn] = variable_db->registerVariableAndContext(
                     var,
                     d_intermediate[sn],
-                    ghosts);
+                    ghosts_intermediate);
             }
             
             for (int sn = 0; sn < d_number_steps; sn++)
@@ -2668,7 +2671,7 @@ RungeKuttaLevelIntegrator::registerVariable(
                 intermediate_id[sn] = variable_db->registerVariableAndContext(
                     var,
                     d_intermediate[sn],
-                    ghosts);
+                    ghosts_intermediate);
             }
             
             for (int sn = 0; sn < d_number_steps; sn++)

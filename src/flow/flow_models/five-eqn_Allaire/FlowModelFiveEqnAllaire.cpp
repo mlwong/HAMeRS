@@ -371,11 +371,13 @@ FlowModelFiveEqnAllaire::putToRestart(
 void
 FlowModelFiveEqnAllaire::registerConservativeVariables(
     RungeKuttaLevelIntegrator* integrator,
-    const hier::IntVector& num_ghosts)
+    const hier::IntVector& num_ghosts,
+    const hier::IntVector& num_ghosts_intermediate)
 {
     integrator->registerVariable(
         d_variable_partial_density,
         num_ghosts,
+        num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::TIME_DEP,
         d_grid_geometry,
         "CONSERVATIVE_COARSEN",
@@ -384,6 +386,7 @@ FlowModelFiveEqnAllaire::registerConservativeVariables(
     integrator->registerVariable(
         d_variable_momentum,
         num_ghosts,
+        num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::TIME_DEP,
         d_grid_geometry,
         "CONSERVATIVE_COARSEN",
@@ -392,6 +395,7 @@ FlowModelFiveEqnAllaire::registerConservativeVariables(
     integrator->registerVariable(
         d_variable_total_energy,
         num_ghosts,
+        num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::TIME_DEP,
         d_grid_geometry,
         "CONSERVATIVE_COARSEN",
@@ -400,6 +404,7 @@ FlowModelFiveEqnAllaire::registerConservativeVariables(
     integrator->registerVariable(
         d_variable_volume_fraction,
         num_ghosts,
+        num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::TIME_DEP,
         d_grid_geometry,
         "CONSERVATIVE_COARSEN",

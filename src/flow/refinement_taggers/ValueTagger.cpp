@@ -380,14 +380,11 @@ ValueTagger::registerValueTaggerVariables(
                         1));
             }
             
-            if (d_uses_global_tol_up[vi] || d_uses_global_tol_lo[vi])
+            d_value_tagger_max_mass_fraction.reserve(d_num_species);
+            
+            for (int si = 0; si < d_num_species; si++)
             {
-                d_value_tagger_max_mass_fraction.reserve(d_num_species);
-                
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    d_value_tagger_max_mass_fraction.push_back(0.0);
-                }
+                d_value_tagger_max_mass_fraction.push_back(0.0);
             }
         }
         else
@@ -412,6 +409,7 @@ ValueTagger::registerValueTaggerVariables(
             integrator->registerVariable(
                 d_value_tagger_variable_density,
                 d_num_value_ghosts,
+                d_num_value_ghosts,
                 RungeKuttaLevelIntegrator::TEMPORARY,
                     d_grid_geometry,
                     "NO_COARSEN",
@@ -421,6 +419,7 @@ ValueTagger::registerValueTaggerVariables(
         {
             integrator->registerVariable(
                 d_value_tagger_variable_total_energy,
+                d_num_value_ghosts,
                 d_num_value_ghosts,
                 RungeKuttaLevelIntegrator::TEMPORARY,
                     d_grid_geometry,
@@ -432,6 +431,7 @@ ValueTagger::registerValueTaggerVariables(
             integrator->registerVariable(
                 d_value_tagger_variable_pressure,
                 d_num_value_ghosts,
+                d_num_value_ghosts,
                 RungeKuttaLevelIntegrator::TEMPORARY,
                     d_grid_geometry,
                     "NO_COARSEN",
@@ -442,6 +442,7 @@ ValueTagger::registerValueTaggerVariables(
             integrator->registerVariable(
                 d_value_tagger_variable_dilatation,
                 d_num_value_ghosts,
+                d_num_value_ghosts,
                 RungeKuttaLevelIntegrator::TEMPORARY,
                     d_grid_geometry,
                     "NO_COARSEN",
@@ -451,6 +452,7 @@ ValueTagger::registerValueTaggerVariables(
         {
             integrator->registerVariable(
                 d_value_tagger_variable_enstrophy,
+                d_num_value_ghosts,
                 d_num_value_ghosts,
                 RungeKuttaLevelIntegrator::TEMPORARY,
                     d_grid_geometry,
@@ -463,6 +465,7 @@ ValueTagger::registerValueTaggerVariables(
             {
                 integrator->registerVariable(
                     d_value_tagger_variable_mass_fraction[si],
+                    d_num_value_ghosts,
                     d_num_value_ghosts,
                     RungeKuttaLevelIntegrator::TEMPORARY,
                         d_grid_geometry,
@@ -625,8 +628,7 @@ void
 ValueTagger::putToRestart(
     const boost::shared_ptr<tbox::Database>& restart_db) const
 {
-    restart_db->putStringVector("d_variables",
-        d_variables);
+    restart_db->putStringVector("d_variables", d_variables);
     
     restart_db->putBoolVector("d_uses_global_tol_up", d_uses_global_tol_up);
     restart_db->putBoolVector("d_uses_global_tol_lo", d_uses_global_tol_lo);

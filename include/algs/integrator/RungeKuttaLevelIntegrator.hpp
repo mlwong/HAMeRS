@@ -782,8 +782,9 @@ class RungeKuttaLevelIntegrator:
         virtual void
         registerVariable(
             const boost::shared_ptr<hier::Variable>& var,
-            const hier::IntVector ghosts,
-            const RK_VAR_TYPE RK_v_type,
+            const hier::IntVector& ghosts,
+            const hier::IntVector& ghosts_intermediate,
+            const RK_VAR_TYPE& RK_v_type,
             const boost::shared_ptr<hier::BaseGridGeometry>& transfer_geom,
             const std::string& coarsen_name = std::string(),
             const std::string& refine_name = std::string());

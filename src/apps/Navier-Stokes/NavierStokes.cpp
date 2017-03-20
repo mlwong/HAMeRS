@@ -268,15 +268,17 @@ NavierStokes::registerModelVariables(
      * Determine the number of ghost cells needed.
      */
     
-    hier::IntVector num_ghosts = hier::IntVector::getZero(d_dim);
+    hier::IntVector num_ghosts_intermediate = hier::IntVector::getZero(d_dim);
     
-    num_ghosts = hier::IntVector::max(
-        num_ghosts,
+    num_ghosts_intermediate = hier::IntVector::max(
+        num_ghosts_intermediate,
         d_convective_flux_reconstructor->getConvectiveFluxNumberOfGhostCells());
     
-    num_ghosts = hier::IntVector::max(
-        num_ghosts,
+    num_ghosts_intermediate = hier::IntVector::max(
+        num_ghosts_intermediate,
         d_diffusive_flux_reconstructor->getDiffusiveFluxNumberOfGhostCells());
+    
+    hier::IntVector num_ghosts = num_ghosts_intermediate;
     
     if (d_value_tagger != nullptr)
     {
@@ -304,7 +306,8 @@ NavierStokes::registerModelVariables(
      */
     d_flow_model->registerConservativeVariables(
         integrator,
-        num_ghosts);
+        num_ghosts,
+        num_ghosts_intermediate);
     
     /*
      * Register the fluxes and sources.
@@ -312,6 +315,7 @@ NavierStokes::registerModelVariables(
     
     integrator->registerVariable(
         d_variable_convective_flux,
+        hier::IntVector::getZero(d_dim),
         hier::IntVector::getZero(d_dim),
         RungeKuttaLevelIntegrator::FLUX,
         d_grid_geometry,
@@ -321,6 +325,7 @@ NavierStokes::registerModelVariables(
     integrator->registerVariable(
         d_variable_diffusive_flux,
         hier::IntVector::getZero(d_dim),
+        hier::IntVector::getZero(d_dim),
         RungeKuttaLevelIntegrator::FLUX,
         d_grid_geometry,
         "CONSERVATIVE_COARSEN",
@@ -328,6 +333,7 @@ NavierStokes::registerModelVariables(
     
     integrator->registerVariable(
         d_variable_source,
+        hier::IntVector::getZero(d_dim),
         hier::IntVector::getZero(d_dim),
         RungeKuttaLevelIntegrator::SOURCE,
         d_grid_geometry,

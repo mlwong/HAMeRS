@@ -626,6 +626,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                         integrator->registerVariable(
                             d_Harten_wavelet_coeffs_density[li],
                             d_num_multiresolution_ghosts,
+                            d_num_multiresolution_ghosts,
                             RungeKuttaLevelIntegrator::TIME_DEP,
                                 d_grid_geometry,
                                 "NO_COARSEN",
@@ -635,6 +636,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                         {
                             integrator->registerVariable(
                                 d_Harten_local_means_density[li],
+                                d_num_multiresolution_ghosts,
                                 d_num_multiresolution_ghosts,
                                 RungeKuttaLevelIntegrator::TEMPORARY,
                                     d_grid_geometry,
@@ -647,6 +649,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                     {
                         integrator->registerVariable(
                             d_Harten_Lipschitz_exponent_density,
+                            d_num_multiresolution_ghosts,
                             d_num_multiresolution_ghosts,
                             RungeKuttaLevelIntegrator::TIME_DEP,
                                 d_grid_geometry,
@@ -661,6 +664,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                         integrator->registerVariable(
                             d_Harten_wavelet_coeffs_total_energy[li],
                             d_num_multiresolution_ghosts,
+                            d_num_multiresolution_ghosts,
                             RungeKuttaLevelIntegrator::TIME_DEP,
                             d_grid_geometry,
                             "NO_COARSEN",
@@ -670,6 +674,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                         {
                             integrator->registerVariable(
                                 d_Harten_local_means_total_energy[li],
+                                d_num_multiresolution_ghosts,
                                 d_num_multiresolution_ghosts,
                                 RungeKuttaLevelIntegrator::TEMPORARY,
                                     d_grid_geometry,
@@ -682,6 +687,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                     {
                         integrator->registerVariable(
                             d_Harten_Lipschitz_exponent_total_energy,
+                            d_num_multiresolution_ghosts,
                             d_num_multiresolution_ghosts,
                             RungeKuttaLevelIntegrator::TIME_DEP,
                                 d_grid_geometry,
@@ -696,6 +702,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                         integrator->registerVariable(
                             d_Harten_wavelet_coeffs_pressure[li],
                             d_num_multiresolution_ghosts,
+                            d_num_multiresolution_ghosts,
                             RungeKuttaLevelIntegrator::TIME_DEP,
                             d_grid_geometry,
                             "NO_COARSEN",
@@ -705,6 +712,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                         {
                             integrator->registerVariable(
                                 d_Harten_local_means_pressure[li],
+                                d_num_multiresolution_ghosts,
                                 d_num_multiresolution_ghosts,
                                 RungeKuttaLevelIntegrator::TEMPORARY,
                                     d_grid_geometry,
@@ -717,6 +725,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
                     {
                         integrator->registerVariable(
                             d_Harten_Lipschitz_exponent_pressure,
+                            d_num_multiresolution_ghosts,
                             d_num_multiresolution_ghosts,
                             RungeKuttaLevelIntegrator::TIME_DEP,
                                 d_grid_geometry,

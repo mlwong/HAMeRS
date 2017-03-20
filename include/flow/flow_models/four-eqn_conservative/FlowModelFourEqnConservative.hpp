@@ -38,7 +38,8 @@ class FlowModelFourEqnConservative: public FlowModel
         void
         registerConservativeVariables(
             RungeKuttaLevelIntegrator* integrator,
-            const hier::IntVector& num_ghosts);
+            const hier::IntVector& num_ghosts,
+            const hier::IntVector& num_ghosts_intermediate);
         
         /*
          * Get the names of conservative variables.

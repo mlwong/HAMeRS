@@ -156,7 +156,8 @@ class FlowModel:
         virtual void
         registerConservativeVariables(
             RungeKuttaLevelIntegrator* integrator,
-            const hier::IntVector& num_ghosts) = 0;
+            const hier::IntVector& num_ghosts,
+            const hier::IntVector& num_ghosts_intermediate) = 0;
         
         /*
          * Get the names of conservative variables.
