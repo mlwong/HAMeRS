@@ -413,7 +413,7 @@ class Euler:
         printErrorStatistics(
             std::ostream& os,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy) const;
-
+        
         /*
          * Set the plotting context.
          */
