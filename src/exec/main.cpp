@@ -597,6 +597,8 @@ int main(int argc, char *argv[])
 #endif
     t_write_viz->stop();
     
+RK_level_integrator->outputDataStatistics(patch_hierarchy, 0.0);
+    
     /*
      * Time step loop.  Note that the step count and integration
      * time are maintained by algs::TimeRefinementIntegrator.

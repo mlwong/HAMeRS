@@ -414,6 +414,13 @@ class Euler:
             std::ostream& os,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy) const;
         
+        /**
+         * Output the statistics of data.
+         */
+        void
+        outputDataStatistics(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy);
+        
         /*
          * Set the plotting context.
          */

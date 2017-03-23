@@ -806,6 +806,14 @@ class RungeKuttaLevelIntegrator:
             const boost::shared_ptr<tbox::Database>& restart_db) const;
         
         /**
+         * Output statistics of data.
+         */
+        virtual void
+        outputDataStatistics(
+            const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+            const double statistics_data_time);
+        
+        /**
          * Return pointer to "current" variable context used by integrator. Current data corresponds
          * to state data at the beginning of a timestep, or when a new level is initialized.
          */
@@ -984,7 +992,7 @@ class RungeKuttaLevelIntegrator:
             const boost::shared_ptr<hier::PatchLevel>& coarse,
             const double sync_time,
             const double coarse_sim_time);
-
+        
     private:
         /*
          * Static integer constant describing class's version number.
@@ -1097,7 +1105,7 @@ class RungeKuttaLevelIntegrator:
          */
         boost::shared_ptr<xfer::RefineAlgorithm> d_bdry_fill_advance_old;
         
-std::vector<boost::shared_ptr<xfer::RefineAlgorithm> > d_bdry_fill_intermediate;
+        std::vector<boost::shared_ptr<xfer::RefineAlgorithm> > d_bdry_fill_intermediate;
         
         /*
          * Coarsen algorithms for conservative data synchronization (e.g., flux correction or
@@ -1252,6 +1260,7 @@ std::vector<boost::shared_ptr<xfer::RefineAlgorithm> > d_bdry_fill_intermediate;
         static boost::shared_ptr<tbox::Timer> t_coarsen_fluxsum_comm;
         static boost::shared_ptr<tbox::Timer> t_coarsen_sync_create;
         static boost::shared_ptr<tbox::Timer> t_coarsen_sync_comm;
+        static boost::shared_ptr<tbox::Timer> t_output_data_statistics;
         
 #ifdef HLI_RECORD_STATS
         /*

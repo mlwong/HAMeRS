@@ -551,6 +551,14 @@ class RungeKuttaPatchStrategy:
             const hier::IntVector& ghost_width_to_fill) = 0;
         
         /**
+         * Output the statistics of data.
+         */
+        virtual void
+        outputDataStatistics(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy);
+        
+        
+        /**
          * Return pointer to patch data context.
          */
         boost::shared_ptr<hier::VariableContext>

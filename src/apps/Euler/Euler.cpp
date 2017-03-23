@@ -3,6 +3,7 @@
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 #include "SAMRAI/hier/BoxContainer.h"
 #include "SAMRAI/hier/Index.h"
+#include "SAMRAI/hier/FlattenedHierarchy.h"
 #include "SAMRAI/hier/PatchDataRestartManager.h"
 #include "SAMRAI/hier/VariableDatabase.h"
 #include "SAMRAI/math/HierarchyCellDataOpsReal.h"
@@ -2523,6 +2524,204 @@ Euler::printDataStatistics(
         {
             os << "Max/min " << variable_names[vi] << ": " << var_max_global << "/" << var_min_global << std::endl;
         }
+    }
+}
+
+
+/**
+ * Output the statistics of data.
+ */
+void
+Euler::outputDataStatistics(
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy)
+{
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    DIRECTION::TYPE averaging_dir = DIRECTION::Y_DIRECTION;
+    
+    const double* x_lo = d_grid_geometry->getXLower();
+    const double* x_hi = d_grid_geometry->getXUpper();
+    
+    const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
+    const hier::Box& physical_domain_box = physical_domain.front();
+    const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    hier::IntVector ratioFinestLevelToCoarestLevel =
+        patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
+    
+    for (int li = num_levels - 2; li > 0 ; li--)
+    {
+        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+    }
+    
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    
+    boost::shared_ptr<hier::FlattenedHierarchy> flattened_hierarchy(
+        new hier::FlattenedHierarchy(
+            *patch_hierarchy,
+            0,
+            num_levels - 1));
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        double* rho_avg_local = nullptr;
+        double* rho_avg_global = nullptr;
+        
+        if (averaging_dir == DIRECTION::Y_DIRECTION)
+        {
+            rho_avg_local = (double*)std::malloc(finest_level_dims[0]*sizeof(double));
+            rho_avg_global = (double*)std::malloc(finest_level_dims[0]*sizeof(double));
+            
+            for (int i = 0; i < finest_level_dims[0]; i++)
+            {
+                rho_avg_local[i] = 0.0;
+                rho_avg_global[i] = 0.0;
+            }
+            
+            const double L_y = x_hi[1] - x_lo[1];
+            
+            for (int li = 0; li < num_levels; li++)
+            {
+                std::cout << "Level: " << li << std::endl;
+                
+                boost::shared_ptr<hier::PatchLevel> patch_level(
+                    patch_hierarchy->getPatchLevel(li));
+                
+                hier::IntVector ratioToCoarestLevel =
+                    patch_hierarchy->getRatioToCoarserLevel(li);
+                
+                for (int lii = li - 1; lii > 0 ; lii--)
+                {
+                    ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+                }
+                
+                hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+                
+                std::cout << "ratioToFinestLevel: " << ratioToFinestLevel << std::endl;
+                
+                for (hier::PatchLevel::iterator ip(patch_level->begin());
+                     ip != patch_level->end();
+                     ip++)
+                {
+                    const boost::shared_ptr<hier::Patch> patch = *ip;
+                    
+                    // Get the dimensions of box that covers the interior of patch.
+                    const hier::Box& patch_box = patch->getBox();
+                    
+                    const hier::Index& patch_index_lo = patch_box.lower();
+                    
+                    const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+                        BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                            patch->getPatchGeometry()));
+                    
+                    const double* const dx = patch_geom->getDx();
+                    
+                    /*
+                     * Register the patch and density in the flow model and compute the
+                     * corresponding cell data.
+                     */
+                    
+                    d_flow_model->registerPatchWithDataContext(*patch, getDataContext());
+                    
+                    hier::IntVector num_ghosts = d_flow_model->getNumberOfGhostCells();
+                    
+                    std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                    
+                    num_subghosts_of_data.insert(
+                        std::pair<std::string, hier::IntVector>("DENSITY", num_ghosts));
+                    
+                    d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+                    
+                    d_flow_model->computeGlobalDerivedCellData();
+                    
+                    /*
+                     * Get the pointer to density data inside the flow model.
+                     */
+                    
+                    boost::shared_ptr<pdat::CellData<double> > data_density =
+                        d_flow_model->getGlobalCellData("DENSITY");
+                    
+                    double* rho = data_density->getPointer(0);
+                    
+                    const hier::BoxContainer& patch_visible_boxes =
+                        flattened_hierarchy->getVisibleBoxes(
+                            patch_box,
+                            li);
+                    
+                    hier::Box ghost_box = patch_box;
+                    ghost_box.grow(num_ghosts);
+                    const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+                    
+                    const double weight = dx[1]/L_y;
+                    
+                    for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                         ib != patch_visible_boxes.end();
+                         ib++)
+                    {
+                        const hier::Box& patch_visible_box = *ib;
+                        
+                        const hier::Index& index_lo = patch_visible_box.lower();
+                        const hier::Index relative_idx_lo = index_lo - patch_index_lo;
+                        
+                        const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                        
+                        for (int j = 0; j < interior_dims[1]; j++)
+                        {
+                            for (int i = 0; i < interior_dims[0]; i++)
+                            {
+                                const int idx = (relative_idx_lo[0] + i + num_ghosts[0]) +
+                                    (relative_idx_lo[1] + j + num_ghosts[1])*ghostcell_dims[0];
+                                
+                                const double value_to_add = rho[idx]*weight;
+                                
+                                for (int ii = 0; ii < ratioToFinestLevel[0]; ii++)
+                                {
+                                    const int idx_fine = (index_lo[0] + i)*ratioToFinestLevel[0] + ii;
+                                    
+                                    rho_avg_local[idx_fine] += value_to_add;
+                                    
+                                }
+                            }
+                        }
+                    }
+                    
+                    /*
+                     * Unregister the patch and data of all registered derived cell variables in the flow model.
+                     */
+                    
+                    d_flow_model->unregisterPatch();
+                }
+            }
+            
+            mpi.Allreduce(
+                rho_avg_local,
+                rho_avg_global,
+                finest_level_dims[0],
+                MPI_DOUBLE,
+                MPI_SUM);
+            
+            if (mpi.getRank() == 0)
+            {
+                std::cout << "rho_avg: ";
+                for (int i = 0; i < finest_level_dims[0]; i++)
+                {
+                    std::cout << rho_avg_global[i] << " ";
+                }
+                std::cout << std::endl;
+            }
+            
+            std::free(rho_avg_local);
+            std::free(rho_avg_global);
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        
     }
 }
 

@@ -233,6 +233,7 @@ boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_coarsen_fluxsum_crea
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_coarsen_fluxsum_comm;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_coarsen_sync_create;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_coarsen_sync_comm;
+boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_output_data_statistics;
 
 #ifdef HLI_RECORD_STATS
 /*
@@ -3414,6 +3415,53 @@ RungeKuttaLevelIntegrator::putToRestart(
 /*
  **************************************************************************************************
  *
+ * Output statistics of data.
+ *
+ **************************************************************************************************
+ */
+void
+RungeKuttaLevelIntegrator::outputDataStatistics(
+    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const double statistics_data_time)
+{
+    t_output_data_statistics->start();
+    
+    int num_levels = hierarchy->getNumberOfLevels();
+    
+    for (int li = 0; li < num_levels; li++)
+    {
+        boost::shared_ptr<hier::PatchLevel> patch_level(
+            hierarchy->getPatchLevel(li));
+        
+        patch_level->allocatePatchData(d_saved_var_scratch_data, statistics_data_time);
+        patch_level->allocatePatchData(d_temp_var_scratch_data, statistics_data_time);
+    }
+    
+    d_patch_strategy->setDataContext(d_scratch);
+    
+    for (int li = 0; li < num_levels; li++)
+    {
+        d_bdry_sched_advance[li]->fillData(statistics_data_time);
+    }
+    
+    d_patch_strategy->outputDataStatistics(hierarchy);
+    
+    for (int li = 0; li < num_levels; li++)
+    {
+        boost::shared_ptr<hier::PatchLevel> patch_level(
+            hierarchy->getPatchLevel(li));
+        
+        patch_level->deallocatePatchData(d_temp_var_scratch_data);
+        patch_level->deallocatePatchData(d_saved_var_scratch_data);
+    }
+    
+    t_output_data_statistics->stop();
+}
+
+
+/*
+ **************************************************************************************************
+ *
  * Reads in cfl, cfl_init, lag_dt_computation, and use_ghosts_to_compute_dt from the input database.
  * Note all restart values are overriden with values from the input database.
  *
@@ -3738,6 +3786,8 @@ RungeKuttaLevelIntegrator::initializeCallback()
         getTimer("RungeKuttaLevelIntegrator::coarsen_sync_create");
     t_coarsen_sync_comm = tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::coarsen_sync_comm");
+    t_output_data_statistics = tbox::TimerManager::getManager()->
+        getTimer("RungeKuttaLevelIntegrator::output_data_statistics");
 }
 
 
@@ -3779,6 +3829,7 @@ RungeKuttaLevelIntegrator::finalizeCallback()
     t_coarsen_fluxsum_comm.reset();
     t_coarsen_sync_create.reset();
     t_coarsen_sync_comm.reset();
+    t_output_data_statistics.reset();
 
 #ifdef HLI_RECORD_STATS
     /*

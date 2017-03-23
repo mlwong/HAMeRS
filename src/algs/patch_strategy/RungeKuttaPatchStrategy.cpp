@@ -349,6 +349,16 @@ RungeKuttaPatchStrategy::tagCellsOnPatchRichardsonExtrapolation(
       << "\nthis method." << std::endl);
 }
 
+/**
+ * Output the statistics of data.
+ */
+void
+RungeKuttaPatchStrategy::outputDataStatistics(
+   const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy)
+{
+   NULL_USE(patch_hierarchy);
+}
+
 
 void
 RungeKuttaPatchStrategy::setupLoadBalancer(
