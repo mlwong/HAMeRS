@@ -593,11 +593,13 @@ int main(int argc, char *argv[])
             patch_hierarchy,
             time_integrator->getIntegratorStep(),
             time_integrator->getIntegratorTime());
+        
+        RK_level_integrator->outputDataStatistics(
+            patch_hierarchy,
+            time_integrator->getIntegratorTime());
     }
 #endif
     t_write_viz->stop();
-    
-RK_level_integrator->outputDataStatistics(patch_hierarchy, 0.0);
     
     /*
      * Time step loop.  Note that the step count and integration
@@ -677,6 +679,8 @@ RK_level_integrator->outputDataStatistics(patch_hierarchy, 0.0);
                     
                     t_write_viz->stop();
                     
+                    RK_level_integrator->outputDataStatistics(patch_hierarchy, loop_time);
+                    
                     last_viz_dump_time = loop_time;
                     
                     tbox::pout << "Files for plotting are written." << std::endl;
@@ -707,6 +711,8 @@ RK_level_integrator->outputDataStatistics(patch_hierarchy, 0.0);
                         loop_time);
                     
                     t_write_viz->stop();
+                    
+                    RK_level_integrator->outputDataStatistics(patch_hierarchy, loop_time);
                     
                     tbox::pout << "Files for plotting are written." << std::endl;
                     
@@ -770,6 +776,8 @@ RK_level_integrator->outputDataStatistics(patch_hierarchy, 0.0);
                 loop_time);
             
             t_write_viz->stop();
+            
+            RK_level_integrator->outputDataStatistics(patch_hierarchy, loop_time);
             
             last_viz_dump_time = loop_time;
             

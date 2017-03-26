@@ -555,7 +555,8 @@ class RungeKuttaPatchStrategy:
          */
         virtual void
         outputDataStatistics(
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy);
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const double output_time);
         
         
         /**

@@ -3444,7 +3444,7 @@ RungeKuttaLevelIntegrator::outputDataStatistics(
         d_bdry_sched_advance[li]->fillData(statistics_data_time);
     }
     
-    d_patch_strategy->outputDataStatistics(hierarchy);
+    d_patch_strategy->outputDataStatistics(hierarchy, statistics_data_time);
     
     for (int li = 0; li < num_levels; li++)
     {

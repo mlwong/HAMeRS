@@ -354,7 +354,8 @@ RungeKuttaPatchStrategy::tagCellsOnPatchRichardsonExtrapolation(
  */
 void
 RungeKuttaPatchStrategy::outputDataStatistics(
-   const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy)
+   const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+   const double output_time)
 {
    NULL_USE(patch_hierarchy);
 }

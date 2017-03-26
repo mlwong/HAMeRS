@@ -419,7 +419,8 @@ class Euler:
          */
         void
         outputDataStatistics(
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy);
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const double output_time);
         
         /*
          * Set the plotting context.
@@ -494,6 +495,11 @@ class Euler:
          * Number of species.
          */
         int d_num_species;
+        
+        /*
+         * Name of file that contains statistics output.
+         */
+        std::string d_filename_output_statistics;
         
         /*
          * boost::shared_ptr to FlowModel and its database.
