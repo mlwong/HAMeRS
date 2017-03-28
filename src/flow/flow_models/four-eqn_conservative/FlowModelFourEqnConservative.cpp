@@ -12299,7 +12299,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataEnstrophyWithVorticity()
                     const int idx_enstrophy = (i + d_num_subghosts_enstrophy[0]) +
                         (j + d_num_subghosts_enstrophy[1])*d_subghostcell_dims_enstrophy[0];
                     
-                    Omega[idx_enstrophy] = 0.5*omega[idx_vorticity]*omega[idx_vorticity];
+                    Omega[idx_enstrophy] = omega[idx_vorticity]*omega[idx_vorticity];
                 }
             }
         }
@@ -12334,7 +12334,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataEnstrophyWithVorticity()
                                 (k + d_num_subghosts_enstrophy[2])*d_subghostcell_dims_enstrophy[0]*
                                     d_subghostcell_dims_enstrophy[1];
                         
-                        Omega[idx_enstrophy] = 0.5*(omega_x[idx_vorticity]*omega_x[idx_vorticity] +
+                        Omega[idx_enstrophy] = (omega_x[idx_vorticity]*omega_x[idx_vorticity] +
                             omega_y[idx_vorticity]*omega_y[idx_vorticity] +
                             omega_z[idx_vorticity]*omega_z[idx_vorticity]);
                     }
