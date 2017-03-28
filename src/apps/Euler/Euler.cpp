@@ -2800,7 +2800,7 @@ Euler::outputDataStatistics(
                     double W = 0.0;
                     
 #ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd reduction(sum:W)
+                    #pragma omp simd reduction(+:W)
 #endif
                     for (int i = 0; i < finest_level_dim_0; i++)
                     {
@@ -2932,7 +2932,7 @@ Euler::outputDataStatistics(
                             for (int j = 0; j < interior_dim_1; j++)
                             {
 #ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd reduction(sum:Omega_to_add)
+                                #pragma omp simd reduction(+:Omega_to_add)
 #endif
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
@@ -3284,7 +3284,7 @@ Euler::outputDataStatistics(
                             for (int j = 0; j < interior_dim_1; j++)
                             {
 #ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd reduction(sum:TKE_to_add)
+                                #pragma omp simd reduction(+:TKE_to_add)
 #endif
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
