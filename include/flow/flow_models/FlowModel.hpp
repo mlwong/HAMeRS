@@ -89,7 +89,7 @@ class FlowModel:
         /*
          * Get the total number of equations.
          */
-        const int getNumberOfEquations() const
+        int getNumberOfEquations() const
         {
             return d_num_eqn;
         }
