@@ -497,11 +497,6 @@ class Euler:
         int d_num_species;
         
         /*
-         * Name of file that contains statistics output.
-         */
-        std::string d_filename_output_statistics;
-        
-        /*
          * boost::shared_ptr to FlowModel and its database.
          */
         boost::shared_ptr<FlowModel> d_flow_model;
@@ -567,6 +562,16 @@ class Euler:
          * boost::shared_ptr to the plotting context.
          */
         boost::shared_ptr<hier::VariableContext> d_plot_context;
+        
+        /*
+         * Name of file output that contains statistical quantities.
+         */
+        std::string d_filename_statistics;
+        
+        /*
+         * Names of statistical quantities to output.
+         */
+        std::vector<std::string> d_statistical_quantities;
         
         /*
          * Timers.
