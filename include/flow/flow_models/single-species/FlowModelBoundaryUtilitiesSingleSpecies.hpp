@@ -183,13 +183,13 @@ class FlowModelBoundaryUtilitiesSingleSpecies: public FlowModelBoundaryUtilities
             const boost::shared_ptr<tbox::Database>& db,
             std::string& db_name,
             int bdry_location_index);
-
+        
         void
         readIsothermalNoSlip(
             const boost::shared_ptr<tbox::Database>& db,
             std::string& db_name,
             int bdry_location_index);
-
+        
         /*
          * Thermodynamic properties of the species.
          */

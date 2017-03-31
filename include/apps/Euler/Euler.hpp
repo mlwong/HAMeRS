@@ -564,14 +564,9 @@ class Euler:
         boost::shared_ptr<hier::VariableContext> d_plot_context;
         
         /*
-         * Name of file output that contains statistical quantities.
+         * Name of file output that contains statistics of data.
          */
         std::string d_filename_statistics;
-        
-        /*
-         * Names of statistical quantities to output.
-         */
-        std::vector<std::string> d_statistical_quantities;
         
         /*
          * Timers.

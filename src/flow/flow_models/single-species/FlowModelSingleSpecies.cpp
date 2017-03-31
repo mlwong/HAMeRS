@@ -1,6 +1,7 @@
 #include "flow/flow_models/single-species/FlowModelSingleSpecies.hpp"
 
 #include "flow/flow_models/single-species/FlowModelBoundaryUtilitiesSingleSpecies.hpp"
+#include "flow/flow_models/single-species/FlowModelStatisticsUtilitiesSingleSpecies.hpp"
 
 FlowModelSingleSpecies::FlowModelSingleSpecies(
     const std::string& object_name,
@@ -360,6 +361,16 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
             molecular_properties_ptr,
             0);
     }
+    
+    /*
+     * Initialize statistics utilities object.
+     */
+    d_flow_model_statistics_utilities.reset(new FlowModelStatisticsUtilitiesSingleSpecies(
+        "d_flow_model_statistics_utilities",
+        d_dim,
+        d_grid_geometry,
+        d_num_species,
+        flow_model_db));
     
     /*
      * Initialize the Riemann solvers.

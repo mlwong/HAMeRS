@@ -5,6 +5,7 @@
 
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
 #include "flow/flow_models/FlowModelBoundaryUtilities.hpp"
+#include "flow/flow_models/FlowModelStatisticsUtilities.hpp"
 #include "util/Directions.hpp"
 #include "util/mixing_rules/equations_of_state/EquationOfStateMixingRulesManager.hpp"
 
@@ -17,7 +18,7 @@
 #include "SAMRAI/pdat/FaceData.h"
 #include "SAMRAI/pdat/SideData.h"
 
-#include "boost/multi_array.hpp"
+#include "boost/enable_shared_from_this.hpp"
 #include "boost/shared_ptr.hpp"
 #include <string>
 #include <unordered_map>
@@ -49,13 +50,16 @@ namespace RIEMANN_SOLVER
                 HLLC_HLL };
 }
 
+class FlowModelStatisticsUtilities;
+
 /*
  * The class should at least be able to register, compute and get the following cell data of the single-species/mixture:
  * DENSITY, MOMENTUM, TOTAL_ENERGY, PRESSURE, VELOCITY, SOUND_SPEED, DILATATION, VORTICITY, ENSTROPHY, PRIMITIVE_VARIABLES
  * CONVECTIVE_FLUX_X, CONVECTIVE_FLUX_Y, CONVECTIVE_FLUX_Z, MAX_WAVE_SPEED_X, MAX_WAVE_SPEED_Y, MAX_WAVE_SPEED_Z
  */
 class FlowModel:
-    public appu::VisDerivedDataStrategy
+    public appu::VisDerivedDataStrategy,
+    public boost::enable_shared_from_this<FlowModel> 
 {
     public:
         FlowModel(
@@ -136,6 +140,15 @@ class FlowModel:
         getFlowModelBoundaryUtilities() const
         {
             return d_flow_model_boundary_utilities;
+        }
+        
+        /*
+         * Return the boost::shared_ptr to the statistics utilities object.
+         */
+        const boost::shared_ptr<FlowModelStatisticsUtilities>&
+        getFlowModelStatisticsUtilities() const
+        {
+            return d_flow_model_statistics_utilities;
         }
         
         /*
@@ -440,6 +453,12 @@ class FlowModel:
         }
         
         /*
+         * Setup the statistics utilties object.
+         */
+        void
+        setupStatisticsUtilities();
+        
+        /*
          * Compute derived plot quantities registered with the VisIt data writers from data that
          * is maintained on each patch in the hierarchy.
          */
@@ -586,6 +605,11 @@ class FlowModel:
          * boost::shared_ptr to the boundary utilities object for the flow model.
          */
         boost::shared_ptr<FlowModelBoundaryUtilities> d_flow_model_boundary_utilities;
+        
+        /*
+         * boost::shared_ptr to the statistics utilities object for the flow model.
+         */
+        boost::shared_ptr<FlowModelStatisticsUtilities> d_flow_model_statistics_utilities;
         
 };
 

@@ -1,6 +1,7 @@
 #include "flow/flow_models/five-eqn_Allaire/FlowModelFiveEqnAllaire.hpp"
 
 #include "flow/flow_models/five-eqn_Allaire/FlowModelBoundaryUtilitiesFiveEqnAllaire.hpp"
+#include "flow/flow_models/five-eqn_Allaire/FlowModelStatisticsUtilitiesFiveEqnAllaire.hpp"
 
 FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
     const std::string& object_name,
@@ -268,6 +269,16 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
             d_equation_of_bulk_viscosity_mixing_rules_manager->
                 getEquationOfBulkViscosityMixingRules();
     }
+    
+    /*
+     * Initialize statistics utilities object.
+     */
+    d_flow_model_statistics_utilities.reset(new FlowModelStatisticsUtilitiesFiveEqnAllaire(
+        "d_flow_model_statistics_utilities",
+        d_dim,
+        d_grid_geometry,
+        d_num_species,
+        flow_model_db));
     
     /*
      * Initialize the Riemann solvers.

@@ -1,6 +1,7 @@
 #include "flow/flow_models/four-eqn_conservative/FlowModelFourEqnConservative.hpp"
 
 #include "flow/flow_models/four-eqn_conservative/FlowModelBoundaryUtilitiesFourEqnConservative.hpp"
+#include "flow/flow_models/four-eqn_conservative/FlowModelStatisticsUtilitiesFourEqnConservative.hpp"
 
 FlowModelFourEqnConservative::FlowModelFourEqnConservative(
     const std::string& object_name,
@@ -365,6 +366,16 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
             d_equation_of_thermal_conductivity_mixing_rules_manager->
                 getEquationOfThermalConductivityMixingRules();
     }
+    
+    /*
+     * Initialize statistics utilities object.
+     */
+    d_flow_model_statistics_utilities.reset(new FlowModelStatisticsUtilitiesFourEqnConservative(
+        "d_flow_model_statistics_utilities",
+        d_dim,
+        d_grid_geometry,
+        d_num_species,
+        flow_model_db));
     
     /*
      * Initialize the Riemann solvers.

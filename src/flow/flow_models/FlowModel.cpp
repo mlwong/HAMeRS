@@ -58,3 +58,12 @@ FlowModel::getDiffusiveFluxDiffusivities(
         << "Function is not yet implemented!"
         << std::endl);
 }
+
+/*
+ * Setup the statistics utilties object.
+ */
+void
+FlowModel::setupStatisticsUtilities()
+{
+    d_flow_model_statistics_utilities->setFlowModel(shared_from_this());
+}
