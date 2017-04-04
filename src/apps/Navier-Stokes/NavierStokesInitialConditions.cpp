@@ -941,7 +941,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         int m_max_candidates[] = {60, 60, 60};
                         
                         // Seed for "random" phase shifts.
-                        int random_seed = std::stoi(random_seed_str) - 1;;
+                        int random_seed = std::stoi(random_seed_str) - 1;
                         
                         double phase_shifts[81];
                         if (random_seed == 0)
@@ -1160,8 +1160,8 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         const double v_air   = 0.0;
                         const double p_air   = 101325.0;
                         
-                        // Shock hits the interface after 0.1 ms.
-                        const double L_x_shock = 0.180254509478037;
+                        // Shock hits the interface after 0.05 ms.
+                        const double L_x_shock = 0.190127254739019;
                         const double L_x_interface = 0.2;
                         
                         for (int j = 0; j < patch_dims[1]; j++)
