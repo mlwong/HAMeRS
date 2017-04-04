@@ -987,46 +987,6 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                             phase_shifts[38] = 5.970421215819234500e+000;
                             phase_shifts[39] = 2.164311069058015300e-001;
                             phase_shifts[40] = 2.756712114200997400e+000;
-                            phase_shifts[41] = 2.397402491436902800e+000;
-                            phase_shifts[42] = 4.809883835697119600e+000;
-                            phase_shifts[43] = 4.996388335095055300e+000;
-                            phase_shifts[44] = 1.174155203250452500e+000;
-                            phase_shifts[45] = 3.077280455596301100e+000;
-                            phase_shifts[46] = 2.799700669388697900e+000;
-                            phase_shifts[47] = 4.060904408970109200e+000;
-                            phase_shifts[48] = 4.457070682677374100e+000;
-                            phase_shifts[49] = 4.741836271755683000e+000;
-                            phase_shifts[50] = 1.734316708210581500e+000;
-                            phase_shifts[51] = 4.270697872457644100e+000;
-                            phase_shifts[52] = 4.116102153331110200e+000;
-                            phase_shifts[53] = 1.021719665349880300e+000;
-                            phase_shifts[54] = 7.476844843560273000e-001;
-                            phase_shifts[55] = 3.131313689040684100e+000;
-                            phase_shifts[56] = 6.030249138802615100e+000;
-                            phase_shifts[57] = 2.138706596562294700e+000;
-                            phase_shifts[58] = 3.677345733722178000e+000;
-                            phase_shifts[59] = 1.406251889782078400e+000;
-                            phase_shifts[60] = 4.720350148797292500e+000;
-                            phase_shifts[61] = 1.602809881386959800e+000;
-                            phase_shifts[62] = 3.179021913086325300e+000;
-                            phase_shifts[63] = 4.392428592387747500e+000;
-                            phase_shifts[64] = 5.597710226451433800e+000;
-                            phase_shifts[65] = 6.027405788154212900e+000;
-                            phase_shifts[66] = 3.438256577729057900e+000;
-                            phase_shifts[67] = 8.710030623971133400e-001;
-                            phase_shifts[68] = 9.380419021786573500e-001;
-                            phase_shifts[69] = 1.617972078787728100e+000;
-                            phase_shifts[70] = 5.282382310288887200e+000;
-                            phase_shifts[71] = 1.597702050791533800e+000;
-                            phase_shifts[72] = 5.116302455014872100e+000;
-                            phase_shifts[73] = 1.530112505424221100e+000;
-                            phase_shifts[74] = 5.838735543706457400e+000;
-                            phase_shifts[75] = 2.199012856187128900e+000;
-                            phase_shifts[76] = 1.235244388970658400e+000;
-                            phase_shifts[77] = 1.577606407304964300e+000;
-                            phase_shifts[78] = 3.870722857730769700e+000;
-                            phase_shifts[79] = 2.973761541477567800e+000;
-                            phase_shifts[80] = 2.209541847908237200e+000;
                         }
                         else
                         {
@@ -1071,46 +1031,6 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                             phase_shifts[38] = 1.149086355026512600e-001;
                             phase_shifts[39] = 4.713295737926515900e+000;
                             phase_shifts[40] = 6.213197464658893700e+000;
-                            phase_shifts[41] = 4.700863446935807500e+000;
-                            phase_shifts[42] = 1.762081570425859000e+000;
-                            phase_shifts[43] = 4.959188279786963500e+000;
-                            phase_shifts[44] = 6.485881278474636700e-001;
-                            phase_shifts[45] = 2.814198022849302600e+000;
-                            phase_shifts[46] = 5.708873915203982500e+000;
-                            phase_shifts[47] = 1.844832103041550000e+000;
-                            phase_shifts[48] = 1.808145779174377100e+000;
-                            phase_shifts[49] = 8.169936138471034500e-001;
-                            phase_shifts[50] = 1.216861851354166200e-001;
-                            phase_shifts[51] = 4.265249446559346700e+000;
-                            phase_shifts[52] = 1.329698669037668000e+000;
-                            phase_shifts[53] = 1.668478868538194200e+000;
-                            phase_shifts[54] = 3.088645251794071900e+000;
-                            phase_shifts[55] = 3.352867594333472400e-001;
-                            phase_shifts[56] = 3.607287303420542800e+000;
-                            phase_shifts[57] = 9.219228259915857000e-001;
-                            phase_shifts[58] = 3.702715890910293100e+000;
-                            phase_shifts[59] = 4.396711446259598000e+000;
-                            phase_shifts[60] = 6.429861796296103500e-001;
-                            phase_shifts[61] = 2.601590499017641300e+000;
-                            phase_shifts[62] = 4.363044868338155500e+000;
-                            phase_shifts[63] = 2.602365100829808300e+000;
-                            phase_shifts[64] = 3.138668392928534700e-001;
-                            phase_shifts[65] = 3.367136423818689800e+000;
-                            phase_shifts[66] = 4.170744761829463500e+000;
-                            phase_shifts[67] = 3.235143703711508100e+000;
-                            phase_shifts[68] = 5.935063892080364700e+000;
-                            phase_shifts[69] = 3.685434012334249100e+000;
-                            phase_shifts[70] = 5.676241640614726700e+000;
-                            phase_shifts[71] = 8.637790412005002000e-001;
-                            phase_shifts[72] = 8.750990986836080200e-001;
-                            phase_shifts[73] = 5.072989082364471400e+000;
-                            phase_shifts[74] = 2.498677259153156100e+000;
-                            phase_shifts[75] = 1.038951061805589000e+000;
-                            phase_shifts[76] = 5.827708284627355800e+000;
-                            phase_shifts[77] = 2.185077340291643500e+000;
-                            phase_shifts[78] = 4.717491574877696400e+000;
-                            phase_shifts[79] = 4.561579874595937100e+000;
-                            phase_shifts[80] = 5.549975854006575600e+000;
                         }
                         
                         // Amplitude.
@@ -1179,7 +1099,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                                 double S = 0.0;
                                 for (int m = m_min; m <= m_max; m++)
                                 {
-                                    S += A*cos(2.0*M_PI*m/0.05*x[1] + phase_shifts[m - m_min]);
+                                    S += A*cos(2.0*M_PI*m/0.05*x[1] + phase_shifts[m - 20]);
                                 }
                                 
                                 if (x[0] < L_x_shock)
