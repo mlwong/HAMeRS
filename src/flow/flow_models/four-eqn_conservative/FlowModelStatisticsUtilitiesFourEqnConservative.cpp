@@ -357,7 +357,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
@@ -377,7 +377,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                         patch_box,
                         li);
                 
-                const int num_ghosts_0 = num_ghosts[0];
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -400,7 +402,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
 #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
-                        const int idx = relative_idx_lo_0 + i + num_ghosts_0;
+                        const int idx = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
                         
                         const double value_to_add = Y[idx];
                         
@@ -537,7 +539,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
@@ -557,13 +559,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                         patch_box,
                         li);
                 
-                hier::Box ghost_box = patch_box;
-                ghost_box.grow(num_ghosts);
-                const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
-                const int num_ghosts_0 = num_ghosts[0];
-                const int num_ghosts_1 = num_ghosts[1];
-                const int ghostcell_dim_0 = ghostcell_dims[0];
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
                 
                 const double weight = dx[1]/L_y;
                 
@@ -592,8 +593,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
 #endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
-                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0) +
-                                (relative_idx_lo_1 + j + num_ghosts_1)*ghostcell_dim_0;
+                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
                             
                             const double value_to_add = Y[idx]*weight;
                             
@@ -732,7 +733,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
@@ -752,15 +753,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                         patch_box,
                         li);
                 
-                hier::Box ghost_box = patch_box;
-                ghost_box.grow(num_ghosts);
-                const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
-                const int num_ghosts_0 = num_ghosts[0];
-                const int num_ghosts_1 = num_ghosts[1];
-                const int num_ghosts_2 = num_ghosts[2];
-                const int ghostcell_dim_0 = ghostcell_dims[0];
-                const int ghostcell_dim_1 = ghostcell_dims[1];
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
+                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
                 
                 const double weight = (dx[1]*dx[2])/(L_y*L_z);
                 
@@ -793,10 +793,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
 #endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
-                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1)*ghostcell_dim_0 +
-                                    (relative_idx_lo_2 + k + num_ghosts_2)*ghostcell_dim_0*
-                                        ghostcell_dim_1;
+                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                        ghostcell_dim_1_mass_fraction;
                                 
                                 const double value_to_add = Y[idx]*weight;
                                 
@@ -1032,7 +1032,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
@@ -1052,13 +1052,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
                         patch_box,
                         li);
                 
-                hier::Box ghost_box = patch_box;
-                ghost_box.grow(num_ghosts);
-                const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
-                const int num_ghosts_0 = num_ghosts[0];
-                const int num_ghosts_1 = num_ghosts[1];
-                const int ghostcell_dim_0 = ghostcell_dims[0];
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
                 
                 const double weight = dx[0]/L_x;
                 
@@ -1087,8 +1086,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
 #endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
-                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0) +
-                                (relative_idx_lo_1 + j + num_ghosts_1)*ghostcell_dim_0;
+                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
                             
                             const double value_to_add = Y[idx]*weight;
                             
@@ -1227,7 +1226,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
@@ -1247,15 +1246,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
                         patch_box,
                         li);
                 
-                hier::Box ghost_box = patch_box;
-                ghost_box.grow(num_ghosts);
-                const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
-                const int num_ghosts_0 = num_ghosts[0];
-                const int num_ghosts_1 = num_ghosts[1];
-                const int num_ghosts_2 = num_ghosts[2];
-                const int ghostcell_dim_0 = ghostcell_dims[0];
-                const int ghostcell_dim_1 = ghostcell_dims[1];
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
+                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
                 
                 const double weight = (dx[0]*dx[2])/(L_x*L_z);
                 
@@ -1288,10 +1286,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
 #endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
-                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1)*ghostcell_dim_0 +
-                                    (relative_idx_lo_2 + k + num_ghosts_2)*ghostcell_dim_0*
-                                        ghostcell_dim_1;
+                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                        ghostcell_dim_1_mass_fraction;
                                 
                                 const double value_to_add = Y[idx]*weight;
                                 
@@ -1535,7 +1533,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInZDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
@@ -1555,15 +1553,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInZDirection(
                         patch_box,
                         li);
                 
-                hier::Box ghost_box = patch_box;
-                ghost_box.grow(num_ghosts);
-                const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
-                const int num_ghosts_0 = num_ghosts[0];
-                const int num_ghosts_1 = num_ghosts[1];
-                const int num_ghosts_2 = num_ghosts[2];
-                const int ghostcell_dim_0 = ghostcell_dims[0];
-                const int ghostcell_dim_1 = ghostcell_dims[1];
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
+                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
                 
                 const double weight = (dx[0]*dx[1])/(L_x*L_y);
                 
@@ -1596,10 +1593,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInZDirection(
 #endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
-                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1)*ghostcell_dim_0 +
-                                    (relative_idx_lo_2 + k + num_ghosts_2)*ghostcell_dim_0*
-                                        ghostcell_dim_1;
+                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                        ghostcell_dim_1_mass_fraction;
                                 
                                 const double value_to_add = Y[idx]*weight;
                                 
@@ -1819,7 +1816,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
@@ -1840,7 +1837,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                         patch_box,
                         li);
                 
-                const int num_ghosts_0 = num_ghosts[0];
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -1863,7 +1862,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
 #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
-                        const int idx = relative_idx_lo_0 + i + num_ghosts_0;
+                        const int idx = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
                         
                         const double value_to_add = Y_0[idx];
                         const double product_to_add = Y_0[idx]*Y_1[idx];
@@ -2022,7 +2021,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
@@ -2043,13 +2042,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                         patch_box,
                         li);
                 
-                hier::Box ghost_box = patch_box;
-                ghost_box.grow(num_ghosts);
-                const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
-                const int num_ghosts_0 = num_ghosts[0];
-                const int num_ghosts_1 = num_ghosts[1];
-                const int ghostcell_dim_0 = ghostcell_dims[0];
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
                 
                 const double weight = dx[1]/L_y;
                 
@@ -2078,8 +2076,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
 #endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
-                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0) +
-                                (relative_idx_lo_1 + j + num_ghosts_1)*ghostcell_dim_0;
+                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
                             
                             const double value_to_add = Y_0[idx]*weight;
                             const double product_to_add = Y_0[idx]*Y_1[idx]*weight;
@@ -2240,7 +2238,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
@@ -2261,15 +2259,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                         patch_box,
                         li);
                 
-                hier::Box ghost_box = patch_box;
-                ghost_box.grow(num_ghosts);
-                const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
-                const int num_ghosts_0 = num_ghosts[0];
-                const int num_ghosts_1 = num_ghosts[1];
-                const int num_ghosts_2 = num_ghosts[2];
-                const int ghostcell_dim_0 = ghostcell_dims[0];
-                const int ghostcell_dim_1 = ghostcell_dims[1];
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
+                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
                 
                 const double weight = (dx[1]*dx[2])/(L_y*L_z);
                 
@@ -2302,10 +2299,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
 #endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
-                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1)*ghostcell_dim_0 +
-                                    (relative_idx_lo_2 + k + num_ghosts_2)*ghostcell_dim_0*
-                                        ghostcell_dim_1;
+                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                        ghostcell_dim_1_mass_fraction;
                                 
                                 const double value_to_add = Y_0[idx]*weight;
                                 const double product_to_add = Y_0[idx]*Y_1[idx]*weight;
@@ -2563,7 +2560,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
@@ -2584,13 +2581,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
                         patch_box,
                         li);
                 
-                hier::Box ghost_box = patch_box;
-                ghost_box.grow(num_ghosts);
-                const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
-                const int num_ghosts_0 = num_ghosts[0];
-                const int num_ghosts_1 = num_ghosts[1];
-                const int ghostcell_dim_0 = ghostcell_dims[0];
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
                 
                 const double weight = dx[0]/L_x;
                 
@@ -2619,8 +2615,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
 #endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
-                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0) +
-                                (relative_idx_lo_1 + j + num_ghosts_1)*ghostcell_dim_0;
+                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
                             
                             const double value_to_add = Y_0[idx]*weight;
                             const double product_to_add = Y_0[idx]*Y_1[idx]*weight;
@@ -2781,7 +2777,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
@@ -2802,15 +2798,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
                         patch_box,
                         li);
                 
-                hier::Box ghost_box = patch_box;
-                ghost_box.grow(num_ghosts);
-                const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
-                const int num_ghosts_0 = num_ghosts[0];
-                const int num_ghosts_1 = num_ghosts[1];
-                const int num_ghosts_2 = num_ghosts[2];
-                const int ghostcell_dim_0 = ghostcell_dims[0];
-                const int ghostcell_dim_1 = ghostcell_dims[1];
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
+                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
                 
                 const double weight = (dx[0]*dx[2])/(L_x*L_z);
                 
@@ -2843,10 +2838,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
 #endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
-                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1)*ghostcell_dim_0 +
-                                    (relative_idx_lo_2 + k + num_ghosts_2)*ghostcell_dim_0*
-                                        ghostcell_dim_1;
+                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                        ghostcell_dim_1_mass_fraction;
                                 
                                 const double value_to_add = Y_0[idx]*weight;
                                 const double product_to_add = Y_0[idx]*Y_1[idx]*weight;
@@ -3112,7 +3107,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInZDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
@@ -3133,15 +3128,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInZDirection(
                         patch_box,
                         li);
                 
-                hier::Box ghost_box = patch_box;
-                ghost_box.grow(num_ghosts);
-                const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
-                const int num_ghosts_0 = num_ghosts[0];
-                const int num_ghosts_1 = num_ghosts[1];
-                const int num_ghosts_2 = num_ghosts[2];
-                const int ghostcell_dim_0 = ghostcell_dims[0];
-                const int ghostcell_dim_1 = ghostcell_dims[1];
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
+                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
                 
                 const double weight = (dx[0]*dx[1])/(L_x*L_y);
                 
@@ -3174,10 +3168,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInZDirection(
 #endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
-                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1)*ghostcell_dim_0 +
-                                    (relative_idx_lo_2 + k + num_ghosts_2)*ghostcell_dim_0*
-                                        ghostcell_dim_1;
+                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                        ghostcell_dim_1_mass_fraction;
                                 
                                 const double value_to_add = Y_0[idx]*weight;
                                 const double product_to_add = Y_0[idx]*Y_1[idx]*weight;
@@ -3380,7 +3374,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputEnstrophyIntegrated(
                     std::pair<std::string, hier::IntVector>("DENSITY", num_ghosts));
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("ENSTROPHY", num_ghosts));
+                    std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("ENSTROPHY", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
@@ -3404,13 +3401,19 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputEnstrophyIntegrated(
                         patch_box,
                         li);
                 
-                hier::Box ghost_box = patch_box;
-                ghost_box.grow(num_ghosts);
-                const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
-                const int num_ghosts_0 = num_ghosts[0];
-                const int num_ghosts_1 = num_ghosts[1];
-                const int ghostcell_dim_0 = ghostcell_dims[0];
+                const hier::IntVector num_ghosts_enstrophy = data_enstrophy->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_enstrophy = data_enstrophy->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_1_density = num_ghosts_density[1];
+                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                
+                const int num_ghosts_0_enstrophy = num_ghosts_enstrophy[0];
+                const int num_ghosts_1_enstrophy = num_ghosts_enstrophy[1];
+                const int ghostcell_dim_0_enstrophy = ghostcell_dims_enstrophy[0];
                 
                 double Omega_to_add = 0.0;
                 
@@ -3438,10 +3441,13 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputEnstrophyIntegrated(
 #endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
-                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0) +
-                                (relative_idx_lo_1 + j + num_ghosts_1)*ghostcell_dim_0;
+                            const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
                             
-                            Omega_to_add += rho[idx]*Omega[idx];
+                            const int idx_enstrophy = (relative_idx_lo_0 + i + num_ghosts_0_enstrophy) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_enstrophy)*ghostcell_dim_0_enstrophy;
+                            
+                            Omega_to_add += rho[idx_density]*Omega[idx_enstrophy];
                         }
                     }
                 }
@@ -3528,7 +3534,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputEnstrophyIntegrated(
                     std::pair<std::string, hier::IntVector>("DENSITY", num_ghosts));
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("ENSTROPHY", num_ghosts));
+                    std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("ENSTROPHY", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
@@ -3552,15 +3561,23 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputEnstrophyIntegrated(
                         patch_box,
                         li);
                 
-                hier::Box ghost_box = patch_box;
-                ghost_box.grow(num_ghosts);
-                const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
-                const int num_ghosts_0 = num_ghosts[0];
-                const int num_ghosts_1 = num_ghosts[1];
-                const int num_ghosts_2 = num_ghosts[2];
-                const int ghostcell_dim_0 = ghostcell_dims[0];
-                const int ghostcell_dim_1 = ghostcell_dims[1];
+                const hier::IntVector num_ghosts_enstrophy = data_enstrophy->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_enstrophy = data_enstrophy->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_1_density = num_ghosts_density[1];
+                const int num_ghosts_2_density = num_ghosts_density[2];
+                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                const int ghostcell_dim_1_density = ghostcell_dims_density[1];
+                
+                const int num_ghosts_0_enstrophy = num_ghosts_enstrophy[0];
+                const int num_ghosts_1_enstrophy = num_ghosts_enstrophy[1];
+                const int num_ghosts_2_enstrophy = num_ghosts_enstrophy[2];
+                const int ghostcell_dim_0_enstrophy = ghostcell_dims_enstrophy[0];
+                const int ghostcell_dim_1_enstrophy = ghostcell_dims_enstrophy[1];
                 
                 double Omega_to_add = 0.0;
                 
@@ -3592,12 +3609,17 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputEnstrophyIntegrated(
 #endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
-                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1)*ghostcell_dim_0 +
-                                    (relative_idx_lo_2 + k + num_ghosts_2)*ghostcell_dim_0*
-                                        ghostcell_dim_1;
+                                const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                                        ghostcell_dim_1_density;
                                 
-                                Omega_to_add += rho[idx]*Omega[idx];
+                                const int idx_enstrophy = (relative_idx_lo_0 + i + num_ghosts_0_enstrophy) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_enstrophy)*ghostcell_dim_0_enstrophy +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_enstrophy)*ghostcell_dim_0_enstrophy*
+                                        ghostcell_dim_1_enstrophy;
+                                
+                                Omega_to_add += rho[idx_density]*Omega[idx_enstrophy];
                             }
                         }
                     }
@@ -3806,10 +3828,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("DENSITY", num_ghosts));
+                    std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
+                    std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
@@ -3834,13 +3856,19 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                         patch_box,
                         li);
                 
-                hier::Box ghost_box = patch_box;
-                ghost_box.grow(num_ghosts);
-                const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
-                const int num_ghosts_0 = num_ghosts[0];
-                const int num_ghosts_1 = num_ghosts[1];
-                const int ghostcell_dim_0 = ghostcell_dims[0];
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_1_density = num_ghosts_density[1];
+                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
                 
                 const double weight = dx[0]/L_x;
                 
@@ -3869,12 +3897,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
 #endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
-                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0) +
-                                (relative_idx_lo_1 + j + num_ghosts_1)*ghostcell_dim_0;
+                            const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
                             
-                            const double rho_to_add = rho[idx]*weight;
-                            const double rho_u_to_add = rho[idx]*u[idx]*weight;
-                            const double rho_v_to_add = rho[idx]*v[idx]*weight;
+                            const int idx_velocity = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const double rho_to_add = rho[idx_density]*weight;
+                            const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight;
+                            const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight;
                             
                             for (int jj = 0; jj < ratioToFinestLevel_1; jj++)
                             {
@@ -3974,7 +4005,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
+                    std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
@@ -3999,13 +4033,19 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                         patch_box,
                         li);
                 
-                hier::Box ghost_box = patch_box;
-                ghost_box.grow(num_ghosts);
-                const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
-                const int num_ghosts_0 = num_ghosts[0];
-                const int num_ghosts_1 = num_ghosts[1];
-                const int ghostcell_dim_0 = ghostcell_dims[0];
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_1_density = num_ghosts_density[1];
+                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
                 
                 double TKE_to_add = 0.0;
                 
@@ -4034,16 +4074,23 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
 #endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
-                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0) +
-                                (relative_idx_lo_1 + j + num_ghosts_1)*ghostcell_dim_0;
+                            const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                            
+                            const int idx_velocity = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
                             
                             for (int jj = 0; jj < ratioToFinestLevel_1; jj++)
                             {
                                 const int idx_fine = (idx_lo_1 + j)*ratioToFinestLevel_1 + jj;
                                 
-                                double u_prime = u[idx] - rho_u_avg_global[idx_fine]/rho_avg_global[idx_fine];
-                                double v_prime = v[idx] - rho_v_avg_global[idx_fine]/rho_avg_global[idx_fine];
-                                TKE_to_add += 0.5*rho[idx]*(u_prime*u_prime + v_prime*v_prime);
+                                double u_prime = u[idx_velocity] -
+                                    rho_u_avg_global[idx_fine]/rho_avg_global[idx_fine];
+                                
+                                double v_prime = v[idx_velocity] -
+                                    rho_v_avg_global[idx_fine]/rho_avg_global[idx_fine];
+                                
+                                TKE_to_add += 0.5*rho[idx_density]*(u_prime*u_prime + v_prime*v_prime);
                             }
                         }
                     }
@@ -4258,10 +4305,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("DENSITY", num_ghosts));
+                    std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
+                    std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
@@ -4286,13 +4333,19 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                         patch_box,
                         li);
                 
-                hier::Box ghost_box = patch_box;
-                ghost_box.grow(num_ghosts);
-                const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
-                const int num_ghosts_0 = num_ghosts[0];
-                const int num_ghosts_1 = num_ghosts[1];
-                const int ghostcell_dim_0 = ghostcell_dims[0];
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_1_density = num_ghosts_density[1];
+                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
                 
                 const double weight = dx[1]/L_y;
                 
@@ -4321,12 +4374,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
 #endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
-                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0) +
-                                (relative_idx_lo_1 + j + num_ghosts_1)*ghostcell_dim_0;
+                            const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
                             
-                            const double rho_to_add = rho[idx]*weight;
-                            const double rho_u_to_add = rho[idx]*u[idx]*weight;
-                            const double rho_v_to_add = rho[idx]*v[idx]*weight;
+                            const int idx_velocity = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const double rho_to_add = rho[idx_density]*weight;
+                            const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight;
+                            const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight;
                             
                             for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                             {
@@ -4426,7 +4482,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
+                    std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
@@ -4451,13 +4510,19 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                         patch_box,
                         li);
                 
-                hier::Box ghost_box = patch_box;
-                ghost_box.grow(num_ghosts);
-                const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
-                const int num_ghosts_0 = num_ghosts[0];
-                const int num_ghosts_1 = num_ghosts[1];
-                const int ghostcell_dim_0 = ghostcell_dims[0];
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_1_density = num_ghosts_density[1];
+                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
                 
                 double TKE_to_add = 0.0;
                 
@@ -4486,16 +4551,23 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
 #endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
-                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0) +
-                                (relative_idx_lo_1 + j + num_ghosts_1)*ghostcell_dim_0;
+                            const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
+                            
+                            const int idx_velocity = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
                             
                             for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                 
-                                double u_prime = u[idx] - rho_u_avg_global[idx_fine]/rho_avg_global[idx_fine];
-                                double v_prime = v[idx] - rho_v_avg_global[idx_fine]/rho_avg_global[idx_fine];
-                                TKE_to_add += 0.5*rho[idx]*(u_prime*u_prime + v_prime*v_prime);
+                                double u_prime = u[idx_velocity] -
+                                    rho_u_avg_global[idx_fine]/rho_avg_global[idx_fine];
+                                
+                                double v_prime = v[idx_velocity] -
+                                    rho_v_avg_global[idx_fine]/rho_avg_global[idx_fine];
+                                
+                                TKE_to_add += 0.5*rho[idx_density]*(u_prime*u_prime + v_prime*v_prime);
                             }
                         }
                     }

@@ -808,7 +808,12 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             
             d_flow_model->registerPatchWithDataContext(patch, data_context);
             
+            const hier::IntVector& num_ghosts = d_flow_model->getNumberOfGhostCells();
+            
             std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+            
+            num_subghosts_of_data.insert(
+                std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
             
             num_subghosts_of_data.insert(
                 std::pair<std::string, hier::IntVector>("DILATATION", d_num_value_ghosts));
@@ -849,7 +854,12 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             
             d_flow_model->registerPatchWithDataContext(patch, data_context);
             
+            const hier::IntVector& num_ghosts = d_flow_model->getNumberOfGhostCells();
+            
             std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+            
+            num_subghosts_of_data.insert(
+                std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
             
             num_subghosts_of_data.insert(
                 std::pair<std::string, hier::IntVector>("ENSTROPHY", d_num_value_ghosts));
