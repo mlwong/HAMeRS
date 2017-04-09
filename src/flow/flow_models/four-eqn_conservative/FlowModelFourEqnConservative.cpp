@@ -499,6 +499,11 @@ FlowModelFourEqnConservative::putToRestart(
         d_equation_of_thermal_conductivity_mixing_rules->
             putToRestart(restart_equation_of_thermal_conductivity_mixing_rules_db);
     }
+    
+    /*
+     * Put the properties of d_flow_model_statistics_utilities into the restart database.
+     */
+    d_flow_model_statistics_utilities->putToRestart(restart_db);
 }
 
 

@@ -33,11 +33,28 @@ class FlowModelStatisticsUtilities
             {
                 d_statistical_quantities = flow_model_db->getStringVector("statistical_quantities");
             }
+            else if (flow_model_db->keyExists("d_statistical_quantities"))
+            {
+                d_statistical_quantities = flow_model_db->getStringVector("d_statistical_quantities");
+            }
         }
         
+        /*
+         * Set the weak pointer to the flow model from the parent FlowModel class.
+         */
         void setFlowModel(const boost::weak_ptr<FlowModel>& flow_model)
         {
             d_flow_model = flow_model;
+        }
+        
+        /*
+         * Put the characteristics of the class into the restart database.
+         */
+        void
+        putToRestart(
+            const boost::shared_ptr<tbox::Database>& restart_db) const
+        {
+            restart_db->putStringVector("d_statistical_quantities", d_statistical_quantities);
         }
         
         /*
