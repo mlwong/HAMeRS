@@ -25,14 +25,14 @@ class FlowModelStatisticsUtilitiesSingleSpecies: public FlowModelStatisticsUtili
          */
         void
         outputStatisticalQuantitiesNames(
-            const std::string& filename_statistics);
+            const std::string& stat_dump_filename);
         
         /*
          * Output statisitcal quantities to a file.
          */
         void
         outputStatisticalQuantities(
-            const std::string& filename_statistics,
+            const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         

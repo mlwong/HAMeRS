@@ -64,7 +64,8 @@ class Euler:
             const std::string& object_name,
             const tbox::Dimension& dim,
             const boost::shared_ptr<tbox::Database>& input_db,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry);
+            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const std::string& stat_dump_filename = "");
         
         /**
          * Destructor of Euler.
@@ -397,12 +398,12 @@ class Euler:
         ///
         
         /**
-         * Print all data members for Euler class.
+         * Print all data members for the class.
          */
         void printClassData(std::ostream& os) const;
         
         /**
-         * Print all data statistics for Euler class.
+         * Print data statistics (max/min conservative variables).
          */
         void
         printDataStatistics(
@@ -422,7 +423,7 @@ class Euler:
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const double output_time);
         
-        /*
+        /**
          * Set the plotting context.
          */
         void
@@ -469,6 +470,11 @@ class Euler:
          * plot context passed to the variable registration routine.
          */
         const boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
+        
+        /*
+         * Name of file output that contains statistics of data.
+         */
+        const std::string d_stat_dump_filename;
         
 #ifdef HAVE_HDF5
         boost::shared_ptr<appu::VisItDataWriter> d_visit_writer;
@@ -564,11 +570,6 @@ class Euler:
         boost::shared_ptr<hier::VariableContext> d_plot_context;
         
         /*
-         * Name of file output that contains statistics of data.
-         */
-        std::string d_filename_statistics;
-        
-        /*
          * Timers.
          */
         static boost::shared_ptr<tbox::Timer> t_init;
@@ -580,6 +581,7 @@ class Euler:
         static boost::shared_ptr<tbox::Timer> t_tagvalue;
         static boost::shared_ptr<tbox::Timer> t_taggradient;
         static boost::shared_ptr<tbox::Timer> t_tagmultiresolution;
+        
 };
 
 #endif /* EULER_HPP */

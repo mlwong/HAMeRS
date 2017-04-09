@@ -57,11 +57,13 @@ Euler::Euler(
     const std::string& object_name,
     const tbox::Dimension& dim,
     const boost::shared_ptr<tbox::Database>& input_db,
-    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry):
+    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+    const std::string& stat_dump_filename):
         RungeKuttaPatchStrategy(),
         d_object_name(object_name),
         d_dim(dim),
         d_grid_geometry(grid_geometry),
+        d_stat_dump_filename(stat_dump_filename),
         d_use_nonuniform_workload(false),
         d_Euler_boundary_conditions_db_is_from_restart(false)
 {
@@ -221,7 +223,7 @@ Euler::Euler(
     d_variable_source = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(dim, "source", d_flow_model->getNumberOfEquations()));
     
-    if ((!d_filename_statistics.empty()))
+    if ((!d_stat_dump_filename.empty()))
     {
         d_flow_model->setupStatisticsUtilities();
         
@@ -229,7 +231,7 @@ Euler::Euler(
         if (mpi.getRank() == 0)
         {
             std::ofstream f_out;
-            f_out.open(d_filename_statistics.c_str(), std::ios::app);
+            f_out.open(d_stat_dump_filename.c_str(), std::ios::app);
             
             if (!f_out.is_open())
             {
@@ -247,12 +249,12 @@ Euler::Euler(
             d_flow_model->getFlowModelStatisticsUtilities();
         
         flow_model_statistics_utilities->outputStatisticalQuantitiesNames(
-            d_filename_statistics);
+            d_stat_dump_filename);
         
         if (mpi.getRank() == 0)
         {
             std::ofstream f_out;
-            f_out.open(d_filename_statistics.c_str(), std::ios::app);
+            f_out.open(d_stat_dump_filename.c_str(), std::ios::app);
             
             if (!f_out.is_open())
             {
@@ -2583,14 +2585,14 @@ Euler::outputDataStatistics(
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const double output_time)
 {
-    if ((!d_filename_statistics.empty()))
+    if ((!d_stat_dump_filename.empty()))
     {
         const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
         
         if (mpi.getRank() == 0)
         {
             std::ofstream f_out;
-            f_out.open(d_filename_statistics.c_str(), std::ios::app);
+            f_out.open(d_stat_dump_filename.c_str(), std::ios::app);
             
             if (!f_out.is_open())
             {
@@ -2608,14 +2610,14 @@ Euler::outputDataStatistics(
             d_flow_model->getFlowModelStatisticsUtilities();
         
         flow_model_statistics_utilities->outputStatisticalQuantities(
-            d_filename_statistics,
+            d_stat_dump_filename,
             patch_hierarchy,
             getDataContext());
         
         if (mpi.getRank() == 0)
         {
             std::ofstream f_out;
-            f_out.open(d_filename_statistics.c_str(), std::ios::app);
+            f_out.open(d_stat_dump_filename.c_str(), std::ios::app);
             
             if (!f_out.is_open())
             {
@@ -2803,18 +2805,6 @@ Euler::getFromInput(
                     << std::endl);
             }
         }
-    }
-    
-    /*
-     * Get the name of file output that contains statistical quantities.
-     */
-    if (input_db->keyExists("filename_statistics"))
-    {
-        d_filename_statistics = input_db->getString("filename_statistics");
-    }
-    else
-    {
-        d_filename_statistics = "";         
     }
 }
 

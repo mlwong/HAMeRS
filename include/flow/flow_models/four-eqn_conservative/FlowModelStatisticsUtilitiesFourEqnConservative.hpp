@@ -2,6 +2,7 @@
 #define FLOW_MODEL_STATISTICS_UTILITIES_FOUR_EQN_CONSERVATIVE_HPP
 
 #include "flow/flow_models/FlowModelStatisticsUtilities.hpp"
+#include "util/mixing_rules/equations_of_mass_diffusivity/EquationOfMassDiffusivityMixingRulesManager.hpp"
 
 class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatisticsUtilities
 {
@@ -11,13 +12,15 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const tbox::Dimension& dim,
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
-            const boost::shared_ptr<tbox::Database>& flow_model_db):
+            const boost::shared_ptr<tbox::Database>& flow_model_db,
+            const boost::shared_ptr<EquationOfMassDiffusivityMixingRules> equation_of_mass_diffusivity_mixing_rules):
                 FlowModelStatisticsUtilities(
                     object_name,
                     dim,
                     grid_geometry,
                     num_species,
-                    flow_model_db)
+                    flow_model_db),
+                d_equation_of_mass_diffusivity_mixing_rules(equation_of_mass_diffusivity_mixing_rules)
         {}
         
         /*
@@ -25,14 +28,14 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
          */
         void
         outputStatisticalQuantitiesNames(
-            const std::string& filename_statistics);
+            const std::string& stat_dump_filename);
         
         /*
          * Output statisitcal quantities to a file.
          */
         void
         outputStatisticalQuantities(
-            const std::string& filename_statistics,
+            const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
@@ -42,7 +45,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
          */
         void
         outputMixingWidthInXDirection(
-            const std::string& filename_statistics,
+            const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
@@ -51,7 +54,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
          */
         void
         outputMixingWidthInYDirection(
-            const std::string& filename_statistics,
+            const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
@@ -60,7 +63,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
          */
         void
         outputMixingWidthInZDirection(
-            const std::string& filename_statistics,
+            const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
@@ -69,7 +72,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
          */
         void
         outputMixednessInXDirection(
-            const std::string& filename_statistics,
+            const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
@@ -78,7 +81,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
          */
         void
         outputMixednessInYDirection(
-            const std::string& filename_statistics,
+            const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
@@ -87,7 +90,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
          */
         void
         outputMixednessInZDirection(
-            const std::string& filename_statistics,
+            const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
@@ -96,7 +99,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
          */
         void
         outputEnstrophyIntegrated(
-            const std::string& filename_statistics,
+            const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
@@ -105,7 +108,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
          */
         void
         outputTKEIntegratedWithHomogeneityInXDirection(
-            const std::string& filename_statistics,
+            const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
@@ -114,7 +117,7 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
          */
         void
         outputTKEIntegratedWithHomogeneityInYDirection(
-            const std::string& filename_statistics,
+            const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
@@ -123,9 +126,33 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
          */
         void
         outputTKEIntegratedWithHomogeneityInZDirection(
-            const std::string& filename_statistics,
+            const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output scalar dissipation rate of first species integrated to a file.
+         */
+        void
+        outputScalarDissipationRateIntegrated(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output numerical interface thickness to a file.
+         */
+        void
+        outputNumericalInterfaceThickness(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * boost::shared_ptr to EquationOfMassDiffusivityMixingRules.
+         */
+        const boost::shared_ptr<EquationOfMassDiffusivityMixingRules>
+            d_equation_of_mass_diffusivity_mixing_rules;
         
 };
 

@@ -55,11 +55,13 @@ NavierStokes::NavierStokes(
     const std::string& object_name,
     const tbox::Dimension& dim,
     const boost::shared_ptr<tbox::Database>& input_db,
-    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry):
+    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+    const std::string& stat_dump_filename):
         RungeKuttaPatchStrategy(),
         d_object_name(object_name),
         d_dim(dim),
         d_grid_geometry(grid_geometry),
+        d_stat_dump_filename(stat_dump_filename),
         d_use_nonuniform_workload(false),
         d_Navier_Stokes_boundary_conditions_db_is_from_restart(false)
 {
@@ -241,6 +243,52 @@ NavierStokes::NavierStokes(
     
     d_variable_source = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(dim, "source", d_flow_model->getNumberOfEquations()));
+    
+    if ((!d_stat_dump_filename.empty()))
+    {
+        d_flow_model->setupStatisticsUtilities();
+        
+        const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+        if (mpi.getRank() == 0)
+        {
+            std::ofstream f_out;
+            f_out.open(d_stat_dump_filename.c_str(), std::ios::app);
+            
+            if (!f_out.is_open())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "Failed to open file to output statistics!"
+                    << std::endl);
+            }
+            
+            f_out << "TIME             ";
+            f_out.close();
+        }
+        
+        boost::shared_ptr<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
+            d_flow_model->getFlowModelStatisticsUtilities();
+        
+        flow_model_statistics_utilities->outputStatisticalQuantitiesNames(
+            d_stat_dump_filename);
+        
+        if (mpi.getRank() == 0)
+        {
+            std::ofstream f_out;
+            f_out.open(d_stat_dump_filename.c_str(), std::ios::app);
+            
+            if (!f_out.is_open())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "Failed to open file to output statistics!"
+                    << std::endl);
+            }
+            
+            f_out << std::endl;
+            f_out.close();
+        }
+    }
 }
 
 
@@ -2456,6 +2504,63 @@ NavierStokes::printDataStatistics(
         else
         {
             os << "Max/min " << variable_names[vi] << ": " << var_max_global << "/" << var_min_global << std::endl;
+        }
+    }
+}
+
+
+/**
+ * Output the statistics of data.
+ */
+void
+NavierStokes::outputDataStatistics(
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const double output_time)
+{
+    if ((!d_stat_dump_filename.empty()))
+    {
+        const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+        
+        if (mpi.getRank() == 0)
+        {
+            std::ofstream f_out;
+            f_out.open(d_stat_dump_filename.c_str(), std::ios::app);
+            
+            if (!f_out.is_open())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "Failed to open file to output statistics!"
+                    << std::endl);
+            }
+            
+            f_out << std::fixed << std::setprecision(std::numeric_limits<double>::digits10) << output_time;
+            f_out.close();
+        }
+        
+        boost::shared_ptr<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
+            d_flow_model->getFlowModelStatisticsUtilities();
+        
+        flow_model_statistics_utilities->outputStatisticalQuantities(
+            d_stat_dump_filename,
+            patch_hierarchy,
+            getDataContext());
+        
+        if (mpi.getRank() == 0)
+        {
+            std::ofstream f_out;
+            f_out.open(d_stat_dump_filename.c_str(), std::ios::app);
+            
+            if (!f_out.is_open())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "Failed to open file to output statistics!"
+                    << std::endl);
+            }
+            
+            f_out << std::endl;
+            f_out.close();
         }
     }
 }

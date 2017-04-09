@@ -9,9 +9,9 @@
  */
 void
 FlowModelStatisticsUtilitiesSingleSpecies::outputStatisticalQuantitiesNames(
-    const std::string& filename_statistics)
+    const std::string& stat_dump_filename)
 {
-    NULL_USE(filename_statistics);
+    NULL_USE(stat_dump_filename);
 }
 
 
@@ -20,11 +20,11 @@ FlowModelStatisticsUtilitiesSingleSpecies::outputStatisticalQuantitiesNames(
  */
 void
 FlowModelStatisticsUtilitiesSingleSpecies::outputStatisticalQuantities(
-    const std::string& filename_statistics,
+    const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
 {
-    NULL_USE(filename_statistics);
+    NULL_USE(stat_dump_filename);
     NULL_USE(patch_hierarchy);
     NULL_USE(data_context);
 }

@@ -266,7 +266,7 @@ int main(int argc, char *argv[])
     std::string viz_dump_setting;
     int viz_dump_timestep_interval = 0;
     double viz_dump_time_interval = 0.0;
-    std::string visit_dump_dirname;
+    std::string visit_dump_dirname = "";
     int visit_number_procs_per_file = 1;
     
     if (main_db->keyExists("viz_dump_setting"))
@@ -320,6 +320,65 @@ int main(int argc, char *argv[])
         }
     }
     
+    bool is_stat_dumping = false;
+    std::string stat_dump_setting;
+    int stat_dump_timestep_interval = 0;
+    double stat_dump_time_interval = 0.0;
+    std::string stat_dump_filename = "";
+    
+    if (main_db->keyExists("stat_dump_setting"))
+    {
+        stat_dump_setting = main_db->getString("stat_dump_setting");
+        
+        if ((stat_dump_setting != "CONSTANT_TIME_INTERVAL") &&
+            (stat_dump_setting != "CONSTANT_TIMESTEP_INTERVAL"))
+        {
+            TBOX_ERROR("Unknown stat_dump_setting string = "
+                << stat_dump_setting
+                << " found in input."
+                << std::endl);
+        }
+        
+        is_stat_dumping = true;
+    }
+    
+    if (is_stat_dumping)
+    {
+        if (main_db->keyExists("stat_dump_interval"))
+        {
+            if (stat_dump_setting == "CONSTANT_TIME_INTERVAL")
+            {
+                stat_dump_time_interval = main_db->getDouble("stat_dump_interval");
+            }
+            else if (stat_dump_setting == "CONSTANT_TIMESTEP_INTERVAL")
+            {
+                stat_dump_timestep_interval = main_db->getInteger("stat_dump_interval");
+            }
+            else
+            {
+                TBOX_ERROR("Unknown stat_dump_setting = "
+                    << stat_dump_setting
+                    << "."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            TBOX_ERROR("Key data 'stat_dump_interval' not found in input."
+                << std::endl);
+        }
+        
+        if (main_db->keyExists("stat_dump_filename"))
+        {
+            stat_dump_filename = main_db->getString("stat_dump_filename");
+        }
+        else
+        {
+            TBOX_ERROR("Key data 'stat_dump_filename' not found in input."
+                << std::endl);
+        }
+    }
+    
     int restart_interval = 0;
     if (main_db->keyExists("restart_interval"))
     {
@@ -330,6 +389,9 @@ int main(int argc, char *argv[])
         main_db->getStringWithDefault("restart_write_dirname",
                                       base_name + ".restart");
     
+    const bool write_restart = (restart_interval > 0)
+                                && !(restart_write_dirname.empty());
+    
     bool use_refined_timestepping = true;
     if (main_db->keyExists("timestepping"))
     {
@@ -339,9 +401,6 @@ int main(int argc, char *argv[])
             use_refined_timestepping = false;
         }
     }
-    
-    const bool write_restart = (restart_interval > 0)
-                                && !(restart_write_dirname.empty());
     
     /*
      * Get restart manager and root restart database.  If run is from
@@ -433,7 +492,8 @@ int main(int argc, char *argv[])
                 "Euler_app",
                 dim,
                 input_db->getDatabase("Euler"),
-                grid_geometry);
+                grid_geometry,
+                stat_dump_filename);
             
                 RK_level_integrator.reset(new RungeKuttaLevelIntegrator(
                     "Runge-Kutta level integrator",
@@ -449,7 +509,8 @@ int main(int argc, char *argv[])
                 "Navier_Stokes_app",
                 dim,
                 input_db->getDatabase("NavierStokes"),
-                grid_geometry);
+                grid_geometry,
+                stat_dump_filename);
             
             RK_level_integrator.reset(
                 new RungeKuttaLevelIntegrator(
@@ -576,11 +637,16 @@ int main(int argc, char *argv[])
     
     tbox::pout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
     tbox::pout << std::endl;
+    
     /*
      * Create timers for measuring I/O.
      */
     boost::shared_ptr<tbox::Timer> t_write_viz(
         tbox::TimerManager::getManager()->getTimer("apps::main::write_viz"));
+    
+    boost::shared_ptr<tbox::Timer> t_write_stat(
+        tbox::TimerManager::getManager()->getTimer("apps::main::write_stat"));
+    
     boost::shared_ptr<tbox::Timer> t_write_restart(
         tbox::TimerManager::getManager()->getTimer(
             "apps::main::write_restart"));
@@ -593,13 +659,18 @@ int main(int argc, char *argv[])
             patch_hierarchy,
             time_integrator->getIntegratorStep(),
             time_integrator->getIntegratorTime());
-        
+    }
+#endif
+    t_write_viz->stop();
+    
+    t_write_stat->start();
+    if (is_stat_dumping)
+    {
         RK_level_integrator->outputDataStatistics(
             patch_hierarchy,
             time_integrator->getIntegratorTime());
     }
-#endif
-    t_write_viz->stop();
+    t_write_stat->stop();
     
     /*
      * Time step loop.  Note that the step count and integration
@@ -608,9 +679,15 @@ int main(int argc, char *argv[])
     
     double loop_time = time_integrator->getIntegratorTime();
     double loop_time_end = time_integrator->getEndTime();
+    
     double last_viz_dump_time = floor((time_integrator->getIntegratorTime() + DBL_EPSILON)/
         viz_dump_time_interval)*viz_dump_time_interval;
     bool dump_viz = true;
+    
+    double last_stat_dump_time = floor((time_integrator->getIntegratorTime() + DBL_EPSILON)/
+        stat_dump_time_interval)*stat_dump_time_interval;
+    bool dump_stat = true;
+    
     int iteration_num = 0;
     
     tbox::pout << "Start simulation... " << std::endl;
@@ -619,16 +696,53 @@ int main(int argc, char *argv[])
     while (loop_time < loop_time_end && time_integrator->stepsRemaining())
     {
         dump_viz = false;
+        dump_stat = false;
         
         iteration_num = time_integrator->getIntegratorStep() + 1;
         
         // Check whether dt_now is larger than the time interval to next files dumping time.
-        if (viz_dump_setting == "CONSTANT_TIME_INTERVAL")
+        if ((viz_dump_setting == "CONSTANT_TIME_INTERVAL") &&
+            (stat_dump_setting == "CONSTANT_TIME_INTERVAL"))
+        {
+            if (viz_dump_time_interval == stat_dump_time_interval)
+            {
+                if ((loop_time + dt_now) - (last_viz_dump_time + viz_dump_time_interval) > DBL_EPSILON)
+                {
+                    dt_now = last_viz_dump_time + viz_dump_time_interval - loop_time;
+                    dump_viz = true;
+                    dump_stat = true;
+                }
+            }
+            else
+            {
+                if ((loop_time + dt_now) - (last_viz_dump_time + viz_dump_time_interval) > DBL_EPSILON)
+                {
+                    dt_now = last_viz_dump_time + viz_dump_time_interval - loop_time;
+                    dump_viz = true;
+                    
+                    if ((loop_time + dt_now) - (last_stat_dump_time + stat_dump_time_interval) > DBL_EPSILON)
+                    {
+                        dt_now = last_stat_dump_time + stat_dump_time_interval - loop_time;
+                        dump_viz = false;
+                        dump_stat = true;
+                    }
+                }
+            }
+        }
+        else if (viz_dump_setting == "CONSTANT_TIME_INTERVAL")
         {
             if ((loop_time + dt_now) - (last_viz_dump_time + viz_dump_time_interval) > DBL_EPSILON)
             {
                 dt_now = last_viz_dump_time + viz_dump_time_interval - loop_time;
                 dump_viz = true;
+            }
+        }
+        else if (stat_dump_setting == "CONSTANT_TIME_INTERVAL")
+        {
+            if ((loop_time + dt_now) - (last_stat_dump_time + stat_dump_time_interval) > DBL_EPSILON)
+            {
+                dt_now = last_stat_dump_time + stat_dump_time_interval - loop_time;
+                dump_stat = true;
             }
         }
         
@@ -679,8 +793,6 @@ int main(int argc, char *argv[])
                     
                     t_write_viz->stop();
                     
-                    RK_level_integrator->outputDataStatistics(patch_hierarchy, loop_time);
-                    
                     last_viz_dump_time = loop_time;
                     
                     tbox::pout << "Files for plotting are written." << std::endl;
@@ -712,8 +824,6 @@ int main(int argc, char *argv[])
                     
                     t_write_viz->stop();
                     
-                    RK_level_integrator->outputDataStatistics(patch_hierarchy, loop_time);
-                    
                     tbox::pout << "Files for plotting are written." << std::endl;
                     
                     if ((restart_interval == -1) && !(restart_write_dirname.empty()))
@@ -734,6 +844,46 @@ int main(int argc, char *argv[])
             {
                 TBOX_ERROR("Unknown viz_dump_setting = "
                     << viz_dump_setting
+                    << "."
+                    << std::endl); 
+            }
+        }
+#endif
+        
+        if (is_stat_dumping)
+        {
+            if (stat_dump_setting == "CONSTANT_TIME_INTERVAL")
+            {
+                if (dump_stat)
+                {
+                    t_write_stat->start();
+                    
+                    RK_level_integrator->outputDataStatistics(patch_hierarchy, loop_time);
+                    
+                    t_write_stat->stop();
+                    
+                    last_stat_dump_time = loop_time;
+                    
+                    tbox::pout << "File of statistics is updated." << std::endl;
+                }
+            }
+            else if (stat_dump_setting == "CONSTANT_TIMESTEP_INTERVAL")
+            {
+                if ((iteration_num % stat_dump_timestep_interval) == 0)
+                {
+                    t_write_stat->start();
+                    
+                    RK_level_integrator->outputDataStatistics(patch_hierarchy, loop_time);
+                    
+                    t_write_stat->stop();
+                    
+                    tbox::pout << "File of statistics is updated." << std::endl;
+                }
+            }
+            else
+            {
+                TBOX_ERROR("Unknown stat_dump_setting = "
+                    << stat_dump_setting
                     << "."
                     << std::endl); 
             }
@@ -760,7 +910,6 @@ int main(int argc, char *argv[])
         
         tbox::pout << "--------------------------------------------------------------------------------";
         tbox::pout << std::endl;
-#endif
     }
     
 #ifdef HAVE_HDF5
@@ -776,8 +925,6 @@ int main(int argc, char *argv[])
                 loop_time);
             
             t_write_viz->stop();
-            
-            RK_level_integrator->outputDataStatistics(patch_hierarchy, loop_time);
             
             last_viz_dump_time = loop_time;
             
@@ -798,6 +945,22 @@ int main(int argc, char *argv[])
         }
     }
 #endif
+    
+    if (is_stat_dumping)
+    {
+        if (stat_dump_setting == "CONSTANT_TIME_INTERVAL" && !dump_stat)
+        {
+            t_write_stat->start();
+            
+            RK_level_integrator->outputDataStatistics(patch_hierarchy, loop_time);
+            
+            t_write_stat->stop();
+            
+            last_stat_dump_time = loop_time;
+            
+            tbox::pout << "File of statistics at last time step is updated." << std::endl;
+        }
+    }
     
     tbox::plog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
     tbox::plog << std::endl;
@@ -854,4 +1017,3 @@ int main(int argc, char *argv[])
    
     return 0;
 }
-

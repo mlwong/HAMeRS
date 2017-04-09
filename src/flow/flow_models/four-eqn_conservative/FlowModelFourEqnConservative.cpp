@@ -375,7 +375,8 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
         d_dim,
         d_grid_geometry,
         d_num_species,
-        flow_model_db));
+        flow_model_db,
+        d_equation_of_mass_diffusivity_mixing_rules));
     
     /*
      * Initialize the Riemann solvers.
@@ -11602,7 +11603,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataDilatationWithDensityAndVeloc
             double* u = d_data_velocity->getPointer(0);
             
             // Compute the dilatation field.
-            if (d_num_subghosts_diff >= hier::IntVector::getOne(d_dim)*4)
+            if (false) // (d_num_subghosts_diff >= hier::IntVector::getOne(d_dim)*4)
             {
                 for (int i = -d_num_subghosts_dilatation[0];
                      i < d_interior_dims[0] + d_num_subghosts_dilatation[0];
@@ -11710,7 +11711,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataDilatationWithDensityAndVeloc
             double* v = d_data_velocity->getPointer(1);
             
             // Compute the dilatation field.
-            if (d_num_subghosts_diff >= hier::IntVector::getOne(d_dim)*4)
+            if (false) // (d_num_subghosts_diff >= hier::IntVector::getOne(d_dim)*4)
             {
                 for (int j = -d_num_subghosts_dilatation[1];
                      j < d_interior_dims[1] + d_num_subghosts_dilatation[1];
@@ -11772,15 +11773,15 @@ FlowModelFourEqnConservative::computeGlobalCellDataDilatationWithDensityAndVeloc
                         const int idx_dilatation = (i + d_num_subghosts_dilatation[0]) +
                             (j + d_num_subghosts_dilatation[1])*d_subghostcell_dims_dilatation[0];
                         
-                        double dudx = (-1.0/280.0*u[idx_x_RRRR] + 4.0/105.0*u[idx_x_RRR] -
-                                       1.0/5.0*u[idx_x_RR] + 4.0/5.0*u[idx_x_R] -
-                                       4.0/5.0*u[idx_x_L] + 1.0/5.0*u[idx_x_LL] -
-                                       4.0/105.0*u[idx_x_LLL] + 1.0/280.0*u[idx_x_LLLL])/dx[0];
+                        const double dudx = (-1.0/280.0*u[idx_x_RRRR] + 4.0/105.0*u[idx_x_RRR] -
+                                             1.0/5.0*u[idx_x_RR] + 4.0/5.0*u[idx_x_R] -
+                                             4.0/5.0*u[idx_x_L] + 1.0/5.0*u[idx_x_LL] -
+                                             4.0/105.0*u[idx_x_LLL] + 1.0/280.0*u[idx_x_LLLL])/dx[0];
                         
-                        double dvdy = (-1.0/280.0*v[idx_y_TTTT] + 4.0/105.0*v[idx_y_TTT] -
-                                       1.0/5.0*v[idx_y_TT] + 4.0/5.0*v[idx_y_T] -
-                                       4.0/5.0*v[idx_y_B] + 1.0/5.0*v[idx_y_BB] -
-                                       4.0/105.0*v[idx_y_BBB] + 1.0/280.0*v[idx_y_BBBB])/dx[1];
+                        const double dvdy = (-1.0/280.0*v[idx_y_TTTT] + 4.0/105.0*v[idx_y_TTT] -
+                                             1.0/5.0*v[idx_y_TT] + 4.0/5.0*v[idx_y_T] -
+                                             4.0/5.0*v[idx_y_B] + 1.0/5.0*v[idx_y_BB] -
+                                             4.0/105.0*v[idx_y_BBB] + 1.0/280.0*v[idx_y_BBBB])/dx[1];
                         
                         theta[idx_dilatation] = dudx + dvdy;
                     }
@@ -11836,13 +11837,13 @@ FlowModelFourEqnConservative::computeGlobalCellDataDilatationWithDensityAndVeloc
                         const int idx_dilatation = (i + d_num_subghosts_dilatation[0]) +
                             (j + d_num_subghosts_dilatation[1])*d_subghostcell_dims_dilatation[0];
                         
-                        double dudx = (1.0/60.0*u[idx_x_RRR] - 3.0/20.0*u[idx_x_RR] +
-                                       3.0/4.0*u[idx_x_R] - 3.0/4.0*u[idx_x_L] +
-                                       3.0/20.0*u[idx_x_LL] - 1.0/60.0*u[idx_x_LLL])/dx[0];
+                        const double dudx = (1.0/60.0*u[idx_x_RRR] - 3.0/20.0*u[idx_x_RR] +
+                                             3.0/4.0*u[idx_x_R] - 3.0/4.0*u[idx_x_L] +
+                                             3.0/20.0*u[idx_x_LL] - 1.0/60.0*u[idx_x_LLL])/dx[0];
                         
-                        double dvdy = (1.0/60.0*v[idx_y_TTT] - 3.0/20.0*v[idx_y_TT] +
-                                       3.0/4.0*v[idx_y_T] - 3.0/4.0*v[idx_y_B] +
-                                       3.0/20.0*v[idx_y_BB] - 1.0/60.0*v[idx_y_BBB])/dx[1];
+                        const double dvdy = (1.0/60.0*v[idx_y_TTT] - 3.0/20.0*v[idx_y_TT] +
+                                             3.0/4.0*v[idx_y_T] - 3.0/4.0*v[idx_y_B] +
+                                             3.0/20.0*v[idx_y_BB] - 1.0/60.0*v[idx_y_BBB])/dx[1];
                         
                         theta[idx_dilatation] = dudx + dvdy;
                     }
@@ -11886,11 +11887,11 @@ FlowModelFourEqnConservative::computeGlobalCellDataDilatationWithDensityAndVeloc
                         const int idx_dilatation = (i + d_num_subghosts_dilatation[0]) +
                             (j + d_num_subghosts_dilatation[1])*d_subghostcell_dims_dilatation[0];
                         
-                        double dudx = (-1.0/12.0*u[idx_x_RR] + 2.0/3.0*u[idx_x_R] -
-                                       2.0/3.0*u[idx_x_L] + 1.0/12.0*u[idx_x_LL])/dx[0];
+                        const double dudx = (-1.0/12.0*u[idx_x_RR] + 2.0/3.0*u[idx_x_R] -
+                                             2.0/3.0*u[idx_x_L] + 1.0/12.0*u[idx_x_LL])/dx[0];
                         
-                        double dvdy = (-1.0/12.0*v[idx_y_TT] + 2.0/3.0*v[idx_y_T] -
-                                       2.0/3.0*v[idx_y_B] + 1.0/12.0*v[idx_y_BB])/dx[1];
+                        const double dvdy = (-1.0/12.0*v[idx_y_TT] + 2.0/3.0*v[idx_y_T] -
+                                             2.0/3.0*v[idx_y_B] + 1.0/12.0*v[idx_y_BB])/dx[1];
                         
                         theta[idx_dilatation] = dudx + dvdy;
                     }
@@ -11922,8 +11923,8 @@ FlowModelFourEqnConservative::computeGlobalCellDataDilatationWithDensityAndVeloc
                         const int idx_dilatation = (i + d_num_subghosts_dilatation[0]) +
                             (j + d_num_subghosts_dilatation[1])*d_subghostcell_dims_dilatation[0];
                         
-                        double dudx = (0.5*u[idx_x_R] - 0.5*u[idx_x_L])/dx[0];
-                        double dvdy = (0.5*v[idx_y_T] - 0.5*v[idx_y_B])/dx[1];
+                        const double dudx = (0.5*u[idx_x_R] - 0.5*u[idx_x_L])/dx[0];
+                        const double dvdy = (0.5*v[idx_y_T] - 0.5*v[idx_y_B])/dx[1];
                         
                         theta[idx_dilatation] = dudx + dvdy;
                     }
@@ -11999,7 +12000,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataDilatationWithDensityAndVeloc
             double* w = d_data_velocity->getPointer(2);
             
             // Compute the dilatation field.
-            if (d_num_subghosts_diff >= hier::IntVector::getOne(d_dim)*4)
+            if (false) // (d_num_subghosts_diff >= hier::IntVector::getOne(d_dim)*4)
             {
                 for (int k = -d_num_subghosts_dilatation[2];
                      k < d_interior_dims[2] + d_num_subghosts_dilatation[2];
@@ -12139,20 +12140,20 @@ FlowModelFourEqnConservative::computeGlobalCellDataDilatationWithDensityAndVeloc
                                 (k + d_num_subghosts_dilatation[2])*d_subghostcell_dims_dilatation[0]*
                                     d_subghostcell_dims_dilatation[1];
                             
-                            double dudx = (-1.0/280.0*u[idx_x_RRRR] + 4.0/105.0*u[idx_x_RRR] -
-                                           1.0/5.0*u[idx_x_RR] + 4.0/5.0*u[idx_x_R] -
-                                           4.0/5.0*u[idx_x_L] + 1.0/5.0*u[idx_x_LL] -
-                                           4.0/105.0*u[idx_x_LLL] + 1.0/280.0*u[idx_x_LLLL])/dx[0];
+                            const double dudx = (-1.0/280.0*u[idx_x_RRRR] + 4.0/105.0*u[idx_x_RRR] -
+                                                 1.0/5.0*u[idx_x_RR] + 4.0/5.0*u[idx_x_R] -
+                                                 4.0/5.0*u[idx_x_L] + 1.0/5.0*u[idx_x_LL] -
+                                                 4.0/105.0*u[idx_x_LLL] + 1.0/280.0*u[idx_x_LLLL])/dx[0];
                             
-                            double dvdy = (-1.0/280.0*v[idx_y_TTTT] + 4.0/105.0*v[idx_y_TTT] -
-                                           1.0/5.0*v[idx_y_TT] + 4.0/5.0*v[idx_y_T] -
-                                           4.0/5.0*v[idx_y_B] + 1.0/5.0*v[idx_y_BB] -
-                                           4.0/105.0*v[idx_y_BBB] + 1.0/280.0*v[idx_y_BBBB])/dx[1];
+                            const double dvdy = (-1.0/280.0*v[idx_y_TTTT] + 4.0/105.0*v[idx_y_TTT] -
+                                                 1.0/5.0*v[idx_y_TT] + 4.0/5.0*v[idx_y_T] -
+                                                 4.0/5.0*v[idx_y_B] + 1.0/5.0*v[idx_y_BB] -
+                                                 4.0/105.0*v[idx_y_BBB] + 1.0/280.0*v[idx_y_BBBB])/dx[1];
                             
-                            double dwdz = (-1.0/280.0*w[idx_z_FFFF] + 4.0/105.0*w[idx_z_FFF] -
-                                           1.0/5.0*w[idx_z_FF] + 4.0/5.0*w[idx_z_F] -
-                                           4.0/5.0*w[idx_z_B] + 1.0/5.0*w[idx_z_BB] -
-                                           4.0/105.0*w[idx_z_BBB] + 1.0/280.0*w[idx_z_BBBB])/dx[2];
+                            const double dwdz = (-1.0/280.0*w[idx_z_FFFF] + 4.0/105.0*w[idx_z_FFF] -
+                                                 1.0/5.0*w[idx_z_FF] + 4.0/5.0*w[idx_z_F] -
+                                                 4.0/5.0*w[idx_z_B] + 1.0/5.0*w[idx_z_BB] -
+                                                 4.0/105.0*w[idx_z_BBB] + 1.0/280.0*w[idx_z_BBBB])/dx[2];
                             
                             theta[idx_dilatation] = dudx + dvdy + dwdz;
                         }
@@ -12269,17 +12270,17 @@ FlowModelFourEqnConservative::computeGlobalCellDataDilatationWithDensityAndVeloc
                                 (k + d_num_subghosts_dilatation[2])*d_subghostcell_dims_dilatation[0]*
                                     d_subghostcell_dims_dilatation[1];
                             
-                            double dudx = (1.0/60.0*u[idx_x_RRR] - 3.0/20.0*u[idx_x_RR] +
-                                           3.0/4.0*u[idx_x_R] - 3.0/4.0*u[idx_x_L] +
-                                           3.0/20.0*u[idx_x_LL] - 1.0/60.0*u[idx_x_LLL])/dx[0];
+                            const double dudx = (1.0/60.0*u[idx_x_RRR] - 3.0/20.0*u[idx_x_RR] +
+                                                 3.0/4.0*u[idx_x_R] - 3.0/4.0*u[idx_x_L] +
+                                                 3.0/20.0*u[idx_x_LL] - 1.0/60.0*u[idx_x_LLL])/dx[0];
                             
-                            double dvdy = (1.0/60.0*v[idx_y_TTT] - 3.0/20.0*v[idx_y_TT] +
-                                           3.0/4.0*v[idx_y_T] - 3.0/4.0*v[idx_y_B] +
-                                           3.0/20.0*v[idx_y_BB] - 1.0/60.0*v[idx_y_BBB])/dx[1];
+                            const double dvdy = (1.0/60.0*v[idx_y_TTT] - 3.0/20.0*v[idx_y_TT] +
+                                                 3.0/4.0*v[idx_y_T] - 3.0/4.0*v[idx_y_B] +
+                                                 3.0/20.0*v[idx_y_BB] - 1.0/60.0*v[idx_y_BBB])/dx[1];
                             
-                            double dwdz = (1.0/60.0*w[idx_z_FFF] - 3.0/20.0*w[idx_z_FF] +
-                                           3.0/4.0*w[idx_z_F] - 3.0/4.0*w[idx_z_B] +
-                                           3.0/20.0*w[idx_z_BB] - 1.0/60.0*w[idx_z_BBB])/dx[2];
+                            const double dwdz = (1.0/60.0*w[idx_z_FFF] - 3.0/20.0*w[idx_z_FF] +
+                                                 3.0/4.0*w[idx_z_F] - 3.0/4.0*w[idx_z_B] +
+                                                 3.0/20.0*w[idx_z_BB] - 1.0/60.0*w[idx_z_BBB])/dx[2];
                             
                             theta[idx_dilatation] = dudx + dvdy + dwdz;
                         }
@@ -12366,14 +12367,14 @@ FlowModelFourEqnConservative::computeGlobalCellDataDilatationWithDensityAndVeloc
                                 (k + d_num_subghosts_dilatation[2])*d_subghostcell_dims_dilatation[0]*
                                     d_subghostcell_dims_dilatation[1];
                             
-                            double dudx = (-1.0/12.0*u[idx_x_RR] + 2.0/3.0*u[idx_x_R] -
-                                           2.0/3.0*u[idx_x_L] + 1.0/12.0*u[idx_x_LL])/dx[0];
+                            const double dudx = (-1.0/12.0*u[idx_x_RR] + 2.0/3.0*u[idx_x_R] -
+                                                 2.0/3.0*u[idx_x_L] + 1.0/12.0*u[idx_x_LL])/dx[0];
                             
-                            double dvdy = (-1.0/12.0*v[idx_y_TT] + 2.0/3.0*v[idx_y_T] -
-                                           2.0/3.0*v[idx_y_B] + 1.0/12.0*v[idx_y_BB])/dx[1];
+                            const double dvdy = (-1.0/12.0*v[idx_y_TT] + 2.0/3.0*v[idx_y_T] -
+                                                 2.0/3.0*v[idx_y_B] + 1.0/12.0*v[idx_y_BB])/dx[1];
                             
-                            double dwdz = (-1.0/12.0*w[idx_z_FF] + 2.0/3.0*w[idx_z_F] -
-                                           2.0/3.0*w[idx_z_B] + 1.0/12.0*w[idx_z_BB])/dx[2];
+                            const double dwdz = (-1.0/12.0*w[idx_z_FF] + 2.0/3.0*w[idx_z_F] -
+                                                 2.0/3.0*w[idx_z_B] + 1.0/12.0*w[idx_z_BB])/dx[2];
                             
                             theta[idx_dilatation] = dudx + dvdy + dwdz;
                         }
@@ -12430,9 +12431,9 @@ FlowModelFourEqnConservative::computeGlobalCellDataDilatationWithDensityAndVeloc
                                 (k + d_num_subghosts_dilatation[2])*d_subghostcell_dims_dilatation[0]*
                                     d_subghostcell_dims_dilatation[1];
                             
-                            double dudx = (0.5*u[idx_x_R] - 0.5*u[idx_x_L])/dx[0];
-                            double dvdy = (0.5*v[idx_y_T] - 0.5*v[idx_y_B])/dx[1];
-                            double dwdz = (0.5*w[idx_z_F] - 0.5*w[idx_z_B])/dx[2];
+                            const double dudx = (0.5*u[idx_x_R] - 0.5*u[idx_x_L])/dx[0];
+                            const double dvdy = (0.5*v[idx_y_T] - 0.5*v[idx_y_B])/dx[1];
+                            const double dwdz = (0.5*w[idx_z_F] - 0.5*w[idx_z_B])/dx[2];
                             
                             theta[idx_dilatation] = dudx + dvdy + dwdz;
                         }
@@ -12599,7 +12600,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataVorticityWithDensityAndVeloci
             double* v = d_data_velocity->getPointer(1);
             
             // Compute the vorticity field.
-            if (d_num_subghosts_diff >= hier::IntVector::getOne(d_dim)*4)
+            if (false) // (d_num_subghosts_diff >= hier::IntVector::getOne(d_dim)*4)
             {
                 for (int j = -d_num_subghosts_vorticity[1];
                      j < d_interior_dims[1] + d_num_subghosts_vorticity[1];
@@ -12661,15 +12662,15 @@ FlowModelFourEqnConservative::computeGlobalCellDataVorticityWithDensityAndVeloci
                         const int idx_vorticity = (i + d_num_subghosts_vorticity[0]) +
                             (j + d_num_subghosts_vorticity[1])*d_subghostcell_dims_vorticity[0];
                         
-                        double dvdx = (-1.0/280.0*v[idx_x_RRRR] + 4.0/105.0*v[idx_x_RRR] -
-                                       1.0/5.0*v[idx_x_RR] + 4.0/5.0*v[idx_x_R] -
-                                       4.0/5.0*v[idx_x_L] + 1.0/5.0*v[idx_x_LL] -
-                                       4.0/105.0*v[idx_x_LLL] + 1.0/280.0*v[idx_x_LLLL])/dx[0];
+                        const double dvdx = (-1.0/280.0*v[idx_x_RRRR] + 4.0/105.0*v[idx_x_RRR] -
+                                             1.0/5.0*v[idx_x_RR] + 4.0/5.0*v[idx_x_R] -
+                                             4.0/5.0*v[idx_x_L] + 1.0/5.0*v[idx_x_LL] -
+                                             4.0/105.0*v[idx_x_LLL] + 1.0/280.0*v[idx_x_LLLL])/dx[0];
                         
-                        double dudy = (-1.0/280.0*u[idx_y_TTTT] + 4.0/105.0*u[idx_y_TTT] -
-                                       1.0/5.0*u[idx_y_TT] + 4.0/5.0*u[idx_y_T] -
-                                       4.0/5.0*u[idx_y_B] + 1.0/5.0*u[idx_y_BB] -
-                                       4.0/105.0*u[idx_y_BBB] + 1.0/280.0*u[idx_y_BBBB])/dx[1];
+                        const double dudy = (-1.0/280.0*u[idx_y_TTTT] + 4.0/105.0*u[idx_y_TTT] -
+                                             1.0/5.0*u[idx_y_TT] + 4.0/5.0*u[idx_y_T] -
+                                             4.0/5.0*u[idx_y_B] + 1.0/5.0*u[idx_y_BB] -
+                                             4.0/105.0*u[idx_y_BBB] + 1.0/280.0*u[idx_y_BBBB])/dx[1];
                         
                         omega[idx_vorticity] = dvdx - dudy;
                     }
@@ -12725,13 +12726,13 @@ FlowModelFourEqnConservative::computeGlobalCellDataVorticityWithDensityAndVeloci
                         const int idx_vorticity = (i + d_num_subghosts_vorticity[0]) +
                             (j + d_num_subghosts_vorticity[1])*d_subghostcell_dims_vorticity[0];
                         
-                        double dvdx = (1.0/60.0*v[idx_x_RRR] - 3.0/20.0*v[idx_x_RR] +
-                                       3.0/4.0*v[idx_x_R] - 3.0/4.0*v[idx_x_L] +
-                                       3.0/20.0*v[idx_x_LL] - 1.0/60.0*v[idx_x_LLL])/dx[0];
+                        const double dvdx = (1.0/60.0*v[idx_x_RRR] - 3.0/20.0*v[idx_x_RR] +
+                                             3.0/4.0*v[idx_x_R] - 3.0/4.0*v[idx_x_L] +
+                                             3.0/20.0*v[idx_x_LL] - 1.0/60.0*v[idx_x_LLL])/dx[0];
                         
-                        double dudy = (1.0/60.0*u[idx_y_TTT] - 3.0/20.0*u[idx_y_TT] +
-                                       3.0/4.0*u[idx_y_T] - 3.0/4.0*u[idx_y_B] +
-                                       3.0/20.0*u[idx_y_BB] - 1.0/60.0*u[idx_y_BBB])/dx[1];
+                        const double dudy = (1.0/60.0*u[idx_y_TTT] - 3.0/20.0*u[idx_y_TT] +
+                                             3.0/4.0*u[idx_y_T] - 3.0/4.0*u[idx_y_B] +
+                                             3.0/20.0*u[idx_y_BB] - 1.0/60.0*u[idx_y_BBB])/dx[1];
                         
                         omega[idx_vorticity] = dvdx - dudy;
                     }
@@ -12775,11 +12776,11 @@ FlowModelFourEqnConservative::computeGlobalCellDataVorticityWithDensityAndVeloci
                         const int idx_vorticity = (i + d_num_subghosts_vorticity[0]) +
                             (j + d_num_subghosts_vorticity[1])*d_subghostcell_dims_vorticity[0];
                         
-                        double dvdx = (-1.0/12.0*v[idx_x_RR] + 2.0/3.0*v[idx_x_R] -
-                                       2.0/3.0*v[idx_x_L] + 1.0/12.0*v[idx_x_LL])/dx[0];
+                        const double dvdx = (-1.0/12.0*v[idx_x_RR] + 2.0/3.0*v[idx_x_R] -
+                                             2.0/3.0*v[idx_x_L] + 1.0/12.0*v[idx_x_LL])/dx[0];
                         
-                        double dudy = (-1.0/12.0*u[idx_y_TT] + 2.0/3.0*u[idx_y_T] -
-                                       2.0/3.0*u[idx_y_B] + 1.0/12.0*u[idx_y_BB])/dx[1];
+                        const double dudy = (-1.0/12.0*u[idx_y_TT] + 2.0/3.0*u[idx_y_T] -
+                                             2.0/3.0*u[idx_y_B] + 1.0/12.0*u[idx_y_BB])/dx[1];
                         
                         omega[idx_vorticity] = dvdx - dudy;
                     }
@@ -12811,8 +12812,8 @@ FlowModelFourEqnConservative::computeGlobalCellDataVorticityWithDensityAndVeloci
                         const int idx_vorticity = (i + d_num_subghosts_vorticity[0]) +
                             (j + d_num_subghosts_vorticity[1])*d_subghostcell_dims_vorticity[0];
                         
-                        double dvdx = (0.5*v[idx_x_R] - 0.5*v[idx_x_L])/dx[0];
-                        double dudy = (0.5*u[idx_y_T] - 0.5*u[idx_y_B])/dx[1];
+                        const double dvdx = (0.5*v[idx_x_R] - 0.5*v[idx_x_L])/dx[0];
+                        const double dudy = (0.5*u[idx_y_T] - 0.5*u[idx_y_B])/dx[1];
                         
                         omega[idx_vorticity] = dvdx - dudy;
                     }
@@ -12896,7 +12897,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataVorticityWithDensityAndVeloci
             double* w = d_data_velocity->getPointer(2);
             
             // Compute the vorticity field.
-            if (d_num_subghosts_diff >= hier::IntVector::getOne(d_dim)*4)
+            if (false) // (d_num_subghosts_diff >= hier::IntVector::getOne(d_dim)*4)
             {
                 for (int k = -d_num_subghosts_vorticity[2];
                      k < d_interior_dims[2] + d_num_subghosts_vorticity[2];
@@ -13036,35 +13037,35 @@ FlowModelFourEqnConservative::computeGlobalCellDataVorticityWithDensityAndVeloci
                                 (k + d_num_subghosts_vorticity[2])*d_subghostcell_dims_vorticity[0]*
                                     d_subghostcell_dims_vorticity[1];
                             
-                            double dvdx = (-1.0/280.0*v[idx_x_RRRR] + 4.0/105.0*v[idx_x_RRR] -
-                                           1.0/5.0*v[idx_x_RR] + 4.0/5.0*v[idx_x_R] -
-                                           4.0/5.0*v[idx_x_L] + 1.0/5.0*v[idx_x_LL] -
-                                           4.0/105.0*v[idx_x_LLL] + 1.0/280.0*v[idx_x_LLLL])/dx[0];
+                            const double dvdx = (-1.0/280.0*v[idx_x_RRRR] + 4.0/105.0*v[idx_x_RRR] -
+                                                 1.0/5.0*v[idx_x_RR] + 4.0/5.0*v[idx_x_R] -
+                                                 4.0/5.0*v[idx_x_L] + 1.0/5.0*v[idx_x_LL] -
+                                                 4.0/105.0*v[idx_x_LLL] + 1.0/280.0*v[idx_x_LLLL])/dx[0];
                             
-                            double dwdx = (-1.0/280.0*w[idx_x_RRRR] + 4.0/105.0*w[idx_x_RRR] -
-                                           1.0/5.0*w[idx_x_RR] + 4.0/5.0*w[idx_x_R] -
-                                           4.0/5.0*w[idx_x_L] + 1.0/5.0*w[idx_x_LL] -
-                                           4.0/105.0*w[idx_x_LLL] + 1.0/280.0*w[idx_x_LLLL])/dx[0];
+                            const double dwdx = (-1.0/280.0*w[idx_x_RRRR] + 4.0/105.0*w[idx_x_RRR] -
+                                                 1.0/5.0*w[idx_x_RR] + 4.0/5.0*w[idx_x_R] -
+                                                 4.0/5.0*w[idx_x_L] + 1.0/5.0*w[idx_x_LL] -
+                                                 4.0/105.0*w[idx_x_LLL] + 1.0/280.0*w[idx_x_LLLL])/dx[0];
                             
-                            double dudy = (-1.0/280.0*u[idx_y_TTTT] + 4.0/105.0*u[idx_y_TTT] -
-                                           1.0/5.0*u[idx_y_TT] + 4.0/5.0*u[idx_y_T] -
-                                           4.0/5.0*u[idx_y_B] + 1.0/5.0*u[idx_y_BB] -
-                                           4.0/105.0*u[idx_y_BBB] + 1.0/280.0*u[idx_y_BBBB])/dx[1];
+                            const double dudy = (-1.0/280.0*u[idx_y_TTTT] + 4.0/105.0*u[idx_y_TTT] -
+                                                 1.0/5.0*u[idx_y_TT] + 4.0/5.0*u[idx_y_T] -
+                                                 4.0/5.0*u[idx_y_B] + 1.0/5.0*u[idx_y_BB] -
+                                                 4.0/105.0*u[idx_y_BBB] + 1.0/280.0*u[idx_y_BBBB])/dx[1];
                             
-                            double dwdy = (-1.0/280.0*w[idx_y_TTTT] + 4.0/105.0*w[idx_y_TTT] -
-                                           1.0/5.0*w[idx_y_TT] + 4.0/5.0*w[idx_y_T] -
-                                           4.0/5.0*w[idx_y_B] + 1.0/5.0*w[idx_y_BB] -
-                                           4.0/105.0*w[idx_y_BBB] + 1.0/280.0*w[idx_y_BBBB])/dx[1];
+                            const double dwdy = (-1.0/280.0*w[idx_y_TTTT] + 4.0/105.0*w[idx_y_TTT] -
+                                                 1.0/5.0*w[idx_y_TT] + 4.0/5.0*w[idx_y_T] -
+                                                 4.0/5.0*w[idx_y_B] + 1.0/5.0*w[idx_y_BB] -
+                                                 4.0/105.0*w[idx_y_BBB] + 1.0/280.0*w[idx_y_BBBB])/dx[1];
                             
-                            double dudz = (-1.0/280.0*u[idx_z_FFFF] + 4.0/105.0*u[idx_z_FFF] -
-                                           1.0/5.0*u[idx_z_FF] + 4.0/5.0*u[idx_z_F] -
-                                           4.0/5.0*u[idx_z_B] + 1.0/5.0*u[idx_z_BB] -
-                                           4.0/105.0*u[idx_z_BBB] + 1.0/280.0*u[idx_z_BBBB])/dx[2];
+                            const double dudz = (-1.0/280.0*u[idx_z_FFFF] + 4.0/105.0*u[idx_z_FFF] -
+                                                 1.0/5.0*u[idx_z_FF] + 4.0/5.0*u[idx_z_F] -
+                                                 4.0/5.0*u[idx_z_B] + 1.0/5.0*u[idx_z_BB] -
+                                                 4.0/105.0*u[idx_z_BBB] + 1.0/280.0*u[idx_z_BBBB])/dx[2];
                             
-                            double dvdz = (-1.0/280.0*v[idx_z_FFFF] + 4.0/105.0*v[idx_z_FFF] -
-                                           1.0/5.0*v[idx_z_FF] + 4.0/5.0*v[idx_z_F] -
-                                           4.0/5.0*v[idx_z_B] + 1.0/5.0*v[idx_z_BB] -
-                                           4.0/105.0*v[idx_z_BBB] + 1.0/280.0*v[idx_z_BBBB])/dx[2];
+                            const double dvdz = (-1.0/280.0*v[idx_z_FFFF] + 4.0/105.0*v[idx_z_FFF] -
+                                                 1.0/5.0*v[idx_z_FF] + 4.0/5.0*v[idx_z_F] -
+                                                 4.0/5.0*v[idx_z_B] + 1.0/5.0*v[idx_z_BB] -
+                                                 4.0/105.0*v[idx_z_BBB] + 1.0/280.0*v[idx_z_BBBB])/dx[2];
                             
                             omega_x[idx_vorticity] = dwdy - dvdz;
                             omega_y[idx_vorticity] = dudz - dwdx;
@@ -13183,29 +13184,29 @@ FlowModelFourEqnConservative::computeGlobalCellDataVorticityWithDensityAndVeloci
                                 (k + d_num_subghosts_vorticity[2])*d_subghostcell_dims_vorticity[0]*
                                     d_subghostcell_dims_vorticity[1];
                             
-                            double dvdx = (1.0/60.0*v[idx_x_RRR] - 3.0/20.0*v[idx_x_RR] +
-                                           3.0/4.0*v[idx_x_R] - 3.0/4.0*v[idx_x_L] +
-                                           3.0/20.0*v[idx_x_LL] - 1.0/60.0*v[idx_x_LLL])/dx[0];
+                            const double dvdx = (1.0/60.0*v[idx_x_RRR] - 3.0/20.0*v[idx_x_RR] +
+                                                 3.0/4.0*v[idx_x_R] - 3.0/4.0*v[idx_x_L] +
+                                                 3.0/20.0*v[idx_x_LL] - 1.0/60.0*v[idx_x_LLL])/dx[0];
                             
-                            double dwdx = (1.0/60.0*w[idx_x_RRR] - 3.0/20.0*w[idx_x_RR] +
-                                           3.0/4.0*w[idx_x_R] - 3.0/4.0*w[idx_x_L] +
-                                           3.0/20.0*w[idx_x_LL] - 1.0/60.0*w[idx_x_LLL])/dx[0];
+                            const double dwdx = (1.0/60.0*w[idx_x_RRR] - 3.0/20.0*w[idx_x_RR] +
+                                                 3.0/4.0*w[idx_x_R] - 3.0/4.0*w[idx_x_L] +
+                                                 3.0/20.0*w[idx_x_LL] - 1.0/60.0*w[idx_x_LLL])/dx[0];
                             
-                            double dudy = (1.0/60.0*u[idx_y_TTT] - 3.0/20.0*u[idx_y_TT] +
-                                           3.0/4.0*u[idx_y_T] - 3.0/4.0*u[idx_y_B] +
-                                           3.0/20.0*u[idx_y_BB] - 1.0/60.0*u[idx_y_BBB])/dx[1];
+                            const double dudy = (1.0/60.0*u[idx_y_TTT] - 3.0/20.0*u[idx_y_TT] +
+                                                 3.0/4.0*u[idx_y_T] - 3.0/4.0*u[idx_y_B] +
+                                                 3.0/20.0*u[idx_y_BB] - 1.0/60.0*u[idx_y_BBB])/dx[1];
                             
-                            double dwdy = (1.0/60.0*w[idx_y_TTT] - 3.0/20.0*w[idx_y_TT] +
-                                           3.0/4.0*w[idx_y_T] - 3.0/4.0*w[idx_y_B] + 3.0/20.0*w[idx_y_BB] -
-                                           1.0/60.0*w[idx_y_BBB])/dx[1];
+                            const double dwdy = (1.0/60.0*w[idx_y_TTT] - 3.0/20.0*w[idx_y_TT] +
+                                                 3.0/4.0*w[idx_y_T] - 3.0/4.0*w[idx_y_B] + 3.0/20.0*w[idx_y_BB] -
+                                                 1.0/60.0*w[idx_y_BBB])/dx[1];
                             
-                            double dudz = (1.0/60.0*u[idx_z_FFF] - 3.0/20.0*u[idx_z_FF] +
-                                           3.0/4.0*u[idx_z_F] - 3.0/4.0*u[idx_z_B] +
-                                           3.0/20.0*u[idx_z_BB] - 1.0/60.0*u[idx_z_BBB])/dx[2];
+                            const double dudz = (1.0/60.0*u[idx_z_FFF] - 3.0/20.0*u[idx_z_FF] +
+                                                 3.0/4.0*u[idx_z_F] - 3.0/4.0*u[idx_z_B] +
+                                                 3.0/20.0*u[idx_z_BB] - 1.0/60.0*u[idx_z_BBB])/dx[2];
                             
-                            double dvdz = (1.0/60.0*v[idx_z_FFF] - 3.0/20.0*v[idx_z_FF] +
-                                           3.0/4.0*v[idx_z_F] - 3.0/4.0*v[idx_z_B] +
-                                           3.0/20.0*v[idx_z_BB] - 1.0/60.0*v[idx_z_BBB])/dx[2];
+                            const double dvdz = (1.0/60.0*v[idx_z_FFF] - 3.0/20.0*v[idx_z_FF] +
+                                                 3.0/4.0*v[idx_z_F] - 3.0/4.0*v[idx_z_B] +
+                                                 3.0/20.0*v[idx_z_BB] - 1.0/60.0*v[idx_z_BBB])/dx[2];
                             
                             omega_x[idx_vorticity] = dwdy - dvdz;
                             omega_y[idx_vorticity] = dudz - dwdx;
@@ -13294,23 +13295,23 @@ FlowModelFourEqnConservative::computeGlobalCellDataVorticityWithDensityAndVeloci
                                 (k + d_num_subghosts_vorticity[2])*d_subghostcell_dims_vorticity[0]*
                                     d_subghostcell_dims_vorticity[1];
                             
-                            double dvdx = (-1.0/12.0*v[idx_x_RR] + 2.0/3.0*v[idx_x_R] -
-                                           2.0/3.0*v[idx_x_L] + 1.0/12.0*v[idx_x_LL])/dx[0];
+                            const double dvdx = (-1.0/12.0*v[idx_x_RR] + 2.0/3.0*v[idx_x_R] -
+                                                 2.0/3.0*v[idx_x_L] + 1.0/12.0*v[idx_x_LL])/dx[0];
                             
-                            double dwdx = (-1.0/12.0*w[idx_x_RR] + 2.0/3.0*w[idx_x_R] -
-                                           2.0/3.0*w[idx_x_L] + 1.0/12.0*w[idx_x_LL])/dx[0];
+                            const double dwdx = (-1.0/12.0*w[idx_x_RR] + 2.0/3.0*w[idx_x_R] -
+                                                 2.0/3.0*w[idx_x_L] + 1.0/12.0*w[idx_x_LL])/dx[0];
                             
-                            double dudy = (-1.0/12.0*u[idx_y_TT] + 2.0/3.0*u[idx_y_T] -
-                                           2.0/3.0*u[idx_y_B] + 1.0/12.0*u[idx_y_BB])/dx[1];
+                            const double dudy = (-1.0/12.0*u[idx_y_TT] + 2.0/3.0*u[idx_y_T] -
+                                                 2.0/3.0*u[idx_y_B] + 1.0/12.0*u[idx_y_BB])/dx[1];
                             
-                            double dwdy = (-1.0/12.0*w[idx_y_TT] + 2.0/3.0*w[idx_y_T] -
-                                           2.0/3.0*w[idx_y_B] + 1.0/12.0*w[idx_y_BB])/dx[1];
+                            const double dwdy = (-1.0/12.0*w[idx_y_TT] + 2.0/3.0*w[idx_y_T] -
+                                                 2.0/3.0*w[idx_y_B] + 1.0/12.0*w[idx_y_BB])/dx[1];
                             
-                            double dudz = (-1.0/12.0*u[idx_z_FF] + 2.0/3.0*u[idx_z_F] -
-                                           2.0/3.0*u[idx_z_B] + 1.0/12.0*u[idx_z_BB])/dx[2];
+                            const double dudz = (-1.0/12.0*u[idx_z_FF] + 2.0/3.0*u[idx_z_F] -
+                                                 2.0/3.0*u[idx_z_B] + 1.0/12.0*u[idx_z_BB])/dx[2];
                             
-                            double dvdz = (-1.0/12.0*v[idx_z_FF] + 2.0/3.0*v[idx_z_F] -
-                                           2.0/3.0*v[idx_z_B] + 1.0/12.0*v[idx_z_BB])/dx[2];
+                            const double dvdz = (-1.0/12.0*v[idx_z_FF] + 2.0/3.0*v[idx_z_F] -
+                                                 2.0/3.0*v[idx_z_B] + 1.0/12.0*v[idx_z_BB])/dx[2];
                             
                             omega_x[idx_vorticity] = dwdy - dvdz;
                             omega_y[idx_vorticity] = dudz - dwdx;
@@ -13369,12 +13370,12 @@ FlowModelFourEqnConservative::computeGlobalCellDataVorticityWithDensityAndVeloci
                                 (k + d_num_subghosts_vorticity[2])*d_subghostcell_dims_vorticity[0]*
                                     d_subghostcell_dims_vorticity[1];
                             
-                            double dvdx = (0.5*v[idx_x_R] - 0.5*v[idx_x_L])/dx[0];
-                            double dwdx = (0.5*w[idx_x_R] - 0.5*w[idx_x_L])/dx[0];
-                            double dudy = (0.5*u[idx_y_T] - 0.5*u[idx_y_B])/dx[1];
-                            double dwdy = (0.5*w[idx_y_T] - 0.5*w[idx_y_B])/dx[1];
-                            double dudz = (0.5*u[idx_z_F] - 0.5*u[idx_z_B])/dx[2];
-                            double dvdz = (0.5*v[idx_z_F] - 0.5*v[idx_z_B])/dx[2];
+                            const double dvdx = (0.5*v[idx_x_R] - 0.5*v[idx_x_L])/dx[0];
+                            const double dwdx = (0.5*w[idx_x_R] - 0.5*w[idx_x_L])/dx[0];
+                            const double dudy = (0.5*u[idx_y_T] - 0.5*u[idx_y_B])/dx[1];
+                            const double dwdy = (0.5*w[idx_y_T] - 0.5*w[idx_y_B])/dx[1];
+                            const double dudz = (0.5*u[idx_z_F] - 0.5*u[idx_z_B])/dx[2];
+                            const double dvdz = (0.5*v[idx_z_F] - 0.5*v[idx_z_B])/dx[2];
                             
                             omega_x[idx_vorticity] = dwdy - dvdz;
                             omega_y[idx_vorticity] = dudz - dwdx;
