@@ -95,15 +95,6 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
-         * Output enstrophy integrated to a file.
-         */
-        void
-        outputEnstrophyIntegrated(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
-        
-        /*
          * Output TKE integrated with assumed homogeneity in x-direction to a file.
          */
         void
@@ -126,6 +117,42 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
          */
         void
         outputTKEIntegratedWithHomogeneityInZDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output TKE integrated with assumed homogeneity in xy-plane to a file.
+         */
+        void
+        outputTKEIntegratedWithHomogeneityInXYPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output TKE integrated with assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputTKEIntegratedWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output TKE integrated with assumed homogeneity in xz-plane to a file.
+         */
+        void
+        outputTKEIntegratedWithHomogeneityInXZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output enstrophy integrated to a file.
+         */
+        void
+        outputEnstrophyIntegrated(
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);

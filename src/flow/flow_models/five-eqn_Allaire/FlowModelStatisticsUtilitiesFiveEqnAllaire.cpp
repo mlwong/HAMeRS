@@ -25,4 +25,5 @@ FlowModelStatisticsUtilitiesFiveEqnAllaire::outputStatisticalQuantities(
 {
     NULL_USE(stat_dump_filename);
     NULL_USE(patch_hierarchy);
-    NULL_USE(data_context);}
+    NULL_USE(data_context);
+}
