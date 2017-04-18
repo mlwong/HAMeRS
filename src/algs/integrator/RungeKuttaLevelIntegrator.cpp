@@ -1573,8 +1573,6 @@ RungeKuttaLevelIntegrator::advanceLevel(
     
     d_patch_strategy->setDataContext(d_scratch);
     
-    t_patch_num_kernel->start();
-    
     for (hier::PatchLevel::iterator ip(level->begin());
          ip != level->end();
          ip++)
@@ -1650,7 +1648,25 @@ RungeKuttaLevelIntegrator::advanceLevel(
                     level,
                     d_patch_strategy);
             
+            if (regrid_advance)
+            {
+                t_error_bdry_fill_comm->start();
+            }
+            else
+            {
+                t_advance_bdry_fill_comm->start();
+            }
+            
             fill_schedule_intermediate->fillData(current_time);
+            
+            if (regrid_advance)
+            {
+                t_error_bdry_fill_comm->stop();
+            }
+            else
+            {
+                t_advance_bdry_fill_comm->stop();
+            }
         }
         
         for (hier::PatchLevel::iterator ip(level->begin());
@@ -1661,6 +1677,8 @@ RungeKuttaLevelIntegrator::advanceLevel(
             
             d_patch_strategy->setDataContext(d_intermediate[sn]);
             
+            t_patch_num_kernel->start();
+            
             // Compute flux corresponding to this sub-step.
             d_patch_strategy->computeFluxesAndSourcesOnPatch(
                 *patch,
@@ -1668,7 +1686,11 @@ RungeKuttaLevelIntegrator::advanceLevel(
                 dt,
                 sn);
             
+            t_patch_num_kernel->stop();
+            
             d_patch_strategy->setDataContext(d_scratch);
+            
+            t_patch_num_kernel->start();
             
             // Advance a Runge-Kutta sub-step.
             d_patch_strategy->advanceSingleStepOnPatch(
@@ -1679,6 +1701,8 @@ RungeKuttaLevelIntegrator::advanceLevel(
                 d_beta[sn],
                 d_gamma[sn],
                 d_intermediate);
+            
+            t_patch_num_kernel->stop();
         }
         
         fill_schedule_intermediate.reset();
@@ -1692,8 +1716,6 @@ RungeKuttaLevelIntegrator::advanceLevel(
         
         patch->deallocatePatchData(d_temp_var_scratch_data);
     }
-    
-    t_patch_num_kernel->stop();
     
     d_patch_strategy->clearDataContext();
     
