@@ -54,7 +54,10 @@ class FlowModelStatisticsUtilities
         putToRestart(
             const boost::shared_ptr<tbox::Database>& restart_db) const
         {
-            restart_db->putStringVector("d_statistical_quantities", d_statistical_quantities);
+            if (!d_statistical_quantities.empty())
+            {
+                restart_db->putStringVector("d_statistical_quantities", d_statistical_quantities);
+            }
         }
         
         /*
