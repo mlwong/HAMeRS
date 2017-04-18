@@ -38,6 +38,7 @@
 #include "SAMRAI/mesh/TreeLoadBalancer.h"
 
 #include "boost/shared_ptr.hpp"
+#include <cmath>
 #include <fstream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -609,6 +610,12 @@ int main(int argc, char *argv[])
     
     double dt_now = time_integrator->initializeHierarchy();
     
+    double dt_const = 0.0;
+    if (!(RK_level_integrator->usingRefinedTimestepping()))
+    {
+        dt_const = dt_now;
+    }
+    
     tbox::RestartManager::getManager()->closeRestartFile();
     
     /*
@@ -706,7 +713,7 @@ int main(int argc, char *argv[])
         {
             if (viz_dump_time_interval == stat_dump_time_interval)
             {
-                if ((loop_time + dt_now) - (last_viz_dump_time + viz_dump_time_interval) > DBL_EPSILON)
+                if ((loop_time + dt_now) - (last_viz_dump_time + viz_dump_time_interval) >= -DBL_EPSILON)
                 {
                     dt_now = last_viz_dump_time + viz_dump_time_interval - loop_time;
                     dump_viz = true;
@@ -715,12 +722,12 @@ int main(int argc, char *argv[])
             }
             else
             {
-                if ((loop_time + dt_now) - (last_viz_dump_time + viz_dump_time_interval) > DBL_EPSILON)
+                if ((loop_time + dt_now) - (last_viz_dump_time + viz_dump_time_interval) >= -DBL_EPSILON)
                 {
                     dt_now = last_viz_dump_time + viz_dump_time_interval - loop_time;
                     dump_viz = true;
                     
-                    if ((loop_time + dt_now) - (last_stat_dump_time + stat_dump_time_interval) > DBL_EPSILON)
+                    if ((loop_time + dt_now) - (last_stat_dump_time + stat_dump_time_interval) >= -DBL_EPSILON)
                     {
                         dt_now = last_stat_dump_time + stat_dump_time_interval - loop_time;
                         dump_viz = false;
@@ -731,7 +738,7 @@ int main(int argc, char *argv[])
         }
         else if (viz_dump_setting == "CONSTANT_TIME_INTERVAL")
         {
-            if ((loop_time + dt_now) - (last_viz_dump_time + viz_dump_time_interval) > DBL_EPSILON)
+            if ((loop_time + dt_now) - (last_viz_dump_time + viz_dump_time_interval) >= -DBL_EPSILON)
             {
                 dt_now = last_viz_dump_time + viz_dump_time_interval - loop_time;
                 dump_viz = true;
@@ -739,7 +746,7 @@ int main(int argc, char *argv[])
         }
         else if (stat_dump_setting == "CONSTANT_TIME_INTERVAL")
         {
-            if ((loop_time + dt_now) - (last_stat_dump_time + stat_dump_time_interval) > DBL_EPSILON)
+            if ((loop_time + dt_now) - (last_stat_dump_time + stat_dump_time_interval) >= -DBL_EPSILON)
             {
                 dt_now = last_stat_dump_time + stat_dump_time_interval - loop_time;
                 dump_stat = true;
@@ -754,7 +761,20 @@ int main(int argc, char *argv[])
         double dt_new = time_integrator->advanceHierarchy(dt_now);
         
         loop_time += dt_now;
-        dt_now = dt_new;
+        
+        if (!(RK_level_integrator->usingRefinedTimestepping()))
+        {
+            dt_now = dt_const;
+            
+            if (loop_time + dt_now > loop_time_end)
+            {
+                dt_now = loop_time_end - loop_time;
+            }
+        }
+        else
+        {
+            dt_now = dt_new;
+        }
         
         tbox::pout << "At end of timestep # " << iteration_num - 1 << std::endl;
         tbox::pout << "Simulation time is " << loop_time << std::endl;

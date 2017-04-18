@@ -1027,7 +1027,9 @@ class RungeKuttaLevelIntegrator:
         
         /*
          * Courant-Friedrichs-Levy parameters for time increment selection.
+         * If d_use_cfl is false, d_use_time_refinement is turned off automatically.
          */
+        bool d_use_cfl;
         double d_cfl;
         double d_cfl_init;
         
@@ -1048,6 +1050,11 @@ class RungeKuttaLevelIntegrator:
          */
         bool d_lag_dt_computation;
         bool d_use_ghosts_for_dt;
+        
+        /*
+         * dt to use at the finest level if dt_use_cfl is false.
+         */
+        double d_dt;
         
         /*
          * Number of steps of the Runge-Kutta method, and matrices of alpha, beta, and gamma values

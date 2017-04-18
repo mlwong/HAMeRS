@@ -261,10 +261,12 @@ RungeKuttaLevelIntegrator::RungeKuttaLevelIntegrator(
     d_patch_strategy(patch_strategy),
     d_object_name(object_name),
     d_use_time_refinement(use_time_refinement),
+    d_use_cfl(true),
     d_cfl(tbox::MathUtilities<double>::getSignalingNaN()),
     d_cfl_init(tbox::MathUtilities<double>::getSignalingNaN()),
     d_lag_dt_computation(true),
     d_use_ghosts_for_dt(false),
+    d_dt(tbox::MathUtilities<double>::getSignalingNaN()),
     d_flux_is_face(true),
     d_flux_face_registered(false),
     d_flux_side_registered(false),
@@ -300,6 +302,14 @@ RungeKuttaLevelIntegrator::RungeKuttaLevelIntegrator(
     {
         std::string context_string = "INTERMEDIATE_" + tbox::Utilities::intToString(sn);
         d_intermediate[sn] = hier::VariableDatabase::getDatabase()->getContext(context_string);
+    }
+    
+    /*
+     * If d_use_cfl is false, d_use_time_refinement is turned off automatically.
+     */
+    if (!d_use_cfl)
+    {
+        d_use_time_refinement = false;
     }
 }
 
@@ -1160,126 +1170,135 @@ RungeKuttaLevelIntegrator::getLevelDt(
 {
     TBOX_ASSERT(level);
     
-    const tbox::SAMRAI_MPI& mpi(level->getBoxLevel()->getMPI());
+    double global_dt = 0.0;
     
     t_get_level_dt->start();
     
-    double dt = tbox::MathUtilities<double>::getMax();
-    
-    if (!d_use_ghosts_for_dt)
+    if (d_use_cfl)
     {
-        //tbox::plog << "!use ghosts for dt" << std::endl;
+        const tbox::SAMRAI_MPI& mpi(level->getBoxLevel()->getMPI());
         
-        d_patch_strategy->setDataContext(d_current);
+        double dt = tbox::MathUtilities<double>::getMax();
         
-        for (hier::PatchLevel::iterator p(level->begin());
-             p != level->end();
-             p++)
+        if (!d_use_ghosts_for_dt)
         {
-            const boost::shared_ptr<hier::Patch>& patch = *p;
+            //tbox::plog << "!use ghosts for dt" << std::endl;
             
-            patch->allocatePatchData(d_temp_var_scratch_data, dt_time);
+            d_patch_strategy->setDataContext(d_current);
             
-            double patch_dt;
-            patch_dt = d_patch_strategy->
-                computeStableDtOnPatch(
-                    *patch,
-                    initial_time,
-                    dt_time);
-            
-            dt = tbox::MathUtilities<double>::Min(dt, patch_dt);
-            //tbox::plog.precision(12);
-            //tbox::plog << "Level " << level->getLevelNumber()
-            //           << " Patch " << *p
-            //           << " box " << patch->getBox()
-            //           << " has patch_dt " << patch_dt
-            //           << " dt " << dt
-            //           << std::endl;
-            
-            patch->deallocatePatchData(d_temp_var_scratch_data);
+            for (hier::PatchLevel::iterator p(level->begin());
+                 p != level->end();
+                 p++)
+            {
+                const boost::shared_ptr<hier::Patch>& patch = *p;
+                
+                patch->allocatePatchData(d_temp_var_scratch_data, dt_time);
+                
+                double patch_dt;
+                patch_dt = d_patch_strategy->
+                    computeStableDtOnPatch(
+                        *patch,
+                        initial_time,
+                        dt_time);
+                
+                dt = tbox::MathUtilities<double>::Min(dt, patch_dt);
+                //tbox::plog.precision(12);
+                //tbox::plog << "Level " << level->getLevelNumber()
+                //           << " Patch " << *p
+                //           << " box " << patch->getBox()
+                //           << " has patch_dt " << patch_dt
+                //           << " dt " << dt
+                //           << std::endl;
+                
+                patch->deallocatePatchData(d_temp_var_scratch_data);
+            }
+         
+            d_patch_strategy->clearDataContext();
         }
-     
-        d_patch_strategy->clearDataContext();
-    }
-    else
-    {
-        //tbox::plog << "use ghosts for dt" << std::endl;
-        
-        level->allocatePatchData(d_saved_var_scratch_data, dt_time);
-        
-        d_patch_strategy->setDataContext(d_scratch);
-        
-        t_advance_bdry_fill_comm->start();
-        d_bdry_sched_advance[level->getLevelNumber()]->fillData(dt_time);
-        t_advance_bdry_fill_comm->stop();
-        
-        for (hier::PatchLevel::iterator ip(level->begin());
-             ip != level->end();
-             ip++)
+        else
         {
-            const boost::shared_ptr<hier::Patch>& patch = *ip;
+            //tbox::plog << "use ghosts for dt" << std::endl;
             
-            patch->allocatePatchData(d_temp_var_scratch_data, dt_time);
+            level->allocatePatchData(d_saved_var_scratch_data, dt_time);
             
-            double patch_dt;
-            patch_dt = d_patch_strategy->
-                computeStableDtOnPatch(
-                    *patch,
-                    initial_time,
-                    dt_time);
+            d_patch_strategy->setDataContext(d_scratch);
             
-            dt = tbox::MathUtilities<double>::Min(dt, patch_dt);
-            //tbox::plog.precision(12);
-            //tbox::plog << "Level " << level->getLevelNumber()
-            //           << " Patch " << *ip
-            //           << " box " << patch->getBox()
-            //           << " has patch_dt " << patch_dt
-            //           << " dt " << dt
-            //           << std::endl;
+            t_advance_bdry_fill_comm->start();
+            d_bdry_sched_advance[level->getLevelNumber()]->fillData(dt_time);
+            t_advance_bdry_fill_comm->stop();
             
-            patch->deallocatePatchData(d_temp_var_scratch_data);
+            for (hier::PatchLevel::iterator ip(level->begin());
+                 ip != level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch>& patch = *ip;
+                
+                patch->allocatePatchData(d_temp_var_scratch_data, dt_time);
+                
+                double patch_dt;
+                patch_dt = d_patch_strategy->
+                    computeStableDtOnPatch(
+                        *patch,
+                        initial_time,
+                        dt_time);
+                
+                dt = tbox::MathUtilities<double>::Min(dt, patch_dt);
+                //tbox::plog.precision(12);
+                //tbox::plog << "Level " << level->getLevelNumber()
+                //           << " Patch " << *ip
+                //           << " box " << patch->getBox()
+                //           << " has patch_dt " << patch_dt
+                //           << " dt " << dt
+                //           << std::endl;
+                
+                patch->deallocatePatchData(d_temp_var_scratch_data);
+            }
+            
+            d_patch_strategy->clearDataContext();
+            
+            /*
+             * Copy data from scratch to current and de-allocate scratch storage. This may be excessive
+             * here, but seems necessary if the computation of dt affects the state of the problem
+             * solution. Also, this getLevelDt() routine is called at initialization only in most cases.
+             */
+         
+            copyTimeDependentData(level, d_scratch, d_current);
+         
+            level->deallocatePatchData(d_saved_var_scratch_data);
         }
         
-        d_patch_strategy->clearDataContext();
+        t_get_level_dt_sync->start();
+        
+        if (d_distinguish_mpi_reduction_costs)
+        {
+            mpi.Barrier();
+            t_get_level_dt_sync->stop();
+            t_mpi_reductions->start();
+        }
         
         /*
-         * Copy data from scratch to current and de-allocate scratch storage. This may be excessive
-         * here, but seems necessary if the computation of dt affects the state of the problem
-         * solution. Also, this getLevelDt() routine is called at initialization only in most cases.
+         * The level time increment is a global min over all patches.
          */
-     
-        copyTimeDependentData(level, d_scratch, d_current);
-     
-        level->deallocatePatchData(d_saved_var_scratch_data);
-    }
-    
-    t_get_level_dt_sync->start();
-    
-    if (d_distinguish_mpi_reduction_costs)
-    {
-        mpi.Barrier();
-        t_get_level_dt_sync->stop();
-        t_mpi_reductions->start();
-    }
-    
-    /*
-     * The level time increment is a global min over all patches.
-     */
-    
-    double global_dt = dt;
-    if (mpi.getSize() > 1)
-    {
-        mpi.AllReduce(&global_dt, 1, MPI_MIN);
-    }
-    global_dt *= tbox::MathUtilities<double>::Min(d_cfl_init, d_cfl);
-    
-    if (d_distinguish_mpi_reduction_costs)
-    {
-        t_mpi_reductions->stop();
+        
+        global_dt = dt;
+        if (mpi.getSize() > 1)
+        {
+            mpi.AllReduce(&global_dt, 1, MPI_MIN);
+        }
+        global_dt *= tbox::MathUtilities<double>::Min(d_cfl_init, d_cfl);
+        
+        if (d_distinguish_mpi_reduction_costs)
+        {
+            t_mpi_reductions->stop();
+        }
+        else
+        {
+            t_get_level_dt_sync->stop();
+        }
     }
     else
     {
-        t_get_level_dt_sync->stop();
+        global_dt = d_dt;
     }
     
     t_get_level_dt->stop();
@@ -1291,7 +1310,7 @@ RungeKuttaLevelIntegrator::getLevelDt(
 /*
  **************************************************************************************************
  *
- * For the standard explicit integration algorithm for  conservation laws, the fine time increment
+ * For the standard explicit integration algorithm for conservation laws, the fine time increment
  * is the coarse increment divided by the maximum mesh ratio (independent of level number).
  *
  **************************************************************************************************
@@ -1710,62 +1729,69 @@ RungeKuttaLevelIntegrator::advanceLevel(
     
     if (!regrid_advance)
     {
-        if (d_lag_dt_computation)
+        if (d_use_cfl)
         {
-            if (d_use_ghosts_for_dt)
+            if (d_lag_dt_computation)
             {
-                d_patch_strategy->setDataContext(d_scratch);
-                copyTimeDependentData(level, d_current, d_scratch);
+                if (d_use_ghosts_for_dt)
+                {
+                    d_patch_strategy->setDataContext(d_scratch);
+                    copyTimeDependentData(level, d_current, d_scratch);
+                }
+                else
+                {
+                    d_patch_strategy->setDataContext(d_current);
+                }
             }
             else
             {
-                d_patch_strategy->setDataContext(d_current);
+                if (d_use_ghosts_for_dt)
+                {
+                    if (!d_bdry_sched_advance_new[level_number])
+                    {
+                        TBOX_ERROR(d_object_name
+                            << ":  "
+                            << "Attempt to fill new ghost data for timestep "
+                            << "computation, but schedule not defined."
+                            << std::endl);
+                    }
+                    d_patch_strategy->setDataContext(d_scratch);
+                    t_new_advance_bdry_fill_comm->start();
+                    d_bdry_sched_advance_new[level_number]->fillData(new_time);
+                    t_new_advance_bdry_fill_comm->stop();
+                }
+                else
+                {
+                    d_patch_strategy->setDataContext(d_new);
+                }
             }
+          
+            for (hier::PatchLevel::iterator ip(level->begin());
+                 ip != level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch>& patch = *ip;
+                
+                patch->allocatePatchData(d_temp_var_scratch_data, new_time);
+                
+                // "false" argument indicates "initial_time" is false.
+                t_patch_num_kernel->start();
+                double patch_dt = d_patch_strategy->computeStableDtOnPatch(
+                    *patch,
+                    false,
+                    new_time);
+                t_patch_num_kernel->stop();
+                
+                dt_next = tbox::MathUtilities<double>::Min(dt_next, patch_dt);
+                
+                patch->deallocatePatchData(d_temp_var_scratch_data);
+            }
+            d_patch_strategy->clearDataContext();
         }
         else
         {
-            if (d_use_ghosts_for_dt)
-            {
-                if (!d_bdry_sched_advance_new[level_number])
-                {
-                    TBOX_ERROR(d_object_name
-                        << ":  "
-                        << "Attempt to fill new ghost data for timestep "
-                        << "computation, but schedule not defined."
-                        << std::endl);
-                }
-                d_patch_strategy->setDataContext(d_scratch);
-                t_new_advance_bdry_fill_comm->start();
-                d_bdry_sched_advance_new[level_number]->fillData(new_time);
-                t_new_advance_bdry_fill_comm->stop();
-            }
-            else
-            {
-                d_patch_strategy->setDataContext(d_new);
-            }
+            dt_next = d_dt;
         }
-      
-        for (hier::PatchLevel::iterator ip(level->begin());
-             ip != level->end();
-             ip++)
-        {
-            const boost::shared_ptr<hier::Patch>& patch = *ip;
-            
-            patch->allocatePatchData(d_temp_var_scratch_data, new_time);
-            
-            // "false" argument indicates "initial_time" is false.
-            t_patch_num_kernel->start();
-            double patch_dt = d_patch_strategy->computeStableDtOnPatch(
-                *patch,
-                false,
-                new_time);
-            t_patch_num_kernel->stop();
-            
-            dt_next = tbox::MathUtilities<double>::Min(dt_next, patch_dt);
-            
-            patch->deallocatePatchData(d_temp_var_scratch_data);
-        }
-        d_patch_strategy->clearDataContext();
       
     } // !regrid_advance
     
@@ -1801,7 +1827,11 @@ RungeKuttaLevelIntegrator::advanceLevel(
     {
         mpi.AllReduce(&next_dt, 1, MPI_MIN);
     }
-    next_dt *= d_cfl;
+    
+    if (d_use_cfl)
+    {
+        next_dt *= d_cfl;
+    }
     
     if (d_distinguish_mpi_reduction_costs)
     {
@@ -3267,11 +3297,22 @@ RungeKuttaLevelIntegrator::printClassData(
     os << "RungeKuttaLevelIntegrator: this = "
        << (RungeKuttaLevelIntegrator *)this << std::endl;
     os << "d_object_name = " << d_object_name << std::endl;
-    os << "d_cfl = " << d_cfl << "\n"
-       << "d_cfl_init = " << d_cfl_init << std::endl;
-    os << "d_lag_dt_computation = " << d_lag_dt_computation << "\n"
-       << "d_use_ghosts_for_dt = "
-       << d_use_ghosts_for_dt << std::endl;
+    
+    os << "d_use_cfl = " << d_use_cfl << std::endl;
+    
+    if (d_use_cfl)
+    {
+        os << "d_cfl = " << d_cfl << "\n"
+           << "d_cfl_init = " << d_cfl_init << std::endl;
+        os << "d_lag_dt_computation = " << d_lag_dt_computation << "\n"
+           << "d_use_ghosts_for_dt = "
+           << d_use_ghosts_for_dt << std::endl;
+    }
+    else
+    {
+        os << "d_dt = " << d_dt << std::endl;
+    }
+    
     os << "d_patch_strategy = "
        << (RungeKuttaPatchStrategy *)d_patch_strategy << std::endl;
     
@@ -3355,10 +3396,12 @@ RungeKuttaLevelIntegrator::putToRestart(
     restart_db->putInteger("RUNGE_KUTTA_LEVEL_INTEGRATOR_VERSION",
         RUNGE_KUTTA_LEVEL_INTEGRATOR_VERSION);
     
+    restart_db->putBool("use_cfl", d_use_cfl);
     restart_db->putDouble("cfl", d_cfl);
     restart_db->putDouble("cfl_init", d_cfl_init);
     restart_db->putBool("lag_dt_computation", d_lag_dt_computation);
     restart_db->putBool("use_ghosts_to_compute_dt", d_use_ghosts_for_dt);
+    restart_db->putDouble("dt", d_dt);
     restart_db->putBool("DEV_distinguish_mpi_reduction_costs",
         d_distinguish_mpi_reduction_costs);
     
@@ -3480,13 +3523,19 @@ RungeKuttaLevelIntegrator::getFromInput(
     
     if (!is_from_restart)
     {
-        d_cfl = input_db->getDouble("cfl");
+        d_use_cfl = input_db->getBoolWithDefault("use_cfl", true);
         
-        d_cfl_init = input_db->getDouble("cfl_init");
-        
-        d_lag_dt_computation = input_db->getBoolWithDefault("lag_dt_computation", true);
-        
-        d_use_ghosts_for_dt = input_db->getBoolWithDefault("use_ghosts_to_compute_dt", false);
+        if (d_use_cfl)
+        {
+            d_cfl = input_db->getDouble("cfl");
+            d_cfl_init = input_db->getDouble("cfl_init");
+            d_lag_dt_computation = input_db->getBoolWithDefault("lag_dt_computation", true);
+            d_use_ghosts_for_dt = input_db->getBoolWithDefault("use_ghosts_to_compute_dt", false);
+        }
+        else
+        {
+            d_dt = input_db->getDouble("dt");
+        }
         
         d_distinguish_mpi_reduction_costs = input_db->getBoolWithDefault("DEV_distinguish_mpi_reduction_costs", false);
         
@@ -3631,17 +3680,26 @@ RungeKuttaLevelIntegrator::getFromInput(
      
         if (read_on_restart)
         {
-            d_cfl = input_db->getDoubleWithDefault("cfl", d_cfl);
+            d_use_cfl = input_db->getBoolWithDefault("use_cfl", true);
             
-            d_cfl_init = input_db->getDoubleWithDefault("cfl_init", d_cfl_init);
-            
-            d_lag_dt_computation =
-               input_db->getBoolWithDefault("lag_dt_computation",
-                  d_lag_dt_computation);
-            
-            d_use_ghosts_for_dt =
-               input_db->getBoolWithDefault("use_ghosts_to_compute_dt",
-                  d_use_ghosts_for_dt);
+            if (d_use_cfl)
+            {
+                d_cfl = input_db->getDoubleWithDefault("cfl", d_cfl);
+                
+                d_cfl_init = input_db->getDoubleWithDefault("cfl_init", d_cfl_init);
+                
+                d_lag_dt_computation =
+                   input_db->getBoolWithDefault("lag_dt_computation",
+                      d_lag_dt_computation);
+                
+                d_use_ghosts_for_dt =
+                   input_db->getBoolWithDefault("use_ghosts_to_compute_dt",
+                      d_use_ghosts_for_dt);
+            }
+            else
+            {
+                d_dt = input_db->getDouble("dt");
+            }
             
             d_distinguish_mpi_reduction_costs =
                 input_db->getBoolWithDefault("DEV_distinguish_mpi_reduction_costs",
@@ -3686,10 +3744,12 @@ RungeKuttaLevelIntegrator::getFromRestart()
                    << std::endl);
     }
     
+    d_use_cfl = db->getBool("use_cfl");
     d_cfl = db->getDouble("cfl");
     d_cfl_init = db->getDouble("cfl_init");
     d_lag_dt_computation = db->getBool("lag_dt_computation");
     d_use_ghosts_for_dt = db->getBool("use_ghosts_to_compute_dt");
+    d_dt = db->getDouble("dt");
     d_distinguish_mpi_reduction_costs = db->getBool("DEV_distinguish_mpi_reduction_costs");
     
     boost::shared_ptr<tbox::Database> RK_db(db->getDatabase("RungeKuttaWeights"));
