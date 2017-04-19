@@ -1953,7 +1953,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                                     double x[3];
                                     x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
                                     x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
-                                    x[2] = patch_xlo[2] + (j + 0.5)*dx[2];
+                                    x[2] = patch_xlo[2] + (k + 0.5)*dx[2];
                                     
                                     double S = 0.0;
                                     for (int m = m_min; m <= m_max; m++)
