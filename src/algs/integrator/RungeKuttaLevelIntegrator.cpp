@@ -205,7 +205,10 @@ RungeKuttaLevelIntegrator::s_initialize_handler(
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_advance_bdry_fill_comm;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_error_bdry_fill_create;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_error_bdry_fill_comm;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_mpi_reductions;
+boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_advance_mpi_reductions;
+boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_get_level_dt_mpi_reductions;
+boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_advance_mpi_barrier;
+boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_get_level_dt_mpi_barrier;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_initialize_level_data;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_init_level_create_sched;
 boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_init_level_fill_data;
@@ -1271,9 +1274,11 @@ RungeKuttaLevelIntegrator::getLevelDt(
         
         if (d_distinguish_mpi_reduction_costs)
         {
+            t_get_level_dt_mpi_barrier->start();
             mpi.Barrier();
+            t_get_level_dt_mpi_barrier->stop();
             t_get_level_dt_sync->stop();
-            t_mpi_reductions->start();
+            t_get_level_dt_mpi_reductions->start();
         }
         
         /*
@@ -1289,7 +1294,7 @@ RungeKuttaLevelIntegrator::getLevelDt(
         
         if (d_distinguish_mpi_reduction_costs)
         {
-            t_mpi_reductions->stop();
+            t_get_level_dt_mpi_reductions->stop();
         }
         else
         {
@@ -1838,9 +1843,11 @@ RungeKuttaLevelIntegrator::advanceLevel(
     
     if (d_distinguish_mpi_reduction_costs)
     {
+        t_advance_mpi_barrier->start();
         hierarchy->getMPI().Barrier();
+        t_advance_mpi_barrier->stop();
         t_advance_level_sync->stop();
-        t_mpi_reductions->start();
+        t_advance_mpi_reductions->start();
     }
     
     double next_dt = dt_next;
@@ -1857,7 +1864,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
     
     if (d_distinguish_mpi_reduction_costs)
     {
-        t_mpi_reductions->stop();
+        t_advance_mpi_reductions->stop();
     }
     else
     {
@@ -3814,8 +3821,14 @@ RungeKuttaLevelIntegrator::initializeCallback()
         getTimer("RungeKuttaLevelIntegrator::error_bdry_fill_comm");
     t_barrier_after_error_bdry_fill_comm = tbox::TimerManager::getManager()->
         getTimer( "RungeKuttaLevelIntegrator::barrier_after_error_bdry_fill_comm");
-    t_mpi_reductions = tbox::TimerManager::getManager()->
-        getTimer("RungeKuttaLevelIntegrator::mpi_reductions");
+    t_advance_mpi_reductions = tbox::TimerManager::getManager()->
+        getTimer("RungeKuttaLevelIntegrator::advance_mpi_reductions");
+    t_get_level_dt_mpi_reductions = tbox::TimerManager::getManager()->
+        getTimer("RungeKuttaLevelIntegrator::get_level_dt_mpi_reductions");
+    t_advance_mpi_barrier = tbox::TimerManager::getManager()->
+        getTimer("RungeKuttaLevelIntegrator::advance_mpi_barrier");
+    t_get_level_dt_mpi_barrier = tbox::TimerManager::getManager()->
+        getTimer("RungeKuttaLevelIntegrator::get_level_dt_mpi_barrier");
     t_initialize_level_data = tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::initializeLevelData()");
     t_init_level_create_sched = tbox::TimerManager::getManager()->
@@ -3884,7 +3897,10 @@ RungeKuttaLevelIntegrator::finalizeCallback()
     t_error_bdry_fill_create.reset();
     t_error_bdry_fill_comm.reset();
     t_barrier_after_error_bdry_fill_comm.reset();
-    t_mpi_reductions.reset();
+    t_advance_mpi_reductions.reset();
+    t_get_level_dt_mpi_reductions.reset();
+    t_advance_mpi_barrier.reset();
+    t_get_level_dt_mpi_barrier.reset();
     t_initialize_level_data.reset();
     t_init_level_create_sched.reset();
     t_init_level_fill_data.reset();

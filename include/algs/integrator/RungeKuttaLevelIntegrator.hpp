@@ -1239,7 +1239,10 @@ class RungeKuttaLevelIntegrator:
         static boost::shared_ptr<tbox::Timer> t_advance_bdry_fill_comm;
         static boost::shared_ptr<tbox::Timer> t_error_bdry_fill_create;
         static boost::shared_ptr<tbox::Timer> t_error_bdry_fill_comm;
-        static boost::shared_ptr<tbox::Timer> t_mpi_reductions;
+        static boost::shared_ptr<tbox::Timer> t_advance_mpi_reductions;
+        static boost::shared_ptr<tbox::Timer> t_get_level_dt_mpi_reductions;
+        static boost::shared_ptr<tbox::Timer> t_advance_mpi_barrier;
+        static boost::shared_ptr<tbox::Timer> t_get_level_dt_mpi_barrier;
         static boost::shared_ptr<tbox::Timer> t_initialize_level_data;
         static boost::shared_ptr<tbox::Timer> t_init_level_create_sched;
         static boost::shared_ptr<tbox::Timer> t_init_level_fill_data;
