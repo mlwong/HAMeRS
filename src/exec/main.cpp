@@ -34,8 +34,11 @@
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/hier/PatchHierarchy.h"
 #include "SAMRAI/mesh/BergerRigoutsos.h"
+#include "SAMRAI/mesh/TileClustering.h"
 #include "SAMRAI/mesh/GriddingAlgorithm.h"
+#include "SAMRAI/mesh/ChopAndPackLoadBalancer.h"
 #include "SAMRAI/mesh/TreeLoadBalancer.h"
+#include "SAMRAI/mesh/CascadePartitioner.h"
 
 #include "boost/shared_ptr.hpp"
 #include <cmath>
@@ -530,21 +533,111 @@ int main(int argc, char *argv[])
             RK_level_integrator.get(),
             input_db->getDatabase("ExtendedTagAndInitialize")));
     
-    boost::shared_ptr<mesh::BergerRigoutsos> box_generator(
-        new mesh::BergerRigoutsos(
-            dim,
-            input_db->getDatabaseWithDefault(
-                "BergerRigoutsos",
-                boost::shared_ptr<tbox::Database>())));
+    /*
+     * Set up the clustering.
+     */
     
-    boost::shared_ptr<mesh::TreeLoadBalancer> load_balancer(
-        new mesh::TreeLoadBalancer(
-            dim,
-            "LoadBalancer",
-            input_db->getDatabase("LoadBalancer"),
-            boost::shared_ptr<tbox::RankTreeStrategy>(new tbox::BalancedDepthFirstTree)));
+    const std::string clustering_type =
+        main_db->getStringWithDefault("clustering_type", "BergerRigoutsos");
     
-    load_balancer->setSAMRAI_MPI(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    boost::shared_ptr<mesh::BoxGeneratorStrategy> box_generator;
+    
+    if (clustering_type == "BergerRigoutsos")
+    {
+        boost::shared_ptr<tbox::Database> abr_db(
+            input_db->getDatabaseWithDefault("BergerRigoutsos", boost::shared_ptr<tbox::Database>()));
+        
+        boost::shared_ptr<mesh::BoxGeneratorStrategy> berger_rigoutsos(new mesh::BergerRigoutsos(dim, abr_db));
+        box_generator = berger_rigoutsos;
+    }
+    else if (clustering_type == "TileClustering")
+    {
+        boost::shared_ptr<tbox::Database> tc_db(
+            input_db->getDatabaseWithDefault("TileClustering", boost::shared_ptr<tbox::Database>()));
+        
+        boost::shared_ptr<mesh::BoxGeneratorStrategy> tile_clustering(new mesh::TileClustering(dim, tc_db));
+        box_generator = tile_clustering;
+    }
+    
+    /*
+     * Set up the load balancers.
+     */
+    
+    boost::shared_ptr<mesh::LoadBalanceStrategy> load_balancer;
+    boost::shared_ptr<mesh::LoadBalanceStrategy> load_balancer0;
+    
+    const std::string partitioner_type =
+        main_db->getStringWithDefault("partitioner_type", "TreeLoadBalancer");
+    
+    if (partitioner_type == "TreeLoadBalancer")
+    {
+        boost::shared_ptr<mesh::TreeLoadBalancer> tree_load_balancer(
+            new mesh::TreeLoadBalancer(
+                dim,
+                "mesh::TreeLoadBalancer",
+                input_db->getDatabaseWithDefault("TreeLoadBalancer", boost::shared_ptr<tbox::Database>()),
+                boost::shared_ptr<tbox::RankTreeStrategy>(new tbox::BalancedDepthFirstTree)));
+        
+        tree_load_balancer->setSAMRAI_MPI(tbox::SAMRAI_MPI::getSAMRAIWorld());
+        
+        boost::shared_ptr<mesh::TreeLoadBalancer> tree_load_balancer0(
+            new mesh::TreeLoadBalancer(
+                dim,
+                "mesh::TreeLoadBalancer0",
+                input_db->getDatabaseWithDefault("TreeLoadBalancer", boost::shared_ptr<tbox::Database>()),
+                boost::shared_ptr<tbox::RankTreeStrategy>(new tbox::BalancedDepthFirstTree)));
+        
+        tree_load_balancer0->setSAMRAI_MPI(tbox::SAMRAI_MPI::getSAMRAIWorld());
+        
+        load_balancer = tree_load_balancer;
+        load_balancer0 = tree_load_balancer0;
+    }
+    else if (partitioner_type == "CascadePartitioner")
+    {
+        boost::shared_ptr<mesh::CascadePartitioner> cascade_partitioner(
+            new mesh::CascadePartitioner(
+                dim,
+                "mesh::CascadePartitioner",
+                input_db->getDatabaseWithDefault("CascadePartitioner", boost::shared_ptr<tbox::Database>())));
+        
+        cascade_partitioner->setSAMRAI_MPI(tbox::SAMRAI_MPI::getSAMRAIWorld());
+        
+        boost::shared_ptr<mesh::CascadePartitioner> cascade_partitioner0(
+            new mesh::CascadePartitioner(
+                dim,
+                "mesh::CascadePartitioner0",
+                input_db->getDatabaseWithDefault("CascadePartitioner", boost::shared_ptr<tbox::Database>())));
+        
+        cascade_partitioner0->setSAMRAI_MPI(tbox::SAMRAI_MPI::getSAMRAIWorld());
+        
+        load_balancer = cascade_partitioner;
+        load_balancer0 = cascade_partitioner0;
+    }
+    else if (partitioner_type == "ChopAndPackLoadBalancer")
+    {
+        boost::shared_ptr<mesh::ChopAndPackLoadBalancer> cap_load_balancer(
+            new mesh::ChopAndPackLoadBalancer(
+                dim,
+                "mesh::ChopAndPackLoadBalancer",
+                input_db->getDatabaseWithDefault("ChopAndPackLoadBalancer", boost::shared_ptr<tbox::Database>())));
+        
+        load_balancer = cap_load_balancer;
+        
+        /*
+         * ChopAndPackLoadBalancer has trouble on L0 for some reason.
+         * Work around by using the CascadePartitioner for L0.
+         */
+        
+        boost::shared_ptr<mesh::CascadePartitioner> cascade_partitioner0(
+            new mesh::CascadePartitioner(
+                dim,
+                "mesh::CascadePartitioner0",
+                input_db->getDatabaseWithDefault("CascadePartitioner", boost::shared_ptr<tbox::Database>())));
+        
+        cascade_partitioner0->setSAMRAI_MPI(tbox::SAMRAI_MPI::getSAMRAIWorld());
+        
+        load_balancer0 = cascade_partitioner0;
+    }
     
     boost::shared_ptr<mesh::GriddingAlgorithm> gridding_algorithm(
         new mesh::GriddingAlgorithm(
@@ -553,7 +646,8 @@ int main(int argc, char *argv[])
             input_db->getDatabase("GriddingAlgorithm"),
             error_detector,
             box_generator,
-            load_balancer));
+            load_balancer,
+            load_balancer0));
     
     boost::shared_ptr<algs::TimeRefinementIntegrator> time_integrator(
         new algs::TimeRefinementIntegrator(
@@ -1017,6 +1111,7 @@ int main(int argc, char *argv[])
     
     box_generator.reset();
     load_balancer.reset();
+    load_balancer0.reset();
     RK_level_integrator.reset();
     error_detector.reset();
     gridding_algorithm.reset();
