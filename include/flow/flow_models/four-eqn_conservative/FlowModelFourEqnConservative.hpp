@@ -435,6 +435,12 @@ class FlowModelFourEqnConservative: public FlowModel
             DIRECTION::TYPE direction);
         
         /*
+         * Compute the global cell data of maximum diffusivity with density, mass fraction, pressure
+         * and temperature in the registered patch.
+         */
+        void computeGlobalCellDataMaxDiffusivityWithDensityMassFractionPressureAndTemperature();
+        
+        /*
          * boost::shared_ptr to registered conservative variables.
          */
         boost::shared_ptr<pdat::CellVariable<double> > d_variable_partial_density;
@@ -460,6 +466,7 @@ class FlowModelFourEqnConservative: public FlowModel
         hier::IntVector d_num_subghosts_max_wave_speed_x;
         hier::IntVector d_num_subghosts_max_wave_speed_y;
         hier::IntVector d_num_subghosts_max_wave_speed_z;
+        hier::IntVector d_num_subghosts_max_diffusivity;
         hier::IntVector d_num_subghosts_diffusivities;
         
         /*
@@ -481,6 +488,7 @@ class FlowModelFourEqnConservative: public FlowModel
         hier::Box d_subghost_box_max_wave_speed_x;
         hier::Box d_subghost_box_max_wave_speed_y;
         hier::Box d_subghost_box_max_wave_speed_z;
+        hier::Box d_subghost_box_max_diffusivity;
         hier::Box d_subghost_box_diffusivities;
         
         /*
@@ -502,6 +510,7 @@ class FlowModelFourEqnConservative: public FlowModel
         hier::IntVector d_subghostcell_dims_max_wave_speed_x;
         hier::IntVector d_subghostcell_dims_max_wave_speed_y;
         hier::IntVector d_subghostcell_dims_max_wave_speed_z;
+        hier::IntVector d_subghostcell_dims_max_diffusivity;
         hier::IntVector d_subghostcell_dims_diffusivities;
         
         /*
@@ -523,6 +532,7 @@ class FlowModelFourEqnConservative: public FlowModel
         boost::shared_ptr<pdat::CellData<double> > d_data_max_wave_speed_x;
         boost::shared_ptr<pdat::CellData<double> > d_data_max_wave_speed_y;
         boost::shared_ptr<pdat::CellData<double> > d_data_max_wave_speed_z;
+        boost::shared_ptr<pdat::CellData<double> > d_data_max_diffusivity;
         boost::shared_ptr<pdat::CellData<double> > d_data_diffusivities;
         
         /*

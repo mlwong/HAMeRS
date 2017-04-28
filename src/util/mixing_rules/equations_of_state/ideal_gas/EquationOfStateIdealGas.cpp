@@ -157,6 +157,38 @@ EquationOfStateIdealGas::getInternalEnergyFromTemperature(
 
 
 /*
+ * Compute the isochoric specific heat capacity.
+ */
+double
+EquationOfStateIdealGas::getIsochoricSpecificHeatCapacity(
+    const double* const density,
+    const double* const pressure,
+    const std::vector<const double*>& thermo_properties) const
+{
+    NULL_USE(density);
+    NULL_USE(pressure);
+    
+    return *(thermo_properties[3]);
+}
+
+
+/*
+ * Compute the isobaric specific heat capacity.
+ */
+double
+EquationOfStateIdealGas::getIsobaricSpecificHeatCapacity(
+    const double* const density,
+    const double* const pressure,
+    const std::vector<const double*>& thermo_properties) const
+{
+    NULL_USE(density);
+    NULL_USE(pressure);
+    
+    return *(thermo_properties[2]);
+}
+
+
+/*
  * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
  */
 double

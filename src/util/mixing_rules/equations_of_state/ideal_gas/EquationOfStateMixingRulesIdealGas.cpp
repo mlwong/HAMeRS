@@ -549,6 +549,98 @@ EquationOfStateMixingRulesIdealGas::getInternalEnergyFromTemperature(
 
 
 /*
+ * Compute the isochoric specific heat capacity of mixture with isothermal assumption.
+ */
+double
+EquationOfStateMixingRulesIdealGas::getIsochoricSpecificHeatCapacity(
+    const double* const density,
+    const double* const pressure,
+    const std::vector<const double*>& mass_fraction) const
+{
+    double c_v = 0.0;
+    
+    if (static_cast<int>(mass_fraction.size()) == d_num_species)
+    {
+        for (int si = 0; si < d_num_species; si++)
+        {
+            c_v += *(mass_fraction[si])*d_species_c_v[si];
+        }
+    }
+    else if (static_cast<int>(mass_fraction.size()) == d_num_species - 1)
+    {
+        double Y_last = 1.0;
+        
+        for (int si = 0; si < d_num_species - 1; si++)
+        {
+            c_v += *(mass_fraction[si])*d_species_c_v[si];
+            
+            // Compute the mass fraction of the last species.
+            Y_last -= *(mass_fraction[si]);
+        }
+        
+        // Add the contribution from the last species.
+        c_v += Y_last*d_species_c_v.back();
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "Number of mass fractions provided is not"
+            << " equal to the total number of species or (total number of species - 1)."
+            << std::endl);
+    }
+    
+    return c_v;
+}
+
+
+/*
+ * Compute the isobaric specific heat capacity of mixture with isothermal assumption.
+ */
+double
+EquationOfStateMixingRulesIdealGas::getIsobaricSpecificHeatCapacity(
+    const double* const density,
+    const double* const pressure,
+    const std::vector<const double*>& mass_fraction) const
+{
+    double c_p = 0.0;
+    
+    if (static_cast<int>(mass_fraction.size()) == d_num_species)
+    {
+        for (int si = 0; si < d_num_species; si++)
+        {
+            c_p += *(mass_fraction[si])*d_species_c_p[si];
+        }
+    }
+    else if (static_cast<int>(mass_fraction.size()) == d_num_species - 1)
+    {
+        double Y_last = 1.0;
+        
+        for (int si = 0; si < d_num_species - 1; si++)
+        {
+            c_p += *(mass_fraction[si])*d_species_c_p[si];
+            
+            // Compute the mass fraction of the last species.
+            Y_last -= *(mass_fraction[si]);
+        }
+        
+        // Add the contribution from the last species.
+        c_p += Y_last*d_species_c_p.back();
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "Number of mass fractions provided is not"
+            << " equal to the total number of species or (total number of species - 1)."
+            << std::endl);
+    }
+    
+    return c_p;
+}
+
+
+/*
  * Get the thermodynamic properties of a species.
  */
 void
@@ -693,7 +785,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithMassFra
             c_p += *(mass_fraction[si])*d_species_c_p[si];
             c_v += *(mass_fraction[si])*d_species_c_v[si];
             
-            // Compute the volume fraction of the last species.
+            // Compute the mass fraction of the last species.
             Y_last -= *(mass_fraction[si]);
         }
         

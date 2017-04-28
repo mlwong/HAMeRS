@@ -408,14 +408,22 @@ class FlowModelSingleSpecies: public FlowModel
         void computeGlobalCellDataEnstrophyWithVorticity();
         
         /*
-         * Compute the global cell data of convective flux with velocity and pressure in the registered patch.
+         * Compute the global cell data of convective flux with velocity and pressure in the registered
+         * patch.
          */
         void computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(DIRECTION::TYPE direction);
         
         /*
-         * Compute the global cell data of maximum wave speed with velocity and sound speed in the registered patch.
+         * Compute the global cell data of maximum wave speed with velocity and sound speed in the
+         * registered patch.
          */
         void computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(DIRECTION::TYPE direction);
+        
+        /*
+         * Compute the global cell data of maximum diffusivity with pressure and temperature in the
+         * registered patch.
+         */
+        void computeGlobalCellDataMaxDiffusivityWithPressureAndTemperature();
         
         /*
          * boost::shared_ptr to registered conservative variables.
@@ -441,6 +449,7 @@ class FlowModelSingleSpecies: public FlowModel
         hier::IntVector d_num_subghosts_max_wave_speed_x;
         hier::IntVector d_num_subghosts_max_wave_speed_y;
         hier::IntVector d_num_subghosts_max_wave_speed_z;
+        hier::IntVector d_num_subghosts_max_diffusivity;
         hier::IntVector d_num_subghosts_diffusivities;
         
         /*
@@ -460,6 +469,7 @@ class FlowModelSingleSpecies: public FlowModel
         hier::Box d_subghost_box_max_wave_speed_x;
         hier::Box d_subghost_box_max_wave_speed_y;
         hier::Box d_subghost_box_max_wave_speed_z;
+        hier::Box d_subghost_box_max_diffusivity;
         hier::Box d_subghost_box_diffusivities;
         
         /*
@@ -479,6 +489,7 @@ class FlowModelSingleSpecies: public FlowModel
         hier::IntVector d_subghostcell_dims_max_wave_speed_x;
         hier::IntVector d_subghostcell_dims_max_wave_speed_y;
         hier::IntVector d_subghostcell_dims_max_wave_speed_z;
+        hier::IntVector d_subghostcell_dims_max_diffusivity;
         hier::IntVector d_subghostcell_dims_diffusivities;
         
         /*
@@ -498,6 +509,7 @@ class FlowModelSingleSpecies: public FlowModel
         boost::shared_ptr<pdat::CellData<double> > d_data_max_wave_speed_x;
         boost::shared_ptr<pdat::CellData<double> > d_data_max_wave_speed_y;
         boost::shared_ptr<pdat::CellData<double> > d_data_max_wave_speed_z;
+        boost::shared_ptr<pdat::CellData<double> > d_data_max_diffusivity;
         boost::shared_ptr<pdat::CellData<double> > d_data_diffusivities;
         
         /*

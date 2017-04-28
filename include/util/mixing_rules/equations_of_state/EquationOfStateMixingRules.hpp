@@ -128,6 +128,24 @@ class EquationOfStateMixingRules
             const std::vector<const double*>& mass_fraction) const = 0;
         
         /*
+         * Compute the isochoric specific heat capacity of mixture with isothermal assumption.
+         */
+        virtual double
+        getIsochoricSpecificHeatCapacity(
+            const double* const density,
+            const double* const pressure,
+            const std::vector<const double*>& mass_fraction) const = 0;
+        
+        /*
+         * Compute the isobaric specific heat capacity of mixture with isothermal assumption.
+         */
+        virtual double
+        getIsobaricSpecificHeatCapacity(
+            const double* const density,
+            const double* const pressure,
+            const std::vector<const double*>& mass_fraction) const = 0;
+        
+        /*
          * Get the number of thermodynamic properties of a species.
          */
         virtual int

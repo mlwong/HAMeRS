@@ -77,6 +77,24 @@ class EquationOfStateIdealGas: public EquationOfState
             const std::vector<const double*>& thermo_properties) const;
         
         /*
+         * Compute the isochoric specific heat capacity.
+         */
+        double
+        getIsochoricSpecificHeatCapacity(
+            const double* const density,
+            const double* const pressure,
+            const std::vector<const double*>& thermo_properties) const;
+        
+        /*
+         * Compute the isobaric specific heat capacity.
+         */
+        double
+        getIsobaricSpecificHeatCapacity(
+            const double* const density,
+            const double* const pressure,
+            const std::vector<const double*>& thermo_properties) const;
+        
+        /*
          * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
          */
         double
