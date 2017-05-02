@@ -747,6 +747,14 @@ FlowModelFiveEqnAllaire::registerDerivedCellVariable(
             "MAX_WAVE_SPEED_Z",
             "MAX_WAVE_SPEED_Z");
     }
+    
+    if (num_subghosts_of_data.find("MAX_DIFFUSIVITY") != num_subghosts_of_data.end())
+    {
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("MAX_DIFFUSIVITY")->second,
+            "MAX_DIFFUSIVITY",
+            "MAX_DIFFUSIVITY");
+    }
 }
 
 

@@ -574,7 +574,8 @@ NavierStokes::computeStableDtOnPatch(
         const double dx_0 = dx[0];
         
         /*
-         * Register the patch and maximum wave speed in the flow model and compute the corresponding cell data.
+         * Register the patch, maximum wave speed and maximum diffusivity in the flow model and
+         * compute the corresponding cell data.
          */
         
         d_flow_model->registerPatchWithDataContext(patch, getDataContext());
@@ -585,26 +586,35 @@ NavierStokes::computeStableDtOnPatch(
         num_subghosts_of_data.insert(
             std::pair<std::string, hier::IntVector>(
                 "MAX_WAVE_SPEED_X", num_ghosts));
+        num_subghosts_of_data.insert(
+            std::pair<std::string, hier::IntVector>(
+                "MAX_DIFFUSIVITY", num_ghosts));
         
         d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
         
         d_flow_model->computeGlobalDerivedCellData();
         
         /*
-         * Get the pointer to the maximum wave speed inside the flow model.
+         * Get the pointers to the maximum wave speed and maximum diffusivity inside the flow model.
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
         boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x =
             d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_X");
         
+        boost::shared_ptr<pdat::CellData<double> > max_diffusivity =
+            d_flow_model->getGlobalCellData("MAX_DIFFUSIVITY");
+        
         hier::IntVector num_subghosts_max_wave_speed_x = max_wave_speed_x->getGhostCellWidth();
+        hier::IntVector num_subghosts_max_diffusivity = max_diffusivity->getGhostCellWidth();
         
         TBOX_ASSERT(num_subghosts_max_wave_speed_x == num_ghosts);
+        TBOX_ASSERT(num_subghosts_max_diffusivity == num_ghosts);
         
         const int num_ghosts_0 = num_ghosts[0];
         
         double* max_lambda_x = max_wave_speed_x->getPointer(0);
+        double* max_D = max_diffusivity->getPointer(0);
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd reduction(max:stable_spectral_radius)
@@ -616,8 +626,24 @@ NavierStokes::computeStableDtOnPatch(
             // Compute the linear index.
             const int idx = i + num_ghosts_0;
             
-            const double spectral_radius = max_lambda_x[idx]/dx_0;
-            stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius);
+            const double spectral_radius_acoustic = max_lambda_x[idx]/dx_0;
+            
+            stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius_acoustic);
+        }
+        
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd reduction(max:stable_spectral_radius)
+#endif
+        for (int i = -num_ghosts_0;
+             i < interior_dim_0 + num_ghosts_0;
+             i++)
+        {
+            // Compute the linear index.
+            const int idx = i + num_ghosts_0;
+            
+            const double spectral_radius_diffusive = max_D[idx]/(dx_0*dx_0);
+            
+            stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius_diffusive);
         }
         
         /*
@@ -640,7 +666,8 @@ NavierStokes::computeStableDtOnPatch(
         const double dx_1 = dx[1];
         
         /*
-         * Register the patch and maximum wave speeds in the flow model and compute the corresponding cell data.
+         * Register the patch, maximum wave speeds and maximum diffusivity in the flow model and
+         * compute the corresponding cell data.
          */
         
         d_flow_model->registerPatchWithDataContext(patch, getDataContext());
@@ -658,13 +685,16 @@ NavierStokes::computeStableDtOnPatch(
         num_subghosts_of_data.insert(
             std::pair<std::string, hier::IntVector>(
                 "MAX_WAVE_SPEED_Y", num_ghosts));
+        num_subghosts_of_data.insert(
+            std::pair<std::string, hier::IntVector>(
+                "MAX_DIFFUSIVITY", num_ghosts));
         
         d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
         
         d_flow_model->computeGlobalDerivedCellData();
         
         /*
-         * Get the pointers to the maximum wave speeds inside the flow model.
+         * Get the pointers to the maximum wave speeds and maximum diffusivity inside the flow model.
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
@@ -674,11 +704,16 @@ NavierStokes::computeStableDtOnPatch(
         boost::shared_ptr<pdat::CellData<double> > max_wave_speed_y =
             d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_Y");
         
+        boost::shared_ptr<pdat::CellData<double> > max_diffusivity =
+            d_flow_model->getGlobalCellData("MAX_DIFFUSIVITY");
+        
         hier::IntVector num_subghosts_max_wave_speed_x = max_wave_speed_x->getGhostCellWidth();
         hier::IntVector num_subghosts_max_wave_speed_y = max_wave_speed_y->getGhostCellWidth();
+        hier::IntVector num_subghosts_max_diffusivity = max_diffusivity->getGhostCellWidth();
         
         TBOX_ASSERT(num_subghosts_max_wave_speed_x == num_ghosts);
         TBOX_ASSERT(num_subghosts_max_wave_speed_y == num_ghosts);
+        TBOX_ASSERT(num_subghosts_max_diffusivity == num_ghosts);
         
         const int num_ghosts_0 = num_ghosts[0];
         const int num_ghosts_1 = num_ghosts[1];
@@ -686,6 +721,7 @@ NavierStokes::computeStableDtOnPatch(
         
         double* max_lambda_x = max_wave_speed_x->getPointer(0);
         double* max_lambda_y = max_wave_speed_y->getPointer(0);
+        double* max_D = max_diffusivity->getPointer(0);
         
         for (int j = -num_ghosts_1;
              j < interior_dim_1 + num_ghosts_1;
@@ -702,10 +738,32 @@ NavierStokes::computeStableDtOnPatch(
                 const int idx = (i + num_ghosts_0) +
                     (j + num_ghosts_1)*ghostcell_dim_0;
                 
-                const double spectral_radius = max_lambda_x[idx]/dx_0 +
-                    max_lambda_y[idx]/dx_1;
+                const double spectral_radius_acoustic = fmax(max_lambda_x[idx]/dx_0,
+                    max_lambda_y[idx]/dx_1);
                 
-                stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius);
+                stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius_acoustic);
+            }
+        }
+        
+        for (int j = -num_ghosts_1;
+             j < interior_dim_1 + num_ghosts_1;
+             j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd reduction(max:stable_spectral_radius)
+#endif
+            for (int i = -num_ghosts_0;
+                 i < interior_dim_0 + num_ghosts_0;
+                 i++)
+            {
+                // Compute the linear indices.
+                const int idx = (i + num_ghosts_0) +
+                    (j + num_ghosts_1)*ghostcell_dim_0;
+                
+                const double spectral_radius_diffusive = fmax(max_D[idx]/(dx_0*dx_0),
+                    max_D[idx]/(dx_1*dx_1));
+                
+                stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius_diffusive);
             }
         }
         
@@ -731,7 +789,8 @@ NavierStokes::computeStableDtOnPatch(
         const double dx_2 = dx[2];
         
         /*
-         * Register the patch and maximum wave speeds in the flow model and compute the corresponding cell data.
+         * Register the patch, maximum wave speeds and maximum diffusivity in the flow model and
+         * compute the corresponding cell data.
          */
         
         d_flow_model->registerPatchWithDataContext(patch, getDataContext());
@@ -752,13 +811,16 @@ NavierStokes::computeStableDtOnPatch(
         num_subghosts_of_data.insert(
             std::pair<std::string, hier::IntVector>(
                 "MAX_WAVE_SPEED_Z", num_ghosts));
+        num_subghosts_of_data.insert(
+            std::pair<std::string, hier::IntVector>(
+                "MAX_DIFFUSIVITY", num_ghosts));
         
         d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
         
         d_flow_model->computeGlobalDerivedCellData();
         
         /*
-         * Get the pointers to the maximum wave speeds inside the flow model.
+         * Get the pointers to the maximum wave speeds and maximum diffusivity inside the flow model.
          * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
          */
         
@@ -771,13 +833,18 @@ NavierStokes::computeStableDtOnPatch(
         boost::shared_ptr<pdat::CellData<double> > max_wave_speed_z =
             d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_Z");
         
+        boost::shared_ptr<pdat::CellData<double> > max_diffusivity =
+            d_flow_model->getGlobalCellData("MAX_DIFFUSIVITY");
+        
         hier::IntVector num_subghosts_max_wave_speed_x = max_wave_speed_x->getGhostCellWidth();
         hier::IntVector num_subghosts_max_wave_speed_y = max_wave_speed_y->getGhostCellWidth();
         hier::IntVector num_subghosts_max_wave_speed_z = max_wave_speed_z->getGhostCellWidth();
+        hier::IntVector num_subghosts_max_diffusivity = max_diffusivity->getGhostCellWidth();
         
         TBOX_ASSERT(num_subghosts_max_wave_speed_x == num_ghosts);
         TBOX_ASSERT(num_subghosts_max_wave_speed_y == num_ghosts);
         TBOX_ASSERT(num_subghosts_max_wave_speed_z == num_ghosts);
+        TBOX_ASSERT(num_subghosts_max_diffusivity == num_ghosts);
         
         const int num_ghosts_0 = num_ghosts[0];
         const int num_ghosts_1 = num_ghosts[1];
@@ -788,6 +855,7 @@ NavierStokes::computeStableDtOnPatch(
         double* max_lambda_x = max_wave_speed_x->getPointer(0);
         double* max_lambda_y = max_wave_speed_y->getPointer(0);
         double* max_lambda_z = max_wave_speed_z->getPointer(0);
+        double* max_D = max_diffusivity->getPointer(0);
         
         for (int k = -num_ghosts_2;
              k < interior_dim_2 + num_ghosts_2;
@@ -810,11 +878,41 @@ NavierStokes::computeStableDtOnPatch(
                         (k + num_ghosts_2)*ghostcell_dim_0*
                             ghostcell_dim_1;
                     
-                    const double spectral_radius = max_lambda_x[idx]/dx_0 +
-                        max_lambda_y[idx]/dx_1 +
-                        max_lambda_z[idx]/dx_2;
+                    const double spectral_radius_acoustic = fmax(fmax(max_lambda_x[idx]/dx_0,
+                        max_lambda_y[idx]/dx_1),
+                        max_lambda_z[idx]/dx_2);
                     
-                    stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius);
+                    stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius_acoustic);
+                }
+            }
+        }
+        
+        for (int k = -num_ghosts_2;
+             k < interior_dim_2 + num_ghosts_2;
+             k++)
+        {
+            for (int j = -num_ghosts_1;
+                 j < interior_dim_1 + num_ghosts_1;
+                 j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd reduction(max:stable_spectral_radius)
+#endif
+                for (int i = -num_ghosts_0;
+                     i < interior_dim_0 + num_ghosts_0;
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx = (i + num_ghosts_0) +
+                        (j + num_ghosts_1)*ghostcell_dim_0 +
+                        (k + num_ghosts_2)*ghostcell_dim_0*
+                            ghostcell_dim_1;
+                    
+                    const double spectral_radius_diffusive = fmax(fmax(max_D[idx]/(dx_0*dx_0),
+                        max_D[idx]/(dx_1*dx_1)),
+                        max_D[idx]/(dx_2*dx_2));
+                    
+                    stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius_diffusive);
                 }
             }
         }
