@@ -42,7 +42,7 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
         void
         computeConvectiveFluxAndSourceOnPatch(
             hier::Patch& patch,
-            const boost::shared_ptr<pdat::FaceVariable<double> >& variable_convective_flux,
+            const boost::shared_ptr<pdat::SideVariable<double> >& variable_convective_flux,
             const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
             const boost::shared_ptr<hier::VariableContext>& data_context,
             const double time,

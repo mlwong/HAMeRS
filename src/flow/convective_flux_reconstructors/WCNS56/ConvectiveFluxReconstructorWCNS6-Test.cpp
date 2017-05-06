@@ -440,7 +440,7 @@ ConvectiveFluxReconstructorWCNS6_Test::putToRestart(
 void
 ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
     hier::Patch& patch,
-    const boost::shared_ptr<pdat::FaceVariable<double> >& variable_convective_flux,
+    const boost::shared_ptr<pdat::SideVariable<double> >& variable_convective_flux,
     const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
     const boost::shared_ptr<hier::VariableContext>& data_context,
     const double time,
@@ -467,9 +467,9 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
     
     const double* const dx = patch_geom->getDx();
     
-    // Get the face data of convective flux.
-    boost::shared_ptr<pdat::FaceData<double> > convective_flux(
-        BOOST_CAST<pdat::FaceData<double>, hier::PatchData>(
+    // Get the side data of convective flux.
+    boost::shared_ptr<pdat::SideData<double> > convective_flux(
+        BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
             patch.getPatchData(variable_convective_flux, data_context)));
     
     // Get the cell data of source.
@@ -1447,7 +1447,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
                 // Compute the linear index of the side.
                 const int idx_midpoint_x = (i + 1) +
                     (j + 1)*(interior_dim_0 + 3);
-                    
+                
                 // Compute the average dilatation and magnitude of vorticity.
                 const int idx_L = (i - 1 + num_conv_ghosts_0) +
                     (j + num_conv_ghosts_1)*conv_ghostcell_dim_0;
@@ -1675,8 +1675,8 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_face_y = j +
-                        i*(interior_dim_1 + 1);
+                    const int idx_face_y = i +
+                        j*interior_dim_0;
                     
                     const int idx_midpoint_y = (i + 1) +
                         (j + 1)*(interior_dim_0 + 2);
@@ -2776,25 +2776,21 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx_face_y = j +
-                            k*(interior_dim_1 + 1) +
-                            i*(interior_dim_1 + 1)*
-                                interior_dim_2;
+                        const int idx_face_y = i +
+                            j*interior_dim_0 +
+                            k*interior_dim_0*(interior_dim_1 + 1);
                         
                         const int idx_midpoint_y = (i + 1) +
                             (j + 1)*(interior_dim_0 + 2) +
-                            (k + 1)*(interior_dim_0 + 2)*
-                                (interior_dim_1 + 3);
+                            (k + 1)*(interior_dim_0 + 2)*(interior_dim_1 + 3);
                         
                         const int idx_midpoint_y_B = (i + 1) +
                             j*(interior_dim_0 + 2) +
-                            (k + 1)*(interior_dim_0 + 2)*
-                                (interior_dim_1 + 3);
+                            (k + 1)*(interior_dim_0 + 2)*(interior_dim_1 + 3);
                         
                         const int idx_midpoint_y_T = (i + 1) +
                             (j + 2)*(interior_dim_0 + 2) +
-                            (k + 1)*(interior_dim_0 + 2)*
-                                (interior_dim_1 + 3);
+                            (k + 1)*(interior_dim_0 + 2)*(interior_dim_1 + 3);
                         
                         const int idx_node_B = (i + num_subghosts_0_convective_flux_y) +
                             (j - 1 + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y +
@@ -2838,24 +2834,21 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx_face_z = k +
-                            i*(interior_dim_2 + 1) +
-                            j*(interior_dim_2 + 1)*interior_dim_0;
+                        const int idx_face_z = i +
+                            j*interior_dim_0 +
+                            k*interior_dim_0*interior_dim_1;
                         
                         const int idx_midpoint_z = (i + 1) +
                             (j + 1)*(interior_dim_0 + 2) +
-                            (k + 1)*(interior_dim_0 + 2)*
-                                (interior_dim_1 + 2);
+                            (k + 1)*(interior_dim_0 + 2)*(interior_dim_1 + 2);
                         
                         const int idx_midpoint_z_B = (i + 1) +
                             (j + 1)*(interior_dim_0 + 2) +
-                            k*(interior_dim_0 + 2)*
-                                (interior_dim_1 + 2);
+                            k*(interior_dim_0 + 2)*(interior_dim_1 + 2);
                         
                         const int idx_midpoint_z_F = (i + 1) +
                             (j + 1)*(interior_dim_0 + 2) +
-                            (k + 2)*(interior_dim_0 + 2)*
-                                (interior_dim_1 + 2);
+                            (k + 2)*(interior_dim_0 + 2)*(interior_dim_1 + 2);
                         
                         const int idx_node_B = (i + num_subghosts_0_convective_flux_z) +
                             (j + num_subghosts_1_convective_flux_z)*subghostcell_dim_0_convective_flux_z +
@@ -3160,6 +3153,7 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
                     d_constant_alpha_tau);
             }
         }
+        
     } // if (d_dim == tbox::Dimension(1))
     else if (d_dim == tbox::Dimension(2))
     {
@@ -3317,6 +3311,7 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
                 }
             }
         }
+        
     } // if (d_dim == tbox::Dimension(2))
     else if (d_dim == tbox::Dimension(3))
     {
@@ -3579,5 +3574,6 @@ ConvectiveFluxReconstructorWCNS6_Test::performWENOInterpolation(
                 }
             }
         }
+        
     } // if (d_dim == tbox::Dimension(3))
 }

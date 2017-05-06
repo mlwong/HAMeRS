@@ -36,7 +36,7 @@ class DiffusiveFluxReconstructorSixthOrder: public DiffusiveFluxReconstructor
          */
         void computeDiffusiveFluxOnPatch(
             hier::Patch& patch,
-            const boost::shared_ptr<pdat::FaceVariable<double> >& variable_diffusive_flux,
+            const boost::shared_ptr<pdat::SideVariable<double> >& variable_diffusive_flux,
             const boost::shared_ptr<hier::VariableContext>& data_context,
             const double time,
             const double dt,

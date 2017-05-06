@@ -64,7 +64,7 @@ DiffusiveFluxReconstructorSixthOrder::putToRestart(
 void
 DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
     hier::Patch& patch,
-    const boost::shared_ptr<pdat::FaceVariable<double> >& variable_diffusive_flux,
+    const boost::shared_ptr<pdat::SideVariable<double> >& variable_diffusive_flux,
     const boost::shared_ptr<hier::VariableContext>& data_context,
     const double time,
     const double dt,
@@ -83,9 +83,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
     diff_ghost_box.grow(d_num_diff_ghosts);
     const hier::IntVector diff_ghostcell_dims = diff_ghost_box.numberCells();
     
-    // Get the face data of diffusive flux.
-    boost::shared_ptr<pdat::FaceData<double> > diffusive_flux(
-        BOOST_CAST<pdat::FaceData<double>, hier::PatchData>(
+    // Get the side data of diffusive flux.
+    boost::shared_ptr<pdat::SideData<double> > diffusive_flux(
+        BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
             patch.getPatchData(variable_diffusive_flux, data_context)));
     
     // Initialize the data of diffusive flux to zero.
@@ -617,8 +617,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx_face_y = j +
-                            i*(interior_dim_1 + 1);
+                        const int idx_face_y = i +
+                            j*interior_dim_0;
                         
                         const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
                             (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity;
@@ -688,8 +688,8 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx_face_y = j +
-                            i*(interior_dim_1 + 1);
+                        const int idx_face_y = i +
+                            j*interior_dim_0;
                         
                         const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
                             (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity;
@@ -1327,9 +1327,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
-                            const int idx_face_y = j +
-                                k*(interior_dim_1 + 1) +
-                                i*(interior_dim_1 + 1)*interior_dim_2;
+                            const int idx_face_y = i +
+                                j*interior_dim_0 +
+                                k*interior_dim_0*(interior_dim_1 + 1);
                             
                             const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
                                 (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity +
@@ -1418,9 +1418,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
-                            const int idx_face_y = j +
-                                k*(interior_dim_1 + 1) +
-                                i*(interior_dim_1 + 1)*interior_dim_2;
+                            const int idx_face_y = i +
+                                j*interior_dim_0 +
+                                k*interior_dim_0*(interior_dim_1 + 1);
                             
                             const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
                                 (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity +
@@ -1509,9 +1509,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
-                            const int idx_face_y = j +
-                                k*(interior_dim_1 + 1) +
-                                i*(interior_dim_1 + 1)*interior_dim_2;
+                            const int idx_face_y = i +
+                                j*interior_dim_0 +
+                                k*interior_dim_0*(interior_dim_1 + 1);
                             
                             const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
                                 (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity +
@@ -1717,9 +1717,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
-                            const int idx_face_z = k +
-                                i*(interior_dim_2 + 1) +
-                                j*(interior_dim_2 + 1)*interior_dim_0;
+                            const int idx_face_z = i +
+                                j*interior_dim_0 +
+                                k*interior_dim_0*interior_dim_1;
                             
                             const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
                                 (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity +
@@ -1808,9 +1808,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
-                            const int idx_face_z = k +
-                                i*(interior_dim_2 + 1) +
-                                j*(interior_dim_2 + 1)*interior_dim_0;
+                            const int idx_face_z = i +
+                                j*interior_dim_0 +
+                                k*interior_dim_0*interior_dim_1;
                             
                             const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
                                 (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity +
@@ -1899,9 +1899,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
-                            const int idx_face_z = k +
-                                i*(interior_dim_2 + 1) +
-                                j*(interior_dim_2 + 1)*interior_dim_0;
+                            const int idx_face_z = i +
+                                j*interior_dim_0 +
+                                k*interior_dim_0*interior_dim_1;
                             
                             const int idx_diffusivity = (i + num_subghosts_0_diffusivity) +
                                 (j + num_subghosts_1_diffusivity)*subghostcell_dim_0_diffusivity +

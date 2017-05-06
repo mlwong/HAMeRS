@@ -433,6 +433,7 @@ ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL::performWENOInterpolation(
                     dx);
             }
         }
+        
     } // if (d_dim == tbox::Dimension(1))
     else if (d_dim == tbox::Dimension(2))
     {
@@ -598,6 +599,7 @@ ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL::performWENOInterpolation(
                 }
             }
         }
+        
     } // if (d_dim == tbox::Dimension(2))
     else if (d_dim == tbox::Dimension(3))
     {
@@ -872,5 +874,6 @@ ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL::performWENOInterpolation(
                 }
             }
         }
+        
     } // if (d_dim == tbox::Dimension(3))
 }

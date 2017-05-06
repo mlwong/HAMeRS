@@ -9,7 +9,7 @@
 #include "SAMRAI/hier/IntVector.h"
 #include "SAMRAI/hier/Patch.h"
 #include "SAMRAI/pdat/CellVariable.h"
-#include "SAMRAI/pdat/FaceVariable.h"
+#include "SAMRAI/pdat/SideVariable.h"
 #include "SAMRAI/tbox/Dimension.h"
 #include "SAMRAI/tbox/Utilities.h"
 
@@ -72,7 +72,7 @@ class ConvectiveFluxReconstructor
         virtual void
         computeConvectiveFluxAndSourceOnPatch(
             hier::Patch& patch,
-            const boost::shared_ptr<pdat::FaceVariable<double> >& variable_convective_flux,
+            const boost::shared_ptr<pdat::SideVariable<double> >& variable_convective_flux,
             const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
             const boost::shared_ptr<hier::VariableContext>& data_context,
             const double time,

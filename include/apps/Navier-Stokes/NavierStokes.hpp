@@ -24,8 +24,8 @@
 #include "SAMRAI/hier/VariableContext.h"
 #include "SAMRAI/mesh/GriddingAlgorithm.h"
 #include "SAMRAI/pdat/CellVariable.h"
-#include "SAMRAI/pdat/FaceData.h"
-#include "SAMRAI/pdat/FaceVariable.h"
+#include "SAMRAI/pdat/SideData.h"
+#include "SAMRAI/pdat/SideVariable.h"
 #include "SAMRAI/tbox/Database.h"
 #include "SAMRAI/tbox/MessageStream.h"
 #include "SAMRAI/tbox/Serializable.h"
@@ -575,12 +575,12 @@ class NavierStokes:
         /*
          * boost::shared_ptr to face variable of convective flux.
          */
-        boost::shared_ptr<pdat::FaceVariable<double> > d_variable_convective_flux;
+        boost::shared_ptr<pdat::SideVariable<double> > d_variable_convective_flux;
         
         /*
          * boost::shared_ptr to face variable of diffusive flux.
          */
-        boost::shared_ptr<pdat::FaceVariable<double> > d_variable_diffusive_flux;
+        boost::shared_ptr<pdat::SideVariable<double> > d_variable_diffusive_flux;
         
         /*
          * boost::shared_ptr to cell variable of source terms.
