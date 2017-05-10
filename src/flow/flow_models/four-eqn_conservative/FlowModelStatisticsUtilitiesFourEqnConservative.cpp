@@ -468,7 +468,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                     {
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
                         
-                        const double value_to_add = Y[idx];
+                        const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0);
                         
                         for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                         {
@@ -660,7 +660,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
                             
-                            const double value_to_add = Y[idx]*weight;
+                            const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)*weight;
                             
                             for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                             {
@@ -862,7 +862,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
                                         ghostcell_dim_1_mass_fraction;
                                 
-                                const double value_to_add = Y[idx]*weight;
+                                const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)*weight;
                                 
                                 for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                                 {
@@ -1153,7 +1153,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
                             
-                            const double value_to_add = Y[idx]*weight;
+                            const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)*weight;
                             
                             for (int jj = 0; jj < ratioToFinestLevel_1; jj++)
                             {
@@ -1355,7 +1355,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
                                         ghostcell_dim_1_mass_fraction;
                                 
-                                const double value_to_add = Y[idx]*weight;
+                                const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)*weight;
                                 
                                 for (int jj = 0; jj < ratioToFinestLevel_1; jj++)
                                 {
@@ -1662,7 +1662,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInZDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
                                         ghostcell_dim_1_mass_fraction;
                                 
-                                const double value_to_add = Y[idx]*weight;
+                                const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)*weight;
                                 
                                 for (int kk = 0; kk < ratioToFinestLevel_2; kk++)
                                 {
@@ -1893,8 +1893,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
                 
-                double* Y_0 = data_mass_fraction->getPointer(0);
-                double* Y_1 = data_mass_fraction->getPointer(1);
+                double* Y = data_mass_fraction->getPointer(0);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -1928,8 +1927,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                     {
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
                         
-                        const double value_to_add = Y_0[idx];
-                        const double product_to_add = Y_0[idx]*Y_1[idx];
+                        const double Y_bounded = fmax(fmin(Y[idx], 1.0), 0.0);
+                        const double value_to_add = Y_bounded;
+                        const double product_to_add = (Y_bounded)*(1.0 - Y_bounded);
                         
                         for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                         {
@@ -2098,8 +2098,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
                 
-                double* Y_0 = data_mass_fraction->getPointer(0);
-                double* Y_1 = data_mass_fraction->getPointer(1);
+                double* Y = data_mass_fraction->getPointer(0);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -2143,8 +2142,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
                             
-                            const double value_to_add = Y_0[idx]*weight;
-                            const double product_to_add = Y_0[idx]*Y_1[idx]*weight;
+                            const double Y_bounded = fmax(fmin(Y[idx], 1.0), 0.0);
+                            const double value_to_add = Y_bounded*weight;
+                            const double product_to_add = (Y_bounded)*(1.0 - Y_bounded)*weight;
                             
                             for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                             {
@@ -2315,8 +2315,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
                 
-                double* Y_0 = data_mass_fraction->getPointer(0);
-                double* Y_1 = data_mass_fraction->getPointer(1);
+                double* Y = data_mass_fraction->getPointer(0);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -2368,8 +2367,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
                                         ghostcell_dim_1_mass_fraction;
                                 
-                                const double value_to_add = Y_0[idx]*weight;
-                                const double product_to_add = Y_0[idx]*Y_1[idx]*weight;
+                                const double Y_bounded = fmax(fmin(Y[idx], 1.0), 0.0);
+                                const double value_to_add = Y_bounded*weight;
+                                const double product_to_add = (Y_bounded)*(1.0 - Y_bounded)*weight;
                                 
                                 for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                                 {
@@ -2637,8 +2637,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
                 
-                double* Y_0 = data_mass_fraction->getPointer(0);
-                double* Y_1 = data_mass_fraction->getPointer(1);
+                double* Y = data_mass_fraction->getPointer(0);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -2682,8 +2681,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
                             
-                            const double value_to_add = Y_0[idx]*weight;
-                            const double product_to_add = Y_0[idx]*Y_1[idx]*weight;
+                            const double Y_bounded = fmax(fmin(Y[idx], 1.0), 0.0);
+                            const double value_to_add = Y_bounded*weight;
+                            const double product_to_add = (Y_bounded)*(1.0 - Y_bounded)*weight;
                             
                             for (int jj = 0; jj < ratioToFinestLevel_1; jj++)
                             {
@@ -2854,8 +2854,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
                 
-                double* Y_0 = data_mass_fraction->getPointer(0);
-                double* Y_1 = data_mass_fraction->getPointer(1);
+                double* Y = data_mass_fraction->getPointer(0);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -2907,8 +2906,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
                                         ghostcell_dim_1_mass_fraction;
                                 
-                                const double value_to_add = Y_0[idx]*weight;
-                                const double product_to_add = Y_0[idx]*Y_1[idx]*weight;
+                                const double Y_bounded = fmax(fmin(Y[idx], 1.0), 0.0);
+                                const double value_to_add = Y_bounded*weight;
+                                const double product_to_add = (Y_bounded)*(1.0 - Y_bounded)*weight;
                                 
                                 for (int jj = 0; jj < ratioToFinestLevel_1; jj++)
                                 {
@@ -3184,8 +3184,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInZDirection(
                 boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
                     d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
                 
-                double* Y_0 = data_mass_fraction->getPointer(0);
-                double* Y_1 = data_mass_fraction->getPointer(1);
+                double* Y = data_mass_fraction->getPointer(0);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -3237,8 +3236,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInZDirection(
                                     (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
                                         ghostcell_dim_1_mass_fraction;
                                 
-                                const double value_to_add = Y_0[idx]*weight;
-                                const double product_to_add = Y_0[idx]*Y_1[idx]*weight;
+                                const double Y_bounded = fmax(fmin(Y[idx], 1.0), 0.0);
+                                const double value_to_add = Y_bounded*weight;
+                                const double product_to_add = (Y_bounded)*(1.0 - Y_bounded)*weight;
                                 
                                 for (int kk = 0; kk < ratioToFinestLevel_2; kk++)
                                 {
