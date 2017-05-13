@@ -639,7 +639,7 @@ NavierStokes::computeStableDtOnPatch(
             // Compute the linear index.
             const int idx = i + num_ghosts_0;
             
-            const double spectral_radius_diffusive = 5.0*max_D[idx]/(dx_0*dx_0);
+            const double spectral_radius_diffusive = max_D[idx]/(dx_0*dx_0);
             
             stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius_diffusive);
         }
@@ -736,12 +736,14 @@ NavierStokes::computeStableDtOnPatch(
                 const int idx = (i + num_ghosts_0) +
                     (j + num_ghosts_1)*ghostcell_dim_0;
                 
-                const double spectral_radius_acoustic = fmax(max_lambda_x[idx]/dx_0,
-                    max_lambda_y[idx]/dx_1);
+                const double spectral_radius_acoustic = max_lambda_x[idx]/dx_0 +
+                    max_lambda_y[idx]/dx_1;
                 
                 stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius_acoustic);
             }
         }
+        
+        const double delta = dx_0 + dx_1;
         
         for (int j = -num_ghosts_1;
              j < interior_dim_1 + num_ghosts_1;
@@ -758,8 +760,7 @@ NavierStokes::computeStableDtOnPatch(
                 const int idx = (i + num_ghosts_0) +
                     (j + num_ghosts_1)*ghostcell_dim_0;
                 
-                const double spectral_radius_diffusive = 5.0*fmax(max_D[idx]/(dx_0*dx_0),
-                    max_D[idx]/(dx_1*dx_1));
+                const double spectral_radius_diffusive = max_D[idx]/(delta*delta);
                 
                 stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius_diffusive);
             }
@@ -876,14 +877,16 @@ NavierStokes::computeStableDtOnPatch(
                         (k + num_ghosts_2)*ghostcell_dim_0*
                             ghostcell_dim_1;
                     
-                    const double spectral_radius_acoustic = fmax(fmax(max_lambda_x[idx]/dx_0,
-                        max_lambda_y[idx]/dx_1),
-                        max_lambda_z[idx]/dx_2);
+                    const double spectral_radius_acoustic = max_lambda_x[idx]/dx_0 +
+                        max_lambda_y[idx]/dx_1 +
+                        max_lambda_z[idx]/dx_2;
                     
                     stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius_acoustic);
                 }
             }
         }
+        
+        const double delta = dx_0 + dx_1 + dx_2;
         
         for (int k = -num_ghosts_2;
              k < interior_dim_2 + num_ghosts_2;
@@ -906,9 +909,7 @@ NavierStokes::computeStableDtOnPatch(
                         (k + num_ghosts_2)*ghostcell_dim_0*
                             ghostcell_dim_1;
                     
-                    const double spectral_radius_diffusive = 5.0*fmax(fmax(max_D[idx]/(dx_0*dx_0),
-                        max_D[idx]/(dx_1*dx_1)),
-                        max_D[idx]/(dx_2*dx_2));
+                    const double spectral_radius_diffusive = max_D[idx]/(delta*delta);
                     
                     stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius_diffusive);
                 }

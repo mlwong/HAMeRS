@@ -666,8 +666,8 @@ Euler::computeStableDtOnPatch(
                 const int idx = (i + num_ghosts_0) +
                     (j + num_ghosts_1)*ghostcell_dim_0;
                 
-                const double spectral_radius = fmax(max_lambda_x[idx]/dx_0,
-                    max_lambda_y[idx]/dx_1);
+                const double spectral_radius = max_lambda_x[idx]/dx_0 +
+                    max_lambda_y[idx]/dx_1;
                 
                 stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius);
             }
@@ -775,9 +775,9 @@ Euler::computeStableDtOnPatch(
                         (k + num_ghosts_2)*ghostcell_dim_0*
                             ghostcell_dim_1;
                     
-                    const double spectral_radius = fmax(fmax(max_lambda_x[idx]/dx_0,
-                        max_lambda_y[idx]/dx_1),
-                        max_lambda_z[idx]/dx_2);
+                    const double spectral_radius = max_lambda_x[idx]/dx_0 +
+                        max_lambda_y[idx]/dx_1 +
+                        max_lambda_z[idx]/dx_2;
                     
                     stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius);
                 }
