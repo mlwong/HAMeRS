@@ -713,6 +713,15 @@ FlowModelFourEqnConservative::registerDerivedCellVariable(
             << std::endl);
     }
     
+    // Check whether all or part of derived cell data is already computed.
+    if (d_global_derived_cell_data_computed)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelFourEqnConservative::registerDerivedCellVariable()\n"
+            << "Global derived cell data is already computed."
+            << std::endl);
+    }
+    
     for (std::unordered_map<std::string, hier::IntVector>::const_iterator it = num_subghosts_of_data.begin();
          it != num_subghosts_of_data.end();
          it++)
@@ -894,6 +903,16 @@ FlowModelFourEqnConservative::registerDerivedVariablesForCharacteristicProjectio
             << std::endl);
     }
     
+    // Check whether all or part of derived cell data is already computed.
+    if (d_global_derived_cell_data_computed)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelFourEqnConservative::"
+            << "registerDerivedVariablesForCharacteristicProjectionOfConservativeVariables()\n"
+            << "Global derived cell data is already computed."
+            << std::endl);
+    }
+    
     NULL_USE(num_subghosts);
     
     d_proj_var_conservative_averaging = averaging;
@@ -919,6 +938,16 @@ FlowModelFourEqnConservative::registerDerivedVariablesForCharacteristicProjectio
             << std::endl);
     }
     
+    // Check whether all or part of derived cell data is already computed.
+    if (d_global_derived_cell_data_computed)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelFourEqnConservative::"
+            << "registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables()\n"
+            << "Global derived cell data is already computed."
+            << std::endl);
+    }
+    
     d_proj_var_primitive_averaging = averaging;
     
     setNumberOfSubGhosts(
@@ -935,6 +964,26 @@ FlowModelFourEqnConservative::registerDerivedVariablesForCharacteristicProjectio
 void
 FlowModelFourEqnConservative::registerDiffusiveFlux(const hier::IntVector& num_subghosts)
 {
+    // Check whether a patch is already registered.
+    if (!d_patch)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelFourEqnConservative::"
+            << "registerDiffusiveFlux()\n"
+            << "No patch is registered yet."
+            << std::endl);
+    }
+    
+    // Check whether all or part of derived cell data is already computed.
+    if (d_global_derived_cell_data_computed)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelFourEqnConservative::"
+            << "registerDiffusiveFlux()\n"
+            << "Global derived cell data is already computed."
+            << std::endl);
+    }
+    
     setNumberOfSubGhosts(
         num_subghosts,
         "DENSITY",
@@ -971,8 +1020,6 @@ FlowModelFourEqnConservative::registerDiffusiveFlux(const hier::IntVector& num_s
     
     d_num_subghosts_diffusivities =
         hier::IntVector::min(d_num_subghosts_diffusivities, d_num_subghosts_temperature);
-    
-    d_diffusive_flux_var_registered = true;
 }
 
 
@@ -1074,6 +1121,8 @@ FlowModelFourEqnConservative::unregisterPatch()
     d_data_max_wave_speed_z.reset();
     d_data_max_diffusivity.reset();
     d_data_diffusivities.reset();
+    
+    d_global_derived_cell_data_computed = false;
     
     clearDataContext();
 }
@@ -1251,6 +1300,8 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData()
             computeGlobalCellDataMaxDiffusivityWithDensityMassFractionPressureAndTemperature();
         }
     }
+    
+    d_global_derived_cell_data_computed = true;
 }
 
 
@@ -6565,6 +6616,8 @@ FlowModelFourEqnConservative::getDiffusiveFluxVariablesForDerivative(
             }
         }
     }
+    
+    d_global_derived_cell_data_computed = true;
 }
 
 
@@ -8981,6 +9034,8 @@ FlowModelFourEqnConservative::getDiffusiveFluxDiffusivities(
             }
         }
     }
+    
+    d_global_derived_cell_data_computed = true;
 }
 
 

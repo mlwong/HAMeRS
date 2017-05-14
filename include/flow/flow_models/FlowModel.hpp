@@ -83,7 +83,7 @@ class FlowModel:
                 d_ghostcell_dims(hier::IntVector::getZero(d_dim)),
                 d_proj_var_conservative_averaging(AVERAGING::SIMPLE),
                 d_proj_var_primitive_averaging(AVERAGING::SIMPLE),
-                d_diffusive_flux_var_registered(false)
+                d_global_derived_cell_data_computed(false)
         {
             NULL_USE(flow_model_db);
         }
@@ -592,9 +592,9 @@ class FlowModel:
         AVERAGING::TYPE d_proj_var_primitive_averaging;
         
         /*
-         * Properties of the diffusive fluxes.
+         * Whether all or part of global derived cell data is computed.
          */
-        bool d_diffusive_flux_var_registered;
+        bool d_global_derived_cell_data_computed;
         
         /*
          * boost::shared_ptr to the plotting context.
