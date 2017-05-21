@@ -571,6 +571,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
+            /*
+             * Get the global box containers.
+             */
+            
+            const hier::BoxLevel& globalized_box_level =
+                patch_level->getGlobalizedBoxLevel();
+            
+            const hier::BoxContainer& global_boxes = globalized_box_level.getGlobalBoxes();
+            
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
@@ -623,11 +632,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                         patch_box,
                         li);
                 
-                const hier::BoxContainer& patch_overlapped_visible_boxes =
-                    flattened_hierarchy->getOverlappedVisibleBoxes(
-                        patch_box,
-                        li);
-                
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
@@ -669,16 +673,16 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                             
                             hier::Index idx_pt(relative_idx_lo_0 + i, relative_idx_lo_1 + j);
                             
-                            int counter = 1;
+                            int counter = 0;
                             
-                            for (hier::BoxContainer::BoxContainerConstIterator iob(
-                                    patch_overlapped_visible_boxes.begin());
-                                 iob != patch_overlapped_visible_boxes.end();
-                                 iob++)
+                            for (hier::BoxContainer::BoxContainerConstIterator igb(
+                                    global_boxes.begin());
+                                 igb != global_boxes.end();
+                                 igb++)
                             {
-                                const hier::Box& patch_overlapped_visible_box = *iob;
+                                const hier::Box& global_box = *igb;
                                 
-                                if (patch_overlapped_visible_box.contains(idx_pt))
+                                if (global_box.contains(idx_pt))
                                 {
                                     counter++;
                                 }
