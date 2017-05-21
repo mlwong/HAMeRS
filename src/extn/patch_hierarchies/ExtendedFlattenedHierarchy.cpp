@@ -55,7 +55,7 @@ ExtendedFlattenedHierarchy::ExtendedFlattenedHierarchy(
             const SAMRAI::hier::Connector& same_level_overlap =
                 current_level->findConnector(
                     *(hierarchy.getPatchLevel(ln)),
-                    SAMRAI::hier::IntVector::getZero(hierarchy.getDim()),
+                    SAMRAI::hier::IntVector::getOne(hierarchy.getDim()),
                     SAMRAI::hier::CONNECTOR_IMPLICIT_CREATION_RULE,
                     true);
             
@@ -120,13 +120,9 @@ ExtendedFlattenedHierarchy::ExtendedFlattenedHierarchy(
                          itr != overlapped_boxes.end();
                          itr++)
                     {
-                        const SAMRAI::hier::BoxId& nbr_box_id = (*itr).getBoxId();
-                        if (nbr_box_id != box_id)
-                        {
-                            SAMRAI::hier::Box overlapped_box(*itr, local_id_overlapped, box_id.getOwnerRank());
-                            local_id_overlapped++;
-                            overlapped_visible_boxes.insert(overlapped_visible_boxes.end(), overlapped_box);
-                        }
+                        SAMRAI::hier::Box overlapped_box(*itr, local_id_overlapped, box_id.getOwnerRank());
+                        local_id_overlapped++;
+                        overlapped_visible_boxes.insert(overlapped_visible_boxes.end(), overlapped_box);
                     }
                 }
             }
@@ -136,7 +132,7 @@ ExtendedFlattenedHierarchy::ExtendedFlattenedHierarchy(
             const SAMRAI::hier::Connector& same_level_overlap =
                 current_level->findConnector(
                     *(hierarchy.getPatchLevel(ln)),
-                    SAMRAI::hier::IntVector::getZero(hierarchy.getDim()),
+                    SAMRAI::hier::IntVector::getOne(hierarchy.getDim()),
                     SAMRAI::hier::CONNECTOR_IMPLICIT_CREATION_RULE,
                     true);
             
@@ -167,13 +163,9 @@ ExtendedFlattenedHierarchy::ExtendedFlattenedHierarchy(
                          itr != overlapped_boxes.end();
                          itr++)
                     {
-                        const SAMRAI::hier::BoxId& nbr_box_id = (*itr).getBoxId();
-                        if (nbr_box_id != box_id)
-                        {
-                            SAMRAI::hier::Box overlapped_box(*itr, local_id_overlapped, box_id.getOwnerRank());
-                            local_id_overlapped++;
-                            overlapped_visible_boxes.insert(overlapped_visible_boxes.end(), overlapped_box);
-                        }
+                        SAMRAI::hier::Box overlapped_box(*itr, local_id_overlapped, box_id.getOwnerRank());
+                        local_id_overlapped++;
+                        overlapped_visible_boxes.insert(overlapped_visible_boxes.end(), overlapped_box);
                     }
                 }
             }
