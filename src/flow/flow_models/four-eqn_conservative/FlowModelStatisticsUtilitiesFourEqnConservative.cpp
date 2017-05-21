@@ -1,6 +1,6 @@
 #include "flow/flow_models/four-eqn_conservative/FlowModelStatisticsUtilitiesFourEqnConservative.hpp"
 
-#include "SAMRAI/hier/FlattenedHierarchy.h"
+#include "extn/patch_hierarchies/ExtendedFlattenedHierarchy.hpp"
 
 #include <fstream>
 
@@ -329,8 +329,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<hier::FlattenedHierarchy> flattened_hierarchy(
-        new hier::FlattenedHierarchy(
+    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
             num_levels - 1));
@@ -623,6 +623,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
@@ -662,11 +667,28 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                             
                             const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)*weight;
                             
+                            hier::Index idx_pt(relative_idx_lo_0 + i, relative_idx_lo_1 + j);
+                            
+                            int counter = 1;
+                            
+                            for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                    patch_overlapped_visible_boxes.begin());
+                                 iob != patch_overlapped_visible_boxes.end();
+                                 iob++)
+                            {
+                                const hier::Box& patch_overlapped_visible_box = *iob;
+                                
+                                if (patch_overlapped_visible_box.contains(idx_pt))
+                                {
+                                    counter++;
+                                }
+                            }
+                            
                             for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                 
-                                Y_avg_local[idx_fine] += value_to_add;
+                                Y_avg_local[idx_fine] += value_to_add/((double) counter);
                             }
                         }
                     }
@@ -990,8 +1012,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<hier::FlattenedHierarchy> flattened_hierarchy(
-        new hier::FlattenedHierarchy(
+    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
             num_levels - 1));
@@ -1483,8 +1505,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInZDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<hier::FlattenedHierarchy> flattened_hierarchy(
-        new hier::FlattenedHierarchy(
+    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
             num_levels - 1));
@@ -1790,8 +1812,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<hier::FlattenedHierarchy> flattened_hierarchy(
-        new hier::FlattenedHierarchy(
+    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
             num_levels - 1));
@@ -2515,8 +2537,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<hier::FlattenedHierarchy> flattened_hierarchy(
-        new hier::FlattenedHierarchy(
+    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
             num_levels - 1));
@@ -3054,8 +3076,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInZDirection(
      * location in the problem space.
      */
     
-    boost::shared_ptr<hier::FlattenedHierarchy> flattened_hierarchy(
-        new hier::FlattenedHierarchy(
+    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
             num_levels - 1));
@@ -3376,8 +3398,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
      * location in the problem space.
      */
     
-    boost::shared_ptr<hier::FlattenedHierarchy> flattened_hierarchy(
-        new hier::FlattenedHierarchy(
+    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
             num_levels - 1));
@@ -3853,8 +3875,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
      * location in the problem space.
      */
     
-    boost::shared_ptr<hier::FlattenedHierarchy> flattened_hierarchy(
-        new hier::FlattenedHierarchy(
+    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
             num_levels - 1));
@@ -4363,8 +4385,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
      * location in the problem space.
      */
     
-    boost::shared_ptr<hier::FlattenedHierarchy> flattened_hierarchy(
-        new hier::FlattenedHierarchy(
+    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
             num_levels - 1));
@@ -4888,8 +4910,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
      * location in the problem space.
      */
     
-    boost::shared_ptr<hier::FlattenedHierarchy> flattened_hierarchy(
-        new hier::FlattenedHierarchy(
+    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
             num_levels - 1));
@@ -5413,8 +5435,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
      * location in the problem space.
      */
     
-    boost::shared_ptr<hier::FlattenedHierarchy> flattened_hierarchy(
-        new hier::FlattenedHierarchy(
+    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
             num_levels - 1));
@@ -5938,8 +5960,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputEnstrophyIntegrated(
      * location in the problem space.
      */
     
-    boost::shared_ptr<hier::FlattenedHierarchy> flattened_hierarchy(
-        new hier::FlattenedHierarchy(
+    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
             num_levels - 1));
@@ -6353,8 +6375,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
      * location in the problem space.
      */
     
-    boost::shared_ptr<hier::FlattenedHierarchy> flattened_hierarchy(
-        new hier::FlattenedHierarchy(
+    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
             num_levels - 1));
@@ -8280,8 +8302,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
      * location in the problem space.
      */
     
-    boost::shared_ptr<hier::FlattenedHierarchy> flattened_hierarchy(
-        new hier::FlattenedHierarchy(
+    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
             num_levels - 1));
