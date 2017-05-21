@@ -55,7 +55,7 @@ ExtendedFlattenedHierarchy::ExtendedFlattenedHierarchy(
             const SAMRAI::hier::Connector& same_level_overlap =
                 current_level->findConnector(
                     *(hierarchy.getPatchLevel(ln)),
-                    SAMRAI::hier::IntVector::getZero(hierarchy.getDim()),
+                    SAMRAI::hier::IntVector::getOne(hierarchy.getDim()),
                     SAMRAI::hier::CONNECTOR_IMPLICIT_CREATION_RULE,
                     true);
             
@@ -136,7 +136,7 @@ ExtendedFlattenedHierarchy::ExtendedFlattenedHierarchy(
             const SAMRAI::hier::Connector& same_level_overlap =
                 current_level->findConnector(
                     *(hierarchy.getPatchLevel(ln)),
-                    SAMRAI::hier::IntVector::getZero(hierarchy.getDim()),
+                    SAMRAI::hier::IntVector::getOne(hierarchy.getDim()),
                     SAMRAI::hier::CONNECTOR_IMPLICIT_CREATION_RULE,
                     true);
             
