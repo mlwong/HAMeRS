@@ -575,10 +575,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
              * Get the global box containers.
              */
             
+            /*
             const hier::BoxLevel& globalized_box_level =
                 patch_level->getGlobalizedBoxLevel();
             
             const hier::BoxContainer& global_boxes = globalized_box_level.getGlobalBoxes();
+            */
             
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
@@ -632,6 +634,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
@@ -673,6 +680,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                             
                             hier::Index idx_pt(index_lo[0] + i, index_lo[1] + j);
                             
+                            /*
                             int counter = 0;
                             
                             for (hier::BoxContainer::BoxContainerConstIterator igb(
@@ -683,6 +691,22 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                                 const hier::Box& global_box = *igb;
                                 
                                 if (global_box.contains(idx_pt))
+                                {
+                                    counter++;
+                                }
+                            }
+                            */
+                            
+                            int counter = 1;
+                            
+                            for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                    patch_overlapped_visible_boxes.begin());
+                                 iob != patch_overlapped_visible_boxes.end();
+                                 iob++)
+                            {
+                                const hier::Box& patch_overlapped_visible_box = *iob;
+                                
+                                if (patch_overlapped_visible_box.contains(idx_pt))
                                 {
                                     counter++;
                                 }
