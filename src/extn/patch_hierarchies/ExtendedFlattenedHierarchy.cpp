@@ -120,9 +120,13 @@ ExtendedFlattenedHierarchy::ExtendedFlattenedHierarchy(
                          itr != overlapped_boxes.end();
                          itr++)
                     {
-                        SAMRAI::hier::Box overlapped_box(*itr, local_id_overlapped, box_id.getOwnerRank());
-                        local_id_overlapped++;
-                        overlapped_visible_boxes.insert(overlapped_visible_boxes.end(), overlapped_box);
+                        const SAMRAI::hier::BoxId& nbr_box_id = (*itr).getBoxId();
+                        if (nbr_box_id != box_id)
+                        {
+                            SAMRAI::hier::Box overlapped_box(*itr, local_id_overlapped, box_id.getOwnerRank());
+                            local_id_overlapped++;
+                            overlapped_visible_boxes.insert(overlapped_visible_boxes.end(), overlapped_box);
+                        }
                     }
                 }
             }
@@ -163,9 +167,13 @@ ExtendedFlattenedHierarchy::ExtendedFlattenedHierarchy(
                          itr != overlapped_boxes.end();
                          itr++)
                     {
-                        SAMRAI::hier::Box overlapped_box(*itr, local_id_overlapped, box_id.getOwnerRank());
-                        local_id_overlapped++;
-                        overlapped_visible_boxes.insert(overlapped_visible_boxes.end(), overlapped_box);
+                        const SAMRAI::hier::BoxId& nbr_box_id = (*itr).getBoxId();
+                        if (nbr_box_id != box_id)
+                        {
+                            SAMRAI::hier::Box overlapped_box(*itr, local_id_overlapped, box_id.getOwnerRank());
+                            local_id_overlapped++;
+                            overlapped_visible_boxes.insert(overlapped_visible_boxes.end(), overlapped_box);
+                        }
                     }
                 }
             }
