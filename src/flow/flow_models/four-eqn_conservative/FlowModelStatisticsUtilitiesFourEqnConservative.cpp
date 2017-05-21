@@ -662,7 +662,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                     for (int j = 0; j < interior_dim_1; j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
+                        // #pragma omp simd
 #endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
@@ -671,7 +671,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                             
                             const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)*weight;
                             
-                            hier::Index idx_pt(relative_idx_lo_0 + i, relative_idx_lo_1 + j);
+                            hier::Index idx_pt(index_lo[0] + i, index_lo[1] + j);
                             
                             int counter = 0;
                             
