@@ -108,13 +108,27 @@ ExtendedFlattenedHierarchy::ExtendedFlattenedHierarchy(
                     visible_boxes.insert(visible_boxes.end(), new_box);
                 }
                 
-                SAMRAI::hier::BoxContainer nbr_boxes;
+                SAMRAI::hier::BoxContainer overlapped_boxes;
                 if (same_level_overlap.hasNeighborSet(box_id))
                 {
-                    same_level_overlap.getNeighborBoxes(box_id, nbr_boxes);
+                    same_level_overlap.getNeighborBoxes(box_id, overlapped_boxes);
+                    
+                    SAMRAI::hier::BoxContainer overlapped_boxes_real;
+                    
+                    for (SAMRAI::hier::BoxContainer::iterator itr = overlapped_boxes.begin();
+                         itr != overlapped_boxes.end();
+                         itr++)
+                    {
+                        const SAMRAI::hier::Box& overlapped_box = *itr;
+                        const SAMRAI::hier::BoxId& overlapped_box_id = overlapped_box.getBoxId();
+                        if (box_id != overlapped_box_id)
+                        {
+                            overlapped_boxes_real.push_back(overlapped_box);
+                        }
+                    }
                     
                     SAMRAI::hier::BoxContainer overlapped_boxes(coarse_boxes);
-                    overlapped_boxes.intersectBoxes(nbr_boxes);
+                    overlapped_boxes.intersectBoxes(overlapped_boxes_real);
                     
                     for (SAMRAI::hier::BoxContainer::iterator itr = overlapped_boxes.begin();
                          itr != overlapped_boxes.end();
@@ -151,26 +165,27 @@ ExtendedFlattenedHierarchy::ExtendedFlattenedHierarchy(
                 local_id++;
                 visible_boxes.insert(visible_boxes.end(), new_box);
                 
-                {
-                    SAMRAI::hier::BoxContainer nbr_boxes;
-                    same_level_overlap.getNeighborBoxes(box_id, nbr_boxes);
-                    for (SAMRAI::hier::BoxContainer::iterator itr = nbr_boxes.begin();
-                         itr != nbr_boxes.end();
-                         itr++)
-                    {
-                        const SAMRAI::hier::BoxId& nbr_box_id = (*itr).getBoxId();
-                        std::cout << "Box: " << box << ", neighbour box: " << *itr
-                        << ", box id: " << box_id << ", neighbour box id: " << nbr_box_id << std::endl;
-                    }
-                }
-                
-                SAMRAI::hier::BoxContainer nbr_boxes;
+                SAMRAI::hier::BoxContainer overlapped_boxes;
                 if (same_level_overlap.hasNeighborSet(box_id))
                 {
-                    same_level_overlap.getNeighborBoxes(box_id, nbr_boxes);
+                    same_level_overlap.getNeighborBoxes(box_id, overlapped_boxes);
+                    
+                    SAMRAI::hier::BoxContainer overlapped_boxes_real;
+                    
+                    for (SAMRAI::hier::BoxContainer::iterator itr = overlapped_boxes.begin();
+                         itr != overlapped_boxes.end();
+                         itr++)
+                    {
+                        const SAMRAI::hier::Box& overlapped_box = *itr;
+                        const SAMRAI::hier::BoxId& overlapped_box_id = overlapped_box.getBoxId();
+                        if (box_id != overlapped_box_id)
+                        {
+                            overlapped_boxes_real.push_back(overlapped_box);
+                        }
+                    }
                     
                     SAMRAI::hier::BoxContainer overlapped_boxes(new_box);
-                    overlapped_boxes.intersectBoxes(nbr_boxes);
+                    overlapped_boxes.intersectBoxes(overlapped_boxes_real);
                     
                     for (SAMRAI::hier::BoxContainer::iterator itr = overlapped_boxes.begin();
                          itr != overlapped_boxes.end();
