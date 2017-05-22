@@ -167,7 +167,7 @@ ExtendedFlattenedHierarchy::ExtendedFlattenedHierarchy(
                         local_id_overlapped++;
                         overlapped_visible_boxes.insert(overlapped_visible_boxes.end(), overlapped_box);
                         
-                        std::cout << "Overlapped_box: " << overlapped_box << std::endl;
+                        std::cout << "Box: " << box << ", overlapped_box: " << overlapped_box << std::endl;
                     }
                 }
             }
