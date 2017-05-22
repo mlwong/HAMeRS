@@ -151,6 +151,17 @@ ExtendedFlattenedHierarchy::ExtendedFlattenedHierarchy(
                 local_id++;
                 visible_boxes.insert(visible_boxes.end(), new_box);
                 
+                {
+                    SAMRAI::hier::BoxContainer nbr_boxes;
+                    same_level_overlap.getNeighborBoxes(box_id, nbr_boxes);
+                    for (SAMRAI::hier::BoxContainer::iterator itr = nbr_boxes.begin();
+                         itr != nbr_boxes.end();
+                         itr++)
+                    {
+                        std::cout << "Box: " << box << ", neighbour box: " << *itr << std::endl;
+                    }
+                }
+                
                 SAMRAI::hier::BoxContainer nbr_boxes;
                 if (same_level_overlap.hasNeighborSet(box_id))
                 {
@@ -166,8 +177,6 @@ ExtendedFlattenedHierarchy::ExtendedFlattenedHierarchy(
                         SAMRAI::hier::Box overlapped_box(*itr, local_id_overlapped, box_id.getOwnerRank());
                         local_id_overlapped++;
                         overlapped_visible_boxes.insert(overlapped_visible_boxes.end(), overlapped_box);
-                        
-                        std::cout << "Box: " << box << ", overlapped_box: " << overlapped_box << std::endl;
                     }
                 }
             }
