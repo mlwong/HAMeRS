@@ -158,7 +158,9 @@ ExtendedFlattenedHierarchy::ExtendedFlattenedHierarchy(
                          itr != nbr_boxes.end();
                          itr++)
                     {
-                        std::cout << "Box: " << box << ", neighbour box: " << *itr << std::endl;
+                        const SAMRAI::hier::BoxId& nbr_box_id = (*itr).getBoxId();
+                        std::cout << "Box: " << box << ", neighbour box: " << *itr
+                        << ", box id: " << box_id << ", neighbour box id: " << nbr_box_id << std::endl;
                     }
                 }
                 
