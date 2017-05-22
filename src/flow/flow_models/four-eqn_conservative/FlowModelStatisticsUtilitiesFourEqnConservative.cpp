@@ -461,9 +461,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                     const int idx_lo_0 = index_lo[0];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
@@ -507,9 +504,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
         {
             double W = 0.0;
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(+:W)
-#endif
             for (int i = 0; i < finest_level_dim_0; i++)
             {
                 W += Y_avg_global[i]*(1.0 - Y_avg_global[i]);
@@ -668,9 +662,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                     
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        // #pragma omp simd
-#endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
@@ -750,9 +741,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
         {
             double W = 0.0;
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(+:W)
-#endif
             for (int i = 0; i < finest_level_dim_0; i++)
             {
                 W += Y_avg_global[i]*(1.0 - Y_avg_global[i]);
@@ -902,9 +890,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
@@ -953,9 +938,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
         {
             double W = 0.0;
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(+:W)
-#endif
             for (int i = 0; i < finest_level_dim_0; i++)
             {
                 W += Y_avg_global[i]*(1.0 - Y_avg_global[i]);
@@ -1195,9 +1177,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
                     
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
@@ -1243,9 +1222,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
         {
             double W = 0.0;
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(+:W)
-#endif
             for (int j = 0; j < finest_level_dim_1; j++)
             {
                 W += Y_avg_global[j]*(1.0 - Y_avg_global[j]);
@@ -1395,9 +1371,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
@@ -1446,9 +1419,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
         {
             double W = 0.0;
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(+:W)
-#endif
             for (int j = 0; j < finest_level_dim_1; j++)
             {
                 W += Y_avg_global[j]*(1.0 - Y_avg_global[j]);
@@ -1702,9 +1672,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInZDirection(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
@@ -1753,9 +1720,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInZDirection(
         {
             double W = 0.0;
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(+:W)
-#endif
             for (int k = 0; k < finest_level_dim_2; k++)
             {
                 W += Y_avg_global[k]*(1.0 - Y_avg_global[k]);
@@ -1970,9 +1934,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                     const int idx_lo_0 = index_lo[0];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
@@ -2028,17 +1989,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
             double num = 0.0;
             double den = 0.0;
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(+:num)
-#endif
             for (int i = 0; i < finest_level_dim_0; i++)
             {
                 num += Y_product_avg_global[i];
             }
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(+:den)
-#endif
             for (int i = 0; i < finest_level_dim_0; i++)
             {
                 den += Y_avg_global[i]*(1.0 - Y_avg_global[i]);
@@ -2184,9 +2139,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                     
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
@@ -2244,17 +2196,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
             double num = 0.0;
             double den = 0.0;
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(+:num)
-#endif
             for (int i = 0; i < finest_level_dim_0; i++)
             {
                 num += Y_product_avg_global[i];
             }
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(+:den)
-#endif
             for (int i = 0; i < finest_level_dim_0; i++)
             {
                 den += Y_avg_global[i]*(1.0 - Y_avg_global[i]);
@@ -2407,9 +2353,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
@@ -2470,17 +2413,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
             double num = 0.0;
             double den = 0.0;
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(+:num)
-#endif
             for (int i = 0; i < finest_level_dim_0; i++)
             {
                 num += Y_product_avg_global[i];
             }
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(+:den)
-#endif
             for (int i = 0; i < finest_level_dim_0; i++)
             {
                 den += Y_avg_global[i]*(1.0 - Y_avg_global[i]);
@@ -2723,9 +2660,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
                     
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
@@ -2783,17 +2717,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
             double num = 0.0;
             double den = 0.0;
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(+:num)
-#endif
             for (int j = 0; j < finest_level_dim_1; j++)
             {
                 num += Y_product_avg_global[j];
             }
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(+:den)
-#endif
             for (int j = 0; j < finest_level_dim_1; j++)
             {
                 den += Y_avg_global[j]*(1.0 - Y_avg_global[j]);
@@ -2946,9 +2874,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
@@ -3009,17 +2934,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
             double num = 0.0;
             double den = 0.0;
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(+:num)
-#endif
             for (int j = 0; j < finest_level_dim_1; j++)
             {
                 num += Y_product_avg_global[j];
             }
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(+:den)
-#endif
             for (int j = 0; j < finest_level_dim_1; j++)
             {
                 den += Y_avg_global[j]*(1.0 - Y_avg_global[j]);
@@ -3276,9 +3195,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInZDirection(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
@@ -3339,17 +3255,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInZDirection(
             double num = 0.0;
             double den = 0.0;
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(+:num)
-#endif
             for (int k = 0; k < finest_level_dim_2; k++)
             {
                 num += Y_product_avg_global[k];
             }
             
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd reduction(+:den)
-#endif
             for (int k = 0; k < finest_level_dim_2; k++)
             {
                 den += Y_avg_global[k]*(1.0 - Y_avg_global[k]);
@@ -3600,9 +3510,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                     
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
@@ -3777,9 +3684,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                     
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd reduction(+:TKE_to_add)
-#endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
@@ -4077,9 +3981,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                     
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
@@ -4254,9 +4155,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                     
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd reduction(+:TKE_to_add)
-#endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
@@ -4608,9 +4506,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
@@ -4808,9 +4703,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd reduction(+:TKE_to_add)
-#endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
@@ -5133,9 +5025,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
@@ -5333,9 +5222,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd reduction(+:TKE_to_add)
-#endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
@@ -5658,9 +5544,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
@@ -5858,9 +5741,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd reduction(+:TKE_to_add)
-#endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
@@ -6112,9 +5992,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputEnstrophyIntegrated(
                     
                     for (int j = 0; j < interior_dim_1; j++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd reduction(+:Omega_to_add)
-#endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute linear indices.
@@ -6281,9 +6158,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputEnstrophyIntegrated(
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd reduction(+:Omega_to_add)
-#endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
@@ -6530,9 +6404,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                     
                     if (false) // (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*4)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd reduction(+:Chi_to_add)
-#endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute indices of current and neighboring cells.
@@ -6584,9 +6455,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                     }
                     else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*3)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd reduction(+:Chi_to_add)
-#endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute indices of current and neighboring cells.
@@ -6635,9 +6503,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                     }
                     else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*2)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd reduction(+:Chi_to_add)
-#endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute indices of current and neighboring cells.
@@ -6683,9 +6548,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                     }
                     else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim))
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd reduction(+:Chi_to_add)
-#endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute indices of current and neighboring cells.
@@ -6728,9 +6590,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                     }
                     else
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd reduction(+:Chi_to_add)
-#endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute indices of current and neighboring cells.
@@ -6948,9 +6807,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd reduction(+:Chi_to_add)
-#endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute indices of current and neighboring cells of mass fraction.
@@ -7054,9 +6910,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd reduction(+:Chi_to_add)
-#endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute indices of current and neighboring cells of mass fraction.
@@ -7146,9 +6999,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd reduction(+:Chi_to_add)
-#endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute indices of current and neighboring cells of mass fraction.
@@ -7224,9 +7074,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd reduction(+:Chi_to_add)
-#endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute indices of current and neighboring cells of mass fraction.
@@ -7287,9 +7134,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd reduction(+:Chi_to_add)
-#endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute indices of current and neighboring cells of mass fraction.
@@ -7545,9 +7389,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd reduction(+:Chi_to_add)
-#endif
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute indices of current and neighboring cells.
@@ -7737,9 +7578,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd reduction(+:Chi_to_add)
-#endif
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute indices of current and neighboring cells.
@@ -7896,9 +7734,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd reduction(+:Chi_to_add)
-#endif
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute indices of current and neighboring cells.
@@ -8022,9 +7857,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd reduction(+:Chi_to_add)
-#endif
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute indices of current and neighboring cells.
@@ -8113,9 +7945,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd reduction(+:Chi_to_add)
-#endif
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute indices of current and neighboring cells.
@@ -8437,9 +8266,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                     
                     if (false) // (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*4)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd reduction(max:grad_mag_max_local)
-#endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute indices of current and neighboring cells of mass fraction.
@@ -8463,9 +8289,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                     }
                     else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*3)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd reduction(max:grad_mag_max_local)
-#endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute indices of current and neighboring cells of mass fraction.
@@ -8486,9 +8309,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                     }
                     else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*2)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd reduction(max:grad_mag_max_local)
-#endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute indices of current and neighboring cells of mass fraction.
@@ -8506,9 +8326,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                     }
                     else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim))
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd reduction(max:grad_mag_max_local)
-#endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute indices of current and neighboring cells of mass fraction.
@@ -8523,9 +8340,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                     }
                     else
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd reduction(max:grad_mag_max_local)
-#endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute indices of current and neighboring cells of mass fraction.
@@ -8690,9 +8504,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd reduction(max:grad_mag_max_local)
-#endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute indices of current and neighboring cells of mass fraction.
@@ -8763,9 +8574,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd reduction(max:grad_mag_max_local)
-#endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute indices of current and neighboring cells of mass fraction.
@@ -8822,9 +8630,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd reduction(max:grad_mag_max_local)
-#endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute indices of current and neighboring cells of mass fraction.
@@ -8867,9 +8672,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd reduction(max:grad_mag_max_local)
-#endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute indices of current and neighboring cells of mass fraction.
@@ -8897,9 +8699,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd reduction(max:grad_mag_max_local)
-#endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute indices of current and neighboring cells of mass fraction.
@@ -9097,9 +8896,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd reduction(max:grad_mag_max_local)
-#endif
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute indices of current and neighboring cells.
@@ -9250,9 +9046,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd reduction(max:grad_mag_max_local)
-#endif
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute indices of current and neighboring cells.
@@ -9370,9 +9163,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd reduction(max:grad_mag_max_local)
-#endif
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute indices of current and neighboring cells.
@@ -9457,9 +9247,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd reduction(max:grad_mag_max_local)
-#endif
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute indices of current and neighboring cells.
@@ -9509,9 +9296,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                         {
                             for (int j = 0; j < interior_dim_1; j++)
                             {
-#ifdef HAMERS_ENABLE_SIMD
-                                #pragma omp simd reduction(max:grad_mag_max_local)
-#endif
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute indices of current and neighboring cells.
