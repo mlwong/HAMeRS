@@ -1,17 +1,16 @@
 /*************************************************************************
  *
- * This file is modified from HyperbolicLevelIntegrator.c of the SAMRAI
+ * This file is modified from HyperbolicLevelIntegrator.c of the SAMRAI 3.9.1.
  * distribution. For full copyright information, see COPYRIGHT and
  * COPYING.LESSER of SAMRAI distribution.
- *
- * Copyright:     (c) 1997-2014 Lawrence Livermore National Security, LLC
- * Description:   Runge-Kutta integration routines for single level in AMR
- *                hierarchy
- *                (basic hyperbolic systems)
- *
+ * 
  ************************************************************************/
 
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
+
+#include "extn/variable_fill_patterns/LayerCellVariableFillPattern.hpp"
+#include "extn/variable_fill_patterns/LayerCellNoCornersVariableFillPattern.hpp"
+#include "extn/variable_fill_patterns/CellCornersVariableFillPattern.hpp"
 
 #include "SAMRAI/pdat/CellData.h"
 #include "SAMRAI/pdat/FaceData.h"
@@ -191,58 +190,58 @@ const int RungeKuttaLevelIntegrator::RUNGE_KUTTA_LEVEL_INTEGRATOR_VERSION = 1;
 
 bool RungeKuttaLevelIntegrator::s_barrier_after_error_bdry_fill_comm = true;
 
-tbox::StartupShutdownManager::Handler
+SAMRAI::tbox::StartupShutdownManager::Handler
 RungeKuttaLevelIntegrator::s_initialize_handler(
     RungeKuttaLevelIntegrator::initializeCallback,
     0,
     0,
     RungeKuttaLevelIntegrator::finalizeCallback,
-    tbox::StartupShutdownManager::priorityTimers);
+    SAMRAI::tbox::StartupShutdownManager::priorityTimers);
 
 /*
  * Timers interspersed throughout the class.
  */
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_advance_bdry_fill_comm;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_error_bdry_fill_create;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_error_bdry_fill_comm;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_advance_mpi_reductions;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_get_level_dt_mpi_reductions;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_initialize_level_data;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_init_level_create_sched;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_init_level_fill_data;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_init_level_fill_interior;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_advance_bdry_fill_create;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_new_advance_bdry_fill_create;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_apply_value_detector;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_apply_gradient_detector;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_apply_multiresolution_detector;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_apply_integral_detector;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_tag_cells;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_coarsen_rich_extrap;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_get_level_dt;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_get_level_dt_sync;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_advance_level;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_new_advance_bdry_fill_comm;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_patch_num_kernel;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_advance_level_sync;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_std_level_sync;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_sync_new_levels;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_barrier_after_error_bdry_fill_comm;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_sync_initial_comm;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_sync_initial_create;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_coarsen_fluxsum_create;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_coarsen_fluxsum_comm;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_coarsen_sync_create;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_coarsen_sync_comm;
-boost::shared_ptr<tbox::Timer> RungeKuttaLevelIntegrator::t_output_data_statistics;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_advance_bdry_fill_comm;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_error_bdry_fill_create;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_error_bdry_fill_comm;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_advance_mpi_reductions;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_get_level_dt_mpi_reductions;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_initialize_level_data;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_init_level_create_sched;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_init_level_fill_data;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_init_level_fill_interior;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_advance_bdry_fill_create;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_new_advance_bdry_fill_create;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_apply_value_detector;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_apply_gradient_detector;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_apply_multiresolution_detector;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_apply_integral_detector;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_tag_cells;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_coarsen_rich_extrap;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_get_level_dt;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_get_level_dt_sync;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_advance_level;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_new_advance_bdry_fill_comm;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_patch_num_kernel;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_advance_level_sync;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_std_level_sync;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_sync_new_levels;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_barrier_after_error_bdry_fill_comm;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_sync_initial_comm;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_sync_initial_create;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_coarsen_fluxsum_create;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_coarsen_fluxsum_comm;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_coarsen_sync_create;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_coarsen_sync_comm;
+boost::shared_ptr<SAMRAI::tbox::Timer> RungeKuttaLevelIntegrator::t_output_data_statistics;
 
 #ifdef HLI_RECORD_STATS
 /*
  * Statistics on number of cells and patches generated.
  */
-std::vector<boost::shared_ptr<tbox::Statistic> > RungeKuttaLevelIntegrator::s_boxes_stat;
-std::vector<boost::shared_ptr<tbox::Statistic> > RungeKuttaLevelIntegrator::s_cells_stat;
-std::vector<boost::shared_ptr<tbox::Statistic> > RungeKuttaLevelIntegrator::s_timestamp_stat;
+std::vector<boost::shared_ptr<SAMRAI::tbox::Statistic> > RungeKuttaLevelIntegrator::s_boxes_stat;
+std::vector<boost::shared_ptr<SAMRAI::tbox::Statistic> > RungeKuttaLevelIntegrator::s_cells_stat;
+std::vector<boost::shared_ptr<SAMRAI::tbox::Statistic> > RungeKuttaLevelIntegrator::s_timestamp_stat;
 #endif
 
 /*
@@ -256,25 +255,25 @@ std::vector<boost::shared_ptr<tbox::Statistic> > RungeKuttaLevelIntegrator::s_ti
  */
 RungeKuttaLevelIntegrator::RungeKuttaLevelIntegrator(
     const std::string& object_name,
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const boost::shared_ptr<SAMRAI::tbox::Database>& input_db,
     RungeKuttaPatchStrategy* patch_strategy,
     bool use_time_refinement):
     d_patch_strategy(patch_strategy),
     d_object_name(object_name),
     d_use_time_refinement(use_time_refinement),
     d_use_cfl(true),
-    d_cfl(tbox::MathUtilities<double>::getSignalingNaN()),
-    d_cfl_init(tbox::MathUtilities<double>::getSignalingNaN()),
+    d_cfl(SAMRAI::tbox::MathUtilities<double>::getSignalingNaN()),
+    d_cfl_init(SAMRAI::tbox::MathUtilities<double>::getSignalingNaN()),
     d_lag_dt_computation(true),
     d_use_ghosts_for_dt(false),
-    d_dt(tbox::MathUtilities<double>::getSignalingNaN()),
+    d_dt(SAMRAI::tbox::MathUtilities<double>::getSignalingNaN()),
     d_flux_is_face(true),
     d_flux_face_registered(false),
     d_flux_side_registered(false),
     d_number_time_data_levels(2),
-    d_scratch(hier::VariableDatabase::getDatabase()->getContext("SCRATCH")),
-    d_current(hier::VariableDatabase::getDatabase()->getContext("CURRENT")),
-    d_new(hier::VariableDatabase::getDatabase()->getContext("NEW")),
+    d_scratch(SAMRAI::hier::VariableDatabase::getDatabase()->getContext("SCRATCH")),
+    d_current(SAMRAI::hier::VariableDatabase::getDatabase()->getContext("CURRENT")),
+    d_new(SAMRAI::hier::VariableDatabase::getDatabase()->getContext("NEW")),
     d_plot_context(d_current),
     d_have_flux_on_level_zero(false),
     d_distinguish_mpi_reduction_costs(false)
@@ -282,13 +281,13 @@ RungeKuttaLevelIntegrator::RungeKuttaLevelIntegrator(
     TBOX_ASSERT(!object_name.empty());
     TBOX_ASSERT(patch_strategy != 0);
     
-    tbox::RestartManager::getManager()->registerRestartItem(d_object_name,
+    SAMRAI::tbox::RestartManager::getManager()->registerRestartItem(d_object_name,
         this);
     
     /*
      * Initialize object with data read from the input and restart databases.
      */
-    bool from_restart = tbox::RestartManager::getManager()->isFromRestart();
+    bool from_restart = SAMRAI::tbox::RestartManager::getManager()->isFromRestart();
     if (from_restart)
     {
         getFromRestart();
@@ -301,8 +300,8 @@ RungeKuttaLevelIntegrator::RungeKuttaLevelIntegrator(
     d_intermediate_source_var_data.resize(d_number_steps);
     for (int sn = 0; sn < d_number_steps; sn++)
     {
-        std::string context_string = "INTERMEDIATE_" + tbox::Utilities::intToString(sn);
-        d_intermediate[sn] = hier::VariableDatabase::getDatabase()->getContext(context_string);
+        std::string context_string = "INTERMEDIATE_" + SAMRAI::tbox::Utilities::intToString(sn);
+        d_intermediate[sn] = SAMRAI::hier::VariableDatabase::getDatabase()->getContext(context_string);
     }
     
     /*
@@ -318,13 +317,14 @@ RungeKuttaLevelIntegrator::RungeKuttaLevelIntegrator(
 /*
  **************************************************************************************************
  *
- * Destructor tells the tbox::RestartManager to remove this object from the list of restart items.
+ * Destructor tells the SAMRAI::tbox::RestartManager to remove this object from the list of restart
+ * items.
  *
  **************************************************************************************************
  */
 RungeKuttaLevelIntegrator::~RungeKuttaLevelIntegrator()
 {
-    tbox::RestartManager::getManager()->unregisterRestartItem(d_object_name);
+    SAMRAI::tbox::RestartManager::getManager()->unregisterRestartItem(d_object_name);
 }
 
 
@@ -345,12 +345,12 @@ RungeKuttaLevelIntegrator::~RungeKuttaLevelIntegrator()
  */
 void
 RungeKuttaLevelIntegrator::initializeLevelData(
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
     const int level_number,
     const double init_data_time,
     const bool can_be_refined,
     const bool initial_time,
-    const boost::shared_ptr<hier::PatchLevel>& old_level,
+    const boost::shared_ptr<SAMRAI::hier::PatchLevel>& old_level,
     const bool allocate_data)
 {
     TBOX_ASSERT(hierarchy);
@@ -359,10 +359,10 @@ RungeKuttaLevelIntegrator::initializeLevelData(
     TBOX_ASSERT(!old_level || level_number == old_level->getLevelNumber());
     TBOX_ASSERT(hierarchy->getPatchLevel(level_number));
     
-    boost::shared_ptr<hier::PatchLevel> level(
+    boost::shared_ptr<SAMRAI::hier::PatchLevel> level(
         hierarchy->getPatchLevel(level_number));
     
-    const tbox::SAMRAI_MPI& mpi(level->getBoxLevel()->getMPI());
+    const SAMRAI::tbox::SAMRAI_MPI& mpi(level->getBoxLevel()->getMPI());
     mpi.Barrier();
     t_initialize_level_data->start();
     
@@ -391,7 +391,7 @@ RungeKuttaLevelIntegrator::initializeLevelData(
     {
         t_init_level_create_sched->start();
         
-        boost::shared_ptr<xfer::RefineSchedule> sched(
+        boost::shared_ptr<SAMRAI::xfer::RefineSchedule> sched(
             d_fill_new_level->createSchedule(
                 level,
                 old_level,
@@ -413,15 +413,15 @@ RungeKuttaLevelIntegrator::initializeLevelData(
     
     if ((d_number_time_data_levels == 3) && can_be_refined)
     {
-        hier::VariableDatabase* variable_db = hier::VariableDatabase::getDatabase();
+        SAMRAI::hier::VariableDatabase* variable_db = SAMRAI::hier::VariableDatabase::getDatabase();
      
-        for (hier::PatchLevel::iterator ip(level->begin());
+        for (SAMRAI::hier::PatchLevel::iterator ip(level->begin());
              ip != level->end();
              ip++)
         {
-            const boost::shared_ptr<hier::Patch>& patch = *ip;
+            const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
             
-            std::list<boost::shared_ptr<hier::Variable> >::iterator time_dep_var =
+            std::list<boost::shared_ptr<SAMRAI::hier::Variable> >::iterator time_dep_var =
                d_time_dep_variables.begin();
             
             while (time_dep_var != d_time_dep_variables.end())
@@ -448,9 +448,9 @@ RungeKuttaLevelIntegrator::initializeLevelData(
      */
     d_patch_strategy->setDataContext(d_current);
     
-    for (hier::PatchLevel::iterator p(level->begin()); p != level->end(); p++)
+    for (SAMRAI::hier::PatchLevel::iterator p(level->begin()); p != level->end(); p++)
     {
-        const boost::shared_ptr<hier::Patch>& patch = *p;
+        const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *p;
         
         patch->allocatePatchData(d_temp_var_scratch_data, init_data_time);
         
@@ -479,7 +479,7 @@ RungeKuttaLevelIntegrator::initializeLevelData(
  */
 void
 RungeKuttaLevelIntegrator::resetHierarchyConfiguration(
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
     const int coarsest_level,
     const int finest_level)
 {
@@ -504,7 +504,7 @@ RungeKuttaLevelIntegrator::resetHierarchyConfiguration(
     
     for (int ln = coarsest_level; ln <= finest_hiera_level; ln++)
     {
-        boost::shared_ptr<hier::PatchLevel> level(hierarchy->getPatchLevel(ln));
+        boost::shared_ptr<SAMRAI::hier::PatchLevel> level(hierarchy->getPatchLevel(ln));
         
         t_advance_bdry_fill_create->start();
         
@@ -540,7 +540,7 @@ RungeKuttaLevelIntegrator::resetHierarchyConfiguration(
  */
 void
 RungeKuttaLevelIntegrator::applyValueDetector(
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
     const int level_number,
     const double error_data_time,
     const int tag_index,
@@ -557,7 +557,7 @@ RungeKuttaLevelIntegrator::applyValueDetector(
     
     t_apply_value_detector->start();
     
-    boost::shared_ptr<hier::PatchLevel> level(
+    boost::shared_ptr<SAMRAI::hier::PatchLevel> level(
         hierarchy->getPatchLevel(level_number));
     
     level->allocatePatchData(d_saved_var_scratch_data, error_data_time);
@@ -565,7 +565,7 @@ RungeKuttaLevelIntegrator::applyValueDetector(
     
     d_patch_strategy->setDataContext(d_scratch);
     
-    const tbox::SAMRAI_MPI& mpi(level->getBoxLevel()->getMPI());
+    const SAMRAI::tbox::SAMRAI_MPI& mpi(level->getBoxLevel()->getMPI());
     
     t_error_bdry_fill_comm->start();
     d_bdry_sched_advance[level_number]->fillData(error_data_time);
@@ -589,11 +589,11 @@ RungeKuttaLevelIntegrator::applyValueDetector(
         uses_richardson_extrapolation_too);
     
     t_tag_cells->start();
-    for (hier::PatchLevel::iterator ip(level->begin());
+    for (SAMRAI::hier::PatchLevel::iterator ip(level->begin());
          ip != level->end();
          ip++)
     {
-        const boost::shared_ptr<hier::Patch>& patch = *ip;
+        const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
         d_patch_strategy->tagCellsOnPatchValueDetector(
             *patch,
             error_data_time,
@@ -629,7 +629,7 @@ RungeKuttaLevelIntegrator::applyValueDetector(
 
 void
 RungeKuttaLevelIntegrator::applyGradientDetector(
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
     const int level_number,
     const double error_data_time,
     const int tag_index,
@@ -646,7 +646,7 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
     
     t_apply_gradient_detector->start();
     
-    boost::shared_ptr<hier::PatchLevel> level(
+    boost::shared_ptr<SAMRAI::hier::PatchLevel> level(
         hierarchy->getPatchLevel(level_number));
     
     level->allocatePatchData(d_saved_var_scratch_data, error_data_time);
@@ -654,7 +654,7 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
     
     d_patch_strategy->setDataContext(d_scratch);
     
-    const tbox::SAMRAI_MPI& mpi(level->getBoxLevel()->getMPI());
+    const SAMRAI::tbox::SAMRAI_MPI& mpi(level->getBoxLevel()->getMPI());
     
     t_error_bdry_fill_comm->start();
     d_bdry_sched_advance[level_number]->fillData(error_data_time);
@@ -678,11 +678,11 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
         uses_richardson_extrapolation_too);
     
     t_tag_cells->start();
-    for (hier::PatchLevel::iterator ip(level->begin());
+    for (SAMRAI::hier::PatchLevel::iterator ip(level->begin());
          ip != level->end();
          ip++)
     {
-        const boost::shared_ptr<hier::Patch>& patch = *ip;
+        const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
         d_patch_strategy->tagCellsOnPatchGradientDetector(
             *patch,
             error_data_time,
@@ -725,7 +725,7 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
  */
 void
 RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
     const int level_number,
     const double error_data_time,
     const int tag_index,
@@ -742,7 +742,7 @@ RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
     
     t_apply_multiresolution_detector->start();
     
-    boost::shared_ptr<hier::PatchLevel> level(
+    boost::shared_ptr<SAMRAI::hier::PatchLevel> level(
         hierarchy->getPatchLevel(level_number));
     
     level->allocatePatchData(d_saved_var_scratch_data, error_data_time);
@@ -750,7 +750,7 @@ RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
     
     d_patch_strategy->setDataContext(d_scratch);
     
-    const tbox::SAMRAI_MPI& mpi(level->getBoxLevel()->getMPI());
+    const SAMRAI::tbox::SAMRAI_MPI& mpi(level->getBoxLevel()->getMPI());
     
     t_error_bdry_fill_comm->start();
     d_bdry_sched_advance[level_number]->fillData(error_data_time);
@@ -774,11 +774,11 @@ RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
         uses_richardson_extrapolation_too);
     
     t_tag_cells->start();
-    for (hier::PatchLevel::iterator ip(level->begin());
+    for (SAMRAI::hier::PatchLevel::iterator ip(level->begin());
          ip != level->end();
          ip++)
     {
-        const boost::shared_ptr<hier::Patch>& patch = *ip;
+        const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
         d_patch_strategy->tagCellsOnPatchMultiresolutionDetector(
             *patch,
             error_data_time,
@@ -821,7 +821,7 @@ RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
  */
 void
 RungeKuttaLevelIntegrator::applyIntegralDetector(
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
     const int level_number,
     const double error_data_time,
     const int tag_index,
@@ -838,7 +838,7 @@ RungeKuttaLevelIntegrator::applyIntegralDetector(
     
     t_apply_integral_detector->start();
     
-    boost::shared_ptr<hier::PatchLevel> level(
+    boost::shared_ptr<SAMRAI::hier::PatchLevel> level(
         hierarchy->getPatchLevel(level_number));
     
     level->allocatePatchData(d_saved_var_scratch_data, error_data_time);
@@ -846,7 +846,7 @@ RungeKuttaLevelIntegrator::applyIntegralDetector(
     
     d_patch_strategy->setDataContext(d_scratch);
     
-    const tbox::SAMRAI_MPI& mpi(level->getBoxLevel()->getMPI());
+    const SAMRAI::tbox::SAMRAI_MPI& mpi(level->getBoxLevel()->getMPI());
     
     t_error_bdry_fill_comm->start();
     d_bdry_sched_advance[level_number]->fillData(error_data_time);
@@ -870,11 +870,11 @@ RungeKuttaLevelIntegrator::applyIntegralDetector(
         uses_richardson_extrapolation_too);
     
     t_tag_cells->start();
-    for (hier::PatchLevel::iterator ip(level->begin());
+    for (SAMRAI::hier::PatchLevel::iterator ip(level->begin());
          ip != level->end();
          ip++)
     {
-        const boost::shared_ptr<hier::Patch>& patch = *ip;
+        const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
         d_patch_strategy->tagCellsOnPatchIntegralDetector(
             *patch,
             error_data_time,
@@ -920,7 +920,7 @@ RungeKuttaLevelIntegrator::applyIntegralDetector(
  */
 void
 RungeKuttaLevelIntegrator::applyRichardsonExtrapolation(
-    const boost::shared_ptr<hier::PatchLevel>& level,
+    const boost::shared_ptr<SAMRAI::hier::PatchLevel>& level,
     const double error_data_time,
     const int tag_index,
     const double deltat,
@@ -943,11 +943,11 @@ RungeKuttaLevelIntegrator::applyRichardsonExtrapolation(
     const int error_level_number =
         level->getNextCoarserHierarchyLevelNumber() + 1;
     
-    for (hier::PatchLevel::iterator ip(level->begin());
+    for (SAMRAI::hier::PatchLevel::iterator ip(level->begin());
          ip != level->end();
          ip++)
     {
-        const boost::shared_ptr<hier::Patch>& patch = *ip;
+        const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
         
         d_patch_strategy->tagCellsOnPatchRichardsonExtrapolation(
             *patch,
@@ -992,9 +992,9 @@ RungeKuttaLevelIntegrator::applyRichardsonExtrapolation(
  */
 void
 RungeKuttaLevelIntegrator::coarsenDataForRichardsonExtrapolation(
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
     const int level_number,
-    const boost::shared_ptr<hier::PatchLevel>& coarse_level,
+    const boost::shared_ptr<SAMRAI::hier::PatchLevel>& coarse_level,
     const double coarsen_data_time,
     const bool before_advance)
 {
@@ -1007,12 +1007,12 @@ RungeKuttaLevelIntegrator::coarsenDataForRichardsonExtrapolation(
     
     t_coarsen_rich_extrap->start();
     
-    const hier::IntVector& zero_vector(hier::IntVector::getZero(hierarchy->getDim()));
+    const SAMRAI::hier::IntVector& zero_vector(SAMRAI::hier::IntVector::getZero(hierarchy->getDim()));
     
-    boost::shared_ptr<hier::PatchLevel> hier_level(
+    boost::shared_ptr<SAMRAI::hier::PatchLevel> hier_level(
         hierarchy->getPatchLevel(level_number));
     
-    hier::IntVector coarsen_ratio(hierarchy->getDim());
+    SAMRAI::hier::IntVector coarsen_ratio(hierarchy->getDim());
     if (coarse_level->getRatioToLevelZero() < zero_vector)
     {
         if (hier_level->getRatioToLevelZero() < zero_vector)
@@ -1047,22 +1047,22 @@ RungeKuttaLevelIntegrator::coarsenDataForRichardsonExtrapolation(
      * fine level. We just have to convert the width to the correct refinement ratio before initializing
      * the Connectors.
      */
-    const hier::IntVector peer_connector_width =
+    const SAMRAI::hier::IntVector peer_connector_width =
         hierarchy->getRequiredConnectorWidth(
             level_number,
             level_number,
             true);
     
-    const hier::IntVector c_to_f_width =
-       hier::IntVector::ceilingDivide(peer_connector_width, coarsen_ratio);
+    const SAMRAI::hier::IntVector c_to_f_width =
+       SAMRAI::hier::IntVector::ceilingDivide(peer_connector_width, coarsen_ratio);
     
-    const hier::IntVector f_to_c_width(c_to_f_width * coarsen_ratio);
+    const SAMRAI::hier::IntVector f_to_c_width(c_to_f_width * coarsen_ratio);
     
     coarse_level->findConnectorWithTranspose(
         *hier_level,
         c_to_f_width,
         f_to_c_width,
-        hier::CONNECTOR_CREATE);
+        SAMRAI::hier::CONNECTOR_CREATE);
     
     if (before_advance)
     {
@@ -1119,10 +1119,10 @@ RungeKuttaLevelIntegrator::coarsenDataForRichardsonExtrapolation(
  */
 void
 RungeKuttaLevelIntegrator::initializeLevelIntegrator(
-    const boost::shared_ptr<mesh::GriddingAlgorithmStrategy>& gridding_alg_strategy)
+    const boost::shared_ptr<SAMRAI::mesh::GriddingAlgorithmStrategy>& gridding_alg_strategy)
 {
     d_gridding_alg =
-        BOOST_CAST<mesh::GriddingAlgorithm, mesh::GriddingAlgorithmStrategy>(
+        BOOST_CAST<SAMRAI::mesh::GriddingAlgorithm, SAMRAI::mesh::GriddingAlgorithmStrategy>(
             gridding_alg_strategy);
     
     TBOX_ASSERT(d_gridding_alg);
@@ -1144,7 +1144,7 @@ RungeKuttaLevelIntegrator::initializeLevelIntegrator(
         (d_gridding_alg->getTagAndInitializeStrategy()->getErrorCoarsenRatio() == 3))
     {
         d_number_time_data_levels = 3;
-        d_old = hier::VariableDatabase::getDatabase()->getContext("OLD");
+        d_old = SAMRAI::hier::VariableDatabase::getDatabase()->getContext("OLD");
     }
     
     d_patch_strategy->registerModelVariables(this);
@@ -1165,7 +1165,7 @@ RungeKuttaLevelIntegrator::initializeLevelIntegrator(
  */
 double
 RungeKuttaLevelIntegrator::getLevelDt(
-    const boost::shared_ptr<hier::PatchLevel>& level,
+    const boost::shared_ptr<SAMRAI::hier::PatchLevel>& level,
     const double dt_time,
     const bool initial_time)
 {
@@ -1177,21 +1177,21 @@ RungeKuttaLevelIntegrator::getLevelDt(
     
     if (d_use_cfl)
     {
-        const tbox::SAMRAI_MPI& mpi(level->getBoxLevel()->getMPI());
+        const SAMRAI::tbox::SAMRAI_MPI& mpi(level->getBoxLevel()->getMPI());
         
-        double dt = tbox::MathUtilities<double>::getMax();
+        double dt = SAMRAI::tbox::MathUtilities<double>::getMax();
         
         if (!d_use_ghosts_for_dt)
         {
-            //tbox::plog << "!use ghosts for dt" << std::endl;
+            //SAMRAI::tbox::plog << "!use ghosts for dt" << std::endl;
             
             d_patch_strategy->setDataContext(d_current);
             
-            for (hier::PatchLevel::iterator p(level->begin());
+            for (SAMRAI::hier::PatchLevel::iterator p(level->begin());
                  p != level->end();
                  p++)
             {
-                const boost::shared_ptr<hier::Patch>& patch = *p;
+                const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *p;
                 
                 patch->allocatePatchData(d_temp_var_scratch_data, dt_time);
                 
@@ -1202,9 +1202,9 @@ RungeKuttaLevelIntegrator::getLevelDt(
                         initial_time,
                         dt_time);
                 
-                dt = tbox::MathUtilities<double>::Min(dt, patch_dt);
-                //tbox::plog.precision(12);
-                //tbox::plog << "Level " << level->getLevelNumber()
+                dt = SAMRAI::tbox::MathUtilities<double>::Min(dt, patch_dt);
+                //SAMRAI::tbox::plog.precision(12);
+                //SAMRAI::tbox::plog << "Level " << level->getLevelNumber()
                 //           << " Patch " << *p
                 //           << " box " << patch->getBox()
                 //           << " has patch_dt " << patch_dt
@@ -1218,7 +1218,7 @@ RungeKuttaLevelIntegrator::getLevelDt(
         }
         else
         {
-            //tbox::plog << "use ghosts for dt" << std::endl;
+            //SAMRAI::tbox::plog << "use ghosts for dt" << std::endl;
             
             level->allocatePatchData(d_saved_var_scratch_data, dt_time);
             
@@ -1228,11 +1228,11 @@ RungeKuttaLevelIntegrator::getLevelDt(
             d_bdry_sched_advance[level->getLevelNumber()]->fillData(dt_time);
             t_advance_bdry_fill_comm->stop();
             
-            for (hier::PatchLevel::iterator ip(level->begin());
+            for (SAMRAI::hier::PatchLevel::iterator ip(level->begin());
                  ip != level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch>& patch = *ip;
+                const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
                 
                 patch->allocatePatchData(d_temp_var_scratch_data, dt_time);
                 
@@ -1243,9 +1243,9 @@ RungeKuttaLevelIntegrator::getLevelDt(
                         initial_time,
                         dt_time);
                 
-                dt = tbox::MathUtilities<double>::Min(dt, patch_dt);
-                //tbox::plog.precision(12);
-                //tbox::plog << "Level " << level->getLevelNumber()
+                dt = SAMRAI::tbox::MathUtilities<double>::Min(dt, patch_dt);
+                //SAMRAI::tbox::plog.precision(12);
+                //SAMRAI::tbox::plog << "Level " << level->getLevelNumber()
                 //           << " Patch " << *ip
                 //           << " box " << patch->getBox()
                 //           << " has patch_dt " << patch_dt
@@ -1286,7 +1286,7 @@ RungeKuttaLevelIntegrator::getLevelDt(
         {
             mpi.AllReduce(&global_dt, 1, MPI_MIN);
         }
-        global_dt *= tbox::MathUtilities<double>::Min(d_cfl_init, d_cfl);
+        global_dt *= SAMRAI::tbox::MathUtilities<double>::Min(d_cfl_init, d_cfl);
         
         if (d_distinguish_mpi_reduction_costs)
         {
@@ -1320,7 +1320,7 @@ double
 RungeKuttaLevelIntegrator::getMaxFinerLevelDt(
     const int finer_level_number,
     const double coarse_dt,
-    const hier::IntVector& ratio)
+    const SAMRAI::hier::IntVector& ratio)
 {
     NULL_USE(finer_level_number);
     
@@ -1410,8 +1410,8 @@ RungeKuttaLevelIntegrator::getMaxFinerLevelDt(
  */
 double
 RungeKuttaLevelIntegrator::advanceLevel(
-    const boost::shared_ptr<hier::PatchLevel>& level,
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const boost::shared_ptr<SAMRAI::hier::PatchLevel>& level,
+    const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
     const double current_time,
     const double new_time,
     const bool first_step,
@@ -1450,13 +1450,13 @@ RungeKuttaLevelIntegrator::advanceLevel(
         level->allocatePatchData(d_intermediate_source_var_data[sn], current_time);
     }
     
-    boost::shared_ptr<xfer::RefineSchedule> fill_schedule;
+    boost::shared_ptr<SAMRAI::xfer::RefineSchedule> fill_schedule;
     
     if (!level->inHierarchy())
     {
         t_error_bdry_fill_create->start();
         
-        const hier::OverlapConnectorAlgorithm oca;
+        const SAMRAI::hier::OverlapConnectorAlgorithm oca;
         
         const int coarser_ln = level->getNextCoarserHierarchyLevelNumber();
         
@@ -1574,25 +1574,25 @@ RungeKuttaLevelIntegrator::advanceLevel(
     
     d_patch_strategy->setDataContext(d_scratch);
     
-    for (hier::PatchLevel::iterator ip(level->begin());
+    for (SAMRAI::hier::PatchLevel::iterator ip(level->begin());
          ip != level->end();
          ip++)
     {
-        const boost::shared_ptr<hier::Patch>& patch = *ip;
+        const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
         
         patch->allocatePatchData(d_temp_var_scratch_data, current_time);
         
         // Fill all fluxes with zero values.
         
-        std::list<boost::shared_ptr<hier::Variable> >::iterator flux_var =
+        std::list<boost::shared_ptr<SAMRAI::hier::Variable> >::iterator flux_var =
             d_flux_variables.begin();
         
         while (flux_var != d_flux_variables.end())
         {            
             if (d_flux_is_face)
             {
-                boost::shared_ptr<pdat::FaceData<double> > flux_data(
-                    BOOST_CAST<pdat::FaceData<double>, hier::PatchData>(
+                boost::shared_ptr<SAMRAI::pdat::FaceData<double> > flux_data(
+                    BOOST_CAST<SAMRAI::pdat::FaceData<double>, SAMRAI::hier::PatchData>(
                         patch->getPatchData(*flux_var, d_scratch)));
                 
                 TBOX_ASSERT(flux_data);
@@ -1600,8 +1600,8 @@ RungeKuttaLevelIntegrator::advanceLevel(
             }
             else
             {
-                boost::shared_ptr<pdat::SideData<double> > flux_data(
-                    BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
+                boost::shared_ptr<SAMRAI::pdat::SideData<double> > flux_data(
+                    BOOST_CAST<SAMRAI::pdat::SideData<double>, SAMRAI::hier::PatchData>(
                         patch->getPatchData(*flux_var, d_scratch)));
                 
                 TBOX_ASSERT(flux_data);
@@ -1613,13 +1613,13 @@ RungeKuttaLevelIntegrator::advanceLevel(
         
         // Fill all sources with zero values.
         
-        std::list<boost::shared_ptr<hier::Variable> >::iterator source_var =
+        std::list<boost::shared_ptr<SAMRAI::hier::Variable> >::iterator source_var =
             d_source_variables.begin();
         
         while (source_var != d_source_variables.end())
         {
-            boost::shared_ptr<pdat::CellData<double> > source_data(
-                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+            boost::shared_ptr<SAMRAI::pdat::CellData<double> > source_data(
+                BOOST_CAST<SAMRAI::pdat::CellData<double>, SAMRAI::hier::PatchData>(
                     patch->getPatchData(*source_var, d_scratch)));
             
             source_data->fillAll(0.0);
@@ -1628,7 +1628,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
         }
     }
     
-    const tbox::SAMRAI_MPI& mpi(hierarchy->getMPI());
+    const SAMRAI::tbox::SAMRAI_MPI& mpi(hierarchy->getMPI());
     for (int sn = 0; sn < d_number_steps; sn++)
     {
         d_patch_strategy->setDataContext(d_intermediate[sn]);
@@ -1640,7 +1640,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
          * Fill the ghost cell data for current intemediate data factory.
          */
         
-        boost::shared_ptr<xfer::RefineSchedule> fill_schedule_intermediate;
+        boost::shared_ptr<SAMRAI::xfer::RefineSchedule> fill_schedule_intermediate;
         
         if (sn > 0)
         {
@@ -1670,11 +1670,11 @@ RungeKuttaLevelIntegrator::advanceLevel(
             }
         }
         
-        for (hier::PatchLevel::iterator ip(level->begin());
+        for (SAMRAI::hier::PatchLevel::iterator ip(level->begin());
              ip != level->end();
              ip++)
         {
-            const boost::shared_ptr<hier::Patch>& patch = *ip;
+            const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
             
             d_patch_strategy->setDataContext(d_intermediate[sn]);
             
@@ -1709,11 +1709,11 @@ RungeKuttaLevelIntegrator::advanceLevel(
         fill_schedule_intermediate.reset();
     }
     
-    for (hier::PatchLevel::iterator ip(level->begin());
+    for (SAMRAI::hier::PatchLevel::iterator ip(level->begin());
          ip != level->end();
          ip++)
     {
-        const boost::shared_ptr<hier::Patch>& patch = *ip;
+        const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
         
         patch->deallocatePatchData(d_temp_var_scratch_data);
     }
@@ -1748,7 +1748,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
     * (c) Then, we loop over patches and compute the dt on each patch.
     */
     
-    double dt_next = tbox::MathUtilities<double>::getMax();
+    double dt_next = SAMRAI::tbox::MathUtilities<double>::getMax();
     
     if (!regrid_advance)
     {
@@ -1789,11 +1789,11 @@ RungeKuttaLevelIntegrator::advanceLevel(
                 }
             }
           
-            for (hier::PatchLevel::iterator ip(level->begin());
+            for (SAMRAI::hier::PatchLevel::iterator ip(level->begin());
                  ip != level->end();
                  ip++)
             {
-                const boost::shared_ptr<hier::Patch>& patch = *ip;
+                const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
                 
                 patch->allocatePatchData(d_temp_var_scratch_data, new_time);
                 
@@ -1805,7 +1805,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
                     new_time);
                 t_patch_num_kernel->stop();
                 
-                dt_next = tbox::MathUtilities<double>::Min(dt_next, patch_dt);
+                dt_next = SAMRAI::tbox::MathUtilities<double>::Min(dt_next, patch_dt);
                 
                 patch->deallocatePatchData(d_temp_var_scratch_data);
             }
@@ -1878,7 +1878,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
  */
 void
 RungeKuttaLevelIntegrator::standardLevelSynchronization(
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
     const int coarsest_level,
     const int finest_level,
     const double sync_time,
@@ -1903,7 +1903,7 @@ RungeKuttaLevelIntegrator::standardLevelSynchronization(
 
 void
 RungeKuttaLevelIntegrator::standardLevelSynchronization(
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
     const int coarsest_level,
     const int finest_level,
     const double sync_time,
@@ -1929,10 +1929,10 @@ RungeKuttaLevelIntegrator::standardLevelSynchronization(
     {
         const int coarse_ln = fine_ln - 1;
         
-        boost::shared_ptr<hier::PatchLevel> fine_level(
+        boost::shared_ptr<SAMRAI::hier::PatchLevel> fine_level(
            hierarchy->getPatchLevel(fine_ln));
         
-        boost::shared_ptr<hier::PatchLevel> coarse_level(
+        boost::shared_ptr<SAMRAI::hier::PatchLevel> coarse_level(
            hierarchy->getPatchLevel(coarse_ln));
         
         synchronizeLevelWithCoarser(
@@ -1984,7 +1984,7 @@ RungeKuttaLevelIntegrator::standardLevelSynchronization(
  */
 void
 RungeKuttaLevelIntegrator::synchronizeNewLevels(
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
     const int coarsest_level,
     const int finest_level,
     const double sync_time,
@@ -2012,14 +2012,14 @@ RungeKuttaLevelIntegrator::synchronizeNewLevels(
         {
             const int coarse_ln = fine_ln - 1;
             
-            boost::shared_ptr<hier::PatchLevel> fine_level(
+            boost::shared_ptr<SAMRAI::hier::PatchLevel> fine_level(
                 hierarchy->getPatchLevel(fine_ln));
             
-            boost::shared_ptr<hier::PatchLevel> coarse_level(
+            boost::shared_ptr<SAMRAI::hier::PatchLevel> coarse_level(
                 hierarchy->getPatchLevel(coarse_ln));
             
             t_sync_initial_create->start();
-            boost::shared_ptr<xfer::CoarsenSchedule> sched(
+            boost::shared_ptr<SAMRAI::xfer::CoarsenSchedule> sched(
                 d_sync_initial_data->createSchedule(
                     coarse_level,
                     fine_level,
@@ -2030,11 +2030,11 @@ RungeKuttaLevelIntegrator::synchronizeNewLevels(
             sched->coarsenData();
             t_sync_initial_comm->stop();
             
-            for (hier::PatchLevel::iterator p(coarse_level->begin());
+            for (SAMRAI::hier::PatchLevel::iterator p(coarse_level->begin());
                  p != coarse_level->end();
                  p++)
             {
-                const boost::shared_ptr<hier::Patch>& patch = *p;
+                const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *p;
                 
                 patch->allocatePatchData(d_temp_var_scratch_data, sync_time);
                 
@@ -2069,8 +2069,8 @@ RungeKuttaLevelIntegrator::synchronizeNewLevels(
  */
 void
 RungeKuttaLevelIntegrator::synchronizeLevelWithCoarser(
-    const boost::shared_ptr<hier::PatchLevel>& fine_level,
-    const boost::shared_ptr<hier::PatchLevel>& coarse_level,
+    const boost::shared_ptr<SAMRAI::hier::PatchLevel>& fine_level,
+    const boost::shared_ptr<SAMRAI::hier::PatchLevel>& coarse_level,
     const double sync_time,
     const double coarse_sim_time)
 {
@@ -2088,7 +2088,7 @@ RungeKuttaLevelIntegrator::synchronizeLevelWithCoarser(
      */
     
     t_coarsen_fluxsum_create->start();
-    boost::shared_ptr<xfer::CoarsenSchedule> sched(
+    boost::shared_ptr<SAMRAI::xfer::CoarsenSchedule> sched(
         d_coarsen_fluxsum->createSchedule(
             coarse_level,
             fine_level,
@@ -2114,11 +2114,11 @@ RungeKuttaLevelIntegrator::synchronizeLevelWithCoarser(
     
     const double reflux_dt = sync_time - coarse_sim_time;
     
-    for (hier::PatchLevel::iterator ip(coarse_level->begin());
+    for (SAMRAI::hier::PatchLevel::iterator ip(coarse_level->begin());
          ip != coarse_level->end();
          ip++)
     {
-        const boost::shared_ptr<hier::Patch>& patch = *ip;
+        const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
         
         patch->allocatePatchData(d_temp_var_scratch_data, coarse_sim_time);
             
@@ -2165,22 +2165,22 @@ RungeKuttaLevelIntegrator::synchronizeLevelWithCoarser(
  */
 void
 RungeKuttaLevelIntegrator::resetTimeDependentData(
-   const boost::shared_ptr<hier::PatchLevel>& level,
+   const boost::shared_ptr<SAMRAI::hier::PatchLevel>& level,
    const double new_time,
    const bool can_be_refined)
 {
     TBOX_ASSERT(level);
     
-    hier::VariableDatabase* variable_db = hier::VariableDatabase::getDatabase();
+    SAMRAI::hier::VariableDatabase* variable_db = SAMRAI::hier::VariableDatabase::getDatabase();
     
     double cur_time = 0.;
-    for (hier::PatchLevel::iterator ip(level->begin());
+    for (SAMRAI::hier::PatchLevel::iterator ip(level->begin());
          ip != level->end();
          ip++)
     {
-        const boost::shared_ptr<hier::Patch>& patch = *ip;
+        const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
         
-        std::list<boost::shared_ptr<hier::Variable> >::iterator time_dep_var =
+        std::list<boost::shared_ptr<SAMRAI::hier::Variable> >::iterator time_dep_var =
             d_time_dep_variables.begin();
         
         while (time_dep_var != d_time_dep_variables.end())
@@ -2245,7 +2245,7 @@ RungeKuttaLevelIntegrator::resetTimeDependentData(
  */
 void
 RungeKuttaLevelIntegrator::resetDataToPreadvanceState(
-    const boost::shared_ptr<hier::PatchLevel>& level)
+    const boost::shared_ptr<SAMRAI::hier::PatchLevel>& level)
 {
     TBOX_ASSERT(level);
     
@@ -2324,15 +2324,15 @@ RungeKuttaLevelIntegrator::resetDataToPreadvanceState(
  */
 void
 RungeKuttaLevelIntegrator::registerVariable(
-    const boost::shared_ptr<hier::Variable>& var,
-    const hier::IntVector& ghosts,
-    const hier::IntVector& ghosts_intermediate,
+    const boost::shared_ptr<SAMRAI::hier::Variable>& var,
+    const SAMRAI::hier::IntVector& ghosts,
+    const SAMRAI::hier::IntVector& ghosts_intermediate,
     const RK_VAR_TYPE& RK_v_type,
-    const boost::shared_ptr<hier::BaseGridGeometry>& transfer_geom,
+    const boost::shared_ptr<SAMRAI::hier::BaseGridGeometry>& transfer_geom,
     const std::string& coarsen_name,
     const std::string& refine_name)
 {
-    const tbox::Dimension dim(ghosts.getDim());
+    const SAMRAI::tbox::Dimension dim(ghosts.getDim());
     
     TBOX_ASSERT(var);
     TBOX_ASSERT(transfer_geom);
@@ -2347,28 +2347,28 @@ RungeKuttaLevelIntegrator::registerVariable(
          * One-time set-up for communication algorithms.
          * We wait until this point to do this because we need a dimension.
          */
-        d_bdry_fill_advance.reset(new xfer::RefineAlgorithm());
-        d_bdry_fill_advance_new.reset(new xfer::RefineAlgorithm());
-        d_bdry_fill_advance_old.reset(new xfer::RefineAlgorithm());
+        d_bdry_fill_advance.reset(new SAMRAI::xfer::RefineAlgorithm());
+        d_bdry_fill_advance_new.reset(new SAMRAI::xfer::RefineAlgorithm());
+        d_bdry_fill_advance_old.reset(new SAMRAI::xfer::RefineAlgorithm());
         
         d_bdry_fill_intermediate.resize(d_number_steps);
         for (int sn = 0; sn < d_number_steps; sn++)
         {
-            d_bdry_fill_intermediate[sn].reset(new xfer::RefineAlgorithm());
+            d_bdry_fill_intermediate[sn].reset(new SAMRAI::xfer::RefineAlgorithm());
         }
         
-        d_fill_new_level.reset(new xfer::RefineAlgorithm());
-        d_coarsen_fluxsum.reset(new xfer::CoarsenAlgorithm(dim));
-        d_coarsen_sync_data.reset(new xfer::CoarsenAlgorithm(dim));
-        d_sync_initial_data.reset(new xfer::CoarsenAlgorithm(dim));
+        d_fill_new_level.reset(new SAMRAI::xfer::RefineAlgorithm());
+        d_coarsen_fluxsum.reset(new SAMRAI::xfer::CoarsenAlgorithm(dim));
+        d_coarsen_sync_data.reset(new SAMRAI::xfer::CoarsenAlgorithm(dim));
+        d_sync_initial_data.reset(new SAMRAI::xfer::CoarsenAlgorithm(dim));
         
-        d_coarsen_rich_extrap_init.reset(new xfer::CoarsenAlgorithm(dim));
-        d_coarsen_rich_extrap_final.reset(new xfer::CoarsenAlgorithm(dim));
+        d_coarsen_rich_extrap_init.reset(new SAMRAI::xfer::CoarsenAlgorithm(dim));
+        d_coarsen_rich_extrap_final.reset(new SAMRAI::xfer::CoarsenAlgorithm(dim));
     }
     
-    hier::VariableDatabase* variable_db = hier::VariableDatabase::getDatabase();
+    SAMRAI::hier::VariableDatabase* variable_db = SAMRAI::hier::VariableDatabase::getDatabase();
     
-    const hier::IntVector& zero_ghosts(hier::IntVector::getZero(dim));
+    const SAMRAI::hier::IntVector& zero_ghosts(SAMRAI::hier::IntVector::getZero(dim));
     
     d_all_variables.push_back(var);
     
@@ -2414,7 +2414,7 @@ RungeKuttaLevelIntegrator::registerVariable(
             /*
              * Register variable and context needed for restart.
              */
-            hier::PatchDataRestartManager::getManager()->
+            SAMRAI::hier::PatchDataRestartManager::getManager()->
                 registerPatchDataForRestart(cur_id);
             
             /*
@@ -2425,10 +2425,10 @@ RungeKuttaLevelIntegrator::registerVariable(
              * levels, and fill from new data on same level. If time interpolation operator is NULL,
              * regular and new bdry fill algorithms will use current and new data, respectively.
              */
-            boost::shared_ptr<hier::RefineOperator> refine_op(
+            boost::shared_ptr<SAMRAI::hier::RefineOperator> refine_op(
                 transfer_geom->lookupRefineOperator(var, refine_name));
             
-            boost::shared_ptr<hier::TimeInterpolateOperator> time_int(
+            boost::shared_ptr<SAMRAI::hier::TimeInterpolateOperator> time_int(
                 transfer_geom->lookupTimeInterpolateOperator(var));
             
             d_bdry_fill_advance->registerRefine(
@@ -2438,17 +2438,35 @@ RungeKuttaLevelIntegrator::registerVariable(
             d_fill_new_level->registerRefine(
                 cur_id, cur_id, cur_id, new_id, scr_id, refine_op, time_int);
             
-            /*
-             * Set boundary fill schedules for data used in the intermediate steps of the Runge-Kutta
-             * integration.
-             */
+/*
+ * Set boundary fill schedules for data used in the intermediate steps of the Runge-Kutta
+ * integration.
+ */
+/* ORIGINAL
+for (int sn = 0; sn < d_number_steps; sn++)
+{
+    d_bdry_fill_intermediate[sn]->registerRefine(
+        intermediate_id[sn],
+        scr_id,
+        intermediate_id[sn],
+        refine_op);
+}
+*/
+            
+            boost::shared_ptr<SAMRAI::xfer::VariableFillPattern> fill_pattern(
+                new LayerCellVariableFillPattern(
+                    dim,
+                    ghosts_intermediate,
+                    SAMRAI::hier::IntVector::getZero(dim)));
+            
             for (int sn = 0; sn < d_number_steps; sn++)
             {
                 d_bdry_fill_intermediate[sn]->registerRefine(
                     intermediate_id[sn],
                     scr_id,
                     intermediate_id[sn],
-                    refine_op);
+                    refine_op,
+                    fill_pattern);
             }
             
             /*
@@ -2458,7 +2476,7 @@ RungeKuttaLevelIntegrator::registerVariable(
              * synchronizeLevelWithCoarser routine).
              */
             
-            boost::shared_ptr<hier::CoarsenOperator> coarsen_op(
+            boost::shared_ptr<SAMRAI::hier::CoarsenOperator> coarsen_op(
                 transfer_geom->lookupCoarsenOperator(var, coarsen_name));
             
             d_coarsen_sync_data->registerCoarsen(new_id, new_id, coarsen_op);
@@ -2514,13 +2532,13 @@ RungeKuttaLevelIntegrator::registerVariable(
             /*
              * Register variable and context needed for restart.
              */
-            hier::PatchDataRestartManager::getManager()->
+            SAMRAI::hier::PatchDataRestartManager::getManager()->
             registerPatchDataForRestart(cur_id);
     
             /*
              * Bdry algorithms for input variables will fill from current only.
              */
-            boost::shared_ptr<hier::RefineOperator> refine_op(
+            boost::shared_ptr<SAMRAI::hier::RefineOperator> refine_op(
                 transfer_geom->lookupRefineOperator(var, refine_name));
             
             d_bdry_fill_advance->registerRefine(
@@ -2535,7 +2553,7 @@ RungeKuttaLevelIntegrator::registerVariable(
              * so that all levels are consistent.
              */
             
-            boost::shared_ptr<hier::CoarsenOperator> coarsen_op(
+            boost::shared_ptr<SAMRAI::hier::CoarsenOperator> coarsen_op(
                 transfer_geom->lookupCoarsenOperator(var, coarsen_name));
             
             d_sync_initial_data->registerCoarsen(cur_id, cur_id, coarsen_op);
@@ -2567,10 +2585,10 @@ RungeKuttaLevelIntegrator::registerVariable(
             /*
              * Register variable and context needed for restart.
              */
-            hier::PatchDataRestartManager::getManager()->
+            SAMRAI::hier::PatchDataRestartManager::getManager()->
                 registerPatchDataForRestart(cur_id);
             
-            boost::shared_ptr<hier::RefineOperator> refine_op(
+            boost::shared_ptr<SAMRAI::hier::RefineOperator> refine_op(
                 transfer_geom->lookupRefineOperator(var, refine_name));
             
             d_fill_new_level->registerRefine(
@@ -2581,7 +2599,7 @@ RungeKuttaLevelIntegrator::registerVariable(
              * in the Richardson extrapolation algorithm.
              */
             
-            boost::shared_ptr<hier::CoarsenOperator> coarsen_op(
+            boost::shared_ptr<SAMRAI::hier::CoarsenOperator> coarsen_op(
                 transfer_geom->lookupCoarsenOperator(var, coarsen_name));
             
             d_coarsen_rich_extrap_init->registerCoarsen(cur_id, cur_id, coarsen_op);
@@ -2595,13 +2613,13 @@ RungeKuttaLevelIntegrator::registerVariable(
              * side-centered. Also, for each flux variable, a corresponding "fluxsum" variable is
              * created to manage synchronization of data betweeen patch levels in the hierarchy.
              */
-            const boost::shared_ptr<pdat::FaceVariable<double> > face_var(
-                boost::dynamic_pointer_cast<pdat::FaceVariable<double>,
-                hier::Variable>(var));
+            const boost::shared_ptr<SAMRAI::pdat::FaceVariable<double> > face_var(
+                boost::dynamic_pointer_cast<SAMRAI::pdat::FaceVariable<double>,
+                SAMRAI::hier::Variable>(var));
             
-            const boost::shared_ptr<pdat::SideVariable<double> > side_var(
-                boost::dynamic_pointer_cast<pdat::SideVariable<double>,
-                hier::Variable>(var));
+            const boost::shared_ptr<SAMRAI::pdat::SideVariable<double> > side_var(
+                boost::dynamic_pointer_cast<SAMRAI::pdat::SideVariable<double>,
+                SAMRAI::hier::Variable>(var));
             
             if (face_var)
             {
@@ -2665,15 +2683,15 @@ RungeKuttaLevelIntegrator::registerVariable(
             std::string fsum_name = var_name;
             fsum_name += fs_suffix;
             
-            boost::shared_ptr<hier::Variable> fluxsum;
+            boost::shared_ptr<SAMRAI::hier::Variable> fluxsum;
             
             if (d_flux_is_face)
             {
-                boost::shared_ptr<pdat::FaceDataFactory<double> > fdf(
-                    BOOST_CAST<pdat::FaceDataFactory<double>,
-                    hier::PatchDataFactory>(var->getPatchDataFactory()));
+                boost::shared_ptr<SAMRAI::pdat::FaceDataFactory<double> > fdf(
+                    BOOST_CAST<SAMRAI::pdat::FaceDataFactory<double>,
+                    SAMRAI::hier::PatchDataFactory>(var->getPatchDataFactory()));
                 TBOX_ASSERT(fdf);
-                fluxsum.reset(new pdat::OuterfaceVariable<double>(
+                fluxsum.reset(new SAMRAI::pdat::OuterfaceVariable<double>(
                     dim,
                     fsum_name,
                     fdf->getDepth()));
@@ -2681,11 +2699,11 @@ RungeKuttaLevelIntegrator::registerVariable(
             }
             else
             {
-                boost::shared_ptr<pdat::SideDataFactory<double> > sdf(
-                    BOOST_CAST<pdat::SideDataFactory<double>,
-                    hier::PatchDataFactory>(var->getPatchDataFactory()));
+                boost::shared_ptr<SAMRAI::pdat::SideDataFactory<double> > sdf(
+                    BOOST_CAST<SAMRAI::pdat::SideDataFactory<double>,
+                    SAMRAI::hier::PatchDataFactory>(var->getPatchDataFactory()));
                 TBOX_ASSERT(sdf);
-                fluxsum.reset(new pdat::OutersideVariable<double>(
+                fluxsum.reset(new SAMRAI::pdat::OutersideVariable<double>(
                     dim,
                     fsum_name,
                     sdf->getDepth()));
@@ -2701,7 +2719,7 @@ RungeKuttaLevelIntegrator::registerVariable(
             
             d_fluxsum_data.setFlag(fs_id);
             
-            boost::shared_ptr<hier::CoarsenOperator> coarsen_op(
+            boost::shared_ptr<SAMRAI::hier::CoarsenOperator> coarsen_op(
                 transfer_geom->lookupCoarsenOperator(fluxsum, coarsen_name));
             
             d_coarsen_fluxsum->registerCoarsen(scr_id, fs_id, coarsen_op);
@@ -2772,7 +2790,7 @@ RungeKuttaLevelIntegrator::registerVariable(
  */
 void
 RungeKuttaLevelIntegrator::preprocessFluxAndSourceData(
-    const boost::shared_ptr<hier::PatchLevel>& level,
+    const boost::shared_ptr<SAMRAI::hier::PatchLevel>& level,
     const double cur_time,
     const double new_time,
     const bool regrid_advance,
@@ -2785,7 +2803,7 @@ RungeKuttaLevelIntegrator::preprocessFluxAndSourceData(
     TBOX_ASSERT(level);
     TBOX_ASSERT(cur_time <= new_time);
     
-    hier::VariableDatabase* variable_db = hier::VariableDatabase::getDatabase();
+    SAMRAI::hier::VariableDatabase* variable_db = SAMRAI::hier::VariableDatabase::getDatabase();
     
     const int level_number = level->getLevelNumber();
     
@@ -2817,13 +2835,13 @@ RungeKuttaLevelIntegrator::preprocessFluxAndSourceData(
         {
             level->allocatePatchData(d_fluxsum_data, new_time);
             
-            for (hier::PatchLevel::iterator p(level->begin());
+            for (SAMRAI::hier::PatchLevel::iterator p(level->begin());
                  p != level->end();
                  p++)
             {
-                const boost::shared_ptr<hier::Patch>& patch = *p;
+                const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *p;
                 
-                std::list<boost::shared_ptr<hier::Variable> >::iterator fs_var =
+                std::list<boost::shared_ptr<SAMRAI::hier::Variable> >::iterator fs_var =
                     d_fluxsum_variables.begin();
                 
                 while (fs_var != d_fluxsum_variables.end())
@@ -2835,8 +2853,8 @@ RungeKuttaLevelIntegrator::preprocessFluxAndSourceData(
                     
                     if (d_flux_is_face)
                     {
-                        boost::shared_ptr<pdat::OuterfaceData<double> > fsum_data(
-                            BOOST_CAST<pdat::OuterfaceData<double>, hier::PatchData>(
+                        boost::shared_ptr<SAMRAI::pdat::OuterfaceData<double> > fsum_data(
+                            BOOST_CAST<SAMRAI::pdat::OuterfaceData<double>, SAMRAI::hier::PatchData>(
                                 patch->getPatchData(fsum_id)));
                         
                         TBOX_ASSERT(fsum_data);
@@ -2844,8 +2862,8 @@ RungeKuttaLevelIntegrator::preprocessFluxAndSourceData(
                     }
                     else
                     {
-                        boost::shared_ptr<pdat::OutersideData<double> > fsum_data(
-                            BOOST_CAST<pdat::OutersideData<double>, hier::PatchData>(
+                        boost::shared_ptr<SAMRAI::pdat::OutersideData<double> > fsum_data(
+                            BOOST_CAST<SAMRAI::pdat::OutersideData<double>, SAMRAI::hier::PatchData>(
                                 patch->getPatchData(fsum_id)));
                         
                         TBOX_ASSERT(fsum_data);
@@ -2885,7 +2903,7 @@ RungeKuttaLevelIntegrator::preprocessFluxAndSourceData(
  */
 void
 RungeKuttaLevelIntegrator::postprocessFluxAndSourceData(
-    const boost::shared_ptr<hier::PatchLevel>& level,
+    const boost::shared_ptr<SAMRAI::hier::PatchLevel>& level,
     const bool regrid_advance,
     const bool first_step,
     const bool last_step)
@@ -2894,7 +2912,7 @@ RungeKuttaLevelIntegrator::postprocessFluxAndSourceData(
     
     TBOX_ASSERT(level);
     
-    if (level->getDim() > tbox::Dimension(3))
+    if (level->getDim() > SAMRAI::tbox::Dimension(3))
     {
         TBOX_ERROR("RungeKuttaLevelIntegrator::postprocessFluxAndSourceData : DIM > 3 not implemented"
             << std::endl);
@@ -2908,43 +2926,43 @@ RungeKuttaLevelIntegrator::postprocessFluxAndSourceData(
     
     if (!regrid_advance && (level->getLevelNumber() > 0))
     {
-        for (hier::PatchLevel::iterator p(level->begin());
+        for (SAMRAI::hier::PatchLevel::iterator p(level->begin());
              p != level->end();
              p++)
         {
-            const boost::shared_ptr<hier::Patch>& patch = *p;
+            const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *p;
             
-            std::list<boost::shared_ptr<hier::Variable> >::iterator flux_var =
+            std::list<boost::shared_ptr<SAMRAI::hier::Variable> >::iterator flux_var =
                 d_flux_variables.begin();
-            std::list<boost::shared_ptr<hier::Variable> >::iterator fluxsum_var =
+            std::list<boost::shared_ptr<SAMRAI::hier::Variable> >::iterator fluxsum_var =
                 d_fluxsum_variables.begin();
             
-            const hier::Index& ilo = patch->getBox().lower();
-            const hier::Index& ihi = patch->getBox().upper();
+            const SAMRAI::hier::Index& ilo = patch->getBox().lower();
+            const SAMRAI::hier::Index& ihi = patch->getBox().upper();
             
             while (flux_var != d_flux_variables.end())
             {
-                boost::shared_ptr<hier::PatchData> flux_data(
+                boost::shared_ptr<SAMRAI::hier::PatchData> flux_data(
                     patch->getPatchData(*flux_var, d_scratch));
-                boost::shared_ptr<hier::PatchData> fsum_data(
+                boost::shared_ptr<SAMRAI::hier::PatchData> fsum_data(
                    patch->getPatchData(*fluxsum_var, d_scratch));
                 
-                boost::shared_ptr<pdat::FaceData<double> > fflux_data;
-                boost::shared_ptr<pdat::OuterfaceData<double> > ffsum_data;
+                boost::shared_ptr<SAMRAI::pdat::FaceData<double> > fflux_data;
+                boost::shared_ptr<SAMRAI::pdat::OuterfaceData<double> > ffsum_data;
                 
-                boost::shared_ptr<pdat::SideData<double> > sflux_data;
-                boost::shared_ptr<pdat::OutersideData<double> > sfsum_data;
+                boost::shared_ptr<SAMRAI::pdat::SideData<double> > sflux_data;
+                boost::shared_ptr<SAMRAI::pdat::OutersideData<double> > sfsum_data;
                 
                 int ddepth;
-                hier::IntVector flux_num_ghosts(level->getDim());
+                SAMRAI::hier::IntVector flux_num_ghosts(level->getDim());
                 
                 if (d_flux_is_face)
                 {
                     fflux_data =
-                        BOOST_CAST<pdat::FaceData<double>, hier::PatchData>(
+                        BOOST_CAST<SAMRAI::pdat::FaceData<double>, SAMRAI::hier::PatchData>(
                             flux_data);
                     ffsum_data =
-                        BOOST_CAST<pdat::OuterfaceData<double>, hier::PatchData>(
+                        BOOST_CAST<SAMRAI::pdat::OuterfaceData<double>, SAMRAI::hier::PatchData>(
                             fsum_data);
                     
                     TBOX_ASSERT(fflux_data && ffsum_data);
@@ -2955,10 +2973,10 @@ RungeKuttaLevelIntegrator::postprocessFluxAndSourceData(
                 else
                 {
                     sflux_data =
-                        BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
+                        BOOST_CAST<SAMRAI::pdat::SideData<double>, SAMRAI::hier::PatchData>(
                             flux_data);
                     sfsum_data =
-                        BOOST_CAST<pdat::OutersideData<double>, hier::PatchData>(
+                        BOOST_CAST<SAMRAI::pdat::OutersideData<double>, SAMRAI::hier::PatchData>(
                             fsum_data);
                     
                     TBOX_ASSERT(sflux_data && sfsum_data);
@@ -2972,7 +2990,7 @@ RungeKuttaLevelIntegrator::postprocessFluxAndSourceData(
                     // Loop over lower and upper parts of outer face/side arrays.
                     for (int ifs = 0; ifs < 2; ifs++)
                     {
-                        if (level->getDim() == tbox::Dimension(1))
+                        if (level->getDim() == SAMRAI::tbox::Dimension(1))
                         {
                             SAMRAI_F77_FUNC(upfluxsum1d, UPFLUXSUM1D) (
                                 ilo(0),
@@ -2986,7 +3004,7 @@ RungeKuttaLevelIntegrator::postprocessFluxAndSourceData(
                         {
                             if (d_flux_is_face)
                             {
-                                if (level->getDim() == tbox::Dimension(2))
+                                if (level->getDim() == SAMRAI::tbox::Dimension(2))
                                 {
                                     SAMRAI_F77_FUNC(upfluxsumface2d0, UPFLUXSUMFACE2D0) (
                                         ilo(0),
@@ -3009,7 +3027,7 @@ RungeKuttaLevelIntegrator::postprocessFluxAndSourceData(
                                         fflux_data->getPointer(1, d),
                                         ffsum_data->getPointer(1, ifs, d));
                                 }
-                                if (level->getDim() == tbox::Dimension(3))
+                                if (level->getDim() == SAMRAI::tbox::Dimension(3))
                                 {
                                     SAMRAI_F77_FUNC(upfluxsumface3d0, UPFLUXSUMFACE3D0) (
                                         ilo(0),
@@ -3054,7 +3072,7 @@ RungeKuttaLevelIntegrator::postprocessFluxAndSourceData(
                             }
                             else
                             {
-                                if (level->getDim() == tbox::Dimension(2))
+                                if (level->getDim() == SAMRAI::tbox::Dimension(2))
                                 {
                                     SAMRAI_F77_FUNC(upfluxsumside2d0, UPFLUXSUMSIDE2D0) (
                                         ilo(0),
@@ -3073,7 +3091,7 @@ RungeKuttaLevelIntegrator::postprocessFluxAndSourceData(
                                         sflux_data->getPointer(1, d),
                                         sfsum_data->getPointer(1, ifs, d));
                                 }
-                                if (level->getDim() == tbox::Dimension(3))
+                                if (level->getDim() == SAMRAI::tbox::Dimension(3))
                                 {
                                     SAMRAI_F77_FUNC(upfluxsumside3d0, UPFLUXSUMSIDE3D0) (
                                         ilo(0),
@@ -3128,29 +3146,29 @@ RungeKuttaLevelIntegrator::postprocessFluxAndSourceData(
  */
 void
 RungeKuttaLevelIntegrator::copyTimeDependentData(
-    const boost::shared_ptr<hier::PatchLevel>& level,
-    const boost::shared_ptr<hier::VariableContext>& src_context,
-    const boost::shared_ptr<hier::VariableContext>& dst_context)
+    const boost::shared_ptr<SAMRAI::hier::PatchLevel>& level,
+    const boost::shared_ptr<SAMRAI::hier::VariableContext>& src_context,
+    const boost::shared_ptr<SAMRAI::hier::VariableContext>& dst_context)
 {
     TBOX_ASSERT(level);
     TBOX_ASSERT(src_context);
     TBOX_ASSERT(dst_context);
     
-    for (hier::PatchLevel::iterator ip(level->begin());
+    for (SAMRAI::hier::PatchLevel::iterator ip(level->begin());
          ip != level->end();
          ip++)
     {
-        const boost::shared_ptr<hier::Patch>& patch = *ip;
+        const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
         
-        std::list<boost::shared_ptr<hier::Variable> >::iterator time_dep_var =
+        std::list<boost::shared_ptr<SAMRAI::hier::Variable> >::iterator time_dep_var =
             d_time_dep_variables.begin();
             
         while (time_dep_var != d_time_dep_variables.end())
         {
-            boost::shared_ptr<hier::PatchData> src_data(
+            boost::shared_ptr<SAMRAI::hier::PatchData> src_data(
                 patch->getPatchData(*time_dep_var, src_context));
             
-            boost::shared_ptr<hier::PatchData> dst_data(
+            boost::shared_ptr<SAMRAI::hier::PatchData> dst_data(
                 patch->getPatchData(*time_dep_var, dst_context));
             
             dst_data->copy(*src_data);
@@ -3167,7 +3185,7 @@ RungeKuttaLevelIntegrator::copyTimeDependentData(
  */
 void
 RungeKuttaLevelIntegrator::recordStatistics(
-   const hier::PatchLevel& patch_level,
+   const SAMRAI::hier::PatchLevel& patch_level,
    double current_time)
 {
     const int ln = patch_level.getLevelNumber();
@@ -3183,12 +3201,12 @@ RungeKuttaLevelIntegrator::recordStatistics(
     {
         if (!s_boxes_stat[ln])
         {
-            std::string lnstr = tbox::Utilities::intToString(ln, 1);
-            s_boxes_stat[ln] = tbox::Statistician::getStatistician()->
+            std::string lnstr = SAMRAI::tbox::Utilities::intToString(ln, 1);
+            s_boxes_stat[ln] = SAMRAI::tbox::Statistician::getStatistician()->
                 getStatistic(std::string("HLI_BoxesL") + lnstr, "PROC_STAT");
-            s_cells_stat[ln] = tbox::Statistician::getStatistician()->
+            s_cells_stat[ln] = SAMRAI::tbox::Statistician::getStatistician()->
                 getStatistic(std::string("HLI_CellsL") + lnstr, "PROC_STAT");
-            s_timestamp_stat[ln] = tbox::Statistician::getStatistician()->
+            s_timestamp_stat[ln] = SAMRAI::tbox::Statistician::getStatistician()->
                 getStatistic(std::string("HLI_TimeL") + lnstr, "PROC_STAT");
         }
         
@@ -3214,9 +3232,9 @@ RungeKuttaLevelIntegrator::printStatistics(
     /*
      * Output statistics.
      */
-    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    const SAMRAI::tbox::SAMRAI_MPI& mpi(SAMRAI::tbox::SAMRAI_MPI::getSAMRAIWorld());
     // Collect statistic on mesh size.
-    tbox::Statistician* statn = tbox::Statistician::getStatistician();
+    SAMRAI::tbox::Statistician* statn = SAMRAI::tbox::Statistician::getStatistician();
     
     statn->finalize(false);
     // statn->printLocalStatData(s);
@@ -3227,9 +3245,9 @@ RungeKuttaLevelIntegrator::printStatistics(
         double n_patch_updates = 0; // Number of patch updates.
         for (int ln = 0; ln < static_cast<int>(s_cells_stat.size()); ln++)
         {
-            tbox::Statistic& cstat = *s_cells_stat[ln];
-            tbox::Statistic& bstat = *s_boxes_stat[ln];
-            tbox::Statistic& tstat = *s_timestamp_stat[ln];
+            SAMRAI::tbox::Statistic& cstat = *s_cells_stat[ln];
+            SAMRAI::tbox::Statistic& bstat = *s_boxes_stat[ln];
+            SAMRAI::tbox::Statistic& tstat = *s_timestamp_stat[ln];
             s << "statistic " << cstat.getName() << ":" << std::endl;
             if (0)
             {
@@ -3412,7 +3430,7 @@ RungeKuttaLevelIntegrator::printClassData(
  */
 void
 RungeKuttaLevelIntegrator::putToRestart(
-    const boost::shared_ptr<tbox::Database>& restart_db) const
+    const boost::shared_ptr<SAMRAI::tbox::Database>& restart_db) const
 {
     TBOX_ASSERT(restart_db);
     
@@ -3430,13 +3448,13 @@ RungeKuttaLevelIntegrator::putToRestart(
     
     restart_db->putDatabase("RungeKuttaWeights");
     
-    boost::shared_ptr<tbox::Database> RK_db(restart_db->getDatabase("RungeKuttaWeights"));
+    boost::shared_ptr<SAMRAI::tbox::Database> RK_db(restart_db->getDatabase("RungeKuttaWeights"));
     
     RK_db->putInteger("number_steps", d_number_steps);
     
     for (int i = 0; i < d_number_steps; i++)
     {
-        std::string alpha_array_name = "alpha_" + tbox::Utilities::intToString(i);
+        std::string alpha_array_name = "alpha_" + SAMRAI::tbox::Utilities::intToString(i);
         
         std::vector<double> alpha_array(static_cast<int>(d_alpha[i].size()));
         
@@ -3450,7 +3468,7 @@ RungeKuttaLevelIntegrator::putToRestart(
     
     for (int i = 0; i < d_number_steps; i++)
     {
-        std::string beta_array_name = "beta_" + tbox::Utilities::intToString(i);
+        std::string beta_array_name = "beta_" + SAMRAI::tbox::Utilities::intToString(i);
         
         std::vector<double> beta_array(static_cast<int>(d_beta[i].size()));
         
@@ -3464,7 +3482,7 @@ RungeKuttaLevelIntegrator::putToRestart(
     
     for (int i = 0; i < d_number_steps; i++)
     {
-        std::string gamma_array_name = "gamma_" + tbox::Utilities::intToString(i);
+        std::string gamma_array_name = "gamma_" + SAMRAI::tbox::Utilities::intToString(i);
         
         std::vector<double> gamma_array(static_cast<int>(d_gamma[i].size()));
         
@@ -3487,7 +3505,7 @@ RungeKuttaLevelIntegrator::putToRestart(
  */
 void
 RungeKuttaLevelIntegrator::outputDataStatistics(
-    const boost::shared_ptr<hier::PatchHierarchy>& hierarchy,
+    const boost::shared_ptr<SAMRAI::hier::PatchHierarchy>& hierarchy,
     const double statistics_data_time)
 {
     t_output_data_statistics->start();
@@ -3496,7 +3514,7 @@ RungeKuttaLevelIntegrator::outputDataStatistics(
     
     for (int li = 0; li < num_levels; li++)
     {
-        boost::shared_ptr<hier::PatchLevel> patch_level(
+        boost::shared_ptr<SAMRAI::hier::PatchLevel> patch_level(
             hierarchy->getPatchLevel(li));
         
         patch_level->allocatePatchData(d_saved_var_scratch_data, statistics_data_time);
@@ -3514,7 +3532,7 @@ RungeKuttaLevelIntegrator::outputDataStatistics(
     
     for (int li = 0; li < num_levels; li++)
     {
-        boost::shared_ptr<hier::PatchLevel> patch_level(
+        boost::shared_ptr<SAMRAI::hier::PatchLevel> patch_level(
             hierarchy->getPatchLevel(li));
         
         patch_level->deallocatePatchData(d_temp_var_scratch_data);
@@ -3535,7 +3553,7 @@ RungeKuttaLevelIntegrator::outputDataStatistics(
  */
 void
 RungeKuttaLevelIntegrator::getFromInput(
-    const boost::shared_ptr<tbox::Database>& input_db,
+    const boost::shared_ptr<SAMRAI::tbox::Database>& input_db,
     bool is_from_restart)
 {
     if (!is_from_restart && !input_db)
@@ -3560,11 +3578,12 @@ RungeKuttaLevelIntegrator::getFromInput(
             d_dt = input_db->getDouble("dt");
         }
         
-        d_distinguish_mpi_reduction_costs = input_db->getBoolWithDefault("DEV_distinguish_mpi_reduction_costs", false);
+        d_distinguish_mpi_reduction_costs =
+            input_db->getBoolWithDefault("DEV_distinguish_mpi_reduction_costs", false);
         
         if (input_db->keyExists("RungeKuttaWeights"))
         {
-            boost::shared_ptr<tbox::Database> RK_db(input_db->getDatabase("RungeKuttaWeights"));
+            boost::shared_ptr<SAMRAI::tbox::Database> RK_db(input_db->getDatabase("RungeKuttaWeights"));
             
             d_number_steps = RK_db->getInteger("number_steps");
             
@@ -3574,9 +3593,9 @@ RungeKuttaLevelIntegrator::getFromInput(
             
             for (int sn = 0; sn < d_number_steps; sn++)
             {
-                std::string alpha_array_name = "alpha_" + tbox::Utilities::intToString(sn);
-                std::string beta_array_name = "beta_" + tbox::Utilities::intToString(sn);
-                std::string gamma_array_name = "gamma_" + tbox::Utilities::intToString(sn);
+                std::string alpha_array_name = "alpha_" + SAMRAI::tbox::Utilities::intToString(sn);
+                std::string beta_array_name = "beta_" + SAMRAI::tbox::Utilities::intToString(sn);
+                std::string gamma_array_name = "gamma_" + SAMRAI::tbox::Utilities::intToString(sn);
                 
                 if (RK_db->keyExists(alpha_array_name))
                 {
@@ -3746,8 +3765,8 @@ RungeKuttaLevelIntegrator::getFromInput(
 void
 RungeKuttaLevelIntegrator::getFromRestart()
 {
-    boost::shared_ptr<tbox::Database> root_db(
-        tbox::RestartManager::getManager()->getRootDatabase());
+    boost::shared_ptr<SAMRAI::tbox::Database> root_db(
+        SAMRAI::tbox::RestartManager::getManager()->getRootDatabase());
 
     if (!root_db->isDatabase(d_object_name))
     {
@@ -3755,7 +3774,7 @@ RungeKuttaLevelIntegrator::getFromRestart()
                    << d_object_name
                    << " not found in restart file" << std::endl);
     }
-    boost::shared_ptr<tbox::Database> db(root_db->getDatabase(d_object_name));
+    boost::shared_ptr<SAMRAI::tbox::Database> db(root_db->getDatabase(d_object_name));
     
     int ver = db->getInteger("RUNGE_KUTTA_LEVEL_INTEGRATOR_VERSION");
     if (ver != RUNGE_KUTTA_LEVEL_INTEGRATOR_VERSION)
@@ -3775,7 +3794,7 @@ RungeKuttaLevelIntegrator::getFromRestart()
     d_dt = db->getDouble("dt");
     d_distinguish_mpi_reduction_costs = db->getBool("DEV_distinguish_mpi_reduction_costs");
     
-    boost::shared_ptr<tbox::Database> RK_db(db->getDatabase("RungeKuttaWeights"));
+    boost::shared_ptr<SAMRAI::tbox::Database> RK_db(db->getDatabase("RungeKuttaWeights"));
     
     d_number_steps = RK_db->getInteger("number_steps");
     
@@ -3785,9 +3804,9 @@ RungeKuttaLevelIntegrator::getFromRestart()
     
     for (int sn = 0; sn < d_number_steps; sn++)
     {
-        std::string alpha_array_name = "alpha_" + tbox::Utilities::intToString(sn);
-        std::string beta_array_name = "beta_" + tbox::Utilities::intToString(sn);
-        std::string gamma_array_name = "gamma_" + tbox::Utilities::intToString(sn);
+        std::string alpha_array_name = "alpha_" + SAMRAI::tbox::Utilities::intToString(sn);
+        std::string beta_array_name = "beta_" + SAMRAI::tbox::Utilities::intToString(sn);
+        std::string gamma_array_name = "gamma_" + SAMRAI::tbox::Utilities::intToString(sn);
         
         d_alpha[sn] = RK_db->getDoubleVector(alpha_array_name);
         d_beta[sn] = RK_db->getDoubleVector(beta_array_name);
@@ -3807,71 +3826,71 @@ RungeKuttaLevelIntegrator::initializeCallback()
      * Timers:  one for each of the communication algorithms ("create"
      * indicates schedule creation, "comm" indicates communication)
      */
-    t_advance_bdry_fill_comm = tbox::TimerManager::getManager()->
+    t_advance_bdry_fill_comm = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::advance_bdry_fill_comm");
-    t_error_bdry_fill_create = tbox::TimerManager::getManager()->
+    t_error_bdry_fill_create = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::error_bdry_fill_create");
-    t_error_bdry_fill_comm = tbox::TimerManager::getManager()->
+    t_error_bdry_fill_comm = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::error_bdry_fill_comm");
-    t_barrier_after_error_bdry_fill_comm = tbox::TimerManager::getManager()->
+    t_barrier_after_error_bdry_fill_comm = SAMRAI::tbox::TimerManager::getManager()->
         getTimer( "RungeKuttaLevelIntegrator::barrier_after_error_bdry_fill_comm");
-    t_advance_mpi_reductions = tbox::TimerManager::getManager()->
+    t_advance_mpi_reductions = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::advance_mpi_reductions");
-    t_get_level_dt_mpi_reductions = tbox::TimerManager::getManager()->
+    t_get_level_dt_mpi_reductions = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::get_level_dt_mpi_reductions");
-    t_initialize_level_data = tbox::TimerManager::getManager()->
+    t_initialize_level_data = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::initializeLevelData()");
-    t_init_level_create_sched = tbox::TimerManager::getManager()->
+    t_init_level_create_sched = SAMRAI::tbox::TimerManager::getManager()->
         getTimer( "RungeKuttaLevelIntegrator::initializeLevelData()_createSched");
-    t_init_level_fill_data = tbox::TimerManager::getManager()->
+    t_init_level_fill_data = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::initializeLevelData()_fillData");
-    t_init_level_fill_interior = tbox::TimerManager::getManager()->
+    t_init_level_fill_interior = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::initializeLevelData()_fill_interior");
-    t_advance_bdry_fill_create = tbox::TimerManager::getManager()->
+    t_advance_bdry_fill_create = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::advance_bdry_fill_create");
-    t_new_advance_bdry_fill_create = tbox::TimerManager::getManager()->
+    t_new_advance_bdry_fill_create = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::new_advance_bdry_fill_create");
-    t_apply_value_detector = tbox::TimerManager::getManager()->
+    t_apply_value_detector = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::applyValueDetector()");
-    t_apply_gradient_detector = tbox::TimerManager::getManager()->
+    t_apply_gradient_detector = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::applyGradientDetector()");
-    t_apply_multiresolution_detector = tbox::TimerManager::getManager()->
+    t_apply_multiresolution_detector = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::applyMultiresolutionDetector()");
-    t_apply_integral_detector = tbox::TimerManager::getManager()->
+    t_apply_integral_detector = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::applyIntegralDetector()");
-    t_tag_cells = tbox::TimerManager::getManager()->
+    t_tag_cells = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::tag_cells");
-    t_coarsen_rich_extrap = tbox::TimerManager::getManager()->
+    t_coarsen_rich_extrap = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::coarsen_rich_extrap");
-    t_get_level_dt = tbox::TimerManager::getManager()->
+    t_get_level_dt = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::getLevelDt()");
-    t_get_level_dt_sync = tbox::TimerManager::getManager()->
+    t_get_level_dt_sync = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::getLevelDt()_sync");
-    t_advance_level = tbox::TimerManager::getManager()->
+    t_advance_level = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::advanceLevel()");
-    t_new_advance_bdry_fill_comm = tbox::TimerManager::getManager()->
+    t_new_advance_bdry_fill_comm = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::new_advance_bdry_fill_comm");
-    t_patch_num_kernel = tbox::TimerManager::getManager()->
+    t_patch_num_kernel = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::patch_numerical_kernels");
-    t_advance_level_sync = tbox::TimerManager::getManager()->
+    t_advance_level_sync = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::advanceLevel()_sync");
-    t_std_level_sync = tbox::TimerManager::getManager()->
+    t_std_level_sync = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::standardLevelSynchronization()");
-    t_sync_new_levels = tbox::TimerManager::getManager()->
+    t_sync_new_levels = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::synchronizeNewLevels()");
-    t_sync_initial_create = tbox::TimerManager::getManager()->
+    t_sync_initial_create = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::sync_initial_create");
-    t_sync_initial_comm = tbox::TimerManager::getManager()->
+    t_sync_initial_comm = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::sync_initial_comm");
-    t_coarsen_fluxsum_create = tbox::TimerManager::getManager()->
+    t_coarsen_fluxsum_create = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::coarsen_fluxsum_create");
-    t_coarsen_fluxsum_comm = tbox::TimerManager::getManager()->
+    t_coarsen_fluxsum_comm = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::coarsen_fluxsum_comm");
-    t_coarsen_sync_create = tbox::TimerManager::getManager()->
+    t_coarsen_sync_create = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::coarsen_sync_create");
-    t_coarsen_sync_comm = tbox::TimerManager::getManager()->
+    t_coarsen_sync_comm = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::coarsen_sync_comm");
-    t_output_data_statistics = tbox::TimerManager::getManager()->
+    t_output_data_statistics = SAMRAI::tbox::TimerManager::getManager()->
         getTimer("RungeKuttaLevelIntegrator::output_data_statistics");
 }
 

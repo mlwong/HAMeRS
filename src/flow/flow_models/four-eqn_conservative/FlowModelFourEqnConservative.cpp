@@ -1132,7 +1132,8 @@ FlowModelFourEqnConservative::unregisterPatch()
  * Compute global cell data of different registered derived variables with the registered data context.
  */
 void
-FlowModelFourEqnConservative::computeGlobalDerivedCellData()
+FlowModelFourEqnConservative::computeGlobalDerivedCellData(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     // Check whether a patch is already registered.
     if (!d_patch)
@@ -1146,14 +1147,18 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData()
     /*
      * Set the boxes and their dimensions for the derived cell variables.
      */
-    setGhostBoxesAndDimensionsDerivedCellVariables();
+    if (!d_global_derived_cell_data_computed)
+    {
+        setGhostBoxesAndDimensionsDerivedCellVariables();
+    }
     
     // Compute the total density cell data.
     if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
     {
         if (!d_data_density)
         {
-            computeGlobalCellDataDensity();
+            computeGlobalCellDataDensity(
+                computing_option);
         }
     }
     
@@ -1162,7 +1167,8 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData()
     {
         if (!d_data_mass_fraction)
         {
-            computeGlobalCellDataMassFractionWithDensity();
+            computeGlobalCellDataMassFractionWithDensity(
+                computing_option);
         }
     }
     
@@ -1171,7 +1177,8 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData()
     {
         if (!d_data_velocity)
         {
-            computeGlobalCellDataVelocityWithDensity();
+            computeGlobalCellDataVelocityWithDensity(
+                computing_option);
         }
     }
     
@@ -1180,7 +1187,8 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData()
     {
         if (!d_data_internal_energy)
         {
-            computeGlobalCellDataInternalEnergyWithDensityAndVelocity();
+            computeGlobalCellDataInternalEnergyWithDensityAndVelocity(
+                computing_option);
         }
     }
     
@@ -1189,7 +1197,8 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData()
     {
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+            computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy(
+                computing_option);
         }
     }
     
@@ -1198,7 +1207,8 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData()
     {
         if (!d_data_sound_speed)
         {
-            computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
+            computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure(
+                computing_option);
         }
     }
     
@@ -1207,7 +1217,8 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData()
     {
         if (!d_data_temperature)
         {
-            computeGlobalCellDataTemperatureWithDensityMassFractionAndPressure();
+            computeGlobalCellDataTemperatureWithDensityMassFractionAndPressure(
+                computing_option);
         }
     }
     
@@ -1216,7 +1227,8 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData()
     {
         if (!d_data_dilatation)
         {
-            computeGlobalCellDataDilatationWithDensityAndVelocity();
+            computeGlobalCellDataDilatationWithDensityAndVelocity(
+                computing_option);
         }
     }
     
@@ -1225,7 +1237,8 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData()
     {
         if (!d_data_vorticity)
         {
-            computeGlobalCellDataVorticityWithDensityAndVelocity();
+            computeGlobalCellDataVorticityWithDensityAndVelocity(
+                computing_option);
         }
     }
     
@@ -1234,7 +1247,8 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData()
     {
         if (!d_data_enstrophy)
         {
-            computeGlobalCellDataEnstrophyWithVorticity();
+            computeGlobalCellDataEnstrophyWithVorticity(
+                computing_option);
         }
     }
     
@@ -1243,7 +1257,9 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData()
     {
         if (!d_data_convective_flux_x)
         {
-            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(DIRECTION::X_DIRECTION);
+            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
+                DIRECTION::X_DIRECTION,
+                computing_option);
         }
     }
     
@@ -1252,7 +1268,9 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData()
     {
         if (!d_data_convective_flux_y)
         {
-            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(DIRECTION::Y_DIRECTION);
+            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
+                DIRECTION::Y_DIRECTION,
+                computing_option);
         }
     }
     
@@ -1261,7 +1279,9 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData()
     {
         if (!d_data_convective_flux_z)
         {
-            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(DIRECTION::Z_DIRECTION);
+            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
+                DIRECTION::Z_DIRECTION,
+                computing_option);
         }
     }
     
@@ -1270,7 +1290,9 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData()
     {
         if (!d_data_max_wave_speed_x)
         {
-            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(DIRECTION::X_DIRECTION);
+            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
+                DIRECTION::X_DIRECTION,
+                computing_option);
         }
     }
     
@@ -1279,7 +1301,9 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData()
     {
         if (!d_data_max_wave_speed_y)
         {
-            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(DIRECTION::Y_DIRECTION);
+            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
+                DIRECTION::Y_DIRECTION,
+                computing_option);
         }
     }
     
@@ -1288,7 +1312,9 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData()
     {
         if (!d_data_max_wave_speed_z)
         {
-            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(DIRECTION::Z_DIRECTION);
+            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
+                DIRECTION::Z_DIRECTION,
+                computing_option);
         }
     }
     
@@ -1297,7 +1323,8 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData()
     {
         if (!d_data_max_diffusivity)
         {
-            computeGlobalCellDataMaxDiffusivityWithDensityMassFractionPressureAndTemperature();
+            computeGlobalCellDataMaxDiffusivityWithDensityMassFractionPressureAndTemperature(
+                computing_option);
         }
     }
     
@@ -1642,12 +1669,18 @@ FlowModelFourEqnConservative::getGlobalCellDataPrimitiveVariables()
     global_cell_data.push_back(getGlobalCellDataPartialDensity());
     if (!d_data_velocity)
     {
-        computeGlobalCellDataVelocityWithDensity();
+        TBOX_ERROR(d_object_name
+            << ": FlowModelFourEqnConservative::getGlobalCellDataPrimitiveVariables()\n"
+            << "Cell data of 'VELOCITY' is not registered/computed yet."
+            << std::endl);
     }
     global_cell_data.push_back(d_data_velocity);
     if (!d_data_pressure)
     {
-        computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+        TBOX_ERROR(d_object_name
+            << ": FlowModelFourEqnConservative::getGlobalCellDataPrimitiveVariables()\n"
+            << "Cell data of 'PRESSURE' is not registered/computed yet."
+            << std::endl);
     }
     global_cell_data.push_back(d_data_pressure);
     
@@ -10721,7 +10754,8 @@ FlowModelFourEqnConservative::getGlobalCellDataTotalEnergy()
  * Compute the global cell data of density in the registered patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataDensity()
+FlowModelFourEqnConservative::computeGlobalCellDataDensity(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
     {
@@ -10849,7 +10883,8 @@ FlowModelFourEqnConservative::computeGlobalCellDataDensity()
  * Compute the global cell data of mass fraction with density in the registered patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataMassFractionWithDensity()
+FlowModelFourEqnConservative::computeGlobalCellDataMassFractionWithDensity(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
     {
@@ -10980,7 +11015,8 @@ FlowModelFourEqnConservative::computeGlobalCellDataMassFractionWithDensity()
  * Compute the global cell data of velocity with density in the registered patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataVelocityWithDensity()
+FlowModelFourEqnConservative::computeGlobalCellDataVelocityWithDensity(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
     {
@@ -11116,7 +11152,8 @@ FlowModelFourEqnConservative::computeGlobalCellDataVelocityWithDensity()
  * patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataInternalEnergyWithDensityAndVelocity()
+FlowModelFourEqnConservative::computeGlobalCellDataInternalEnergyWithDensityAndVelocity(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_internal_energy > -hier::IntVector::getOne(d_dim))
     {
@@ -11260,7 +11297,8 @@ FlowModelFourEqnConservative::computeGlobalCellDataInternalEnergyWithDensityAndV
  * the registered patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy()
+FlowModelFourEqnConservative::computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
     {
@@ -11429,7 +11467,8 @@ FlowModelFourEqnConservative::computeGlobalCellDataPressureWithDensityMassFracti
  * registered patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure()
+FlowModelFourEqnConservative::computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
     {
@@ -11598,7 +11637,8 @@ FlowModelFourEqnConservative::computeGlobalCellDataSoundSpeedWithDensityMassFrac
  * registered patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataTemperatureWithDensityMassFractionAndPressure()
+FlowModelFourEqnConservative::computeGlobalCellDataTemperatureWithDensityMassFractionAndPressure(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_temperature > -hier::IntVector::getOne(d_dim))
     {
@@ -11766,7 +11806,8 @@ FlowModelFourEqnConservative::computeGlobalCellDataTemperatureWithDensityMassFra
  * Compute the global cell data of dilatation with density and velocity in the registered patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataDilatationWithDensityAndVelocity()
+FlowModelFourEqnConservative::computeGlobalCellDataDilatationWithDensityAndVelocity(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_dilatation > -hier::IntVector::getOne(d_dim))
     {
@@ -12756,7 +12797,8 @@ FlowModelFourEqnConservative::computeGlobalCellDataDilatationWithDensityAndVeloc
  * Compute the global cell data of vorticity with density and velocity in the registered patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataVorticityWithDensityAndVelocity()
+FlowModelFourEqnConservative::computeGlobalCellDataVorticityWithDensityAndVelocity(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_vorticity > -hier::IntVector::getOne(d_dim))
     {
@@ -13705,7 +13747,8 @@ FlowModelFourEqnConservative::computeGlobalCellDataVorticityWithDensityAndVeloci
  * Compute the global cell data of enstrophy with vorticity in the registered patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataEnstrophyWithVorticity()
+FlowModelFourEqnConservative::computeGlobalCellDataEnstrophyWithVorticity(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_enstrophy > -hier::IntVector::getOne(d_dim))
     {
@@ -13809,7 +13852,8 @@ FlowModelFourEqnConservative::computeGlobalCellDataEnstrophyWithVorticity()
  */
 void
 FlowModelFourEqnConservative::computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
-    DIRECTION::TYPE direction)
+    const DIRECTION::TYPE& direction,
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (direction == DIRECTION::X_DIRECTION)
     {
@@ -14276,7 +14320,8 @@ FlowModelFourEqnConservative::computeGlobalCellDataConvectiveFluxWithVelocityAnd
  */
 void
 FlowModelFourEqnConservative::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
-    DIRECTION::TYPE direction)
+    const DIRECTION::TYPE& direction,
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (direction == DIRECTION::X_DIRECTION)
     {
@@ -14574,7 +14619,8 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSo
  * and temperature in the registered patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataMaxDiffusivityWithDensityMassFractionPressureAndTemperature()
+FlowModelFourEqnConservative::computeGlobalCellDataMaxDiffusivityWithDensityMassFractionPressureAndTemperature(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (!d_equation_of_mass_diffusivity_mixing_rules ||
         !d_equation_of_shear_viscosity_mixing_rules ||

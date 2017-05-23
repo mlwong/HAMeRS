@@ -63,7 +63,82 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
         d_subghostcell_dims_max_wave_speed_y(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_max_wave_speed_z(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_max_diffusivity(hier::IntVector::getZero(d_dim)),
-        d_subghostcell_dims_diffusivities(hier::IntVector::getZero(d_dim))
+        d_subghostcell_dims_diffusivities(hier::IntVector::getZero(d_dim)),
+        d_interior_computed_velocity(false),
+        d_interior_computed_internal_energy(false),
+        d_interior_computed_pressure(false),
+        d_interior_computed_sound_speed(false),
+        d_interior_computed_temperature(false),
+        d_interior_computed_dilatation(false),
+        d_interior_computed_vorticity(false),
+        d_interior_computed_enstrophy(false),
+        d_interior_computed_convective_flux_x(false),
+        d_interior_computed_convective_flux_y(false),
+        d_interior_computed_convective_flux_z(false),
+        d_interior_computed_max_wave_speed_x(false),
+        d_interior_computed_max_wave_speed_y(false),
+        d_interior_computed_max_wave_speed_z(false),
+        d_interior_computed_max_diffusivity(false),
+        d_ghost_x_computed_velocity(false),
+        d_ghost_x_computed_internal_energy(false),
+        d_ghost_x_computed_pressure(false),
+        d_ghost_x_computed_sound_speed(false),
+        d_ghost_x_computed_temperature(false),
+        d_ghost_x_computed_dilatation(false),
+        d_ghost_x_computed_vorticity(false),
+        d_ghost_x_computed_enstrophy(false),
+        d_ghost_x_computed_convective_flux_x(false),
+        d_ghost_x_computed_convective_flux_y(false),
+        d_ghost_x_computed_convective_flux_z(false),
+        d_ghost_x_computed_max_wave_speed_x(false),
+        d_ghost_x_computed_max_wave_speed_y(false),
+        d_ghost_x_computed_max_wave_speed_z(false),
+        d_ghost_x_computed_max_diffusivity(false),
+        d_ghost_y_computed_velocity(false),
+        d_ghost_y_computed_internal_energy(false),
+        d_ghost_y_computed_pressure(false),
+        d_ghost_y_computed_sound_speed(false),
+        d_ghost_y_computed_temperature(false),
+        d_ghost_y_computed_dilatation(false),
+        d_ghost_y_computed_vorticity(false),
+        d_ghost_y_computed_enstrophy(false),
+        d_ghost_y_computed_convective_flux_x(false),
+        d_ghost_y_computed_convective_flux_y(false),
+        d_ghost_y_computed_convective_flux_z(false),
+        d_ghost_y_computed_max_wave_speed_x(false),
+        d_ghost_y_computed_max_wave_speed_y(false),
+        d_ghost_y_computed_max_wave_speed_z(false),
+        d_ghost_y_computed_max_diffusivity(false),
+        d_ghost_z_computed_velocity(false),
+        d_ghost_z_computed_internal_energy(false),
+        d_ghost_z_computed_pressure(false),
+        d_ghost_z_computed_sound_speed(false),
+        d_ghost_z_computed_temperature(false),
+        d_ghost_z_computed_dilatation(false),
+        d_ghost_z_computed_vorticity(false),
+        d_ghost_z_computed_enstrophy(false),
+        d_ghost_z_computed_convective_flux_x(false),
+        d_ghost_z_computed_convective_flux_y(false),
+        d_ghost_z_computed_convective_flux_z(false),
+        d_ghost_z_computed_max_wave_speed_x(false),
+        d_ghost_z_computed_max_wave_speed_y(false),
+        d_ghost_z_computed_max_wave_speed_z(false),
+        d_ghost_z_computed_max_diffusivity(false),
+        d_ghost_corners_computed_velocity(false),
+        d_ghost_corners_computed_internal_energy(false),
+        d_ghost_corners_computed_pressure(false),
+        d_ghost_corners_computed_sound_speed(false),
+        d_ghost_corners_computed_temperature(false),
+        d_ghost_corners_computed_dilatation(false),
+        d_ghost_corners_computed_vorticity(false),
+        d_ghost_corners_computed_enstrophy(false),
+        d_ghost_corners_computed_convective_flux_x(false),
+        d_ghost_corners_computed_convective_flux_y(false),
+        d_ghost_corners_computed_convective_flux_z(false),
+        d_ghost_corners_computed_max_wave_speed_x(false),
+        d_ghost_corners_computed_max_wave_speed_y(false),
+        d_ghost_corners_computed_max_wave_speed_z(false),
+        d_ghost_corners_computed_max_diffusivity(false)
 {
     d_eqn_form.reserve(d_num_eqn);
     
@@ -1067,7 +1142,8 @@ FlowModelSingleSpecies::unregisterPatch()
  * Compute global cell data of different registered derived variables with the registered data context.
  */
 void
-FlowModelSingleSpecies::computeGlobalDerivedCellData()
+FlowModelSingleSpecies::computeGlobalDerivedCellData(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     // Check whether a patch is already registered.
     if (!d_patch)
@@ -1081,14 +1157,18 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     /*
      * Set the boxes and their dimensions for the derived cell variables.
      */
-    setGhostBoxesAndDimensionsDerivedCellVariables();
+    if (!d_global_derived_cell_data_computed)
+    {
+        setGhostBoxesAndDimensionsDerivedCellVariables();
+    }
     
     // Compute the velocity cell data.
     if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
     {
         if (!d_data_velocity)
         {
-            computeGlobalCellDataVelocity();
+            computeGlobalCellDataVelocity(
+                computing_option);
         }
     }
     
@@ -1097,7 +1177,8 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_internal_energy)
         {
-            computeGlobalCellDataInternalEnergyWithVelocity();
+            computeGlobalCellDataInternalEnergyWithVelocity(
+                computing_option);
         }
     }
     
@@ -1106,7 +1187,8 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithInternalEnergy();
+            computeGlobalCellDataPressureWithInternalEnergy(
+                computing_option);
         }
     }
     
@@ -1115,7 +1197,8 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_sound_speed)
         {
-            computeGlobalCellDataSoundSpeedWithPressure();
+            computeGlobalCellDataSoundSpeedWithPressure(
+                computing_option);
         }
     }
     
@@ -1124,7 +1207,8 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_temperature)
         {
-            computeGlobalCellDataTemperatureWithPressure();
+            computeGlobalCellDataTemperatureWithPressure(
+                computing_option);
         }
     }
     
@@ -1133,7 +1217,8 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_dilatation)
         {
-            computeGlobalCellDataDilatationWithVelocity();
+            computeGlobalCellDataDilatationWithVelocity(
+                computing_option);
         }
     }
     
@@ -1142,7 +1227,8 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_vorticity)
         {
-            computeGlobalCellDataVorticityWithVelocity();
+            computeGlobalCellDataVorticityWithVelocity(
+                computing_option);
         }
     }
     
@@ -1151,7 +1237,8 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_enstrophy)
         {
-            computeGlobalCellDataEnstrophyWithVorticity();
+            computeGlobalCellDataEnstrophyWithVorticity(
+                computing_option);
         }
     }
     
@@ -1160,7 +1247,9 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_convective_flux_x)
         {
-            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(DIRECTION::X_DIRECTION);
+            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
+                DIRECTION::X_DIRECTION,
+                computing_option);
         }
     }
     
@@ -1169,7 +1258,9 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_convective_flux_y)
         {
-            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(DIRECTION::Y_DIRECTION);
+            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
+                DIRECTION::Y_DIRECTION,
+                computing_option);
         }
     }
     
@@ -1178,7 +1269,9 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_convective_flux_z)
         {
-            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(DIRECTION::Z_DIRECTION);
+            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
+                DIRECTION::Z_DIRECTION,
+                computing_option);
         }
     }
     
@@ -1187,7 +1280,9 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_max_wave_speed_x)
         {
-            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(DIRECTION::X_DIRECTION);
+            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
+                DIRECTION::X_DIRECTION,
+                computing_option);
         }
     }
     
@@ -1196,7 +1291,9 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_max_wave_speed_y)
         {
-            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(DIRECTION::Y_DIRECTION);
+            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
+                DIRECTION::Y_DIRECTION,
+                computing_option);
         }
     }
     
@@ -1205,7 +1302,9 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_max_wave_speed_z)
         {
-            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(DIRECTION::Z_DIRECTION);
+            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
+                DIRECTION::Z_DIRECTION,
+                computing_option);
         }
     }
     
@@ -1214,7 +1313,8 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_max_diffusivity)
         {
-            computeGlobalCellDataMaxDiffusivityWithPressureAndTemperature();
+            computeGlobalCellDataMaxDiffusivityWithPressureAndTemperature(
+                computing_option);
         }
     }
     
@@ -1537,12 +1637,18 @@ FlowModelSingleSpecies::getGlobalCellDataPrimitiveVariables()
     global_cell_data.push_back(getGlobalCellDataDensity());
     if (!d_data_velocity)
     {
-        computeGlobalCellDataVelocity();
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::getGlobalCellDataPrimitiveVariables()\n"
+            << "Cell data of 'VELOCITY' is not registered/computed yet."
+            << std::endl);
     }
     global_cell_data.push_back(d_data_velocity);
     if (!d_data_pressure)
     {
-        computeGlobalCellDataPressureWithInternalEnergy();
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::getGlobalCellDataPrimitiveVariables()\n"
+            << "Cell data of 'PRESSURE' is not registered/computed yet."
+            << std::endl);
     }
     global_cell_data.push_back(d_data_pressure);
     
@@ -7351,7 +7457,8 @@ FlowModelSingleSpecies::getGlobalCellDataTotalEnergy()
  * Compute the global cell data of velocity in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataVelocity()
+FlowModelSingleSpecies::computeGlobalCellDataVelocity(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
     {
@@ -7476,7 +7583,8 @@ FlowModelSingleSpecies::computeGlobalCellDataVelocity()
  * Compute the global cell data of internal energy with velocity in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataInternalEnergyWithVelocity()
+FlowModelSingleSpecies::computeGlobalCellDataInternalEnergyWithVelocity(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_internal_energy > -hier::IntVector::getOne(d_dim))
     {
@@ -7615,7 +7723,8 @@ FlowModelSingleSpecies::computeGlobalCellDataInternalEnergyWithVelocity()
  * Compute the global cell data of pressure with internal energy in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataPressureWithInternalEnergy()
+FlowModelSingleSpecies::computeGlobalCellDataPressureWithInternalEnergy(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
     {
@@ -7746,7 +7855,8 @@ FlowModelSingleSpecies::computeGlobalCellDataPressureWithInternalEnergy()
  * Compute the global cell data of sound speed with pressure in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure()
+FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
     {
@@ -7876,7 +7986,8 @@ FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure()
  * Compute the global cell data of temperature with pressure in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataTemperatureWithPressure()
+FlowModelSingleSpecies::computeGlobalCellDataTemperatureWithPressure(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_temperature > -hier::IntVector::getOne(d_dim))
     {
@@ -8006,7 +8117,8 @@ FlowModelSingleSpecies::computeGlobalCellDataTemperatureWithPressure()
  * Compute the global cell data of dilatation with velocity in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataDilatationWithVelocity()
+FlowModelSingleSpecies::computeGlobalCellDataDilatationWithVelocity(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_dilatation > -hier::IntVector::getOne(d_dim))
     {
@@ -8362,7 +8474,8 @@ FlowModelSingleSpecies::computeGlobalCellDataDilatationWithVelocity()
  * Compute the global cell data of vorticity with velocity in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataVorticityWithVelocity()
+FlowModelSingleSpecies::computeGlobalCellDataVorticityWithVelocity(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_vorticity > -hier::IntVector::getOne(d_dim))
     {
@@ -8695,7 +8808,8 @@ FlowModelSingleSpecies::computeGlobalCellDataVorticityWithVelocity()
  * Compute the global cell data of enstrophy with vorticity in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataEnstrophyWithVorticity()
+FlowModelSingleSpecies::computeGlobalCellDataEnstrophyWithVorticity(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_enstrophy > -hier::IntVector::getOne(d_dim))
     {
@@ -8797,7 +8911,9 @@ FlowModelSingleSpecies::computeGlobalCellDataEnstrophyWithVorticity()
  * Compute the global cell data of convective flux with velocity and pressure in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(DIRECTION::TYPE direction)
+FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
+    const DIRECTION::TYPE& direction,
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (direction == DIRECTION::X_DIRECTION)
     {
@@ -9210,7 +9326,9 @@ FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithVelocityAndPressu
  * Compute the global cell data of maximum wave speed with velocity and sound speed in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(DIRECTION::TYPE direction)
+FlowModelSingleSpecies::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
+    const DIRECTION::TYPE& direction,
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (direction == DIRECTION::X_DIRECTION)
     {
@@ -9502,7 +9620,8 @@ FlowModelSingleSpecies::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpe
  * Compute the global cell data of maximum diffusivity with pressure and temperature in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataMaxDiffusivityWithPressureAndTemperature()
+FlowModelSingleSpecies::computeGlobalCellDataMaxDiffusivityWithPressureAndTemperature(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (!d_equation_of_shear_viscosity_mixing_rules ||
         !d_equation_of_bulk_viscosity_mixing_rules ||
