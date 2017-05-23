@@ -441,6 +441,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 
                 const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
@@ -463,9 +468,34 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                     
                     for (int i = 0; i < interior_dim_0; i++)
                     {
+                        /*
+                         * Compute the index of the data point and count how many times the data is repeated.
+                         */
+                        
+                        const hier::Index idx_pt(tbox::Dimension(1), idx_lo_0 + i);
+                        
+                        int n_overlapped = 1;
+                        
+                        for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                patch_overlapped_visible_boxes.begin());
+                             iob != patch_overlapped_visible_boxes.end();
+                             iob++)
+                        {
+                            const hier::Box& patch_overlapped_visible_box = *iob;
+                            
+                            if (patch_overlapped_visible_box.contains(idx_pt))
+                            {
+                                n_overlapped++;
+                            }
+                        }
+                        
+                        /*
+                         * Compute the linear index and the data to add.
+                         */
+                        
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
                         
-                        const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0);
+                        const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)/((double) n_overlapped);
                         
                         for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                         {
@@ -565,17 +595,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
             
             const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
             
-            /*
-             * Get the global box containers.
-             */
-            
-            /*
-            const hier::BoxLevel& globalized_box_level =
-                patch_level->getGlobalizedBoxLevel();
-            
-            const hier::BoxContainer& global_boxes = globalized_box_level.getGlobalBoxes();
-            */
-            
             for (hier::PatchLevel::iterator ip(patch_level->begin());
                  ip != patch_level->end();
                  ip++)
@@ -657,6 +676,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
                     const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
@@ -664,31 +684,13 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                     {
                         for (int i = 0; i < interior_dim_0; i++)
                         {
-                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
-                            
-                            const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)*weight;
-                            
-                            hier::Index idx_pt(index_lo[0] + i, index_lo[1] + j);
-                            
                             /*
-                            int counter = 0;
+                             * Compute the index of the data point and count how many times the data is repeated.
+                             */
                             
-                            for (hier::BoxContainer::BoxContainerConstIterator igb(
-                                    global_boxes.begin());
-                                 igb != global_boxes.end();
-                                 igb++)
-                            {
-                                const hier::Box& global_box = *igb;
-                                
-                                if (global_box.contains(idx_pt))
-                                {
-                                    counter++;
-                                }
-                            }
-                            */
+                            const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j);
                             
-                            int counter = 1;
+                            int n_overlapped = 1;
                             
                             for (hier::BoxContainer::BoxContainerConstIterator iob(
                                     patch_overlapped_visible_boxes.begin());
@@ -699,15 +701,24 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                                 
                                 if (patch_overlapped_visible_box.contains(idx_pt))
                                 {
-                                    counter++;
+                                    n_overlapped++;
                                 }
                             }
+                            
+                            /*
+                             * Compute the linear index and the data to add.
+                             */
+                            
+                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                            
+                            const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)*weight/((double) n_overlapped);
                             
                             for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                             {
                                 const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
                                 
-                                Y_avg_local[idx_fine] += value_to_add/((double) counter);
+                                Y_avg_local[idx_fine] += value_to_add;
                             }
                         }
                     }
@@ -855,6 +866,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
@@ -882,6 +898,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
                     const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -892,12 +910,37 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                         {
                             for (int i = 0; i < interior_dim_0; i++)
                             {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear index and the data to add.
+                                 */
+                                
                                 const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
                                     (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
                                         ghostcell_dim_1_mass_fraction;
                                 
-                                const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)*weight;
+                                const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)*weight/((double) n_overlapped);
                                 
                                 for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                                 {
@@ -1148,6 +1191,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
@@ -1171,6 +1219,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
+                    const int idx_lo_0 = index_lo[0];
                     const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
@@ -1179,10 +1228,35 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
                     {
                         for (int i = 0; i < interior_dim_0; i++)
                         {
+                            /*
+                             * Compute the index of the data point and count how many times the data is repeated.
+                             */
+                            
+                            const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j);
+                            
+                            int n_overlapped = 1;
+                            
+                            for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                    patch_overlapped_visible_boxes.begin());
+                                 iob != patch_overlapped_visible_boxes.end();
+                                 iob++)
+                            {
+                                const hier::Box& patch_overlapped_visible_box = *iob;
+                                
+                                if (patch_overlapped_visible_box.contains(idx_pt))
+                                {
+                                    n_overlapped++;
+                                }
+                            }
+                            
+                            /*
+                             * Compute the linear index and the data to add.
+                             */
+                            
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
                             
-                            const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)*weight;
+                            const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)*weight/((double) n_overlapped);
                             
                             for (int jj = 0; jj < ratioToFinestLevel_1; jj++)
                             {
@@ -1336,6 +1410,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
@@ -1362,7 +1441,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
+                    const int idx_lo_0 = index_lo[0];
                     const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -1373,12 +1454,37 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
                         {
                             for (int i = 0; i < interior_dim_0; i++)
                             {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear index and the data to add.
+                                 */
+                                
                                 const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
                                     (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
                                         ghostcell_dim_1_mass_fraction;
                                 
-                                const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)*weight;
+                                const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)*weight/((double) n_overlapped);
                                 
                                 for (int jj = 0; jj < ratioToFinestLevel_1; jj++)
                                 {
@@ -1637,6 +1743,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInZDirection(
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
@@ -1663,6 +1774,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInZDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
                     const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
@@ -1674,12 +1787,37 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInZDirection(
                         {
                             for (int i = 0; i < interior_dim_0; i++)
                             {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear index and the data to add.
+                                 */
+                                
                                 const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
                                     (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
                                         ghostcell_dim_1_mass_fraction;
                                 
-                                const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)*weight;
+                                const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)*weight/((double) n_overlapped);
                                 
                                 for (int kk = 0; kk < ratioToFinestLevel_2; kk++)
                                 {
@@ -1914,6 +2052,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 
                 const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
@@ -1936,11 +2079,39 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                     
                     for (int i = 0; i < interior_dim_0; i++)
                     {
+                        /*
+                         * Compute the index of the data point and count how many times the data is repeated.
+                         */
+                        
+                        const hier::Index idx_pt(tbox::Dimension(1), idx_lo_0 + i);
+                        
+                        int n_overlapped = 1;
+                        
+                        for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                patch_overlapped_visible_boxes.begin());
+                             iob != patch_overlapped_visible_boxes.end();
+                             iob++)
+                        {
+                            const hier::Box& patch_overlapped_visible_box = *iob;
+                            
+                            if (patch_overlapped_visible_box.contains(idx_pt))
+                            {
+                                n_overlapped++;
+                            }
+                        }
+                        
+                        /*
+                         * Compute the linear index and the data to add.
+                         */
+                        
                         const int idx = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
                         
                         const double Y_bounded = fmax(fmin(Y[idx], 1.0), 0.0);
-                        const double value_to_add = Y_bounded;
-                        const double product_to_add = (Y_bounded)*(1.0 - Y_bounded);
+                        
+                        const double weight_local = 1.0/((double) n_overlapped);
+                        
+                        const double value_to_add = Y_bounded*weight_local;
+                        const double product_to_add = Y_bounded*(1.0 - Y_bounded)*weight_local;
                         
                         for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                         {
@@ -2110,6 +2281,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
@@ -2134,6 +2310,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
                     const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
@@ -2141,12 +2318,40 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                     {
                         for (int i = 0; i < interior_dim_0; i++)
                         {
+                            /*
+                             * Compute the index of the data point and count how many times the data is repeated.
+                             */
+                            
+                            const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j);
+                            
+                            int n_overlapped = 1;
+                            
+                            for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                    patch_overlapped_visible_boxes.begin());
+                                 iob != patch_overlapped_visible_boxes.end();
+                                 iob++)
+                            {
+                                const hier::Box& patch_overlapped_visible_box = *iob;
+                                
+                                if (patch_overlapped_visible_box.contains(idx_pt))
+                                {
+                                    n_overlapped++;
+                                }
+                            }
+                            
+                            /*
+                             * Compute the linear index and the data to add.
+                             */
+                            
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
                             
                             const double Y_bounded = fmax(fmin(Y[idx], 1.0), 0.0);
-                            const double value_to_add = Y_bounded*weight;
-                            const double product_to_add = (Y_bounded)*(1.0 - Y_bounded)*weight;
+                            
+                            const double weight_local = weight/((double) n_overlapped);
+                            
+                            const double value_to_add = Y_bounded*weight_local;
+                            const double product_to_add = Y_bounded*(1.0 - Y_bounded)*weight_local;
                             
                             for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                             {
@@ -2318,6 +2523,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
@@ -2345,6 +2555,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
                     const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -2355,14 +2567,42 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                         {
                             for (int i = 0; i < interior_dim_0; i++)
                             {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear index and the data to add.
+                                 */
+                                
                                 const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
                                     (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
                                         ghostcell_dim_1_mass_fraction;
                                 
                                 const double Y_bounded = fmax(fmin(Y[idx], 1.0), 0.0);
-                                const double value_to_add = Y_bounded*weight;
-                                const double product_to_add = (Y_bounded)*(1.0 - Y_bounded)*weight;
+                                
+                                const double weight_local = weight/((double) n_overlapped);
+                                
+                                const double value_to_add = Y_bounded*weight_local;
+                                const double product_to_add = Y_bounded*(1.0 - Y_bounded)*weight_local;
                                 
                                 for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                                 {
@@ -2631,6 +2871,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
@@ -2654,6 +2899,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
+                    const int idx_lo_0 = index_lo[0];
                     const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
@@ -2662,12 +2908,40 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
                     {
                         for (int i = 0; i < interior_dim_0; i++)
                         {
+                            /*
+                             * Compute the index of the data point and count how many times the data is repeated.
+                             */
+                            
+                            const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j);
+                            
+                            int n_overlapped = 1;
+                            
+                            for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                    patch_overlapped_visible_boxes.begin());
+                                 iob != patch_overlapped_visible_boxes.end();
+                                 iob++)
+                            {
+                                const hier::Box& patch_overlapped_visible_box = *iob;
+                                
+                                if (patch_overlapped_visible_box.contains(idx_pt))
+                                {
+                                    n_overlapped++;
+                                }
+                            }
+                            
+                            /*
+                             * Compute the linear index and the data to add.
+                             */
+                            
                             const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
                             
                             const double Y_bounded = fmax(fmin(Y[idx], 1.0), 0.0);
-                            const double value_to_add = Y_bounded*weight;
-                            const double product_to_add = (Y_bounded)*(1.0 - Y_bounded)*weight;
+                            
+                            const double weight_local = weight/((double) n_overlapped);
+                        
+                            const double value_to_add = Y_bounded*weight_local;
+                            const double product_to_add = Y_bounded*(1.0 - Y_bounded)*weight_local;
                             
                             for (int jj = 0; jj < ratioToFinestLevel_1; jj++)
                             {
@@ -2839,6 +3113,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
@@ -2865,7 +3144,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
+                    const int idx_lo_0 = index_lo[0];
                     const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -2876,14 +3157,42 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
                         {
                             for (int i = 0; i < interior_dim_0; i++)
                             {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear index and the data to add.
+                                 */
+                                
                                 const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
                                     (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
                                         ghostcell_dim_1_mass_fraction;
                                 
                                 const double Y_bounded = fmax(fmin(Y[idx], 1.0), 0.0);
-                                const double value_to_add = Y_bounded*weight;
-                                const double product_to_add = (Y_bounded)*(1.0 - Y_bounded)*weight;
+                                
+                                const double weight_local = weight/((double) n_overlapped);
+                            
+                                const double value_to_add = Y_bounded*weight_local;
+                                const double product_to_add = Y_bounded*(1.0 - Y_bounded)*weight_local;
                                 
                                 for (int jj = 0; jj < ratioToFinestLevel_1; jj++)
                                 {
@@ -3160,6 +3469,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInZDirection(
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
@@ -3186,6 +3500,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInZDirection(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
                     const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
@@ -3197,14 +3513,42 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInZDirection(
                         {
                             for (int i = 0; i < interior_dim_0; i++)
                             {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear index and the data to add.
+                                 */
+                                
                                 const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
                                     (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
                                         ghostcell_dim_1_mass_fraction;
                                 
                                 const double Y_bounded = fmax(fmin(Y[idx], 1.0), 0.0);
-                                const double value_to_add = Y_bounded*weight;
-                                const double product_to_add = (Y_bounded)*(1.0 - Y_bounded)*weight;
+                                
+                                const double weight_local = weight/((double) n_overlapped);
+                                
+                                const double value_to_add = Y_bounded*weight_local;
+                                const double product_to_add = Y_bounded*(1.0 - Y_bounded)*weight_local;
                                 
                                 for (int kk = 0; kk < ratioToFinestLevel_2; kk++)
                                 {
@@ -3474,6 +3818,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
@@ -3504,6 +3853,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
+                    const int idx_lo_0 = index_lo[0];
                     const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
@@ -3512,15 +3862,42 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                     {
                         for (int i = 0; i < interior_dim_0; i++)
                         {
+                            /*
+                             * Compute the index of the data point and count how many times the data is repeated.
+                             */
+                            
+                            const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j);
+                            
+                            int n_overlapped = 1;
+                            
+                            for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                    patch_overlapped_visible_boxes.begin());
+                                 iob != patch_overlapped_visible_boxes.end();
+                                 iob++)
+                            {
+                                const hier::Box& patch_overlapped_visible_box = *iob;
+                                
+                                if (patch_overlapped_visible_box.contains(idx_pt))
+                                {
+                                    n_overlapped++;
+                                }
+                            }
+                            
+                            /*
+                             * Compute the linear indices and the data to add.
+                             */
+                            
                             const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
                             
                             const int idx_velocity = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
                             
-                            const double rho_to_add = rho[idx_density]*weight;
-                            const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight;
-                            const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight;
+                            const double weight_local = weight/((double) n_overlapped);
+                            
+                            const double rho_to_add = rho[idx_density]*weight_local;
+                            const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
+                            const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
                             
                             for (int jj = 0; jj < ratioToFinestLevel_1; jj++)
                             {
@@ -3648,6 +4025,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
@@ -3678,6 +4060,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
+                    const int idx_lo_0 = index_lo[0];
                     const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
@@ -3686,11 +4069,38 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                     {
                         for (int i = 0; i < interior_dim_0; i++)
                         {
+                            /*
+                             * Compute the index of the data point and count how many times the data is repeated.
+                             */
+                            
+                            const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j);
+                            
+                            int n_overlapped = 1;
+                            
+                            for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                    patch_overlapped_visible_boxes.begin());
+                                 iob != patch_overlapped_visible_boxes.end();
+                                 iob++)
+                            {
+                                const hier::Box& patch_overlapped_visible_box = *iob;
+                                
+                                if (patch_overlapped_visible_box.contains(idx_pt))
+                                {
+                                    n_overlapped++;
+                                }
+                            }
+                            
+                            /*
+                             * Compute the linear indices and the data to add.
+                             */
+                            
                             const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
                             
                             const int idx_velocity = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const double weight = 1.0/((double) n_overlapped);
                             
                             for (int jj = 0; jj < ratioToFinestLevel_1; jj++)
                             {
@@ -3702,7 +4112,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                                 double v_prime = v[idx_velocity] -
                                     rho_v_avg_global[idx_fine]/rho_avg_global[idx_fine];
                                 
-                                TKE_to_add += 0.5*rho[idx_density]*(u_prime*u_prime + v_prime*v_prime);
+                                TKE_to_add += 0.5*rho[idx_density]*(u_prime*u_prime + v_prime*v_prime)*weight;
                             }
                         }
                     }
@@ -3945,6 +4355,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
@@ -3976,6 +4391,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
                     const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
@@ -3983,15 +4399,42 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                     {
                         for (int i = 0; i < interior_dim_0; i++)
                         {
+                            /*
+                             * Compute the index of the data point and count how many times the data is repeated.
+                             */
+                            
+                            const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j);
+                            
+                            int n_overlapped = 1;
+                            
+                            for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                    patch_overlapped_visible_boxes.begin());
+                                 iob != patch_overlapped_visible_boxes.end();
+                                 iob++)
+                            {
+                                const hier::Box& patch_overlapped_visible_box = *iob;
+                                
+                                if (patch_overlapped_visible_box.contains(idx_pt))
+                                {
+                                    n_overlapped++;
+                                }
+                            }
+                            
+                            /*
+                             * Compute the linear indices and the data to add.
+                             */
+                            
                             const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
                             
                             const int idx_velocity = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
                             
-                            const double rho_to_add = rho[idx_density]*weight;
-                            const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight;
-                            const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight;
+                            const double weight_local = weight/((double) n_overlapped);
+                            
+                            const double rho_to_add = rho[idx_density]*weight_local;
+                            const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
+                            const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
                             
                             for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                             {
@@ -4119,6 +4562,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
@@ -4150,6 +4598,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
                     const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
@@ -4157,11 +4606,38 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                     {
                         for (int i = 0; i < interior_dim_0; i++)
                         {
+                            /*
+                             * Compute the index of the data point and count how many times the data is repeated.
+                             */
+                            
+                            const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j);
+                            
+                            int n_overlapped = 1;
+                            
+                            for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                    patch_overlapped_visible_boxes.begin());
+                                 iob != patch_overlapped_visible_boxes.end();
+                                 iob++)
+                            {
+                                const hier::Box& patch_overlapped_visible_box = *iob;
+                                
+                                if (patch_overlapped_visible_box.contains(idx_pt))
+                                {
+                                    n_overlapped++;
+                                }
+                            }
+                            
+                            /*
+                             * Compute the linear indices and the data to add.
+                             */
+                            
                             const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
                             
                             const int idx_velocity = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity;
+                            
+                            const double weight = 1.0/((double) n_overlapped);
                             
                             for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                             {
@@ -4173,7 +4649,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                                 double v_prime = v[idx_velocity] -
                                     rho_v_avg_global[idx_fine]/rho_avg_global[idx_fine];
                                 
-                                TKE_to_add += 0.5*rho[idx_density]*(u_prime*u_prime + v_prime*v_prime);
+                                TKE_to_add += 0.5*rho[idx_density]*(u_prime*u_prime + v_prime*v_prime)*weight;
                             }
                         }
                     }
@@ -4462,6 +4938,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
@@ -4497,6 +4978,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
                     const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
@@ -4508,6 +4991,31 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                         {
                             for (int i = 0; i < interior_dim_0; i++)
                             {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear indices and the data to add.
+                                 */
+                                
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
                                     (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
@@ -4518,10 +5026,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                                     (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
                                         ghostcell_dim_1_velocity;
                                 
-                                const double rho_to_add = rho[idx_density]*weight;
-                                const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight;
-                                const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight;
-                                const double rho_w_to_add = rho[idx_density]*w[idx_velocity]*weight;
+                                const double weight_local = weight/((double) n_overlapped);
+                                
+                                const double rho_to_add = rho[idx_density]*weight_local;
+                                const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
+                                const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
+                                const double rho_w_to_add = rho[idx_density]*w[idx_velocity]*weight_local;
                                 
                                 for (int kk = 0; kk < ratioToFinestLevel_2; kk++)
                                 {
@@ -4659,6 +5169,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
@@ -4694,6 +5209,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
                     const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
@@ -4705,6 +5222,31 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                         {
                             for (int i = 0; i < interior_dim_0; i++)
                             {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear indices and the data to add.
+                                 */
+                                
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
                                     (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
@@ -4714,6 +5256,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                                     (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
                                     (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
                                         ghostcell_dim_1_velocity;
+                                
+                                const double weight = 1.0/((double) n_overlapped);
                                 
                                 for (int kk = 0; kk < ratioToFinestLevel_2; kk++)
                                 {
@@ -4729,7 +5273,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                                         rho_w_avg_global[idx_fine]/rho_avg_global[idx_fine];
                                     
                                     TKE_to_add += 0.5*rho[idx_density]*
-                                        (u_prime*u_prime + v_prime*v_prime + w_prime*w_prime);
+                                        (u_prime*u_prime + v_prime*v_prime + w_prime*w_prime)*weight;
                                 }
                             }
                         }
@@ -4981,6 +5525,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
@@ -5017,6 +5566,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
                     const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -5027,6 +5578,31 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                         {
                             for (int i = 0; i < interior_dim_0; i++)
                             {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear indices and the data to add.
+                                 */
+                                
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
                                     (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
@@ -5037,10 +5613,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                                     (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
                                         ghostcell_dim_1_velocity;
                                 
-                                const double rho_to_add = rho[idx_density]*weight;
-                                const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight;
-                                const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight;
-                                const double rho_w_to_add = rho[idx_density]*w[idx_velocity]*weight;
+                                const double weight_local = weight/((double) n_overlapped);
+                                
+                                const double rho_to_add = rho[idx_density]*weight_local;
+                                const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
+                                const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
+                                const double rho_w_to_add = rho[idx_density]*w[idx_velocity]*weight_local;
                                 
                                 for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                                 {
@@ -5178,6 +5756,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
@@ -5214,6 +5797,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
                     const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -5224,6 +5809,31 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                         {
                             for (int i = 0; i < interior_dim_0; i++)
                             {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear indices and the data to add.
+                                 */
+                                
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
                                     (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
@@ -5233,6 +5843,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                                     (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
                                     (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
                                         ghostcell_dim_1_velocity;
+                                
+                                const double weight = 1.0/((double) n_overlapped);
                                 
                                 for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
                                 {
@@ -5248,7 +5860,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                                         rho_w_avg_global[idx_fine]/rho_avg_global[idx_fine];
                                     
                                     TKE_to_add += 0.5*rho[idx_density]*
-                                        (u_prime*u_prime + v_prime*v_prime + w_prime*w_prime);
+                                        (u_prime*u_prime + v_prime*v_prime + w_prime*w_prime)*weight;
                                 }
                             }
                         }
@@ -5500,6 +6112,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
@@ -5535,7 +6152,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
+                    const int idx_lo_0 = index_lo[0];
                     const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -5546,6 +6165,31 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                         {
                             for (int i = 0; i < interior_dim_0; i++)
                             {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear indices and the data to add.
+                                 */
+                                
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
                                     (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
@@ -5556,10 +6200,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                                     (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
                                         ghostcell_dim_1_velocity;
                                 
-                                const double rho_to_add = rho[idx_density]*weight;
-                                const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight;
-                                const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight;
-                                const double rho_w_to_add = rho[idx_density]*w[idx_velocity]*weight;
+                                const double weight_local = weight/((double) n_overlapped);
+                                
+                                const double rho_to_add = rho[idx_density]*weight_local;
+                                const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
+                                const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
+                                const double rho_w_to_add = rho[idx_density]*w[idx_velocity]*weight_local;
                                 
                                 for (int jj = 0; jj < ratioToFinestLevel_1; jj++)
                                 {
@@ -5697,6 +6343,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
@@ -5732,7 +6383,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
+                    const int idx_lo_0 = index_lo[0];
                     const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -5743,6 +6396,31 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                         {
                             for (int i = 0; i < interior_dim_0; i++)
                             {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear indices and the data to add.
+                                 */
+                                
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
                                     (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
@@ -5752,6 +6430,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                                     (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
                                     (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
                                         ghostcell_dim_1_velocity;
+                                
+                                const double weight = 1.0/((double) n_overlapped);
                                 
                                 for (int jj = 0; jj < ratioToFinestLevel_1; jj++)
                                 {
@@ -5767,7 +6447,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
                                         rho_w_avg_global[idx_fine]/rho_avg_global[idx_fine];
                                     
                                     TKE_to_add += 0.5*rho[idx_density]*
-                                        (u_prime*u_prime + v_prime*v_prime + w_prime*w_prime);
+                                        (u_prime*u_prime + v_prime*v_prime + w_prime*w_prime)*weight;
                                 }
                             }
                         }
@@ -5957,6 +6637,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputEnstrophyIntegrated(
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
@@ -5987,6 +6672,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputEnstrophyIntegrated(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
@@ -5994,6 +6681,27 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputEnstrophyIntegrated(
                     {
                         for (int i = 0; i < interior_dim_0; i++)
                         {
+                            /*
+                             * Compute the index of the data point and count how many times the data is repeated.
+                             */
+                            
+                            const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j);
+                            
+                            int n_overlapped = 1;
+                            
+                            for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                    patch_overlapped_visible_boxes.begin());
+                                 iob != patch_overlapped_visible_boxes.end();
+                                 iob++)
+                            {
+                                const hier::Box& patch_overlapped_visible_box = *iob;
+                                
+                                if (patch_overlapped_visible_box.contains(idx_pt))
+                                {
+                                    n_overlapped++;
+                                }
+                            }
+                            
                             // Compute linear indices.
                             const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density;
@@ -6001,7 +6709,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputEnstrophyIntegrated(
                             const int idx_enstrophy = (relative_idx_lo_0 + i + num_ghosts_0_enstrophy) +
                                 (relative_idx_lo_1 + j + num_ghosts_1_enstrophy)*ghostcell_dim_0_enstrophy;
                             
-                            Omega_to_add += rho[idx_density]*Omega[idx_enstrophy];
+                            Omega_to_add += rho[idx_density]*Omega[idx_enstrophy]/((double) n_overlapped);
                         }
                     }
                 }
@@ -6115,6 +6823,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputEnstrophyIntegrated(
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
@@ -6150,6 +6863,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputEnstrophyIntegrated(
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -6160,6 +6876,31 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputEnstrophyIntegrated(
                         {
                             for (int i = 0; i < interior_dim_0; i++)
                             {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear indices and the data to add.
+                                 */
+                                
                                 const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
                                     (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
@@ -6170,7 +6911,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputEnstrophyIntegrated(
                                     (relative_idx_lo_2 + k + num_ghosts_2_enstrophy)*ghostcell_dim_0_enstrophy*
                                         ghostcell_dim_1_enstrophy;
                                 
-                                Omega_to_add += rho[idx_density]*Omega[idx_enstrophy];
+                                Omega_to_add += rho[idx_density]*Omega[idx_enstrophy]/((double) n_overlapped);
                             }
                         }
                     }
@@ -6377,6 +7118,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
                 const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
@@ -6400,12 +7146,34 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
+                    const int idx_lo_0 = index_lo[0];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     
                     if (false) // (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*4)
                     {
                         for (int i = 0; i < interior_dim_0; i++)
                         {
+                            /*
+                             * Compute the index of the data point and count how many times the data is repeated.
+                             */
+                            
+                            const hier::Index idx_pt(tbox::Dimension(1), idx_lo_0 + i);
+                            
+                            int n_overlapped = 1;
+                            
+                            for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                    patch_overlapped_visible_boxes.begin());
+                                 iob != patch_overlapped_visible_boxes.end();
+                                 iob++)
+                            {
+                                const hier::Box& patch_overlapped_visible_box = *iob;
+                                
+                                if (patch_overlapped_visible_box.contains(idx_pt))
+                                {
+                                    n_overlapped++;
+                                }
+                            }
+                            
                             // Compute indices of current and neighboring cells.
                             const int idx_mass_fraction = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
                             const int idx_x_LLLL = relative_idx_lo_0 + i - 4 + num_ghosts_0_mass_fraction;
@@ -6450,13 +7218,34 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                     &T[idx_temperature],
                                     Y_ptr);
                             
-                            Chi_to_add += D[0]*dYdx*dYdx;
+                            Chi_to_add += D[0]*dYdx*dYdx/((double) n_overlapped);
                         }
                     }
                     else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*3)
                     {
                         for (int i = 0; i < interior_dim_0; i++)
                         {
+                            /*
+                             * Compute the index of the data point and count how many times the data is repeated.
+                             */
+                            
+                            const hier::Index idx_pt(tbox::Dimension(1), idx_lo_0 + i);
+                            
+                            int n_overlapped = 1;
+                            
+                            for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                    patch_overlapped_visible_boxes.begin());
+                                 iob != patch_overlapped_visible_boxes.end();
+                                 iob++)
+                            {
+                                const hier::Box& patch_overlapped_visible_box = *iob;
+                                
+                                if (patch_overlapped_visible_box.contains(idx_pt))
+                                {
+                                    n_overlapped++;
+                                }
+                            }
+                            
                             // Compute indices of current and neighboring cells.
                             const int idx_mass_fraction = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
                             const int idx_x_LLL = relative_idx_lo_0 + i - 3 + num_ghosts_0_mass_fraction;
@@ -6498,13 +7287,34 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                     &T[idx_temperature],
                                     Y_ptr);
                             
-                            Chi_to_add += D[0]*dYdx*dYdx;
+                            Chi_to_add += D[0]*dYdx*dYdx/((double) n_overlapped);
                         }
                     }
                     else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*2)
                     {
                         for (int i = 0; i < interior_dim_0; i++)
                         {
+                            /*
+                             * Compute the index of the data point and count how many times the data is repeated.
+                             */
+                            
+                            const hier::Index idx_pt(tbox::Dimension(1), idx_lo_0 + i);
+                            
+                            int n_overlapped = 1;
+                            
+                            for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                    patch_overlapped_visible_boxes.begin());
+                                 iob != patch_overlapped_visible_boxes.end();
+                                 iob++)
+                            {
+                                const hier::Box& patch_overlapped_visible_box = *iob;
+                                
+                                if (patch_overlapped_visible_box.contains(idx_pt))
+                                {
+                                    n_overlapped++;
+                                }
+                            }
+                            
                             // Compute indices of current and neighboring cells.
                             const int idx_mass_fraction = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
                             const int idx_x_LL = relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fraction;
@@ -6543,13 +7353,34 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                     &T[idx_temperature],
                                     Y_ptr);
                             
-                            Chi_to_add += D[0]*dYdx*dYdx;
+                            Chi_to_add += D[0]*dYdx*dYdx/((double) n_overlapped);
                         }
                     }
                     else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim))
                     {
                         for (int i = 0; i < interior_dim_0; i++)
                         {
+                            /*
+                             * Compute the index of the data point and count how many times the data is repeated.
+                             */
+                            
+                            const hier::Index idx_pt(tbox::Dimension(1), idx_lo_0 + i);
+                            
+                            int n_overlapped = 1;
+                            
+                            for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                    patch_overlapped_visible_boxes.begin());
+                                 iob != patch_overlapped_visible_boxes.end();
+                                 iob++)
+                            {
+                                const hier::Box& patch_overlapped_visible_box = *iob;
+                                
+                                if (patch_overlapped_visible_box.contains(idx_pt))
+                                {
+                                    n_overlapped++;
+                                }
+                            }
+                            
                             // Compute indices of current and neighboring cells.
                             const int idx_mass_fraction = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
                             const int idx_x_L = relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction;
@@ -6585,13 +7416,34 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                     &T[idx_temperature],
                                     Y_ptr);
                             
-                            Chi_to_add += D[0]*dYdx*dYdx;
+                            Chi_to_add += D[0]*dYdx*dYdx/((double) n_overlapped);
                         }
                     }
                     else
                     {
                         for (int i = 0; i < interior_dim_0; i++)
                         {
+                            /*
+                             * Compute the index of the data point and count how many times the data is repeated.
+                             */
+                            
+                            const hier::Index idx_pt(tbox::Dimension(1), idx_lo_0 + i);
+                            
+                            int n_overlapped = 1;
+                            
+                            for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                    patch_overlapped_visible_boxes.begin());
+                                 iob != patch_overlapped_visible_boxes.end();
+                                 iob++)
+                            {
+                                const hier::Box& patch_overlapped_visible_box = *iob;
+                                
+                                if (patch_overlapped_visible_box.contains(idx_pt))
+                                {
+                                    n_overlapped++;
+                                }
+                            }
+                            
                             // Compute indices of current and neighboring cells.
                             const int idx_mass_fraction = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
                             const int idx_x_L = relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction;
@@ -6640,7 +7492,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                     &T[idx_temperature],
                                     Y_ptr);
                             
-                            Chi_to_add += D[0]*dYdx*dYdx;
+                            Chi_to_add += D[0]*dYdx*dYdx/((double) n_overlapped);
                         }
                     }
                 }
@@ -6763,6 +7615,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
@@ -6800,6 +7657,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
@@ -6809,6 +7668,27 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                         {
                             for (int i = 0; i < interior_dim_0; i++)
                             {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
                                 // Compute indices of current and neighboring cells of mass fraction.
                                 const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
@@ -6902,7 +7782,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                         &T[idx_temperature],
                                         Y_ptr);
                                 
-                                Chi_to_add += D[0]*(dYdx*dYdx + dYdy*dYdy);
+                                Chi_to_add += D[0]*(dYdx*dYdx + dYdy*dYdy)/((double) n_overlapped);
                             }
                         }
                     }
@@ -6912,6 +7792,27 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                         {
                             for (int i = 0; i < interior_dim_0; i++)
                             {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
                                 // Compute indices of current and neighboring cells of mass fraction.
                                 const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
@@ -6991,7 +7892,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                         &T[idx_temperature],
                                         Y_ptr);
                                 
-                                Chi_to_add += D[0]*(dYdx*dYdx + dYdy*dYdy);
+                                Chi_to_add += D[0]*(dYdx*dYdx + dYdy*dYdy)/((double) n_overlapped);
                             }
                         }
                     }
@@ -7001,6 +7902,27 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                         {
                             for (int i = 0; i < interior_dim_0; i++)
                             {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
                                 // Compute indices of current and neighboring cells of mass fraction.
                                 const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
@@ -7066,7 +7988,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                         &T[idx_temperature],
                                         Y_ptr);
                                 
-                                Chi_to_add += D[0]*(dYdx*dYdx + dYdy*dYdy);
+                                Chi_to_add += D[0]*(dYdx*dYdx + dYdy*dYdy)/((double) n_overlapped);
                             }
                         }
                     }
@@ -7076,6 +7998,27 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                         {
                             for (int i = 0; i < interior_dim_0; i++)
                             {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
                                 // Compute indices of current and neighboring cells of mass fraction.
                                 const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
@@ -7126,7 +8069,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                         &T[idx_temperature],
                                         Y_ptr);
                                 
-                                Chi_to_add += D[0]*(dYdx*dYdx + dYdy*dYdy);
+                                Chi_to_add += D[0]*(dYdx*dYdx + dYdy*dYdy)/((double) n_overlapped);
                             }
                         }
                     }
@@ -7136,6 +8079,27 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                         {
                             for (int i = 0; i < interior_dim_0; i++)
                             {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
                                 // Compute indices of current and neighboring cells of mass fraction.
                                 const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                     (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
@@ -7211,7 +8175,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                         &T[idx_temperature],
                                         Y_ptr);
                                 
-                                Chi_to_add += D[0]*(dYdx*dYdx + dYdy*dYdy);
+                                Chi_to_add += D[0]*(dYdx*dYdx + dYdy*dYdy)/((double) n_overlapped);
                             }
                         }
                     }
@@ -7335,6 +8299,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                         patch_box,
                         li);
                 
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
                 const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
                 
@@ -7379,6 +8348,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                     const hier::Index& index_lo = patch_visible_box.lower();
                     const hier::Index relative_index_lo = index_lo - patch_index_lo;
                     
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
@@ -7391,6 +8363,27 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                             {
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
+                                    /*
+                                     * Compute the index of the data point and count how many times the data is repeated.
+                                     */
+                                    
+                                    const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                    
+                                    int n_overlapped = 1;
+                                    
+                                    for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                            patch_overlapped_visible_boxes.begin());
+                                         iob != patch_overlapped_visible_boxes.end();
+                                         iob++)
+                                    {
+                                        const hier::Box& patch_overlapped_visible_box = *iob;
+                                        
+                                        if (patch_overlapped_visible_box.contains(idx_pt))
+                                        {
+                                            n_overlapped++;
+                                        }
+                                    }
+                                    
                                     // Compute indices of current and neighboring cells.
                                     const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                         (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
@@ -7567,7 +8560,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                             &T[idx_temperature],
                                             Y_ptr);
                                     
-                                    Chi_to_add += D[0]*(dYdx*dYdx + dYdy*dYdy + dYdz*dYdz);
+                                    Chi_to_add += D[0]*(dYdx*dYdx + dYdy*dYdy + dYdz*dYdz)/((double) n_overlapped);
                                 }
                             }
                         }
@@ -7580,6 +8573,27 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                             {
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
+                                    /*
+                                     * Compute the index of the data point and count how many times the data is repeated.
+                                     */
+                                    
+                                    const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                    
+                                    int n_overlapped = 1;
+                                    
+                                    for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                            patch_overlapped_visible_boxes.begin());
+                                         iob != patch_overlapped_visible_boxes.end();
+                                         iob++)
+                                    {
+                                        const hier::Box& patch_overlapped_visible_box = *iob;
+                                        
+                                        if (patch_overlapped_visible_box.contains(idx_pt))
+                                        {
+                                            n_overlapped++;
+                                        }
+                                    }
+                                    
                                     // Compute indices of current and neighboring cells.
                                     const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                         (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
@@ -7723,7 +8737,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                             &T[idx_temperature],
                                             Y_ptr);
                                     
-                                    Chi_to_add += D[0]*(dYdx*dYdx + dYdy*dYdy + dYdz*dYdz);
+                                    Chi_to_add += D[0]*(dYdx*dYdx + dYdy*dYdy + dYdz*dYdz)/((double) n_overlapped);
                                 }
                             }
                         }
@@ -7736,6 +8750,27 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                             {
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
+                                    /*
+                                     * Compute the index of the data point and count how many times the data is repeated.
+                                     */
+                                    
+                                    const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                    
+                                    int n_overlapped = 1;
+                                    
+                                    for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                            patch_overlapped_visible_boxes.begin());
+                                         iob != patch_overlapped_visible_boxes.end();
+                                         iob++)
+                                    {
+                                        const hier::Box& patch_overlapped_visible_box = *iob;
+                                        
+                                        if (patch_overlapped_visible_box.contains(idx_pt))
+                                        {
+                                            n_overlapped++;
+                                        }
+                                    }
+                                    
                                     // Compute indices of current and neighboring cells.
                                     const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                         (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
@@ -7846,7 +8881,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                             &T[idx_temperature],
                                             Y_ptr);
                                     
-                                    Chi_to_add += D[0]*(dYdx*dYdx + dYdy*dYdy + dYdz*dYdz);
+                                    Chi_to_add += D[0]*(dYdx*dYdx + dYdy*dYdy + dYdz*dYdz)/((double) n_overlapped);
                                 }
                             }
                         }
@@ -7859,6 +8894,27 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                             {
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
+                                    /*
+                                     * Compute the index of the data point and count how many times the data is repeated.
+                                     */
+                                    
+                                    const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                    
+                                    int n_overlapped = 1;
+                                    
+                                    for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                            patch_overlapped_visible_boxes.begin());
+                                         iob != patch_overlapped_visible_boxes.end();
+                                         iob++)
+                                    {
+                                        const hier::Box& patch_overlapped_visible_box = *iob;
+                                        
+                                        if (patch_overlapped_visible_box.contains(idx_pt))
+                                        {
+                                            n_overlapped++;
+                                        }
+                                    }
+                                    
                                     // Compute indices of current and neighboring cells.
                                     const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                         (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
@@ -7934,7 +8990,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                             &T[idx_temperature],
                                             Y_ptr);
                                     
-                                    Chi_to_add += D[0]*(dYdx*dYdx + dYdy*dYdy + dYdz*dYdz);
+                                    Chi_to_add += D[0]*(dYdx*dYdx + dYdy*dYdy + dYdz*dYdz)/((double) n_overlapped);
                                 }
                             }
                         }
@@ -7947,6 +9003,27 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                             {
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
+                                    /*
+                                     * Compute the index of the data point and count how many times the data is repeated.
+                                     */
+                                    
+                                    const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                    
+                                    int n_overlapped = 1;
+                                    
+                                    for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                            patch_overlapped_visible_boxes.begin());
+                                         iob != patch_overlapped_visible_boxes.end();
+                                         iob++)
+                                    {
+                                        const hier::Box& patch_overlapped_visible_box = *iob;
+                                        
+                                        if (patch_overlapped_visible_box.contains(idx_pt))
+                                        {
+                                            n_overlapped++;
+                                        }
+                                    }
+                                    
                                     // Compute indices of current and neighboring cells.
                                     const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                         (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
@@ -8059,7 +9136,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                             &T[idx_temperature],
                                             Y_ptr);
                                     
-                                    Chi_to_add += D[0]*(dYdx*dYdx + dYdy*dYdy + dYdz*dYdz);
+                                    Chi_to_add += D[0]*(dYdx*dYdx + dYdy*dYdy + dYdz*dYdz)/((double) n_overlapped);
                                 }
                             }
                         }
