@@ -65,7 +65,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             }
             else if (statistical_quantity_key == "MIXEDNESS_Z")
             {
-                f_out << "\t" << "MIXEDNESS_Z         ";
+                f_out << "\t" << "MIXEDNESS_Z          ";
             }
             else if (statistical_quantity_key == "TKE_INT_HOMO_X")
             {
@@ -97,7 +97,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             }
             else if (statistical_quantity_key == "SCAL_DISS_RAT_INT")
             {
-                f_out << "\t" << "SCAL_DISS_RAT_INT";
+                f_out << "\t" << "SCAL_DISS_RAT_INT    ";
             }
             else if (statistical_quantity_key == "NUM_INTEF_THICK")
             {
