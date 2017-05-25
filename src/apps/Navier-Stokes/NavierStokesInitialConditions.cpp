@@ -1280,7 +1280,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                                 double S = 0.0;
                                 for (int m = m_min; m <= m_max; m++)
                                 {
-                                    S += A*cos(2.0*M_PI*m/0.05*x[1] + phase_shifts[24 - m]);
+                                    S += A*cos(2.0*M_PI*m/0.02*x[1] + phase_shifts[24 - m]);
                                 }
                                 
                                 if (x[0] < L_x_shock)
