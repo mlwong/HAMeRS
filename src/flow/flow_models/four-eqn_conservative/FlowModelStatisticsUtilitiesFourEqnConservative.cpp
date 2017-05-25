@@ -45,63 +45,63 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             
             if (statistical_quantity_key == "MIXING_WIDTH_X")
             {
-                f_out << "\t" << "MIXING_WIDTH_X   ";
+                f_out << "\t" << "MIXING_WIDTH_X       ";
             }
             else if (statistical_quantity_key == "MIXING_WIDTH_Y")
             {
-                f_out << "\t" << "MIXING_WIDTH_Y   ";
+                f_out << "\t" << "MIXING_WIDTH_Y       ";
             }
             else if (statistical_quantity_key == "MIXING_WIDTH_Z")
             {
-                f_out << "\t" << "MIXING_WIDTH_Z   ";
+                f_out << "\t" << "MIXING_WIDTH_Z       ";
             }
             else if (statistical_quantity_key == "MIXEDNESS_X")
             {
-                f_out << "\t" << "MIXEDNESS_X      ";
+                f_out << "\t" << "MIXEDNESS_X          ";
             }
             else if (statistical_quantity_key == "MIXEDNESS_Y")
             {
-                f_out << "\t" << "MIXEDNESS_Y      ";
+                f_out << "\t" << "MIXEDNESS_Y          ";
             }
             else if (statistical_quantity_key == "MIXEDNESS_Z")
             {
-                f_out << "\t" << "MIXEDNESS_Z     ";
+                f_out << "\t" << "MIXEDNESS_Z          ";
             }
             else if (statistical_quantity_key == "TKE_INT_HOMO_X")
             {
-                f_out << "\t" << "TKE_INT_HOMO_X   ";
+                f_out << "\t" << "TKE_INT_HOMO_X       ";
             }
             else if (statistical_quantity_key == "TKE_INT_HOMO_Y")
             {
-                f_out << "\t" << "TKE_INT_HOMO_Y   ";
+                f_out << "\t" << "TKE_INT_HOMO_Y       ";
             }
             else if (statistical_quantity_key == "TKE_INT_HOMO_Z")
             {
-                f_out << "\t" << "TKE_INT_HOMO_Z   ";
+                f_out << "\t" << "TKE_INT_HOMO_Z       ";
             }
             else if (statistical_quantity_key == "TKE_INT_HOMO_XY")
             {
-                f_out << "\t" << "TKE_INT_HOMO_XY  ";
+                f_out << "\t" << "TKE_INT_HOMO_XY      ";
             }
             else if (statistical_quantity_key == "TKE_INT_HOMO_YZ")
             {
-                f_out << "\t" << "TKE_INT_HOMO_YZ  ";
+                f_out << "\t" << "TKE_INT_HOMO_YZ      ";
             }
             else if (statistical_quantity_key == "TKE_INT_HOMO_XZ")
             {
-                f_out << "\t" << "TKE_INT_HOMO_XZ  ";
+                f_out << "\t" << "TKE_INT_HOMO_XZ      ";
             }
             else if (statistical_quantity_key == "ENSTROPHY_INT")
             {
-                f_out << "\t" << "ENSTROPHY_INT    ";
+                f_out << "\t" << "ENSTROPHY_INT        ";
             }
             else if (statistical_quantity_key == "SCAL_DISS_RAT_INT")
             {
-                f_out << "\t" << "SCAL_DISS_RAT_INT";
+                f_out << "\t" << "SCAL_DISS_RAT_INT    ";
             }
             else if (statistical_quantity_key == "NUM_INTEF_THICK")
             {
-                f_out << "\t" << "NUM_INTEF_THICK  ";
+                f_out << "\t" << "NUM_INTEF_THICK      ";
             }
         }
         
