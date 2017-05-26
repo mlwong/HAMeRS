@@ -639,7 +639,7 @@ NavierStokes::computeStableDtOnPatch(
             // Compute the linear index.
             const int idx = i + num_ghosts_0;
             
-            const double spectral_radius_diffusive = 0.5*max_D[idx]/(dx_0*dx_0);
+            const double spectral_radius_diffusive = 2.0*max_D[idx]/(dx_0*dx_0);
             
             stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius_diffusive);
         }
@@ -760,7 +760,7 @@ NavierStokes::computeStableDtOnPatch(
                 const int idx = (i + num_ghosts_0) +
                     (j + num_ghosts_1)*ghostcell_dim_0;
                 
-                const double spectral_radius_diffusive = 0.5*max_D[idx]/(delta*delta);
+                const double spectral_radius_diffusive = 2.0*max_D[idx]/(delta*delta);
                 
                 stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius_diffusive);
             }
@@ -909,7 +909,7 @@ NavierStokes::computeStableDtOnPatch(
                         (k + num_ghosts_2)*ghostcell_dim_0*
                             ghostcell_dim_1;
                     
-                    const double spectral_radius_diffusive = 0.5*max_D[idx]/(delta*delta);
+                    const double spectral_radius_diffusive = 2.0*max_D[idx]/(delta*delta);
                     
                     stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius_diffusive);
                 }
