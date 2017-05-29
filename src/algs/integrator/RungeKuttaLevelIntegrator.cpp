@@ -398,7 +398,9 @@ RungeKuttaLevelIntegrator::initializeLevelData(
                 level_number - 1,
                 hierarchy,
                 d_patch_strategy));
+        
         mpi.Barrier();
+        
         t_init_level_create_sched->stop();
         
         d_patch_strategy->setDataContext(d_scratch);
@@ -513,18 +515,23 @@ RungeKuttaLevelIntegrator::resetHierarchyConfiguration(
                 level,
                 ln - 1,
                 hierarchy,
-                d_patch_strategy);
+                d_patch_strategy,
+                true);
+        
         t_advance_bdry_fill_create->stop();
      
         if (!d_lag_dt_computation && d_use_ghosts_for_dt)
         {
             t_new_advance_bdry_fill_create->start();
+            
             d_bdry_sched_advance_new[ln] =
                 d_bdry_fill_advance_new->createSchedule(
                     level,
                     ln - 1,
                     hierarchy,
-                    d_patch_strategy);
+                    d_patch_strategy,
+                    true);
+            
             t_new_advance_bdry_fill_create->stop();
         }
     }
@@ -1468,8 +1475,6 @@ RungeKuttaLevelIntegrator::advanceLevel(
                 fill_schedule =
                     d_bdry_fill_advance_old->createSchedule(
                         level,
-                        coarser_ln,
-                        hierarchy,
                         d_patch_strategy);
             }
             else
@@ -1477,15 +1482,12 @@ RungeKuttaLevelIntegrator::advanceLevel(
                 fill_schedule =
                     d_bdry_fill_advance->createSchedule(
                         level,
-                        coarser_ln,
-                        hierarchy,
                         d_patch_strategy);
             }
         }
         else
         {
             // Use coarser level in boundary fill.
-            
             if (d_number_time_data_levels == 3)
             {
                 fill_schedule =
@@ -1493,7 +1495,8 @@ RungeKuttaLevelIntegrator::advanceLevel(
                         level,
                         coarser_ln,
                         hierarchy,
-                        d_patch_strategy);
+                        d_patch_strategy,
+                        true);
             }
             else
             {
@@ -1502,7 +1505,8 @@ RungeKuttaLevelIntegrator::advanceLevel(
                         level,
                         coarser_ln,
                         hierarchy,
-                        d_patch_strategy);
+                        d_patch_strategy,
+                        true);
             }
         }
         t_error_bdry_fill_create->stop();
