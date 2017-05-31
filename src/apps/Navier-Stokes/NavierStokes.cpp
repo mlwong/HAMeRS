@@ -886,8 +886,6 @@ NavierStokes::computeStableDtOnPatch(
             }
         }
         
-        const double delta = dx_0 + dx_1 + dx_2;
-        
         for (int k = -num_ghosts_2;
              k < interior_dim_2 + num_ghosts_2;
              k++)
