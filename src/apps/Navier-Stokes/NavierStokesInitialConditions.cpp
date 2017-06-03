@@ -2062,9 +2062,96 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         std::getline(ss, A_idx_str, '-');
                         std::getline(ss, m_idx_str);
                         
-                        double A_candidates[] = {0.5e-3, 0.35355339e-3, 0.25e-3};
+                        double A_candidates[] = {0.01e-3, 0.04e-3, 0.16e-3};
                         int m_min_candidates[] = {40, 30, 20};
                         int m_max_candidates[] = {60, 60, 60};
+                        
+                        double phase_shifts_x[41];
+                        double phase_shifts_y[41];
+                        
+                        phase_shifts_x[0] = 5.119059895756811000e+000;
+                        phase_shifts_x[1] = 5.691258590395267300e+000;
+                        phase_shifts_x[2] = 7.978816983408705300e-001;
+                        phase_shifts_x[3] = 5.738909759225261800e+000;
+                        phase_shifts_x[4] = 3.973230324742651500e+000;
+                        phase_shifts_x[5] = 6.128644395486362300e-001;
+                        phase_shifts_x[6] = 1.749855916861123200e+000;
+                        phase_shifts_x[7] = 3.436157926236805200e+000;
+                        phase_shifts_x[8] = 6.016192879924800800e+000;
+                        phase_shifts_x[9] = 6.062573467430127000e+000;
+                        phase_shifts_x[10] = 9.903121990156674700e-001;
+                        phase_shifts_x[11] = 6.098414305612863000e+000;
+                        phase_shifts_x[12] = 6.014057305717998700e+000;
+                        phase_shifts_x[13] = 3.049705144518116000e+000;
+                        phase_shifts_x[14] = 5.028310483744898600e+000;
+                        phase_shifts_x[15] = 8.914981581520268200e-001;
+                        phase_shifts_x[16] = 2.650004294134627800e+000;
+                        phase_shifts_x[17] = 5.753735997130328400e+000;
+                        phase_shifts_x[18] = 4.977585453328568800e+000;
+                        phase_shifts_x[19] = 6.028668715861979200e+000;
+                        phase_shifts_x[20] = 4.120140326260335300e+000;
+                        phase_shifts_x[21] = 2.243830941120678300e-001;
+                        phase_shifts_x[22] = 5.335236778530300800e+000;
+                        phase_shifts_x[23] = 5.868452651315184500e+000;
+                        phase_shifts_x[24] = 4.264618752468623900e+000;
+                        phase_shifts_x[25] = 4.761021655110125600e+000;
+                        phase_shifts_x[26] = 4.669239005010575200e+000;
+                        phase_shifts_x[27] = 2.464435046215926100e+000;
+                        phase_shifts_x[28] = 4.118489048744698300e+000;
+                        phase_shifts_x[29] = 1.075597681642343600e+000;
+                        phase_shifts_x[30] = 4.436218406436430500e+000;
+                        phase_shifts_x[31] = 2.000116726443145200e-001;
+                        phase_shifts_x[32] = 1.739958430326577400e+000;
+                        phase_shifts_x[33] = 2.901034032257156500e-001;
+                        phase_shifts_x[34] = 6.102969807212590400e-001;
+                        phase_shifts_x[35] = 5.173938128028055400e+000;
+                        phase_shifts_x[36] = 4.365736994889477500e+000;
+                        phase_shifts_x[37] = 1.992394794032684900e+000;
+                        phase_shifts_x[38] = 5.970421215819234500e+000;
+                        phase_shifts_x[39] = 2.164311069058015300e-001;
+                        phase_shifts_x[40] = 2.756712114200997400e+000;
+                        
+                        phase_shifts_y[0] = 2.620226532717789200e+000;
+                        phase_shifts_y[1] = 4.525932273597345700e+000;
+                        phase_shifts_y[2] = 7.186381718527406600e-004;
+                        phase_shifts_y[3] = 1.899611578242180700e+000;
+                        phase_shifts_y[4] = 9.220944569241362700e-001;
+                        phase_shifts_y[5] = 5.801805019369201700e-001;
+                        phase_shifts_y[6] = 1.170307423440345900e+000;
+                        phase_shifts_y[7] = 2.171222082895173200e+000;
+                        phase_shifts_y[8] = 2.492963564452900500e+000;
+                        phase_shifts_y[9] = 3.385485386352383500e+000;
+                        phase_shifts_y[10] = 2.633876813749063600e+000;
+                        phase_shifts_y[11] = 4.305361097085856200e+000;
+                        phase_shifts_y[12] = 1.284611371532881700e+000;
+                        phase_shifts_y[13] = 5.517374574309792800e+000;
+                        phase_shifts_y[14] = 1.720813231802212400e-001;
+                        phase_shifts_y[15] = 4.212671608894216200e+000;
+                        phase_shifts_y[16] = 2.622003402848613000e+000;
+                        phase_shifts_y[17] = 3.510351721361030500e+000;
+                        phase_shifts_y[18] = 8.820771499014955500e-001;
+                        phase_shifts_y[19] = 1.244708365548507600e+000;
+                        phase_shifts_y[20] = 5.031226508705986900e+000;
+                        phase_shifts_y[21] = 6.083766906066673000e+000;
+                        phase_shifts_y[22] = 1.969302191124991500e+000;
+                        phase_shifts_y[23] = 4.349991286601573700e+000;
+                        phase_shifts_y[24] = 5.506515445078040500e+000;
+                        phase_shifts_y[25] = 5.620979443832325700e+000;
+                        phase_shifts_y[26] = 5.343485393392637400e-001;
+                        phase_shifts_y[27] = 2.453884401839301100e-001;
+                        phase_shifts_y[28] = 1.067075996920243900e+000;
+                        phase_shifts_y[29] = 5.517532075157587800e+000;
+                        phase_shifts_y[30] = 6.179313813474526200e-001;
+                        phase_shifts_y[31] = 2.645897242173034700e+000;
+                        phase_shifts_y[32] = 6.018597421742790700e+000;
+                        phase_shifts_y[33] = 3.349976284840678000e+000;
+                        phase_shifts_y[34] = 4.347192116747430100e+000;
+                        phase_shifts_y[35] = 1.982443176922790600e+000;
+                        phase_shifts_y[36] = 4.313412542174082100e+000;
+                        phase_shifts_y[37] = 5.244107758660463900e+000;
+                        phase_shifts_y[38] = 1.149086355026512600e-001;
+                        phase_shifts_y[39] = 4.713295737926515900e+000;
+                        phase_shifts_y[40] = 6.213197464658893700e+000;
                         
                         // Amplitude.
                         double A = A_candidates[std::stoi(A_idx_str) - 1];
@@ -2117,8 +2204,8 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         const double w_air   = 0.0;
                         const double p_air   = 101325.0;
                         
-                        // Shock hits the interface after 0.1 ms.
-                        const double L_x_shock = 0.180254509478037;
+                        // Shock hits the interface after 0.05 ms.
+                        const double L_x_shock = 0.190127254739019;
                         const double L_x_interface = 0.2;
                         
                         for (int k = 0; k < patch_dims[2]; k++)
@@ -2139,8 +2226,8 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                                     double S = 0.0;
                                     for (int m = m_min; m <= m_max; m++)
                                     {
-                                        S += A*cos(2.0*M_PI*m/0.05*x[1] + tan(7.0*(double)m))*
-                                            cos(2.0*M_PI*m/0.05*x[2] + tan(11.0*(double)m));
+                                        S += A*cos(2.0*M_PI*m/0.05*x[1] + phase_shifts_x[60 - m])*
+                                            cos(2.0*M_PI*m/0.05*x[2] + phase_shifts_y[60 - m]);
                                     }
                                     
                                     if (x[0] < L_x_shock)
