@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * This file is modified from UncoveredBoxIterator.c of the SAMRAI 3.11.2
- * distribution.  For full copyright information, see COPYRIGHT and
- * COPYING.LESSER of SAMRAI distribution.
+ * This file is modified from UncoveredBoxIterator.C of the SAMRAI version
+ * 3.11.2 distribution.  For full copyright information, see COPYRIGHT and
+ * COPYING.LESSER of the SAMRAI distribution.
  *
  ************************************************************************/
 #include "extn/patch_hierarchies/ExtendedUncoveredBoxIterator.hpp"

@@ -1,13 +1,8 @@
 /*************************************************************************
  *
  * This file is modified from HyperbolicLevelIntegrator.h of the SAMRAI
- * distribution. For full copyright information, see COPYRIGHT and
- * COPYING.LESSER of SAMRAI distribution.
- *
- * Copyright:     (c) 1997-2014 Lawrence Livermore National Security, LLC
- * Description:   Runge-Kutta integration routines for single level in AMR
- *                hierarchy
- *                (basic hyperbolic systems)
+ * version 3.9.1 distribution. For full copyright information, see COPYRIGHT
+ * and COPYING.LESSER of the SAMRAI distribution.
  *
  ************************************************************************/
 
@@ -46,6 +41,10 @@
 #include <list>
 #include <string>
 #include <vector>
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 /**
  * Class RungeKuttaLevelIntegrator provides routines needed to integrate a system of conservation

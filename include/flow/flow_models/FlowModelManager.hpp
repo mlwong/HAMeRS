@@ -26,9 +26,6 @@ class FlowModelManager
     public:
         FlowModelManager(
             const std::string& object_name,
-            const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
-            const int& num_species,
             const boost::shared_ptr<tbox::Database>& flow_model_db,
             const std::string& flow_model_str);
         
@@ -42,13 +39,12 @@ class FlowModelManager
         }
         
         /*
-         * Get the flow model.
+         * Create the flow model.
          */
-        boost::shared_ptr<FlowModel>
-        getFlowModel() const
-        {
-            return d_flow_model;
-        }
+        boost::shared_ptr<FlowModel> createFlowModel(
+            const tbox::Dimension& dim,
+            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const int& num_species);
         
         /*
          * Print all characteristics of flow model manager.
@@ -63,29 +59,14 @@ class FlowModelManager
         const std::string d_object_name;
         
         /*
-         * Problem dimension.
-         */
-        const tbox::Dimension d_dim;
-        
-        /*
-         * boost::shared_ptr to the grid geometry.
-         */
-        const boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
-        
-        /*
          * Type of flow model.
          */
         FLOW_MODEL::TYPE d_flow_model_type;
         
         /*
-         * Flow model.
+         * boost::shared_ptr to the flow model database.
          */
-        boost::shared_ptr<FlowModel> d_flow_model;
-        
-        /*
-         * Number of species.
-         */
-        const int d_num_species;
+        boost::shared_ptr<tbox::Database> d_flow_model_db;
         
 };
 

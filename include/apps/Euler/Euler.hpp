@@ -33,6 +33,10 @@
 #include <string>
 #include <vector>
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 using namespace SAMRAI;
 
 /**
@@ -253,8 +257,8 @@ class Euler:
         ///      preprocessRefine(),
         ///      postprocessRefine()
         ///
-        ///  are concrete implementations of functions declared in the RefinePatchStrategy abstract
-        ///  base class.
+        ///  are concrete implementations of functions declared in the SAMRAI::xfer::RefinePatchStrategy
+        ///  abstract base class.
         ///
         
         /**
@@ -311,8 +315,8 @@ class Euler:
         ///      preprocessCoarsen()
         ///      postprocessCoarsen()
         ///
-        ///  are concrete implementations of functions declared in the CoarsenPatchStrategy abstract
-        ///  base class. They are trivial because this class doesn't do any pre/postprocessCoarsen.
+        ///  are concrete implementations of functions declared in the SAMRAI::xfer::CoarsenPatchStrategy
+        ///  abstract base class. They are trivial because this class doesn't do any pre/postprocessCoarsen.
         ///
         
         /**
@@ -356,8 +360,8 @@ class Euler:
         /**
          * Write state of Euler object to the given database for restart.
          *
-         * This routine is a concrete implementation of the function declared in the tbox::Serializable
-         * abstract base class.
+         * This routine is a concrete implementation of the function declared in the
+         * SAMRAI::tbox::Serializable abstract base class.
          */
         void
         putToRestart(
@@ -432,7 +436,7 @@ class Euler:
         {
             d_plot_context = plot_context;
         }
-
+        
     private:
         /*
          * These private member functions read data from input and restart. When beginning a run
@@ -503,46 +507,70 @@ class Euler:
         int d_num_species;
         
         /*
-         * boost::shared_ptr to FlowModel and its database.
+         * boost::shared_ptr to the database of FlowModel.
          */
-        boost::shared_ptr<FlowModel> d_flow_model;
         boost::shared_ptr<tbox::Database> d_flow_model_db;
         
         /*
-         * boost::shared_ptr to the ConvectiveFluxReconstructor and its database.
+         * Vector of boost::shared_ptr's to FlowModel objects for different threads.
          */
-        boost::shared_ptr<ConvectiveFluxReconstructor> d_convective_flux_reconstructor;
+        std::vector<boost::shared_ptr<FlowModel> > d_flow_models_thread;
+        
+        /*
+         * boost::shared_ptr to the database of ConvectiveFluxReconstructor.
+         */
         boost::shared_ptr<tbox::Database> d_convective_flux_reconstructor_db;
         
         /*
-         * boost::shared_ptr to EulerInitialConditions.
+         * Vector of boost::shared_ptr's to ConvectiveFluxReconstructor objects for different threads.
          */
-        boost::shared_ptr<EulerInitialConditions> d_Euler_initial_conditions;
+        std::vector<boost::shared_ptr<ConvectiveFluxReconstructor> > d_convective_flux_reconstructors_thread;
         
         /*
-         * boost::shared_ptr to EulerBoundaryConditions and its database.
+         * Vector of boost::shared_ptr's to EulerInitialConditions for different threads.
          */
-        boost::shared_ptr<EulerBoundaryConditions> d_Euler_boundary_conditions;
+        std::vector<boost::shared_ptr<EulerInitialConditions> > d_Euler_initial_conditions_thread;
+        
+        /*
+         * boost::shared_ptr to the database of EulerBoundaryConditions.
+         */
         boost::shared_ptr<tbox::Database> d_Euler_boundary_conditions_db;
         bool d_Euler_boundary_conditions_db_is_from_restart;
         
         /*
-         * boost::shared_ptr to ValueTagger and its database.
+         * Vector of boost::shared_ptr's to EulerBoundaryConditions for different threads.
          */
-        boost::shared_ptr<ValueTagger> d_value_tagger;
+        std::vector<boost::shared_ptr<EulerBoundaryConditions> > d_Euler_boundary_conditions_thread;
+        
+        /*
+         * boost::shared_ptr to the database of ValueTagger.
+         */
         boost::shared_ptr<tbox::Database> d_value_tagger_db;
         
         /*
-         * boost::shared_ptr to GradientTagger and its database.
+         * Vector of boost::shared_ptr's to ValueTagger for different threads.
          */
-        boost::shared_ptr<GradientTagger> d_gradient_tagger;
+        std::vector<boost::shared_ptr<ValueTagger> > d_value_taggers_thread;
+        
+        /*
+         * boost::shared_ptr to the database of GradientTagger.
+         */
         boost::shared_ptr<tbox::Database> d_gradient_tagger_db;
         
         /*
-         * boost::shared_ptr to MultiresolutionTagger and its database.
+         * Vector of boost::shared_ptr's to GradientTagger for different threads.
          */
-        boost::shared_ptr<MultiresolutionTagger> d_multiresolution_tagger;
+        std::vector<boost::shared_ptr<GradientTagger> > d_gradient_taggers_thread;
+        
+        /*
+         * boost::shared_ptr to the database of MultiresolutionTagger.
+         */
         boost::shared_ptr<tbox::Database> d_multiresolution_tagger_db;
+        
+        /*
+         * Vector of boost::shared_ptr's to MultiresolutionTagger for different threads.
+         */
+        std::vector<boost::shared_ptr<MultiresolutionTagger> > d_multiresolution_taggers_thread;
         
         /*
          * boost::shared_ptr to FlowModelManager.
@@ -581,6 +609,21 @@ class Euler:
         static boost::shared_ptr<tbox::Timer> t_tagvalue;
         static boost::shared_ptr<tbox::Timer> t_taggradient;
         static boost::shared_ptr<tbox::Timer> t_tagmultiresolution;
+        
+#ifdef _OPENMP
+        /*
+         * Locks for timing.
+         */
+        omp_lock_t t_lock_init;
+        omp_lock_t t_lock_compute_dt;
+        omp_lock_t t_lock_compute_fluxes_sources;
+        omp_lock_t t_lock_advance_step;
+        omp_lock_t t_lock_synchronize_fluxes;
+        omp_lock_t t_lock_setphysbcs;
+        omp_lock_t t_lock_tagvalue;
+        omp_lock_t t_lock_taggradient;
+        omp_lock_t t_lock_tagmultiresolution;
+#endif
         
 };
 

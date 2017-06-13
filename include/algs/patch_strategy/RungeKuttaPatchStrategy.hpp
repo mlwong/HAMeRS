@@ -1,12 +1,8 @@
 /*************************************************************************
  *
  * This file is modified from HyperbolicPatchStrategy.h of the SAMRAI
- * distribution. For full copyright information, see COPYRIGHT and
- * COPYING.LESSER of SAMRAI distribution.
- *
- * Copyright:     (c) 1997-2014 Lawrence Livermore National Security, LLC
- * Description:   Interface to patch routines for hyperbolic Runge-Kutta
- *                integration scheme.
+ * version 3.9.1 distribution. For full copyright information, see COPYRIGHT
+ * and COPYING.LESSER of the SAMRAI distribution.
  *
  ************************************************************************/
 
@@ -56,8 +52,8 @@ class RungeKuttaLevelIntegrator;
 using namespace SAMRAI;
 
 class RungeKuttaPatchStrategy:
-   public xfer::RefinePatchStrategy,
-   public xfer::CoarsenPatchStrategy
+    public xfer::RefinePatchStrategy,
+    public xfer::CoarsenPatchStrategy
 {
     public:
         /**

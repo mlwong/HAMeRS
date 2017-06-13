@@ -54,9 +54,10 @@ class NavierStokes:
 {
     public:
         /**
-         * The constructor for Euler sets default parameters for the Euler model. Specifically, it
-         * allocates the variables that represent the state of the solution. The constructor also
-         * registers this object for restart with the restart manager using the object name.
+         * The constructor for NavierStokes sets default parameters for the Navier-Stokes model.
+         * Specifically, it allocates the variables that represent the state of the solution. The
+         * constructor also registers this object for restart with the restart manager using the
+         * object name.
          *
          * After default values are set, this routine calls getFromRestart() if execution from a
          * restart file is specified. Finally, getFromInput() is called to read values from the given
@@ -255,8 +256,8 @@ class NavierStokes:
         ///      preprocessRefine(),
         ///      postprocessRefine()
         ///
-        ///  are concrete implementations of functions declared in the RefinePatchStrategy abstract
-        ///  base class.
+        ///  are concrete implementations of functions declared in the SAMRAI::xfer::RefinePatchStrategy
+        ///  abstract base class.
         ///
         
         /**
@@ -313,8 +314,8 @@ class NavierStokes:
         ///      preprocessCoarsen()
         ///      postprocessCoarsen()
         ///
-        ///  are concrete implementations of functions declared in the CoarsenPatchStrategy abstract
-        ///  base class. They are trivial because this class doesn't do any pre/postprocessCoarsen.
+        ///  are concrete implementations of functions declared in the SAMRAI::xfer::CoarsenPatchStrategy
+        ///  abstract base class. They are trivial because this class doesn't do any pre/postprocessCoarsen.
         ///
         
         /**
@@ -358,8 +359,8 @@ class NavierStokes:
         /**
          * Write state of NavierStokes object to the given database for restart.
          *
-         * This routine is a concrete implementation of the function declared in the tbox::Serializable
-         * abstract base class.
+         * This routine is a concrete implementation of the function declared in the
+         * SAMRAI::tbox::Serializable abstract base class.
          */
         void
         putToRestart(
@@ -434,7 +435,7 @@ class NavierStokes:
         {
             d_plot_context = plot_context;
         }
-
+        
     private:
         /*
          * These private member functions read data from input and restart. When beginning a run

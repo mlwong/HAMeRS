@@ -18,11 +18,6 @@ class DiffusiveFluxReconstructorManager
     public:
         DiffusiveFluxReconstructorManager(
             const std::string& object_name,
-            const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
-            const int& num_eqn,
-            const int& num_species,
-            const boost::shared_ptr<FlowModel>& flow_model,
             const boost::shared_ptr<tbox::Database>& diffusive_flux_reconstructor_db,
             const std::string& diffusive_flux_reconstructor_str);
         
@@ -36,13 +31,14 @@ class DiffusiveFluxReconstructorManager
         }
         
         /*
-         * Get the diffusive flux reconstructor.
+         * Create the diffusive flux reconstructor.
          */
         boost::shared_ptr<DiffusiveFluxReconstructor>
-        getDiffusiveFluxReconstructor() const
-        {
-            return d_diff_flux_reconstructor;
-        }
+        createDiffusiveFluxReconstructor(
+            const tbox::Dimension& dim,
+            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const int& num_species,
+            const boost::shared_ptr<FlowModel>& flow_model);
         
         /*
          * Print all characteristics of diffusive flux reconstructor manager.
@@ -62,9 +58,9 @@ class DiffusiveFluxReconstructorManager
         DIFFUSIVE_FLUX_RECONSTRUCTOR::TYPE d_diffusive_flux_reconstructor_type;
         
         /*
-         * boost::shared_ptr to the diffusive flux reconstructor.
+         * boost::shared_ptr to the diffusive flux reconstructor database.
          */
-        boost::shared_ptr<DiffusiveFluxReconstructor> d_diff_flux_reconstructor;
+        boost::shared_ptr<tbox::Database> d_diffusive_flux_reconstructor_db;
         
 };
 

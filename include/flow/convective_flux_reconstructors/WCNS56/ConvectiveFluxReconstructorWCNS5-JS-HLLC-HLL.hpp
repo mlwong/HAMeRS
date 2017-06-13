@@ -30,7 +30,7 @@ class ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL: public ConvectiveFluxReconst
         void
         putToRestart(
             const boost::shared_ptr<tbox::Database>& restart_db) const;
-    
+        
     private:
         /*
          * Perform WENO interpolation.

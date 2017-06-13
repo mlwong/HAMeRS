@@ -160,6 +160,11 @@ enum APPLICATION_LABEL { EULER,
 
 int main(int argc, char *argv[])
 {
+#ifdef _OPENMP
+    omp_set_dynamic(0);
+    omp_set_num_threads(8);
+#endif
+    
     /*
      * Initialize tbox::MPI and SAMRAI, enable logging, and process command line.
      */

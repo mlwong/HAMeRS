@@ -442,9 +442,9 @@ class FlowModelSingleSpecies: public FlowModel
         /*
          * boost::shared_ptr to registered conservative variables.
          */
-        boost::shared_ptr<pdat::CellVariable<double> > d_variable_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_variable_momentum;
-        boost::shared_ptr<pdat::CellVariable<double> > d_variable_total_energy;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_density;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_momentum;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_total_energy;
         
         /*
          * Number of sub-ghost cells of derived cell data.

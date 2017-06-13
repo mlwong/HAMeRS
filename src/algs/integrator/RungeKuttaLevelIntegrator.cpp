@@ -1,16 +1,12 @@
 /*************************************************************************
  *
- * This file is modified from HyperbolicLevelIntegrator.c of the SAMRAI 3.9.1.
- * distribution. For full copyright information, see COPYRIGHT and
- * COPYING.LESSER of SAMRAI distribution.
+ * This file is modified from HyperbolicLevelIntegrator.C of the SAMRAI
+ * verson 3.9.1 distribution. For full copyright information, see COPYRIGHT
+ * and COPYING.LESSER of the SAMRAI distribution.
  * 
  ************************************************************************/
 
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
-
-#include "extn/variable_fill_patterns/LayerCellVariableFillPattern.hpp"
-#include "extn/variable_fill_patterns/LayerCellNoCornersVariableFillPattern.hpp"
-#include "extn/variable_fill_patterns/CellCornersVariableFillPattern.hpp"
 
 #include "SAMRAI/pdat/CellData.h"
 #include "SAMRAI/pdat/FaceData.h"
@@ -398,7 +394,9 @@ RungeKuttaLevelIntegrator::initializeLevelData(
                 level_number - 1,
                 hierarchy,
                 d_patch_strategy));
+        
         mpi.Barrier();
+        
         t_init_level_create_sched->stop();
         
         d_patch_strategy->setDataContext(d_scratch);
@@ -448,19 +446,36 @@ RungeKuttaLevelIntegrator::initializeLevelData(
      */
     d_patch_strategy->setDataContext(d_current);
     
-    for (SAMRAI::hier::PatchLevel::iterator p(level->begin()); p != level->end(); p++)
+#ifdef _OPENMP
+    #pragma omp parallel
     {
-        const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *p;
-        
-        patch->allocatePatchData(d_temp_var_scratch_data, init_data_time);
-        
-        d_patch_strategy->initializeDataOnPatch(
-            *patch,
-            init_data_time,
-            initial_time);
-        
-        patch->deallocatePatchData(d_temp_var_scratch_data);
+        #pragma omp single nowait
+        {
+#endif
+            for (SAMRAI::hier::PatchLevel::iterator p(level->begin()); p != level->end(); p++)
+#ifdef _OPENMP
+            {
+                #pragma omp task
+#endif
+                {
+                    const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *p;
+                    
+                    patch->allocatePatchData(d_temp_var_scratch_data, init_data_time);
+                    
+                    d_patch_strategy->initializeDataOnPatch(
+                        *patch,
+                        init_data_time,
+                        initial_time);
+                    
+                    patch->deallocatePatchData(d_temp_var_scratch_data);
+                }
+#ifdef _OPENMP
+            }
+        }
+        #pragma omp taskwait
     }
+#endif
+    
     d_patch_strategy->clearDataContext();
     mpi.Barrier();
     t_init_level_fill_interior->stop();
@@ -513,18 +528,23 @@ RungeKuttaLevelIntegrator::resetHierarchyConfiguration(
                 level,
                 ln - 1,
                 hierarchy,
-                d_patch_strategy);
+                d_patch_strategy,
+                true);
+        
         t_advance_bdry_fill_create->stop();
      
         if (!d_lag_dt_computation && d_use_ghosts_for_dt)
         {
             t_new_advance_bdry_fill_create->start();
+            
             d_bdry_sched_advance_new[ln] =
                 d_bdry_fill_advance_new->createSchedule(
                     level,
                     ln - 1,
                     hierarchy,
-                    d_patch_strategy);
+                    d_patch_strategy,
+                    true);
+            
             t_new_advance_bdry_fill_create->stop();
         }
     }
@@ -578,6 +598,8 @@ RungeKuttaLevelIntegrator::applyValueDetector(
     }
     t_error_bdry_fill_comm->stop();
     
+    t_tag_cells->start();
+    
     d_patch_strategy->preprocessTagCellsValueDetector(
         hierarchy,
         level_number,
@@ -588,23 +610,37 @@ RungeKuttaLevelIntegrator::applyValueDetector(
         uses_integral_detector_too,
         uses_richardson_extrapolation_too);
     
-    t_tag_cells->start();
-    for (SAMRAI::hier::PatchLevel::iterator ip(level->begin());
-         ip != level->end();
-         ip++)
+#ifdef _OPENMP
+    #pragma omp parallel
     {
-        const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
-        d_patch_strategy->tagCellsOnPatchValueDetector(
-            *patch,
-            error_data_time,
-            initial_time,
-            tag_index,
-            uses_gradient_detector_too,
-            uses_multiresolution_detector_too,
-            uses_integral_detector_too,
-            uses_richardson_extrapolation_too);
+        #pragma omp single nowait
+        {
+#endif
+            for (SAMRAI::hier::PatchLevel::iterator ip(level->begin());
+                 ip != level->end();
+                 ip++)
+#ifdef _OPENMP
+            {
+                #pragma omp task
+#endif
+                {
+                    const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
+                    d_patch_strategy->tagCellsOnPatchValueDetector(
+                        *patch,
+                        error_data_time,
+                        initial_time,
+                        tag_index,
+                        uses_gradient_detector_too,
+                        uses_multiresolution_detector_too,
+                        uses_integral_detector_too,
+                        uses_richardson_extrapolation_too);
+                }
+#ifdef _OPENMP
+            }
+        }
+        #pragma omp taskwait
     }
-    t_tag_cells->stop();
+#endif
     
     d_patch_strategy->postprocessTagCellsValueDetector(
         hierarchy,
@@ -615,6 +651,8 @@ RungeKuttaLevelIntegrator::applyValueDetector(
         uses_multiresolution_detector_too,
         uses_integral_detector_too,
         uses_richardson_extrapolation_too);
+    
+    t_tag_cells->stop();
     
     d_patch_strategy->clearDataContext();
     
@@ -667,6 +705,8 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
     }
     t_error_bdry_fill_comm->stop();
     
+    t_tag_cells->start();
+    
     d_patch_strategy->preprocessTagCellsGradientDetector(
         hierarchy,
         level_number,
@@ -677,23 +717,37 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
         uses_integral_detector_too,
         uses_richardson_extrapolation_too);
     
-    t_tag_cells->start();
-    for (SAMRAI::hier::PatchLevel::iterator ip(level->begin());
-         ip != level->end();
-         ip++)
+#ifdef _OPENMP
+    #pragma omp parallel
     {
-        const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
-        d_patch_strategy->tagCellsOnPatchGradientDetector(
-            *patch,
-            error_data_time,
-            initial_time,
-            tag_index,
-            uses_value_detector_too,
-            uses_multiresolution_detector_too,
-            uses_integral_detector_too,
-            uses_richardson_extrapolation_too);
+        #pragma omp single nowait
+        {
+#endif
+            for (SAMRAI::hier::PatchLevel::iterator ip(level->begin());
+                 ip != level->end();
+                 ip++)
+#ifdef _OPENMP
+            {
+                #pragma omp task
+#endif
+                {
+                    const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
+                    d_patch_strategy->tagCellsOnPatchGradientDetector(
+                        *patch,
+                        error_data_time,
+                        initial_time,
+                        tag_index,
+                        uses_value_detector_too,
+                        uses_multiresolution_detector_too,
+                        uses_integral_detector_too,
+                        uses_richardson_extrapolation_too);
+                }
+#ifdef _OPENMP
+            }
+        }
+        #pragma omp taskwait
     }
-    t_tag_cells->stop();
+#endif
     
     d_patch_strategy->postprocessTagCellsGradientDetector(
         hierarchy,
@@ -704,6 +758,8 @@ RungeKuttaLevelIntegrator::applyGradientDetector(
         uses_multiresolution_detector_too,
         uses_integral_detector_too,
         uses_richardson_extrapolation_too);
+    
+    t_tag_cells->stop();
     
     d_patch_strategy->clearDataContext();
     
@@ -763,6 +819,8 @@ RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
     }
     t_error_bdry_fill_comm->stop();
     
+    t_tag_cells->start();
+    
     d_patch_strategy->preprocessTagCellsMultiresolutionDetector(
         hierarchy,
         level_number,
@@ -773,23 +831,37 @@ RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
         uses_integral_detector_too,
         uses_richardson_extrapolation_too);
     
-    t_tag_cells->start();
-    for (SAMRAI::hier::PatchLevel::iterator ip(level->begin());
-         ip != level->end();
-         ip++)
+#ifdef _OPENMP
+    #pragma omp parallel
     {
-        const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
-        d_patch_strategy->tagCellsOnPatchMultiresolutionDetector(
-            *patch,
-            error_data_time,
-            initial_time,
-            tag_index,
-            uses_value_detector_too,
-            uses_gradient_detector_too,
-            uses_integral_detector_too,
-            uses_richardson_extrapolation_too);
+        #pragma omp single nowait
+        {
+#endif
+            for (SAMRAI::hier::PatchLevel::iterator ip(level->begin());
+                 ip != level->end();
+                 ip++)
+#ifdef _OPENMP
+            {
+                #pragma omp task
+#endif
+                {
+                    const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
+                    d_patch_strategy->tagCellsOnPatchMultiresolutionDetector(
+                        *patch,
+                        error_data_time,
+                        initial_time,
+                        tag_index,
+                        uses_value_detector_too,
+                        uses_gradient_detector_too,
+                        uses_integral_detector_too,
+                        uses_richardson_extrapolation_too);
+                }
+#ifdef _OPENMP
+            }
+        }
+        #pragma omp taskwait
     }
-    t_tag_cells->stop();
+#endif
     
     d_patch_strategy->postprocessTagCellsMultiresolutionDetector(
         hierarchy,
@@ -800,6 +872,8 @@ RungeKuttaLevelIntegrator::applyMultiresolutionDetector(
         uses_gradient_detector_too,
         uses_integral_detector_too,
         uses_richardson_extrapolation_too);
+    
+    t_tag_cells->stop();
     
     d_patch_strategy->clearDataContext();
     
@@ -1187,33 +1261,48 @@ RungeKuttaLevelIntegrator::getLevelDt(
             
             d_patch_strategy->setDataContext(d_current);
             
-            for (SAMRAI::hier::PatchLevel::iterator p(level->begin());
-                 p != level->end();
-                 p++)
+#ifdef _OPENMP
+            #pragma omp parallel
             {
-                const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *p;
-                
-                patch->allocatePatchData(d_temp_var_scratch_data, dt_time);
-                
-                double patch_dt;
-                patch_dt = d_patch_strategy->
-                    computeStableDtOnPatch(
-                        *patch,
-                        initial_time,
-                        dt_time);
-                
-                dt = SAMRAI::tbox::MathUtilities<double>::Min(dt, patch_dt);
-                //SAMRAI::tbox::plog.precision(12);
-                //SAMRAI::tbox::plog << "Level " << level->getLevelNumber()
-                //           << " Patch " << *p
-                //           << " box " << patch->getBox()
-                //           << " has patch_dt " << patch_dt
-                //           << " dt " << dt
-                //           << std::endl;
-                
-                patch->deallocatePatchData(d_temp_var_scratch_data);
+                #pragma omp single nowait
+                {
+#endif
+                    for (SAMRAI::hier::PatchLevel::iterator p(level->begin());
+                         p != level->end();
+                         p++)
+#ifdef _OPENMP
+                    {
+                        #pragma omp task
+#endif
+                        {
+                            const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *p;
+                            
+                            patch->allocatePatchData(d_temp_var_scratch_data, dt_time);
+                            
+                            double patch_dt = d_patch_strategy->
+                                computeStableDtOnPatch(
+                                    *patch,
+                                    initial_time,
+                                    dt_time);
+                            
+                            dt = SAMRAI::tbox::MathUtilities<double>::Min(dt, patch_dt);
+                            //SAMRAI::tbox::plog.precision(12);
+                            //SAMRAI::tbox::plog << "Level " << level->getLevelNumber()
+                            //           << " Patch " << *p
+                            //           << " box " << patch->getBox()
+                            //           << " has patch_dt " << patch_dt
+                            //           << " dt " << dt
+                            //           << std::endl;
+                            
+                            patch->deallocatePatchData(d_temp_var_scratch_data);
+                        }
+#ifdef _OPENMP
+                    }
+                }
+                #pragma omp taskwait
             }
-         
+#endif
+            
             d_patch_strategy->clearDataContext();
         }
         else
@@ -1228,32 +1317,47 @@ RungeKuttaLevelIntegrator::getLevelDt(
             d_bdry_sched_advance[level->getLevelNumber()]->fillData(dt_time);
             t_advance_bdry_fill_comm->stop();
             
-            for (SAMRAI::hier::PatchLevel::iterator ip(level->begin());
-                 ip != level->end();
-                 ip++)
+#ifdef _OPENMP
+            #pragma omp parallel
             {
-                const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
-                
-                patch->allocatePatchData(d_temp_var_scratch_data, dt_time);
-                
-                double patch_dt;
-                patch_dt = d_patch_strategy->
-                    computeStableDtOnPatch(
-                        *patch,
-                        initial_time,
-                        dt_time);
-                
-                dt = SAMRAI::tbox::MathUtilities<double>::Min(dt, patch_dt);
-                //SAMRAI::tbox::plog.precision(12);
-                //SAMRAI::tbox::plog << "Level " << level->getLevelNumber()
-                //           << " Patch " << *ip
-                //           << " box " << patch->getBox()
-                //           << " has patch_dt " << patch_dt
-                //           << " dt " << dt
-                //           << std::endl;
-                
-                patch->deallocatePatchData(d_temp_var_scratch_data);
+                #pragma omp single nowait
+                {
+#endif
+                    for (SAMRAI::hier::PatchLevel::iterator ip(level->begin());
+                         ip != level->end();
+                         ip++)
+#ifdef _OPENMP
+                    {
+                        #pragma omp task
+#endif
+                        {
+                            const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
+                            
+                            patch->allocatePatchData(d_temp_var_scratch_data, dt_time);
+                            
+                            double patch_dt = d_patch_strategy->
+                                computeStableDtOnPatch(
+                                    *patch,
+                                    initial_time,
+                                    dt_time);
+                            
+                            dt = SAMRAI::tbox::MathUtilities<double>::Min(dt, patch_dt);
+                            //SAMRAI::tbox::plog.precision(12);
+                            //SAMRAI::tbox::plog << "Level " << level->getLevelNumber()
+                            //           << " Patch " << *ip
+                            //           << " box " << patch->getBox()
+                            //           << " has patch_dt " << patch_dt
+                            //           << " dt " << dt
+                            //           << std::endl;
+                            
+                            patch->deallocatePatchData(d_temp_var_scratch_data);
+                        }
+#ifdef _OPENMP
+                    }
+                }
+                #pragma omp taskwait
             }
+#endif
             
             d_patch_strategy->clearDataContext();
             
@@ -1468,8 +1572,6 @@ RungeKuttaLevelIntegrator::advanceLevel(
                 fill_schedule =
                     d_bdry_fill_advance_old->createSchedule(
                         level,
-                        coarser_ln,
-                        hierarchy,
                         d_patch_strategy);
             }
             else
@@ -1477,15 +1579,12 @@ RungeKuttaLevelIntegrator::advanceLevel(
                 fill_schedule =
                     d_bdry_fill_advance->createSchedule(
                         level,
-                        coarser_ln,
-                        hierarchy,
                         d_patch_strategy);
             }
         }
         else
         {
             // Use coarser level in boundary fill.
-            
             if (d_number_time_data_levels == 3)
             {
                 fill_schedule =
@@ -1493,7 +1592,8 @@ RungeKuttaLevelIntegrator::advanceLevel(
                         level,
                         coarser_ln,
                         hierarchy,
-                        d_patch_strategy);
+                        d_patch_strategy,
+                        true);
             }
             else
             {
@@ -1502,7 +1602,8 @@ RungeKuttaLevelIntegrator::advanceLevel(
                         level,
                         coarser_ln,
                         hierarchy,
-                        d_patch_strategy);
+                        d_patch_strategy,
+                        true);
             }
         }
         t_error_bdry_fill_create->stop();
@@ -1556,7 +1657,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
      *     (6c) Advance one Runge-Kutta sub-step and accumulate the intermediate flux to the total
      *          flux during this whole Runge-Kutta step. Time-independent intermediate data of next
      *          Runge-Kutta step is stored in scratch context.
-     * (7) Copy new solution to from scratch to new storage.
+     * (7) Copy new solution from scratch to new storage.
      * (8) Call user-routine to post-process state data, if needed.
      */
     
@@ -1670,6 +1771,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
             }
         }
         
+        /*
         for (SAMRAI::hier::PatchLevel::iterator ip(level->begin());
              ip != level->end();
              ip++)
@@ -1705,6 +1807,82 @@ RungeKuttaLevelIntegrator::advanceLevel(
             
             t_patch_num_kernel->stop();
         }
+        */
+        
+        d_patch_strategy->setDataContext(d_intermediate[sn]);
+        
+        t_patch_num_kernel->start();
+        
+#ifdef _OPENMP
+        #pragma omp parallel
+        {
+            #pragma omp single nowait
+            {
+#endif
+                for (SAMRAI::hier::PatchLevel::iterator ip(level->begin());
+                     ip != level->end();
+                     ip++)
+#ifdef _OPENMP
+                {
+                    #pragma omp task
+#endif
+                    {
+                        const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
+                        
+                        // Compute flux corresponding to this sub-step.
+                        d_patch_strategy->computeFluxesAndSourcesOnPatch(
+                            *patch,
+                            current_time,
+                            dt,
+                            sn);
+                    }
+#ifdef _OPENMP
+                }
+            }
+            #pragma omp taskwait
+        }
+#endif
+        
+        t_patch_num_kernel->stop();
+        
+        d_patch_strategy->setDataContext(d_scratch);
+        
+        t_patch_num_kernel->start();
+        
+#ifdef _OPENMP
+        #pragma omp parallel
+        {
+            #pragma omp single nowait
+            {
+#endif
+                for (SAMRAI::hier::PatchLevel::iterator ip(level->begin());
+                     ip != level->end();
+                     ip++)
+#ifdef _OPENMP
+                {
+                    #pragma omp task
+#endif
+                    {
+                        const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
+                        
+                        // Advance a Runge-Kutta sub-step.
+                        d_patch_strategy->advanceSingleStepOnPatch(
+                            *patch,
+                            current_time,
+                            dt,
+                            d_alpha[sn],
+                            d_beta[sn],
+                            d_gamma[sn],
+                            d_intermediate);
+                    }
+#ifdef _OPENMP
+                }
+            }
+            #pragma omp taskwait
+        }
+#endif
+        
+        t_patch_num_kernel->stop();
         
         fill_schedule_intermediate.reset();
     }
@@ -1736,17 +1914,17 @@ RungeKuttaLevelIntegrator::advanceLevel(
     t_patch_num_kernel->stop();
     
     /*
-    * (9) If the level advance is for regridding, we compute the next timestep:
-    *
-    * (a) If the dt computation is lagged (i.e., we use pre-advance data to compute timestep), we
-    *     reset scratch space on patch interiors if needed. Then, we set the strategy context to
-    *     current or scratch depending on whether ghost values are used to compute dt.
-    * (b) If the dt computation is not lagged (i.e., we use advanced data to compute timestep), we
-    *     refill scratch space, including ghost data with new solution values if needed. Then, we
-    *     set the strategy context to new or scratch depending on whether ghost values are used to
-    *     compute dt.
-    * (c) Then, we loop over patches and compute the dt on each patch.
-    */
+     * (9) If the level advance is for regridding, we compute the next timestep:
+     *
+     * (a) If the dt computation is lagged (i.e., we use pre-advance data to compute timestep), we
+     *     reset scratch space on patch interiors if needed. Then, we set the strategy context to
+     *     current or scratch depending on whether ghost values are used to compute dt.
+     * (b) If the dt computation is not lagged (i.e., we use advanced data to compute timestep), we
+     *     refill scratch space, including ghost data with new solution values if needed. Then, we
+     *     set the strategy context to new or scratch depending on whether ghost values are used to
+     *     compute dt.
+     * (c) Then, we loop over patches and compute the dt on each patch.
+     */
     
     double dt_next = SAMRAI::tbox::MathUtilities<double>::getMax();
     
@@ -1788,27 +1966,44 @@ RungeKuttaLevelIntegrator::advanceLevel(
                     d_patch_strategy->setDataContext(d_new);
                 }
             }
-          
-            for (SAMRAI::hier::PatchLevel::iterator ip(level->begin());
-                 ip != level->end();
-                 ip++)
+            
+            t_patch_num_kernel->start();
+#ifdef _OPENMP
+            #pragma omp parallel
             {
-                const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
-                
-                patch->allocatePatchData(d_temp_var_scratch_data, new_time);
-                
-                // "false" argument indicates "initial_time" is false.
-                t_patch_num_kernel->start();
-                double patch_dt = d_patch_strategy->computeStableDtOnPatch(
-                    *patch,
-                    false,
-                    new_time);
-                t_patch_num_kernel->stop();
-                
-                dt_next = SAMRAI::tbox::MathUtilities<double>::Min(dt_next, patch_dt);
-                
-                patch->deallocatePatchData(d_temp_var_scratch_data);
+                #pragma omp single nowait
+                {
+#endif
+                    for (SAMRAI::hier::PatchLevel::iterator ip(level->begin());
+                         ip != level->end();
+                         ip++)
+#ifdef _OPENMP
+                    {
+                        #pragma omp task
+#endif
+                        {
+                            const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
+                            
+                            patch->allocatePatchData(d_temp_var_scratch_data, new_time);
+                            
+                            // "false" argument indicates "initial_time" is false.
+                            double patch_dt = d_patch_strategy->computeStableDtOnPatch(
+                                *patch,
+                                false,
+                                new_time);
+                            
+                            dt_next = SAMRAI::tbox::MathUtilities<double>::Min(dt_next, patch_dt);
+                            
+                            patch->deallocatePatchData(d_temp_var_scratch_data);
+                        }
+#ifdef _OPENMP
+                    }
+                }
+                #pragma omp taskwait
             }
+#endif
+            t_patch_num_kernel->stop();
+            
             d_patch_strategy->clearDataContext();
         }
         else
@@ -2030,21 +2225,37 @@ RungeKuttaLevelIntegrator::synchronizeNewLevels(
             sched->coarsenData();
             t_sync_initial_comm->stop();
             
-            for (SAMRAI::hier::PatchLevel::iterator p(coarse_level->begin());
-                 p != coarse_level->end();
-                 p++)
+#ifdef _OPENMP
+            #pragma omp parallel
             {
-                const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *p;
-                
-                patch->allocatePatchData(d_temp_var_scratch_data, sync_time);
-                
-                d_patch_strategy->initializeDataOnPatch(
-                    *patch,
-                    sync_time,
-                    initial_time);
-                
-                patch->deallocatePatchData(d_temp_var_scratch_data);
+                #pragma omp single nowait
+                {
+#endif
+                    for (SAMRAI::hier::PatchLevel::iterator p(coarse_level->begin());
+                         p != coarse_level->end();
+                         p++)
+#ifdef _OPENMP
+                    {
+                        #pragma omp task
+#endif
+                        {
+                            const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *p;
+                            
+                            patch->allocatePatchData(d_temp_var_scratch_data, sync_time);
+                            
+                            d_patch_strategy->initializeDataOnPatch(
+                                *patch,
+                                sync_time,
+                                initial_time);
+                            
+                            patch->deallocatePatchData(d_temp_var_scratch_data);
+                        }
+#ifdef _OPENMP
+                    }
+                }
+                #pragma omp taskwait
             }
+#endif
         }
         
         d_patch_strategy->clearDataContext();
@@ -2114,19 +2325,36 @@ RungeKuttaLevelIntegrator::synchronizeLevelWithCoarser(
     
     const double reflux_dt = sync_time - coarse_sim_time;
     
-    for (SAMRAI::hier::PatchLevel::iterator ip(coarse_level->begin());
-         ip != coarse_level->end();
-         ip++)
+#ifdef _OPENMP
+    #pragma omp parallel
     {
-        const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
-        
-        patch->allocatePatchData(d_temp_var_scratch_data, coarse_sim_time);
-            
-        d_patch_strategy->synchronizeFluxes(*patch,
-           coarse_sim_time,
-           reflux_dt);
-        patch->deallocatePatchData(d_temp_var_scratch_data);
+        #pragma omp single nowait
+        {
+#endif
+            for (SAMRAI::hier::PatchLevel::iterator ip(coarse_level->begin());
+                 ip != coarse_level->end();
+                 ip++)
+#ifdef _OPENMP
+            {
+                #pragma omp task
+#endif
+                {
+                    const boost::shared_ptr<SAMRAI::hier::Patch>& patch = *ip;
+                    
+                    patch->allocatePatchData(d_temp_var_scratch_data, coarse_sim_time);
+                        
+                    d_patch_strategy->synchronizeFluxes(*patch,
+                       coarse_sim_time,
+                       reflux_dt);
+                    
+                    patch->deallocatePatchData(d_temp_var_scratch_data);
+                }
+#ifdef _OPENMP
+            }
+        }
+        #pragma omp taskwait
     }
+#endif
     
     d_patch_strategy->clearDataContext();
     
@@ -2438,35 +2666,17 @@ RungeKuttaLevelIntegrator::registerVariable(
             d_fill_new_level->registerRefine(
                 cur_id, cur_id, cur_id, new_id, scr_id, refine_op, time_int);
             
-/*
- * Set boundary fill schedules for data used in the intermediate steps of the Runge-Kutta
- * integration.
- */
-/* ORIGINAL
-for (int sn = 0; sn < d_number_steps; sn++)
-{
-    d_bdry_fill_intermediate[sn]->registerRefine(
-        intermediate_id[sn],
-        scr_id,
-        intermediate_id[sn],
-        refine_op);
-}
-*/
-            
-            boost::shared_ptr<SAMRAI::xfer::VariableFillPattern> fill_pattern(
-                new LayerCellVariableFillPattern(
-                    dim,
-                    ghosts_intermediate,
-                    SAMRAI::hier::IntVector::getZero(dim)));
-            
+            /*
+             * Set boundary fill schedules for data used in the intermediate steps of the Runge-Kutta
+             * integration.
+             */
             for (int sn = 0; sn < d_number_steps; sn++)
             {
                 d_bdry_fill_intermediate[sn]->registerRefine(
                     intermediate_id[sn],
                     scr_id,
                     intermediate_id[sn],
-                    refine_op,
-                    fill_pattern);
+                    refine_op);
             }
             
             /*
@@ -3945,4 +4155,3 @@ RungeKuttaLevelIntegrator::finalizeCallback()
     s_timestamp_stat.clear();
 #endif
 }
-

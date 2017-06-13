@@ -93,6 +93,18 @@ Euler::Euler(
             getTimer("Euler::tagMultiresolutionDetectorCells()");
     }
     
+#ifdef _OPENMP
+    omp_init_lock(&t_lock_init);
+    omp_init_lock(&t_lock_compute_dt);
+    omp_init_lock(&t_lock_compute_fluxes_sources);
+    omp_init_lock(&t_lock_advance_step);
+    omp_init_lock(&t_lock_synchronize_fluxes);
+    omp_init_lock(&t_lock_setphysbcs);
+    omp_init_lock(&t_lock_tagvalue);
+    omp_init_lock(&t_lock_taggradient);
+    omp_init_lock(&t_lock_tagmultiresolution);
+#endif
+    
     /*
      * Initialize object with data read from given input/restart databases.
      */
@@ -105,106 +117,164 @@ Euler::Euler(
     getFromInput(input_db, is_from_restart);
     
     /*
-     * Initialize d_flow_model_manager and get the flow model object.
+     * Get the number of threads used.
+     */
+    
+    int n_threads = 1;
+    
+#ifdef _OPENMP
+    n_threads = omp_get_max_threads();
+#endif
+    
+    /*
+     * Initialize d_flow_model_manager and create flow model object for each thread.
      */
     
     d_flow_model_manager.reset(new FlowModelManager(
         "d_flow_model_manager",
-        d_dim,
-        d_grid_geometry,
-        d_num_species,
         d_flow_model_db,
         d_flow_model_str));
     
-    d_flow_model = d_flow_model_manager->getFlowModel();
+    d_flow_models_thread.reserve(n_threads);
+    
+    for (int ti = 0; ti < n_threads; ti++)
+    {
+        d_flow_models_thread.push_back(d_flow_model_manager->createFlowModel(
+            d_dim,
+            d_grid_geometry,
+            d_num_species));
+    }
     
     /*
-     * Initialize d_convective_flux_reconstructor_manager and get the convective flux reconstructor object.
+     * Initialize d_convective_flux_reconstructor_manager and create convective flux reconstructor
+     * object for each thread.
      */
     
     d_convective_flux_reconstructor_manager.reset(new ConvectiveFluxReconstructorManager(
         "d_convective_flux_reconstructor_manager",
-        d_dim,
-        d_grid_geometry,
-        d_flow_model->getNumberOfEquations(),
-        d_num_species,
-        d_flow_model,
         d_convective_flux_reconstructor_db,
         d_convective_flux_reconstructor_str));
     
-    d_convective_flux_reconstructor = d_convective_flux_reconstructor_manager->getConvectiveFluxReconstructor();
+    d_convective_flux_reconstructors_thread.reserve(n_threads);
+    
+    for (int ti = 0; ti < n_threads; ti++)
+    {
+        d_convective_flux_reconstructors_thread.push_back(
+            d_convective_flux_reconstructor_manager->
+                createConvectiveFluxReconstructor(
+                    d_dim,
+                    d_grid_geometry,
+                    d_num_species,
+                    d_flow_models_thread[ti]));
+    }
     
     /*
-     * Initialize d_Euler_initial_conditions.
+     * Initialize d_Euler_initial_conditions_thread.
      */
     
-    d_Euler_initial_conditions.reset(new EulerInitialConditions(
-        "d_Euler_initial_conditions",
-        d_project_name,
-        d_dim,
-        d_grid_geometry,
-        d_flow_model_manager->getFlowModelType(),
-        d_num_species));
+    d_Euler_initial_conditions_thread.reserve(n_threads);
     
-    d_Euler_initial_conditions->setVariables(d_flow_model->getConservativeVariables());
+    for (int ti = 0; ti < n_threads; ti++)
+    {
+        d_Euler_initial_conditions_thread.push_back(
+            boost::shared_ptr<EulerInitialConditions>(
+                new EulerInitialConditions(
+                    "d_Euler_initial_conditions",
+                    d_project_name,
+                    d_dim,
+                    d_grid_geometry,
+                    d_flow_model_manager->getFlowModelType(),
+                    d_num_species)));
+        
+        d_Euler_initial_conditions_thread[ti]->setVariables(
+            d_flow_models_thread[ti]->getConservativeVariables());
+    }
     
     /*
-     * Initialize d_Euler_boundary_conditions.
+     * Initialize d_Euler_boundary_conditions_thread.
      */
     
-    d_Euler_boundary_conditions.reset(new EulerBoundaryConditions(
-        "d_Euler_boundary_conditions",
-        d_project_name,
-        d_dim,
-        d_grid_geometry,
-        d_num_species,
-        d_flow_model,
-        d_Euler_boundary_conditions_db,
-        d_Euler_boundary_conditions_db_is_from_restart));
+    d_Euler_boundary_conditions_thread.reserve(n_threads);
+    
+    for (int ti = 0; ti < n_threads; ti++)
+    {
+        d_Euler_boundary_conditions_thread.push_back(
+            boost::shared_ptr<EulerBoundaryConditions>(
+                new EulerBoundaryConditions(
+                    "d_Euler_boundary_conditions",
+                    d_project_name,
+                    d_dim,
+                    d_grid_geometry,
+                    d_num_species,
+                    d_flow_models_thread[ti],
+                    d_Euler_boundary_conditions_db,
+                    d_Euler_boundary_conditions_db_is_from_restart)));
+    }
     
     /*
-     * Initialize d_value_tagger.
+     * Initialize d_value_taggers_thread.
      */
     
     if (d_value_tagger_db != nullptr)
     {
-        d_value_tagger.reset(new ValueTagger(
-            "d_value_tagger",
-            d_dim,
-            d_grid_geometry,
-            d_num_species,
-            d_flow_model,
-            d_value_tagger_db));
+        d_value_taggers_thread.reserve(n_threads);
+        
+        for (int ti = 0; ti < n_threads; ti++)
+        {
+            d_value_taggers_thread.push_back(
+                boost::shared_ptr<ValueTagger>(
+                    new ValueTagger(
+                        "d_value_tagger",
+                        d_dim,
+                        d_grid_geometry,
+                        d_num_species,
+                        d_flow_models_thread[ti],
+                        d_value_tagger_db)));
+        }
     }
     
     /*
-     * Initialize d_gradient_tagger.
+     * Initialize d_gradient_taggers_thread.
      */
     
     if (d_gradient_tagger_db != nullptr)
     {
-        d_gradient_tagger.reset(new GradientTagger(
-            "d_gradient_tagger",
-            d_dim,
-            d_grid_geometry,
-            d_num_species,
-            d_flow_model,
-            d_gradient_tagger_db));
+        d_gradient_taggers_thread.reserve(n_threads);
+        
+        for (int ti = 0; ti < n_threads; ti++)
+        {
+            d_gradient_taggers_thread.push_back(
+                boost::shared_ptr<GradientTagger>(
+                    new GradientTagger(
+                        "d_gradient_tagger",
+                        d_dim,
+                        d_grid_geometry,
+                        d_num_species,
+                        d_flow_models_thread[ti],
+                        d_gradient_tagger_db)));
+        }
     }
     
     /*
-     * Initialize d_multiresolution_tagger.
+     * Initialize d_multiresolution_taggers_thread.
      */
     
     if (d_multiresolution_tagger_db != nullptr)
     {
-        d_multiresolution_tagger.reset(new MultiresolutionTagger(
-            "d_multiresolution_tagger",
-            d_dim,
-            d_grid_geometry,
-            d_num_species,
-            d_flow_model,
-            d_multiresolution_tagger_db));
+        d_multiresolution_taggers_thread.reserve(n_threads);
+        
+        for (int ti = 0; ti < n_threads; ti++)
+        {
+            d_multiresolution_taggers_thread.push_back(
+                boost::shared_ptr<MultiresolutionTagger>(
+                    new MultiresolutionTagger(
+                        "d_multiresolution_tagger",
+                        d_dim,
+                        d_grid_geometry,
+                        d_num_species,
+                        d_flow_models_thread[ti],
+                        d_multiresolution_tagger_db)));
+        }
     }
     
     /*
@@ -212,18 +282,18 @@ Euler::Euler(
      */
     
     d_variable_convective_flux = boost::shared_ptr<pdat::SideVariable<double> > (
-        new pdat::SideVariable<double>(dim, "convective flux", d_flow_model->getNumberOfEquations()));
+        new pdat::SideVariable<double>(dim, "convective flux", d_flow_models_thread[0]->getNumberOfEquations()));
     
     /*
      * Initialize the cell variable of source.
      */
     
     d_variable_source = boost::shared_ptr<pdat::CellVariable<double> > (
-        new pdat::CellVariable<double>(dim, "source", d_flow_model->getNumberOfEquations()));
+        new pdat::CellVariable<double>(dim, "source", d_flow_models_thread[0]->getNumberOfEquations()));
     
     if ((!d_stat_dump_filename.empty()))
     {
-        d_flow_model->setupStatisticsUtilities();
+        d_flow_models_thread[0]->setupStatisticsUtilities();
         
         const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
         if (mpi.getRank() == 0)
@@ -244,7 +314,7 @@ Euler::Euler(
         }
         
         boost::shared_ptr<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
-            d_flow_model->getFlowModelStatisticsUtilities();
+            d_flow_models_thread[0]->getFlowModelStatisticsUtilities();
         
         flow_model_statistics_utilities->outputStatisticalQuantitiesNames(
             d_stat_dump_filename);
@@ -280,6 +350,18 @@ Euler::~Euler()
     t_tagvalue.reset();
     t_taggradient.reset();
     t_tagmultiresolution.reset();
+    
+#ifdef _OPENMP
+    omp_destroy_lock(&t_lock_init);
+    omp_destroy_lock(&t_lock_compute_dt);
+    omp_destroy_lock(&t_lock_compute_fluxes_sources);
+    omp_destroy_lock(&t_lock_advance_step);
+    omp_destroy_lock(&t_lock_synchronize_fluxes);
+    omp_destroy_lock(&t_lock_setphysbcs);
+    omp_destroy_lock(&t_lock_tagvalue);
+    omp_destroy_lock(&t_lock_taggradient);
+    omp_destroy_lock(&t_lock_tagmultiresolution);
+#endif
 }
 
 
@@ -297,35 +379,35 @@ Euler::registerModelVariables(
     
     num_ghosts_intermediate = hier::IntVector::max(
         num_ghosts_intermediate,
-        d_convective_flux_reconstructor->getConvectiveFluxNumberOfGhostCells());
+        d_convective_flux_reconstructors_thread[0]->getConvectiveFluxNumberOfGhostCells());
     
     hier::IntVector num_ghosts = num_ghosts_intermediate;
     
-    if (d_value_tagger != nullptr)
+    if (d_value_taggers_thread.size() > 0)
     {
         num_ghosts = hier::IntVector::max(
             num_ghosts,
-            d_value_tagger->getValueTaggerNumberOfGhostCells());
+            d_value_taggers_thread[0]->getValueTaggerNumberOfGhostCells());
     }
     
-    if (d_gradient_tagger != nullptr)
+    if (d_gradient_taggers_thread.size() > 0)
     {
         num_ghosts = hier::IntVector::max(
             num_ghosts,
-            d_gradient_tagger->getGradientTaggerNumberOfGhostCells());
+            d_gradient_taggers_thread[0]->getGradientTaggerNumberOfGhostCells());
     }
     
-    if (d_multiresolution_tagger != nullptr)
+    if (d_multiresolution_taggers_thread.size() > 0)
     {
         num_ghosts = hier::IntVector::max(
             num_ghosts,
-            d_multiresolution_tagger->getMultiresolutionTaggerNumberOfGhostCells());
+            d_multiresolution_taggers_thread[0]->getMultiresolutionTaggerNumberOfGhostCells());
     }
     
     /*
-     * Register the conservative variables of d_flow_model.
+     * Register the conservative variables of d_flow_models_thread.
      */
-    d_flow_model->registerConservativeVariables(
+    d_flow_models_thread[0]->registerConservativeVariables(
         integrator,
         num_ghosts,
         num_ghosts_intermediate);
@@ -356,19 +438,19 @@ Euler::registerModelVariables(
      * Register the temporary variables used in refinement taggers.
      */
     
-    if (d_value_tagger != nullptr)
+    if (d_value_taggers_thread.size() > 0)
     {
-        d_value_tagger->registerValueTaggerVariables(integrator);
+        d_value_taggers_thread[0]->registerValueTaggerVariables(integrator);
     }
     
-    if (d_gradient_tagger != nullptr)
+    if (d_gradient_taggers_thread.size() > 0)
     {
-        d_gradient_tagger->registerGradientTaggerVariables(integrator);
+        d_gradient_taggers_thread[0]->registerGradientTaggerVariables(integrator);
     }
     
-    if (d_multiresolution_tagger != nullptr)
+    if (d_multiresolution_taggers_thread.size() > 0)
     {
-        d_multiresolution_tagger->registerMultiresolutionTaggerVariables(integrator);
+        d_multiresolution_taggers_thread[0]->registerMultiresolutionTaggerVariables(integrator);
     }
     
     /*
@@ -376,7 +458,7 @@ Euler::registerModelVariables(
      */
     setPlotContext(integrator->getPlotContext());
     
-    d_flow_model->setPlotContext(integrator->getPlotContext());
+    d_flow_models_thread[0]->setPlotContext(integrator->getPlotContext());
     
     /*
      * Register the plotting quantities.
@@ -384,26 +466,26 @@ Euler::registerModelVariables(
 #ifdef HAVE_HDF5
     if (d_visit_writer)
     {
-        d_flow_model->registerPlotQuantities(
+        d_flow_models_thread[0]->registerPlotQuantities(
             d_visit_writer);
         
-        if (d_value_tagger != nullptr)
+        if (d_value_taggers_thread.size() > 0)
         {
-            d_value_tagger->registerPlotQuantities(
+            d_value_taggers_thread[0]->registerPlotQuantities(
                 d_visit_writer,
                 integrator->getPlotContext());
         }
         
-        if (d_gradient_tagger != nullptr)
+        if (d_gradient_taggers_thread.size() > 0)
         {
-            d_gradient_tagger->registerPlotQuantities(
+            d_gradient_taggers_thread[0]->registerPlotQuantities(
                 d_visit_writer,
                 integrator->getPlotContext());
         }
         
-        if (d_multiresolution_tagger != nullptr)
+        if (d_multiresolution_taggers_thread.size() > 0)
         {
-            d_multiresolution_tagger->registerPlotQuantities(
+            d_multiresolution_taggers_thread[0]->registerPlotQuantities(
                 d_visit_writer,
                 integrator->getPlotContext());
         }
@@ -474,10 +556,33 @@ Euler::initializeDataOnPatch(
     hier::Patch& patch,
     const double data_time,
     const bool initial_time)
-{   
+{
+#ifdef _OPENMP
+    omp_set_lock(&t_lock_init);
+    if (t_init->isRunning())
+    {
+        t_init->stop();
+    }
+#endif
+    
     t_init->start();
     
-    d_Euler_initial_conditions->initializeDataOnPatch(
+#ifdef _OPENMP
+    int n_timer_accesses = t_init->getNumberAccesses();
+    omp_unset_lock(&t_lock_init);
+#endif
+    
+    /*
+     * Get the thread id.
+     */
+    
+    int thread_id = 0;
+    
+#ifdef _OPENMP
+    thread_id = omp_get_thread_num();
+#endif
+    
+    d_Euler_initial_conditions_thread[thread_id]->initializeDataOnPatch(
         patch,
         data_time,
         initial_time,
@@ -496,8 +601,17 @@ Euler::initializeDataOnPatch(
         TBOX_ASSERT(workload_data);
         workload_data->fillAll(1.0);
     }
-
-    t_init->stop();
+    
+#ifdef _OPENMP
+    omp_set_lock(&t_lock_init);
+    if (t_init->getNumberAccesses() == n_timer_accesses)
+    {
+#endif
+        t_init->stop();
+#ifdef _OPENMP
+    }
+    omp_unset_lock(&t_lock_init);
+#endif
 }
 
 
@@ -507,7 +621,30 @@ Euler::computeStableDtOnPatch(
     const bool initial_time,
     const double dt_time)
 {
+#ifdef _OPENMP
+    omp_set_lock(&t_lock_compute_dt);
+    if (t_compute_dt->isRunning())
+    {
+        t_compute_dt->stop();
+    }
+#endif
+    
     t_compute_dt->start();
+    
+#ifdef _OPENMP
+    int n_timer_accesses = t_compute_dt->getNumberAccesses();
+    omp_unset_lock(&t_lock_compute_dt);
+#endif
+    
+    /*
+     * Get the thread id.
+     */
+    
+    int thread_id = 0;
+    
+#ifdef _OPENMP
+    thread_id = omp_get_thread_num();
+#endif
     
     double stable_dt;
     
@@ -541,18 +678,18 @@ Euler::computeStableDtOnPatch(
          * Register the patch and maximum wave speed in the flow model and compute the corresponding cell data.
          */
         
-        d_flow_model->registerPatchWithDataContext(patch, getDataContext());
+        d_flow_models_thread[thread_id]->registerPatchWithDataContext(patch, getDataContext());
         
-        hier::IntVector num_ghosts = d_flow_model->getNumberOfGhostCells();
+        hier::IntVector num_ghosts = d_flow_models_thread[thread_id]->getNumberOfGhostCells();
         
         std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
         num_subghosts_of_data.insert(
             std::pair<std::string, hier::IntVector>(
                 "MAX_WAVE_SPEED_X", num_ghosts));
         
-        d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+        d_flow_models_thread[thread_id]->registerDerivedCellVariable(num_subghosts_of_data);
         
-        d_flow_model->computeGlobalDerivedCellData();
+        d_flow_models_thread[thread_id]->computeGlobalDerivedCellData();
         
         /*
          * Get the pointer to the maximum wave speed inside the flow model.
@@ -560,7 +697,7 @@ Euler::computeStableDtOnPatch(
          */
         
         boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x =
-            d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_X");
+            d_flow_models_thread[thread_id]->getGlobalCellData("MAX_WAVE_SPEED_X");
         
         hier::IntVector num_subghosts_max_wave_speed_x = max_wave_speed_x->getGhostCellWidth();
         
@@ -588,7 +725,7 @@ Euler::computeStableDtOnPatch(
          * Unregister the patch and data of all registered derived cell variables in the flow model.
          */
         
-        d_flow_model->unregisterPatch();
+        d_flow_models_thread[thread_id]->unregisterPatch();
         
     }
     else if (d_dim == tbox::Dimension(2))
@@ -607,9 +744,9 @@ Euler::computeStableDtOnPatch(
          * Register the patch and maximum wave speeds in the flow model and compute the corresponding cell data.
          */
         
-        d_flow_model->registerPatchWithDataContext(patch, getDataContext());
+        d_flow_models_thread[thread_id]->registerPatchWithDataContext(patch, getDataContext());
         
-        hier::IntVector num_ghosts = d_flow_model->getNumberOfGhostCells();
+        hier::IntVector num_ghosts = d_flow_models_thread[thread_id]->getNumberOfGhostCells();
         
         hier::Box ghost_box = interior_box;
         ghost_box.grow(num_ghosts);
@@ -623,9 +760,9 @@ Euler::computeStableDtOnPatch(
             std::pair<std::string, hier::IntVector>(
                 "MAX_WAVE_SPEED_Y", num_ghosts));
         
-        d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+        d_flow_models_thread[thread_id]->registerDerivedCellVariable(num_subghosts_of_data);
         
-        d_flow_model->computeGlobalDerivedCellData();
+        d_flow_models_thread[thread_id]->computeGlobalDerivedCellData();
         
         /*
          * Get the pointers to the maximum wave speeds inside the flow model.
@@ -633,10 +770,10 @@ Euler::computeStableDtOnPatch(
          */
         
         boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x =
-            d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_X");
+            d_flow_models_thread[thread_id]->getGlobalCellData("MAX_WAVE_SPEED_X");
         
         boost::shared_ptr<pdat::CellData<double> > max_wave_speed_y =
-            d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_Y");
+            d_flow_models_thread[thread_id]->getGlobalCellData("MAX_WAVE_SPEED_Y");
         
         hier::IntVector num_subghosts_max_wave_speed_x = max_wave_speed_x->getGhostCellWidth();
         hier::IntVector num_subghosts_max_wave_speed_y = max_wave_speed_y->getGhostCellWidth();
@@ -677,7 +814,7 @@ Euler::computeStableDtOnPatch(
          * Unregister the patch and data of all registered derived cell variables in the flow model.
          */
         
-        d_flow_model->unregisterPatch();
+        d_flow_models_thread[thread_id]->unregisterPatch();
         
     }
     else if (d_dim == tbox::Dimension(3))
@@ -699,9 +836,9 @@ Euler::computeStableDtOnPatch(
          * cell data.
          */
         
-        d_flow_model->registerPatchWithDataContext(patch, getDataContext());
+        d_flow_models_thread[thread_id]->registerPatchWithDataContext(patch, getDataContext());
         
-        hier::IntVector num_ghosts = d_flow_model->getNumberOfGhostCells();
+        hier::IntVector num_ghosts = d_flow_models_thread[thread_id]->getNumberOfGhostCells();
         
         hier::Box ghost_box = interior_box;
         ghost_box.grow(num_ghosts);
@@ -718,9 +855,9 @@ Euler::computeStableDtOnPatch(
             std::pair<std::string, hier::IntVector>(
                 "MAX_WAVE_SPEED_Z", num_ghosts));
         
-        d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
+        d_flow_models_thread[thread_id]->registerDerivedCellVariable(num_subghosts_of_data);
         
-        d_flow_model->computeGlobalDerivedCellData();
+        d_flow_models_thread[thread_id]->computeGlobalDerivedCellData();
         
         /*
          * Get the pointers to the maximum wave speeds inside the flow model.
@@ -728,13 +865,13 @@ Euler::computeStableDtOnPatch(
          */
         
         boost::shared_ptr<pdat::CellData<double> > max_wave_speed_x =
-            d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_X");
+            d_flow_models_thread[thread_id]->getGlobalCellData("MAX_WAVE_SPEED_X");
         
         boost::shared_ptr<pdat::CellData<double> > max_wave_speed_y =
-            d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_Y");
+            d_flow_models_thread[thread_id]->getGlobalCellData("MAX_WAVE_SPEED_Y");
         
         boost::shared_ptr<pdat::CellData<double> > max_wave_speed_z =
-            d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_Z");
+            d_flow_models_thread[thread_id]->getGlobalCellData("MAX_WAVE_SPEED_Z");
         
         hier::IntVector num_subghosts_max_wave_speed_x = max_wave_speed_x->getGhostCellWidth();
         hier::IntVector num_subghosts_max_wave_speed_y = max_wave_speed_y->getGhostCellWidth();
@@ -788,12 +925,21 @@ Euler::computeStableDtOnPatch(
          * Unregister the patch and data of all registered derived cell variables in the flow model.
          */
         
-        d_flow_model->unregisterPatch();
+        d_flow_models_thread[thread_id]->unregisterPatch();
     }
     
     stable_dt = 1.0/stable_spectral_radius;
     
-    t_compute_dt->stop();
+#ifdef _OPENMP
+    omp_set_lock(&t_lock_compute_dt);
+    if (t_compute_dt->getNumberAccesses() == n_timer_accesses)
+    {
+#endif
+        t_compute_dt->stop();
+#ifdef _OPENMP
+    }
+    omp_unset_lock(&t_lock_compute_dt);
+#endif
     
     return stable_dt;
 }
@@ -806,7 +952,30 @@ Euler::computeFluxesAndSourcesOnPatch(
     const double dt,
     const int RK_step_number)
 {
+#ifdef _OPENMP
+    omp_set_lock(&t_lock_compute_fluxes_sources);
+    if (t_compute_fluxes_sources->isRunning())
+    {
+        t_compute_fluxes_sources->stop();
+    }
+#endif
+    
     t_compute_fluxes_sources->start();
+    
+#ifdef _OPENMP
+    int n_timer_accesses = t_compute_fluxes_sources->getNumberAccesses();
+    omp_unset_lock(&t_lock_compute_fluxes_sources);
+#endif
+    
+    /*
+     * Get the thread id.
+     */
+    
+    int thread_id = 0;
+    
+#ifdef _OPENMP
+    thread_id = omp_get_thread_num();
+#endif
     
     /*
      * Set zero for the source.
@@ -822,16 +991,26 @@ Euler::computeFluxesAndSourcesOnPatch(
      * Compute the convective flux and source due to splitting of convective term.
      */
     
-    d_convective_flux_reconstructor->computeConvectiveFluxAndSourceOnPatch(
-        patch,
-        d_variable_convective_flux,
-        d_variable_source,
-        getDataContext(),
-        time,
-        dt,
-        RK_step_number);
+    d_convective_flux_reconstructors_thread[thread_id]->
+        computeConvectiveFluxAndSourceOnPatch(
+            patch,
+            d_variable_convective_flux,
+            d_variable_source,
+            getDataContext(),
+            time,
+            dt,
+            RK_step_number);
     
-    t_compute_fluxes_sources->stop();
+#ifdef _OPENMP
+    omp_set_lock(&t_lock_compute_fluxes_sources);
+    if (t_compute_fluxes_sources->getNumberAccesses() == n_timer_accesses)
+    {
+#endif
+        t_compute_fluxes_sources->stop();
+#ifdef _OPENMP
+    }
+    omp_unset_lock(&t_lock_compute_fluxes_sources);
+#endif
 }
 
 
@@ -848,7 +1027,30 @@ Euler::advanceSingleStepOnPatch(
     NULL_USE(time);
     NULL_USE(dt);
     
+#ifdef _OPENMP
+    omp_set_lock(&t_lock_advance_step);
+    if (t_advance_step->isRunning())
+    {
+        t_advance_step->stop();
+    }
+#endif
+    
     t_advance_step->start();
+    
+#ifdef _OPENMP
+    int n_timer_accesses = t_advance_step->getNumberAccesses();
+    omp_unset_lock(&t_lock_advance_step);
+#endif
+    
+    /*
+     * Get the thread id.
+     */
+    
+    int thread_id = 0;
+    
+#ifdef _OPENMP
+    thread_id = omp_get_thread_num();
+#endif
     
     const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
         BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
@@ -869,19 +1071,19 @@ Euler::advanceSingleStepOnPatch(
      * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
      */
     
-    d_flow_model->registerPatchWithDataContext(patch, getDataContext());
+    d_flow_models_thread[thread_id]->registerPatchWithDataContext(patch, getDataContext());
     
     std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
-        d_flow_model->getGlobalCellDataConservativeVariables();
+        d_flow_models_thread[thread_id]->getGlobalCellDataConservativeVariables();
     
     std::vector<hier::IntVector> num_ghosts_conservative_var;
-    num_ghosts_conservative_var.reserve(d_flow_model->getNumberOfEquations());
+    num_ghosts_conservative_var.reserve(d_flow_models_thread[thread_id]->getNumberOfEquations());
     
     std::vector<hier::IntVector> ghostcell_dims_conservative_var;
-    ghostcell_dims_conservative_var.reserve(d_flow_model->getNumberOfEquations());
+    ghostcell_dims_conservative_var.reserve(d_flow_models_thread[thread_id]->getNumberOfEquations());
     
     std::vector<double*> Q;
-    Q.reserve(d_flow_model->getNumberOfEquations());
+    Q.reserve(d_flow_models_thread[thread_id]->getNumberOfEquations());
     
     int count_eqn = 0;
     
@@ -893,7 +1095,7 @@ Euler::advanceSingleStepOnPatch(
         {
             // If the last element of the conservative variable vector is not in the system of
             // equations, ignore it.
-            if (count_eqn >= d_flow_model->getNumberOfEquations())
+            if (count_eqn >= d_flow_models_thread[thread_id]->getNumberOfEquations())
                 break;
             
             Q.push_back(conservative_variables[vi]->getPointer(di));
@@ -904,10 +1106,10 @@ Euler::advanceSingleStepOnPatch(
         }
     }
     
-    d_flow_model->fillZeroGlobalCellDataConservativeVariables();
+    d_flow_models_thread[thread_id]->fillZeroGlobalCellDataConservativeVariables();
     
     // Unregister the patch.
-    d_flow_model->unregisterPatch();
+    d_flow_models_thread[thread_id]->unregisterPatch();
     
     /*
      * Use alpha, beta and gamma values to update the time-dependent solution, flux and source.
@@ -954,19 +1156,19 @@ Euler::advanceSingleStepOnPatch(
          * current intermediate data context.
          */
         
-        d_flow_model->registerPatchWithDataContext(patch, intermediate_context[n]);
+        d_flow_models_thread[thread_id]->registerPatchWithDataContext(patch, intermediate_context[n]);
         
         std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables_intermediate =
-            d_flow_model->getGlobalCellDataConservativeVariables();
+            d_flow_models_thread[thread_id]->getGlobalCellDataConservativeVariables();
         
         std::vector<hier::IntVector> num_ghosts_conservative_var_intermediate;
-        num_ghosts_conservative_var_intermediate.reserve(d_flow_model->getNumberOfEquations());
+        num_ghosts_conservative_var_intermediate.reserve(d_flow_models_thread[thread_id]->getNumberOfEquations());
         
         std::vector<hier::IntVector> ghostcell_dims_conservative_var_intermediate;
-        ghostcell_dims_conservative_var_intermediate.reserve(d_flow_model->getNumberOfEquations());
+        ghostcell_dims_conservative_var_intermediate.reserve(d_flow_models_thread[thread_id]->getNumberOfEquations());
         
         std::vector<double*> Q_intermediate;
-        Q_intermediate.reserve(d_flow_model->getNumberOfEquations());
+        Q_intermediate.reserve(d_flow_models_thread[thread_id]->getNumberOfEquations());
         
         count_eqn = 0;
         
@@ -978,7 +1180,7 @@ Euler::advanceSingleStepOnPatch(
             {
                 // If the last element of the conservative variable vector is not in the system of
                 // equations, ignore it.
-                if (count_eqn >= d_flow_model->getNumberOfEquations())
+                if (count_eqn >= d_flow_models_thread[thread_id]->getNumberOfEquations())
                     break;
                 
                 Q_intermediate.push_back(conservative_variables_intermediate[vi]->getPointer(di));
@@ -992,7 +1194,7 @@ Euler::advanceSingleStepOnPatch(
         }
         
         // Unregister the patch.
-        d_flow_model->unregisterPatch();
+        d_flow_models_thread[thread_id]->unregisterPatch();
         
         if (d_dim == tbox::Dimension(1))
         {
@@ -1006,7 +1208,7 @@ Euler::advanceSingleStepOnPatch(
             
             if (alpha[n] != 0.0)
             {
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                for (int ei = 0; ei < d_flow_models_thread[thread_id]->getNumberOfEquations(); ei++)
                 {
                     const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
                     const int num_ghosts_0_conservative_var_intermediate =
@@ -1028,7 +1230,7 @@ Euler::advanceSingleStepOnPatch(
             
             if (beta[n] != 0.0)
             {
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                for (int ei = 0; ei < d_flow_models_thread[thread_id]->getNumberOfEquations(); ei++)
                 {
                     double* F_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
                     double* S_intermediate = source_intermediate->getPointer(ei);
@@ -1055,7 +1257,7 @@ Euler::advanceSingleStepOnPatch(
             if (gamma[n] != 0.0)
             {
                 // Accumulate the flux in the x direction.
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                for (int ei = 0; ei < d_flow_models_thread[thread_id]->getNumberOfEquations(); ei++)
                 {
                     double* F_x = convective_flux->getPointer(0, ei);
                     double* F_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
@@ -1073,7 +1275,7 @@ Euler::advanceSingleStepOnPatch(
                 }
                 
                 // Accumulate the source.
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                for (int ei = 0; ei < d_flow_models_thread[thread_id]->getNumberOfEquations(); ei++)
                 {
                     double* S = source->getPointer(ei);
                     double* S_intermediate = source_intermediate->getPointer(ei);
@@ -1105,7 +1307,7 @@ Euler::advanceSingleStepOnPatch(
             
             if (alpha[n] != 0.0)
             {
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                for (int ei = 0; ei < d_flow_models_thread[thread_id]->getNumberOfEquations(); ei++)
                 {
                     const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
                     const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
@@ -1141,7 +1343,7 @@ Euler::advanceSingleStepOnPatch(
             
             if (beta[n] != 0.0)
             {
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                for (int ei = 0; ei < d_flow_models_thread[thread_id]->getNumberOfEquations(); ei++)
                 {
                     double* F_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
                     double* F_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
@@ -1189,7 +1391,7 @@ Euler::advanceSingleStepOnPatch(
             if (gamma[n] != 0.0)
             {
                 // Accumulate the flux in the x direction.
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                for (int ei = 0; ei < d_flow_models_thread[thread_id]->getNumberOfEquations(); ei++)
                 {
                     double* F_x = convective_flux->getPointer(0, ei);
                     double* F_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
@@ -1211,7 +1413,7 @@ Euler::advanceSingleStepOnPatch(
                 }
                 
                 // Accumulate the flux in the y direction.
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                for (int ei = 0; ei < d_flow_models_thread[thread_id]->getNumberOfEquations(); ei++)
                 {
                     double* F_y = convective_flux->getPointer(1, ei);
                     double* F_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
@@ -1233,7 +1435,7 @@ Euler::advanceSingleStepOnPatch(
                 }
                 
                 // Accumulate the source.
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                for (int ei = 0; ei < d_flow_models_thread[thread_id]->getNumberOfEquations(); ei++)
                 {
                     double* S = source->getPointer(ei);
                     double* S_intermediate = source_intermediate->getPointer(ei);
@@ -1271,7 +1473,7 @@ Euler::advanceSingleStepOnPatch(
             
             if (alpha[n] != 0.0)
             {
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                for (int ei = 0; ei < d_flow_models_thread[thread_id]->getNumberOfEquations(); ei++)
                 {
                     const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
                     const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
@@ -1321,7 +1523,7 @@ Euler::advanceSingleStepOnPatch(
             
             if (beta[n] != 0.0)
             {
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                for (int ei = 0; ei < d_flow_models_thread[thread_id]->getNumberOfEquations(); ei++)
                 {
                     double* F_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
                     double* F_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
@@ -1391,7 +1593,7 @@ Euler::advanceSingleStepOnPatch(
             if (gamma[n] != 0.0)
             {
                 // Accumulate the flux in the x direction.
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                for (int ei = 0; ei < d_flow_models_thread[thread_id]->getNumberOfEquations(); ei++)
                 {
                     double* F_x = convective_flux->getPointer(0, ei);
                     double* F_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
@@ -1417,7 +1619,7 @@ Euler::advanceSingleStepOnPatch(
                 }
                 
                 // Accumulate the flux in the y direction.
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                for (int ei = 0; ei < d_flow_models_thread[thread_id]->getNumberOfEquations(); ei++)
                 {
                     double* F_y = convective_flux->getPointer(1, ei);
                     double* F_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
@@ -1443,7 +1645,7 @@ Euler::advanceSingleStepOnPatch(
                 }
                 
                 // Accumulate the flux in the z direction.
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                for (int ei = 0; ei < d_flow_models_thread[thread_id]->getNumberOfEquations(); ei++)
                 {
                     double* F_z = convective_flux->getPointer(2, ei);
                     double* F_z_intermediate = convective_flux_intermediate->getPointer(2, ei);
@@ -1469,7 +1671,7 @@ Euler::advanceSingleStepOnPatch(
                 }
                 
                 // Accumulate the source.
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                for (int ei = 0; ei < d_flow_models_thread[thread_id]->getNumberOfEquations(); ei++)
                 {
                     double* S = source->getPointer(ei);
                     double* S_intermediate = source_intermediate->getPointer(ei);
@@ -1502,15 +1704,24 @@ Euler::advanceSingleStepOnPatch(
         
         if (beta[n] != 0.0)
         {
-            d_flow_model->registerPatchWithDataContext(patch, getDataContext());
+            d_flow_models_thread[thread_id]->registerPatchWithDataContext(patch, getDataContext());
             
-            d_flow_model->updateGlobalCellDataConservativeVariables();
+            d_flow_models_thread[thread_id]->updateGlobalCellDataConservativeVariables();
             
-            d_flow_model->unregisterPatch();
+            d_flow_models_thread[thread_id]->unregisterPatch();
         }
     }
     
-    t_advance_step->stop();
+#ifdef _OPENMP
+    omp_set_lock(&t_lock_advance_step);
+    if (t_advance_step->getNumberAccesses() == n_timer_accesses)
+    {
+#endif
+        t_advance_step->stop();
+#ifdef _OPENMP
+    }
+    omp_unset_lock(&t_lock_advance_step);
+#endif
 }
 
 
@@ -1523,7 +1734,30 @@ Euler::synchronizeFluxes(
     NULL_USE(time);
     NULL_USE(dt);
     
+#ifdef _OPENMP
+    omp_set_lock(&t_lock_synchronize_fluxes);
+    if (t_synchronize_fluxes->isRunning())
+    {
+        t_synchronize_fluxes->stop();
+    }
+#endif
+    
     t_synchronize_fluxes->start();
+    
+#ifdef _OPENMP
+    int n_timer_accesses = t_synchronize_fluxes->getNumberAccesses();
+    omp_unset_lock(&t_lock_synchronize_fluxes);
+#endif
+    
+    /*
+     * Get the thread id.
+     */
+    
+    int thread_id = 0;
+    
+#ifdef _OPENMP
+    thread_id = omp_get_thread_num();
+#endif
     
     const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
         BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
@@ -1544,19 +1778,19 @@ Euler::synchronizeFluxes(
      * The numbers of ghost cells and the dimensions of the ghost cell boxes are also determined.
      */
     
-    d_flow_model->registerPatchWithDataContext(patch, getDataContext());
+    d_flow_models_thread[thread_id]->registerPatchWithDataContext(patch, getDataContext());
     
     std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables =
-        d_flow_model->getGlobalCellDataConservativeVariables();
+        d_flow_models_thread[thread_id]->getGlobalCellDataConservativeVariables();
     
     std::vector<hier::IntVector> num_ghosts_conservative_var;
-    num_ghosts_conservative_var.reserve(d_flow_model->getNumberOfEquations());
+    num_ghosts_conservative_var.reserve(d_flow_models_thread[thread_id]->getNumberOfEquations());
     
     std::vector<hier::IntVector> ghostcell_dims_conservative_var;
-    ghostcell_dims_conservative_var.reserve(d_flow_model->getNumberOfEquations());
+    ghostcell_dims_conservative_var.reserve(d_flow_models_thread[thread_id]->getNumberOfEquations());
     
     std::vector<double*> Q;
-    Q.reserve(d_flow_model->getNumberOfEquations());
+    Q.reserve(d_flow_models_thread[thread_id]->getNumberOfEquations());
     
     int count_eqn = 0;
     
@@ -1567,7 +1801,7 @@ Euler::synchronizeFluxes(
         for (int di = 0; di < depth; di++)
         {
             // If the last element of the conservative variable vector is not in the system of equations, ignore it.
-            if (count_eqn >= d_flow_model->getNumberOfEquations())
+            if (count_eqn >= d_flow_models_thread[thread_id]->getNumberOfEquations())
                 break;
             
             Q.push_back(conservative_variables[vi]->getPointer(di));
@@ -1579,7 +1813,7 @@ Euler::synchronizeFluxes(
     }
     
     // Unregister the patch.
-    d_flow_model->unregisterPatch();
+    d_flow_models_thread[thread_id]->unregisterPatch();
     
     boost::shared_ptr<pdat::SideData<double> > convective_flux(
         BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
@@ -1607,7 +1841,7 @@ Euler::synchronizeFluxes(
         
         const double dx_0 = dx[0];
         
-        for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+        for (int ei = 0; ei < d_flow_models_thread[thread_id]->getNumberOfEquations(); ei++)
         {
             double *F_x = convective_flux->getPointer(0, ei);
             double *S = source->getPointer(ei);
@@ -1642,7 +1876,7 @@ Euler::synchronizeFluxes(
         const double dx_0 = dx[0];
         const double dx_1 = dx[1];
         
-        for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+        for (int ei = 0; ei < d_flow_models_thread[thread_id]->getNumberOfEquations(); ei++)
         {
             double *F_x = convective_flux->getPointer(0, ei);
             double *F_y = convective_flux->getPointer(1, ei);
@@ -1699,7 +1933,7 @@ Euler::synchronizeFluxes(
         const double dx_1 = dx[1];
         const double dx_2 = dx[2];
         
-        for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+        for (int ei = 0; ei < d_flow_models_thread[thread_id]->getNumberOfEquations(); ei++)
         {
             double *F_x = convective_flux->getPointer(0, ei);
             double *F_y = convective_flux->getPointer(1, ei);
@@ -1769,13 +2003,22 @@ Euler::synchronizeFluxes(
      * Update the conservative variables.
      */
     
-    d_flow_model->registerPatchWithDataContext(patch, getDataContext());
+    d_flow_models_thread[thread_id]->registerPatchWithDataContext(patch, getDataContext());
     
-    d_flow_model->updateGlobalCellDataConservativeVariables();
+    d_flow_models_thread[thread_id]->updateGlobalCellDataConservativeVariables();
     
-    d_flow_model->unregisterPatch();
+    d_flow_models_thread[thread_id]->unregisterPatch();
     
-    t_synchronize_fluxes->stop();
+#ifdef _OPENMP
+    omp_set_lock(&t_lock_synchronize_fluxes);
+    if (t_synchronize_fluxes->getNumberAccesses() == n_timer_accesses)
+    {
+#endif
+        t_synchronize_fluxes->stop();
+#ifdef _OPENMP
+    }
+    omp_unset_lock(&t_lock_synchronize_fluxes);
+#endif
 }
 
 
@@ -1800,27 +2043,60 @@ Euler::preprocessTagCellsValueDetector(
     NULL_USE(uses_integral_detector_too);
     NULL_USE(uses_richardson_extrapolation_too);
     
-    if (d_value_tagger != nullptr)
+    t_tagvalue->start();
+    
+    if (d_value_taggers_thread.size() > 0)
     {
         boost::shared_ptr<hier::PatchLevel> level(
             patch_hierarchy->getPatchLevel(level_number));
         
-        for (hier::PatchLevel::iterator ip(level->begin());
-             ip != level->end();
-             ip++)
-        {
-            const boost::shared_ptr<hier::Patch>& patch = *ip;
-            
-            d_value_tagger->computeValueTaggerValuesOnPatch(
-                *patch,
-                getDataContext());
-        }
+        d_value_taggers_thread[0]->initializeValueStatistics();
         
-        d_value_tagger->getValueStatistics(
-            patch_hierarchy,
-            level_number,
-            getDataContext());
+#ifdef _OPENMP
+        #pragma omp parallel
+        {
+            #pragma omp single nowait
+            {
+#endif
+                for (hier::PatchLevel::iterator ip(level->begin());
+                     ip != level->end();
+                     ip++)
+#ifdef _OPENMP
+                {
+                    #pragma omp task
+#endif
+                    {
+                        const boost::shared_ptr<hier::Patch>& patch = *ip;
+                        
+                        /*
+                         * Get the thread id.
+                         */
+                        
+                        int thread_id = 0;
+                        
+#ifdef _OPENMP
+                        thread_id = omp_get_thread_num();
+#endif
+                        
+                        d_value_taggers_thread[thread_id]->computeValueTaggerValuesOnPatch(
+                            *patch,
+                            getDataContext());
+                        
+                        d_value_taggers_thread[thread_id]->updateValueStatisticsFromPatch(
+                            *patch,
+                            getDataContext());
+                    }
+#ifdef _OPENMP
+                }
+            }
+            #pragma omp taskwait
+        }
+#endif
+        
+        d_value_taggers_thread[0]->getGlobalValueStatistics();
     }
+    
+    t_tagvalue->stop();
 }
 
 
@@ -1841,7 +2117,30 @@ Euler::tagCellsOnPatchValueDetector(
     NULL_USE(regrid_time);
     NULL_USE(initial_error);
     
+#ifdef _OPENMP
+    omp_set_lock(&t_lock_tagvalue);
+    if (t_tagvalue->isRunning())
+    {
+        t_tagvalue->stop();
+    }
+#endif
+    
     t_tagvalue->start();
+    
+#ifdef _OPENMP
+    int n_timer_accesses = t_tagvalue->getNumberAccesses();
+    omp_unset_lock(&t_lock_tagvalue);
+#endif
+    
+    /*
+     * Get the thread id.
+     */
+    
+    int thread_id = 0;
+    
+#ifdef _OPENMP
+    thread_id = omp_get_thread_num();
+#endif
     
     // Get the tags.
     boost::shared_ptr<pdat::CellData<int> > tags(
@@ -1862,16 +2161,25 @@ Euler::tagCellsOnPatchValueDetector(
         tags->fillAll(0);
     }
     
-    // Tag the cells by using d_value_tagger.
-    if (d_value_tagger != nullptr)
+    // Tag the cells by using d_value_taggers_thread.
+    if (d_value_taggers_thread.size() > 0)
     {
-        d_value_tagger->tagCellsOnPatch(
+        d_value_taggers_thread[thread_id]->tagCellsOnPatch(
             patch,
             tags,
             getDataContext());
     }
     
-    t_tagvalue->stop();
+#ifdef _OPENMP
+    omp_set_lock(&t_lock_tagvalue);
+    if (t_tagvalue->getNumberAccesses() == n_timer_accesses)
+    {
+#endif
+        t_tagvalue->stop();
+#ifdef _OPENMP
+    }
+    omp_unset_lock(&t_lock_tagvalue);
+#endif
 }
 
 
@@ -1896,27 +2204,60 @@ Euler::preprocessTagCellsGradientDetector(
     NULL_USE(uses_integral_detector_too);
     NULL_USE(uses_richardson_extrapolation_too);
     
-    if (d_gradient_tagger != nullptr)
+    t_taggradient->start();
+    
+    if (d_gradient_taggers_thread.size() > 0)
     {
         boost::shared_ptr<hier::PatchLevel> level(
             patch_hierarchy->getPatchLevel(level_number));
         
-        for (hier::PatchLevel::iterator ip(level->begin());
-             ip != level->end();
-             ip++)
-        {
-            const boost::shared_ptr<hier::Patch>& patch = *ip;
-            
-            d_gradient_tagger->computeGradientSensorValuesOnPatch(
-                *patch,
-                getDataContext());
-        }
+        d_gradient_taggers_thread[0]->initializeSensorValueStatistics();
         
-        d_gradient_tagger->getSensorValueStatistics(
-            patch_hierarchy,
-            level_number,
-            getDataContext());
+#ifdef _OPENMP
+        #pragma omp parallel
+        {
+            #pragma omp single nowait
+            {
+#endif
+                for (hier::PatchLevel::iterator ip(level->begin());
+                     ip != level->end();
+                     ip++)
+#ifdef _OPENMP
+                {
+                    #pragma omp task
+#endif
+                    {
+                        const boost::shared_ptr<hier::Patch>& patch = *ip;
+                        
+                        /*
+                         * Get the thread id.
+                         */
+                        
+                        int thread_id = 0;
+                        
+#ifdef _OPENMP
+                        thread_id = omp_get_thread_num();
+#endif
+                        
+                        d_gradient_taggers_thread[thread_id]->computeGradientSensorValuesOnPatch(
+                            *patch,
+                            getDataContext());
+                        
+                        d_gradient_taggers_thread[thread_id]->updateSensorValueStatisticsFromPatch(
+                            *patch,
+                            getDataContext());
+                    }
+#ifdef _OPENMP
+                }
+            }
+            #pragma omp taskwait
+        }
+#endif
+        
+        d_gradient_taggers_thread[0]->getGlobalSensorValueStatistics();
     }
+    
+    t_taggradient->stop();
 }
 
 
@@ -1938,7 +2279,30 @@ Euler::tagCellsOnPatchGradientDetector(
     NULL_USE(initial_error);
     NULL_USE(uses_value_detector_too);
     
+#ifdef _OPENMP
+    omp_set_lock(&t_lock_taggradient);
+    if (t_taggradient->isRunning())
+    {
+        t_taggradient->stop();
+    }
+#endif
+    
     t_taggradient->start();
+    
+#ifdef _OPENMP
+    int n_timer_accesses = t_taggradient->getNumberAccesses();
+    omp_unset_lock(&t_lock_taggradient);
+#endif
+    
+    /*
+     * Get the thread id.
+     */
+    
+    int thread_id = 0;
+    
+#ifdef _OPENMP
+    thread_id = omp_get_thread_num();
+#endif
     
     // Get the tags.
     boost::shared_ptr<pdat::CellData<int> > tags(
@@ -1958,16 +2322,25 @@ Euler::tagCellsOnPatchGradientDetector(
         tags->fillAll(0);
     }
     
-    // Tag the cells by using d_gradient_tagger.
-    if (d_gradient_tagger != nullptr)
+    // Tag the cells by using d_gradient_taggers_thread.
+    if (d_gradient_taggers_thread.size() > 0)
     {
-        d_gradient_tagger->tagCellsOnPatch(
+        d_gradient_taggers_thread[thread_id]->tagCellsOnPatch(
             patch,
             tags,
             getDataContext());
     }
     
-    t_taggradient->stop();
+#ifdef _OPENMP
+    omp_set_lock(&t_lock_taggradient);
+    if (t_taggradient->getNumberAccesses() == n_timer_accesses)
+    {
+#endif
+        t_taggradient->stop();
+#ifdef _OPENMP
+    }
+    omp_unset_lock(&t_lock_taggradient);
+#endif
 }
 
 
@@ -1992,27 +2365,60 @@ Euler::preprocessTagCellsMultiresolutionDetector(
     NULL_USE(uses_integral_detector_too);
     NULL_USE(uses_richardson_extrapolation_too);
     
-    if (d_multiresolution_tagger != nullptr)
+    t_tagmultiresolution->start();
+    
+    if (d_multiresolution_taggers_thread.size() > 0)
     {
         boost::shared_ptr<hier::PatchLevel> level(
             patch_hierarchy->getPatchLevel(level_number));
         
-        for (hier::PatchLevel::iterator ip(level->begin());
-             ip != level->end();
-             ip++)
-        {
-            const boost::shared_ptr<hier::Patch>& patch = *ip;
-            
-            d_multiresolution_tagger->computeMultiresolutionSensorValuesOnPatch(
-                *patch,
-                getDataContext());
-        }
+        d_multiresolution_taggers_thread[0]->initializeSensorValueStatistics();
         
-        d_multiresolution_tagger->getSensorValueStatistics(
-            patch_hierarchy,
-            level_number,
-            getDataContext());
+#ifdef _OPENMP
+        #pragma omp parallel
+        {
+            #pragma omp single nowait
+            {
+#endif
+                for (hier::PatchLevel::iterator ip(level->begin());
+                     ip != level->end();
+                     ip++)
+#ifdef _OPENMP
+                {
+                    #pragma omp task
+#endif
+                    {
+                        const boost::shared_ptr<hier::Patch>& patch = *ip;
+                        
+                        /*
+                         * Get the thread id.
+                         */
+                        
+                        int thread_id = 0;
+                        
+#ifdef _OPENMP
+                        thread_id = omp_get_thread_num();
+#endif
+                        
+                        d_multiresolution_taggers_thread[thread_id]->computeMultiresolutionSensorValuesOnPatch(
+                            *patch,
+                            getDataContext());
+                        
+                        d_multiresolution_taggers_thread[thread_id]->updateSensorValueStatisticsFromPatch(
+                            *patch,
+                            getDataContext());
+                    }
+#ifdef _OPENMP
+                }
+            }
+            #pragma omp taskwait
+        }
+#endif
+        
+        d_multiresolution_taggers_thread[0]->getGlobalSensorValueStatistics();
     }
+    
+    t_tagmultiresolution->stop();
 }
 
 
@@ -2035,7 +2441,30 @@ Euler::tagCellsOnPatchMultiresolutionDetector(
     NULL_USE(uses_value_detector_too);
     NULL_USE(uses_gradient_detector_too);
     
+#ifdef _OPENMP
+    omp_set_lock(&t_lock_tagmultiresolution);
+    if (t_tagmultiresolution->isRunning())
+    {
+        t_tagmultiresolution->stop();
+    }
+#endif
+    
     t_tagmultiresolution->start();
+    
+#ifdef _OPENMP
+    int n_timer_accesses = t_tagmultiresolution->getNumberAccesses();
+    omp_unset_lock(&t_lock_tagmultiresolution);
+#endif
+    
+    /*
+     * Get the thread id.
+     */
+    
+    int thread_id = 0;
+    
+#ifdef _OPENMP
+    thread_id = omp_get_thread_num();
+#endif
     
     // Get the tags.
     boost::shared_ptr<pdat::CellData<int> > tags(
@@ -2054,16 +2483,25 @@ Euler::tagCellsOnPatchMultiresolutionDetector(
         tags->fillAll(0);
     }
     
-    // Tag the cells by using d_multiresolution_tagger.
-    if (d_multiresolution_tagger != nullptr)
+    // Tag the cells by using d_multiresolution_taggers_thread.
+    if (d_multiresolution_taggers_thread.size() > 0)
     {
-        d_multiresolution_tagger->tagCellsOnPatch(
+        d_multiresolution_taggers_thread[thread_id]->tagCellsOnPatch(
             patch,
             tags,
             getDataContext());
     }
     
-    t_tagmultiresolution->stop();
+#ifdef _OPENMP
+    omp_set_lock(&t_lock_tagmultiresolution);
+    if (t_tagmultiresolution->getNumberAccesses() == n_timer_accesses)
+    {
+#endif
+        t_tagmultiresolution->stop();
+#ifdef _OPENMP
+    }
+    omp_unset_lock(&t_lock_tagmultiresolution);
+#endif
 }
 
 
@@ -2073,15 +2511,47 @@ Euler::setPhysicalBoundaryConditions(
     const double fill_time,
     const hier::IntVector& ghost_width_to_fill)
 {
+#ifdef _OPENMP
+    omp_set_lock(&t_lock_setphysbcs);
+    if (t_setphysbcs->isRunning())
+    {
+        t_setphysbcs->stop();
+    }
+#endif
+    
     t_setphysbcs->start();
     
-    d_Euler_boundary_conditions->setPhysicalBoundaryConditions(
+#ifdef _OPENMP
+    int n_timer_accesses = t_setphysbcs->getNumberAccesses();
+    omp_unset_lock(&t_lock_setphysbcs);
+#endif
+    
+    /*
+     * Get the thread id.
+     */
+    
+    int thread_id = 0;
+    
+#ifdef _OPENMP
+    thread_id = omp_get_thread_num();
+#endif
+    
+    d_Euler_boundary_conditions_thread[thread_id]->setPhysicalBoundaryConditions(
         patch,
         fill_time,
         ghost_width_to_fill,
         getDataContext());
     
-    t_setphysbcs->stop();
+#ifdef _OPENMP
+    omp_set_lock(&t_lock_setphysbcs);
+    if (t_setphysbcs->getNumberAccesses() == n_timer_accesses)
+    {
+#endif
+        t_setphysbcs->stop();
+#ifdef _OPENMP
+    }
+    omp_unset_lock(&t_lock_setphysbcs);
+#endif
 }
 
 
@@ -2100,42 +2570,42 @@ Euler::putToRestart(
     // Put the properties of d_flow_model into the restart database.
     boost::shared_ptr<tbox::Database> restart_flow_model_db =
         restart_db->putDatabase("d_flow_model_db");
-    d_flow_model->putToRestart(restart_flow_model_db);
+    d_flow_models_thread[0]->putToRestart(restart_flow_model_db);
     
     restart_db->putString("d_convective_flux_reconstructor_str", d_convective_flux_reconstructor_str);
     
     // Put the properties of d_convective_flux_reconstructor into the restart database.
     boost::shared_ptr<tbox::Database> restart_convective_flux_reconstructor_db =
         restart_db->putDatabase("d_convective_flux_reconstructor_db");
-    d_convective_flux_reconstructor->putToRestart(restart_convective_flux_reconstructor_db);
+    d_convective_flux_reconstructors_thread[0]->putToRestart(restart_convective_flux_reconstructor_db);
     
     boost::shared_ptr<tbox::Database> restart_Euler_boundary_conditions_db =
         restart_db->putDatabase("d_Euler_boundary_conditions_db");
     
-    d_Euler_boundary_conditions->putToRestart(restart_Euler_boundary_conditions_db);
+    d_Euler_boundary_conditions_thread[0]->putToRestart(restart_Euler_boundary_conditions_db);
     
-    if (d_value_tagger != nullptr)
+    if (d_value_taggers_thread.size() > 0)
     {
         boost::shared_ptr<tbox::Database> restart_value_tagger_db =
             restart_db->putDatabase("d_value_tagger_db");
         
-        d_value_tagger->putToRestart(restart_value_tagger_db);
+        d_value_taggers_thread[0]->putToRestart(restart_value_tagger_db);
     }
     
-    if (d_gradient_tagger != nullptr)
+    if (d_gradient_taggers_thread.size() > 0)
     {
         boost::shared_ptr<tbox::Database> restart_gradient_tagger_db =
             restart_db->putDatabase("d_gradient_tagger_db");
         
-        d_gradient_tagger->putToRestart(restart_gradient_tagger_db);
+        d_gradient_taggers_thread[0]->putToRestart(restart_gradient_tagger_db);
     }
     
-    if (d_multiresolution_tagger != nullptr)
+    if (d_multiresolution_taggers_thread.size() > 0)
     {
         boost::shared_ptr<tbox::Database> restart_multiresolution_tagger_db =
             restart_db->putDatabase("d_multiresolution_tagger_db");
         
-        d_multiresolution_tagger->putToRestart(restart_multiresolution_tagger_db);
+        d_multiresolution_taggers_thread[0]->putToRestart(restart_multiresolution_tagger_db);
     }
 }
 
@@ -2160,7 +2630,17 @@ Euler::packDerivedDataIntoDoubleBuffer(
     int depth_id,
     double simulation_time) const
 {
-    bool data_on_patch = d_flow_model->
+    /*
+     * Get the thread id.
+     */
+    
+    int thread_id = 0;
+    
+#ifdef _OPENMP
+    thread_id = omp_get_thread_num();
+#endif
+    
+    bool data_on_patch = d_flow_models_thread[thread_id]->
         packDerivedDataIntoDoubleBuffer(
             buffer,
             patch,
@@ -2184,7 +2664,7 @@ void Euler::printClassData(std::ostream& os) const
     os << "d_dim = " << d_dim.getValue() << std::endl;
     os << "d_grid_geometry = " << d_grid_geometry.get() << std::endl;
     
-    // Print all characteristics of d_flow_model.
+    // Print all characteristics of d_flow_model_manager.
     d_flow_model_manager->printClassData(os);
     
     os << "d_num_species = " << d_num_species << std::endl;
@@ -2242,10 +2722,10 @@ void Euler::printClassData(std::ostream& os) const
     os << "--------------------------------------------------------------------------------";
     
     /*
-     * Print data of d_convective_flux_reconstructor.
+     * Print data of d_convective_flux_reconstructors_thread.
      */
     
-    d_convective_flux_reconstructor->printClassData(os);
+    d_convective_flux_reconstructors_thread[0]->printClassData(os);
     os << "--------------------------------------------------------------------------------";
     
     /*
@@ -2253,10 +2733,10 @@ void Euler::printClassData(std::ostream& os) const
      */
     
     /*
-     * Print data of d_Euler_boundary_conditions.
+     * Print data of d_Euler_boundary_conditions_thread.
      */
     
-    d_Euler_boundary_conditions->printClassData(os);
+    d_Euler_boundary_conditions_thread[0]->printClassData(os);
 }
 
 
@@ -2269,10 +2749,10 @@ Euler::printErrorStatistics(
     
     math::HierarchyCellDataOpsReal<double> cell_double_operator(patch_hierarchy, 0, 0);
     
-    std::vector<std::string> variable_names = d_flow_model->getNamesOfConservativeVariables();
+    std::vector<std::string> variable_names = d_flow_models_thread[0]->getNamesOfConservativeVariables();
     
     std::vector<boost::shared_ptr<pdat::CellVariable<double> > > variables =
-        d_flow_model->getConservativeVariables();
+        d_flow_models_thread[0]->getConservativeVariables();
     
    if (d_project_name == "2D single-species convergence test")
    {
@@ -2470,10 +2950,10 @@ Euler::printDataStatistics(
     
     hier::VariableDatabase* variable_db = hier::VariableDatabase::getDatabase();
     
-    std::vector<std::string> variable_names = d_flow_model->getNamesOfConservativeVariables();
+    std::vector<std::string> variable_names = d_flow_models_thread[0]->getNamesOfConservativeVariables();
     
     std::vector<boost::shared_ptr<pdat::CellVariable<double> > > variables =
-        d_flow_model->getConservativeVariables();
+        d_flow_models_thread[0]->getConservativeVariables();
     
     for (int vi = 0; vi < static_cast<int>(variables.size()); vi++)
     {
@@ -2544,7 +3024,7 @@ Euler::outputDataStatistics(
         }
         
         boost::shared_ptr<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
-            d_flow_model->getFlowModelStatisticsUtilities();
+            d_flow_models_thread[0]->getFlowModelStatisticsUtilities();
         
         flow_model_statistics_utilities->outputStatisticalQuantities(
             d_stat_dump_filename,

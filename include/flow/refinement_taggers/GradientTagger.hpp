@@ -10,7 +10,7 @@
 #include "util/gradient_sensors/GradientSensorJameson.hpp"
 
 #include "SAMRAI/appu/VisItDataWriter.h"
-#include "SAMRAI/math/HierarchyCellDataOpsReal.h"
+#include "SAMRAI/math/PatchCellDataOpsReal.h"
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 #include "SAMRAI/hier/IntVector.h"
@@ -20,6 +20,10 @@
 #include "boost/shared_ptr.hpp"
 #include <string>
 #include <vector>
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 class GradientTagger
 {
@@ -31,6 +35,11 @@ class GradientTagger
             const int& num_species,
             const boost::shared_ptr<FlowModel>& flow_model,
             const boost::shared_ptr<tbox::Database>& gradient_tagger_db);
+        
+        /*
+         * Destructor of GradientTagger.
+         */
+        ~GradientTagger();
         
         /*
          * Get the number of ghost cells needed by the gradient tagger.
@@ -63,8 +72,7 @@ class GradientTagger
         printClassData(std::ostream& os) const;
         
         /*
-         * Put the characteristics of the gradient tagger class into the restart
-         * database.
+         * Put the characteristics of the gradient tagger class into the restart database.
          */
         void
         putToRestart(
@@ -79,14 +87,25 @@ class GradientTagger
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
-         * Get the statistics of the sensor values that are required by the
-         * gradient sensors at a given patch level.
+         * Initialize the statistics of the sensor values that are required by the gradient sensors.
          */
         void
-        getSensorValueStatistics(
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const int level_number,
+        initializeSensorValueStatistics();
+        
+        /*
+         * Update the statistics of the sensor values that are required by the gradient sensors from
+         * a patch.
+         */
+        void
+        updateSensorValueStatisticsFromPatch(
+            hier::Patch& patch,
             const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Get the global statistics of the sensor values that are required by the gradient sensors.
+         */
+        void
+        getGlobalSensorValueStatistics();
         
         /*
          * Tag cells on a patch for refinement using gradient sensors.
@@ -194,39 +213,52 @@ class GradientTagger
         /*
          * boost::shared_ptr to differences.
          */
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_derivative_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_derivative_total_energy;
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_derivative_pressure;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_difference_first_derivative_density;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_difference_first_derivative_total_energy;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_difference_first_derivative_pressure;
         
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_derivative_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_derivative_total_energy;
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_derivative_pressure;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_difference_second_derivative_density;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_difference_second_derivative_total_energy;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_difference_second_derivative_pressure;
         
         /*
          * boost::shared_ptr to values of Jameson gradient sensor.
          */
-        boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_gradient_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_gradient_total_energy;
-        boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_gradient_pressure;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_Jameson_gradient_density;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_Jameson_gradient_total_energy;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_Jameson_gradient_pressure;
         
         /*
          * Statistics of sensor values.
          */
-        double d_difference_first_derivative_max_density;
-        double d_difference_first_derivative_max_total_energy;
-        double d_difference_first_derivative_max_pressure;
+        static double s_difference_first_derivative_max_density;
+        static double s_difference_first_derivative_max_total_energy;
+        static double s_difference_first_derivative_max_pressure;
         
-        double d_difference_second_derivative_max_density;
-        double d_difference_second_derivative_max_total_energy;
-        double d_difference_second_derivative_max_pressure;
+        static double s_difference_second_derivative_max_density;
+        static double s_difference_second_derivative_max_total_energy;
+        static double s_difference_second_derivative_max_pressure;
         
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_derivative_local_mean_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_derivative_local_mean_total_energy;
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_derivative_local_mean_pressure;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_difference_first_derivative_local_mean_density;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_difference_first_derivative_local_mean_total_energy;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_difference_first_derivative_local_mean_pressure;
         
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_derivative_local_mean_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_derivative_local_mean_total_energy;
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_derivative_local_mean_pressure;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_difference_second_derivative_local_mean_density;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_difference_second_derivative_local_mean_total_energy;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_difference_second_derivative_local_mean_pressure;
+       
+#ifdef _OPENMP
+        /*
+         * Locks for updating statistics.
+         */
+        static omp_lock_t s_lock_difference_first_derivative_max_density;
+        static omp_lock_t s_lock_difference_first_derivative_max_total_energy;
+        static omp_lock_t s_lock_difference_first_derivative_max_pressure;
+        
+        static omp_lock_t s_lock_difference_second_derivative_max_density;
+        static omp_lock_t s_lock_difference_second_derivative_max_total_energy;
+        static omp_lock_t s_lock_difference_second_derivative_max_pressure;
+#endif
         
 };
 

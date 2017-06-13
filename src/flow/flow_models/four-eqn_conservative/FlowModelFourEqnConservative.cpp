@@ -3,6 +3,10 @@
 #include "flow/flow_models/four-eqn_conservative/FlowModelBoundaryUtilitiesFourEqnConservative.hpp"
 #include "flow/flow_models/four-eqn_conservative/FlowModelStatisticsUtilitiesFourEqnConservative.hpp"
 
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelFourEqnConservative::s_variable_partial_density;
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelFourEqnConservative::s_variable_momentum;
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelFourEqnConservative::s_variable_total_energy;
+
 FlowModelFourEqnConservative::FlowModelFourEqnConservative(
     const std::string& object_name,
     const tbox::Dimension& dim,
@@ -96,13 +100,13 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
      * Initialize the conservative variables.
      */
     
-    d_variable_partial_density = boost::shared_ptr<pdat::CellVariable<double> > (
+    s_variable_partial_density = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "partial density", d_num_species));
     
-    d_variable_momentum = boost::shared_ptr<pdat::CellVariable<double> > (
+    s_variable_momentum = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "momentum", d_dim.getValue()));
     
-    d_variable_total_energy = boost::shared_ptr<pdat::CellVariable<double> > (
+    s_variable_total_energy = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "total energy", 1));
     
     /*
@@ -520,7 +524,7 @@ FlowModelFourEqnConservative::registerConservativeVariables(
     const hier::IntVector& num_ghosts_intermediate)
 {
     integrator->registerVariable(
-        d_variable_partial_density,
+        s_variable_partial_density,
         num_ghosts,
         num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::TIME_DEP,
@@ -529,7 +533,7 @@ FlowModelFourEqnConservative::registerConservativeVariables(
         "CONSERVATIVE_LINEAR_REFINE");
     
     integrator->registerVariable(
-        d_variable_momentum,
+        s_variable_momentum,
         num_ghosts,
         num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::TIME_DEP,
@@ -538,7 +542,7 @@ FlowModelFourEqnConservative::registerConservativeVariables(
         "CONSERVATIVE_LINEAR_REFINE");
     
     integrator->registerVariable(
-        d_variable_total_energy,
+        s_variable_total_energy,
         num_ghosts,
         num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::TIME_DEP,
@@ -642,9 +646,9 @@ FlowModelFourEqnConservative::getConservativeVariables()
     std::vector<boost::shared_ptr<pdat::CellVariable<double> > > conservative_variables;
     conservative_variables.reserve(3);
     
-    conservative_variables.push_back(d_variable_partial_density);
-    conservative_variables.push_back(d_variable_momentum);
-    conservative_variables.push_back(d_variable_total_energy);
+    conservative_variables.push_back(s_variable_partial_density);
+    conservative_variables.push_back(s_variable_momentum);
+    conservative_variables.push_back(s_variable_total_energy);
     
     return conservative_variables;
 }
@@ -677,7 +681,7 @@ FlowModelFourEqnConservative::registerPatchWithDataContext(
     
     boost::shared_ptr<pdat::CellData<double> > data_partial_density(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(d_variable_partial_density, getDataContext())));
+            d_patch->getPatchData(s_variable_partial_density, getDataContext())));
     
     d_num_ghosts = data_partial_density->getGhostCellWidth();
     
@@ -9109,7 +9113,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
     {
         boost::shared_ptr<pdat::CellData<double> > data_partial_density(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_density, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_partial_density);
@@ -9208,15 +9212,15 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
     {
         boost::shared_ptr<pdat::CellData<double> > data_partial_density(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_density, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_momentum(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_momentum, d_plot_context)));
+                patch.getPatchData(s_variable_momentum, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_total_energy(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_total_energy, d_plot_context)));
+                patch.getPatchData(s_variable_total_energy, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_partial_density);
@@ -9470,15 +9474,15 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
     {
         boost::shared_ptr<pdat::CellData<double> > data_partial_density(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_density, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_momentum(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_momentum, d_plot_context)));
+                patch.getPatchData(s_variable_momentum, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_total_energy(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_total_energy, d_plot_context)));
+                patch.getPatchData(s_variable_total_energy, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_partial_density);
@@ -9750,11 +9754,11 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
     {
         boost::shared_ptr<pdat::CellData<double> > data_partial_density(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_density, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_momentum(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_momentum, d_plot_context)));
+                patch.getPatchData(s_variable_momentum, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_partial_density);
@@ -9864,7 +9868,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
         
         boost::shared_ptr<pdat::CellData<double> > data_partial_density(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_density, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_partial_density);
@@ -10010,7 +10014,7 @@ FlowModelFourEqnConservative::registerPlotQuantities(
             partial_density_name,
             "SCALAR",
             vardb->mapVariableAndContextToIndex(
-                d_variable_partial_density,
+                s_variable_partial_density,
                 d_plot_context),
             si);
     }
@@ -10019,14 +10023,14 @@ FlowModelFourEqnConservative::registerPlotQuantities(
         "momentum",
         "VECTOR",
         vardb->mapVariableAndContextToIndex(
-           d_variable_momentum,
+           s_variable_momentum,
            d_plot_context));
     
     visit_writer->registerPlotQuantity(
         "total energy",
         "SCALAR",
         vardb->mapVariableAndContextToIndex(
-           d_variable_total_energy,
+           s_variable_total_energy,
            d_plot_context));
     */
     
@@ -10714,7 +10718,7 @@ FlowModelFourEqnConservative::getGlobalCellDataPartialDensity()
     // Get the cell data of the registered variable partial density.
     boost::shared_ptr<pdat::CellData<double> > data_partial_density(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(d_variable_partial_density, getDataContext())));
+            d_patch->getPatchData(s_variable_partial_density, getDataContext())));
     
     return data_partial_density;
 }
@@ -10729,7 +10733,7 @@ FlowModelFourEqnConservative::getGlobalCellDataMomentum()
     // Get the cell data of the registered variable momentum.
     boost::shared_ptr<pdat::CellData<double> > data_momentum(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(d_variable_momentum, getDataContext())));
+            d_patch->getPatchData(s_variable_momentum, getDataContext())));
     
     return data_momentum;
 }
@@ -10744,7 +10748,7 @@ FlowModelFourEqnConservative::getGlobalCellDataTotalEnergy()
     // Get the cell data of the registered variable total energy.
     boost::shared_ptr<pdat::CellData<double> > data_total_energy(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(d_variable_total_energy, getDataContext())));
+            d_patch->getPatchData(s_variable_total_energy, getDataContext())));
     
     return data_total_energy;
 }

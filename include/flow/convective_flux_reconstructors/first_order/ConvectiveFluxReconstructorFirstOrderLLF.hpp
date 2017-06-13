@@ -42,7 +42,9 @@ class ConvectiveFluxReconstructorFirstOrderLLF: public ConvectiveFluxReconstruct
             const double time,
             const double dt,
             const int RK_step_number);
-    
+        
+    private:
+        
 };
 
 #endif /* CONVECTIVE_FLUX_RECONSTRUCTOR_HPP */

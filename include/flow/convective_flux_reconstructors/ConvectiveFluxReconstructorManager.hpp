@@ -18,11 +18,6 @@ class ConvectiveFluxReconstructorManager
     public:
         ConvectiveFluxReconstructorManager(
             const std::string& object_name,
-            const tbox::Dimension& dim,
-            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
-            const int& num_eqn,
-            const int& num_species,
-            const boost::shared_ptr<FlowModel>& flow_model,
             const boost::shared_ptr<tbox::Database>& convective_flux_reconstructor_db,
             const std::string& convective_flux_reconstructor_str);
         
@@ -36,13 +31,14 @@ class ConvectiveFluxReconstructorManager
         }
         
         /*
-         * Get the convective flux reconstructor.
+         * Create the convective flux reconstructor.
          */
         boost::shared_ptr<ConvectiveFluxReconstructor>
-        getConvectiveFluxReconstructor() const
-        {
-            return d_conv_flux_reconstructor;
-        }
+        createConvectiveFluxReconstructor(
+            const tbox::Dimension& dim,
+            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const int& num_species,
+            const boost::shared_ptr<FlowModel>& flow_model);
         
         /*
          * Print all characteristics of convective flux reconstructor manager.
@@ -62,9 +58,9 @@ class ConvectiveFluxReconstructorManager
         CONVECTIVE_FLUX_RECONSTRUCTOR::TYPE d_convective_flux_reconstructor_type;
         
         /*
-         * boost::shared_ptr to the convective flux reconstructor.
+         * boost::shared_ptr to the convective flux reconstructor database.
          */
-        boost::shared_ptr<ConvectiveFluxReconstructor> d_conv_flux_reconstructor;
+        boost::shared_ptr<tbox::Database> d_convective_flux_reconstructor_db;
         
 };
 

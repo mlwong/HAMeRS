@@ -78,7 +78,7 @@ class ConvectiveFluxReconstructor
             const double time,
             const double dt,
             const int RK_step_number) = 0;
-    
+        
     protected:
         /*
          * The object name is used for error/warning reporting.

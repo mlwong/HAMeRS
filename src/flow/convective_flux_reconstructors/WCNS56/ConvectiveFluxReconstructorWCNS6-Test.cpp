@@ -690,18 +690,18 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
          * primitive variables and characteristic variables.
          */
         
-        t_characteristic_decomposition->start();
+        // t_characteristic_decomposition->start();
         
         d_flow_model->computeGlobalSideDataProjectionVariablesForPrimitiveVariables(
             projection_variables);
         
-        t_characteristic_decomposition->stop();
+        // t_characteristic_decomposition->stop();
         
         /*
          * Transform primitive variables to characteristic variables.
          */
         
-        t_characteristic_decomposition->start();
+        // t_characteristic_decomposition->start();
         
         for (int m = 0; m < 6; m++)
         {
@@ -712,26 +712,26 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
                 m - 3);
         }
         
-        t_characteristic_decomposition->stop();
+        // t_characteristic_decomposition->stop();
         
         /*
          * Peform WENO interpolation.
          */
         
-        t_WENO_interpolation->start();
+        // t_WENO_interpolation->start();
         
         performWENOInterpolation(
             characteristic_variables_minus,
             characteristic_variables_plus,
             characteristic_variables);
         
-        t_WENO_interpolation->stop();
+        // t_WENO_interpolation->stop();
         
         /*
          * Transform characteristic variables back to primitive variables.
          */
         
-        t_characteristic_decomposition->start();
+        // t_characteristic_decomposition->start();
         
         d_flow_model->computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
             primitive_variables_minus,
@@ -743,7 +743,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
             characteristic_variables_plus,
             projection_variables);
         
-        t_characteristic_decomposition->stop();
+        // t_characteristic_decomposition->stop();
         
         /*
          * Declare containers to store pointers for computing mid-point fluxes.
@@ -824,7 +824,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
          * Compute mid-point flux in the x-direction.
          */
         
-        t_Riemann_solver->start();
+        // t_Riemann_solver->start();
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
@@ -871,13 +871,13 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
             V_plus_ref.clear();
         }
         
-        t_Riemann_solver->stop();
+        // t_Riemann_solver->stop();
         
         /*
          * Reconstruct the flux in the x-direction.
          */
         
-        t_reconstruct_flux->start();
+        // t_reconstruct_flux->start();
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
@@ -904,13 +904,13 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
             }
         }
         
-        t_reconstruct_flux->stop();
+        // t_reconstruct_flux->stop();
         
         /*
          * Compute the source.
          */
         
-        t_compute_source->start();
+        // t_compute_source->start();
         
         const std::vector<EQN_FORM::TYPE> eqn_form = d_flow_model->getEquationsForm();
         
@@ -954,7 +954,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
             }
         }
         
-        t_compute_source->stop();
+        // t_compute_source->stop();
         
         /*
          * Unregister the patch and data of all registered derived cell variables in the flow model.
@@ -1242,18 +1242,18 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
          * primitive variables and characteristic variables.
          */
         
-        t_characteristic_decomposition->start();
+        // t_characteristic_decomposition->start();
         
         d_flow_model->computeGlobalSideDataProjectionVariablesForPrimitiveVariables(
             projection_variables);
         
-        t_characteristic_decomposition->stop();
+        // t_characteristic_decomposition->stop();
         
         /*
          * Transform primitive variables to characteristic variables.
          */
         
-        t_characteristic_decomposition->start();
+        // t_characteristic_decomposition->start();
         
         for (int m = 0; m < 6; m++)
         {
@@ -1264,26 +1264,26 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
                 m - 3);
         }
         
-        t_characteristic_decomposition->stop();
+        // t_characteristic_decomposition->stop();
         
         /*
          * Peform WENO interpolation.
          */
         
-        t_WENO_interpolation->start();
+        // t_WENO_interpolation->start();
         
         performWENOInterpolation(
             characteristic_variables_minus,
             characteristic_variables_plus,
             characteristic_variables);
         
-        t_WENO_interpolation->stop();
+        // t_WENO_interpolation->stop();
         
         /*
          * Transform characteristic variables back to primitive variables.
          */
         
-        t_characteristic_decomposition->start();
+        // t_characteristic_decomposition->start();
         
         d_flow_model->computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
             primitive_variables_minus,
@@ -1295,7 +1295,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
             characteristic_variables_plus,
             projection_variables);
         
-        t_characteristic_decomposition->stop();
+        // t_characteristic_decomposition->stop();
         
         /*
          * Declare containers to store pointers for computing mid-point fluxes.
@@ -1432,7 +1432,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
          * Compute mid-point flux in the x-direction.
          */
         
-        t_Riemann_solver->start();
+        // t_Riemann_solver->start();
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
@@ -1517,13 +1517,13 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
             }
         }
         
-        t_Riemann_solver->stop();
+        // t_Riemann_solver->stop();
         
         /*
          * Compute mid-point flux in the y-direction.
          */
         
-        t_Riemann_solver->start();
+        // t_Riemann_solver->start();
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
@@ -1608,13 +1608,13 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
             }
         }
         
-        t_Riemann_solver->stop();
+        // t_Riemann_solver->stop();
         
         /*
          * Reconstruct the flux in the x-direction.
          */
         
-        t_reconstruct_flux->start();
+        // t_reconstruct_flux->start();
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
@@ -1655,13 +1655,13 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
             }
         }
         
-        t_reconstruct_flux->stop();
+        // t_reconstruct_flux->stop();
         
         /*
          * Reconstruct the flux in the y-direction.
          */
         
-        t_reconstruct_flux->start();
+        // t_reconstruct_flux->start();
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
@@ -1702,13 +1702,13 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
             }
         }
         
-        t_reconstruct_flux->stop();
+        // t_reconstruct_flux->stop();
         
         /*
          * Compute the source.
          */
         
-        t_compute_source->start();
+        // t_compute_source->start();
         
         const std::vector<EQN_FORM::TYPE> eqn_form = d_flow_model->getEquationsForm();
         
@@ -1786,7 +1786,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
             }
         }
         
-        t_compute_source->stop();
+        // t_compute_source->stop();
         
         /*
          * Unregister the patch and data of all registered derived cell variables in the flow model.
@@ -2116,18 +2116,18 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
          * primitive variables and characteristic variables.
          */
         
-        t_characteristic_decomposition->start();
+        // t_characteristic_decomposition->start();
         
         d_flow_model->computeGlobalSideDataProjectionVariablesForPrimitiveVariables(
             projection_variables);
         
-        t_characteristic_decomposition->stop();
+        // t_characteristic_decomposition->stop();
         
         /*
          * Transform primitive variables to characteristic variables.
          */
         
-        t_characteristic_decomposition->start();
+        // t_characteristic_decomposition->start();
         
         for (int m = 0; m < 6; m++)
         {
@@ -2138,26 +2138,26 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
                 m - 3);
         }
         
-        t_characteristic_decomposition->stop();
+        // t_characteristic_decomposition->stop();
         
         /*
          * Peform WENO interpolation.
          */
         
-        t_WENO_interpolation->start();
+        // t_WENO_interpolation->start();
         
         performWENOInterpolation(
             characteristic_variables_minus,
             characteristic_variables_plus,
             characteristic_variables);
         
-        t_WENO_interpolation->stop();
+        // t_WENO_interpolation->stop();
         
         /*
          * Transform characteristic variables back to primitive variables.
          */
         
-        t_characteristic_decomposition->start();
+        // t_characteristic_decomposition->start();
         
         d_flow_model->computeGlobalSideDataPrimitiveVariablesFromCharacteristicVariables(
             primitive_variables_minus,
@@ -2169,7 +2169,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
             characteristic_variables_plus,
             projection_variables);
         
-        t_characteristic_decomposition->stop();
+        // t_characteristic_decomposition->stop();
         
         /*
          * Declare containers to store pointers for computing mid-point fluxes.
@@ -2385,7 +2385,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
          * Compute mid-point flux in the x-direction.
          */
         
-        t_Riemann_solver->start();
+        // t_Riemann_solver->start();
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
@@ -2484,13 +2484,13 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
             }
         }
         
-        t_Riemann_solver->stop();
+        // t_Riemann_solver->stop();
         
         /*
          * Compute mid-point flux in the y-direction.
          */
         
-        t_Riemann_solver->start();
+        // _Riemann_solver->start();
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
@@ -2588,13 +2588,13 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
             }
         }
         
-        t_Riemann_solver->stop();
+        // t_Riemann_solver->stop();
         
         /*
          * Compute mid-point flux in the z-direction.
          */
         
-        t_Riemann_solver->start();
+        // t_Riemann_solver->start();
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
@@ -2692,13 +2692,13 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
             }
         }
         
-        t_Riemann_solver->stop();
+        // t_Riemann_solver->stop();
         
         /*
          * Reconstruct the flux in the x-direction.
          */
         
-        t_reconstruct_flux->start();
+        // t_reconstruct_flux->start();
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
@@ -2754,13 +2754,13 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
             }
         }
         
-        t_reconstruct_flux->stop();
+        // t_reconstruct_flux->stop();
         
         /*
          * Reconstruct the flux in the y-direction.
          */
         
-        t_reconstruct_flux->start();
+        // t_reconstruct_flux->start();
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
@@ -2812,13 +2812,13 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
             }
         }
         
-        t_reconstruct_flux->stop();
+        // t_reconstruct_flux->stop();
         
         /*
          * Reconstruct the flux in the z-direction.
          */
         
-        t_reconstruct_flux->start();
+        // t_reconstruct_flux->start();
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
@@ -2870,13 +2870,13 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
             }
         }
         
-        t_reconstruct_flux->stop();
+        // t_reconstruct_flux->stop();
         
         /*
          * Compute the source.
          */
         
-        t_compute_source->start();
+        // t_compute_source->start();
         
         const std::vector<EQN_FORM::TYPE> eqn_form = d_flow_model->getEquationsForm();
         
@@ -3022,7 +3022,7 @@ ConvectiveFluxReconstructorWCNS6_Test::computeConvectiveFluxAndSourceOnPatch(
             }
         }
         
-        t_compute_source->stop();
+        // t_compute_source->stop();
         
         /*
          * Unregister the patch and data of all registered derived cell variables in the flow model.

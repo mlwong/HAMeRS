@@ -1,12 +1,8 @@
 /************************************************************************
  *
- * This file is modified from HyperbolicPatchStrategy.c of the SAMRAI
- * distribution. For full copyright information, see COPYRIGHT and
- * COPYING.LESSER of SAMRAI distribution.
- *
- * Copyright:     (c) 1997-2014 Lawrence Livermore National Security, LLC
- * Description:   Interface to patch routines for hyperbolic Runge-Kutta
- *                integration scheme.
+ * This file is modified from HyperbolicPatchStrategy.C of the SAMRAI version
+ * 3.9.1 distribution. For full copyright information, see COPYRIGHT and
+ * COPYING.LESSER of the SAMRAI distribution.
  *
  ************************************************************************/
 

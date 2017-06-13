@@ -1,11 +1,8 @@
 /*************************************************************************
  *
- * This file is modified from StandardTagAndInitializeConnectorWidthRequestor.c
- * of the SAMRAI distribution.  For full copyright information, see COPYRIGHT
- * and COPYING.LESSER of SAMRAI distribution.
- *
- * Copyright:     (c) 1997-2014 Lawrence Livermore National Security, LLC
- * Description:   ExtendedTagAndInitialize's implementation of PatchHierarchy
+ * This file is modified from StandardTagAndInitializeConnectorWidthRequestor.C
+ * of the version 3.9.1 SAMRAI distribution.  For full copyright information,
+ * see COPYRIGHT and COPYING.LESSER of the SAMRAI distribution.
  *
  ************************************************************************/
 

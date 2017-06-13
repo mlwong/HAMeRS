@@ -460,10 +460,10 @@ class FlowModelFiveEqnAllaire: public FlowModel
         /*
          * boost::shared_ptr to registered conservative variables.
          */
-        boost::shared_ptr<pdat::CellVariable<double> > d_variable_partial_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_variable_momentum;
-        boost::shared_ptr<pdat::CellVariable<double> > d_variable_total_energy;
-        boost::shared_ptr<pdat::CellVariable<double> > d_variable_volume_fraction;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_partial_density;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_momentum;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_total_energy;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_volume_fraction;
         
         /*
          * Number of sub-ghost cells of derived cell data.

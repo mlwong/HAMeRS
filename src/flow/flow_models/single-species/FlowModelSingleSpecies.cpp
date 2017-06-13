@@ -3,6 +3,10 @@
 #include "flow/flow_models/single-species/FlowModelBoundaryUtilitiesSingleSpecies.hpp"
 #include "flow/flow_models/single-species/FlowModelStatisticsUtilitiesSingleSpecies.hpp"
 
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelSingleSpecies::s_variable_density;
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelSingleSpecies::s_variable_momentum;
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelSingleSpecies::s_variable_total_energy;
+
 FlowModelSingleSpecies::FlowModelSingleSpecies(
     const std::string& object_name,
     const tbox::Dimension& dim,
@@ -151,13 +155,13 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
      * Initialize the conservative variables.
      */
     
-    d_variable_density = boost::shared_ptr<pdat::CellVariable<double> > (
+    s_variable_density = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "density", 1));
     
-    d_variable_momentum = boost::shared_ptr<pdat::CellVariable<double> > (
+    s_variable_momentum = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "momentum", d_dim.getValue()));
     
-    d_variable_total_energy = boost::shared_ptr<pdat::CellVariable<double> > (
+    s_variable_total_energy = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "total energy", 1));
     
     /*
@@ -575,7 +579,7 @@ FlowModelSingleSpecies::registerConservativeVariables(
     const hier::IntVector& num_ghosts_intermediate)
 {
     integrator->registerVariable(
-        d_variable_density,
+        s_variable_density,
         num_ghosts,
         num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::TIME_DEP,
@@ -584,7 +588,7 @@ FlowModelSingleSpecies::registerConservativeVariables(
         "CONSERVATIVE_LINEAR_REFINE");
     
     integrator->registerVariable(
-        d_variable_momentum,
+        s_variable_momentum,
         num_ghosts,
         num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::TIME_DEP,
@@ -593,7 +597,7 @@ FlowModelSingleSpecies::registerConservativeVariables(
         "CONSERVATIVE_LINEAR_REFINE");
     
     integrator->registerVariable(
-        d_variable_total_energy,
+        s_variable_total_energy,
         num_ghosts,
         num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::TIME_DEP,
@@ -691,9 +695,9 @@ FlowModelSingleSpecies::getConservativeVariables()
     std::vector<boost::shared_ptr<pdat::CellVariable<double> > > conservative_variables;
     conservative_variables.reserve(3);
     
-    conservative_variables.push_back(d_variable_density);
-    conservative_variables.push_back(d_variable_momentum);
-    conservative_variables.push_back(d_variable_total_energy);
+    conservative_variables.push_back(s_variable_density);
+    conservative_variables.push_back(s_variable_momentum);
+    conservative_variables.push_back(s_variable_total_energy);
     
     return conservative_variables;
 }
@@ -726,7 +730,7 @@ FlowModelSingleSpecies::registerPatchWithDataContext(
     
     boost::shared_ptr<pdat::CellData<double> > data_density(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(d_variable_density, getDataContext())));
+            d_patch->getPatchData(s_variable_density, getDataContext())));
     
     d_num_ghosts = data_density->getGhostCellWidth();
     
@@ -6440,15 +6444,15 @@ FlowModelSingleSpecies::packDerivedDataIntoDoubleBuffer(
     {
         boost::shared_ptr<pdat::CellData<double> > data_density(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_density, d_plot_context)));
+                patch.getPatchData(s_variable_density, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_momentum(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_momentum, d_plot_context)));
+                patch.getPatchData(s_variable_momentum, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_total_energy(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_total_energy, d_plot_context)));
+                patch.getPatchData(s_variable_total_energy, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_density);
@@ -6558,15 +6562,15 @@ FlowModelSingleSpecies::packDerivedDataIntoDoubleBuffer(
     {
         boost::shared_ptr<pdat::CellData<double> > data_density(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_density, d_plot_context)));
+                patch.getPatchData(s_variable_density, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_momentum(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_momentum, d_plot_context)));
+                patch.getPatchData(s_variable_momentum, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_total_energy(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_total_energy, d_plot_context)));
+                patch.getPatchData(s_variable_total_energy, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_density);
@@ -6695,11 +6699,11 @@ FlowModelSingleSpecies::packDerivedDataIntoDoubleBuffer(
     {
         boost::shared_ptr<pdat::CellData<double> > data_density(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_density, d_plot_context)));
+                patch.getPatchData(s_variable_density, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_momentum(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_momentum, d_plot_context)));
+                patch.getPatchData(s_variable_momentum, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_density);
@@ -6809,7 +6813,7 @@ FlowModelSingleSpecies::registerPlotQuantities(
         "density",
         "SCALAR",
         vardb->mapVariableAndContextToIndex(
-           d_variable_density,
+           s_variable_density,
            d_plot_context));
     
     /*
@@ -6817,14 +6821,14 @@ FlowModelSingleSpecies::registerPlotQuantities(
         "momentum",
         "VECTOR",
         vardb->mapVariableAndContextToIndex(
-           d_variable_momentum,
+           s_variable_momentum,
            d_plot_context));
     
     visit_writer->registerPlotQuantity(
         "total energy",
         "SCALAR",
         vardb->mapVariableAndContextToIndex(
-           d_variable_total_energy,
+           s_variable_total_energy,
            d_plot_context));
     */
     
@@ -7417,7 +7421,7 @@ FlowModelSingleSpecies::getGlobalCellDataDensity()
     // Get the cell data of the registered variable density.
     boost::shared_ptr<pdat::CellData<double> > data_density(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(d_variable_density, getDataContext())));
+            d_patch->getPatchData(s_variable_density, getDataContext())));
     
     return data_density;
 }
@@ -7432,7 +7436,7 @@ FlowModelSingleSpecies::getGlobalCellDataMomentum()
     // Get the cell data of the registered variable momentum.
     boost::shared_ptr<pdat::CellData<double> > data_momentum(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(d_variable_momentum, getDataContext())));
+            d_patch->getPatchData(s_variable_momentum, getDataContext())));
     
     return data_momentum;
 }
@@ -7447,7 +7451,7 @@ FlowModelSingleSpecies::getGlobalCellDataTotalEnergy()
     // Get the cell data of the registered variable total energy.
     boost::shared_ptr<pdat::CellData<double> > data_total_energy(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(d_variable_total_energy, getDataContext())));
+            d_patch->getPatchData(s_variable_total_energy, getDataContext())));
     
     return data_total_energy;
 }

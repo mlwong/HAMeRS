@@ -74,8 +74,9 @@ link_directories(${HAMeRS_BINARY_DIR}/algs/patch_strategy
                  ${HAMeRS_BINARY_DIR}/flow/convective_flux_reconstructors
                  ${HAMeRS_BINARY_DIR}/flow/diffusive_flux_reconstructors
                  ${HAMeRS_BINARY_DIR}/flow/refinement_taggers
-                 ${HAMeRS_BINARY_DIR}/extn/variable_fill_patterns
                  ${HAMeRS_BINARY_DIR}/extn/patch_hierarchies
+                 ${HAMeRS_BINARY_DIR}/extn/transfer
+                 ${HAMeRS_BINARY_DIR}/extn/variable_fill_patterns
                  ${HAMeRS_BINARY_DIR}/util
                  ${HAMeRS_BINARY_DIR}/util/basic_boundary_conditions
                  ${HAMeRS_BINARY_DIR}/util/mixing_rules
@@ -91,8 +92,9 @@ add_subdirectory(src/flow/flow_models)
 add_subdirectory(src/flow/convective_flux_reconstructors)
 add_subdirectory(src/flow/diffusive_flux_reconstructors)
 add_subdirectory(src/flow/refinement_taggers)
-add_subdirectory(src/extn/variable_fill_patterns)
 add_subdirectory(src/extn/patch_hierarchies)
+add_subdirectory(src/extn/transfer)
+add_subdirectory(src/extn/variable_fill_patterns)
 add_subdirectory(src/util)
 add_subdirectory(src/util/basic_boundary_conditions)
 add_subdirectory(src/util/mixing_rules)

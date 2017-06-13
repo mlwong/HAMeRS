@@ -7,7 +7,7 @@
 #include "flow/flow_models/FlowModels.hpp"
 
 #include "SAMRAI/appu/VisItDataWriter.h"
-#include "SAMRAI/math/HierarchyCellDataOpsReal.h"
+#include "SAMRAI/math/PatchCellDataOpsReal.h"
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 #include "SAMRAI/hier/IntVector.h"
@@ -17,6 +17,10 @@
 #include "boost/shared_ptr.hpp"
 #include <string>
 #include <vector>
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 class ValueTagger
 {
@@ -28,6 +32,11 @@ class ValueTagger
             const int& num_species,
             const boost::shared_ptr<FlowModel>& flow_model,
             const boost::shared_ptr<tbox::Database>& value_tagger_db);
+        
+        /*
+         * Destructor of ValueTagger.
+         */
+        ~ValueTagger();
         
         /*
          * Get the number of ghost cells needed by the value tagger.
@@ -76,13 +85,24 @@ class ValueTagger
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
-         * Get the statistics of values that are required by the value tagger.
+         * Initialize the statistics of the values that are required by the value tagger.
          */
         void
-        getValueStatistics(
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const int level_number,
+        initializeValueStatistics();
+        
+        /*
+         * Update the statistics of the values that are required by the value tagger from a patch.
+         */
+        void
+        updateValueStatisticsFromPatch(
+            hier::Patch& patch,
             const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Get the global statistics of the values that are required by the value tagger.
+         */
+        void
+        getGlobalValueStatistics();
         
         /*
          * Tag cells on a patch for refinement using value tagger.
@@ -169,22 +189,34 @@ class ValueTagger
         /*
          * boost::shared_ptr to data values.
          */
-        boost::shared_ptr<pdat::CellVariable<double> > d_value_tagger_variable_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_value_tagger_variable_total_energy;
-        boost::shared_ptr<pdat::CellVariable<double> > d_value_tagger_variable_pressure;
-        boost::shared_ptr<pdat::CellVariable<double> > d_value_tagger_variable_dilatation;
-        boost::shared_ptr<pdat::CellVariable<double> > d_value_tagger_variable_enstrophy;
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_value_tagger_variable_mass_fraction;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_value_tagger_variable_density;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_value_tagger_variable_total_energy;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_value_tagger_variable_pressure;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_value_tagger_variable_dilatation;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_value_tagger_variable_enstrophy;
+        static std::vector<boost::shared_ptr<pdat::CellVariable<double> > > s_value_tagger_variable_mass_fraction;
         
         /*
          * Statistics of data values.
          */
-        double d_value_tagger_max_density;
-        double d_value_tagger_max_total_energy;
-        double d_value_tagger_max_pressure;
-        double d_value_tagger_max_dilatation;
-        double d_value_tagger_max_enstrophy;
-        std::vector<double> d_value_tagger_max_mass_fraction;
+        static double s_value_tagger_max_density;
+        static double s_value_tagger_max_total_energy;
+        static double s_value_tagger_max_pressure;
+        static double s_value_tagger_max_dilatation;
+        static double s_value_tagger_max_enstrophy;
+        static std::vector<double> s_value_tagger_max_mass_fraction;
+        
+#ifdef _OPENMP
+        /*
+         * Locks for updating statistics.
+         */
+        static omp_lock_t s_lock_value_tagger_max_density;
+        static omp_lock_t s_lock_value_tagger_max_total_energy;
+        static omp_lock_t s_lock_value_tagger_max_pressure;
+        static omp_lock_t s_lock_value_tagger_max_dilatation;
+        static omp_lock_t s_lock_value_tagger_max_enstrophy;
+        static std::vector<omp_lock_t> s_lock_value_tagger_max_mass_fraction;
+#endif
         
 };
 

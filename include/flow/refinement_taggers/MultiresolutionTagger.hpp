@@ -8,7 +8,7 @@
 #include "util/wavelet_transform/WaveletTransformHarten.hpp"
 
 #include "SAMRAI/appu/VisItDataWriter.h"
-#include "SAMRAI/math/HierarchyCellDataOpsReal.h"
+#include "SAMRAI/math/PatchCellDataOpsReal.h"
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 #include "SAMRAI/hier/IntVector.h"
@@ -18,6 +18,10 @@
 #include "boost/shared_ptr.hpp"
 #include <string>
 #include <vector>
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 class MultiresolutionTagger
 {
@@ -29,6 +33,11 @@ class MultiresolutionTagger
             const int& num_species,
             const boost::shared_ptr<FlowModel>& flow_model,
             const boost::shared_ptr<tbox::Database>& multiresolution_tagger_db);
+        
+        /*
+         * Destructor of MultiresolutionTagger.
+         */
+        ~MultiresolutionTagger();
         
         /*
          * Get the number of ghost cells needed by the multiresolution tagger.
@@ -77,14 +86,27 @@ class MultiresolutionTagger
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
-         * Get the statistics of the sensor values that are required by the
-         * multiresolution sensors at a given patch level.
+         * Initialize the statistics of the sensor values that are required by the multiresolution
+         * sensors.
          */
         void
-        getSensorValueStatistics(
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const int level_number,
+        initializeSensorValueStatistics();
+        
+        /*
+         * Update the statistics of the sensor values that are required by the multiresolution sensors
+         * from a patch.
+         */
+        void
+        updateSensorValueStatisticsFromPatch(
+            hier::Patch& patch,
             const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Get the global statistics of the sensor values that are required by the multiresolution
+         * sensors.
+         */
+        void
+        getGlobalSensorValueStatistics();
         
         /*
          * Tag cells on a patch for refinement using multiresolution sensors.
@@ -190,24 +212,33 @@ class MultiresolutionTagger
         /*
          * boost::shared_ptr to wavelet coefficients at different levels.
          */
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_wavelet_coeffs_density;
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_wavelet_coeffs_total_energy;
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_wavelet_coeffs_pressure;
+        static std::vector<boost::shared_ptr<pdat::CellVariable<double> > > s_Harten_wavelet_coeffs_density;
+        static std::vector<boost::shared_ptr<pdat::CellVariable<double> > > s_Harten_wavelet_coeffs_total_energy;
+        static std::vector<boost::shared_ptr<pdat::CellVariable<double> > > s_Harten_wavelet_coeffs_pressure;
         
         /*
          * Statistics of sensor values.
          */
-        std::vector<double> d_Harten_wavelet_coeffs_maxs_density;
-        std::vector<double> d_Harten_wavelet_coeffs_maxs_total_energy;
-        std::vector<double> d_Harten_wavelet_coeffs_maxs_pressure;
+        static std::vector<double> s_Harten_wavelet_coeffs_maxs_density;
+        static std::vector<double> s_Harten_wavelet_coeffs_maxs_total_energy;
+        static std::vector<double> s_Harten_wavelet_coeffs_maxs_pressure;
         
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_local_means_density;
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_local_means_total_energy;
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_Harten_local_means_pressure;
+        static std::vector<boost::shared_ptr<pdat::CellVariable<double> > > s_Harten_local_means_density;
+        static std::vector<boost::shared_ptr<pdat::CellVariable<double> > > s_Harten_local_means_total_energy;
+        static std::vector<boost::shared_ptr<pdat::CellVariable<double> > > s_Harten_local_means_pressure;
         
-        boost::shared_ptr<pdat::CellVariable<double> > d_Harten_Lipschitz_exponent_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_Harten_Lipschitz_exponent_total_energy;
-        boost::shared_ptr<pdat::CellVariable<double> > d_Harten_Lipschitz_exponent_pressure;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_Harten_Lipschitz_exponent_density;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_Harten_Lipschitz_exponent_total_energy;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_Harten_Lipschitz_exponent_pressure;
+        
+#ifdef _OPENMP
+        /*
+         * Locks for updating statistics.
+         */
+        static std::vector<omp_lock_t> s_lock_Harten_wavelet_coeffs_maxs_density;
+        static std::vector<omp_lock_t> s_lock_Harten_wavelet_coeffs_maxs_total_energy;
+        static std::vector<omp_lock_t> s_lock_Harten_wavelet_coeffs_maxs_pressure;
+#endif
         
 };
 

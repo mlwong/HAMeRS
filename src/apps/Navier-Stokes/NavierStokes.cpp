@@ -108,13 +108,13 @@ NavierStokes::NavierStokes(
     
     d_flow_model_manager.reset(new FlowModelManager(
         "d_flow_model_manager",
-        d_dim,
-        d_grid_geometry,
-        d_num_species,
         d_flow_model_db,
         d_flow_model_str));
     
-    d_flow_model = d_flow_model_manager->getFlowModel();
+    d_flow_model = d_flow_model_manager->createFlowModel(
+        d_dim,
+        d_grid_geometry,
+        d_num_species);
     
     /*
      * Initialize d_convective_flux_reconstructor_manager and get the convective flux reconstructor object.
@@ -122,15 +122,15 @@ NavierStokes::NavierStokes(
     
     d_convective_flux_reconstructor_manager.reset(new ConvectiveFluxReconstructorManager(
         "d_convective_flux_reconstructor_manager",
-        d_dim,
-        d_grid_geometry,
-        d_flow_model->getNumberOfEquations(),
-        d_num_species,
-        d_flow_model,
         d_convective_flux_reconstructor_db,
         d_convective_flux_reconstructor_str));
     
-    d_convective_flux_reconstructor = d_convective_flux_reconstructor_manager->getConvectiveFluxReconstructor();
+    d_convective_flux_reconstructor = d_convective_flux_reconstructor_manager->
+        createConvectiveFluxReconstructor(
+            d_dim,
+            d_grid_geometry,
+            d_num_species,
+            d_flow_model);
     
     /*
      * Initialize d_diffusive_flux_reconstructor_manager and get the diffusive flux reconstructor object.
@@ -138,15 +138,15 @@ NavierStokes::NavierStokes(
     
     d_diffusive_flux_reconstructor_manager.reset(new DiffusiveFluxReconstructorManager(
         "d_diffusive_flux_reconstructor_manager",
-        d_dim,
-        d_grid_geometry,
-        d_flow_model->getNumberOfEquations(),
-        d_num_species,
-        d_flow_model,
         d_diffusive_flux_reconstructor_db,
         d_diffusive_flux_reconstructor_str));
     
-    d_diffusive_flux_reconstructor = d_diffusive_flux_reconstructor_manager->getDiffusiveFluxReconstructor();
+    d_diffusive_flux_reconstructor = d_diffusive_flux_reconstructor_manager->
+        createDiffusiveFluxReconstructor(
+            d_dim,
+            d_grid_geometry,
+            d_num_species,
+            d_flow_model);
     
     /*
      * Initialize d_Navier_Stokes_initial_conditions.
@@ -2012,6 +2012,8 @@ NavierStokes::preprocessTagCellsValueDetector(
         boost::shared_ptr<hier::PatchLevel> level(
             patch_hierarchy->getPatchLevel(level_number));
         
+        d_value_tagger->initializeValueStatistics();
+        
         for (hier::PatchLevel::iterator ip(level->begin());
              ip != level->end();
              ip++)
@@ -2021,12 +2023,13 @@ NavierStokes::preprocessTagCellsValueDetector(
             d_value_tagger->computeValueTaggerValuesOnPatch(
                 *patch,
                 getDataContext());
+            
+            d_value_tagger->updateValueStatisticsFromPatch(
+                *patch,
+                getDataContext());
         }
         
-        d_value_tagger->getValueStatistics(
-            patch_hierarchy,
-            level_number,
-            getDataContext());
+        d_value_tagger->getGlobalValueStatistics();
     }
 }
 
@@ -2108,6 +2111,8 @@ NavierStokes::preprocessTagCellsGradientDetector(
         boost::shared_ptr<hier::PatchLevel> level(
             patch_hierarchy->getPatchLevel(level_number));
         
+        d_gradient_tagger->initializeSensorValueStatistics();
+        
         for (hier::PatchLevel::iterator ip(level->begin());
              ip != level->end();
              ip++)
@@ -2117,12 +2122,13 @@ NavierStokes::preprocessTagCellsGradientDetector(
             d_gradient_tagger->computeGradientSensorValuesOnPatch(
                 *patch,
                 getDataContext());
+            
+            d_gradient_tagger->updateSensorValueStatisticsFromPatch(
+                *patch,
+                getDataContext());
         }
         
-        d_gradient_tagger->getSensorValueStatistics(
-            patch_hierarchy,
-            level_number,
-            getDataContext());
+        d_gradient_tagger->getGlobalSensorValueStatistics();
     }
 }
 
@@ -2204,6 +2210,8 @@ NavierStokes::preprocessTagCellsMultiresolutionDetector(
         boost::shared_ptr<hier::PatchLevel> level(
             patch_hierarchy->getPatchLevel(level_number));
         
+        d_multiresolution_tagger->initializeSensorValueStatistics();
+        
         for (hier::PatchLevel::iterator ip(level->begin());
              ip != level->end();
              ip++)
@@ -2213,12 +2221,13 @@ NavierStokes::preprocessTagCellsMultiresolutionDetector(
             d_multiresolution_tagger->computeMultiresolutionSensorValuesOnPatch(
                 *patch,
                 getDataContext());
+            
+            d_multiresolution_tagger->updateSensorValueStatisticsFromPatch(
+                *patch,
+                getDataContext());
         }
         
-        d_multiresolution_tagger->getSensorValueStatistics(
-            patch_hierarchy,
-            level_number,
-            getDataContext());
+        d_multiresolution_tagger->getGlobalSensorValueStatistics();
     }
 }
 
@@ -2398,7 +2407,7 @@ void NavierStokes::printClassData(std::ostream& os) const
     os << "d_dim = " << d_dim.getValue() << std::endl;
     os << "d_grid_geometry = " << d_grid_geometry.get() << std::endl;
     
-    // Print all characteristics of d_flow_model.
+    // Print all characteristics of d_flow_model_manager.
     d_flow_model_manager->printClassData(os);
     
     os << "d_num_species = " << d_num_species << std::endl;

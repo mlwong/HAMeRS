@@ -7,6 +7,29 @@
 
 #define EPSILON 1e-40
 
+boost::shared_ptr<pdat::CellVariable<double> > ValueTagger::s_value_tagger_variable_density;
+boost::shared_ptr<pdat::CellVariable<double> > ValueTagger::s_value_tagger_variable_total_energy;
+boost::shared_ptr<pdat::CellVariable<double> > ValueTagger::s_value_tagger_variable_pressure;
+boost::shared_ptr<pdat::CellVariable<double> > ValueTagger::s_value_tagger_variable_dilatation;
+boost::shared_ptr<pdat::CellVariable<double> > ValueTagger::s_value_tagger_variable_enstrophy;
+std::vector<boost::shared_ptr<pdat::CellVariable<double> > > ValueTagger::s_value_tagger_variable_mass_fraction;
+
+double ValueTagger::s_value_tagger_max_density;
+double ValueTagger::s_value_tagger_max_total_energy;
+double ValueTagger::s_value_tagger_max_pressure;
+double ValueTagger::s_value_tagger_max_dilatation;
+double ValueTagger::s_value_tagger_max_enstrophy;
+std::vector<double> ValueTagger::s_value_tagger_max_mass_fraction;
+
+#ifdef _OPENMP
+omp_lock_t ValueTagger::s_lock_value_tagger_max_density;
+omp_lock_t ValueTagger::s_lock_value_tagger_max_total_energy;
+omp_lock_t ValueTagger::s_lock_value_tagger_max_pressure;
+omp_lock_t ValueTagger::s_lock_value_tagger_max_dilatation;
+omp_lock_t ValueTagger::s_lock_value_tagger_max_enstrophy;
+std::vector<omp_lock_t> ValueTagger::s_lock_value_tagger_max_mass_fraction;
+#endif
+
 ValueTagger::ValueTagger(
     const std::string& object_name,
     const tbox::Dimension& dim,
@@ -19,12 +42,7 @@ ValueTagger::ValueTagger(
         d_grid_geometry(grid_geometry),
         d_num_value_ghosts(hier::IntVector::getZero(d_dim)),
         d_num_species(num_species),
-        d_flow_model(flow_model),
-        d_value_tagger_max_density(0.0),
-        d_value_tagger_max_total_energy(0.0),
-        d_value_tagger_max_pressure(0.0),
-        d_value_tagger_max_dilatation(0.0),
-        d_value_tagger_max_enstrophy(0.0)
+        d_flow_model(flow_model)
 {
     if (value_tagger_db != nullptr)
     {
@@ -316,6 +334,188 @@ ValueTagger::ValueTagger(
             << " No refinement with value tagger will occur."
             << std::endl);
     }
+    
+#ifdef _OPENMP
+    // Loop over variables chosen.
+    for (int vi = 0; vi < static_cast<int>(d_variables.size()); vi++)
+    {
+        // Get the key of the current variable.
+        std::string variable_key = d_variables[vi];
+        
+        if (variable_key == "DENSITY")
+        {
+            if (d_uses_global_tol_up[vi] ||
+                d_uses_global_tol_lo[vi])
+            {
+                if (omp_get_thread_num() == 0)
+                {
+                    omp_init_lock(&s_lock_value_tagger_max_density);
+                }
+            }
+        }
+        else if (variable_key == "TOTAL_ENERGY")
+        {
+            if (d_uses_global_tol_up[vi] ||
+                d_uses_global_tol_lo[vi])
+            {
+                if (omp_get_thread_num() == 0)
+                {
+                    omp_init_lock(&s_lock_value_tagger_max_total_energy);
+                }
+            }
+        }
+        else if (variable_key == "PRESSURE")
+        {
+            if (d_uses_global_tol_up[vi] ||
+                d_uses_global_tol_lo[vi])
+            {
+                if (omp_get_thread_num() == 0)
+                {
+                    omp_init_lock(&s_lock_value_tagger_max_pressure);
+                }
+            }
+        }
+        else if (variable_key == "DILATATION")
+        {
+            if (d_uses_global_tol_up[vi] ||
+                d_uses_global_tol_lo[vi])
+            {
+                if (omp_get_thread_num() == 0)
+                {
+                    omp_init_lock(&s_lock_value_tagger_max_dilatation);
+                }
+            }
+        }
+        else if (variable_key == "ENSTROPHY")
+        {
+            if (d_uses_global_tol_up[vi] ||
+                d_uses_global_tol_lo[vi])
+            {
+                if (omp_get_thread_num() == 0)
+                {
+                    omp_init_lock(&s_lock_value_tagger_max_enstrophy);
+                }
+            }
+        }
+        else if (variable_key == "MASS_FRACTION")
+        {
+            if (d_uses_global_tol_up[vi] ||
+                d_uses_global_tol_lo[vi])
+            {
+                if (omp_get_thread_num() == 0)
+                {
+                    s_lock_value_tagger_max_mass_fraction.resize(d_num_species);
+                    
+                    for (int si = 0; si < d_num_species; si++)
+                    {
+                        omp_init_lock(&s_lock_value_tagger_max_mass_fraction[si]);
+                    }
+                }
+            }
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Unknown/unsupported variable: "
+                << variable_key
+                << "\nin input."
+                << std::endl);
+        }
+    }
+#endif
+}
+
+
+ValueTagger::~ValueTagger()
+{
+#ifdef _OPENMP
+    // Loop over variables chosen.
+    for (int vi = 0; vi < static_cast<int>(d_variables.size()); vi++)
+    {
+        // Get the key of the current variable.
+        std::string variable_key = d_variables[vi];
+        
+        if (variable_key == "DENSITY")
+        {
+            if (d_uses_global_tol_up[vi] ||
+                d_uses_global_tol_lo[vi])
+            {
+                if (omp_get_thread_num() == 0)
+                {
+                    omp_destroy_lock(&s_lock_value_tagger_max_density);
+                }
+            }
+        }
+        else if (variable_key == "TOTAL_ENERGY")
+        {
+            if (d_uses_global_tol_up[vi] ||
+                d_uses_global_tol_lo[vi])
+            {
+                if (omp_get_thread_num() == 0)
+                {
+                    omp_destroy_lock(&s_lock_value_tagger_max_total_energy);
+                }
+            }
+        }
+        else if (variable_key == "PRESSURE")
+        {
+            if (d_uses_global_tol_up[vi] ||
+                d_uses_global_tol_lo[vi])
+            {
+                if (omp_get_thread_num() == 0)
+                {
+                    omp_destroy_lock(&s_lock_value_tagger_max_pressure);
+                }
+            }
+        }
+        else if (variable_key == "DILATATION")
+        {
+            if (d_uses_global_tol_up[vi] ||
+                d_uses_global_tol_lo[vi])
+            {
+                if (omp_get_thread_num() == 0)
+                {
+                    omp_destroy_lock(&s_lock_value_tagger_max_dilatation);
+                }
+            }
+        }
+        else if (variable_key == "ENSTROPHY")
+        {
+            if (d_uses_global_tol_up[vi] ||
+                d_uses_global_tol_lo[vi])
+            {
+                if (omp_get_thread_num() == 0)
+                {
+                    omp_destroy_lock(&s_lock_value_tagger_max_enstrophy);
+                }
+            }
+        }
+        else if (variable_key == "MASS_FRACTION")
+        {
+            if (d_uses_global_tol_up[vi] ||
+                d_uses_global_tol_lo[vi])
+            {
+                if (omp_get_thread_num() == 0)
+                {
+                    for (int si = 0; si < d_num_species; si++)
+                    {
+                        omp_destroy_lock(&s_lock_value_tagger_max_mass_fraction[si]);
+                    }
+                }
+            }
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Unknown/unsupported variable: "
+                << variable_key
+                << "\nin input."
+                << std::endl);
+        }
+    }
+#endif
 }
 
 
@@ -334,57 +534,50 @@ ValueTagger::registerValueTaggerVariables(
         
         if (variable_key == "DENSITY")
         {
-            d_value_tagger_variable_density = boost::make_shared<pdat::CellVariable<double> >(
+            s_value_tagger_variable_density = boost::make_shared<pdat::CellVariable<double> >(
                 d_dim,
                 "Value tagger density",
                 1);
         }
         else if (variable_key == "TOTAL_ENERGY")
         {
-            d_value_tagger_variable_total_energy = boost::make_shared<pdat::CellVariable<double> >(
+            s_value_tagger_variable_total_energy = boost::make_shared<pdat::CellVariable<double> >(
                 d_dim,
                 "Value tagger total energy",
                 1);
         }
         else if (variable_key == "PRESSURE")
         {
-            d_value_tagger_variable_pressure = boost::make_shared<pdat::CellVariable<double> >(
+            s_value_tagger_variable_pressure = boost::make_shared<pdat::CellVariable<double> >(
                 d_dim,
                 "Value tagger pressure",
                 1);
         }
         else if (variable_key == "DILATATION")
         {
-            d_value_tagger_variable_dilatation = boost::make_shared<pdat::CellVariable<double> >(
+            s_value_tagger_variable_dilatation = boost::make_shared<pdat::CellVariable<double> >(
                 d_dim,
                 "Value tagger dilatation",
                 1);
         }
         else if (variable_key == "ENSTROPHY")
         {
-            d_value_tagger_variable_enstrophy = boost::make_shared<pdat::CellVariable<double> >(
+            s_value_tagger_variable_enstrophy = boost::make_shared<pdat::CellVariable<double> >(
                 d_dim,
                 "Value tagger enstrophy",
                 1);
         }
         else if (variable_key == "MASS_FRACTION")
         {
-            d_value_tagger_variable_mass_fraction.reserve(d_num_species);
+            s_value_tagger_variable_mass_fraction.reserve(d_num_species);
             
             for (int si = 0; si < d_num_species; si++)
             {
-                d_value_tagger_variable_mass_fraction.push_back(
+                s_value_tagger_variable_mass_fraction.push_back(
                     boost::make_shared<pdat::CellVariable<double> >(
                         d_dim,
                         "Value tagger mass fraction "  + boost::lexical_cast<std::string>(si),
                         1));
-            }
-            
-            d_value_tagger_max_mass_fraction.reserve(d_num_species);
-            
-            for (int si = 0; si < d_num_species; si++)
-            {
-                d_value_tagger_max_mass_fraction.push_back(0.0);
             }
         }
         else
@@ -407,7 +600,7 @@ ValueTagger::registerValueTaggerVariables(
         if (variable_key == "DENSITY")
         {
             integrator->registerVariable(
-                d_value_tagger_variable_density,
+                s_value_tagger_variable_density,
                 d_num_value_ghosts,
                 d_num_value_ghosts,
                 RungeKuttaLevelIntegrator::TEMPORARY,
@@ -418,7 +611,7 @@ ValueTagger::registerValueTaggerVariables(
         else if (variable_key == "TOTAL_ENERGY")
         {
             integrator->registerVariable(
-                d_value_tagger_variable_total_energy,
+                s_value_tagger_variable_total_energy,
                 d_num_value_ghosts,
                 d_num_value_ghosts,
                 RungeKuttaLevelIntegrator::TEMPORARY,
@@ -429,7 +622,7 @@ ValueTagger::registerValueTaggerVariables(
         else if (variable_key == "PRESSURE")
         {
             integrator->registerVariable(
-                d_value_tagger_variable_pressure,
+                s_value_tagger_variable_pressure,
                 d_num_value_ghosts,
                 d_num_value_ghosts,
                 RungeKuttaLevelIntegrator::TEMPORARY,
@@ -440,7 +633,7 @@ ValueTagger::registerValueTaggerVariables(
         else if (variable_key == "DILATATION")
         {
             integrator->registerVariable(
-                d_value_tagger_variable_dilatation,
+                s_value_tagger_variable_dilatation,
                 d_num_value_ghosts,
                 d_num_value_ghosts,
                 RungeKuttaLevelIntegrator::TEMPORARY,
@@ -451,7 +644,7 @@ ValueTagger::registerValueTaggerVariables(
         else if (variable_key == "ENSTROPHY")
         {
             integrator->registerVariable(
-                d_value_tagger_variable_enstrophy,
+                s_value_tagger_variable_enstrophy,
                 d_num_value_ghosts,
                 d_num_value_ghosts,
                 RungeKuttaLevelIntegrator::TEMPORARY,
@@ -464,7 +657,7 @@ ValueTagger::registerValueTaggerVariables(
             for (int si = 0; si < d_num_species; si++)
             {
                 integrator->registerVariable(
-                    d_value_tagger_variable_mass_fraction[si],
+                    s_value_tagger_variable_mass_fraction[si],
                     d_num_value_ghosts,
                     d_num_value_ghosts,
                     RungeKuttaLevelIntegrator::TEMPORARY,
@@ -709,7 +902,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 patch,
                 data_context,
                 flow_model_data_density,
-                d_value_tagger_variable_density,
+                s_value_tagger_variable_density,
                 0);
             
             /*
@@ -750,7 +943,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 patch,
                 data_context,
                 flow_model_data_total_energy,
-                d_value_tagger_variable_total_energy,
+                s_value_tagger_variable_total_energy,
                 0);
             
             /*
@@ -791,7 +984,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 patch,
                 data_context,
                 flow_model_data_pressure,
-                d_value_tagger_variable_pressure,
+                s_value_tagger_variable_pressure,
                 0);
             
             /*
@@ -837,7 +1030,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 patch,
                 data_context,
                 flow_model_data_dilatation,
-                d_value_tagger_variable_dilatation,
+                s_value_tagger_variable_dilatation,
                 0);
             
             /*
@@ -883,7 +1076,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 patch,
                 data_context,
                 flow_model_data_enstrophy,
-                d_value_tagger_variable_enstrophy,
+                s_value_tagger_variable_enstrophy,
                 0);
             
             /*
@@ -926,7 +1119,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                     patch,
                     data_context,
                     flow_model_data_mass_fraction,
-                    d_value_tagger_variable_mass_fraction[si],
+                    s_value_tagger_variable_mass_fraction[si],
                     si);
             }
             
@@ -941,19 +1134,95 @@ ValueTagger::computeValueTaggerValuesOnPatch(
 
 
 /*
- * Get the statistics of values that are required by the value tagger.
+ * Initialize the statistics of the values that are required by the value tagger.
  */
 void
-ValueTagger::getValueStatistics(
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const int level_number,
+ValueTagger::initializeValueStatistics()
+{
+    // Loop over variables chosen.
+    for (int vi = 0; vi < static_cast<int>(d_variables.size()); vi++)
+    {
+        // Get the key of the current variable.
+        std::string variable_key = d_variables[vi];
+        
+        if (variable_key == "DENSITY")
+        {
+            if (d_uses_global_tol_up[vi] ||
+                d_uses_global_tol_lo[vi])
+            {
+                s_value_tagger_max_density = 0.0;
+            }
+        }
+        else if (variable_key == "TOTAL_ENERGY")
+        {
+            if (d_uses_global_tol_up[vi] ||
+                d_uses_global_tol_lo[vi])
+            {
+                s_value_tagger_max_total_energy = 0.0;
+            }
+        }
+        else if (variable_key == "PRESSURE")
+        {
+            if (d_uses_global_tol_up[vi] ||
+                d_uses_global_tol_lo[vi])
+            {
+                s_value_tagger_max_pressure = 0.0;
+            }
+        }
+        else if (variable_key == "DILATATION")
+        {
+            if (d_uses_global_tol_up[vi] ||
+                d_uses_global_tol_lo[vi])
+            {
+                s_value_tagger_max_dilatation = 0.0;
+            }
+        }
+        else if (variable_key == "ENSTROPHY")
+        {
+            if (d_uses_global_tol_up[vi] ||
+                d_uses_global_tol_lo[vi])
+            {
+                s_value_tagger_max_enstrophy = 0.0;
+            }
+        }
+        else if (variable_key == "MASS_FRACTION")
+        {
+            if (d_uses_global_tol_up[vi] ||
+                d_uses_global_tol_lo[vi])
+            {
+                s_value_tagger_max_mass_fraction.reserve(d_num_species);
+                
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    s_value_tagger_max_mass_fraction.push_back(0.0);
+                }
+            }
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Unknown/unsupported variable: "
+                << variable_key
+                << "\nin input."
+                << std::endl);
+        }
+    }
+}
+
+
+/*
+ * Update the statistics of the values that are required by the value tagger from a patch.
+ */
+void
+ValueTagger::updateValueStatisticsFromPatch(
+    hier::Patch& patch,
     const boost::shared_ptr<hier::VariableContext>& data_context)
 {
-    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    // Get the box that covers the interior of patch.
+    const hier::Box interior_box = patch.getBox();
     
-    math::HierarchyCellDataOpsReal<double> cell_double_operator(patch_hierarchy, level_number, level_number);
-    
-    hier::VariableDatabase* variable_db = hier::VariableDatabase::getDatabase();
+    math::PatchCellDataOpsReal<double> patch_cell_data_operator;
     
     // Loop over variables chosen.
     for (int vi = 0; vi < static_cast<int>(d_variables.size()); vi++)
@@ -965,80 +1234,211 @@ ValueTagger::getValueStatistics(
             
             if (variable_key == "DENSITY")
             {
-                const int rho_id = variable_db->mapVariableAndContextToIndex(
-                    d_value_tagger_variable_density,
-                    data_context);
+                boost::shared_ptr<pdat::CellData<double> > rho(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch.getPatchData(
+                        s_value_tagger_variable_density,
+                        data_context)));
                 
-                double rho_max_local = cell_double_operator.max(rho_id);
-                d_value_tagger_max_density = 0.0;
+                const double rho_max_patch = patch_cell_data_operator.max(rho, interior_box);
+                
+#ifdef _OPENMP
+                omp_set_lock(&s_lock_value_tagger_max_density);
+#endif
+                
+                s_value_tagger_max_density = fmax(
+                    rho_max_patch,
+                    s_value_tagger_max_density);
+                
+#ifdef _OPENMP
+                omp_unset_lock(&s_lock_value_tagger_max_density);
+#endif
+            }
+            else if (variable_key == "TOTAL_ENERGY")
+            {
+                boost::shared_ptr<pdat::CellData<double> > E(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch.getPatchData(
+                        s_value_tagger_variable_total_energy,
+                        data_context)));
+                
+                const double E_max_patch = patch_cell_data_operator.max(E, interior_box);
+                
+#ifdef _OPENMP
+                omp_set_lock(&s_lock_value_tagger_max_total_energy);
+#endif
+                
+                s_value_tagger_max_total_energy = fmax(
+                    E_max_patch,
+                    s_value_tagger_max_total_energy);
+                
+#ifdef _OPENMP
+                omp_unset_lock(&s_lock_value_tagger_max_total_energy);
+#endif
+            }
+            else if (variable_key == "PRESSURE")
+            {
+                boost::shared_ptr<pdat::CellData<double> > p(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch.getPatchData(
+                        s_value_tagger_variable_pressure,
+                        data_context)));
+                
+                const double p_max_patch = patch_cell_data_operator.max(p, interior_box);
+                
+#ifdef _OPENMP
+                omp_set_lock(&s_lock_value_tagger_max_pressure);
+#endif
+                
+                s_value_tagger_max_pressure = fmax(
+                    p_max_patch,
+                    s_value_tagger_max_pressure);
+                
+#ifdef _OPENMP
+                omp_unset_lock(&s_lock_value_tagger_max_pressure);
+#endif
+            }
+            else if (variable_key == "DILATATION")
+            {
+                boost::shared_ptr<pdat::CellData<double> > theta(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch.getPatchData(
+                        s_value_tagger_variable_dilatation,
+                        data_context)));
+                
+                const double theta_max_patch = patch_cell_data_operator.max(theta, interior_box);
+                
+#ifdef _OPENMP
+                omp_set_lock(&s_lock_value_tagger_max_dilatation);
+#endif
+                
+                s_value_tagger_max_dilatation = fmax(
+                    theta_max_patch,
+                    s_value_tagger_max_dilatation);
+                
+#ifdef _OPENMP
+                omp_unset_lock(&s_lock_value_tagger_max_dilatation);
+#endif
+            }
+            else if (variable_key == "ENSTROPHY")
+            {
+                boost::shared_ptr<pdat::CellData<double> > Omega(
+                    BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                        patch.getPatchData(
+                        s_value_tagger_variable_enstrophy,
+                        data_context)));
+                
+                const double Omega_max_patch = patch_cell_data_operator.max(Omega, interior_box);
+                
+#ifdef _OPENMP
+                omp_set_lock(&s_lock_value_tagger_max_enstrophy);
+#endif
+                
+                s_value_tagger_max_enstrophy = fmax(
+                    Omega_max_patch,
+                    s_value_tagger_max_enstrophy);
+                
+#ifdef _OPENMP
+                omp_unset_lock(&s_lock_value_tagger_max_enstrophy);
+#endif
+            }
+            else if (variable_key == "MASS_FRACTION")
+            {
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    boost::shared_ptr<pdat::CellData<double> > Y(
+                        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                            patch.getPatchData(
+                            s_value_tagger_variable_mass_fraction[si],
+                            data_context)));
+                    
+                    const double Y_max_patch = patch_cell_data_operator.max(Y, interior_box);
+                    
+#ifdef _OPENMP
+                    omp_set_lock(&s_lock_value_tagger_max_mass_fraction[si]);
+#endif
+                    
+                    s_value_tagger_max_mass_fraction[si] = fmax(
+                        Y_max_patch,
+                        s_value_tagger_max_mass_fraction[si]);
+                    
+#ifdef _OPENMP
+                    omp_unset_lock(&s_lock_value_tagger_max_mass_fraction[si]);
+#endif
+                }
+            }
+        }
+    }
+}
+
+
+/*
+ * Get the global statistics of the values that are required by the value tagger.
+ */
+void
+ValueTagger::getGlobalValueStatistics()
+{
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    // Loop over variables chosen.
+    for (int vi = 0; vi < static_cast<int>(d_variables.size()); vi++)
+    {
+        if (d_uses_global_tol_up[vi] || d_uses_global_tol_lo[vi])
+        {
+            // Get the key of the current variable.
+            std::string variable_key = d_variables[vi];
+            
+            if (variable_key == "DENSITY")
+            {
+                double rho_max_local = s_value_tagger_max_density;
                 
                 mpi.Allreduce(
                     &rho_max_local,
-                    &d_value_tagger_max_density,
+                    &s_value_tagger_max_density,
                     1,
                     MPI_DOUBLE,
                     MPI_MAX);
             }
             else if (variable_key == "TOTAL_ENERGY")
             {
-                const int E_id = variable_db->mapVariableAndContextToIndex(
-                    d_value_tagger_variable_total_energy,
-                    data_context);
-                
-                double E_max_local = cell_double_operator.max(E_id);
-                d_value_tagger_max_total_energy = 0.0;
+                double E_max_local = s_value_tagger_max_total_energy;
                 
                 mpi.Allreduce(
                     &E_max_local,
-                    &d_value_tagger_max_total_energy,
+                    &s_value_tagger_max_total_energy,
                     1,
                     MPI_DOUBLE,
                     MPI_MAX);
             }
             else if (variable_key == "PRESSURE")
             {
-                const int p_id = variable_db->mapVariableAndContextToIndex(
-                    d_value_tagger_variable_pressure,
-                    data_context);
-                
-                double p_max_local = cell_double_operator.max(p_id);
-                d_value_tagger_max_pressure = 0.0;
+                double p_max_local = s_value_tagger_max_pressure;
                 
                 mpi.Allreduce(
                     &p_max_local,
-                    &d_value_tagger_max_pressure,
+                    &s_value_tagger_max_pressure,
                     1,
                     MPI_DOUBLE,
                     MPI_MAX);
             }
             else if (variable_key == "DILATATION")
             {
-                const int theta_id = variable_db->mapVariableAndContextToIndex(
-                    d_value_tagger_variable_dilatation,
-                    data_context);
-                
-                double theta_max_local = cell_double_operator.max(theta_id);
-                d_value_tagger_max_dilatation = 0.0;
+                double theta_max_local = s_value_tagger_max_dilatation;
                 
                 mpi.Allreduce(
                     &theta_max_local,
-                    &d_value_tagger_max_dilatation,
+                    &s_value_tagger_max_dilatation,
                     1,
                     MPI_DOUBLE,
                     MPI_MAX);
             }
             else if (variable_key == "ENSTROPHY")
             {
-                const int Omega_id = variable_db->mapVariableAndContextToIndex(
-                    d_value_tagger_variable_enstrophy,
-                    data_context);
-                
-                double Omega_max_local = cell_double_operator.max(Omega_id);
-                d_value_tagger_max_enstrophy = 0.0;
+                double Omega_max_local = s_value_tagger_max_enstrophy;
                 
                 mpi.Allreduce(
                     &Omega_max_local,
-                    &d_value_tagger_max_enstrophy,
+                    &s_value_tagger_max_enstrophy,
                     1,
                     MPI_DOUBLE,
                     MPI_MAX);
@@ -1047,16 +1447,11 @@ ValueTagger::getValueStatistics(
             {
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    const int Y_id = variable_db->mapVariableAndContextToIndex(
-                        d_value_tagger_variable_mass_fraction[si],
-                        data_context);
-                    
-                    double Y_max_local = cell_double_operator.max(Y_id);
-                    d_value_tagger_max_mass_fraction[si] = 0.0;
+                    double Y_max_local = s_value_tagger_max_mass_fraction[si];
                     
                     mpi.Allreduce(
                         &Y_max_local,
-                        &d_value_tagger_max_mass_fraction[si],
+                        &s_value_tagger_max_mass_fraction[si],
                         1,
                         MPI_DOUBLE,
                         MPI_MAX);
@@ -1127,8 +1522,8 @@ ValueTagger::tagCellsOnPatch(
                 patch,
                 data_context,
                 tags,
-                d_value_tagger_variable_density,
-                d_value_tagger_max_density,
+                s_value_tagger_variable_density,
+                s_value_tagger_max_density,
                 uses_global_tol_up,
                 uses_global_tol_lo,
                 uses_local_tol_up,
@@ -1144,8 +1539,8 @@ ValueTagger::tagCellsOnPatch(
                 patch,
                 data_context,
                 tags,
-                d_value_tagger_variable_total_energy,
-                d_value_tagger_max_total_energy,
+                s_value_tagger_variable_total_energy,
+                s_value_tagger_max_total_energy,
                 uses_global_tol_up,
                 uses_global_tol_lo,
                 uses_local_tol_up,
@@ -1161,8 +1556,8 @@ ValueTagger::tagCellsOnPatch(
                 patch,
                 data_context,
                 tags,
-                d_value_tagger_variable_pressure,
-                d_value_tagger_max_pressure,
+                s_value_tagger_variable_pressure,
+                s_value_tagger_max_pressure,
                 uses_global_tol_up,
                 uses_global_tol_lo,
                 uses_local_tol_up,
@@ -1178,8 +1573,8 @@ ValueTagger::tagCellsOnPatch(
                 patch,
                 data_context,
                 tags,
-                d_value_tagger_variable_dilatation,
-                d_value_tagger_max_dilatation,
+                s_value_tagger_variable_dilatation,
+                s_value_tagger_max_dilatation,
                 uses_global_tol_up,
                 uses_global_tol_lo,
                 uses_local_tol_up,
@@ -1195,8 +1590,8 @@ ValueTagger::tagCellsOnPatch(
                 patch,
                 data_context,
                 tags,
-                d_value_tagger_variable_enstrophy,
-                d_value_tagger_max_enstrophy,
+                s_value_tagger_variable_enstrophy,
+                s_value_tagger_max_enstrophy,
                 uses_global_tol_up,
                 uses_global_tol_lo,
                 uses_local_tol_up,
@@ -1214,8 +1609,8 @@ ValueTagger::tagCellsOnPatch(
                     patch,
                     data_context,
                     tags,
-                    d_value_tagger_variable_mass_fraction[si],
-                    d_value_tagger_max_mass_fraction[si],
+                    s_value_tagger_variable_mass_fraction[si],
+                    s_value_tagger_max_mass_fraction[si],
                     uses_global_tol_up,
                     uses_global_tol_lo,
                     uses_local_tol_up,

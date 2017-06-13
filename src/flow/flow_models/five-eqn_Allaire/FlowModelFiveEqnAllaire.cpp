@@ -3,6 +3,11 @@
 #include "flow/flow_models/five-eqn_Allaire/FlowModelBoundaryUtilitiesFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelStatisticsUtilitiesFiveEqnAllaire.hpp"
 
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelFiveEqnAllaire::s_variable_partial_density;
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelFiveEqnAllaire::s_variable_momentum;
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelFiveEqnAllaire::s_variable_total_energy;
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelFiveEqnAllaire::s_variable_volume_fraction;
+
 FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
     const std::string& object_name,
     const tbox::Dimension& dim,
@@ -104,16 +109,16 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
      * Initialize the conservative variables.
      */
     
-    d_variable_partial_density = boost::shared_ptr<pdat::CellVariable<double> > (
+    s_variable_partial_density = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "partial density", d_num_species));
     
-    d_variable_momentum = boost::shared_ptr<pdat::CellVariable<double> > (
+    s_variable_momentum = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "momentum", d_dim.getValue()));
     
-    d_variable_total_energy = boost::shared_ptr<pdat::CellVariable<double> > (
+    s_variable_total_energy = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "total energy", 1));
     
-    d_variable_volume_fraction = boost::shared_ptr<pdat::CellVariable<double> > (
+    s_variable_volume_fraction = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "volume fraction", d_num_species));
     
     /*
@@ -394,7 +399,7 @@ FlowModelFiveEqnAllaire::registerConservativeVariables(
     const hier::IntVector& num_ghosts_intermediate)
 {
     integrator->registerVariable(
-        d_variable_partial_density,
+        s_variable_partial_density,
         num_ghosts,
         num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::TIME_DEP,
@@ -403,7 +408,7 @@ FlowModelFiveEqnAllaire::registerConservativeVariables(
         "CONSERVATIVE_LINEAR_REFINE");
     
     integrator->registerVariable(
-        d_variable_momentum,
+        s_variable_momentum,
         num_ghosts,
         num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::TIME_DEP,
@@ -412,7 +417,7 @@ FlowModelFiveEqnAllaire::registerConservativeVariables(
         "CONSERVATIVE_LINEAR_REFINE");
     
     integrator->registerVariable(
-        d_variable_total_energy,
+        s_variable_total_energy,
         num_ghosts,
         num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::TIME_DEP,
@@ -421,7 +426,7 @@ FlowModelFiveEqnAllaire::registerConservativeVariables(
         "CONSERVATIVE_LINEAR_REFINE");
     
     integrator->registerVariable(
-        d_variable_volume_fraction,
+        s_variable_volume_fraction,
         num_ghosts,
         num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::TIME_DEP,
@@ -532,10 +537,10 @@ FlowModelFiveEqnAllaire::getConservativeVariables()
     std::vector<boost::shared_ptr<pdat::CellVariable<double> > > conservative_variables;
     conservative_variables.reserve(4);
     
-    conservative_variables.push_back(d_variable_partial_density);
-    conservative_variables.push_back(d_variable_momentum);
-    conservative_variables.push_back(d_variable_total_energy);
-    conservative_variables.push_back(d_variable_volume_fraction);
+    conservative_variables.push_back(s_variable_partial_density);
+    conservative_variables.push_back(s_variable_momentum);
+    conservative_variables.push_back(s_variable_total_energy);
+    conservative_variables.push_back(s_variable_volume_fraction);
     
     return conservative_variables;
 }
@@ -568,7 +573,7 @@ FlowModelFiveEqnAllaire::registerPatchWithDataContext(
     
     boost::shared_ptr<pdat::CellData<double> > data_partial_density(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(d_variable_partial_density, getDataContext())));
+            d_patch->getPatchData(s_variable_partial_density, getDataContext())));
     
     d_num_ghosts = data_partial_density->getGhostCellWidth();
     
@@ -9008,7 +9013,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
     {
         boost::shared_ptr<pdat::CellData<double> > data_partial_density(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_density, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_partial_density);
@@ -9107,19 +9112,19 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
     {
         boost::shared_ptr<pdat::CellData<double> > data_partial_density(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_density, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_momentum(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_momentum, d_plot_context)));
+                patch.getPatchData(s_variable_momentum, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_total_energy(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_total_energy, d_plot_context)));
+                patch.getPatchData(s_variable_total_energy, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_volume_fraction(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_volume_fraction, d_plot_context)));
+                patch.getPatchData(s_variable_volume_fraction, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_partial_density);
@@ -9402,19 +9407,19 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
     {
         boost::shared_ptr<pdat::CellData<double> > data_partial_density(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_density, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_momentum(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_momentum, d_plot_context)));
+                patch.getPatchData(s_variable_momentum, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_total_energy(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_total_energy, d_plot_context)));
+                patch.getPatchData(s_variable_total_energy, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_volume_fraction(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_volume_fraction, d_plot_context)));
+                patch.getPatchData(s_variable_volume_fraction, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_partial_density);
@@ -9718,11 +9723,11 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
     {
         boost::shared_ptr<pdat::CellData<double> > data_partial_density(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_density, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_momentum(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_momentum, d_plot_context)));
+                patch.getPatchData(s_variable_momentum, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_partial_density);
@@ -9835,7 +9840,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
         
         boost::shared_ptr<pdat::CellData<double> > data_partial_density(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_density, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_partial_density);
@@ -9983,7 +9988,7 @@ FlowModelFiveEqnAllaire::registerPlotQuantities(
             partial_density_name,
             "SCALAR",
             vardb->mapVariableAndContextToIndex(
-                d_variable_partial_density,
+                s_variable_partial_density,
                 d_plot_context),
             si);
     }
@@ -9992,14 +9997,14 @@ FlowModelFiveEqnAllaire::registerPlotQuantities(
         "momentum",
         "VECTOR",
         vardb->mapVariableAndContextToIndex(
-           d_variable_momentum,
+           s_variable_momentum,
            d_plot_context));
     
     visit_writer->registerPlotQuantity(
         "total energy",
         "SCALAR",
         vardb->mapVariableAndContextToIndex(
-           d_variable_total_energy,
+           s_variable_total_energy,
            d_plot_context));
     */
     
@@ -10012,7 +10017,7 @@ FlowModelFiveEqnAllaire::registerPlotQuantities(
             volume_fraction_name,
             "SCALAR",
             vardb->mapVariableAndContextToIndex(
-               d_variable_volume_fraction,
+               s_variable_volume_fraction,
                d_plot_context),
             si);
     }
@@ -10699,7 +10704,7 @@ FlowModelFiveEqnAllaire::getGlobalCellDataPartialDensity()
     // Get the cell data of the registered variable partial density.
     boost::shared_ptr<pdat::CellData<double> > data_partial_density(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(d_variable_partial_density, getDataContext())));
+            d_patch->getPatchData(s_variable_partial_density, getDataContext())));
     
     return data_partial_density;
 }
@@ -10714,7 +10719,7 @@ FlowModelFiveEqnAllaire::getGlobalCellDataMomentum()
     // Get the cell data of the registered variable momentum.
     boost::shared_ptr<pdat::CellData<double> > data_momentum(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(d_variable_momentum, getDataContext())));
+            d_patch->getPatchData(s_variable_momentum, getDataContext())));
     
     return data_momentum;
 }
@@ -10729,7 +10734,7 @@ FlowModelFiveEqnAllaire::getGlobalCellDataTotalEnergy()
     // Get the cell data of the registered variable total energy.
     boost::shared_ptr<pdat::CellData<double> > data_total_energy(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(d_variable_total_energy, getDataContext())));
+            d_patch->getPatchData(s_variable_total_energy, getDataContext())));
     
     return data_total_energy;
 }
@@ -10744,7 +10749,7 @@ FlowModelFiveEqnAllaire::getGlobalCellDataVolumeFraction()
     // Get the cell data of the registered variable volume fraction.
     boost::shared_ptr<pdat::CellData<double> > data_volume_fraction(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(d_variable_volume_fraction, getDataContext())));
+            d_patch->getPatchData(s_variable_volume_fraction, getDataContext())));
     
     return data_volume_fraction;
 }
