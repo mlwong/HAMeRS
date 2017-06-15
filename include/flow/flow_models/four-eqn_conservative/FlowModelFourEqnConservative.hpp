@@ -121,7 +121,8 @@ class FlowModelFourEqnConservative: public FlowModel
          * Compute global cell data of different registered derived variables with the registered data context.
          */
         void
-        computeGlobalDerivedCellData();
+        computeGlobalDerivedCellData(
+            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
         
         /*
          * Get the global cell data of one cell variable in the registered patch.
@@ -369,83 +370,96 @@ class FlowModelFourEqnConservative: public FlowModel
         /*
          * Compute the global cell data of density in the registered patch.
          */
-        void computeGlobalCellDataDensity();
+        void computeGlobalCellDataDensity(
+            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
         
         /*
          * Compute the global cell data of mass fraction with density in the registered patch.
          */
-        void computeGlobalCellDataMassFractionWithDensity();
+        void computeGlobalCellDataMassFractionWithDensity(
+            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
         
         /*
          * Compute the global cell data of velocity with density in the registered patch.
          */
-        void computeGlobalCellDataVelocityWithDensity();
+        void computeGlobalCellDataVelocityWithDensity(
+            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
         
         /*
          * Compute the global cell data of internal energy with density and velocity in the registered
          * patch.
          */
-        void computeGlobalCellDataInternalEnergyWithDensityAndVelocity();
+        void computeGlobalCellDataInternalEnergyWithDensityAndVelocity(
+            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
         
         /*
          * Compute the global cell data of pressure with density, mass fraction and internal energy in
          * the registered patch.
          */
-        void computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+        void computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy(
+            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
         
         /*
          * Compute the global cell data of sound speed with density, mass fraction and pressure in the
          * registered patch.
          */
-        void computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
+        void computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure(
+            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
         
         /*
          * Compute the global cell data of temperature with density, mass fraction and pressure in the
          * registered patch.
          */
-        void computeGlobalCellDataTemperatureWithDensityMassFractionAndPressure();
+        void computeGlobalCellDataTemperatureWithDensityMassFractionAndPressure(
+            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
         
         /*
          * Compute the global cell data of dilatation with density and velocity in the registered patch.
          */
-        void computeGlobalCellDataDilatationWithDensityAndVelocity();
+        void computeGlobalCellDataDilatationWithDensityAndVelocity(
+            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
         
         /*
          * Compute the global cell data of vorticity with density and velocity in the registered patch.
          */
-        void computeGlobalCellDataVorticityWithDensityAndVelocity();
+        void computeGlobalCellDataVorticityWithDensityAndVelocity(
+            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
         
         /*
          * Compute the global cell data of enstrophy with vorticity in the registered patch.
          */
-        void computeGlobalCellDataEnstrophyWithVorticity();
+        void computeGlobalCellDataEnstrophyWithVorticity(
+            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
         
         /*
          * Compute the global cell data of convective flux with velocity and pressure in the registered
          * patch.
          */
         void computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
-            DIRECTION::TYPE direction);
+            const DIRECTION::TYPE& direction,
+            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
         
         /*
          * Compute the global cell data of maximum wave speed with velocity and sound speed in the
          * registered patch.
          */
         void computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
-            DIRECTION::TYPE direction);
+            const DIRECTION::TYPE& direction,
+            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
         
         /*
          * Compute the global cell data of maximum diffusivity with density, mass fraction, pressure
          * and temperature in the registered patch.
          */
-        void computeGlobalCellDataMaxDiffusivityWithDensityMassFractionPressureAndTemperature();
+        void computeGlobalCellDataMaxDiffusivityWithDensityMassFractionPressureAndTemperature(
+            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
         
         /*
          * boost::shared_ptr to registered conservative variables.
          */
-        boost::shared_ptr<pdat::CellVariable<double> > d_variable_partial_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_variable_momentum;
-        boost::shared_ptr<pdat::CellVariable<double> > d_variable_total_energy;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_partial_density;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_momentum;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_total_energy;
         
         /*
          * Number of sub-ghost cells of derived cell data.

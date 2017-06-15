@@ -50,6 +50,16 @@ namespace RIEMANN_SOLVER
                 HLLC_HLL };
 }
 
+namespace COMPUTING_OPTION
+{
+    enum TYPE { ALL,
+                INTERIOR,
+                GHOST_X,
+                GHOST_Y,
+                GHOST_Z,
+                GHOST_CORNERS };
+}
+
 class FlowModelStatisticsUtilities;
 
 /*
@@ -83,7 +93,7 @@ class FlowModel:
                 d_ghostcell_dims(hier::IntVector::getZero(d_dim)),
                 d_proj_var_conservative_averaging(AVERAGING::SIMPLE),
                 d_proj_var_primitive_averaging(AVERAGING::SIMPLE),
-                d_diffusive_flux_var_registered(false)
+                d_global_derived_cell_data_computed(false)
         {
             NULL_USE(flow_model_db);
         }
@@ -252,7 +262,8 @@ class FlowModel:
          * Compute global cell data of different registered derived variables with the registered data context.
          */
         virtual void
-        computeGlobalDerivedCellData() = 0;
+        computeGlobalDerivedCellData(
+            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL) = 0;
         
         /*
          * Get the global cell data of one cell variable in the registered patch.
@@ -592,9 +603,9 @@ class FlowModel:
         AVERAGING::TYPE d_proj_var_primitive_averaging;
         
         /*
-         * Properties of the diffusive fluxes.
+         * Whether all or part of global derived cell data is computed.
          */
-        bool d_diffusive_flux_var_registered;
+        bool d_global_derived_cell_data_computed;
         
         /*
          * boost::shared_ptr to the plotting context.

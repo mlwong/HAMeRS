@@ -3,6 +3,11 @@
 #include "flow/flow_models/five-eqn_Allaire/FlowModelBoundaryUtilitiesFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelStatisticsUtilitiesFiveEqnAllaire.hpp"
 
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelFiveEqnAllaire::s_variable_partial_density;
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelFiveEqnAllaire::s_variable_momentum;
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelFiveEqnAllaire::s_variable_total_energy;
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelFiveEqnAllaire::s_variable_volume_fraction;
+
 FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
     const std::string& object_name,
     const tbox::Dimension& dim,
@@ -104,16 +109,16 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
      * Initialize the conservative variables.
      */
     
-    d_variable_partial_density = boost::shared_ptr<pdat::CellVariable<double> > (
+    s_variable_partial_density = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "partial density", d_num_species));
     
-    d_variable_momentum = boost::shared_ptr<pdat::CellVariable<double> > (
+    s_variable_momentum = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "momentum", d_dim.getValue()));
     
-    d_variable_total_energy = boost::shared_ptr<pdat::CellVariable<double> > (
+    s_variable_total_energy = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "total energy", 1));
     
-    d_variable_volume_fraction = boost::shared_ptr<pdat::CellVariable<double> > (
+    s_variable_volume_fraction = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "volume fraction", d_num_species));
     
     /*
@@ -394,7 +399,7 @@ FlowModelFiveEqnAllaire::registerConservativeVariables(
     const hier::IntVector& num_ghosts_intermediate)
 {
     integrator->registerVariable(
-        d_variable_partial_density,
+        s_variable_partial_density,
         num_ghosts,
         num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::TIME_DEP,
@@ -403,7 +408,7 @@ FlowModelFiveEqnAllaire::registerConservativeVariables(
         "CONSERVATIVE_LINEAR_REFINE");
     
     integrator->registerVariable(
-        d_variable_momentum,
+        s_variable_momentum,
         num_ghosts,
         num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::TIME_DEP,
@@ -412,7 +417,7 @@ FlowModelFiveEqnAllaire::registerConservativeVariables(
         "CONSERVATIVE_LINEAR_REFINE");
     
     integrator->registerVariable(
-        d_variable_total_energy,
+        s_variable_total_energy,
         num_ghosts,
         num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::TIME_DEP,
@@ -421,7 +426,7 @@ FlowModelFiveEqnAllaire::registerConservativeVariables(
         "CONSERVATIVE_LINEAR_REFINE");
     
     integrator->registerVariable(
-        d_variable_volume_fraction,
+        s_variable_volume_fraction,
         num_ghosts,
         num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::TIME_DEP,
@@ -532,10 +537,10 @@ FlowModelFiveEqnAllaire::getConservativeVariables()
     std::vector<boost::shared_ptr<pdat::CellVariable<double> > > conservative_variables;
     conservative_variables.reserve(4);
     
-    conservative_variables.push_back(d_variable_partial_density);
-    conservative_variables.push_back(d_variable_momentum);
-    conservative_variables.push_back(d_variable_total_energy);
-    conservative_variables.push_back(d_variable_volume_fraction);
+    conservative_variables.push_back(s_variable_partial_density);
+    conservative_variables.push_back(s_variable_momentum);
+    conservative_variables.push_back(s_variable_total_energy);
+    conservative_variables.push_back(s_variable_volume_fraction);
     
     return conservative_variables;
 }
@@ -568,7 +573,7 @@ FlowModelFiveEqnAllaire::registerPatchWithDataContext(
     
     boost::shared_ptr<pdat::CellData<double> > data_partial_density(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(d_variable_partial_density, getDataContext())));
+            d_patch->getPatchData(s_variable_partial_density, getDataContext())));
     
     d_num_ghosts = data_partial_density->getGhostCellWidth();
     
@@ -601,6 +606,15 @@ FlowModelFiveEqnAllaire::registerDerivedCellVariable(
         TBOX_ERROR(d_object_name
             << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
             << "No patch is registered yet."
+            << std::endl);
+    }
+    
+    // Check whether all or part of derived cell data is already computed.
+    if (d_global_derived_cell_data_computed)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelFiveEqnAllaire::registerDerivedCellVariable()\n"
+            << "Global derived cell data is already computed."
             << std::endl);
     }
     
@@ -777,6 +791,16 @@ FlowModelFiveEqnAllaire::registerDerivedVariablesForCharacteristicProjectionOfCo
             << std::endl);
     }
     
+    // Check whether all or part of derived cell data is already computed.
+    if (d_global_derived_cell_data_computed)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelFiveEqnAllaire::"
+            << "registerDerivedVariablesForCharacteristicProjectionOfConservativeVariables()\n"
+            << "Global derived cell data is already computed."
+            << std::endl);
+    }
+    
     NULL_USE(num_subghosts);
     
     d_proj_var_conservative_averaging = averaging;
@@ -802,6 +826,16 @@ FlowModelFiveEqnAllaire::registerDerivedVariablesForCharacteristicProjectionOfPr
             << std::endl);
     }
     
+    // Check whether all or part of derived cell data is already computed.
+    if (d_global_derived_cell_data_computed)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelFiveEqnAllaire::"
+            << "registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables()\n"
+            << "Global derived cell data is already computed."
+            << std::endl);
+    }
+    
     setNumberOfSubGhosts(
         num_subghosts,
         "SOUND_SPEED",
@@ -817,6 +851,26 @@ void
 FlowModelFiveEqnAllaire::registerDiffusiveFlux(
     const hier::IntVector& num_subghosts)
 {
+    // Check whether a patch is already registered.
+    if (!d_patch)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelFiveEqnAllaire::"
+            << "registerDiffusiveFlux()\n"
+            << "No patch is registered yet."
+            << std::endl);
+    }
+    
+    // Check whether all or part of derived cell data is already computed.
+    if (d_global_derived_cell_data_computed)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelFiveEqnAllaire::"
+            << "registerDiffusiveFlux()\n"
+            << "Global derived cell data is already computed."
+            << std::endl);
+    }
+    
     setNumberOfSubGhosts(
         num_subghosts,
         "MASS_FRACTION",
@@ -845,8 +899,6 @@ FlowModelFiveEqnAllaire::registerDiffusiveFlux(
     
     d_num_subghosts_diffusivities = 
         hier::IntVector::min(d_num_subghosts_diffusivities, d_num_subghosts_temperature);
-    
-    d_diffusive_flux_var_registered = true;
 }
 
 
@@ -949,6 +1001,8 @@ void FlowModelFiveEqnAllaire::unregisterPatch()
     d_data_max_diffusivity.reset();
     d_data_diffusivities.reset();
     
+    d_global_derived_cell_data_computed = false;
+    
     clearDataContext();
 }
 
@@ -957,7 +1011,8 @@ void FlowModelFiveEqnAllaire::unregisterPatch()
  * Compute global cell data of different registered derived variables with the registered data context.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
+FlowModelFiveEqnAllaire::computeGlobalDerivedCellData(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     // Check whether a patch is already registered.
     if (!d_patch)
@@ -971,14 +1026,18 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     /*
      * Set the boxes and their dimensions for the derived cell variables.
      */
-    setGhostBoxesAndDimensionsDerivedCellVariables();
+    if (!d_global_derived_cell_data_computed)
+    {
+        setGhostBoxesAndDimensionsDerivedCellVariables();
+    }
     
     // Compute the total density cell data.
     if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
     {
         if (!d_data_density)
         {
-            computeGlobalCellDataDensity();
+            computeGlobalCellDataDensity(
+                computing_option);
         }
     }
     
@@ -987,7 +1046,8 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_mass_fraction)
         {
-            computeGlobalCellDataMassFractionWithDensity();
+            computeGlobalCellDataMassFractionWithDensity(
+                computing_option);
         }
     }
     
@@ -996,7 +1056,8 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_velocity)
         {
-            computeGlobalCellDataVelocityWithDensity();
+            computeGlobalCellDataVelocityWithDensity(
+                computing_option);
         }
     }
     
@@ -1005,7 +1066,8 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_internal_energy)
         {
-            computeGlobalCellDataInternalEnergyWithDensityAndVelocity();
+            computeGlobalCellDataInternalEnergyWithDensityAndVelocity(
+                computing_option);
         }
     }
     
@@ -1014,7 +1076,8 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+            computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy(
+                computing_option);
         }
     }
     
@@ -1023,7 +1086,8 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_sound_speed)
         {
-            computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
+            computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure(
+                computing_option);
         }
     }
     
@@ -1032,7 +1096,8 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_temperature)
         {
-            computeGlobalCellDataTemperatureWithPressure();
+            computeGlobalCellDataTemperatureWithPressure(
+                computing_option);
         }
     }
     
@@ -1041,7 +1106,8 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_dilatation)
         {
-            computeGlobalCellDataDilatationWithDensityAndVelocity();
+            computeGlobalCellDataDilatationWithDensityAndVelocity(
+                computing_option);
         }
     }
     
@@ -1050,7 +1116,8 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_vorticity)
         {
-            computeGlobalCellDataVorticityWithDensityAndVelocity();
+            computeGlobalCellDataVorticityWithDensityAndVelocity(
+                computing_option);
         }
     }
     
@@ -1059,7 +1126,8 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_enstrophy)
         {
-            computeGlobalCellDataEnstrophyWithVorticity();
+            computeGlobalCellDataEnstrophyWithVorticity(
+                computing_option);
         }
     }
     
@@ -1068,7 +1136,9 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_convective_flux_x)
         {
-            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(DIRECTION::X_DIRECTION);
+            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
+                DIRECTION::X_DIRECTION,
+                computing_option);
         }
     }
     
@@ -1077,7 +1147,9 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_convective_flux_y)
         {
-            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(DIRECTION::Y_DIRECTION);
+            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
+                DIRECTION::Y_DIRECTION,
+                computing_option);
         }
     }
     
@@ -1086,7 +1158,9 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_convective_flux_z)
         {
-            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(DIRECTION::Z_DIRECTION);
+            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
+                DIRECTION::Z_DIRECTION,
+                computing_option);
         }
     }
     
@@ -1095,7 +1169,9 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_max_wave_speed_x)
         {
-            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(DIRECTION::X_DIRECTION);
+            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
+                DIRECTION::X_DIRECTION,
+                computing_option);
         }
     }
     
@@ -1104,7 +1180,9 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_max_wave_speed_y)
         {
-            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(DIRECTION::Y_DIRECTION);
+            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
+                DIRECTION::Y_DIRECTION,
+                computing_option);
         }
     }
     
@@ -1113,7 +1191,9 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_max_wave_speed_z)
         {
-            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(DIRECTION::Z_DIRECTION);
+            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
+                DIRECTION::Z_DIRECTION,
+                computing_option);
         }
     }
     
@@ -1122,9 +1202,12 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData()
     {
         if (!d_data_max_diffusivity)
         {
-            computeGlobalCellDataMaxDiffusivityWithDensityMassFractionPressureAndTemperature();
+            computeGlobalCellDataMaxDiffusivityWithDensityMassFractionPressureAndTemperature(
+                computing_option);
         }
     }
+    
+    d_global_derived_cell_data_computed = true;
 }
 
 
@@ -1540,12 +1623,18 @@ FlowModelFiveEqnAllaire::getGlobalCellDataPrimitiveVariables()
     global_cell_data.push_back(getGlobalCellDataPartialDensity());
     if (!d_data_velocity)
     {
-        computeGlobalCellDataVelocityWithDensity();
+        TBOX_ERROR(d_object_name
+            << ": FlowModelFiveEqnAllaire::getGlobalCellDataPrimitiveVariables()\n"
+            << "Cell data of 'VELOCITY' is not registered/computed yet."
+            << std::endl);
     }
     global_cell_data.push_back(d_data_velocity);
     if (!d_data_pressure)
     {
-        computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+        TBOX_ERROR(d_object_name
+            << ": FlowModelFiveEqnAllaire::getGlobalCellDataPrimitiveVariables()\n"
+            << "Cell data of 'PRESSURE' is not registered/computed yet."
+            << std::endl);
     }
     global_cell_data.push_back(d_data_pressure);
     global_cell_data.push_back(getGlobalCellDataVolumeFraction());
@@ -7454,6 +7543,8 @@ FlowModelFiveEqnAllaire::getDiffusiveFluxVariablesForDerivative(
             }
         }
     }
+    
+    d_global_derived_cell_data_computed = true;
 }
 
 
@@ -8880,6 +8971,8 @@ FlowModelFiveEqnAllaire::getDiffusiveFluxDiffusivities(
             }
         }
     }
+    
+    d_global_derived_cell_data_computed = true;
 }
 
 
@@ -8920,7 +9013,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
     {
         boost::shared_ptr<pdat::CellData<double> > data_partial_density(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_density, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_partial_density);
@@ -9019,19 +9112,19 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
     {
         boost::shared_ptr<pdat::CellData<double> > data_partial_density(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_density, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_momentum(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_momentum, d_plot_context)));
+                patch.getPatchData(s_variable_momentum, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_total_energy(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_total_energy, d_plot_context)));
+                patch.getPatchData(s_variable_total_energy, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_volume_fraction(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_volume_fraction, d_plot_context)));
+                patch.getPatchData(s_variable_volume_fraction, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_partial_density);
@@ -9314,19 +9407,19 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
     {
         boost::shared_ptr<pdat::CellData<double> > data_partial_density(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_density, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_momentum(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_momentum, d_plot_context)));
+                patch.getPatchData(s_variable_momentum, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_total_energy(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_total_energy, d_plot_context)));
+                patch.getPatchData(s_variable_total_energy, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_volume_fraction(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_volume_fraction, d_plot_context)));
+                patch.getPatchData(s_variable_volume_fraction, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_partial_density);
@@ -9630,11 +9723,11 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
     {
         boost::shared_ptr<pdat::CellData<double> > data_partial_density(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_density, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_momentum(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_momentum, d_plot_context)));
+                patch.getPatchData(s_variable_momentum, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_partial_density);
@@ -9747,7 +9840,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
         
         boost::shared_ptr<pdat::CellData<double> > data_partial_density(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_density, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_partial_density);
@@ -9895,7 +9988,7 @@ FlowModelFiveEqnAllaire::registerPlotQuantities(
             partial_density_name,
             "SCALAR",
             vardb->mapVariableAndContextToIndex(
-                d_variable_partial_density,
+                s_variable_partial_density,
                 d_plot_context),
             si);
     }
@@ -9904,14 +9997,14 @@ FlowModelFiveEqnAllaire::registerPlotQuantities(
         "momentum",
         "VECTOR",
         vardb->mapVariableAndContextToIndex(
-           d_variable_momentum,
+           s_variable_momentum,
            d_plot_context));
     
     visit_writer->registerPlotQuantity(
         "total energy",
         "SCALAR",
         vardb->mapVariableAndContextToIndex(
-           d_variable_total_energy,
+           s_variable_total_energy,
            d_plot_context));
     */
     
@@ -9924,7 +10017,7 @@ FlowModelFiveEqnAllaire::registerPlotQuantities(
             volume_fraction_name,
             "SCALAR",
             vardb->mapVariableAndContextToIndex(
-               d_variable_volume_fraction,
+               s_variable_volume_fraction,
                d_plot_context),
             si);
     }
@@ -10611,7 +10704,7 @@ FlowModelFiveEqnAllaire::getGlobalCellDataPartialDensity()
     // Get the cell data of the registered variable partial density.
     boost::shared_ptr<pdat::CellData<double> > data_partial_density(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(d_variable_partial_density, getDataContext())));
+            d_patch->getPatchData(s_variable_partial_density, getDataContext())));
     
     return data_partial_density;
 }
@@ -10626,7 +10719,7 @@ FlowModelFiveEqnAllaire::getGlobalCellDataMomentum()
     // Get the cell data of the registered variable momentum.
     boost::shared_ptr<pdat::CellData<double> > data_momentum(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(d_variable_momentum, getDataContext())));
+            d_patch->getPatchData(s_variable_momentum, getDataContext())));
     
     return data_momentum;
 }
@@ -10641,7 +10734,7 @@ FlowModelFiveEqnAllaire::getGlobalCellDataTotalEnergy()
     // Get the cell data of the registered variable total energy.
     boost::shared_ptr<pdat::CellData<double> > data_total_energy(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(d_variable_total_energy, getDataContext())));
+            d_patch->getPatchData(s_variable_total_energy, getDataContext())));
     
     return data_total_energy;
 }
@@ -10656,7 +10749,7 @@ FlowModelFiveEqnAllaire::getGlobalCellDataVolumeFraction()
     // Get the cell data of the registered variable volume fraction.
     boost::shared_ptr<pdat::CellData<double> > data_volume_fraction(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(d_variable_volume_fraction, getDataContext())));
+            d_patch->getPatchData(s_variable_volume_fraction, getDataContext())));
     
     return data_volume_fraction;
 }
@@ -10666,7 +10759,8 @@ FlowModelFiveEqnAllaire::getGlobalCellDataVolumeFraction()
  * Compute the global cell data of density in the registered patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataDensity()
+FlowModelFiveEqnAllaire::computeGlobalCellDataDensity(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
     {
@@ -10794,7 +10888,8 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataDensity()
  * Compute the global cell data of mass fraction with density in the registered patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataMassFractionWithDensity()
+FlowModelFiveEqnAllaire::computeGlobalCellDataMassFractionWithDensity(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
     {
@@ -10923,7 +11018,8 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMassFractionWithDensity()
  * Compute the global cell data of velocity with density in the registered patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataVelocityWithDensity()
+FlowModelFiveEqnAllaire::computeGlobalCellDataVelocityWithDensity(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
     {
@@ -11059,7 +11155,8 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataVelocityWithDensity()
  * patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataInternalEnergyWithDensityAndVelocity()
+FlowModelFiveEqnAllaire::computeGlobalCellDataInternalEnergyWithDensityAndVelocity(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_internal_energy > -hier::IntVector::getOne(d_dim))
     {
@@ -11202,7 +11299,8 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataInternalEnergyWithDensityAndVeloci
  * the registered patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy()
+FlowModelFiveEqnAllaire::computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
     {
@@ -11414,7 +11512,8 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataPressureWithDensityMassFractionAnd
  * registered patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure()
+FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
     {
@@ -11625,7 +11724,8 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityMassFractionA
  * Compute the global cell data of temperature with pressure in the registered patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataTemperatureWithPressure()
+FlowModelFiveEqnAllaire::computeGlobalCellDataTemperatureWithPressure(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_temperature > -hier::IntVector::getOne(d_dim))
     {
@@ -11990,7 +12090,8 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataTemperatureWithPressure()
  * Compute the global cell data of dilatation with density and velocity in the registered patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataDilatationWithDensityAndVelocity()
+FlowModelFiveEqnAllaire::computeGlobalCellDataDilatationWithDensityAndVelocity(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_dilatation > -hier::IntVector::getOne(d_dim))
     {
@@ -12351,7 +12452,8 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataDilatationWithDensityAndVelocity()
  * Compute the global cell data of vorticity with density and velocity in the registered patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataVorticityWithDensityAndVelocity()
+FlowModelFiveEqnAllaire::computeGlobalCellDataVorticityWithDensityAndVelocity(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_vorticity > -hier::IntVector::getOne(d_dim))
     {
@@ -12689,7 +12791,8 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataVorticityWithDensityAndVelocity()
  * Compute the global cell data of enstrophy with vorticity in the registered patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataEnstrophyWithVorticity()
+FlowModelFiveEqnAllaire::computeGlobalCellDataEnstrophyWithVorticity(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_enstrophy > -hier::IntVector::getOne(d_dim))
     {
@@ -12793,7 +12896,8 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataEnstrophyWithVorticity()
  */
 void
 FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
-    DIRECTION::TYPE direction)
+    const DIRECTION::TYPE& direction,
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (direction == DIRECTION::X_DIRECTION)
     {
@@ -13312,7 +13416,8 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
  */
 void
 FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
-    DIRECTION::TYPE direction)
+    const DIRECTION::TYPE& direction,
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (direction == DIRECTION::X_DIRECTION)
     {
@@ -13610,7 +13715,8 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSp
  * and temperature in the registered patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataMaxDiffusivityWithDensityMassFractionPressureAndTemperature()
+FlowModelFiveEqnAllaire::computeGlobalCellDataMaxDiffusivityWithDensityMassFractionPressureAndTemperature(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (!d_equation_of_shear_viscosity_mixing_rules ||
         !d_equation_of_bulk_viscosity_mixing_rules)
