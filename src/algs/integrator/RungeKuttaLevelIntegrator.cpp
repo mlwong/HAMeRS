@@ -1516,6 +1516,8 @@ RungeKuttaLevelIntegrator::advanceLevel(
         fill_schedule = d_bdry_sched_advance[level_number];
     }
     
+    d_patch_strategy->setDataContext(d_scratch);
+    
     if (regrid_advance)
     {
         t_error_bdry_fill_comm->start();
@@ -1536,6 +1538,7 @@ RungeKuttaLevelIntegrator::advanceLevel(
         t_advance_bdry_fill_comm->stop();
     }
     
+    d_patch_strategy->clearDataContext();
     fill_schedule.reset();
     
     preprocessFluxAndSourceData(
@@ -1627,11 +1630,11 @@ RungeKuttaLevelIntegrator::advanceLevel(
         }
     }
     
-    d_patch_strategy->setDataContext(d_scratch);
-    
     const tbox::SAMRAI_MPI& mpi(hierarchy->getMPI());
     for (int sn = 0; sn < d_number_steps; sn++)
     {
+        d_patch_strategy->setDataContext(d_intermediate[sn]);
+        
         // Copy scratch data to intermediate data corresponding to current step.
         copyTimeDependentData(level, d_scratch, d_intermediate[sn]);
         
@@ -1669,6 +1672,8 @@ RungeKuttaLevelIntegrator::advanceLevel(
             }
         }
         
+        d_patch_strategy->setDataContext(d_scratch);
+            
         for (hier::PatchLevel::iterator ip(level->begin());
              ip != level->end();
              ip++)
