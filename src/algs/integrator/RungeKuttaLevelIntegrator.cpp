@@ -1516,8 +1516,6 @@ RungeKuttaLevelIntegrator::advanceLevel(
         fill_schedule = d_bdry_sched_advance[level_number];
     }
     
-    d_patch_strategy->setDataContext(d_scratch);
-    
     if (regrid_advance)
     {
         t_error_bdry_fill_comm->start();
@@ -1538,7 +1536,6 @@ RungeKuttaLevelIntegrator::advanceLevel(
         t_advance_bdry_fill_comm->stop();
     }
     
-    d_patch_strategy->clearDataContext();
     fill_schedule.reset();
     
     preprocessFluxAndSourceData(
@@ -1575,8 +1572,6 @@ RungeKuttaLevelIntegrator::advanceLevel(
         regrid_advance);
     
     t_patch_num_kernel->stop();
-    
-    d_patch_strategy->setDataContext(d_scratch);
     
     for (hier::PatchLevel::iterator ip(level->begin());
          ip != level->end();
@@ -1632,11 +1627,11 @@ RungeKuttaLevelIntegrator::advanceLevel(
         }
     }
     
+    d_patch_strategy->setDataContext(d_scratch);
+    
     const tbox::SAMRAI_MPI& mpi(hierarchy->getMPI());
     for (int sn = 0; sn < d_number_steps; sn++)
     {
-        d_patch_strategy->setDataContext(d_intermediate[sn]);
-        
         // Copy scratch data to intermediate data corresponding to current step.
         copyTimeDependentData(level, d_scratch, d_intermediate[sn]);
         
@@ -1680,8 +1675,6 @@ RungeKuttaLevelIntegrator::advanceLevel(
         {
             const boost::shared_ptr<hier::Patch>& patch = *ip;
             
-            d_patch_strategy->setDataContext(d_intermediate[sn]);
-            
             t_patch_num_kernel->start();
             
             // Compute flux corresponding to this sub-step.
@@ -1689,13 +1682,8 @@ RungeKuttaLevelIntegrator::advanceLevel(
                 *patch,
                 current_time,
                 dt,
-                sn);
-            
-            t_patch_num_kernel->stop();
-            
-            d_patch_strategy->setDataContext(d_scratch);
-            
-            t_patch_num_kernel->start();
+                sn,
+                d_intermediate[sn]);
             
             // Advance a Runge-Kutta sub-step.
             d_patch_strategy->advanceSingleStepOnPatch(
