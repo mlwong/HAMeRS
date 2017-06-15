@@ -804,7 +804,8 @@ Euler::computeFluxesAndSourcesOnPatch(
     hier::Patch& patch,
     const double time,
     const double dt,
-    const int RK_step_number)
+    const int RK_step_number,
+    const boost::shared_ptr<hier::VariableContext>& data_context)
 {
     t_compute_fluxes_sources->start();
     
@@ -812,24 +813,51 @@ Euler::computeFluxesAndSourcesOnPatch(
      * Set zero for the source.
      */
     
-    boost::shared_ptr<pdat::CellData<double> > data_source(
-        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            patch.getPatchData(d_variable_source, getDataContext())));
-    
-    data_source->fillAll(0.0);
+    if (data_context)
+    {
+        boost::shared_ptr<pdat::CellData<double> > data_source(
+            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                patch.getPatchData(d_variable_source, data_context)));
+        
+        data_source->fillAll(0.0);
+    }
+    else
+    {
+        boost::shared_ptr<pdat::CellData<double> > data_source(
+            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                patch.getPatchData(d_variable_source, getDataContext())));
+        
+        data_source->fillAll(0.0);
+    }
     
     /*
      * Compute the convective flux and source due to splitting of convective term.
      */
     
-    d_convective_flux_reconstructor->computeConvectiveFluxAndSourceOnPatch(
-        patch,
-        d_variable_convective_flux,
-        d_variable_source,
-        getDataContext(),
-        time,
-        dt,
-        RK_step_number);
+    if (data_context)
+    {
+        d_convective_flux_reconstructor->
+            computeConvectiveFluxAndSourceOnPatch(
+                patch,
+                d_variable_convective_flux,
+                d_variable_source,
+                data_context,
+                time,
+                dt,
+                RK_step_number);
+    }
+    else
+    {
+        d_convective_flux_reconstructor->
+            computeConvectiveFluxAndSourceOnPatch(
+                patch,
+                d_variable_convective_flux,
+                d_variable_source,
+                getDataContext(),
+                time,
+                dt,
+                RK_step_number);
+    }
     
     t_compute_fluxes_sources->stop();
 }
