@@ -2037,7 +2037,181 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                 }
                 else if (d_dim == tbox::Dimension(3))
                 {
-                    if (d_project_name.find("3D Poggi's RMI 1mm smooth interface") != std::string::npos)
+                    if (d_project_name == "3D binary diffusion in x-direction")
+                    {
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Please provide only two-species for the problem"
+                                << " '3D binary diffustion'."
+                                << std::endl);
+                        }
+                        
+                        // Characteristic length of the problem.
+                        const double K = 0.1*0.1;
+                        
+                        double* rho_Y_1  = partial_density->getPointer(0);
+                        double* rho_Y_2  = partial_density->getPointer(1);
+                        double* rho_u    = momentum->getPointer(0);
+                        double* rho_v    = momentum->getPointer(1);
+                        double* rho_w    = momentum->getPointer(2);
+                        double* E        = total_energy->getPointer(0);
+                        
+                        // Initial conditions of mixture.
+                        const double rho = 1.0;
+                        const double u   = 0.0;
+                        const double v   = 0.0;
+                        const double w   = 0.0;
+                        const double p   = 1.0;
+                        
+                        for (int k = 0; k < patch_dims[2]; k++)
+                        {
+                            for (int j = 0; j < patch_dims[1]; j++)
+                            {
+                                for (int i = 0; i < patch_dims[0]; i++)
+                                {
+                                    // Compute index into linear data array.
+                                    int idx_cell = i + j*patch_dims[0] + k*patch_dims[0]*patch_dims[1];
+                                    
+                                    // Compute the coordinates.
+                                    double x[3];
+                                    x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                    x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                    x[2] = patch_xlo[2] + (k + 0.5)*dx[2];
+                                    
+                                    const double Y_1 = exp(-x[0]*x[0]/K);
+                                    const double Y_2 = 1.0 - Y_1;
+                                    
+                                    const double gamma = 1.4;
+                                    
+                                    rho_Y_1[idx_cell] = rho*Y_1;
+                                    rho_Y_2[idx_cell] = rho*Y_2;
+                                    rho_u[idx_cell]   = rho*u;
+                                    rho_v[idx_cell]   = rho*v;
+                                    rho_w[idx_cell]   = rho*w;
+                                    E[idx_cell]       = p/(gamma - 1.0) + 0.5*rho*(u*u + v*v + w*w);
+                                }
+                            }
+                        }
+                    }
+                    else if (d_project_name == "3D binary diffusion in y-direction")
+                    {
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Please provide only two-species for the problem"
+                                << " '3D binary diffustion'."
+                                << std::endl);
+                        }
+                        
+                        // Characteristic length of the problem.
+                        const double K = 0.1*0.1;
+                        
+                        double* rho_Y_1  = partial_density->getPointer(0);
+                        double* rho_Y_2  = partial_density->getPointer(1);
+                        double* rho_u    = momentum->getPointer(0);
+                        double* rho_v    = momentum->getPointer(1);
+                        double* rho_w    = momentum->getPointer(2);
+                        double* E        = total_energy->getPointer(0);
+                        
+                        // Initial conditions of mixture.
+                        const double rho = 1.0;
+                        const double u   = 0.0;
+                        const double v   = 0.0;
+                        const double w   = 0.0;
+                        const double p   = 1.0;
+                        
+                        for (int k = 0; k < patch_dims[2]; k++)
+                        {
+                            for (int j = 0; j < patch_dims[1]; j++)
+                            {
+                                for (int i = 0; i < patch_dims[0]; i++)
+                                {
+                                    // Compute index into linear data array.
+                                    int idx_cell = i + j*patch_dims[0] + k*patch_dims[0]*patch_dims[1];
+                                    
+                                    // Compute the coordinates.
+                                    double x[3];
+                                    x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                    x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                    x[2] = patch_xlo[2] + (k + 0.5)*dx[2];
+                                    
+                                    const double Y_1 = exp(-x[1]*x[1]/K);
+                                    const double Y_2 = 1.0 - Y_1;
+                                    
+                                    const double gamma = 1.4;
+                                    
+                                    rho_Y_1[idx_cell] = rho*Y_1;
+                                    rho_Y_2[idx_cell] = rho*Y_2;
+                                    rho_u[idx_cell]   = rho*u;
+                                    rho_v[idx_cell]   = rho*v;
+                                    rho_w[idx_cell]   = rho*w;
+                                    E[idx_cell]       = p/(gamma - 1.0) + 0.5*rho*(u*u + v*v + w*w);
+                                }
+                            }
+                        }
+                    }
+                    else if (d_project_name == "3D binary diffusion in z-direction")
+                    {
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Please provide only two-species for the problem"
+                                << " '3D binary diffustion'."
+                                << std::endl);
+                        }
+                        
+                        // Characteristic length of the problem.
+                        const double K = 0.1*0.1;
+                        
+                        double* rho_Y_1  = partial_density->getPointer(0);
+                        double* rho_Y_2  = partial_density->getPointer(1);
+                        double* rho_u    = momentum->getPointer(0);
+                        double* rho_v    = momentum->getPointer(1);
+                        double* rho_w    = momentum->getPointer(2);
+                        double* E        = total_energy->getPointer(0);
+                        
+                        // Initial conditions of mixture.
+                        const double rho = 1.0;
+                        const double u   = 0.0;
+                        const double v   = 0.0;
+                        const double w   = 0.0;
+                        const double p   = 1.0;
+                        
+                        for (int k = 0; k < patch_dims[2]; k++)
+                        {
+                            for (int j = 0; j < patch_dims[1]; j++)
+                            {
+                                for (int i = 0; i < patch_dims[0]; i++)
+                                {
+                                    // Compute index into linear data array.
+                                    int idx_cell = i + j*patch_dims[0] + k*patch_dims[0]*patch_dims[1];
+                                    
+                                    // Compute the coordinates.
+                                    double x[3];
+                                    x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                    x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                    x[2] = patch_xlo[2] + (k + 0.5)*dx[2];
+                                    
+                                    const double Y_1 = exp(-x[2]*x[2]/K);
+                                    const double Y_2 = 1.0 - Y_1;
+                                    
+                                    const double gamma = 1.4;
+                                    
+                                    rho_Y_1[idx_cell] = rho*Y_1;
+                                    rho_Y_2[idx_cell] = rho*Y_2;
+                                    rho_u[idx_cell]   = rho*u;
+                                    rho_v[idx_cell]   = rho*v;
+                                    rho_w[idx_cell]   = rho*w;
+                                    E[idx_cell]       = p/(gamma - 1.0) + 0.5*rho*(u*u + v*v + w*w);
+                                }
+                            }
+                        }
+                    }
+                    else if (d_project_name.find("3D Poggi's RMI 1mm smooth interface") != std::string::npos)
                     {
                         if (d_num_species != 2)
                         {
