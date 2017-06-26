@@ -228,7 +228,7 @@ EquationOfStateIdealGas::getIsobaricPartialInternalEnergyPartialDensity(
 
 
 /*
- * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+ * Compute the density.
  */
 double
 EquationOfStateIdealGas::getDensity(

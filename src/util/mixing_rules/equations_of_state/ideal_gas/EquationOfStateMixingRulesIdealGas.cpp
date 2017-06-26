@@ -641,6 +641,50 @@ EquationOfStateMixingRulesIdealGas::getIsobaricSpecificHeatCapacity(
 
 
 /*
+ * Compute the density of mixture with isothermal and isobaric assumptions.
+ */
+double
+EquationOfStateMixingRulesIdealGas::getMixtureDensity(
+    const double* const pressure,
+    const double* const temperature,
+    const std::vector<const double*>& mass_fraction) const
+{
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
+                (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
+    TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
+                (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
+#endif
+    
+    // Get the mixture thermodynamic properties.
+    std::vector<double> mixture_thermo_properties;
+    std::vector<double*> mixture_thermo_properties_ptr;
+    std::vector<const double*> mixture_thermo_properties_const_ptr;
+    
+    const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
+    
+    mixture_thermo_properties.resize(num_thermo_properties);
+    mixture_thermo_properties_ptr.reserve(num_thermo_properties);
+    mixture_thermo_properties_const_ptr.reserve(num_thermo_properties);
+    
+    for (int ti = 0; ti < num_thermo_properties; ti++)
+    {
+        mixture_thermo_properties_ptr.push_back(&mixture_thermo_properties[ti]);
+        mixture_thermo_properties_const_ptr.push_back(&mixture_thermo_properties[ti]);
+    }
+    
+    getMixtureThermodynamicProperties(
+        mixture_thermo_properties_ptr,
+        mass_fraction);
+    
+    return d_equation_of_state->getDensity(
+        pressure,
+        temperature,
+        mixture_thermo_properties_const_ptr);
+}
+
+
+/*
  * Get the thermodynamic properties of a species.
  */
 void

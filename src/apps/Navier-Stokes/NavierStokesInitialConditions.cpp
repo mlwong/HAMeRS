@@ -487,7 +487,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                                     x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
                                     x[2] = patch_xlo[2] + (k + 0.5)*dx[2];
                                     
-                                    double phi = x[0]/H;
+                                    double phi = x[2]/H;
                                     double v = v_w*phi;
                                     
                                     rho[idx_cell] = rho_avg;
@@ -531,7 +531,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                                     x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
                                     x[2] = patch_xlo[2] + (k + 0.5)*dx[2];
                                     
-                                    double phi = x[1]/H;
+                                    double phi = x[0]/H;
                                     double w = w_w*phi;
                                     
                                     rho[idx_cell] = rho_avg;
@@ -591,14 +591,108 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                 }
                 else if (d_dim == tbox::Dimension(2))
                 {
-                    if (d_project_name == "2D binary diffusion in x-direction")
+                    if (d_project_name == "2D multi-species Couette flow in x-direction")
                     {
                         if (d_num_species != 2)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
                                 << "Please provide only two-species for the problem"
-                                << " '2D binary diffustion'."
+                                << " '2D multi-species Couette flow'."
+                                << std::endl);
+                        }
+                        
+                        const double gamma = 1.4;
+                        const double rho_avg = 1.159750086791891;
+                        const double u_w = 69.445;
+                        const double p_c = 1.0e5;
+                        
+                        double* rho_Y_1   = partial_density->getPointer(0);
+                        double* rho_Y_2   = partial_density->getPointer(1);
+                        double* rho_u     = momentum->getPointer(0);
+                        double* rho_v     = momentum->getPointer(1);
+                        double* E         = total_energy->getPointer(0);
+                        
+                        const double H = 1.0;
+                        
+                        for (int j = 0; j < patch_dims[1]; j++)
+                        {
+                            for (int i = 0; i < patch_dims[0]; i++)
+                            {
+                                // Compute index into linear data array.
+                                int idx_cell = i + j*patch_dims[0];
+                                
+                                // Compute the coordinates.
+                                double x[2];
+                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                
+                                double phi = x[1]/H;
+                                double u = u_w*phi;
+                                
+                                rho_Y_1[idx_cell] = 0.5*rho_avg;
+                                rho_Y_2[idx_cell] = 0.5*rho_avg;
+                                rho_u[idx_cell] = rho_avg*u;
+                                rho_v[idx_cell] = 0.0;
+                                E[idx_cell] = p_c/(gamma - 1.0) + 0.5*rho_avg*u*u;
+                            }
+                        }
+                    }
+                    else if (d_project_name == "2D multi-species Couette flow in y-direction")
+                    {
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Please provide only two-species for the problem"
+                                << " '2D multi-species Couette flow'."
+                                << std::endl);
+                        }
+                        
+                        const double gamma = 1.4;
+                        const double rho_avg = 1.159750086791891;
+                        const double v_w = 69.445;
+                        const double p_c = 1.0e5;
+                        
+                        double* rho_Y_1   = partial_density->getPointer(0);
+                        double* rho_Y_2   = partial_density->getPointer(1);
+                        double* rho_u     = momentum->getPointer(0);
+                        double* rho_v     = momentum->getPointer(1);
+                        double* E         = total_energy->getPointer(0);
+                        
+                        const double H = 1.0;
+                        
+                        for (int j = 0; j < patch_dims[1]; j++)
+                        {
+                            for (int i = 0; i < patch_dims[0]; i++)
+                            {
+                                // Compute index into linear data array.
+                                int idx_cell = i + j*patch_dims[0];
+                                
+                                // Compute the coordinates.
+                                double x[2];
+                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                
+                                double phi = x[0]/H;
+                                double v = v_w*phi;
+                                
+                                rho_Y_1[idx_cell] = 0.5*rho_avg;
+                                rho_Y_2[idx_cell] = 0.5*rho_avg;
+                                rho_u[idx_cell] = rho_avg*v;
+                                rho_v[idx_cell] = 0.0;
+                                E[idx_cell] = p_c/(gamma - 1.0) + 0.5*rho_avg*v*v;
+                            }
+                        }
+                    }
+                    else if (d_project_name == "2D binary mass diffusion in x-direction")
+                    {
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Please provide only two-species for the problem"
+                                << " '2D binary mass diffusion'."
                                 << std::endl);
                         }
                         
@@ -642,14 +736,14 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                             }
                         }
                     }
-                    else if (d_project_name == "2D binary diffusion in y-direction")
+                    else if (d_project_name == "2D binary mass diffusion in y-direction")
                     {
                         if (d_num_species != 2)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
                                 << "Please provide only two-species for the problem"
-                                << " '2D binary diffustion'."
+                                << " '2D binary mass diffusion'."
                                 << std::endl);
                         }
                         
@@ -2037,14 +2131,14 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                 }
                 else if (d_dim == tbox::Dimension(3))
                 {
-                    if (d_project_name == "3D binary diffusion in x-direction")
+                    if (d_project_name == "3D binary mass diffusion in x-direction")
                     {
                         if (d_num_species != 2)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
                                 << "Please provide only two-species for the problem"
-                                << " '3D binary diffustion'."
+                                << " '3D binary mass diffusion'."
                                 << std::endl);
                         }
                         
@@ -2095,14 +2189,14 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                             }
                         }
                     }
-                    else if (d_project_name == "3D binary diffusion in y-direction")
+                    else if (d_project_name == "3D binary mass diffusion in y-direction")
                     {
                         if (d_num_species != 2)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
                                 << "Please provide only two-species for the problem"
-                                << " '3D binary diffustion'."
+                                << " '3D binary mass diffusion'."
                                 << std::endl);
                         }
                         
@@ -2153,14 +2247,14 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                             }
                         }
                     }
-                    else if (d_project_name == "3D binary diffusion in z-direction")
+                    else if (d_project_name == "3D binary mass diffusion in z-direction")
                     {
                         if (d_num_species != 2)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
                                 << "Please provide only two-species for the problem"
-                                << " '3D binary diffustion'."
+                                << " '3D binary mass diffusion'."
                                 << std::endl);
                         }
                         

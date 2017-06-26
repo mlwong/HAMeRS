@@ -429,7 +429,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill1dNodeBoundaryData(
                                 &p_pivot,
                                 thermo_properties_ptr);
                         
-                        double T = -T_pivot;
+                        double T = T_pivot;
                         
                         double epsilon = d_equation_of_state_mixing_rules->getEquationOfState()->
                             getInternalEnergyFromTemperature(
@@ -817,7 +817,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dEdgeBoundaryData(
                                     &p_pivot,
                                     thermo_properties_ptr);
                             
-                            double T = -T_pivot;
+                            double T = T_pivot;
                             
                             double epsilon = d_equation_of_state_mixing_rules->getEquationOfState()->
                                 getInternalEnergyFromTemperature(
@@ -1273,7 +1273,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dNodeBoundaryData(
                                     &p_pivot,
                                     thermo_properties_ptr);
                             
-                            double T = -T_pivot;
+                            double T = T_pivot;
                             
                             double epsilon = d_equation_of_state_mixing_rules->getEquationOfState()->
                                 getInternalEnergyFromTemperature(
@@ -1381,7 +1381,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill2dNodeBoundaryData(
                                     &p_pivot,
                                     thermo_properties_ptr);
                             
-                            double T = -T_pivot;
+                            double T = T_pivot;
                             
                             double epsilon = d_equation_of_state_mixing_rules->getEquationOfState()->
                                 getInternalEnergyFromTemperature(
@@ -2017,7 +2017,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dFaceBoundaryData(
                                         &p_pivot,
                                         thermo_properties_ptr);
                                 
-                                double T = -T_pivot;
+                                double T = T_pivot;
                                 
                                 double epsilon = d_equation_of_state_mixing_rules->getEquationOfState()->
                                     getInternalEnergyFromTemperature(
@@ -2670,7 +2670,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dEdgeBoundaryData(
                                         &p_pivot,
                                         thermo_properties_ptr);
                                 
-                                double T = -T_pivot;
+                                double T = T_pivot;
                                 
                                 double epsilon = d_equation_of_state_mixing_rules->getEquationOfState()->
                                     getInternalEnergyFromTemperature(
@@ -2812,7 +2812,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dEdgeBoundaryData(
                                         &p_pivot,
                                         thermo_properties_ptr);
                                 
-                                double T = -T_pivot;
+                                double T = T_pivot;
                                 
                                 double epsilon = d_equation_of_state_mixing_rules->getEquationOfState()->
                                     getInternalEnergyFromTemperature(
@@ -2954,7 +2954,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dEdgeBoundaryData(
                                         &p_pivot,
                                         thermo_properties_ptr);
                                 
-                                double T = -T_pivot;
+                                double T = T_pivot;
                                 
                                 double epsilon = d_equation_of_state_mixing_rules->getEquationOfState()->
                                     getInternalEnergyFromTemperature(
@@ -3781,7 +3781,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dNodeBoundaryData(
                                         &p_pivot,
                                         thermo_properties_ptr);
                                 
-                                double T = -T_pivot;
+                                double T = T_pivot;
                                 
                                 double epsilon = d_equation_of_state_mixing_rules->getEquationOfState()->
                                     getInternalEnergyFromTemperature(
@@ -3923,7 +3923,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dNodeBoundaryData(
                                         &p_pivot,
                                         thermo_properties_ptr);
                                 
-                                double T = -T_pivot;
+                                double T = T_pivot;
                                 
                                 double epsilon = d_equation_of_state_mixing_rules->getEquationOfState()->
                                     getInternalEnergyFromTemperature(
@@ -4065,7 +4065,7 @@ FlowModelBoundaryUtilitiesSingleSpecies::fill3dNodeBoundaryData(
                                         &p_pivot,
                                         thermo_properties_ptr);
                                 
-                                double T = -T_pivot;
+                                double T = T_pivot;
                                 
                                 double epsilon = d_equation_of_state_mixing_rules->getEquationOfState()->
                                     getInternalEnergyFromTemperature(

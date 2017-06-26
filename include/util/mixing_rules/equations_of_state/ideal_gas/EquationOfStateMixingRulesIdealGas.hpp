@@ -124,6 +124,15 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const std::vector<const double*>& mass_fraction) const;
         
         /*
+         * Compute the density of mixture with isothermal and isobaric assumptions.
+         */
+        double
+        getMixtureDensity(
+            const double* const pressure,
+            const double* const temperature,
+            const std::vector<const double*>& mass_fraction) const;
+        
+        /*
          * Get the number of thermodynamic properties of a species.
          */
         int

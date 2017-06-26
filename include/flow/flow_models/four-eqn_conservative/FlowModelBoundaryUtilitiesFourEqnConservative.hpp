@@ -11,14 +11,7 @@ class FlowModelBoundaryUtilitiesFourEqnConservative: public FlowModelBoundaryUti
             const tbox::Dimension& dim,
             const int& num_species,
             const int& num_eqn,
-            const boost::shared_ptr<EquationOfStateMixingRules>& equation_of_state_mixing_rules):
-                FlowModelBoundaryUtilities(
-                    object_name,
-                    dim,
-                    num_species,
-                    num_eqn,
-                    equation_of_state_mixing_rules)
-        {}
+            const boost::shared_ptr<EquationOfStateMixingRules>& equation_of_state_mixing_rules);
         
         /*
          * Function to read 1d boundary data from input database.
@@ -184,6 +177,35 @@ class FlowModelBoundaryUtilitiesFourEqnConservative: public FlowModelBoundaryUti
             const std::vector<int>& face_conds,
             std::vector<int>& node_conds,
             const hier::IntVector& periodic);
+        
+        void
+        readAdiabaticNoSlip(
+            const boost::shared_ptr<tbox::Database>& db,
+            std::string& db_name,
+            int bdry_location_index);
+        
+        void
+        readIsothermalNoSlip(
+            const boost::shared_ptr<tbox::Database>& db,
+            std::string& db_name,
+            int bdry_location_index);
+        
+        /*
+         * Vectors of node (1D), edge (2D) or face (3D) boundary values for ADIABATIC_NO_SLIP case.
+         */
+        std::vector<double> d_bdry_node_adiabatic_no_slip_vel;
+        std::vector<double> d_bdry_edge_adiabatic_no_slip_vel;
+        std::vector<double> d_bdry_face_adiabatic_no_slip_vel;
+        
+        /*
+         * Vectors of node (1D), edge (2D) or face (3D) boundary values for ISOTHERMAL_NO_SLIP case.
+         */
+        std::vector<double> d_bdry_node_isothermal_no_slip_T;
+        std::vector<double> d_bdry_edge_isothermal_no_slip_T;
+        std::vector<double> d_bdry_face_isothermal_no_slip_T;
+        std::vector<double> d_bdry_node_isothermal_no_slip_vel;
+        std::vector<double> d_bdry_edge_isothermal_no_slip_vel;
+        std::vector<double> d_bdry_face_isothermal_no_slip_vel;
         
 };
 
