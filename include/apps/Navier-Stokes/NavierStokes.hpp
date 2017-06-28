@@ -135,7 +135,7 @@ class NavierStokes:
             const double time,
             const double dt,
             const int RK_step_number,
-            const boost::shared_ptr<hier::VariableContext>& data_context = nullptr);
+            const boost::shared_ptr<hier::VariableContext>& data_context = boost::shared_ptr<hier::VariableContext>());
         
         /**
          * Advance a single Runge-Kutta step. Conservative differencing is implemented here by using
