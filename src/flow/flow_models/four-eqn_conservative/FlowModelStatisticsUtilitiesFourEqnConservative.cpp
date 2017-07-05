@@ -6531,22 +6531,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputEnstrophyIntegrated(
     }
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
-     */
-    
-    const int num_levels = patch_hierarchy->getNumberOfLevels();
-    
-    hier::IntVector ratioFinestLevelToCoarestLevel =
-        patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
-    for (int li = num_levels - 2; li > 0 ; li--)
-    {
-        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
-    }
-    
-    /*
      * Get the flattened hierarchy where only the finest existing grid is visible at any given
      * location in the problem space.
      */
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
     
     boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
@@ -7001,37 +6990,17 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
     }
     
     /*
-     * Get the refinement ratio from the finest level to the coarest level.
-     */
-    
-    const int num_levels = patch_hierarchy->getNumberOfLevels();
-    
-    hier::IntVector ratioFinestLevelToCoarestLevel =
-        patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
-    for (int li = num_levels - 2; li > 0 ; li--)
-    {
-        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
-    }
-    
-    /*
      * Get the flattened hierarchy where only the finest existing grid is visible at any given
      * location in the problem space.
      */
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
     
     boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
         new ExtendedFlattenedHierarchy(
             *patch_hierarchy,
             0,
             num_levels - 1));
-    
-    /*
-     * Get the number of cells of physical domain refined to the finest level.
-     */
-    
-    const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
-    const hier::Box& physical_domain_box = physical_domain.front();
-    const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
-    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -8440,7 +8409,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                         (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
                                             ghostcell_dim_1_mass_fraction;
                                     
-                                    const int idx_y_BB = (i + num_ghosts_0_mass_fraction) +
+                                    const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                         (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
                                         (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
                                             ghostcell_dim_1_mass_fraction;
@@ -8635,7 +8604,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                         (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
                                             ghostcell_dim_1_mass_fraction;
                                     
-                                    const int idx_y_BB = (i + num_ghosts_0_mass_fraction) +
+                                    const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                         (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
                                         (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
                                             ghostcell_dim_1_mass_fraction;
@@ -8797,7 +8766,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                         (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
                                             ghostcell_dim_1_mass_fraction;
                                     
-                                    const int idx_y_BB = (i + num_ghosts_0_mass_fraction) +
+                                    const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
                                         (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
                                         (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
                                             ghostcell_dim_1_mass_fraction;
