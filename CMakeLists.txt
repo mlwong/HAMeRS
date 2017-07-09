@@ -73,6 +73,7 @@ link_directories(${HAMeRS_BINARY_DIR}/algs/patch_strategy
                  ${HAMeRS_BINARY_DIR}/flow/flow_models
                  ${HAMeRS_BINARY_DIR}/flow/convective_flux_reconstructors
                  ${HAMeRS_BINARY_DIR}/flow/diffusive_flux_reconstructors
+                 ${HAMeRS_BINARY_DIR}/flow/nonconservative_diffusive_flux_divergence_operators
                  ${HAMeRS_BINARY_DIR}/flow/refinement_taggers
                  ${HAMeRS_BINARY_DIR}/extn/patch_hierarchies
                  ${HAMeRS_BINARY_DIR}/util
@@ -89,6 +90,7 @@ add_subdirectory(src/exec)
 add_subdirectory(src/flow/flow_models)
 add_subdirectory(src/flow/convective_flux_reconstructors)
 add_subdirectory(src/flow/diffusive_flux_reconstructors)
+add_subdirectory(src/flow/nonconservative_diffusive_flux_divergence_operators)
 add_subdirectory(src/flow/refinement_taggers)
 add_subdirectory(src/extn/patch_hierarchies)
 add_subdirectory(src/util)
