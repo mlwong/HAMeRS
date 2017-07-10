@@ -556,7 +556,7 @@ class Euler:
         boost::shared_ptr<ConvectiveFluxReconstructorManager> d_convective_flux_reconstructor_manager;
         
         /*
-         * boost::shared_ptr to face variable of convective flux.
+         * boost::shared_ptr to side variable of convective flux.
          */
         boost::shared_ptr<pdat::SideVariable<double> > d_variable_convective_flux;
         

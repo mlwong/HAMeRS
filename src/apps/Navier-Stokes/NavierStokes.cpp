@@ -61,6 +61,7 @@ NavierStokes::NavierStokes(
         d_grid_geometry(grid_geometry),
         d_stat_dump_filename(stat_dump_filename),
         d_use_nonuniform_workload(false),
+        d_use_conservative_form_diffusive_flux(true),
         d_Navier_Stokes_boundary_conditions_db_is_from_restart(false)
 {
     TBOX_ASSERT(!object_name.empty());
@@ -132,21 +133,46 @@ NavierStokes::NavierStokes(
     
     d_convective_flux_reconstructor = d_convective_flux_reconstructor_manager->getConvectiveFluxReconstructor();
     
-    /*
-     * Initialize d_diffusive_flux_reconstructor_manager and get the diffusive flux reconstructor object.
-     */
-    
-    d_diffusive_flux_reconstructor_manager.reset(new DiffusiveFluxReconstructorManager(
-        "d_diffusive_flux_reconstructor_manager",
-        d_dim,
-        d_grid_geometry,
-        d_flow_model->getNumberOfEquations(),
-        d_num_species,
-        d_flow_model,
-        d_diffusive_flux_reconstructor_db,
-        d_diffusive_flux_reconstructor_str));
-    
-    d_diffusive_flux_reconstructor = d_diffusive_flux_reconstructor_manager->getDiffusiveFluxReconstructor();
+    if (d_use_conservative_form_diffusive_flux)
+    {
+        /*
+         * Initialize d_diffusive_flux_reconstructor_manager and get the diffusive flux reconstructor object.
+         */
+        
+        d_diffusive_flux_reconstructor_manager.reset(new DiffusiveFluxReconstructorManager(
+            "d_diffusive_flux_reconstructor_manager",
+            d_dim,
+            d_grid_geometry,
+            d_flow_model->getNumberOfEquations(),
+            d_num_species,
+            d_flow_model,
+            d_diffusive_flux_reconstructor_db,
+            d_diffusive_flux_reconstructor_str));
+        
+        d_diffusive_flux_reconstructor = d_diffusive_flux_reconstructor_manager->getDiffusiveFluxReconstructor();
+    }
+    else
+    {
+        /*
+         * Initialize d_non-conservative_diffusive_flux_divergence_operator_manager and get the
+         * non-conservative diffusive flux divergence operator object.
+         */
+        
+        d_nonconservative_diffusive_flux_divergence_operator_manager.reset(
+            new NonconservativeDiffusiveFluxDivergenceOperatorManager(
+                "d_nonconservative_diffusive_flux_divergence_operator_manager",
+                d_dim,
+                d_grid_geometry,
+                d_flow_model->getNumberOfEquations(),
+                d_num_species,
+                d_flow_model,
+                d_nonconservative_diffusive_flux_divergence_operator_db,
+                d_nonconservative_diffusive_flux_divergence_operator_str));
+        
+        d_nonconservative_diffusive_flux_divergence_operator =
+            d_nonconservative_diffusive_flux_divergence_operator_manager->
+                getNonconservativeDiffusiveFluxDivergenceOperator();
+    }
     
     /*
      * Initialize d_Navier_Stokes_initial_conditions.
@@ -222,18 +248,30 @@ NavierStokes::NavierStokes(
     }
     
     /*
-     * Initialize the face variable of convective flux.
+     * Initialize the side variable of convective flux.
      */
     
     d_variable_convective_flux = boost::shared_ptr<pdat::SideVariable<double> > (
         new pdat::SideVariable<double>(dim, "convective flux", d_flow_model->getNumberOfEquations()));
     
-    /*
-     * Initialize the face variable of diffusive flux.
-     */
-    
-    d_variable_diffusive_flux = boost::shared_ptr<pdat::SideVariable<double> > (
-        new pdat::SideVariable<double>(dim, "diffusive flux", d_flow_model->getNumberOfEquations()));
+    if (d_use_conservative_form_diffusive_flux)
+    {
+        /*
+         * Initialize the side variable of diffusive flux.
+         */
+        
+        d_variable_diffusive_flux = boost::shared_ptr<pdat::SideVariable<double> > (
+            new pdat::SideVariable<double>(dim, "diffusive flux", d_flow_model->getNumberOfEquations()));
+    }
+    else
+    {
+        /*
+         * Initialize the cell variable of diffusive flux divergence.
+         */
+        
+        d_variable_diffusive_flux_divergence = boost::shared_ptr<pdat::CellVariable<double> > (
+            new pdat::CellVariable<double>(dim, "diffusive flux divergence", d_flow_model->getNumberOfEquations()));
+    }
     
     /*
      * Initialize the cell variable of source.
@@ -320,9 +358,19 @@ NavierStokes::registerModelVariables(
         num_ghosts_intermediate,
         d_convective_flux_reconstructor->getConvectiveFluxNumberOfGhostCells());
     
-    num_ghosts_intermediate = hier::IntVector::max(
-        num_ghosts_intermediate,
-        d_diffusive_flux_reconstructor->getDiffusiveFluxNumberOfGhostCells());
+    if (d_use_conservative_form_diffusive_flux)
+    {
+        num_ghosts_intermediate = hier::IntVector::max(
+            num_ghosts_intermediate,
+            d_diffusive_flux_reconstructor->getDiffusiveFluxNumberOfGhostCells());
+    }
+    else
+    {
+        num_ghosts_intermediate = hier::IntVector::max(
+            num_ghosts_intermediate,
+            d_nonconservative_diffusive_flux_divergence_operator->
+                getNonconservativeDiffusiveFluxDivergenceOperatorNumberOfGhostCells());
+    }
     
     hier::IntVector num_ghosts = num_ghosts_intermediate;
     
@@ -368,14 +416,28 @@ NavierStokes::registerModelVariables(
         "CONSERVATIVE_COARSEN",
         "NO_REFINE");
     
-    integrator->registerVariable(
-        d_variable_diffusive_flux,
-        hier::IntVector::getZero(d_dim),
-        hier::IntVector::getZero(d_dim),
-        RungeKuttaLevelIntegrator::FLUX,
-        d_grid_geometry,
-        "CONSERVATIVE_COARSEN",
-        "NO_REFINE");
+    if (d_use_conservative_form_diffusive_flux)
+    {
+        integrator->registerVariable(
+            d_variable_diffusive_flux,
+            hier::IntVector::getZero(d_dim),
+            hier::IntVector::getZero(d_dim),
+            RungeKuttaLevelIntegrator::FLUX,
+            d_grid_geometry,
+            "CONSERVATIVE_COARSEN",
+            "NO_REFINE");
+    }
+    else
+    {
+        integrator->registerVariable(
+            d_variable_diffusive_flux_divergence,
+            hier::IntVector::getZero(d_dim),
+            hier::IntVector::getZero(d_dim),
+            RungeKuttaLevelIntegrator::SOURCE,
+            d_grid_geometry,
+            "NO_COARSEN",
+            "NO_REFINE");
+    }
     
     integrator->registerVariable(
         d_variable_source,
@@ -978,13 +1040,27 @@ NavierStokes::computeFluxesAndSourcesOnPatch(
             dt,
             RK_step_number);
         
-        d_diffusive_flux_reconstructor->computeDiffusiveFluxOnPatch(
-            patch,
-            d_variable_diffusive_flux,
-            data_context,
-            time,
-            dt,
-            RK_step_number);
+        if (d_use_conservative_form_diffusive_flux)
+        {
+            d_diffusive_flux_reconstructor->computeDiffusiveFluxOnPatch(
+                patch,
+                d_variable_diffusive_flux,
+                data_context,
+                time,
+                dt,
+                RK_step_number);
+        }
+        else
+        {
+            d_nonconservative_diffusive_flux_divergence_operator->
+                computeNonconservativeDiffusiveFluxDivergenceOnPatch(
+                    patch,
+                    d_variable_diffusive_flux_divergence,
+                    data_context,
+                    time,
+                    dt,
+                    RK_step_number);
+        }
     }
     else
     {
@@ -997,13 +1073,27 @@ NavierStokes::computeFluxesAndSourcesOnPatch(
             dt,
             RK_step_number);
         
-        d_diffusive_flux_reconstructor->computeDiffusiveFluxOnPatch(
-            patch,
-            d_variable_diffusive_flux,
-            getDataContext(),
-            time,
-            dt,
-            RK_step_number);
+        if (d_use_conservative_form_diffusive_flux)
+        {
+            d_diffusive_flux_reconstructor->computeDiffusiveFluxOnPatch(
+                patch,
+                d_variable_diffusive_flux,
+                getDataContext(),
+                time,
+                dt,
+                RK_step_number);
+        }
+        else
+        {
+            d_nonconservative_diffusive_flux_divergence_operator->
+                computeNonconservativeDiffusiveFluxDivergenceOnPatch(
+                    patch,
+                    d_variable_diffusive_flux_divergence,
+                    getDataContext(),
+                    time,
+                    dt,
+                    RK_step_number);
+        }
     }
     
     t_compute_fluxes_sources->stop();
@@ -1093,9 +1183,21 @@ NavierStokes::advanceSingleStepOnPatch(
         BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
             patch.getPatchData(d_variable_convective_flux, getDataContext())));
     
-    boost::shared_ptr<pdat::SideData<double> > diffusive_flux(
-        BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
-            patch.getPatchData(d_variable_diffusive_flux, getDataContext())));
+    boost::shared_ptr<pdat::SideData<double> > diffusive_flux;
+    boost::shared_ptr<pdat::CellData<double> > diffusive_flux_divergence;
+    
+    if (d_use_conservative_form_diffusive_flux)
+    {
+        diffusive_flux =
+            BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
+                patch.getPatchData(d_variable_diffusive_flux, getDataContext()));
+    }
+    else
+    {
+        diffusive_flux_divergence =
+            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                patch.getPatchData(d_variable_diffusive_flux_divergence, getDataContext()));
+    }
     
     boost::shared_ptr<pdat::CellData<double> > source(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -1103,11 +1205,25 @@ NavierStokes::advanceSingleStepOnPatch(
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(convective_flux);
-    TBOX_ASSERT(diffusive_flux);
+    if (d_use_conservative_form_diffusive_flux)
+    {
+        TBOX_ASSERT(diffusive_flux);
+    }
+    else
+    {
+        TBOX_ASSERT(diffusive_flux_divergence);
+    }
     TBOX_ASSERT(source);
     
     TBOX_ASSERT(convective_flux->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
-    TBOX_ASSERT(diffusive_flux->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
+    if (d_use_conservative_form_diffusive_flux)
+    {
+        TBOX_ASSERT(diffusive_flux->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
+    }
+    else
+    {
+        TBOX_ASSERT(diffusive_flux_divergence->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
+    }
     TBOX_ASSERT(source->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
 #endif
     
@@ -1119,9 +1235,21 @@ NavierStokes::advanceSingleStepOnPatch(
             BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
                     patch.getPatchData(d_variable_convective_flux, intermediate_context[n])));
         
-        boost::shared_ptr<pdat::SideData<double> > diffusive_flux_intermediate(
-            BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
-                    patch.getPatchData(d_variable_diffusive_flux, intermediate_context[n])));
+        boost::shared_ptr<pdat::SideData<double> > diffusive_flux_intermediate;
+        boost::shared_ptr<pdat::CellData<double> > diffusive_flux_divergence_intermediate;
+        
+        if (d_use_conservative_form_diffusive_flux)
+        {
+            diffusive_flux_intermediate =
+                BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
+                        patch.getPatchData(d_variable_diffusive_flux, intermediate_context[n]));
+        }
+        else
+        {
+            diffusive_flux_divergence_intermediate =
+                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    patch.getPatchData(d_variable_diffusive_flux_divergence, intermediate_context[n]));
+        }
         
         boost::shared_ptr<pdat::CellData<double> > source_intermediate(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -1129,11 +1257,25 @@ NavierStokes::advanceSingleStepOnPatch(
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(convective_flux_intermediate);
-        TBOX_ASSERT(diffusive_flux_intermediate);
+        if (d_use_conservative_form_diffusive_flux)
+        {
+            TBOX_ASSERT(diffusive_flux_intermediate);
+        }
+        else
+        {
+            TBOX_ASSERT(diffusive_flux_divergence_intermediate);
+        }
         TBOX_ASSERT(source_intermediate);
         
         TBOX_ASSERT(convective_flux_intermediate->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
-        TBOX_ASSERT(diffusive_flux_intermediate->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
+        if (d_use_conservative_form_diffusive_flux)
+        {
+            TBOX_ASSERT(diffusive_flux_intermediate->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
+        }
+        else
+        {
+            TBOX_ASSERT(diffusive_flux_divergence_intermediate->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
+        }
         TBOX_ASSERT(source_intermediate->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
 #endif
         
@@ -1216,28 +1358,58 @@ NavierStokes::advanceSingleStepOnPatch(
             
             if (beta[n] != 0.0)
             {
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                if (d_use_conservative_form_diffusive_flux)
                 {
-                    double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
-                    double* F_d_x_intermediate = diffusive_flux_intermediate->getPointer(0, ei);
-                    double* S_intermediate = source_intermediate->getPointer(ei);
-                    
-                    const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
-                    
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        // Compute linear indices.
-                        const int idx = i + num_ghosts_0_conservative_var;
-                        const int idx_source = i;
-                        const int idx_flux_x = i + 1;
+                        double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                        double* F_d_x_intermediate = diffusive_flux_intermediate->getPointer(0, ei);
+                        double* S_intermediate = source_intermediate->getPointer(ei);
                         
-                        Q[ei][idx] += beta[n]*
-                            (-(F_c_x_intermediate[idx_flux_x] - F_c_x_intermediate[idx_flux_x - 1] +
-                               F_d_x_intermediate[idx_flux_x] - F_d_x_intermediate[idx_flux_x - 1])/dx_0 +
-                             S_intermediate[idx_source]);
+                        const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
+                        
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute linear indices.
+                            const int idx = i + num_ghosts_0_conservative_var;
+                            const int idx_flux_x = i + 1;
+                            const int idx_source = i;
+                            
+                            Q[ei][idx] += beta[n]*
+                                (-(F_c_x_intermediate[idx_flux_x] - F_c_x_intermediate[idx_flux_x - 1] +
+                                   F_d_x_intermediate[idx_flux_x] - F_d_x_intermediate[idx_flux_x - 1])/dx_0 +
+                                 S_intermediate[idx_source]);
+                        }
+                    }
+                }
+                else
+                {
+                    for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                    {
+                        double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                        double* nabla_F_d_intermediate = diffusive_flux_divergence_intermediate->getPointer(ei);
+                        double* S_intermediate = source_intermediate->getPointer(ei);
+                        
+                        const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
+                        
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute linear indices.
+                            const int idx = i + num_ghosts_0_conservative_var;
+                            const int idx_flux_x = i + 1;
+                            const int idx_cell = i;
+                            
+                            Q[ei][idx] += beta[n]*
+                                (-(F_c_x_intermediate[idx_flux_x] - F_c_x_intermediate[idx_flux_x - 1])/dx_0 -
+                                 nabla_F_d_intermediate[idx_cell] +
+                                 S_intermediate[idx_cell]);
+                        }
                     }
                 }
             }
@@ -1245,42 +1417,90 @@ NavierStokes::advanceSingleStepOnPatch(
             if (gamma[n] != 0.0)
             {
                 // Accumulate the flux in the x direction.
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                if (d_use_conservative_form_diffusive_flux)
                 {
-                    double* F_c_x = convective_flux->getPointer(0, ei);
-                    double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
-                    
-                    double* F_d_x = diffusive_flux->getPointer(0, ei);
-                    double* F_d_x_intermediate = diffusive_flux_intermediate->getPointer(0, ei);
-                    
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = 0; i < interior_dim_0 + 1; i++)
+                    for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        // Compute linear index.
-                        const int idx_flux_x = i;
+                        double* F_c_x = convective_flux->getPointer(0, ei);
+                        double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
                         
-                        F_c_x[idx_flux_x] += gamma[n]*F_c_x_intermediate[idx_flux_x];
-                        F_d_x[idx_flux_x] += gamma[n]*F_d_x_intermediate[idx_flux_x];
-                    }                        
+                        double* F_d_x = diffusive_flux->getPointer(0, ei);
+                        double* F_d_x_intermediate = diffusive_flux_intermediate->getPointer(0, ei);
+                        
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0 + 1; i++)
+                        {
+                            // Compute linear index.
+                            const int idx_flux_x = i;
+                            
+                            F_c_x[idx_flux_x] += gamma[n]*F_c_x_intermediate[idx_flux_x];
+                            F_d_x[idx_flux_x] += gamma[n]*F_d_x_intermediate[idx_flux_x];
+                        }
+                    }
+                }
+                else
+                {
+                    for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                    {
+                        double* F_c_x = convective_flux->getPointer(0, ei);
+                        double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                        
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0 + 1; i++)
+                        {
+                            // Compute linear index.
+                            const int idx_flux_x = i;
+                            
+                            F_c_x[idx_flux_x] += gamma[n]*F_c_x_intermediate[idx_flux_x];
+                        }
+                    }
                 }
                 
-                // Accumulate the source.
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                // Accumulate the source terms.
+                if (d_use_conservative_form_diffusive_flux)
                 {
-                    double* S = source->getPointer(ei);
-                    double* S_intermediate = source_intermediate->getPointer(ei);
-                    
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        // Compute linear index.
-                        const int idx = i;
+                        double* S = source->getPointer(ei);
+                        double* S_intermediate = source_intermediate->getPointer(ei);
                         
-                        S[idx] += gamma[n]*S_intermediate[idx];
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute linear index.
+                            const int idx = i;
+                            
+                            S[idx] += gamma[n]*S_intermediate[idx];
+                        }
+                    }
+                }
+                else
+                {
+                    for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                    {
+                        double* nabla_F_d = diffusive_flux_divergence->getPointer(ei);
+                        double* nabla_F_d_intermediate = diffusive_flux_divergence_intermediate->getPointer(ei);
+                        
+                        double* S = source->getPointer(ei);
+                        double* S_intermediate = source_intermediate->getPointer(ei);
+                        
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute linear index.
+                            const int idx = i;
+                            
+                            nabla_F_d[idx] += gamma[n]*nabla_F_d_intermediate[idx];
+                            S[idx] += gamma[n]*S_intermediate[idx];
+                        }
                     }
                 }
             } // if (gamma[n] != 0.0)
@@ -1335,50 +1555,101 @@ NavierStokes::advanceSingleStepOnPatch(
             
             if (beta[n] != 0.0)
             {
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                if (d_use_conservative_form_diffusive_flux)
                 {
-                    double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
-                    double* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
-                    double* F_d_x_intermediate = diffusive_flux_intermediate->getPointer(0, ei);
-                    double* F_d_y_intermediate = diffusive_flux_intermediate->getPointer(1, ei);
-                    double* S_intermediate = source_intermediate->getPointer(ei);
-                    
-                    const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
-                    const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
-                    const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[ei][0];
-                    
-                    for (int j = 0; j < interior_dim_1; j++)
+                    for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = 0; i < interior_dim_0; i++)
+                        double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                        double* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
+                        double* F_d_x_intermediate = diffusive_flux_intermediate->getPointer(0, ei);
+                        double* F_d_y_intermediate = diffusive_flux_intermediate->getPointer(1, ei);
+                        double* S_intermediate = source_intermediate->getPointer(ei);
+                        
+                        const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
+                        const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
+                        const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[ei][0];
+                        
+                        for (int j = 0; j < interior_dim_1; j++)
                         {
-                            // Compute linear indices.
-                            const int idx = (i + num_ghosts_0_conservative_var) +
-                                (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
-                            
-                            const int idx_flux_x_L = i +
-                                j*(interior_dim_0 + 1);
-                            
-                            const int idx_flux_x_R = (i + 1) +
-                                j*(interior_dim_0 + 1);
-                            
-                            const int idx_flux_y_B = i +
-                                j*interior_dim_0;
-                            
-                            const int idx_flux_y_T = i +
-                                (j + 1)*interior_dim_0;
-                            
-                            const int idx_source = i +
-                                j*interior_dim_0;
-                            
-                            Q[ei][idx] += beta[n]*
-                                (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L] +
-                                   F_d_x_intermediate[idx_flux_x_R] - F_d_x_intermediate[idx_flux_x_L])/dx_0 -
-                                  (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B] +
-                                   F_d_y_intermediate[idx_flux_y_T] - F_d_y_intermediate[idx_flux_y_B])/dx_1 +
-                                  S_intermediate[idx_source]);
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                // Compute linear indices.
+                                const int idx = (i + num_ghosts_0_conservative_var) +
+                                    (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
+                                
+                                const int idx_flux_x_L = i +
+                                    j*(interior_dim_0 + 1);
+                                
+                                const int idx_flux_x_R = (i + 1) +
+                                    j*(interior_dim_0 + 1);
+                                
+                                const int idx_flux_y_B = i +
+                                    j*interior_dim_0;
+                                
+                                const int idx_flux_y_T = i +
+                                    (j + 1)*interior_dim_0;
+                                
+                                const int idx_source = i +
+                                    j*interior_dim_0;
+                                
+                                Q[ei][idx] += beta[n]*
+                                    (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L] +
+                                       F_d_x_intermediate[idx_flux_x_R] - F_d_x_intermediate[idx_flux_x_L])/dx_0 -
+                                      (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B] +
+                                       F_d_y_intermediate[idx_flux_y_T] - F_d_y_intermediate[idx_flux_y_B])/dx_1 +
+                                      S_intermediate[idx_source]);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                    {
+                        double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                        double* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
+                        double* nabla_F_d_intermediate = diffusive_flux_divergence_intermediate->getPointer(ei);
+                        double* S_intermediate = source_intermediate->getPointer(ei);
+                        
+                        const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
+                        const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
+                        const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[ei][0];
+                        
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                // Compute linear indices.
+                                const int idx = (i + num_ghosts_0_conservative_var) +
+                                    (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
+                                
+                                const int idx_flux_x_L = i +
+                                    j*(interior_dim_0 + 1);
+                                
+                                const int idx_flux_x_R = (i + 1) +
+                                    j*(interior_dim_0 + 1);
+                                
+                                const int idx_flux_y_B = i +
+                                    j*interior_dim_0;
+                                
+                                const int idx_flux_y_T = i +
+                                    (j + 1)*interior_dim_0;
+                                
+                                const int idx_cell = i +
+                                    j*interior_dim_0;
+                                
+                                Q[ei][idx] += beta[n]*
+                                    (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L])/dx_0 -
+                                      (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B])/dx_1 -
+                                      nabla_F_d_intermediate[idx_cell] +
+                                      S_intermediate[idx_cell]);
+                            }
                         }
                     }
                 }
@@ -1387,75 +1658,153 @@ NavierStokes::advanceSingleStepOnPatch(
             if (gamma[n] != 0.0)
             {
                 // Accumulate the flux in the x direction.
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                if (d_use_conservative_form_diffusive_flux)
                 {
-                    double* F_c_x = convective_flux->getPointer(0, ei);
-                    double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
-                    
-                    double* F_d_x = diffusive_flux->getPointer(0, ei);
-                    double* F_d_x_intermediate = diffusive_flux_intermediate->getPointer(0, ei);
-                    
-                    for (int j = 0; j < interior_dim_1; j++)
+                    for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = 0; i < interior_dim_0 + 1; i++)
+                        double* F_c_x = convective_flux->getPointer(0, ei);
+                        double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                        
+                        double* F_d_x = diffusive_flux->getPointer(0, ei);
+                        double* F_d_x_intermediate = diffusive_flux_intermediate->getPointer(0, ei);
+                        
+                        for (int j = 0; j < interior_dim_1; j++)
                         {
-                            // Compute linear index.
-                            const int idx_flux_x = i +
-                                j*(interior_dim_0 + 1);
-                            
-                            F_c_x[idx_flux_x] += gamma[n]*F_c_x_intermediate[idx_flux_x];
-                            F_d_x[idx_flux_x] += gamma[n]*F_d_x_intermediate[idx_flux_x];
-                        }                        
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0 + 1; i++)
+                            {
+                                // Compute linear index.
+                                const int idx_flux_x = i +
+                                    j*(interior_dim_0 + 1);
+                                
+                                F_c_x[idx_flux_x] += gamma[n]*F_c_x_intermediate[idx_flux_x];
+                                F_d_x[idx_flux_x] += gamma[n]*F_d_x_intermediate[idx_flux_x];
+                            }                        
+                        }
+                    }
+                    
+                    // Accumulate the flux in the y direction.
+                    for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                    {
+                        double* F_c_y = convective_flux->getPointer(1, ei);
+                        double* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
+                        
+                        double* F_d_y = diffusive_flux->getPointer(1, ei);
+                        double* F_d_y_intermediate = diffusive_flux_intermediate->getPointer(1, ei);
+                        
+                        for (int j = 0; j < interior_dim_1 + 1; j++)
+                        {
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                // Compute linear index.
+                                const int idx_flux_y = i +
+                                    j*interior_dim_0;
+                                
+                                F_c_y[idx_flux_y] += gamma[n]*F_c_y_intermediate[idx_flux_y];
+                                F_d_y[idx_flux_y] += gamma[n]*F_d_y_intermediate[idx_flux_y];
+                            }
+                        }
                     }
                 }
-                
-                // Accumulate the flux in the y direction.
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                else
                 {
-                    double* F_c_y = convective_flux->getPointer(1, ei);
-                    double* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
-                    
-                    double* F_d_y = diffusive_flux->getPointer(1, ei);
-                    double* F_d_y_intermediate = diffusive_flux_intermediate->getPointer(1, ei);
-                    
-                    for (int j = 0; j < interior_dim_1 + 1; j++)
+                    for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = 0; i < interior_dim_0; i++)
+                        double* F_c_x = convective_flux->getPointer(0, ei);
+                        double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                        
+                        for (int j = 0; j < interior_dim_1; j++)
                         {
-                            // Compute linear index.
-                            const int idx_flux_y = i +
-                                j*interior_dim_0;
-                            
-                            F_c_y[idx_flux_y] += gamma[n]*F_c_y_intermediate[idx_flux_y];
-                            F_d_y[idx_flux_y] += gamma[n]*F_d_y_intermediate[idx_flux_y];
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0 + 1; i++)
+                            {
+                                // Compute linear index.
+                                const int idx_flux_x = i +
+                                    j*(interior_dim_0 + 1);
+                                
+                                F_c_x[idx_flux_x] += gamma[n]*F_c_x_intermediate[idx_flux_x];
+                            }                        
+                        }
+                    }
+                    
+                    // Accumulate the flux in the y direction.
+                    for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                    {
+                        double* F_c_y = convective_flux->getPointer(1, ei);
+                        double* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
+                        
+                        for (int j = 0; j < interior_dim_1 + 1; j++)
+                        {
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                // Compute linear index.
+                                const int idx_flux_y = i +
+                                    j*interior_dim_0;
+                                
+                                F_c_y[idx_flux_y] += gamma[n]*F_c_y_intermediate[idx_flux_y];
+                            }
                         }
                     }
                 }
                 
                 // Accumulate the source.
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                if (d_use_conservative_form_diffusive_flux)
                 {
-                    double* S = source->getPointer(ei);
-                    double* S_intermediate = source_intermediate->getPointer(ei);
-                    
-                    for (int j = 0; j < interior_dim_1; j++)
+                    for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = 0; i < interior_dim_0; i++)
+                        double* S = source->getPointer(ei);
+                        double* S_intermediate = source_intermediate->getPointer(ei);
+                        
+                        for (int j = 0; j < interior_dim_1; j++)
                         {
-                            // Compute linear index.
-                            const int idx = i +
-                                j*interior_dim_0;
-                            
-                            S[idx] += gamma[n]*S_intermediate[idx];
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                // Compute linear index.
+                                const int idx = i +
+                                    j*interior_dim_0;
+                                
+                                S[idx] += gamma[n]*S_intermediate[idx];
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                    {
+                        double* nabla_F_d = diffusive_flux_divergence->getPointer(ei);
+                        double* nabla_F_d_intermediate = diffusive_flux_divergence_intermediate->getPointer(ei);
+                        
+                        double* S = source->getPointer(ei);
+                        double* S_intermediate = source_intermediate->getPointer(ei);
+                        
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                // Compute linear index.
+                                const int idx = i +
+                                    j*interior_dim_0;
+                                
+                                nabla_F_d[idx] += gamma[n]*nabla_F_d_intermediate[idx];
+                                S[idx] += gamma[n]*S_intermediate[idx];
+                            }
                         }
                     }
                 }
@@ -1527,73 +1876,146 @@ NavierStokes::advanceSingleStepOnPatch(
             
             if (beta[n] != 0.0)
             {
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                if (d_use_conservative_form_diffusive_flux)
                 {
-                    double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
-                    double* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
-                    double* F_c_z_intermediate = convective_flux_intermediate->getPointer(2, ei);
-                    double* F_d_x_intermediate = diffusive_flux_intermediate->getPointer(0, ei);
-                    double* F_d_y_intermediate = diffusive_flux_intermediate->getPointer(1, ei);
-                    double* F_d_z_intermediate = diffusive_flux_intermediate->getPointer(2, ei);
-                    double* S_intermediate = source_intermediate->getPointer(ei);
-                    
-                    const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
-                    const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
-                    const int num_ghosts_2_conservative_var = num_ghosts_conservative_var[ei][2];
-                    const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[ei][0];
-                    const int ghostcell_dim_1_conservative_var = ghostcell_dims_conservative_var[ei][1];
-                    
-                    for (int k = 0; k < interior_dim_2; k++)
+                    for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        for (int j = 0; j < interior_dim_1; j++)
+                        double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                        double* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
+                        double* F_c_z_intermediate = convective_flux_intermediate->getPointer(2, ei);
+                        double* F_d_x_intermediate = diffusive_flux_intermediate->getPointer(0, ei);
+                        double* F_d_y_intermediate = diffusive_flux_intermediate->getPointer(1, ei);
+                        double* F_d_z_intermediate = diffusive_flux_intermediate->getPointer(2, ei);
+                        double* S_intermediate = source_intermediate->getPointer(ei);
+                        
+                        const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
+                        const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
+                        const int num_ghosts_2_conservative_var = num_ghosts_conservative_var[ei][2];
+                        const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[ei][0];
+                        const int ghostcell_dim_1_conservative_var = ghostcell_dims_conservative_var[ei][1];
+                        
+                        for (int k = 0; k < interior_dim_2; k++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
-                            for (int i = 0; i < interior_dim_0; i++)
+                            for (int j = 0; j < interior_dim_1; j++)
                             {
-                                // Compute linear indices.
-                                const int idx = (i + num_ghosts_0_conservative_var) +
-                                    (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
-                                    (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
-                                        ghostcell_dim_1_conservative_var;
-                                
-                                const int idx_flux_x_L = i +
-                                    j*(interior_dim_0 + 1) +
-                                    k*(interior_dim_0 + 1)*interior_dim_1;
-                                
-                                const int idx_flux_x_R = (i + 1) +
-                                    j*(interior_dim_0 + 1) +
-                                    k*(interior_dim_0 + 1)*interior_dim_1;
-                                
-                                const int idx_flux_y_B = i +
-                                    j*interior_dim_0 +
-                                    k*interior_dim_0*(interior_dim_1 + 1);
-                                
-                                const int idx_flux_y_T = i +
-                                    (j + 1)*interior_dim_0 +
-                                    k*interior_dim_0*(interior_dim_1 + 1);
-                                
-                                const int idx_flux_z_B = i +
-                                    j*interior_dim_0 +
-                                    k*interior_dim_0*interior_dim_1;
-                                
-                                const int idx_flux_z_F = i +
-                                    j*interior_dim_0 +
-                                    (k + 1)*interior_dim_0*interior_dim_1;
-                                
-                                const int idx_source = i +
-                                    j*interior_dim_0 +
-                                    k*interior_dim_0*interior_dim_1;
-                                
-                                Q[ei][idx] += beta[n]*
-                                    (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L] +
-                                       F_d_x_intermediate[idx_flux_x_R] - F_d_x_intermediate[idx_flux_x_L])/dx_0 -
-                                      (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B] +
-                                       F_d_y_intermediate[idx_flux_y_T] - F_d_y_intermediate[idx_flux_y_B])/dx_1 -
-                                      (F_c_z_intermediate[idx_flux_z_F] - F_c_z_intermediate[idx_flux_z_B] +
-                                       F_d_z_intermediate[idx_flux_z_F] - F_d_z_intermediate[idx_flux_z_B])/dx_2 +
-                                      S_intermediate[idx_source]);
+#ifdef HAMERS_ENABLE_SIMD
+                                #pragma omp simd
+#endif
+                                for (int i = 0; i < interior_dim_0; i++)
+                                {
+                                    // Compute linear indices.
+                                    const int idx = (i + num_ghosts_0_conservative_var) +
+                                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                                        (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                                            ghostcell_dim_1_conservative_var;
+                                    
+                                    const int idx_flux_x_L = i +
+                                        j*(interior_dim_0 + 1) +
+                                        k*(interior_dim_0 + 1)*interior_dim_1;
+                                    
+                                    const int idx_flux_x_R = (i + 1) +
+                                        j*(interior_dim_0 + 1) +
+                                        k*(interior_dim_0 + 1)*interior_dim_1;
+                                    
+                                    const int idx_flux_y_B = i +
+                                        j*interior_dim_0 +
+                                        k*interior_dim_0*(interior_dim_1 + 1);
+                                    
+                                    const int idx_flux_y_T = i +
+                                        (j + 1)*interior_dim_0 +
+                                        k*interior_dim_0*(interior_dim_1 + 1);
+                                    
+                                    const int idx_flux_z_B = i +
+                                        j*interior_dim_0 +
+                                        k*interior_dim_0*interior_dim_1;
+                                    
+                                    const int idx_flux_z_F = i +
+                                        j*interior_dim_0 +
+                                        (k + 1)*interior_dim_0*interior_dim_1;
+                                    
+                                    const int idx_source = i +
+                                        j*interior_dim_0 +
+                                        k*interior_dim_0*interior_dim_1;
+                                    
+                                    Q[ei][idx] += beta[n]*
+                                        (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L] +
+                                           F_d_x_intermediate[idx_flux_x_R] - F_d_x_intermediate[idx_flux_x_L])/dx_0 -
+                                          (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B] +
+                                           F_d_y_intermediate[idx_flux_y_T] - F_d_y_intermediate[idx_flux_y_B])/dx_1 -
+                                          (F_c_z_intermediate[idx_flux_z_F] - F_c_z_intermediate[idx_flux_z_B] +
+                                           F_d_z_intermediate[idx_flux_z_F] - F_d_z_intermediate[idx_flux_z_B])/dx_2 +
+                                          S_intermediate[idx_source]);
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                    {
+                        double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                        double* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
+                        double* F_c_z_intermediate = convective_flux_intermediate->getPointer(2, ei);
+                        double* nabla_F_d_intermediate = diffusive_flux_divergence_intermediate->getPointer(ei);
+                        double* S_intermediate = source_intermediate->getPointer(ei);
+                        
+                        const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
+                        const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
+                        const int num_ghosts_2_conservative_var = num_ghosts_conservative_var[ei][2];
+                        const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[ei][0];
+                        const int ghostcell_dim_1_conservative_var = ghostcell_dims_conservative_var[ei][1];
+                        
+                        for (int k = 0; k < interior_dim_2; k++)
+                        {
+                            for (int j = 0; j < interior_dim_1; j++)
+                            {
+#ifdef HAMERS_ENABLE_SIMD
+                                #pragma omp simd
+#endif
+                                for (int i = 0; i < interior_dim_0; i++)
+                                {
+                                    // Compute linear indices.
+                                    const int idx = (i + num_ghosts_0_conservative_var) +
+                                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                                        (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                                            ghostcell_dim_1_conservative_var;
+                                    
+                                    const int idx_flux_x_L = i +
+                                        j*(interior_dim_0 + 1) +
+                                        k*(interior_dim_0 + 1)*interior_dim_1;
+                                    
+                                    const int idx_flux_x_R = (i + 1) +
+                                        j*(interior_dim_0 + 1) +
+                                        k*(interior_dim_0 + 1)*interior_dim_1;
+                                    
+                                    const int idx_flux_y_B = i +
+                                        j*interior_dim_0 +
+                                        k*interior_dim_0*(interior_dim_1 + 1);
+                                    
+                                    const int idx_flux_y_T = i +
+                                        (j + 1)*interior_dim_0 +
+                                        k*interior_dim_0*(interior_dim_1 + 1);
+                                    
+                                    const int idx_flux_z_B = i +
+                                        j*interior_dim_0 +
+                                        k*interior_dim_0*interior_dim_1;
+                                    
+                                    const int idx_flux_z_F = i +
+                                        j*interior_dim_0 +
+                                        (k + 1)*interior_dim_0*interior_dim_1;
+                                    
+                                    const int idx_cell = i +
+                                        j*interior_dim_0 +
+                                        k*interior_dim_0*interior_dim_1;
+                                    
+                                    Q[ei][idx] += beta[n]*
+                                        (-(F_c_x_intermediate[idx_flux_x_R] - F_c_x_intermediate[idx_flux_x_L])/dx_0 -
+                                          (F_c_y_intermediate[idx_flux_y_T] - F_c_y_intermediate[idx_flux_y_B])/dx_1 -
+                                          (F_c_z_intermediate[idx_flux_z_F] - F_c_z_intermediate[idx_flux_z_B])/dx_2 -
+                                          nabla_F_d_intermediate[idx_cell] +
+                                          S_intermediate[idx_cell]);
+                                }
                             }
                         }
                     }
@@ -1603,116 +2025,232 @@ NavierStokes::advanceSingleStepOnPatch(
             if (gamma[n] != 0.0)
             {
                 // Accumulate the flux in the x direction.
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                if (d_use_conservative_form_diffusive_flux)
                 {
-                    double* F_c_x = convective_flux->getPointer(0, ei);
-                    double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
-                    
-                    double* F_d_x = diffusive_flux->getPointer(0, ei);
-                    double* F_d_x_intermediate = diffusive_flux_intermediate->getPointer(0, ei);
-                    
-                    for (int k = 0; k < interior_dim_2; k++)
+                    for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        for (int j = 0; j < interior_dim_1; j++)
+                        double* F_c_x = convective_flux->getPointer(0, ei);
+                        double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                        
+                        double* F_d_x = diffusive_flux->getPointer(0, ei);
+                        double* F_d_x_intermediate = diffusive_flux_intermediate->getPointer(0, ei);
+                        
+                        for (int k = 0; k < interior_dim_2; k++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
-                            for (int i = 0; i < interior_dim_0 + 1; i++)
+                            for (int j = 0; j < interior_dim_1; j++)
                             {
-                                // Compute linear index.
-                                const int idx_flux_x = i +
-                                    j*(interior_dim_0 + 1) +
-                                    k*(interior_dim_0 + 1)*interior_dim_1;
-                                
-                                F_c_x[idx_flux_x] += gamma[n]*F_c_x_intermediate[idx_flux_x];
-                                F_d_x[idx_flux_x] += gamma[n]*F_d_x_intermediate[idx_flux_x];
-                            }                        
+#ifdef HAMERS_ENABLE_SIMD
+                                #pragma omp simd
+#endif
+                                for (int i = 0; i < interior_dim_0 + 1; i++)
+                                {
+                                    // Compute linear index.
+                                    const int idx_flux_x = i +
+                                        j*(interior_dim_0 + 1) +
+                                        k*(interior_dim_0 + 1)*interior_dim_1;
+                                    
+                                    F_c_x[idx_flux_x] += gamma[n]*F_c_x_intermediate[idx_flux_x];
+                                    F_d_x[idx_flux_x] += gamma[n]*F_d_x_intermediate[idx_flux_x];
+                                }                        
+                            }
                         }
                     }
-                }
-                
-                // Accumulate the flux in the y direction.
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
-                {
-                    double* F_c_y = convective_flux->getPointer(1, ei);
-                    double* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
                     
-                    double* F_d_y = diffusive_flux->getPointer(1, ei);
-                    double* F_d_y_intermediate = diffusive_flux_intermediate->getPointer(1, ei);
-                    
-                    for (int k = 0; k < interior_dim_2; k++)
+                    // Accumulate the flux in the y direction.
+                    for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        for (int j = 0; j < interior_dim_1 + 1; j++)
+                        double* F_c_y = convective_flux->getPointer(1, ei);
+                        double* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
+                        
+                        double* F_d_y = diffusive_flux->getPointer(1, ei);
+                        double* F_d_y_intermediate = diffusive_flux_intermediate->getPointer(1, ei);
+                        
+                        for (int k = 0; k < interior_dim_2; k++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
-                            for (int i = 0; i < interior_dim_0; i++)
+                            for (int j = 0; j < interior_dim_1 + 1; j++)
                             {
-                                // Compute linear index.
-                                const int idx_flux_y = i +
-                                    j*interior_dim_0 +
-                                    k*interior_dim_0*(interior_dim_1 + 1);
-                                
-                                F_c_y[idx_flux_y] += gamma[n]*F_c_y_intermediate[idx_flux_y];
-                                F_d_y[idx_flux_y] += gamma[n]*F_d_y_intermediate[idx_flux_y];
+#ifdef HAMERS_ENABLE_SIMD
+                                #pragma omp simd
+#endif
+                                for (int i = 0; i < interior_dim_0; i++)
+                                {
+                                    // Compute linear index.
+                                    const int idx_flux_y = i +
+                                        j*interior_dim_0 +
+                                        k*interior_dim_0*(interior_dim_1 + 1);
+                                    
+                                    F_c_y[idx_flux_y] += gamma[n]*F_c_y_intermediate[idx_flux_y];
+                                    F_d_y[idx_flux_y] += gamma[n]*F_d_y_intermediate[idx_flux_y];
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Accumulate the flux in the z direction.
+                    for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                    {
+                        double* F_c_z = convective_flux->getPointer(2, ei);
+                        double* F_c_z_intermediate = convective_flux_intermediate->getPointer(2, ei);
+                        
+                        double* F_d_z = diffusive_flux->getPointer(2, ei);
+                        double* F_d_z_intermediate = diffusive_flux_intermediate->getPointer(2, ei);
+                        
+                        for (int k = 0; k < interior_dim_2 + 1; k++)
+                        {
+                            for (int j = 0; j < interior_dim_1; j++)
+                            {
+    #ifdef HAMERS_ENABLE_SIMD
+                                #pragma omp simd
+    #endif
+                                for (int i = 0; i < interior_dim_0; i++)
+                                {
+                                    // Compute linear index.
+                                    const int idx_flux_z = i +
+                                        j*interior_dim_0 +
+                                        k*interior_dim_0*interior_dim_1;
+                                    
+                                    F_c_z[idx_flux_z] += gamma[n]*F_c_z_intermediate[idx_flux_z];
+                                    F_d_z[idx_flux_z] += gamma[n]*F_d_z_intermediate[idx_flux_z];
+                                }
                             }
                         }
                     }
                 }
-                
-                // Accumulate the flux in the z direction.
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                else
                 {
-                    double* F_c_z = convective_flux->getPointer(2, ei);
-                    double* F_c_z_intermediate = convective_flux_intermediate->getPointer(2, ei);
-                    
-                    double* F_d_z = diffusive_flux->getPointer(2, ei);
-                    double* F_d_z_intermediate = diffusive_flux_intermediate->getPointer(2, ei);
-                    
-                    for (int k = 0; k < interior_dim_2 + 1; k++)
+                    for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        for (int j = 0; j < interior_dim_1; j++)
+                        double* F_c_x = convective_flux->getPointer(0, ei);
+                        double* F_c_x_intermediate = convective_flux_intermediate->getPointer(0, ei);
+                        
+                        for (int k = 0; k < interior_dim_2; k++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
-                            for (int i = 0; i < interior_dim_0; i++)
+                            for (int j = 0; j < interior_dim_1; j++)
                             {
-                                // Compute linear index.
-                                const int idx_flux_z = i +
-                                    j*interior_dim_0 +
-                                    k*interior_dim_0*interior_dim_1;
-                                
-                                F_c_z[idx_flux_z] += gamma[n]*F_c_z_intermediate[idx_flux_z];
-                                F_d_z[idx_flux_z] += gamma[n]*F_d_z_intermediate[idx_flux_z];
+#ifdef HAMERS_ENABLE_SIMD
+                                #pragma omp simd
+#endif
+                                for (int i = 0; i < interior_dim_0 + 1; i++)
+                                {
+                                    // Compute linear index.
+                                    const int idx_flux_x = i +
+                                        j*(interior_dim_0 + 1) +
+                                        k*(interior_dim_0 + 1)*interior_dim_1;
+                                    
+                                    F_c_x[idx_flux_x] += gamma[n]*F_c_x_intermediate[idx_flux_x];
+                                }                        
+                            }
+                        }
+                    }
+                    
+                    // Accumulate the flux in the y direction.
+                    for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                    {
+                        double* F_c_y = convective_flux->getPointer(1, ei);
+                        double* F_c_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
+                        
+                        for (int k = 0; k < interior_dim_2; k++)
+                        {
+                            for (int j = 0; j < interior_dim_1 + 1; j++)
+                            {
+#ifdef HAMERS_ENABLE_SIMD
+                                #pragma omp simd
+#endif
+                                for (int i = 0; i < interior_dim_0; i++)
+                                {
+                                    // Compute linear index.
+                                    const int idx_flux_y = i +
+                                        j*interior_dim_0 +
+                                        k*interior_dim_0*(interior_dim_1 + 1);
+                                    
+                                    F_c_y[idx_flux_y] += gamma[n]*F_c_y_intermediate[idx_flux_y];
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Accumulate the flux in the z direction.
+                    for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                    {
+                        double* F_c_z = convective_flux->getPointer(2, ei);
+                        double* F_c_z_intermediate = convective_flux_intermediate->getPointer(2, ei);
+                        
+                        for (int k = 0; k < interior_dim_2 + 1; k++)
+                        {
+                            for (int j = 0; j < interior_dim_1; j++)
+                            {
+    #ifdef HAMERS_ENABLE_SIMD
+                                #pragma omp simd
+    #endif
+                                for (int i = 0; i < interior_dim_0; i++)
+                                {
+                                    // Compute linear index.
+                                    const int idx_flux_z = i +
+                                        j*interior_dim_0 +
+                                        k*interior_dim_0*interior_dim_1;
+                                    
+                                    F_c_z[idx_flux_z] += gamma[n]*F_c_z_intermediate[idx_flux_z];
+                                }
                             }
                         }
                     }
                 }
                 
                 // Accumulate the source.
-                for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                if (d_use_conservative_form_diffusive_flux)
                 {
-                    double* S = source->getPointer(ei);
-                    double* S_intermediate = source_intermediate->getPointer(ei);
-                    
-                    for (int k = 0; k < interior_dim_2; k++)
+                    for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                     {
-                        for (int j = 0; j < interior_dim_1; j++)
+                        double* S = source->getPointer(ei);
+                        double* S_intermediate = source_intermediate->getPointer(ei);
+                        
+                        for (int k = 0; k < interior_dim_2; k++)
                         {
-#ifdef HAMERS_ENABLE_SIMD
-                            #pragma omp simd
-#endif
-                            for (int i = 0; i < interior_dim_0; i++)
+                            for (int j = 0; j < interior_dim_1; j++)
                             {
-                                // Compute linear index.
-                                const int idx = i +
-                                    j*interior_dim_0 +
-                                    k*interior_dim_0*interior_dim_1;
-                                
-                                S[idx] += gamma[n]*S_intermediate[idx];
+#ifdef HAMERS_ENABLE_SIMD
+                                #pragma omp simd
+#endif
+                                for (int i = 0; i < interior_dim_0; i++)
+                                {
+                                    // Compute linear index.
+                                    const int idx = i +
+                                        j*interior_dim_0 +
+                                        k*interior_dim_0*interior_dim_1;
+                                    
+                                    S[idx] += gamma[n]*S_intermediate[idx];
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+                    {
+                        double* nabla_F_d = diffusive_flux_divergence->getPointer(ei);
+                        double* nabla_F_d_intermediate = diffusive_flux_divergence_intermediate->getPointer(ei);
+                        
+                        double* S = source->getPointer(ei);
+                        double* S_intermediate = source_intermediate->getPointer(ei);
+                        
+                        for (int k = 0; k < interior_dim_2; k++)
+                        {
+                            for (int j = 0; j < interior_dim_1; j++)
+                            {
+#ifdef HAMERS_ENABLE_SIMD
+                                #pragma omp simd
+#endif
+                                for (int i = 0; i < interior_dim_0; i++)
+                                {
+                                    // Compute linear index.
+                                    const int idx = i +
+                                        j*interior_dim_0 +
+                                        k*interior_dim_0*interior_dim_1;
+                                    
+                                    nabla_F_d[idx] += gamma[n]*nabla_F_d_intermediate[idx];
+                                    S[idx] += gamma[n]*S_intermediate[idx];
+                                }
                             }
                         }
                     }
@@ -1809,9 +2347,21 @@ NavierStokes::synchronizeFluxes(
         BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
             patch.getPatchData(d_variable_convective_flux, getDataContext())));
     
-    boost::shared_ptr<pdat::SideData<double> > diffusive_flux(
-        BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
-            patch.getPatchData(d_variable_diffusive_flux, getDataContext())));
+    boost::shared_ptr<pdat::SideData<double> > diffusive_flux;
+    boost::shared_ptr<pdat::CellData<double> > diffusive_flux_divergence;
+    
+    if (d_use_conservative_form_diffusive_flux)
+    {
+        diffusive_flux =
+            BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
+                patch.getPatchData(d_variable_diffusive_flux, getDataContext()));
+    }
+    else
+    {
+        diffusive_flux_divergence =
+            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                patch.getPatchData(d_variable_diffusive_flux_divergence, getDataContext()));
+    }
     
     boost::shared_ptr<pdat::CellData<double> > source(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -1819,11 +2369,25 @@ NavierStokes::synchronizeFluxes(
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(convective_flux);
-    TBOX_ASSERT(diffusive_flux);
+    if (d_use_conservative_form_diffusive_flux)
+    {
+        TBOX_ASSERT(diffusive_flux);
+    }
+    else
+    {
+        TBOX_ASSERT(diffusive_flux_divergence);
+    }
     TBOX_ASSERT(source);
     
     TBOX_ASSERT(convective_flux->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
-    TBOX_ASSERT(diffusive_flux->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
+    if (d_use_conservative_form_diffusive_flux)
+    {
+        TBOX_ASSERT(diffusive_flux->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
+    }
+    else
+    {
+        TBOX_ASSERT(diffusive_flux_divergence->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
+    }
     TBOX_ASSERT(source->getGhostCellWidth() == hier::IntVector::getZero(d_dim));
 #endif
     
@@ -1837,30 +2401,61 @@ NavierStokes::synchronizeFluxes(
         
         const double dx_0 = dx[0];
         
-        for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+        if (d_use_conservative_form_diffusive_flux)
         {
-            double *F_c_x = convective_flux->getPointer(0, ei);
-            double *F_d_x = diffusive_flux->getPointer(0, ei);
-            double *S = source->getPointer(ei);
-            
-            const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
-            
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
-            for (int i = 0; i < interior_dim_0; i++)
+            for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
             {
-                // Compute linear indices.
-                const int idx = i + num_ghosts_0_conservative_var;
-                const int idx_flux_x_L = i;
-                const int idx_flux_x_R = i + 1;
-                const int idx_source = i;
+                double *F_c_x = convective_flux->getPointer(0, ei);
+                double *F_d_x = diffusive_flux->getPointer(0, ei);
+                double *S = source->getPointer(ei);
                 
-                Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L] +
-                                 F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])/dx_0 +
-                                S[idx_source]);
+                const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
+                
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute linear indices.
+                    const int idx = i + num_ghosts_0_conservative_var;
+                    const int idx_flux_x_L = i;
+                    const int idx_flux_x_R = i + 1;
+                    const int idx_source = i;
+                    
+                    Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L] +
+                                     F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])/dx_0 +
+                                    S[idx_source]);
+                }
             }
         }
+        else
+        {
+            for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+            {
+                double *F_c_x = convective_flux->getPointer(0, ei);
+                double *nabla_F_d = diffusive_flux_divergence->getPointer(ei);
+                double *S = source->getPointer(ei);
+                
+                const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
+                
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute linear indices.
+                    const int idx = i + num_ghosts_0_conservative_var;
+                    const int idx_flux_x_L = i;
+                    const int idx_flux_x_R = i + 1;
+                    const int idx_cell = i;
+                    
+                    Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L])/dx_0 -
+                                    nabla_F_d[idx_cell] +
+                                    S[idx_cell]);
+                }
+            }
+        }
+        
     }
     else if (d_dim == tbox::Dimension(2))
     {
@@ -1874,49 +2469,99 @@ NavierStokes::synchronizeFluxes(
         const double dx_0 = dx[0];
         const double dx_1 = dx[1];
         
-        for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+        if (d_use_conservative_form_diffusive_flux)
         {
-            double *F_c_x = convective_flux->getPointer(0, ei);
-            double *F_c_y = convective_flux->getPointer(1, ei);
-            double *F_d_x = diffusive_flux->getPointer(0, ei);
-            double *F_d_y = diffusive_flux->getPointer(1, ei);
-            double *S = source->getPointer(ei);
-            
-            const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
-            const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
-            const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[ei][0];
-            
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
             {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
-                for (int i = 0; i < interior_dim_0; i++)
+                double *F_c_x = convective_flux->getPointer(0, ei);
+                double *F_c_y = convective_flux->getPointer(1, ei);
+                double *F_d_x = diffusive_flux->getPointer(0, ei);
+                double *F_d_y = diffusive_flux->getPointer(1, ei);
+                double *S = source->getPointer(ei);
+                
+                const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
+                const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
+                const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[ei][0];
+                
+                for (int j = 0; j < interior_dim_1; j++)
                 {
-                    // Compute linear indices.
-                    const int idx = (i + num_ghosts_0_conservative_var) +
-                        (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
-                    
-                    const int idx_flux_x_L = i +
-                        j*(interior_dim_0 + 1);
-                    
-                    const int idx_flux_x_R = (i + 1) +
-                        j*(interior_dim_0 + 1);
-                    
-                    const int idx_flux_y_B = i +
-                        j*interior_dim_0;
-                    
-                    const int idx_flux_y_T = i +
-                        (j + 1)*interior_dim_0;
-                    
-                    const int idx_source = i +
-                        j*interior_dim_0;
-                    
-                    Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L] +
-                                     F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])/dx_0 -
-                                    (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B] +
-                                     F_d_y[idx_flux_y_T] - F_d_y[idx_flux_y_B])/dx_1 +
-                                    S[idx_source]);
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute linear indices.
+                        const int idx = (i + num_ghosts_0_conservative_var) +
+                            (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
+                        
+                        const int idx_flux_x_L = i +
+                            j*(interior_dim_0 + 1);
+                        
+                        const int idx_flux_x_R = (i + 1) +
+                            j*(interior_dim_0 + 1);
+                        
+                        const int idx_flux_y_B = i +
+                            j*interior_dim_0;
+                        
+                        const int idx_flux_y_T = i +
+                            (j + 1)*interior_dim_0;
+                        
+                        const int idx_source = i +
+                            j*interior_dim_0;
+                        
+                        Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L] +
+                                         F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])/dx_0 -
+                                        (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B] +
+                                         F_d_y[idx_flux_y_T] - F_d_y[idx_flux_y_B])/dx_1 +
+                                        S[idx_source]);
+                    }
+                }
+            }
+        }
+        else
+        {
+            for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+            {
+                double *F_c_x = convective_flux->getPointer(0, ei);
+                double *F_c_y = convective_flux->getPointer(1, ei);
+                double *nabla_F_d = diffusive_flux_divergence->getPointer(ei);
+                double *S = source->getPointer(ei);
+                
+                const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
+                const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
+                const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[ei][0];
+                
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute linear indices.
+                        const int idx = (i + num_ghosts_0_conservative_var) +
+                            (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
+                        
+                        const int idx_flux_x_L = i +
+                            j*(interior_dim_0 + 1);
+                        
+                        const int idx_flux_x_R = (i + 1) +
+                            j*(interior_dim_0 + 1);
+                        
+                        const int idx_flux_y_B = i +
+                            j*interior_dim_0;
+                        
+                        const int idx_flux_y_T = i +
+                            (j + 1)*interior_dim_0;
+                        
+                        const int idx_cell = i +
+                            j*interior_dim_0;
+                        
+                        Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L])/dx_0 -
+                                        (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B])/dx_1 -
+                                        nabla_F_d[idx_cell] +
+                                        S[idx_cell]);
+                    }
                 }
             }
         }
@@ -1935,72 +2580,144 @@ NavierStokes::synchronizeFluxes(
         const double dx_1 = dx[1];
         const double dx_2 = dx[2];
         
-        for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+        if (d_use_conservative_form_diffusive_flux)
         {
-            double *F_c_x = convective_flux->getPointer(0, ei);
-            double *F_c_y = convective_flux->getPointer(1, ei);
-            double *F_c_z = convective_flux->getPointer(2, ei);
-            double *F_d_x = diffusive_flux->getPointer(0, ei);
-            double *F_d_y = diffusive_flux->getPointer(1, ei);
-            double *F_d_z = diffusive_flux->getPointer(2, ei);
-            double *S = source->getPointer(ei);
-            
-            const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
-            const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
-            const int num_ghosts_2_conservative_var = num_ghosts_conservative_var[ei][2];
-            const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[ei][0];
-            const int ghostcell_dim_1_conservative_var = ghostcell_dims_conservative_var[ei][1];
-            
-            for (int k = 0; k < interior_dim_2; k++)
+            for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                double *F_c_x = convective_flux->getPointer(0, ei);
+                double *F_c_y = convective_flux->getPointer(1, ei);
+                double *F_c_z = convective_flux->getPointer(2, ei);
+                double *F_d_x = diffusive_flux->getPointer(0, ei);
+                double *F_d_y = diffusive_flux->getPointer(1, ei);
+                double *F_d_z = diffusive_flux->getPointer(2, ei);
+                double *S = source->getPointer(ei);
+                
+                const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
+                const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
+                const int num_ghosts_2_conservative_var = num_ghosts_conservative_var[ei][2];
+                const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[ei][0];
+                const int ghostcell_dim_1_conservative_var = ghostcell_dims_conservative_var[ei][1];
+                
+                for (int k = 0; k < interior_dim_2; k++)
                 {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int j = 0; j < interior_dim_1; j++)
                     {
-                        // Compute linear indices.
-                        const int idx = (i + num_ghosts_0_conservative_var) +
-                            (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
-                            (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
-                                ghostcell_dim_1_conservative_var;
-                        
-                        const int idx_flux_x_L = i +
-                            j*(interior_dim_0 + 1) +
-                            k*(interior_dim_0 + 1)*interior_dim_1;
-                        
-                        const int idx_flux_x_R = (i + 1) +
-                            j*(interior_dim_0 + 1) +
-                            k*(interior_dim_0 + 1)*interior_dim_1;
-                        
-                        const int idx_flux_y_B = i +
-                            j*interior_dim_0 +
-                            k*interior_dim_0*(interior_dim_1 + 1);
-                        
-                        const int idx_flux_y_T = i +
-                            (j + 1)*interior_dim_0 +
-                            k*interior_dim_0*(interior_dim_1 + 1);
-                        
-                        const int idx_flux_z_B = i +
-                            j*interior_dim_0 +
-                            k*interior_dim_0*interior_dim_1;
-                        
-                        const int idx_flux_z_F = i +
-                            j*interior_dim_0 +
-                            (k + 1)*interior_dim_0*interior_dim_1;
-                        
-                        const int idx_source = i +
-                            j*interior_dim_0 +
-                            k*interior_dim_0*interior_dim_1;
-                        
-                        Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L] +
-                                         F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])/dx_0 -
-                                        (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B] +
-                                         F_d_y[idx_flux_y_T] - F_d_y[idx_flux_y_B])/dx_1 -
-                                        (F_c_z[idx_flux_z_F] - F_c_z[idx_flux_z_B] +
-                                         F_d_z[idx_flux_z_F] - F_d_z[idx_flux_z_B])/dx_2 +
-                                        S[idx_source]);
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute linear indices.
+                            const int idx = (i + num_ghosts_0_conservative_var) +
+                                (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                                (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                                    ghostcell_dim_1_conservative_var;
+                            
+                            const int idx_flux_x_L = i +
+                                j*(interior_dim_0 + 1) +
+                                k*(interior_dim_0 + 1)*interior_dim_1;
+                            
+                            const int idx_flux_x_R = (i + 1) +
+                                j*(interior_dim_0 + 1) +
+                                k*(interior_dim_0 + 1)*interior_dim_1;
+                            
+                            const int idx_flux_y_B = i +
+                                j*interior_dim_0 +
+                                k*interior_dim_0*(interior_dim_1 + 1);
+                            
+                            const int idx_flux_y_T = i +
+                                (j + 1)*interior_dim_0 +
+                                k*interior_dim_0*(interior_dim_1 + 1);
+                            
+                            const int idx_flux_z_B = i +
+                                j*interior_dim_0 +
+                                k*interior_dim_0*interior_dim_1;
+                            
+                            const int idx_flux_z_F = i +
+                                j*interior_dim_0 +
+                                (k + 1)*interior_dim_0*interior_dim_1;
+                            
+                            const int idx_source = i +
+                                j*interior_dim_0 +
+                                k*interior_dim_0*interior_dim_1;
+                            
+                            Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L] +
+                                             F_d_x[idx_flux_x_R] - F_d_x[idx_flux_x_L])/dx_0 -
+                                            (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B] +
+                                             F_d_y[idx_flux_y_T] - F_d_y[idx_flux_y_B])/dx_1 -
+                                            (F_c_z[idx_flux_z_F] - F_c_z[idx_flux_z_B] +
+                                             F_d_z[idx_flux_z_F] - F_d_z[idx_flux_z_B])/dx_2 +
+                                            S[idx_source]);
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
+            {
+                double *F_c_x = convective_flux->getPointer(0, ei);
+                double *F_c_y = convective_flux->getPointer(1, ei);
+                double *F_c_z = convective_flux->getPointer(2, ei);
+                double *nabla_F_d = diffusive_flux_divergence->getPointer(ei);
+                double *S = source->getPointer(ei);
+                
+                const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
+                const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
+                const int num_ghosts_2_conservative_var = num_ghosts_conservative_var[ei][2];
+                const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[ei][0];
+                const int ghostcell_dim_1_conservative_var = ghostcell_dims_conservative_var[ei][1];
+                
+                for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute linear indices.
+                            const int idx = (i + num_ghosts_0_conservative_var) +
+                                (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
+                                (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
+                                    ghostcell_dim_1_conservative_var;
+                            
+                            const int idx_flux_x_L = i +
+                                j*(interior_dim_0 + 1) +
+                                k*(interior_dim_0 + 1)*interior_dim_1;
+                            
+                            const int idx_flux_x_R = (i + 1) +
+                                j*(interior_dim_0 + 1) +
+                                k*(interior_dim_0 + 1)*interior_dim_1;
+                            
+                            const int idx_flux_y_B = i +
+                                j*interior_dim_0 +
+                                k*interior_dim_0*(interior_dim_1 + 1);
+                            
+                            const int idx_flux_y_T = i +
+                                (j + 1)*interior_dim_0 +
+                                k*interior_dim_0*(interior_dim_1 + 1);
+                            
+                            const int idx_flux_z_B = i +
+                                j*interior_dim_0 +
+                                k*interior_dim_0*interior_dim_1;
+                            
+                            const int idx_flux_z_F = i +
+                                j*interior_dim_0 +
+                                (k + 1)*interior_dim_0*interior_dim_1;
+                            
+                            const int idx_cell = i +
+                                j*interior_dim_0 +
+                                k*interior_dim_0*interior_dim_1;
+                            
+                            Q[ei][idx] += (-(F_c_x[idx_flux_x_R] - F_c_x[idx_flux_x_L])/dx_0 -
+                                            (F_c_y[idx_flux_y_T] - F_c_y[idx_flux_y_B])/dx_1 -
+                                            (F_c_z[idx_flux_z_F] - F_c_z[idx_flux_z_B])/dx_2 -
+                                            nabla_F_d[idx_cell] +
+                                            S[idx_cell]);
+                        }
                     }
                 }
             }
@@ -2351,12 +3068,27 @@ NavierStokes::putToRestart(
         restart_db->putDatabase("d_convective_flux_reconstructor_db");
     d_convective_flux_reconstructor->putToRestart(restart_convective_flux_reconstructor_db);
     
-    restart_db->putString("d_diffusive_flux_reconstructor_str", d_diffusive_flux_reconstructor_str);
     
-    // Put the properties of d_diffusive_flux_reconstructor into the restart database.
-    boost::shared_ptr<tbox::Database> restart_diffusive_flux_reconstructor_db =
-        restart_db->putDatabase("d_diffusive_flux_reconstructor_db");
-    d_diffusive_flux_reconstructor->putToRestart(restart_diffusive_flux_reconstructor_db);
+    if (d_use_conservative_form_diffusive_flux)
+    {
+        restart_db->putString("d_diffusive_flux_reconstructor_str", d_diffusive_flux_reconstructor_str);
+        
+        // Put the properties of d_diffusive_flux_reconstructor into the restart database.
+        boost::shared_ptr<tbox::Database> restart_diffusive_flux_reconstructor_db =
+            restart_db->putDatabase("d_diffusive_flux_reconstructor_db");
+        d_diffusive_flux_reconstructor->putToRestart(restart_diffusive_flux_reconstructor_db);
+    }
+    else
+    {
+        restart_db->putString("d_nonconservative_diffusive_flux_divergence_operator_str",
+            d_nonconservative_diffusive_flux_divergence_operator_str);
+        
+        // Put the properties of d_nonconservative_diffusive_flux_divergence_operator into the restart database.
+        boost::shared_ptr<tbox::Database> restart_nonconservative_diffusive_flux_divergence_operator_db =
+            restart_db->putDatabase("d_nonconservative_diffusive_flux_divergence_operator_db");
+        d_nonconservative_diffusive_flux_divergence_operator->putToRestart(
+            restart_nonconservative_diffusive_flux_divergence_operator_db);
+    }
     
     boost::shared_ptr<tbox::Database> restart_Navier_Stokes_boundary_conditions_db =
         restart_db->putDatabase("d_Navier_Stokes_boundary_conditions_db");
@@ -2497,11 +3229,22 @@ void NavierStokes::printClassData(std::ostream& os) const
     d_convective_flux_reconstructor->printClassData(os);
     os << "--------------------------------------------------------------------------------";
     
-    /*
-     * Print data of d_diffusive_flux_reconstructor.
-     */
-    
-    d_diffusive_flux_reconstructor->printClassData(os);
+    if (d_use_conservative_form_diffusive_flux)
+    {
+        /*
+         * Print data of d_diffusive_flux_reconstructor.
+         */
+        
+        d_diffusive_flux_reconstructor->printClassData(os);
+    }
+    else
+    {
+        /*
+         * Print data of d_nonconservative_diffusive_flux_divergence_operator.
+         */
+        
+        d_nonconservative_diffusive_flux_divergence_operator->printClassData(os);
+    }
     os << "--------------------------------------------------------------------------------";
     
     /*
@@ -2756,34 +3499,74 @@ NavierStokes::getFromInput(
                 << std::endl);
         }
         
-        /*
-         * Get the diffusive flux reconstructor.
-         */
-        if (input_db->keyExists("diffusive_flux_reconstructor"))
-        {
-            d_diffusive_flux_reconstructor_str = input_db->getString("diffusive_flux_reconstructor");
-        }
-        else
-        {
-            TBOX_ERROR(d_object_name
-                << ": "
-                << "Key data 'diffusive_flux_reconstructor' not found in input database."
-                << std::endl);            
-        }
+        d_use_conservative_form_diffusive_flux = input_db->getBoolWithDefault(
+            "use_conservative_form_diffusive_flux", true);
         
-        /*
-         * Get the database of the diffusive flux reconstructor.
-         */
-        if (input_db->keyExists("Diffusive_flux_reconstructor"))
+        if (d_use_conservative_form_diffusive_flux)
         {
-            d_diffusive_flux_reconstructor_db = input_db->getDatabase("Diffusive_flux_reconstructor");
+            /*
+             * Get the diffusive flux reconstructor.
+             */
+            if (input_db->keyExists("diffusive_flux_reconstructor"))
+            {
+                d_diffusive_flux_reconstructor_str = input_db->getString("diffusive_flux_reconstructor");
+            }
+            else
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "Key data 'diffusive_flux_reconstructor' not found in input database."
+                    << std::endl);            
+            }
+            
+            /*
+             * Get the database of the diffusive flux reconstructor.
+             */
+            if (input_db->keyExists("Diffusive_flux_reconstructor"))
+            {
+                d_diffusive_flux_reconstructor_db = input_db->getDatabase("Diffusive_flux_reconstructor");
+            }
+            else
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "Key data 'Diffusive_flux_reconstructor' not found in input database."
+                    << std::endl);
+            }
         }
         else
         {
-            TBOX_ERROR(d_object_name
-                << ": "
-                << "Key data 'Diffusive_flux_reconstructor' not found in input database."
-                << std::endl);
+            /*
+             * Get the non-conservative diffusive flux divergence operator.
+             */
+            if (input_db->keyExists("nonconservative_diffusive_flux_divergence_operator"))
+            {
+                d_nonconservative_diffusive_flux_divergence_operator_str = input_db->getString(
+                    "nonconservative_diffusive_flux_divergence_operator");
+            }
+            else
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "Key data 'nonconservative_diffusive_flux_divergence_operator' not found in input database."
+                    << std::endl);            
+            }
+            
+            /*
+             * Get the database of the non-conservative diffusive flux divergence operator.
+             */
+            if (input_db->keyExists("Nonconservative_diffusive_flux_divergence_operator"))
+            {
+                d_diffusive_flux_reconstructor_db = input_db->getDatabase(
+                    "Nonconservative_diffusive_flux_divergence_operator");
+            }
+            else
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "Key data 'Nonconservative_diffusive_flux_divergence_operator' not found in input database."
+                    << std::endl);
+            }
         }
         
         if (input_db->keyExists("Value_tagger"))
@@ -2869,9 +3652,20 @@ void NavierStokes::getFromRestart()
     
     d_convective_flux_reconstructor_db = db->getDatabase("d_convective_flux_reconstructor_db");
     
-    d_diffusive_flux_reconstructor_str = db->getString("d_diffusive_flux_reconstructor_str");
+    d_use_conservative_form_diffusive_flux = db->getBool("d_use_conservative_form_diffusive_flux");
     
-    d_diffusive_flux_reconstructor_db = db->getDatabase("d_diffusive_flux_reconstructor_db");
+    if (d_use_conservative_form_diffusive_flux)
+    {
+        d_diffusive_flux_reconstructor_str = db->getString("d_diffusive_flux_reconstructor_str");
+        d_diffusive_flux_reconstructor_db = db->getDatabase("d_diffusive_flux_reconstructor_db");
+    }
+    else
+    {
+        d_nonconservative_diffusive_flux_divergence_operator_str =
+            db->getString("d_nonconservative_diffusive_flux_divergence_operator_str");
+        d_nonconservative_diffusive_flux_divergence_operator_db =
+            db->getDatabase("d_nonconservative_diffusive_flux_divergence_operator_db");
+    }
     
     d_Navier_Stokes_boundary_conditions_db = db->getDatabase("d_Navier_Stokes_boundary_conditions_db");
     

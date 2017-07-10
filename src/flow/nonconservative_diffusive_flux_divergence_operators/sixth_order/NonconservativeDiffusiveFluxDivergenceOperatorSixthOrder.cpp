@@ -87,9 +87,9 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
     diff_ghost_box.grow(d_num_diff_ghosts);
     const hier::IntVector diff_ghostcell_dims = diff_ghost_box.numberCells();
     
-    // Get the side data of diffusive flux.
-    boost::shared_ptr<pdat::SideData<double> > diffusive_flux_divergence(
-        BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
+    // Get the cell data of diffusive flux divergence.
+    boost::shared_ptr<pdat::CellData<double> > diffusive_flux_divergence(
+        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
             patch.getPatchData(variable_diffusive_flux_divergence, data_context)));
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -246,7 +246,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
                     
                     const int idx_diff = i + num_diff_ghosts_0;
                     
-                    nabla_F[idx_nghost] += (dmudx[idx_diff]*dudx[idx_diff] +
+                    nabla_F[idx_nghost] += dt*(dmudx[idx_diff]*dudx[idx_diff] +
                         mu[idx_diffusivity]*d2udxdx[idx_diff]);
                 }
             }
@@ -446,7 +446,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
                         const int idx_diff = (i + num_diff_ghosts_0) +
                             (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
                         
-                        nabla_F[idx_nghost] += (dmudx[idx_diff]*dudx[idx_diff] +
+                        nabla_F[idx_nghost] += dt*(dmudx[idx_diff]*dudx[idx_diff] +
                             mu[idx_diffusivity]*d2udxdx[idx_diff]);
                     }
                 }
@@ -504,7 +504,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         var_derivative_component_idx_y.resize(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            var_derivative_component_idx_y[ei].resize(var_derivative_y.size());
+            var_derivative_component_idx_y[ei].resize(var_derivative_y[ei].size());
             for (int vi = 0; vi < static_cast<int>(var_derivative_component_idx_y[ei].size()); vi++)
             {
                 var_derivative_component_idx_y[ei][vi] = 0;
@@ -585,7 +585,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
                         const int idx_diff = (i + num_diff_ghosts_0) +
                             (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
                         
-                        nabla_F[idx_nghost] += (dmudx[idx_diff]*dudy[idx_diff] +
+                        nabla_F[idx_nghost] += dt*(dmudx[idx_diff]*dudy[idx_diff] +
                             mu[idx_diffusivity]*d2udxdy[idx_diff]);
                     }
                 }
@@ -649,7 +649,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         var_derivative_component_idx_x.resize(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            var_derivative_component_idx_x[ei].resize(var_derivative_x.size());
+            var_derivative_component_idx_x[ei].resize(var_derivative_x[ei].size());
             for (int vi = 0; vi < static_cast<int>(var_derivative_component_idx_x[ei].size()); vi++)
             {
                 var_derivative_component_idx_x[ei][vi] = 0;
@@ -730,7 +730,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
                         const int idx_diff = (i + num_diff_ghosts_0) +
                             (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
                         
-                        nabla_F[idx_nghost] += (dmudy[idx_diff]*dudx[idx_diff] +
+                        nabla_F[idx_nghost] += dt*(dmudy[idx_diff]*dudx[idx_diff] +
                             mu[idx_diffusivity]*d2udydx[idx_diff]);
                     }
                 }
@@ -861,7 +861,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
                         const int idx_diff = (i + num_diff_ghosts_0) +
                             (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
                         
-                        nabla_F[idx_nghost] += (dmudy[idx_diff]*dudy[idx_diff] +
+                        nabla_F[idx_nghost] += dt*(dmudy[idx_diff]*dudy[idx_diff] +
                             mu[idx_diffusivity]*d2udydy[idx_diff]);
                     }
                 }
@@ -1092,7 +1092,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
                                 (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
                                     diff_ghostcell_dim_1;
                             
-                            nabla_F[idx_nghost] += (dmudx[idx_diff]*dudx[idx_diff] +
+                            nabla_F[idx_nghost] += dt*(dmudx[idx_diff]*dudx[idx_diff] +
                                 mu[idx_diffusivity]*d2udxdx[idx_diff]);
                         }
                     }
@@ -1151,7 +1151,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         var_derivative_component_idx_y.resize(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            var_derivative_component_idx_y[ei].resize(var_derivative_y.size());
+            var_derivative_component_idx_y[ei].resize(var_derivative_y[ei].size());
             for (int vi = 0; vi < static_cast<int>(var_derivative_component_idx_y[ei].size()); vi++)
             {
                 var_derivative_component_idx_y[ei][vi] = 0;
@@ -1241,7 +1241,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
                                 (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
                                     diff_ghostcell_dim_1;
                             
-                            nabla_F[idx_nghost] += (dmudx[idx_diff]*dudy[idx_diff] +
+                            nabla_F[idx_nghost] += dt*(dmudx[idx_diff]*dudy[idx_diff] +
                                 mu[idx_diffusivity]*d2udxdy[idx_diff]);
                         }
                     }
@@ -1302,7 +1302,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         var_derivative_component_idx_z.resize(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            var_derivative_component_idx_z[ei].resize(var_derivative_z.size());
+            var_derivative_component_idx_z[ei].resize(var_derivative_z[ei].size());
             for (int vi = 0; vi < static_cast<int>(var_derivative_component_idx_z[ei].size()); vi++)
             {
                 var_derivative_component_idx_z[ei][vi] = 0;
@@ -1392,7 +1392,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
                                 (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
                                     diff_ghostcell_dim_1;
                             
-                            nabla_F[idx_nghost] += (dmudx[idx_diff]*dudz[idx_diff] +
+                            nabla_F[idx_nghost] += dt*(dmudx[idx_diff]*dudz[idx_diff] +
                                 mu[idx_diffusivity]*d2udxdz[idx_diff]);
                         }
                     }
@@ -1457,7 +1457,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         var_derivative_component_idx_x.resize(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            var_derivative_component_idx_x[ei].resize(var_derivative_x.size());
+            var_derivative_component_idx_x[ei].resize(var_derivative_x[ei].size());
             for (int vi = 0; vi < static_cast<int>(var_derivative_component_idx_x[ei].size()); vi++)
             {
                 var_derivative_component_idx_x[ei][vi] = 0;
@@ -1547,7 +1547,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
                                 (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
                                     diff_ghostcell_dim_1;
                             
-                            nabla_F[idx_nghost] += (dmudy[idx_diff]*dudx[idx_diff] +
+                            nabla_F[idx_nghost] += dt*(dmudy[idx_diff]*dudx[idx_diff] +
                                 mu[idx_diffusivity]*d2udydx[idx_diff]);
                         }
                     }
@@ -1688,7 +1688,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
                                 (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
                                     diff_ghostcell_dim_1;
                             
-                            nabla_F[idx_nghost] += (dmudy[idx_diff]*dudy[idx_diff] +
+                            nabla_F[idx_nghost] += dt*(dmudy[idx_diff]*dudy[idx_diff] +
                                 mu[idx_diffusivity]*d2udydy[idx_diff]);
                         }
                     }
@@ -1747,7 +1747,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         var_derivative_component_idx_z.resize(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            var_derivative_component_idx_z[ei].resize(var_derivative_z.size());
+            var_derivative_component_idx_z[ei].resize(var_derivative_z[ei].size());
             for (int vi = 0; vi < static_cast<int>(var_derivative_component_idx_z[ei].size()); vi++)
             {
                 var_derivative_component_idx_z[ei][vi] = 0;
@@ -1837,7 +1837,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
                                 (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
                                     diff_ghostcell_dim_1;
                             
-                            nabla_F[idx_nghost] += (dmudy[idx_diff]*dudz[idx_diff] +
+                            nabla_F[idx_nghost] += dt*(dmudy[idx_diff]*dudz[idx_diff] +
                                 mu[idx_diffusivity]*d2udydz[idx_diff]);
                         }
                     }
@@ -1902,7 +1902,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         var_derivative_component_idx_x.resize(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            var_derivative_component_idx_x[ei].resize(var_derivative_x.size());
+            var_derivative_component_idx_x[ei].resize(var_derivative_x[ei].size());
             for (int vi = 0; vi < static_cast<int>(var_derivative_component_idx_x[ei].size()); vi++)
             {
                 var_derivative_component_idx_x[ei][vi] = 0;
@@ -1992,7 +1992,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
                                 (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
                                     diff_ghostcell_dim_1;
                             
-                            nabla_F[idx_nghost] += (dmudz[idx_diff]*dudx[idx_diff] +
+                            nabla_F[idx_nghost] += dt*(dmudz[idx_diff]*dudx[idx_diff] +
                                 mu[idx_diffusivity]*d2udzdx[idx_diff]);
                         }
                     }
@@ -2053,7 +2053,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
         var_derivative_component_idx_y.resize(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            var_derivative_component_idx_y[ei].resize(var_derivative_y.size());
+            var_derivative_component_idx_y[ei].resize(var_derivative_y[ei].size());
             for (int vi = 0; vi < static_cast<int>(var_derivative_component_idx_y[ei].size()); vi++)
             {
                 var_derivative_component_idx_y[ei][vi] = 0;
@@ -2143,7 +2143,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
                                 (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
                                     diff_ghostcell_dim_1;
                             
-                            nabla_F[idx_nghost] += (dmudz[idx_diff]*dudy[idx_diff] +
+                            nabla_F[idx_nghost] += dt*(dmudz[idx_diff]*dudy[idx_diff] +
                                 mu[idx_diffusivity]*d2udzdy[idx_diff]);
                         }
                     }
@@ -2284,7 +2284,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
                                 (k + num_diff_ghosts_2)*diff_ghostcell_dim_0*
                                     diff_ghostcell_dim_1;
                             
-                            nabla_F[idx_nghost] += (dmudz[idx_diff]*dudz[idx_diff] +
+                            nabla_F[idx_nghost] += dt*(dmudz[idx_diff]*dudz[idx_diff] +
                                 mu[idx_diffusivity]*d2udzdz[idx_diff]);
                         }
                     }
@@ -2398,7 +2398,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
-                    for (int i = -3; i < interior_dim_0 + 3; i++)
+                    for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
                         const int idx = i + num_diff_ghosts_0;
@@ -2485,7 +2485,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
-                        for (int i = -3; i < interior_dim_0 + 3; i++)
+                        for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
                             const int idx = (i + num_diff_ghosts_0) +
@@ -2592,7 +2592,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
 #ifdef HAMERS_ENABLE_SIMD
                             #pragma omp simd
 #endif
-                            for (int i = -3; i < interior_dim_0 + 3; i++)
+                            for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute the linear indices.
                                 const int idx = (i + num_diff_ghosts_0) +
@@ -2753,7 +2753,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                     const int num_subghosts_1_data = num_subghosts_data[1];
                     const int subghostcell_dim_0_data = subghostcell_dims_data[0];
                     
-                    for (int j = -3; j < interior_dim_1 + 3; j++)
+                    for (int j = 0; j < interior_dim_1; j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
@@ -2860,7 +2860,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                     
                     for (int k = -3; k < interior_dim_2 + 3; k++)
                     {
-                        for (int j = -3; j < interior_dim_1 + 3; j++)
+                        for (int j = 0; j < interior_dim_1; j++)
                         {
 #ifdef HAMERS_ENABLE_SIMD
                             #pragma omp simd
@@ -3039,7 +3039,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                     const int subghostcell_dim_0_data = subghostcell_dims_data[0];
                     const int subghostcell_dim_1_data = subghostcell_dims_data[1];
                     
-                    for (int k = -3; k < interior_dim_2 + 3; k++)
+                    for (int k = 0; k < interior_dim_2; k++)
                     {
                         for (int j = -3; j < interior_dim_1 + 3; j++)
                         {
@@ -3193,7 +3193,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
-                    for (int i = -3; i < interior_dim_0 + 3; i++)
+                    for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute the linear indices.
                         const int idx = i + num_diff_ghosts_0;
@@ -3209,7 +3209,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                         dudx[idx] = (1.0/90.0*u[idx_data_LLL] - 3.0/20.0*u[idx_data_LL]
                                      + 3.0/2.0*u[idx_data_L] - 49.0/18.0*u[idx_data]
                                      + 3.0/2.0*u[idx_data_R] - 3.0/20.0*u[idx_data_RR]
-                                     + 1.0/90.0*u[idx_data_RRR])/dx_0;
+                                     + 1.0/90.0*u[idx_data_RRR])/(dx_0*dx_0);
                     }
                     
                     std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
@@ -3276,12 +3276,12 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                     const int num_subghosts_1_data = num_subghosts_data[1];
                     const int subghostcell_dim_0_data = subghostcell_dims_data[0];
                     
-                    for (int j = -3; j < interior_dim_1 + 3; j++)
+                    for (int j = 0; j < interior_dim_1; j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
-                        for (int i = -3; i < interior_dim_0 + 3; i++)
+                        for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
                             const int idx = (i + num_diff_ghosts_0) +
@@ -3311,7 +3311,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                             dudx[idx] = (1.0/90.0*u[idx_data_LLL] - 3.0/20.0*u[idx_data_LL]
                                          + 3.0/2.0*u[idx_data_L] - 49.0/18.0*u[idx_data]
                                          + 3.0/2.0*u[idx_data_R] - 3.0/20.0*u[idx_data_RR]
-                                         + 1.0/90.0*u[idx_data_RRR])/dx_0;
+                                         + 1.0/90.0*u[idx_data_RRR])/(dx_0*dx_0);
                         }
                     }
                     
@@ -3384,14 +3384,14 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                     const int subghostcell_dim_0_data = subghostcell_dims_data[0];
                     const int subghostcell_dim_1_data = subghostcell_dims_data[1];
                     
-                    for (int k = -3; k < interior_dim_2 + 3; k++)
+                    for (int k = 0; k < interior_dim_2; k++)
                     {
-                        for (int j = -3; j < interior_dim_1 + 3; j++)
+                        for (int j = 0; j < interior_dim_1; j++)
                         {
 #ifdef HAMERS_ENABLE_SIMD
                             #pragma omp simd
 #endif
-                            for (int i = -3; i < interior_dim_0 + 3; i++)
+                            for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute the linear indices.
                                 const int idx = (i + num_diff_ghosts_0) +
@@ -3437,7 +3437,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                                 dudx[idx] = (1.0/90.0*u[idx_data_LLL] - 3.0/20.0*u[idx_data_LL]
                                              + 3.0/2.0*u[idx_data_L] - 49.0/18.0*u[idx_data]
                                              + 3.0/2.0*u[idx_data_R] - 3.0/20.0*u[idx_data_RR]
-                                             + 1.0/90.0*u[idx_data_RRR])/dx_0;
+                                             + 1.0/90.0*u[idx_data_RRR])/(dx_0*dx_0);
                             }
                         }
                     }
@@ -3557,12 +3557,12 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                     const int num_subghosts_1_data = num_subghosts_data[1];
                     const int subghostcell_dim_0_data = subghostcell_dims_data[0];
                     
-                    for (int j = -3; j < interior_dim_1 + 3; j++)
+                    for (int j = 0; j < interior_dim_1; j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
-                        for (int i = -3; i < interior_dim_0 + 3; i++)
+                        for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute the linear indices.
                             const int idx = (i + num_diff_ghosts_0) +
@@ -3592,7 +3592,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                             dudy[idx] = (1.0/90.0*u[idx_data_BBB] - 3.0/20.0*u[idx_data_BB]
                                          + 3.0/2.0*u[idx_data_B] - 49.0/18.0*u[idx_data]
                                          + 3.0/2.0*u[idx_data_T] - 3.0/20.0*u[idx_data_TT]
-                                         + 1.0/90.0*u[idx_data_TTT])/dx_1;
+                                         + 1.0/90.0*u[idx_data_TTT])/(dx_1*dx_1);
                         }
                     }
                     
@@ -3665,14 +3665,14 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                     const int subghostcell_dim_0_data = subghostcell_dims_data[0];
                     const int subghostcell_dim_1_data = subghostcell_dims_data[1];
                     
-                    for (int k = -3; k < interior_dim_2 + 3; k++)
+                    for (int k = 0; k < interior_dim_2; k++)
                     {
-                        for (int j = -3; j < interior_dim_1 + 3; j++)
+                        for (int j = 0; j < interior_dim_1; j++)
                         {
 #ifdef HAMERS_ENABLE_SIMD
                             #pragma omp simd
 #endif
-                            for (int i = -3; i < interior_dim_0 + 3; i++)
+                            for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute the linear indices.
                                 const int idx = (i + num_diff_ghosts_0) +
@@ -3718,7 +3718,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                                 dudy[idx] = (1.0/90.0*u[idx_data_BBB] - 3.0/20.0*u[idx_data_BB]
                                              + 3.0/2.0*u[idx_data_B] - 49.0/18.0*u[idx_data]
                                              + 3.0/2.0*u[idx_data_T] - 3.0/20.0*u[idx_data_TT]
-                                             + 1.0/90.0*u[idx_data_TTT])/dx_1;
+                                             + 1.0/90.0*u[idx_data_TTT])/(dx_1*dx_1);
                             }
                         }
                     }
@@ -3851,14 +3851,14 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                     const int subghostcell_dim_0_data = subghostcell_dims_data[0];
                     const int subghostcell_dim_1_data = subghostcell_dims_data[1];
                     
-                    for (int k = -3; k < interior_dim_2 + 3; k++)
+                    for (int k = 0; k < interior_dim_2; k++)
                     {
-                        for (int j = -3; j < interior_dim_1 + 3; j++)
+                        for (int j = 0; j < interior_dim_1; j++)
                         {
 #ifdef HAMERS_ENABLE_SIMD
                             #pragma omp simd
 #endif
-                            for (int i = -3; i < interior_dim_0 + 3; i++)
+                            for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute the linear indices.
                                 const int idx = (i + num_diff_ghosts_0) +
@@ -3904,7 +3904,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                                 dudz[idx] = (1.0/90.0*u[idx_data_BBB] - 3.0/20.0*u[idx_data_BB]
                                              + 3.0/2.0*u[idx_data_B] - 49.0/18.0*u[idx_data]
                                              + 3.0/2.0*u[idx_data_F] - 3.0/20.0*u[idx_data_FF]
-                                             + 1.0/90.0*u[idx_data_FFF])/dx_2;
+                                             + 1.0/90.0*u[idx_data_FFF])/(dx_2*dx_2);
                             }
                         }
                     }

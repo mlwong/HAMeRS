@@ -9,6 +9,7 @@
 #include "apps/Navier-Stokes/NavierStokesInitialConditions.hpp"
 #include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructorManager.hpp"
 #include "flow/diffusive_flux_reconstructors/DiffusiveFluxReconstructorManager.hpp"
+#include "flow/nonconservative_diffusive_flux_divergence_operators/NonconservativeDiffusiveFluxDivergenceOperatorManager.hpp"
 #include "flow/flow_models/FlowModelManager.hpp"
 #include "flow/refinement_taggers/GradientTagger.hpp"
 #include "flow/refinement_taggers/MultiresolutionTagger.hpp"
@@ -506,6 +507,11 @@ class NavierStokes:
         std::string d_diffusive_flux_reconstructor_str;
         
         /*
+         * A string variable to describe the non-conservative diffusive flux divergence operator used.
+         */
+        std::string d_nonconservative_diffusive_flux_divergence_operator_str;
+        
+        /*
          * Number of species.
          */
         int d_num_species;
@@ -527,6 +533,18 @@ class NavierStokes:
          */
         boost::shared_ptr<DiffusiveFluxReconstructor> d_diffusive_flux_reconstructor;
         boost::shared_ptr<tbox::Database> d_diffusive_flux_reconstructor_db;
+        
+        /*
+         * boost::shared_ptr to the NonconservativeDiffusiveFluxDivergenceOperator and its database.
+         */
+        boost::shared_ptr<NonconservativeDiffusiveFluxDivergenceOperator>
+            d_nonconservative_diffusive_flux_divergence_operator;
+        boost::shared_ptr<tbox::Database> d_nonconservative_diffusive_flux_divergence_operator_db;
+        
+        /*
+         * Boolean to determine whether to use conservative or non-conservative form of diffusive flux.
+         */
+        bool d_use_conservative_form_diffusive_flux;
         
         /*
          * boost::shared_ptr to NavierStokesInitialConditions.
@@ -574,14 +592,25 @@ class NavierStokes:
         boost::shared_ptr<DiffusiveFluxReconstructorManager> d_diffusive_flux_reconstructor_manager;
         
         /*
-         * boost::shared_ptr to face variable of convective flux.
+         * boost::shared_ptr to NonconservativeDiffusiveFluxDivergenceOperatorManager.
+         */
+        boost::shared_ptr<NonconservativeDiffusiveFluxDivergenceOperatorManager>
+            d_nonconservative_diffusive_flux_divergence_operator_manager;
+        
+        /*
+         * boost::shared_ptr to side variable of convective flux.
          */
         boost::shared_ptr<pdat::SideVariable<double> > d_variable_convective_flux;
         
         /*
-         * boost::shared_ptr to face variable of diffusive flux.
+         * boost::shared_ptr to side variable of diffusive flux.
          */
         boost::shared_ptr<pdat::SideVariable<double> > d_variable_diffusive_flux;
+        
+        /*
+         * boost::shared_ptr to cell variable of diffusive flux divergence.
+         */
+        boost::shared_ptr<pdat::CellVariable<double> > d_variable_diffusive_flux_divergence;
         
         /*
          * boost::shared_ptr to cell variable of source terms.

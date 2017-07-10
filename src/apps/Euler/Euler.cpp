@@ -208,7 +208,7 @@ Euler::Euler(
     }
     
     /*
-     * Initialize the face variable of convective flux.
+     * Initialize the side variable of convective flux.
      */
     
     d_variable_convective_flux = boost::shared_ptr<pdat::SideVariable<double> > (
