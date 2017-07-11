@@ -3068,6 +3068,7 @@ NavierStokes::putToRestart(
         restart_db->putDatabase("d_convective_flux_reconstructor_db");
     d_convective_flux_reconstructor->putToRestart(restart_convective_flux_reconstructor_db);
     
+    restart_db->putBool("d_use_conservative_form_diffusive_flux", d_use_conservative_form_diffusive_flux);
     
     if (d_use_conservative_form_diffusive_flux)
     {
