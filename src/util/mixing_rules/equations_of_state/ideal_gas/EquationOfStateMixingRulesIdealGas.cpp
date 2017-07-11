@@ -228,6 +228,35 @@ EquationOfStateMixingRulesIdealGas::getPressure(
 
 
 /*
+ * Compute the pressure of the mixture with isothermal and isobaric assumptions.
+ */
+void
+EquationOfStateMixingRulesIdealGas::getPressure(
+    boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::CellData<double> >& data_density,
+    const boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
+    const boost::shared_ptr<pdat::CellData<double> >& data_mass_fraction,
+    const hier::Box& domain) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
+                (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
+
+    TBOX_ASSERT(data_pressure);
+    TBOX_ASSERT(data_density);
+    TBOX_ASSERT(data_internal_energy);
+    TBOX_ASSERT(data_mass_fraction);
+    
+    TBOX_ASSERT((data_mass_fraction->getDepth() == d_num_species) ||
+                (data_mass_fraction->getDepth() == d_num_species - 1));
+#endif
+    
+
+
+}
+
+
+/*
  * Compute the pressure of the mixture with isobaric assumption.
  */
 double
@@ -276,6 +305,22 @@ EquationOfStateMixingRulesIdealGas::getPressure(
 
 
 /*
+ * Compute the pressure of the mixture with isobaric assumption.
+ */
+void
+EquationOfStateMixingRulesIdealGas::getPressure(
+    boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::CellData<double> >& data_density,
+    const boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
+    const boost::shared_ptr<pdat::CellData<double> >& data_mass_fraction,
+    const boost::shared_ptr<pdat::CellData<double> >& data_volume_fraction,
+    const hier::Box& domain) const
+{
+    
+}
+
+
+/*
  * Compute the sound speed of the mixture with isothermal and isobaric assumptions.
  */
 double
@@ -316,6 +361,21 @@ EquationOfStateMixingRulesIdealGas::getSoundSpeed(
         density,
         pressure,
         mixture_thermo_properties_const_ptr);
+}
+
+
+/*
+ * Compute the sound speed of the mixture with isothermal and isobaric assumptions.
+ */
+void
+EquationOfStateMixingRulesIdealGas::getSoundSpeed(
+    boost::shared_ptr<pdat::CellData<double> >& data_sound_speed,
+    const boost::shared_ptr<pdat::CellData<double> >& data_density,
+    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::CellData<double> >& data_mass_fraction,
+    const hier::Box& domain) const
+{
+    
 }
 
 
@@ -368,6 +428,22 @@ EquationOfStateMixingRulesIdealGas::getSoundSpeed(
 
 
 /*
+ * Compute the sound speed of the mixture with isobaric assumption.
+ */
+void
+EquationOfStateMixingRulesIdealGas::getSoundSpeed(
+    boost::shared_ptr<pdat::CellData<double> >& data_sound_speed,
+    const boost::shared_ptr<pdat::CellData<double> >& data_density,
+    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::CellData<double> >& data_mass_fraction,
+    const boost::shared_ptr<pdat::CellData<double> >& data_volume_fraction,
+    const hier::Box& domain) const
+{
+    
+}
+
+
+/*
  * Compute the specific internal energy of the mixture with isothermal and isobaric assumptions.
  */
 double
@@ -408,6 +484,21 @@ EquationOfStateMixingRulesIdealGas::getInternalEnergy(
         density,
         pressure,
         mixture_thermo_properties_const_ptr);
+}
+
+
+/*
+ * Compute the specific internal energy of the mixture with isothermal and isobaric assumptions.
+ */
+void
+EquationOfStateMixingRulesIdealGas::getInternalEnergy(
+    boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
+    const boost::shared_ptr<pdat::CellData<double> >& data_density,
+    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::CellData<double> >& data_mass_fraction,
+    const hier::Box& domain) const
+{
+    
 }
 
 
@@ -460,6 +551,22 @@ EquationOfStateMixingRulesIdealGas::getInternalEnergy(
 
 
 /*
+ * Compute the specific internal energy of the mixture with isobaric assumption.
+ */
+void
+EquationOfStateMixingRulesIdealGas::getInternalEnergy(
+    boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
+    const boost::shared_ptr<pdat::CellData<double> >& data_density,
+    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::CellData<double> >& data_mass_fraction,
+    const boost::shared_ptr<pdat::CellData<double> >& data_volume_fraction,
+    const hier::Box& domain) const
+{
+    
+}
+
+
+/*
  * Compute the temperature of the mixture with isothermal and isobaric assumptions.
  */
 double
@@ -500,6 +607,21 @@ EquationOfStateMixingRulesIdealGas::getTemperature(
         density,
         pressure,
         mixture_thermo_properties_const_ptr);
+}
+
+
+/*
+ * Compute the temperature of the mixture with isothermal and isobaric assumptions.
+ */
+void
+EquationOfStateMixingRulesIdealGas::getTemperature(
+    boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+    const boost::shared_ptr<pdat::CellData<double> >& data_density,
+    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::CellData<double> >& data_mass_fraction,
+    const hier::Box& domain) const
+{
+    
 }
 
 
@@ -545,6 +667,22 @@ EquationOfStateMixingRulesIdealGas::getInternalEnergyFromTemperature(
         density,
         temperature,
         mixture_thermo_properties_const_ptr);
+}
+
+
+/*
+ * Compute the specific internal energy of the mixture from temperature with isothermal
+ * and isobaric assumptions.
+ */
+void
+EquationOfStateMixingRulesIdealGas::getInternalEnergyFromTemperature(
+    boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
+    const boost::shared_ptr<pdat::CellData<double> >& data_density,
+    const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+    const boost::shared_ptr<pdat::CellData<double> >& data_mass_fraction,
+    const hier::Box& domain) const
+{
+    
 }
 
 
@@ -595,6 +733,21 @@ EquationOfStateMixingRulesIdealGas::getIsochoricSpecificHeatCapacity(
 
 
 /*
+ * Compute the isochoric specific heat capacity of mixture with isothermal assumption.
+ */
+void
+EquationOfStateMixingRulesIdealGas::getIsochoricSpecificHeatCapacity(
+    boost::shared_ptr<pdat::CellData<double> >& data_isochoric_specific_heat_capacity,
+    const boost::shared_ptr<pdat::CellData<double> >& data_density,
+    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::CellData<double> >& data_mass_fraction,
+    const hier::Box& domain) const
+{
+    
+}
+
+
+/*
  * Compute the isobaric specific heat capacity of mixture with isothermal assumption.
  */
 double
@@ -641,6 +794,21 @@ EquationOfStateMixingRulesIdealGas::getIsobaricSpecificHeatCapacity(
 
 
 /*
+ * Compute the isobaric specific heat capacity of mixture with isothermal assumption.
+ */
+void
+EquationOfStateMixingRulesIdealGas::getIsobaricSpecificHeatCapacity(
+    boost::shared_ptr<pdat::CellData<double> >& data_isobaric_specific_heat_capacity,
+    const boost::shared_ptr<pdat::CellData<double> >& data_density,
+    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::CellData<double> >& data_mass_fraction,
+    const hier::Box& domain) const
+{
+    
+}
+
+
+/*
  * Compute the density of mixture with isothermal and isobaric assumptions.
  */
 double
@@ -681,6 +849,21 @@ EquationOfStateMixingRulesIdealGas::getMixtureDensity(
         pressure,
         temperature,
         mixture_thermo_properties_const_ptr);
+}
+
+
+/*
+ * Compute the density of mixture with isothermal and isobaric assumptions.
+ */
+void
+EquationOfStateMixingRulesIdealGas::getMixtureDensity(
+    boost::shared_ptr<pdat::CellData<double> >& data_mixture_density,
+    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+    const boost::shared_ptr<pdat::CellData<double> >& data_mass_fraction,
+    const hier::Box& domain) const
+{
+    
 }
 
 
@@ -852,6 +1035,576 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithMassFra
 
 
 /*
+ * Compute the thermodynamic properties of the mixture with mass fraction.
+ */
+void
+EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithMassFraction(
+    boost::shared_ptr<pdat::CellData<double> >& data_mixture_thermo_properties,
+    const boost::shared_ptr<pdat::CellData<double> >& data_mass_fraction,
+    const hier::Box& domain) const
+{
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(data_mixture_thermo_properties);
+    TBOX_ASSERT(data_mixture_thermo_properties->getDepth() == 4);
+#endif
+    
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = data_mixture_thermo_properties->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(data_mass_fraction->getBox().numberCells() == interior_dims);
+#endif
+    
+    /*
+     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
+     */
+    
+    const hier::IntVector num_ghosts_mixture_thermo_properties = data_mixture_thermo_properties->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_mixture_thermo_properties =
+        data_mixture_thermo_properties->getGhostBox().numberCells();
+    
+    const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_mass_fraction =
+        data_mass_fraction->getGhostBox().numberCells();
+    
+    /*
+     * Get the local lower indices and number of cells in each direction of the domain.
+     */
+    
+    hier::IntVector domain_lo(d_dim);
+    hier::IntVector domain_dims(d_dim);
+    
+    if (domain.empty())
+    {
+        hier::IntVector num_ghosts_min(d_dim);
+        
+        num_ghosts_min = num_ghosts_mixture_thermo_properties;
+        num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fraction, num_ghosts_min);
+        
+        hier::Box ghost_box = interior_box;
+        ghost_box.grow(num_ghosts_min);
+        
+        domain_lo = -num_ghosts_min;
+        domain_dims = ghost_box.numberCells();
+    }
+    else
+    {
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+        TBOX_ASSERT(data_mixture_thermo_properties->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_mass_fraction->getGhostBox().contains(domain));
+#endif
+        
+        domain_lo = domain.lower() - interior_box.lower();
+        domain_dims = domain.numberCells();
+    }
+    
+    /*
+     * Get the pointers to the cell data of mixture thermodynamic properties.
+     */
+    
+    double* gamma = data_mixture_thermo_properties->getPointer(0);
+    double* R = data_mixture_thermo_properties->getPointer(1);
+    double* c_p = data_mixture_thermo_properties->getPointer(2);
+    double* c_v = data_mixture_thermo_properties->getPointer(3);
+    
+    /*
+     * Fill zeros for c_p and c_v.
+     */
+    
+    data_mixture_thermo_properties->fill(0.0, domain, 2);
+    data_mixture_thermo_properties->fill(0.0, domain, 3);
+    
+    if (data_mass_fraction->getDepth() == d_num_species)
+    {
+        /*
+         * Get the pointers to the cell data of mass fraction.
+         */
+        
+        std::vector<double*> Y;
+        Y.reserve(d_num_species);
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Y.push_back(data_mass_fraction->getPointer(si));
+        }
+        
+        if (d_dim == tbox::Dimension(1))
+        {
+            /*
+             * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_dim_0 = domain_dims[0];
+            
+            const int num_ghosts_0_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[0];
+            const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+            
+            // Compute c_p and c_v.
+            for (int si = 0; si < d_num_species; si++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0;
+                     i < domain_dim_0;
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_mixture_thermo_properties = i + num_ghosts_0_mixture_thermo_properties;
+                    const int idx_mass_fraction = i + num_ghosts_0_mass_fraction;
+                    
+                    c_p[idx_mixture_thermo_properties] += Y[si][idx_mass_fraction]*d_species_c_p[si];
+                    c_v[idx_mixture_thermo_properties] += Y[si][idx_mass_fraction]*d_species_c_v[si];
+                }
+            }
+            
+            // Compute gamma and R.
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0;
+                 i < domain_dim_0;
+                 i++)
+            {
+                // Compute the linear indices.
+                const int idx_mixture_thermo_properties = i + num_ghosts_0_mixture_thermo_properties;
+                
+                gamma[idx_mixture_thermo_properties] = c_p[idx_mixture_thermo_properties]/
+                    c_v[idx_mixture_thermo_properties];
+                R[idx_mixture_thermo_properties] = c_p[idx_mixture_thermo_properties] -
+                    c_v[idx_mixture_thermo_properties];
+            }
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            
+            const int num_ghosts_0_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[0];
+            const int num_ghosts_1_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[1];
+            const int ghostcell_dim_0_mixture_thermo_properties = ghostcell_dims_mixture_thermo_properties[0];
+            
+            const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+            const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+            const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+            
+            // Compute c_p and c_v.
+            for (int si = 0; si < d_num_species; si++)
+            {
+                for (int j = domain_lo_1;
+                     j < domain_dim_1;
+                     j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                    for (int i = domain_lo_0;
+                         i < domain_dim_0;
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
+                            (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties;
+                        
+                        const int idx_mass_fraction = (i + num_ghosts_0_mass_fraction) +
+                            (j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                        
+                        c_p[idx_mixture_thermo_properties] += Y[si][idx_mass_fraction]*d_species_c_p[si];
+                        c_v[idx_mixture_thermo_properties] += Y[si][idx_mass_fraction]*d_species_c_v[si];
+                    }
+                }
+            }
+            
+            // Compute gamma and R.
+            for (int j = domain_lo_1;
+                 j < domain_dim_1;
+                 j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+                for (int i = domain_lo_0;
+                     i < domain_dim_0;
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
+                        (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties;
+                    
+                    gamma[idx_mixture_thermo_properties] = c_p[idx_mixture_thermo_properties]/
+                        c_v[idx_mixture_thermo_properties];
+                    R[idx_mixture_thermo_properties] = c_p[idx_mixture_thermo_properties] -
+                        c_v[idx_mixture_thermo_properties];
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_lo_2 = domain_lo[2];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            const int domain_dim_2 = domain_dims[2];
+            
+            const int num_ghosts_0_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[0];
+            const int num_ghosts_1_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[1];
+            const int num_ghosts_2_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[2];
+            const int ghostcell_dim_0_mixture_thermo_properties = ghostcell_dims_mixture_thermo_properties[0];
+            const int ghostcell_dim_1_mixture_thermo_properties = ghostcell_dims_mixture_thermo_properties[1];
+            
+            const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+            const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+            const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
+            const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+            const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+            
+            // Compute c_p and c_v.
+            for (int si = 0; si < d_num_species; si++)
+            {
+                for (int k = domain_lo_2;
+                     k < domain_dim_2;
+                     k++)
+                {
+                    for (int j = domain_lo_1;
+                         j < domain_dim_1;
+                         j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = domain_lo_0;
+                             i < domain_dim_0;
+                             i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
+                                (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties +
+                                (k + num_ghosts_2_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties*
+                                    ghostcell_dim_1_mixture_thermo_properties;
+                            
+                            const int idx_mass_fraction = (i + num_ghosts_0_mass_fraction) +
+                                (j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                (k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                    ghostcell_dim_1_mass_fraction;
+                            
+                            c_p[idx_mixture_thermo_properties] += Y[si][idx_mass_fraction]*d_species_c_p[si];
+                            c_v[idx_mixture_thermo_properties] += Y[si][idx_mass_fraction]*d_species_c_v[si];
+                        }
+                    }
+                }
+            }
+            
+            // Compute gamma and R.
+            for (int k = domain_lo_2;
+                 k < domain_dim_2;
+                 k++)
+            {
+                for (int j = domain_lo_1;
+                     j < domain_dim_1;
+                     j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0;
+                         i < domain_dim_0;
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
+                            (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties +
+                            (k + num_ghosts_2_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties*
+                                ghostcell_dim_1_mixture_thermo_properties;
+                        
+                        gamma[idx_mixture_thermo_properties] = c_p[idx_mixture_thermo_properties]/
+                            c_v[idx_mixture_thermo_properties];
+                        R[idx_mixture_thermo_properties] = c_p[idx_mixture_thermo_properties] -
+                            c_v[idx_mixture_thermo_properties];
+                    }
+                }
+            }
+        }
+    }
+    else if (data_mass_fraction->getDepth() == d_num_species - 1)
+    {
+        boost::shared_ptr<pdat::CellData<double> > data_mass_fraction_last(
+            new pdat::CellData<double>(interior_box, 1, num_ghosts_mass_fraction));
+        
+        data_mass_fraction_last->fill(1.0, domain);
+        
+        /*
+         * Get the pointers to the cell data of mass fraction.
+         */
+        
+        std::vector<double*> Y;
+        Y.reserve(d_num_species - 1);
+        for (int si = 0; si < d_num_species - 1; si++)
+        {
+            Y.push_back(data_mass_fraction->getPointer(si));
+        }
+        
+        double* Y_last = data_mass_fraction_last->getPointer(0);
+        
+        if (d_dim == tbox::Dimension(1))
+        {
+            /*
+             * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_dim_0 = domain_dims[0];
+            
+            const int num_ghosts_0_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[0];
+            const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+            
+            // Compute c_p and c_v.
+            for (int si = 0; si < d_num_species - 1; si++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0;
+                     i < domain_dim_0;
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_mixture_thermo_properties = i + num_ghosts_0_mixture_thermo_properties;
+                    const int idx_mass_fraction = i + num_ghosts_0_mass_fraction;
+                    
+                    c_p[idx_mixture_thermo_properties] += Y[si][idx_mass_fraction]*d_species_c_p[si];
+                    c_v[idx_mixture_thermo_properties] += Y[si][idx_mass_fraction]*d_species_c_v[si];
+                    
+                    // Compute the mass fraction of the last species.
+                    Y_last[idx_mass_fraction] -= Y[si][idx_mass_fraction];
+                }
+            }
+            
+            // Add the contribution from the last species and compute gamma and R.
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0;
+                 i < domain_dim_0;
+                 i++)
+            {
+                // Compute the linear indices.
+                const int idx_mixture_thermo_properties = i + num_ghosts_0_mixture_thermo_properties;
+                const int idx_mass_fraction = i + num_ghosts_0_mass_fraction;
+                
+                c_p[idx_mixture_thermo_properties] += Y_last[idx_mass_fraction]*d_species_c_p.back();
+                c_v[idx_mixture_thermo_properties] += Y_last[idx_mass_fraction]*d_species_c_v.back();
+                
+                gamma[idx_mixture_thermo_properties] = c_p[idx_mixture_thermo_properties]/
+                    c_v[idx_mixture_thermo_properties];
+                R[idx_mixture_thermo_properties] = c_p[idx_mixture_thermo_properties] -
+                    c_v[idx_mixture_thermo_properties];
+            }
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            
+            const int num_ghosts_0_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[0];
+            const int num_ghosts_1_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[1];
+            const int ghostcell_dim_0_mixture_thermo_properties = ghostcell_dims_mixture_thermo_properties[0];
+            
+            const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+            const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+            const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+            
+            // Compute c_p and c_v.
+            for (int si = 0; si < d_num_species - 1; si++)
+            {
+                for (int j = domain_lo_1;
+                     j < domain_dim_1;
+                     j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                    for (int i = domain_lo_0;
+                         i < domain_dim_0;
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
+                            (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties;
+                        
+                        const int idx_mass_fraction = (i + num_ghosts_0_mass_fraction) +
+                            (j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                        
+                        c_p[idx_mixture_thermo_properties] += Y[si][idx_mass_fraction]*d_species_c_p[si];
+                        c_v[idx_mixture_thermo_properties] += Y[si][idx_mass_fraction]*d_species_c_v[si];
+                        
+                        // Compute the mass fraction of the last species.
+                        Y_last[idx_mass_fraction] -= Y[si][idx_mass_fraction];
+                    }
+                }
+            }
+            
+            // Add the contribution from the last species and compute gamma and R.
+            for (int j = domain_lo_1;
+                 j < domain_dim_1;
+                 j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0;
+                     i < domain_dim_0;
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
+                        (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties;
+                    
+                    const int idx_mass_fraction = (i + num_ghosts_0_mass_fraction) +
+                        (j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                    
+                    c_p[idx_mixture_thermo_properties] += Y_last[idx_mass_fraction]*d_species_c_p.back();
+                    c_v[idx_mixture_thermo_properties] += Y_last[idx_mass_fraction]*d_species_c_v.back();
+                    
+                    gamma[idx_mixture_thermo_properties] = c_p[idx_mixture_thermo_properties]/
+                        c_v[idx_mixture_thermo_properties];
+                    R[idx_mixture_thermo_properties] = c_p[idx_mixture_thermo_properties] -
+                        c_v[idx_mixture_thermo_properties];
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_lo_2 = domain_lo[2];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            const int domain_dim_2 = domain_dims[2];
+            
+            const int num_ghosts_0_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[0];
+            const int num_ghosts_1_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[1];
+            const int num_ghosts_2_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[2];
+            const int ghostcell_dim_0_mixture_thermo_properties = ghostcell_dims_mixture_thermo_properties[0];
+            const int ghostcell_dim_1_mixture_thermo_properties = ghostcell_dims_mixture_thermo_properties[1];
+            
+            const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+            const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+            const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
+            const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+            const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+            
+            // Compute c_p and c_v.
+            for (int si = 0; si < d_num_species - 1; si++)
+            {
+                for (int k = domain_lo_2;
+                     k < domain_dim_2;
+                     k++)
+                {
+                    for (int j = domain_lo_1;
+                         j < domain_dim_1;
+                         j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = domain_lo_0;
+                             i < domain_dim_0;
+                             i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
+                                (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties +
+                                (k + num_ghosts_2_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties*
+                                    ghostcell_dim_1_mixture_thermo_properties;
+                            
+                            const int idx_mass_fraction = (i + num_ghosts_0_mass_fraction) +
+                                (j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                (k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                    ghostcell_dim_1_mass_fraction;
+                            
+                            c_p[idx_mixture_thermo_properties] += Y[si][idx_mass_fraction]*d_species_c_p[si];
+                            c_v[idx_mixture_thermo_properties] += Y[si][idx_mass_fraction]*d_species_c_v[si];
+                            
+                            // Compute the mass fraction of the last species.
+                            Y_last[idx_mass_fraction] -= Y[si][idx_mass_fraction];
+                        }
+                    }
+                }
+            }
+            
+            // Add the contribution from the last species and compute gamma and R.
+            for (int k = domain_lo_2;
+                 k < domain_dim_2;
+                 k++)
+            {
+                for (int j = domain_lo_1;
+                     j < domain_dim_1;
+                     j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0;
+                         i < domain_dim_0;
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
+                            (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties +
+                            (k + num_ghosts_2_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties*
+                                ghostcell_dim_1_mixture_thermo_properties;
+                        
+                        const int idx_mass_fraction = (i + num_ghosts_0_mass_fraction) +
+                            (j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                            (k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                ghostcell_dim_1_mass_fraction;
+                            
+                        c_p[idx_mixture_thermo_properties] += Y_last[idx_mass_fraction]*d_species_c_p.back();
+                        c_v[idx_mixture_thermo_properties] += Y_last[idx_mass_fraction]*d_species_c_v.back();
+                        
+                        gamma[idx_mixture_thermo_properties] = c_p[idx_mixture_thermo_properties]/
+                            c_v[idx_mixture_thermo_properties];
+                        R[idx_mixture_thermo_properties] = c_p[idx_mixture_thermo_properties] -
+                            c_v[idx_mixture_thermo_properties];
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "Number of components in the data of mass fraction provided is not"
+            << " equal to the total number of species or (total number of species - 1)."
+            << std::endl);
+    }
+}
+
+
+/*
  * Compute the thermodynamic properties of the mixture with volume fraction.
  */
 void
@@ -899,4 +1652,555 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeF
     }
     
     gamma = 1.0/xi + 1.0;
+}
+
+
+/*
+ * Compute the thermodynamic properties of the mixture with volume fraction.
+ */
+void
+EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeFraction(
+    boost::shared_ptr<pdat::CellData<double> >& data_mixture_thermo_properties,
+    const boost::shared_ptr<pdat::CellData<double> >& data_volume_fraction,
+    const hier::Box& domain) const
+{
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(data_mixture_thermo_properties);
+    TBOX_ASSERT(data_mixture_thermo_properties->getDepth() == 1);
+#endif
+    
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = data_mixture_thermo_properties->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT(data_volume_fraction->getBox().numberCells() == interior_dims);
+#endif
+    
+    /*
+     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
+     */
+    
+    const hier::IntVector num_ghosts_mixture_thermo_properties = data_mixture_thermo_properties->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_mixture_thermo_properties =
+        data_mixture_thermo_properties->getGhostBox().numberCells();
+    
+    const hier::IntVector num_ghosts_volume_fraction = data_volume_fraction->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_volume_fraction =
+        data_volume_fraction->getGhostBox().numberCells();
+    
+    /*
+     * Get the local lower indices and number of cells in each direction of the domain.
+     */
+    
+    hier::IntVector domain_lo(d_dim);
+    hier::IntVector domain_dims(d_dim);
+    
+    if (domain.empty())
+    {
+        hier::IntVector num_ghosts_min(d_dim);
+        
+        num_ghosts_min = num_ghosts_mixture_thermo_properties;
+        num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fraction, num_ghosts_min);
+        
+        hier::Box ghost_box = interior_box;
+        ghost_box.grow(num_ghosts_min);
+        
+        domain_lo = -num_ghosts_min;
+        domain_dims = ghost_box.numberCells();
+    }
+    else
+    {
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+        TBOX_ASSERT(data_mixture_thermo_properties->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_volume_fraction->getGhostBox().contains(domain));
+#endif
+        
+        domain_lo = domain.lower() - interior_box.lower();
+        domain_dims = domain.numberCells();
+    }
+    
+    /*
+     * Get the pointer to the cell data of mixture thermodynamic property.
+     */
+    
+    double* gamma = data_mixture_thermo_properties->getPointer(0);
+    
+    /*
+     * Fill zeros for gamma.
+     */
+    
+    data_mixture_thermo_properties->fill(0.0, domain, 0);
+    
+    if (data_volume_fraction->getDepth() == d_num_species)
+    {
+        /*
+         * Get the pointers to the cell data of volume fraction.
+         */
+        
+        std::vector<double*> Z;
+        Z.reserve(d_num_species);
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Z.push_back(data_volume_fraction->getPointer(si));
+        }
+        
+        if (d_dim == tbox::Dimension(1))
+        {
+            /*
+             * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_dim_0 = domain_dims[0];
+            
+            const int num_ghosts_0_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[0];
+            const int num_ghosts_0_volume_fraction = num_ghosts_volume_fraction[0];
+            
+            // Compute xi and store it in the data of gamma temporarily.
+            for (int si = 0; si < d_num_species; si++)
+            {
+                const double one_over_denominator = 1.0/(d_species_gamma[si] - 1.0);
+                
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0;
+                     i < domain_dim_0;
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_mixture_thermo_properties = i + num_ghosts_0_mixture_thermo_properties;
+                    const int idx_volume_fraction = i + num_ghosts_0_volume_fraction;
+                    
+                    gamma[idx_mixture_thermo_properties] += Z[si][idx_volume_fraction]*one_over_denominator;
+                }
+            }
+            
+            // Compute gamma.
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0;
+                 i < domain_dim_0;
+                 i++)
+            {
+                // Compute the linear index.
+                const int idx_mixture_thermo_properties = i + num_ghosts_0_mixture_thermo_properties;
+                
+                gamma[idx_mixture_thermo_properties] = 1.0/gamma[idx_mixture_thermo_properties] + 1.0;
+            }
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            
+            const int num_ghosts_0_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[0];
+            const int num_ghosts_1_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[1];
+            const int ghostcell_dim_0_mixture_thermo_properties = ghostcell_dims_mixture_thermo_properties[0];
+            
+            const int num_ghosts_0_volume_fraction = num_ghosts_volume_fraction[0];
+            const int num_ghosts_1_volume_fraction = num_ghosts_volume_fraction[1];
+            const int ghostcell_dim_0_volume_fraction = ghostcell_dims_volume_fraction[0];
+            
+            // Compute xi and store it in the data of gamma temporarily.
+            for (int si = 0; si < d_num_species; si++)
+            {
+                const double one_over_denominator = 1.0/(d_species_gamma[si] - 1.0);
+                
+                for (int j = domain_lo_1;
+                     j < domain_dim_1;
+                     j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                    for (int i = domain_lo_0;
+                         i < domain_dim_0;
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
+                            (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties;
+                        
+                        const int idx_volume_fraction = (i + num_ghosts_0_volume_fraction) +
+                            (j + num_ghosts_1_volume_fraction)*ghostcell_dim_0_volume_fraction;
+                        
+                        gamma[idx_mixture_thermo_properties] += Z[si][idx_volume_fraction]*one_over_denominator;
+                    }
+                }
+            }
+            
+            // Compute gamma.
+            for (int j = domain_lo_1;
+                 j < domain_dim_1;
+                 j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+                for (int i = domain_lo_0;
+                     i < domain_dim_0;
+                     i++)
+                {
+                    // Compute the linear index.
+                    const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
+                        (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties;
+                    
+                    gamma[idx_mixture_thermo_properties] = 1.0/gamma[idx_mixture_thermo_properties] + 1.0;
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_lo_2 = domain_lo[2];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            const int domain_dim_2 = domain_dims[2];
+            
+            const int num_ghosts_0_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[0];
+            const int num_ghosts_1_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[1];
+            const int num_ghosts_2_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[2];
+            const int ghostcell_dim_0_mixture_thermo_properties = ghostcell_dims_mixture_thermo_properties[0];
+            const int ghostcell_dim_1_mixture_thermo_properties = ghostcell_dims_mixture_thermo_properties[1];
+            
+            const int num_ghosts_0_volume_fraction = num_ghosts_volume_fraction[0];
+            const int num_ghosts_1_volume_fraction = num_ghosts_volume_fraction[1];
+            const int num_ghosts_2_volume_fraction = num_ghosts_volume_fraction[2];
+            const int ghostcell_dim_0_volume_fraction = ghostcell_dims_volume_fraction[0];
+            const int ghostcell_dim_1_volume_fraction = ghostcell_dims_volume_fraction[1];
+            
+            // Compute xi and store it in the data of gamma temporarily.
+            for (int si = 0; si < d_num_species; si++)
+            {
+                const double one_over_denominator = 1.0/(d_species_gamma[si] - 1.0);
+                
+                for (int k = domain_lo_2;
+                     k < domain_dim_2;
+                     k++)
+                {
+                    for (int j = domain_lo_1;
+                         j < domain_dim_1;
+                         j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = domain_lo_0;
+                             i < domain_dim_0;
+                             i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
+                                (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties +
+                                (k + num_ghosts_2_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties*
+                                    ghostcell_dim_1_mixture_thermo_properties;
+                            
+                            const int idx_volume_fraction = (i + num_ghosts_0_volume_fraction) +
+                                (j + num_ghosts_1_volume_fraction)*ghostcell_dim_0_volume_fraction +
+                                (k + num_ghosts_2_volume_fraction)*ghostcell_dim_0_volume_fraction*
+                                    ghostcell_dim_1_volume_fraction;
+                            
+                            gamma[idx_mixture_thermo_properties] += Z[si][idx_volume_fraction]*one_over_denominator;
+                        }
+                    }
+                }
+            }
+            
+            // Compute gamma.
+            for (int k = domain_lo_2;
+                 k < domain_dim_2;
+                 k++)
+            {
+                for (int j = domain_lo_1;
+                     j < domain_dim_1;
+                     j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0;
+                         i < domain_dim_0;
+                         i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
+                            (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties +
+                            (k + num_ghosts_2_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties*
+                                ghostcell_dim_1_mixture_thermo_properties;
+                        
+                        gamma[idx_mixture_thermo_properties] = 1.0/gamma[idx_mixture_thermo_properties] + 1.0;
+                    }
+                }
+            }
+        }
+    }
+    else if (data_volume_fraction->getDepth() == d_num_species - 1)
+    {
+        boost::shared_ptr<pdat::CellData<double> > data_volume_fraction_last(
+            new pdat::CellData<double>(interior_box, 1, num_ghosts_volume_fraction));
+        
+        data_volume_fraction_last->fill(1.0, domain);
+        
+        /*
+         * Get the pointers to the cell data of volume fraction.
+         */
+        
+        std::vector<double*> Z;
+        Z.reserve(d_num_species - 1);
+        for (int si = 0; si < d_num_species - 1; si++)
+        {
+            Z.push_back(data_volume_fraction->getPointer(si));
+        }
+        
+        double* Z_last = data_volume_fraction_last->getPointer(0);
+        
+        if (d_dim == tbox::Dimension(1))
+        {
+            /*
+             * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_dim_0 = domain_dims[0];
+            
+            const int num_ghosts_0_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[0];
+            const int num_ghosts_0_volume_fraction = num_ghosts_volume_fraction[0];
+            
+            // Compute xi and store it in the data of gamma temporarily.
+            for (int si = 0; si < d_num_species - 1; si++)
+            {
+                const double one_over_denominator = 1.0/(d_species_gamma[si] - 1.0);
+                
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0;
+                     i < domain_dim_0;
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_mixture_thermo_properties = i + num_ghosts_0_mixture_thermo_properties;
+                    const int idx_volume_fraction = i + num_ghosts_0_volume_fraction;
+                    
+                    gamma[idx_mixture_thermo_properties] += Z[si][idx_volume_fraction]*one_over_denominator;
+                    
+                    // Compute the volume fraction of the last species.
+                    Z_last[idx_volume_fraction] -= Z[si][idx_volume_fraction];
+                }
+            }
+            
+            // Add the contribution from the last species and compute gamma.
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0;
+                 i < domain_dim_0;
+                 i++)
+            {
+                // Compute the linear indices.
+                const int idx_mixture_thermo_properties = i + num_ghosts_0_mixture_thermo_properties;
+                const int idx_volume_fraction = i + num_ghosts_0_volume_fraction;
+                
+                gamma[idx_mixture_thermo_properties] += Z_last[idx_volume_fraction]/
+                    (d_species_gamma.back() - 1.0);
+                gamma[idx_mixture_thermo_properties] = 1.0/gamma[idx_mixture_thermo_properties] + 1.0;
+            }
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            
+            const int num_ghosts_0_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[0];
+            const int num_ghosts_1_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[1];
+            const int ghostcell_dim_0_mixture_thermo_properties = ghostcell_dims_mixture_thermo_properties[0];
+            
+            const int num_ghosts_0_volume_fraction = num_ghosts_volume_fraction[0];
+            const int num_ghosts_1_volume_fraction = num_ghosts_volume_fraction[1];
+            const int ghostcell_dim_0_volume_fraction = ghostcell_dims_volume_fraction[0];
+            
+            // Compute xi and store it in the data of gamma temporarily.
+            for (int si = 0; si < d_num_species - 1; si++)
+            {
+                const double one_over_denominator = 1.0/(d_species_gamma[si] - 1.0);
+                
+                for (int j = domain_lo_1;
+                     j < domain_dim_1;
+                     j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                    for (int i = domain_lo_0;
+                         i < domain_dim_0;
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
+                            (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties;
+                        
+                        const int idx_volume_fraction = (i + num_ghosts_0_volume_fraction) +
+                            (j + num_ghosts_1_volume_fraction)*ghostcell_dim_0_volume_fraction;
+                        
+                        gamma[idx_mixture_thermo_properties] += Z[si][idx_volume_fraction]*one_over_denominator;
+                        
+                        // Compute the volume fraction of the last species.
+                        Z_last[idx_volume_fraction] -= Z[si][idx_volume_fraction];
+                    }
+                }
+            }
+            
+            // Add the contribution from the last species and compute gamma.
+            for (int j = domain_lo_1;
+                 j < domain_dim_1;
+                 j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0;
+                     i < domain_dim_0;
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
+                        (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties;
+                    
+                    const int idx_volume_fraction = (i + num_ghosts_0_volume_fraction) +
+                        (j + num_ghosts_1_volume_fraction)*ghostcell_dim_0_volume_fraction;
+                    
+                    gamma[idx_mixture_thermo_properties] += Z_last[idx_volume_fraction]/
+                        (d_species_gamma.back() - 1.0);
+                    gamma[idx_mixture_thermo_properties] = 1.0/gamma[idx_mixture_thermo_properties] + 1.0;
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_lo_2 = domain_lo[2];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            const int domain_dim_2 = domain_dims[2];
+            
+            const int num_ghosts_0_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[0];
+            const int num_ghosts_1_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[1];
+            const int num_ghosts_2_mixture_thermo_properties = num_ghosts_mixture_thermo_properties[2];
+            const int ghostcell_dim_0_mixture_thermo_properties = ghostcell_dims_mixture_thermo_properties[0];
+            const int ghostcell_dim_1_mixture_thermo_properties = ghostcell_dims_mixture_thermo_properties[1];
+            
+            const int num_ghosts_0_volume_fraction = num_ghosts_volume_fraction[0];
+            const int num_ghosts_1_volume_fraction = num_ghosts_volume_fraction[1];
+            const int num_ghosts_2_volume_fraction = num_ghosts_volume_fraction[2];
+            const int ghostcell_dim_0_volume_fraction = ghostcell_dims_volume_fraction[0];
+            const int ghostcell_dim_1_volume_fraction = ghostcell_dims_volume_fraction[1];
+            
+            // Compute xi and store it in the data of gamma temporarily.
+            for (int si = 0; si < d_num_species - 1; si++)
+            {
+                const double one_over_denominator = 1.0/(d_species_gamma[si] - 1.0);
+                
+                for (int k = domain_lo_2;
+                     k < domain_dim_2;
+                     k++)
+                {
+                    for (int j = domain_lo_1;
+                         j < domain_dim_1;
+                         j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = domain_lo_0;
+                             i < domain_dim_0;
+                             i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
+                                (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties +
+                                (k + num_ghosts_2_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties*
+                                    ghostcell_dim_1_mixture_thermo_properties;
+                            
+                            const int idx_volume_fraction = (i + num_ghosts_0_volume_fraction) +
+                                (j + num_ghosts_1_volume_fraction)*ghostcell_dim_0_volume_fraction +
+                                (k + num_ghosts_2_volume_fraction)*ghostcell_dim_0_volume_fraction*
+                                    ghostcell_dim_1_volume_fraction;
+                            
+                            gamma[idx_mixture_thermo_properties] += Z[si][idx_volume_fraction]*one_over_denominator;
+                            
+                            // Compute the volume fraction of the last species.
+                            Z_last[idx_volume_fraction] -= Z[si][idx_volume_fraction];
+                        }
+                    }
+                }
+            }
+            
+            // Add the contribution from the last species and compute gamma.
+            for (int k = domain_lo_2;
+                 k < domain_dim_2;
+                 k++)
+            {
+                for (int j = domain_lo_1;
+                     j < domain_dim_1;
+                     j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0;
+                         i < domain_dim_0;
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
+                            (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties +
+                            (k + num_ghosts_2_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties*
+                                ghostcell_dim_1_mixture_thermo_properties;
+                        
+                        const int idx_volume_fraction = (i + num_ghosts_0_volume_fraction) +
+                            (j + num_ghosts_1_volume_fraction)*ghostcell_dim_0_volume_fraction +
+                            (k + num_ghosts_2_volume_fraction)*ghostcell_dim_0_volume_fraction*
+                                ghostcell_dim_1_volume_fraction;
+                            
+                        gamma[idx_mixture_thermo_properties] += Z_last[idx_volume_fraction]/
+                            (d_species_gamma.back() - 1.0);
+                        gamma[idx_mixture_thermo_properties] = 1.0/gamma[idx_mixture_thermo_properties] + 1.0;
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "Number of components in the data of volume fraction provided is not"
+            << " equal to the total number of species or (total number of species - 1)."
+            << std::endl);
+    }
 }
