@@ -6,7 +6,7 @@
 
 set (SAMRAI_ROOT_DIR $ENV{SAMRAI_ROOT})
 # Uncomment the following line to print which directory CMake is looking in.
-MESSAGE(STATUS "SAMRAI_ROOT_DIR: " ${SAMRAI_ROOT_DIR})
+MESSAGE(STATUS "SAMRAI_ROOT: " ${SAMRAI_ROOT_DIR})
 
 find_path(SAMRAI_INCLUDE_DIR
     NAMES SAMRAI/SAMRAI_config.h

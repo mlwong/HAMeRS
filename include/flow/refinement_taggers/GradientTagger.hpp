@@ -5,9 +5,12 @@
 
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
 #include "flow/flow_models/FlowModels.hpp"
+#include "util/differences/DifferenceFirstDerivative.hpp"
+#include "util/differences/DifferenceSecondDerivative.hpp"
 #include "util/gradient_sensors/GradientSensorJameson.hpp"
 
 #include "SAMRAI/appu/VisItDataWriter.h"
+#include "SAMRAI/math/HierarchyCellDataOpsReal.h"
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 #include "SAMRAI/hier/IntVector.h"
@@ -68,25 +71,58 @@ class GradientTagger
             const boost::shared_ptr<tbox::Database>& restart_db) const;
         
         /*
-         * Tag cells for refinement using gradient sensors.
+         * Compute values of gradient sensors on a patch.
          */
         void
-        tagCells(
+        computeGradientSensorValuesOnPatch(
             hier::Patch& patch,
-            boost::shared_ptr<pdat::CellData<int> > tags,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Get the statistics of the sensor values that are required by the
+         * gradient sensors at a given patch level.
+         */
+        void
+        getSensorValueStatistics(
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const int level_number,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Tag cells on a patch for refinement using gradient sensors.
+         */
+        void
+        tagCellsOnPatch(
+            hier::Patch& patch,
+            const boost::shared_ptr<pdat::CellData<int> >& tags,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
     private:
         /*
-         * Tag cells using value of gradient sensor.
+         * Tag cells on a patch using value of gradient sensor.
          */
         void
-        tagCellsWithGradientSensor(
+        tagCellsOnPatchWithGradientSensor(
             hier::Patch& patch,
-            boost::shared_ptr<pdat::CellData<int> > tags,
-            boost::shared_ptr<pdat::CellData<double> > gradient,
-            double& tol,
-            std::string& sensor_key);
+            const boost::shared_ptr<pdat::CellData<int> >& tags,
+            const boost::shared_ptr<pdat::CellData<double> >& gradient,
+            const std::string& sensor_key,
+            const double tol);
+        
+        /*
+         * Tag cells on a patch using difference sensor.
+         */
+        void
+        tagCellsOnPatchWithDifferenceSensor(
+            hier::Patch& patch,
+            const boost::shared_ptr<pdat::CellData<int> >& tags,
+            const boost::shared_ptr<pdat::CellData<double> >& difference,
+            const double difference_max,
+            const boost::shared_ptr<pdat::CellData<double> >& variable_local_mean,
+            const bool uses_global_tol,
+            const bool uses_local_tol,
+            const double global_tol,
+            const double local_tol);
         
         /*
          * The object name is used for error/warning reporting.
@@ -124,22 +160,73 @@ class GradientTagger
         std::vector<std::string> d_gradient_sensors;
         
         /*
+         * boost::shared_ptr to difference operators.
+         */
+        boost::shared_ptr<DifferenceFirstDerivative> d_difference_first_derivative;
+        boost::shared_ptr<DifferenceSecondDerivative> d_difference_second_derivative;
+        
+        /*
          * boost::shared_ptr to GradientSensorJameson.
          */
         boost::shared_ptr<GradientSensorJameson> d_gradient_sensor_Jameson;
         
         /*
-         * Variables and tolerances for the gradient sensors.
+         * Variables, tolerances and settings for the gradient sensors.
+         */
+        std::vector<std::string> d_difference_first_derivative_variables;
+        std::vector<double> d_difference_first_derivative_global_tol;
+        std::vector<double> d_difference_first_derivative_local_tol;
+        std::vector<bool> d_difference_first_derivative_uses_global_tol;
+        std::vector<bool> d_difference_first_derivative_uses_local_tol;
+        
+        std::vector<std::string> d_difference_second_derivative_variables;
+        std::vector<double> d_difference_second_derivative_global_tol;
+        std::vector<double> d_difference_second_derivative_local_tol;
+        std::vector<bool> d_difference_second_derivative_uses_global_tol;
+        std::vector<bool> d_difference_second_derivative_uses_local_tol;
+        
+        /*
+         * Variables and tolerances for the Jameson gradient sensors.
          */
         std::vector<std::string> d_Jameson_gradient_variables;
         std::vector<double> d_Jameson_gradient_tol;
         
         /*
-         * boost::shared_ptr to values of Jameson's gradient sensor.
+         * boost::shared_ptr to differences.
          */
-        boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_density_gradient;
-        boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_total_energy_gradient;
-        boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_pressure_gradient;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_derivative_density;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_derivative_total_energy;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_derivative_pressure;
+        
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_derivative_density;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_derivative_total_energy;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_derivative_pressure;
+        
+        /*
+         * boost::shared_ptr to values of Jameson gradient sensor.
+         */
+        boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_gradient_density;
+        boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_gradient_total_energy;
+        boost::shared_ptr<pdat::CellVariable<double> > d_Jameson_gradient_pressure;
+        
+        /*
+         * Statistics of sensor values.
+         */
+        double d_difference_first_derivative_max_density;
+        double d_difference_first_derivative_max_total_energy;
+        double d_difference_first_derivative_max_pressure;
+        
+        double d_difference_second_derivative_max_density;
+        double d_difference_second_derivative_max_total_energy;
+        double d_difference_second_derivative_max_pressure;
+        
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_derivative_local_mean_density;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_derivative_local_mean_total_energy;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_derivative_local_mean_pressure;
+        
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_derivative_local_mean_density;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_derivative_local_mean_total_energy;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_derivative_local_mean_pressure;
         
 };
 

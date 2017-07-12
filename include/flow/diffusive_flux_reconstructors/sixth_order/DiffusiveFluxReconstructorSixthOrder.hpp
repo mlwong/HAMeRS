@@ -32,46 +32,46 @@ class DiffusiveFluxReconstructorSixthOrder: public DiffusiveFluxReconstructor
             const boost::shared_ptr<tbox::Database>& restart_db) const;
         
         /*
-         * Compute the diffusive fluxes.
+         * Compute the diffusive flux on a patch.
          */
-        void computeDiffusiveFluxes(
+        void computeDiffusiveFluxOnPatch(
             hier::Patch& patch,
+            const boost::shared_ptr<pdat::SideVariable<double> >& variable_diffusive_flux,
+            const boost::shared_ptr<hier::VariableContext>& data_context,
             const double time,
             const double dt,
-            const int RK_step_number,
-            const boost::shared_ptr<pdat::FaceVariable<double> >& variable_diffusive_flux,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const int RK_step_number);
         
     private:
         /*
-         * Compute the derivatives in the x-direction for diffusive flux.
+         * Compute the first derivatives in the x-direction.
          */
-        void computeDerivativesInXForDiffusiveFlux(
+        void computeFirstDerivativesInX(
             hier::Patch& patch,
             std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_x,
             std::map<double*, boost::shared_ptr<pdat::CellData<double> > >& derivative_x_computed,
-            const std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_var_data_x,
-            const std::vector<std::vector<int> >& derivative_var_component_idx_x);
+            const std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& data_x,
+            const std::vector<std::vector<int> >& data_component_idx_x);
         
         /*
-         * Compute the derivatives in the y-direction for diffusive flux.
+         * Compute the first derivatives in the y-direction.
          */
-        void computeDerivativesInYForDiffusiveFlux(
+        void computeFirstDerivativesInY(
             hier::Patch& patch,
             std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_y,
             std::map<double*, boost::shared_ptr<pdat::CellData<double> > >& derivative_y_computed,
-            const std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_var_data_y,
-            const std::vector<std::vector<int> >& derivative_var_component_idx_y);
+            const std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& data_y,
+            const std::vector<std::vector<int> >& data_component_idx_y);
         
         /*
-         * Compute the derivatives in the z-direction for diffusive flux.
+         * Compute the first derivatives in the z-direction.
          */
-        void computeDerivativesInZForDiffusiveFlux(
+        void computeFirstDerivativesInZ(
             hier::Patch& patch,
             std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_z,
             std::map<double*, boost::shared_ptr<pdat::CellData<double> > >& derivative_z_computed,
-            const std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& derivative_var_data_z,
-            const std::vector<std::vector<int> >& derivative_var_component_idx_z);
+            const std::vector<std::vector<boost::shared_ptr<pdat::CellData<double> > > >& data_z,
+            const std::vector<std::vector<int> >& data_component_idx_z);
         
 };
 

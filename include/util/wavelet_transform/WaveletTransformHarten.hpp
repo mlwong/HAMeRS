@@ -19,23 +19,23 @@ class WaveletTransformHarten: public WaveletTransform
          */
         void
         computeWaveletCoefficients(
-            hier::Patch& patch,
-            boost::shared_ptr<pdat::CellData<double> > cell_data,
             std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
-            int depth = 0,
-            bool smooth_cell_data = false);
+            const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+            hier::Patch& patch,
+            const int depth = 0,
+            const bool smooth_cell_data = false);
         
         /*
          * Perform the wavelet transformation and compute the local mean of the given cell data.
          */
         void
         computeWaveletCoefficientsWithVariableLocalMeans(
-            hier::Patch& patch,
-            boost::shared_ptr<pdat::CellData<double> > cell_data,
             std::vector<boost::shared_ptr<pdat::CellData<double> > >& wavelet_coeffs,
             std::vector<boost::shared_ptr<pdat::CellData<double> > >& variable_local_means,
-            int depth = 0,
-            bool smooth_cell_data = false);
+            const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+            hier::Patch& patch,
+            const int depth = 0,
+            const bool smooth_cell_data = false);
         
     private:
         /*
@@ -48,9 +48,9 @@ class WaveletTransformHarten: public WaveletTransform
          */
         boost::shared_ptr<pdat::CellData<double> >
         smoothCellData(
+            const boost::shared_ptr<pdat::CellData<double> >& cell_data,
             hier::Patch& patch,
-            boost::shared_ptr<pdat::CellData<double> > cell_data,
-            int depth = 0);
+            const int depth = 0);
 };
 
 #endif /* WAVELET_TRANSFORM_HARTEN_HPP */

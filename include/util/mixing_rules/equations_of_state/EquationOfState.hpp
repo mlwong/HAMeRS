@@ -79,6 +79,24 @@ class EquationOfState
             const std::vector<const double*>& thermo_properties) const = 0;
         
         /*
+         * Compute the isochoric specific heat capacity.
+         */
+        virtual double
+        getIsochoricSpecificHeatCapacity(
+            const double* const density,
+            const double* const pressure,
+            const std::vector<const double*>& thermo_properties) const = 0;
+        
+        /*
+         * Compute the isobaric specific heat capacity.
+         */
+        virtual double
+        getIsobaricSpecificHeatCapacity(
+            const double* const density,
+            const double* const pressure,
+            const std::vector<const double*>& thermo_properties) const = 0;
+        
+        /*
          * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
          */
         virtual double

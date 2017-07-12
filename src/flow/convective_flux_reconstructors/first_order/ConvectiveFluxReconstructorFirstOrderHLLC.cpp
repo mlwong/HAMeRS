@@ -56,18 +56,17 @@ ConvectiveFluxReconstructorFirstOrderHLLC::putToRestart(
 
 
 /*
- * Compute the convective fluxes and sources due to hyperbolization
- * of the equations.
+ * Compute the convective flux and source due to splitting of convective term on a patch.
  */
 void
-ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
+ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxAndSourceOnPatch(
     hier::Patch& patch,
+    const boost::shared_ptr<pdat::SideVariable<double> >& variable_convective_flux,
+    const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
+    const boost::shared_ptr<hier::VariableContext>& data_context,
     const double time,
     const double dt,
-    const int RK_step_number,
-    const boost::shared_ptr<pdat::FaceVariable<double> >& variable_convective_flux,
-    const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const int RK_step_number)
 {
     NULL_USE(time);
     NULL_USE(RK_step_number);
@@ -89,9 +88,9 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
     
     const double* const dx = patch_geom->getDx();
     
-    // Get the face data of convective flux.
-    boost::shared_ptr<pdat::FaceData<double> > convective_flux(
-        BOOST_CAST<pdat::FaceData<double>, hier::PatchData>(
+    // Get the side data of convective flux.
+    boost::shared_ptr<pdat::SideData<double> > convective_flux(
+        BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
             patch.getPatchData(variable_convective_flux, data_context)));
     
     // Get the cell data of source.
@@ -108,20 +107,20 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
 #endif
     
     // Allocate temporary patch data.
-    boost::shared_ptr<pdat::FaceData<double> > velocity_intercell(
-        new pdat::FaceData<double>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
+    boost::shared_ptr<pdat::SideData<double> > velocity_intercell(
+        new pdat::SideData<double>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
     
     if (d_dim == tbox::Dimension(1))
     {
         /*
-         * Get the pointer to the convective flux face data.
+         * Get the pointer to the convective flux side data.
          */
         
-        std::vector<double*> F_x_face;
-        F_x_face.reserve(d_num_eqn);
+        std::vector<double*> F_face_x;
+        F_face_x.reserve(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            F_x_face.push_back(convective_flux->getPointer(0, ei));
+            F_face_x.push_back(convective_flux->getPointer(0, ei));
         }
         
         /*
@@ -178,12 +177,12 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
         Q_x_R_ref.reserve(d_num_eqn);
         
         // Declare container to store the references to the flux at faces.
-        std::vector<boost::reference_wrapper<double> > F_x_face_ref;
-        F_x_face_ref.reserve(d_num_eqn);
+        std::vector<boost::reference_wrapper<double> > F_face_x_ref;
+        F_face_x_ref.reserve(d_num_eqn);
         
         // Declare container to store the references to the velocity at faces.
-        std::vector<boost::reference_wrapper<double> > vel_x_face_ref;
-        vel_x_face_ref.reserve(d_dim.getValue());
+        std::vector<boost::reference_wrapper<double> > vel_face_x_ref;
+        vel_face_x_ref.reserve(d_dim.getValue());
         
         for (int i = 0; i < interior_dims[0] + 1; i++)
         {
@@ -204,21 +203,21 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
             // Initialize container that stores the references to flux at faces.
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                F_x_face_ref.push_back(boost::ref(F_x_face[ei][idx_face_x]));
+                F_face_x_ref.push_back(boost::ref(F_face_x[ei][idx_face_x]));
             }
             
             // Initialize container that stores the references to the velocity at faces.
             for (int di = 0; di < d_dim.getValue(); di++)
             {
-                vel_x_face_ref.push_back(
+                vel_face_x_ref.push_back(
                     boost::ref(velocity_intercell->getPointer(0, di)[idx_face_x]));
             }
             
             // Apply the Riemann solver.
             d_flow_model->
                 computeLocalFaceFluxAndVelocityFromRiemannSolverWithConservativeVariables(
-                    F_x_face_ref,
-                    vel_x_face_ref,
+                    F_face_x_ref,
+                    vel_face_x_ref,
                     Q_x_L_ref,
                     Q_x_R_ref,
                     DIRECTION::X_DIRECTION,
@@ -226,13 +225,13 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
             
             Q_x_L_ref.clear();
             Q_x_R_ref.clear();
-            F_x_face_ref.clear();
-            vel_x_face_ref.clear();
+            F_face_x_ref.clear();
+            vel_face_x_ref.clear();
             
             // Mulitply fluxes by dt.
             for (int ei = 0; ei < d_num_eqn; ei++)
             {
-                F_x_face[ei][idx_face_x] *= dt;
+                F_face_x[ei][idx_face_x] *= dt;
             }
         }
         
@@ -274,17 +273,17 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the pointers to the convective flux face data.
+         * Get the pointers to the convective flux side data.
          */
         
-        std::vector<double*> F_x_face;
-        std::vector<double*> F_y_face;
-        F_x_face.reserve(d_num_eqn);
-        F_y_face.reserve(d_num_eqn);
+        std::vector<double*> F_face_x;
+        std::vector<double*> F_face_y;
+        F_face_x.reserve(d_num_eqn);
+        F_face_y.reserve(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            F_x_face.push_back(convective_flux->getPointer(0, ei));
-            F_y_face.push_back(convective_flux->getPointer(1, ei));
+            F_face_x.push_back(convective_flux->getPointer(0, ei));
+            F_face_y.push_back(convective_flux->getPointer(1, ei));
         }
         
         /*
@@ -341,12 +340,12 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
         Q_x_R_ref.reserve(d_num_eqn);
         
         // Declare container to store the references to the flux at faces.
-        std::vector<boost::reference_wrapper<double> > F_x_face_ref;
-        F_x_face_ref.reserve(d_num_eqn);
+        std::vector<boost::reference_wrapper<double> > F_face_x_ref;
+        F_face_x_ref.reserve(d_num_eqn);
         
         // Declare container to store the references to the velocity at faces.
-        std::vector<boost::reference_wrapper<double> > vel_x_face_ref;
-        vel_x_face_ref.reserve(d_dim.getValue());
+        std::vector<boost::reference_wrapper<double> > vel_face_x_ref;
+        vel_face_x_ref.reserve(d_dim.getValue());
         
         for (int j = 0; j < interior_dims[1]; j++)
         {
@@ -375,21 +374,21 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
                 // Initialize container that stores the references to flux at faces.
                 for (int ei = 0; ei < d_num_eqn; ei++)
                 {
-                    F_x_face_ref.push_back(boost::ref(F_x_face[ei][idx_face_x]));
+                    F_face_x_ref.push_back(boost::ref(F_face_x[ei][idx_face_x]));
                 }
                 
                 // Initialize container that stores the references to the velocity at faces.
                 for (int di = 0; di < d_dim.getValue(); di++)
                 {
-                    vel_x_face_ref.push_back(
+                    vel_face_x_ref.push_back(
                         boost::ref(velocity_intercell->getPointer(0, di)[idx_face_x]));
                 }
                 
                 // Apply the Riemann solver.
                 d_flow_model->
                     computeLocalFaceFluxAndVelocityFromRiemannSolverWithConservativeVariables(
-                        F_x_face_ref,
-                        vel_x_face_ref,
+                        F_face_x_ref,
+                        vel_face_x_ref,
                         Q_x_L_ref,
                         Q_x_R_ref,
                         DIRECTION::X_DIRECTION,
@@ -397,13 +396,13 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
                 
                 Q_x_L_ref.clear();
                 Q_x_R_ref.clear();
-                F_x_face_ref.clear();
-                vel_x_face_ref.clear();
+                F_face_x_ref.clear();
+                vel_face_x_ref.clear();
                 
                 // Mulitply fluxes by dt.
                 for (int ei = 0; ei < d_num_eqn; ei++)
                 {
-                    F_x_face[ei][idx_face_x] *= dt;
+                    F_face_x[ei][idx_face_x] *= dt;
                 }
             }
         }
@@ -419,20 +418,20 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
         Q_y_T_ref.reserve(d_num_eqn);
         
         // Declare container to store the references to the flux at faces.
-        std::vector<boost::reference_wrapper<double> > F_y_face_ref;
-        F_y_face_ref.reserve(d_num_eqn);
+        std::vector<boost::reference_wrapper<double> > F_face_y_ref;
+        F_face_y_ref.reserve(d_num_eqn);
         
         // Declare container to store the references to the velocity at faces.
-        std::vector<boost::reference_wrapper<double> > vel_y_face_ref;
-        vel_y_face_ref.reserve(d_dim.getValue());
+        std::vector<boost::reference_wrapper<double> > vel_face_y_ref;
+        vel_face_y_ref.reserve(d_dim.getValue());
         
-        for (int i = 0; i < interior_dims[0]; i++)
+        for (int j = 0; j < interior_dims[1] + 1; j++)
         {
-            for (int j = 0; j < interior_dims[1] + 1; j++)
+            for (int i = 0; i < interior_dims[0]; i++)
             {
                 // Compute the linear index.
-                const int idx_face_y = j +
-                    i*(interior_dims[1] + 1);
+                const int idx_face_y = i +
+                    j*interior_dims[0];
                 
                 // Initialzie container that stores the references to conserevative variables.
                 for (int ei = 0; ei < d_num_eqn; ei++)
@@ -453,21 +452,21 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
                 // Initialize container that stores the references to flux at faces.
                 for (int ei = 0; ei < d_num_eqn; ei++)
                 {
-                    F_y_face_ref.push_back(boost::ref(F_y_face[ei][idx_face_y]));
+                    F_face_y_ref.push_back(boost::ref(F_face_y[ei][idx_face_y]));
                 }
                 
                 // Initialize container that stores the references to the velocity at faces.
                 for (int di = 0; di < d_dim.getValue(); di++)
                 {
-                    vel_y_face_ref.push_back(
+                    vel_face_y_ref.push_back(
                         boost::ref(velocity_intercell->getPointer(1, di)[idx_face_y]));
                 }
                 
                 // Apply the Riemann solver.
                 d_flow_model->
                     computeLocalFaceFluxAndVelocityFromRiemannSolverWithConservativeVariables(
-                        F_y_face_ref,
-                        vel_y_face_ref,
+                        F_face_y_ref,
+                        vel_face_y_ref,
                         Q_y_B_ref,
                         Q_y_T_ref,
                         DIRECTION::Y_DIRECTION,
@@ -475,13 +474,13 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
                 
                 Q_y_B_ref.clear();
                 Q_y_T_ref.clear();
-                F_y_face_ref.clear();
-                vel_y_face_ref.clear();
+                F_face_y_ref.clear();
+                vel_face_y_ref.clear();
                 
                 // Mulitply fluxes by dt.
                 for (int ei = 0; ei < d_num_eqn; ei++)
                 {
-                    F_y_face[ei][idx_face_y] *= dt;
+                    F_face_y[ei][idx_face_y] *= dt;
                 }
             }
         }
@@ -514,11 +513,11 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
                         const int idx_face_x_R = (i + 1) +
                             j*(interior_dims[0] + 1);
                         
-                        const int idx_face_y_B = j +
-                            i*(interior_dims[1] + 1);
+                        const int idx_face_y_B = i +
+                            j*interior_dims[0];
                         
-                        const int idx_face_y_T = (j + 1) +
-                            i*(interior_dims[1] + 1);
+                        const int idx_face_y_T = i +
+                            (j + 1)*interior_dims[0];
                         
                         const double& u_L = velocity_intercell->getPointer(0, 0)[idx_face_x_L];
                         const double& u_R = velocity_intercell->getPointer(0, 0)[idx_face_x_R];
@@ -542,20 +541,20 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the pointers to the convective flux face data.
+         * Get the pointers to the convective flux side data.
          */
         
-        std::vector<double*> F_x_face;
-        std::vector<double*> F_y_face;
-        std::vector<double*> F_z_face;
-        F_x_face.reserve(d_num_eqn);
-        F_y_face.reserve(d_num_eqn);
-        F_z_face.reserve(d_num_eqn);
+        std::vector<double*> F_face_x;
+        std::vector<double*> F_face_y;
+        std::vector<double*> F_face_z;
+        F_face_x.reserve(d_num_eqn);
+        F_face_y.reserve(d_num_eqn);
+        F_face_z.reserve(d_num_eqn);
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
-            F_x_face.push_back(convective_flux->getPointer(0, ei));
-            F_y_face.push_back(convective_flux->getPointer(1, ei));
-            F_z_face.push_back(convective_flux->getPointer(2, ei));
+            F_face_x.push_back(convective_flux->getPointer(0, ei));
+            F_face_y.push_back(convective_flux->getPointer(1, ei));
+            F_face_z.push_back(convective_flux->getPointer(2, ei));
         }
         
         /*
@@ -612,12 +611,12 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
         Q_x_R_ref.reserve(d_num_eqn);
         
         // Declare container to store the references to the flux at faces.
-        std::vector<boost::reference_wrapper<double> > F_x_face_ref;
-        F_x_face_ref.reserve(d_num_eqn);
+        std::vector<boost::reference_wrapper<double> > F_face_x_ref;
+        F_face_x_ref.reserve(d_num_eqn);
         
         // Declare container to store the references to the velocity at faces.
-        std::vector<boost::reference_wrapper<double> > vel_x_face_ref;
-        vel_x_face_ref.reserve(d_dim.getValue());
+        std::vector<boost::reference_wrapper<double> > vel_face_x_ref;
+        vel_face_x_ref.reserve(d_dim.getValue());
         
         for (int k = 0; k < interior_dims[2]; k++)
         {
@@ -637,16 +636,16 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
                         const int idx_L = (i - 1 + num_subghosts_conservative_var[ei][0]) +
                             (j + num_subghosts_conservative_var[ei][1])*
                                 subghostcell_dims_conservative_var[ei][0] +
-                                    (k + num_subghosts_conservative_var[ei][2])*
-                                        subghostcell_dims_conservative_var[ei][0]*
-                                            subghostcell_dims_conservative_var[ei][1];
+                            (k + num_subghosts_conservative_var[ei][2])*
+                                subghostcell_dims_conservative_var[ei][0]*
+                                    subghostcell_dims_conservative_var[ei][1];
                         
                         const int idx_R = (i + num_subghosts_conservative_var[ei][0]) +
                             (j + num_subghosts_conservative_var[ei][1])*
                                 subghostcell_dims_conservative_var[ei][0] +
-                                    (k + num_subghosts_conservative_var[ei][2])*
-                                        subghostcell_dims_conservative_var[ei][0]*
-                                            subghostcell_dims_conservative_var[ei][1];
+                            (k + num_subghosts_conservative_var[ei][2])*
+                                subghostcell_dims_conservative_var[ei][0]*
+                                    subghostcell_dims_conservative_var[ei][1];
                         
                         Q_x_L_ref.push_back(boost::ref(Q[ei][idx_L]));
                         Q_x_R_ref.push_back(boost::ref(Q[ei][idx_R]));
@@ -655,21 +654,21 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
                     // Initialize container that stores the references to flux at faces.
                     for (int ei = 0; ei < d_num_eqn; ei++)
                     {
-                        F_x_face_ref.push_back(boost::ref(F_x_face[ei][idx_face_x]));
+                        F_face_x_ref.push_back(boost::ref(F_face_x[ei][idx_face_x]));
                     }
                     
                     // Initialize container that stores the references to the velocity at faces.
                     for (int di = 0; di < d_dim.getValue(); di++)
                     {
-                        vel_x_face_ref.push_back(
+                        vel_face_x_ref.push_back(
                             boost::ref(velocity_intercell->getPointer(0, di)[idx_face_x]));
                     }
                     
                     // Apply the Riemann solver.
                     d_flow_model->
                         computeLocalFaceFluxAndVelocityFromRiemannSolverWithConservativeVariables(
-                            F_x_face_ref,
-                            vel_x_face_ref,
+                            F_face_x_ref,
+                            vel_face_x_ref,
                             Q_x_L_ref,
                             Q_x_R_ref,
                             DIRECTION::X_DIRECTION,
@@ -677,13 +676,13 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
                     
                     Q_x_L_ref.clear();
                     Q_x_R_ref.clear();
-                    F_x_face_ref.clear();
-                    vel_x_face_ref.clear();
+                    F_face_x_ref.clear();
+                    vel_face_x_ref.clear();
                     
                     // Mulitply fluxes by dt.
                     for (int ei = 0; ei < d_num_eqn; ei++)
                     {
-                        F_x_face[ei][idx_face_x] *= dt;
+                        F_face_x[ei][idx_face_x] *= dt;
                     }
                 }
             }
@@ -700,23 +699,23 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
         Q_y_T_ref.reserve(d_num_eqn);
         
         // Declare container to store the references to the flux at faces.
-        std::vector<boost::reference_wrapper<double> > F_y_face_ref;
-        F_y_face_ref.reserve(d_num_eqn);
+        std::vector<boost::reference_wrapper<double> > F_face_y_ref;
+        F_face_y_ref.reserve(d_num_eqn);
         
         // Declare container to store the references to the velocity at faces.
-        std::vector<boost::reference_wrapper<double> > vel_y_face_ref;
-        vel_y_face_ref.reserve(d_dim.getValue());
+        std::vector<boost::reference_wrapper<double> > vel_face_y_ref;
+        vel_face_y_ref.reserve(d_dim.getValue());
         
-        for (int i = 0; i < interior_dims[0]; i++)
+        for (int k = 0; k < interior_dims[2]; k++)
         {
-            for (int k = 0; k < interior_dims[2]; k++)
+            for (int j = 0; j < interior_dims[1] + 1; j++)
             {
-                for (int j = 0; j < interior_dims[1] + 1; j++)
+                for (int i = 0; i < interior_dims[0]; i++)
                 {
                     // Compute the linear index.
-                    const int idx_face_y = j +
-                        k*(interior_dims[1] + 1) +
-                        i*(interior_dims[1] + 1)*interior_dims[2];
+                    const int idx_face_y = i +
+                        j*interior_dims[0] +
+                        k*interior_dims[0]*(interior_dims[1] + 1);
                     
                     // Initialzie container that stores the references to conserevative variables.
                     for (int ei = 0; ei < d_num_eqn; ei++)
@@ -725,16 +724,16 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
                         const int idx_B = (i + num_subghosts_conservative_var[ei][0]) +
                             (j - 1 + num_subghosts_conservative_var[ei][1])*
                                 subghostcell_dims_conservative_var[ei][0] +
-                                    (k + num_subghosts_conservative_var[ei][2])*
-                                        subghostcell_dims_conservative_var[ei][0]*
-                                            subghostcell_dims_conservative_var[ei][1];
+                            (k + num_subghosts_conservative_var[ei][2])*
+                                subghostcell_dims_conservative_var[ei][0]*
+                                    subghostcell_dims_conservative_var[ei][1];
                         
                         const int idx_T = (i + num_subghosts_conservative_var[ei][0]) +
                             (j + num_subghosts_conservative_var[ei][1])*
                                 subghostcell_dims_conservative_var[ei][0] +
-                                    (k + num_subghosts_conservative_var[ei][2])*
-                                        subghostcell_dims_conservative_var[ei][0]*
-                                            subghostcell_dims_conservative_var[ei][1];
+                            (k + num_subghosts_conservative_var[ei][2])*
+                                subghostcell_dims_conservative_var[ei][0]*
+                                    subghostcell_dims_conservative_var[ei][1];
                         
                         Q_y_B_ref.push_back(boost::ref(Q[ei][idx_B]));
                         Q_y_T_ref.push_back(boost::ref(Q[ei][idx_T]));
@@ -743,21 +742,21 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
                     // Initialize container that stores the references to flux at faces.
                     for (int ei = 0; ei < d_num_eqn; ei++)
                     {
-                        F_y_face_ref.push_back(boost::ref(F_y_face[ei][idx_face_y]));
+                        F_face_y_ref.push_back(boost::ref(F_face_y[ei][idx_face_y]));
                     }
                     
                     // Initialize container that stores the references to the velocity at faces.
                     for (int di = 0; di < d_dim.getValue(); di++)
                     {
-                        vel_y_face_ref.push_back(
+                        vel_face_y_ref.push_back(
                             boost::ref(velocity_intercell->getPointer(1, di)[idx_face_y]));
                     }
                     
                     // Apply the Riemann solver.
                     d_flow_model->
                         computeLocalFaceFluxAndVelocityFromRiemannSolverWithConservativeVariables(
-                            F_y_face_ref,
-                            vel_y_face_ref,
+                            F_face_y_ref,
+                            vel_face_y_ref,
                             Q_y_B_ref,
                             Q_y_T_ref,
                             DIRECTION::Y_DIRECTION,
@@ -765,13 +764,13 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
                     
                     Q_y_B_ref.clear();
                     Q_y_T_ref.clear();
-                    F_y_face_ref.clear();
-                    vel_y_face_ref.clear();
+                    F_face_y_ref.clear();
+                    vel_face_y_ref.clear();
                     
                     // Mulitply fluxes by dt.
                     for (int ei = 0; ei < d_num_eqn; ei++)
                     {
-                        F_y_face[ei][idx_face_y] *= dt;
+                        F_face_y[ei][idx_face_y] *= dt;
                     }
                 }
             }
@@ -788,23 +787,23 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
         Q_z_F_ref.reserve(d_num_eqn);
         
         // Declare container to store the references to the flux at faces.
-        std::vector<boost::reference_wrapper<double> > F_z_face_ref;
-        F_z_face_ref.reserve(d_num_eqn);
+        std::vector<boost::reference_wrapper<double> > F_face_z_ref;
+        F_face_z_ref.reserve(d_num_eqn);
         
         // Declare container to store the references to the velocity at faces.
-        std::vector<boost::reference_wrapper<double> > vel_z_face_ref;
-        vel_z_face_ref.reserve(d_dim.getValue());
+        std::vector<boost::reference_wrapper<double> > vel_face_z_ref;
+        vel_face_z_ref.reserve(d_dim.getValue());
         
-        for (int j = 0; j < interior_dims[1]; j++)
+        for (int k = 0; k < interior_dims[2] + 1; k++)
         {
-            for (int i = 0; i < interior_dims[0]; i++)
+            for (int j = 0; j < interior_dims[1]; j++)
             {
-                for (int k = 0; k < interior_dims[2] + 1; k++)
+                for (int i = 0; i < interior_dims[0]; i++)
                 {
                     // Compute the linear index.
-                    const int idx_face_z = k +
-                        i*(interior_dims[2] + 1) +
-                        j*(interior_dims[2] + 1)*interior_dims[0];
+                    const int idx_face_z = i +
+                        j*interior_dims[0] +
+                        k*interior_dims[0]*interior_dims[1];
                     
                     // Initialzie container that stores the references to conserevative variables.
                     for (int ei = 0; ei < d_num_eqn; ei++)
@@ -813,16 +812,16 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
                         const int idx_B = (i + num_subghosts_conservative_var[ei][0]) +
                             (j + num_subghosts_conservative_var[ei][1])*
                                 subghostcell_dims_conservative_var[ei][0] +
-                                    (k - 1 + num_subghosts_conservative_var[ei][2])*
-                                        subghostcell_dims_conservative_var[ei][0]*
-                                            subghostcell_dims_conservative_var[ei][1];
+                            (k - 1 + num_subghosts_conservative_var[ei][2])*
+                                subghostcell_dims_conservative_var[ei][0]*
+                                    subghostcell_dims_conservative_var[ei][1];
                         
                         const int idx_F = (i + num_subghosts_conservative_var[ei][0]) +
                             (j + num_subghosts_conservative_var[ei][1])*
                                 subghostcell_dims_conservative_var[ei][0] +
-                                    (k + num_subghosts_conservative_var[ei][2])*
-                                        subghostcell_dims_conservative_var[ei][0]*
-                                            subghostcell_dims_conservative_var[ei][1];
+                            (k + num_subghosts_conservative_var[ei][2])*
+                                subghostcell_dims_conservative_var[ei][0]*
+                                    subghostcell_dims_conservative_var[ei][1];
                         
                         Q_z_B_ref.push_back(boost::ref(Q[ei][idx_B]));
                         Q_z_F_ref.push_back(boost::ref(Q[ei][idx_F]));
@@ -831,21 +830,21 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
                     // Initialize container that stores the references to flux at faces.
                     for (int ei = 0; ei < d_num_eqn; ei++)
                     {
-                        F_z_face_ref.push_back(boost::ref(F_z_face[ei][idx_face_z]));
+                        F_face_z_ref.push_back(boost::ref(F_face_z[ei][idx_face_z]));
                     }
                     
                     // Initialize container that stores the references to the velocity at faces.
                     for (int di = 0; di < d_dim.getValue(); di++)
                     {
-                        vel_z_face_ref.push_back(
+                        vel_face_z_ref.push_back(
                             boost::ref(velocity_intercell->getPointer(2, di)[idx_face_z]));
                     }
                     
                     // Apply the Riemann solver.
                     d_flow_model->
                         computeLocalFaceFluxAndVelocityFromRiemannSolverWithConservativeVariables(
-                            F_z_face_ref,
-                            vel_z_face_ref,
+                            F_face_z_ref,
+                            vel_face_z_ref,
                             Q_z_B_ref,
                             Q_z_F_ref,
                             DIRECTION::Z_DIRECTION,
@@ -853,13 +852,13 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
                     
                     Q_z_B_ref.clear();
                     Q_z_F_ref.clear();
-                    F_z_face_ref.clear();
-                    vel_z_face_ref.clear();
+                    F_face_z_ref.clear();
+                    vel_face_z_ref.clear();
                     
                     // Mulitply fluxes by dt.
                     for (int ei = 0; ei < d_num_eqn; ei++)
                     {
-                        F_z_face[ei][idx_face_z] *= dt;
+                        F_face_z[ei][idx_face_z] *= dt;
                     }
                 }
             }
@@ -901,21 +900,21 @@ ConvectiveFluxReconstructorFirstOrderHLLC::computeConvectiveFluxesAndSources(
                                 j*(interior_dims[0] + 1) +
                                 k*(interior_dims[0] + 1)*interior_dims[1];
                             
-                            const int idx_face_y_B = j +
-                                k*(interior_dims[1] + 1) +
-                                i*(interior_dims[1] + 1)*interior_dims[2];
+                            const int idx_face_y_B = i +
+                                j*interior_dims[0] +
+                                k*interior_dims[0]*(interior_dims[1] + 1);
                             
-                            const int idx_face_y_T = (j + 1) +
-                                k*(interior_dims[1] + 1) +
-                                i*(interior_dims[1] + 1)*interior_dims[2];
+                            const int idx_face_y_T = i +
+                                (j + 1)*interior_dims[0] +
+                                k*interior_dims[0]*(interior_dims[1] + 1);
                             
-                            const int idx_face_z_B = k +
-                                i*(interior_dims[2] + 1) +
-                                j*(interior_dims[2] + 1)*interior_dims[0];
+                            const int idx_face_z_B = i +
+                                j*interior_dims[0] +
+                                k*interior_dims[0]*interior_dims[1];
                             
-                            const int idx_face_z_F = (k + 1) +
-                                i*(interior_dims[2] + 1) +
-                                j*(interior_dims[2] + 1)*interior_dims[0];
+                            const int idx_face_z_F = i +
+                                j*interior_dims[0] +
+                                (k + 1)*interior_dims[0]*interior_dims[1];
                             
                             const double& u_L = velocity_intercell->getPointer(0, 0)[idx_face_x_L];
                             const double& u_R = velocity_intercell->getPointer(0, 0)[idx_face_x_R];

@@ -10,9 +10,7 @@
 #include "SAMRAI/pdat/CellData.h"
 #include "SAMRAI/pdat/CellIndex.h"
 #include "SAMRAI/pdat/CellIterator.h"
-#include "SAMRAI/pdat/FaceData.h"
-#include "SAMRAI/pdat/FaceIndex.h"
-#include "SAMRAI/pdat/FaceVariable.h"
+#include "SAMRAI/pdat/SideIndex.h"
 #include "SAMRAI/tbox/MathUtilities.h"
 #include "SAMRAI/tbox/SAMRAI_MPI.h"
 #include "SAMRAI/tbox/PIO.h"
@@ -28,6 +26,8 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <limits>
+#include <fstream>
 
 #ifndef LACKS_SSTREAM
 #ifndef included_sstream
@@ -43,9 +43,9 @@
 
 boost::shared_ptr<tbox::Timer> Euler::t_init;
 boost::shared_ptr<tbox::Timer> Euler::t_compute_dt;
-boost::shared_ptr<tbox::Timer> Euler::t_compute_hyperbolicfluxes;
-boost::shared_ptr<tbox::Timer> Euler::t_advance_steps;
-boost::shared_ptr<tbox::Timer> Euler::t_synchronize_hyperbloicfluxes;
+boost::shared_ptr<tbox::Timer> Euler::t_compute_fluxes_sources;
+boost::shared_ptr<tbox::Timer> Euler::t_advance_step;
+boost::shared_ptr<tbox::Timer> Euler::t_synchronize_fluxes;
 boost::shared_ptr<tbox::Timer> Euler::t_setphysbcs;
 boost::shared_ptr<tbox::Timer> Euler::t_tagvalue;
 boost::shared_ptr<tbox::Timer> Euler::t_taggradient;
@@ -55,13 +55,14 @@ Euler::Euler(
     const std::string& object_name,
     const tbox::Dimension& dim,
     const boost::shared_ptr<tbox::Database>& input_db,
-    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry):
+    const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+    const std::string& stat_dump_filename):
         RungeKuttaPatchStrategy(),
         d_object_name(object_name),
         d_dim(dim),
         d_grid_geometry(grid_geometry),
+        d_stat_dump_filename(stat_dump_filename),
         d_use_nonuniform_workload(false),
-        d_num_ghosts(hier::IntVector::getZero(d_dim)),
         d_Euler_boundary_conditions_db_is_from_restart(false)
 {
     TBOX_ASSERT(!object_name.empty());
@@ -76,11 +77,11 @@ Euler::Euler(
             getTimer("Euler::initializeDataOnPatch()");
         t_compute_dt = tbox::TimerManager::getManager()->
             getTimer("Euler::computeStableDtOnPatch()");
-        t_compute_hyperbolicfluxes = tbox::TimerManager::getManager()->
+        t_compute_fluxes_sources = tbox::TimerManager::getManager()->
             getTimer("Euler::computeHyperbolicFluxesOnPatch()");
-        t_advance_steps = tbox::TimerManager::getManager()->
-            getTimer("Euler::advanceSingleStep()");
-        t_synchronize_hyperbloicfluxes = tbox::TimerManager::getManager()->
+        t_advance_step = tbox::TimerManager::getManager()->
+            getTimer("Euler::advanceSingleStepOnPatch()");
+        t_synchronize_fluxes = tbox::TimerManager::getManager()->
             getTimer("Euler::synchronizeHyperbolicFluxes()");
         t_setphysbcs = tbox::TimerManager::getManager()->
             getTimer("Euler::setPhysicalBoundaryConditions()");
@@ -207,51 +208,11 @@ Euler::Euler(
     }
     
     /*
-     * Determine the number of ghost cells needed.
+     * Initialize the side variable of convective flux.
      */
     
-    if (!is_from_restart)
-    {
-        d_num_ghosts = hier::IntVector::getZero(d_dim);
-        
-        d_num_ghosts = hier::IntVector::max(
-            d_num_ghosts,
-            d_convective_flux_reconstructor->getConvectiveFluxNumberOfGhostCells());
-        
-        if (d_value_tagger != nullptr)
-        {
-            d_num_ghosts = hier::IntVector::max(
-                d_num_ghosts,
-                d_value_tagger->getValueTaggerNumberOfGhostCells());
-        }
-        
-        if (d_gradient_tagger != nullptr)
-        {
-            d_num_ghosts = hier::IntVector::max(
-                d_num_ghosts,
-                d_gradient_tagger->getGradientTaggerNumberOfGhostCells());
-        }
-        
-        if (d_multiresolution_tagger != nullptr)
-        {
-            d_num_ghosts = hier::IntVector::max(
-                d_num_ghosts,
-                d_multiresolution_tagger->getMultiresolutionTaggerNumberOfGhostCells());
-        }
-    }
-    
-    /*
-     * Set the number of ghost cells needed in d_flow_model.
-     */
-    
-    d_flow_model->setNumberOfGhostCells(d_num_ghosts);
-    
-    /*
-     * Initialize the face variable of convective flux.
-     */
-    
-    d_variable_convective_flux = boost::shared_ptr<pdat::FaceVariable<double> > (
-        new pdat::FaceVariable<double>(dim, "convective flux", d_flow_model->getNumberOfEquations()));
+    d_variable_convective_flux = boost::shared_ptr<pdat::SideVariable<double> > (
+        new pdat::SideVariable<double>(dim, "convective flux", d_flow_model->getNumberOfEquations()));
     
     /*
      * Initialize the cell variable of source.
@@ -259,6 +220,52 @@ Euler::Euler(
     
     d_variable_source = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(dim, "source", d_flow_model->getNumberOfEquations()));
+    
+    if ((!d_stat_dump_filename.empty()))
+    {
+        d_flow_model->setupStatisticsUtilities();
+        
+        const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+        if (mpi.getRank() == 0)
+        {
+            std::ofstream f_out;
+            f_out.open(d_stat_dump_filename.c_str(), std::ios::app);
+            
+            if (!f_out.is_open())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "Failed to open file to output statistics!"
+                    << std::endl);
+            }
+            
+            f_out << "TIME                 ";
+            f_out.close();
+        }
+        
+        boost::shared_ptr<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
+            d_flow_model->getFlowModelStatisticsUtilities();
+        
+        flow_model_statistics_utilities->outputStatisticalQuantitiesNames(
+            d_stat_dump_filename);
+        
+        if (mpi.getRank() == 0)
+        {
+            std::ofstream f_out;
+            f_out.open(d_stat_dump_filename.c_str(), std::ios::app);
+            
+            if (!f_out.is_open())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "Failed to open file to output statistics!"
+                    << std::endl);
+            }
+            
+            f_out << std::endl;
+            f_out.close();
+        }
+    }
 }
 
 
@@ -266,9 +273,9 @@ Euler::~Euler()
 {
     t_init.reset();
     t_compute_dt.reset();
-    t_compute_hyperbolicfluxes.reset();
-    t_advance_steps.reset();
-    t_synchronize_hyperbloicfluxes.reset();
+    t_compute_fluxes_sources.reset();
+    t_advance_step.reset();
+    t_synchronize_fluxes.reset();
     t_setphysbcs.reset();
     t_tagvalue.reset();
     t_taggradient.reset();
@@ -283,9 +290,45 @@ Euler::registerModelVariables(
     TBOX_ASSERT(integrator != 0);
     
     /*
+     * Determine the numbers of ghost cells needed.
+     */
+    
+    hier::IntVector num_ghosts_intermediate = hier::IntVector::getZero(d_dim);
+    
+    num_ghosts_intermediate = hier::IntVector::max(
+        num_ghosts_intermediate,
+        d_convective_flux_reconstructor->getConvectiveFluxNumberOfGhostCells());
+    
+    hier::IntVector num_ghosts = num_ghosts_intermediate;
+    
+    if (d_value_tagger != nullptr)
+    {
+        num_ghosts = hier::IntVector::max(
+            num_ghosts,
+            d_value_tagger->getValueTaggerNumberOfGhostCells());
+    }
+    
+    if (d_gradient_tagger != nullptr)
+    {
+        num_ghosts = hier::IntVector::max(
+            num_ghosts,
+            d_gradient_tagger->getGradientTaggerNumberOfGhostCells());
+    }
+    
+    if (d_multiresolution_tagger != nullptr)
+    {
+        num_ghosts = hier::IntVector::max(
+            num_ghosts,
+            d_multiresolution_tagger->getMultiresolutionTaggerNumberOfGhostCells());
+    }
+    
+    /*
      * Register the conservative variables of d_flow_model.
      */
-    d_flow_model->registerConservativeVariables(integrator);
+    d_flow_model->registerConservativeVariables(
+        integrator,
+        num_ghosts,
+        num_ghosts_intermediate);
     
     /*
      * Register the fluxes and sources.
@@ -294,13 +337,15 @@ Euler::registerModelVariables(
     integrator->registerVariable(
         d_variable_convective_flux,
         hier::IntVector::getZero(d_dim),
-        RungeKuttaLevelIntegrator::HYP_FLUX,
+        hier::IntVector::getZero(d_dim),
+        RungeKuttaLevelIntegrator::FLUX,
         d_grid_geometry,
         "CONSERVATIVE_COARSEN",
         "NO_REFINE");
     
     integrator->registerVariable(
         d_variable_source,
+        hier::IntVector::getZero(d_dim),
         hier::IntVector::getZero(d_dim),
         RungeKuttaLevelIntegrator::SOURCE,
         d_grid_geometry,
@@ -498,10 +543,12 @@ Euler::computeStableDtOnPatch(
         
         d_flow_model->registerPatchWithDataContext(patch, getDataContext());
         
+        hier::IntVector num_ghosts = d_flow_model->getNumberOfGhostCells();
+        
         std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
         num_subghosts_of_data.insert(
             std::pair<std::string, hier::IntVector>(
-                "MAX_WAVE_SPEED_X", hier::IntVector::getZero(d_dim)));
+                "MAX_WAVE_SPEED_X", num_ghosts));
         
         d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
         
@@ -517,19 +564,23 @@ Euler::computeStableDtOnPatch(
         
         hier::IntVector num_subghosts_max_wave_speed_x = max_wave_speed_x->getGhostCellWidth();
         
-        const int num_subghosts_0_max_wave_speed_x = num_subghosts_max_wave_speed_x[0];
+        TBOX_ASSERT(num_subghosts_max_wave_speed_x == num_ghosts);
+        
+        const int num_ghosts_0 = num_ghosts[0];
         
         double* max_lambda_x = max_wave_speed_x->getPointer(0);
         
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd reduction(max:stable_spectral_radius)
 #endif
-        for (int i = 0; i < interior_dim_0; i++)
+        for (int i = -num_ghosts_0;
+             i < interior_dim_0 + num_ghosts_0;
+             i++)
         {
             // Compute the linear index.
-            const int idx_max_wave_speed_x = i + num_subghosts_0_max_wave_speed_x;
+            const int idx = i + num_ghosts_0;
             
-            const double spectral_radius = max_lambda_x[idx_max_wave_speed_x]/dx_0;
+            const double spectral_radius = max_lambda_x[idx]/dx_0;
             stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius);
         }
         
@@ -558,13 +609,19 @@ Euler::computeStableDtOnPatch(
         
         d_flow_model->registerPatchWithDataContext(patch, getDataContext());
         
+        hier::IntVector num_ghosts = d_flow_model->getNumberOfGhostCells();
+        
+        hier::Box ghost_box = interior_box;
+        ghost_box.grow(num_ghosts);
+        const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+        
         std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
         num_subghosts_of_data.insert(
             std::pair<std::string, hier::IntVector>(
-                "MAX_WAVE_SPEED_X", hier::IntVector::getZero(d_dim)));
+                "MAX_WAVE_SPEED_X", num_ghosts));
         num_subghosts_of_data.insert(
             std::pair<std::string, hier::IntVector>(
-                "MAX_WAVE_SPEED_Y", hier::IntVector::getZero(d_dim)));
+                "MAX_WAVE_SPEED_Y", num_ghosts));
         
         d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
         
@@ -582,38 +639,35 @@ Euler::computeStableDtOnPatch(
             d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_Y");
         
         hier::IntVector num_subghosts_max_wave_speed_x = max_wave_speed_x->getGhostCellWidth();
-        hier::IntVector subghostcell_dims_max_wave_speed_x = max_wave_speed_x->getGhostBox().numberCells();
-        
         hier::IntVector num_subghosts_max_wave_speed_y = max_wave_speed_y->getGhostCellWidth();
-        hier::IntVector subghostcell_dims_max_wave_speed_y = max_wave_speed_y->getGhostBox().numberCells();
         
-        const int num_subghosts_0_max_wave_speed_x = num_subghosts_max_wave_speed_x[0];
-        const int num_subghosts_1_max_wave_speed_x = num_subghosts_max_wave_speed_x[1];
-        const int subghostcell_dim_0_max_wave_speed_x = subghostcell_dims_max_wave_speed_x[0];
+        TBOX_ASSERT(num_subghosts_max_wave_speed_x == num_ghosts);
+        TBOX_ASSERT(num_subghosts_max_wave_speed_y == num_ghosts);
         
-        const int num_subghosts_0_max_wave_speed_y = num_subghosts_max_wave_speed_y[0];
-        const int num_subghosts_1_max_wave_speed_y = num_subghosts_max_wave_speed_y[1];
-        const int subghostcell_dim_0_max_wave_speed_y = subghostcell_dims_max_wave_speed_y[0];
+        const int num_ghosts_0 = num_ghosts[0];
+        const int num_ghosts_1 = num_ghosts[1];
+        const int ghostcell_dim_0 = ghostcell_dims[0];
         
         double* max_lambda_x = max_wave_speed_x->getPointer(0);
         double* max_lambda_y = max_wave_speed_y->getPointer(0);
         
-        for (int j = 0; j < interior_dim_1; j++)
+        for (int j = -num_ghosts_1;
+             j < interior_dim_1 + num_ghosts_1;
+             j++)
         {
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd reduction(max:stable_spectral_radius)
 #endif
-            for (int i = 0; i < interior_dim_0; i++)
+            for (int i = -num_ghosts_0;
+                 i < interior_dim_0 + num_ghosts_0;
+                 i++)
             {
                 // Compute the linear indices.
-                const int idx_max_wave_speed_x = (i + num_subghosts_0_max_wave_speed_x) +
-                    (j + num_subghosts_1_max_wave_speed_x)*subghostcell_dim_0_max_wave_speed_x;
+                const int idx = (i + num_ghosts_0) +
+                    (j + num_ghosts_1)*ghostcell_dim_0;
                 
-                const int idx_max_wave_speed_y = (i + num_subghosts_0_max_wave_speed_y) +
-                    (j + num_subghosts_1_max_wave_speed_y)*subghostcell_dim_0_max_wave_speed_y;
-                
-                const double spectral_radius = max_lambda_x[idx_max_wave_speed_x]/dx_0 +
-                    max_lambda_y[idx_max_wave_speed_y]/dx_1;
+                const double spectral_radius = max_lambda_x[idx]/dx_0 +
+                    max_lambda_y[idx]/dx_1;
                 
                 stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius);
             }
@@ -641,21 +695,28 @@ Euler::computeStableDtOnPatch(
         const double dx_2 = dx[2];
         
         /*
-         * Register the patch and maximum wave speeds in the flow model and compute the corresponding cell data.
+         * Register the patch and maximum wave speeds in the flow model and compute the corresponding
+         * cell data.
          */
         
         d_flow_model->registerPatchWithDataContext(patch, getDataContext());
         
+        hier::IntVector num_ghosts = d_flow_model->getNumberOfGhostCells();
+        
+        hier::Box ghost_box = interior_box;
+        ghost_box.grow(num_ghosts);
+        const hier::IntVector ghostcell_dims = ghost_box.numberCells();
+        
         std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
         num_subghosts_of_data.insert(
             std::pair<std::string, hier::IntVector>(
-                "MAX_WAVE_SPEED_X", hier::IntVector::getZero(d_dim)));
+                "MAX_WAVE_SPEED_X", num_ghosts));
         num_subghosts_of_data.insert(
             std::pair<std::string, hier::IntVector>(
-                "MAX_WAVE_SPEED_Y", hier::IntVector::getZero(d_dim)));
+                "MAX_WAVE_SPEED_Y", num_ghosts));
         num_subghosts_of_data.insert(
             std::pair<std::string, hier::IntVector>(
-                "MAX_WAVE_SPEED_Z", hier::IntVector::getZero(d_dim)));
+                "MAX_WAVE_SPEED_Z", num_ghosts));
         
         d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
         
@@ -676,64 +737,47 @@ Euler::computeStableDtOnPatch(
             d_flow_model->getGlobalCellData("MAX_WAVE_SPEED_Z");
         
         hier::IntVector num_subghosts_max_wave_speed_x = max_wave_speed_x->getGhostCellWidth();
-        hier::IntVector subghostcell_dims_max_wave_speed_x = max_wave_speed_x->getGhostBox().numberCells();
-        
         hier::IntVector num_subghosts_max_wave_speed_y = max_wave_speed_y->getGhostCellWidth();
-        hier::IntVector subghostcell_dims_max_wave_speed_y = max_wave_speed_y->getGhostBox().numberCells();
-        
         hier::IntVector num_subghosts_max_wave_speed_z = max_wave_speed_z->getGhostCellWidth();
-        hier::IntVector subghostcell_dims_max_wave_speed_z = max_wave_speed_z->getGhostBox().numberCells();
         
-        const int num_subghosts_0_max_wave_speed_x = num_subghosts_max_wave_speed_x[0];
-        const int num_subghosts_1_max_wave_speed_x = num_subghosts_max_wave_speed_x[1];
-        const int num_subghosts_2_max_wave_speed_x = num_subghosts_max_wave_speed_x[2];
-        const int subghostcell_dim_0_max_wave_speed_x = subghostcell_dims_max_wave_speed_x[0];
-        const int subghostcell_dim_1_max_wave_speed_x = subghostcell_dims_max_wave_speed_x[1];
+        TBOX_ASSERT(num_subghosts_max_wave_speed_x == num_ghosts);
+        TBOX_ASSERT(num_subghosts_max_wave_speed_y == num_ghosts);
+        TBOX_ASSERT(num_subghosts_max_wave_speed_z == num_ghosts);
         
-        const int num_subghosts_0_max_wave_speed_y = num_subghosts_max_wave_speed_y[0];
-        const int num_subghosts_1_max_wave_speed_y = num_subghosts_max_wave_speed_y[1];
-        const int num_subghosts_2_max_wave_speed_y = num_subghosts_max_wave_speed_y[2];
-        const int subghostcell_dim_0_max_wave_speed_y = subghostcell_dims_max_wave_speed_y[0];
-        const int subghostcell_dim_1_max_wave_speed_y = subghostcell_dims_max_wave_speed_y[1];
-        
-        const int num_subghosts_0_max_wave_speed_z = num_subghosts_max_wave_speed_z[0];
-        const int num_subghosts_1_max_wave_speed_z = num_subghosts_max_wave_speed_z[1];
-        const int num_subghosts_2_max_wave_speed_z = num_subghosts_max_wave_speed_z[2];
-        const int subghostcell_dim_0_max_wave_speed_z = subghostcell_dims_max_wave_speed_z[0];
-        const int subghostcell_dim_1_max_wave_speed_z = subghostcell_dims_max_wave_speed_z[1];
+        const int num_ghosts_0 = num_ghosts[0];
+        const int num_ghosts_1 = num_ghosts[1];
+        const int num_ghosts_2 = num_ghosts[2];
+        const int ghostcell_dim_0 = ghostcell_dims[0];
+        const int ghostcell_dim_1 = ghostcell_dims[1];
         
         double* max_lambda_x = max_wave_speed_x->getPointer(0);
         double* max_lambda_y = max_wave_speed_y->getPointer(0);
         double* max_lambda_z = max_wave_speed_z->getPointer(0);
         
-        for (int k = 0; k < interior_dim_2; k++)
+        for (int k = -num_ghosts_2;
+             k < interior_dim_2 + num_ghosts_2;
+             k++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = -num_ghosts_1;
+                 j < interior_dim_1 + num_ghosts_1;
+                 j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd reduction(max:stable_spectral_radius)
 #endif
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = -num_ghosts_0;
+                     i < interior_dim_0 + num_ghosts_0;
+                     i++)
                 {
                     // Compute the linear indices.
-                    const int idx_max_wave_speed_x = (i + num_subghosts_0_max_wave_speed_x) +
-                        (j + num_subghosts_1_max_wave_speed_x)*subghostcell_dim_0_max_wave_speed_x +
-                        (k + num_subghosts_2_max_wave_speed_x)*subghostcell_dim_0_max_wave_speed_x*
-                            subghostcell_dim_1_max_wave_speed_x;
+                    const int idx = (i + num_ghosts_0) +
+                        (j + num_ghosts_1)*ghostcell_dim_0 +
+                        (k + num_ghosts_2)*ghostcell_dim_0*
+                            ghostcell_dim_1;
                     
-                    const int idx_max_wave_speed_y = (i + num_subghosts_0_max_wave_speed_y) +
-                        (j + num_subghosts_1_max_wave_speed_y)*subghostcell_dim_0_max_wave_speed_y +
-                        (k + num_subghosts_2_max_wave_speed_y)*subghostcell_dim_0_max_wave_speed_y*
-                            subghostcell_dim_1_max_wave_speed_y;
-                    
-                    const int idx_max_wave_speed_z = (i + num_subghosts_0_max_wave_speed_z) +
-                        (j + num_subghosts_1_max_wave_speed_z)*subghostcell_dim_0_max_wave_speed_z +
-                        (k + num_subghosts_2_max_wave_speed_z)*subghostcell_dim_0_max_wave_speed_z*
-                            subghostcell_dim_1_max_wave_speed_z;
-                    
-                    const double spectral_radius = max_lambda_x[idx_max_wave_speed_x]/dx_0 +
-                        max_lambda_y[idx_max_wave_speed_y]/dx_1 +
-                        max_lambda_z[idx_max_wave_speed_z]/dx_2;
+                    const double spectral_radius = max_lambda_x[idx]/dx_0 +
+                        max_lambda_y[idx]/dx_1 +
+                        max_lambda_z[idx]/dx_2;
                     
                     stable_spectral_radius = fmax(stable_spectral_radius, spectral_radius);
                 }
@@ -756,45 +800,71 @@ Euler::computeStableDtOnPatch(
 
 
 void
-Euler::computeHyperbolicFluxesAndSourcesOnPatch(
+Euler::computeFluxesAndSourcesOnPatch(
     hier::Patch& patch,
     const double time,
     const double dt,
-    const int RK_step_number)
+    const int RK_step_number,
+    const boost::shared_ptr<hier::VariableContext>& data_context)
 {
-    NULL_USE(time);
-    
-    t_compute_hyperbolicfluxes->start();
+    t_compute_fluxes_sources->start();
     
     /*
      * Set zero for the source.
      */
     
-    boost::shared_ptr<pdat::CellData<double> > data_source(
-        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            patch.getPatchData(d_variable_source, getDataContext())));
-    
-    data_source->fillAll(0.0);
+    if (data_context)
+    {
+        boost::shared_ptr<pdat::CellData<double> > data_source(
+            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                patch.getPatchData(d_variable_source, data_context)));
+        
+        data_source->fillAll(0.0);
+    }
+    else
+    {
+        boost::shared_ptr<pdat::CellData<double> > data_source(
+            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                patch.getPatchData(d_variable_source, getDataContext())));
+        
+        data_source->fillAll(0.0);
+    }
     
     /*
-     * Compute the fluxes and sources.
+     * Compute the convective flux and source due to splitting of convective term.
      */
     
-    d_convective_flux_reconstructor->computeConvectiveFluxesAndSources(
-        patch,
-        time,
-        dt,
-        RK_step_number,
-        d_variable_convective_flux,
-        d_variable_source,
-        getDataContext());
+    if (data_context)
+    {
+        d_convective_flux_reconstructor->
+            computeConvectiveFluxAndSourceOnPatch(
+                patch,
+                d_variable_convective_flux,
+                d_variable_source,
+                data_context,
+                time,
+                dt,
+                RK_step_number);
+    }
+    else
+    {
+        d_convective_flux_reconstructor->
+            computeConvectiveFluxAndSourceOnPatch(
+                patch,
+                d_variable_convective_flux,
+                d_variable_source,
+                getDataContext(),
+                time,
+                dt,
+                RK_step_number);
+    }
     
-    t_compute_hyperbolicfluxes->stop();
+    t_compute_fluxes_sources->stop();
 }
 
 
 void
-Euler::advanceSingleStep(
+Euler::advanceSingleStepOnPatch(
     hier::Patch& patch,
     const double time,
     const double dt,
@@ -806,7 +876,7 @@ Euler::advanceSingleStep(
     NULL_USE(time);
     NULL_USE(dt);
     
-    t_advance_steps->start();
+    t_advance_step->start();
     
     const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
         BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
@@ -849,7 +919,8 @@ Euler::advanceSingleStep(
         
         for (int di = 0; di < depth; di++)
         {
-            // If the last element of the conservative variable vector is not in the system of equations, ignore it.
+            // If the last element of the conservative variable vector is not in the system of
+            // equations, ignore it.
             if (count_eqn >= d_flow_model->getNumberOfEquations())
                 break;
             
@@ -867,12 +938,11 @@ Euler::advanceSingleStep(
     d_flow_model->unregisterPatch();
     
     /*
-     * Use alpha, beta and gamma values to update the time-dependent solution,
-     * flux and source
+     * Use alpha, beta and gamma values to update the time-dependent solution, flux and source.
      */
     
-    boost::shared_ptr<pdat::FaceData<double> > convective_flux(
-        BOOST_CAST<pdat::FaceData<double>, hier::PatchData>(
+    boost::shared_ptr<pdat::SideData<double> > convective_flux(
+        BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
             patch.getPatchData(d_variable_convective_flux, getDataContext())));
     
     boost::shared_ptr<pdat::CellData<double> > source(
@@ -891,8 +961,8 @@ Euler::advanceSingleStep(
     
     for (int n = 0; n < num_coeffs; n++)
     {
-        boost::shared_ptr<pdat::FaceData<double> > convective_flux_intermediate(
-            BOOST_CAST<pdat::FaceData<double>, hier::PatchData>(
+        boost::shared_ptr<pdat::SideData<double> > convective_flux_intermediate(
+            BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
                     patch.getPatchData(d_variable_convective_flux, intermediate_context[n])));
         
         boost::shared_ptr<pdat::CellData<double> > source_intermediate(
@@ -917,6 +987,12 @@ Euler::advanceSingleStep(
         std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_variables_intermediate =
             d_flow_model->getGlobalCellDataConservativeVariables();
         
+        std::vector<hier::IntVector> num_ghosts_conservative_var_intermediate;
+        num_ghosts_conservative_var_intermediate.reserve(d_flow_model->getNumberOfEquations());
+        
+        std::vector<hier::IntVector> ghostcell_dims_conservative_var_intermediate;
+        ghostcell_dims_conservative_var_intermediate.reserve(d_flow_model->getNumberOfEquations());
+        
         std::vector<double*> Q_intermediate;
         Q_intermediate.reserve(d_flow_model->getNumberOfEquations());
         
@@ -928,11 +1004,16 @@ Euler::advanceSingleStep(
             
             for (int di = 0; di < depth; di++)
             {
-                // If the last element of the conservative variable vector is not in the system of equations, ignore it.
+                // If the last element of the conservative variable vector is not in the system of
+                // equations, ignore it.
                 if (count_eqn >= d_flow_model->getNumberOfEquations())
                     break;
                 
                 Q_intermediate.push_back(conservative_variables_intermediate[vi]->getPointer(di));
+                num_ghosts_conservative_var_intermediate.push_back(
+                    conservative_variables_intermediate[vi]->getGhostCellWidth());
+                ghostcell_dims_conservative_var_intermediate.push_back(
+                    conservative_variables_intermediate[vi]->getGhostBox().numberCells());
                 
                 count_eqn++;
             }
@@ -956,16 +1037,19 @@ Euler::advanceSingleStep(
                 for (int ei = 0; ei < d_flow_model->getNumberOfEquations(); ei++)
                 {
                     const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
+                    const int num_ghosts_0_conservative_var_intermediate =
+                        num_ghosts_conservative_var_intermediate[ei][0];
                     
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
-                        // Compute linear index of conservative variable data.
-                        const int idx_cell = i + num_ghosts_0_conservative_var;
+                        // Compute linear indices of conservative variable data.
+                        const int idx = i + num_ghosts_0_conservative_var;
+                        const int idx_intermediate = i + num_ghosts_0_conservative_var_intermediate;
                         
-                        Q[ei][idx_cell] += alpha[n]*Q_intermediate[ei][idx_cell];
+                        Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
                     }
                 }
             }
@@ -985,13 +1069,13 @@ Euler::advanceSingleStep(
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute linear indices.
-                        const int idx_cell = i + num_ghosts_0_conservative_var;
+                        const int idx = i + num_ghosts_0_conservative_var;
                         const int idx_source = i;
                         const int idx_flux_x = i + 1;
                         
-                        Q[ei][idx_cell] += beta[n]*
+                        Q[ei][idx] += beta[n]*
                             (-(F_x_intermediate[idx_flux_x] - F_x_intermediate[idx_flux_x - 1])/dx_0 +
-                            S_intermediate[idx_source]);
+                             S_intermediate[idx_source]);
                     }
                 }
             }
@@ -1028,9 +1112,9 @@ Euler::advanceSingleStep(
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute linear index.
-                        const int idx_cell = i;
+                        const int idx = i;
                         
-                        S[idx_cell] += gamma[n]*S_intermediate[idx_cell];
+                        S[idx] += gamma[n]*S_intermediate[idx];
                     }
                 }
             } // if (gamma[n] != 0.0)
@@ -1055,6 +1139,13 @@ Euler::advanceSingleStep(
                     const int num_ghosts_1_conservative_var = num_ghosts_conservative_var[ei][1];
                     const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[ei][0];
                     
+                    const int num_ghosts_0_conservative_var_intermediate =
+                        num_ghosts_conservative_var_intermediate[ei][0];
+                    const int num_ghosts_1_conservative_var_intermediate =
+                        num_ghosts_conservative_var_intermediate[ei][1];
+                    const int ghostcell_dim_0_conservative_var_intermediate =
+                        ghostcell_dims_conservative_var_intermediate[ei][0];
+                    
                     for (int j = 0; j < interior_dim_1; j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
@@ -1062,11 +1153,15 @@ Euler::advanceSingleStep(
 #endif
                         for (int i = 0; i < interior_dim_0; i++)
                         {
-                            // Compute linear index of conservative data.
-                            const int idx_cell = (i + num_ghosts_0_conservative_var) +
+                            // Compute linear indices of conservative data.
+                            const int idx = (i + num_ghosts_0_conservative_var) +
                                 (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
                             
-                            Q[ei][idx_cell] += alpha[n]*Q_intermediate[ei][idx_cell];
+                            const int idx_intermediate = (i + num_ghosts_0_conservative_var_intermediate) +
+                                (j + num_ghosts_1_conservative_var_intermediate)*
+                                    ghostcell_dim_0_conservative_var_intermediate;
+                            
+                            Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
                         }
                     }
                 }
@@ -1092,17 +1187,28 @@ Euler::advanceSingleStep(
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute linear indices.
-                            const int idx_cell = (i + num_ghosts_0_conservative_var) +
+                            const int idx = (i + num_ghosts_0_conservative_var) +
                                 (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
                             
-                            const int idx_source = i + j*interior_dim_0;
-                            const int idx_flux_x = (i + 1) + j*(interior_dim_0 + 1);
-                            const int idx_flux_y = (j + 1) + i*(interior_dim_1 + 1);
+                            const int idx_flux_x_L = i +
+                                j*(interior_dim_0 + 1);
                             
-                            Q[ei][idx_cell] += beta[n]*
-                                (-(F_x_intermediate[idx_flux_x] - F_x_intermediate[idx_flux_x - 1])/dx_0 -
-                                (F_y_intermediate[idx_flux_y] - F_y_intermediate[idx_flux_y - 1])/dx_1 +
-                                S_intermediate[idx_source]);
+                            const int idx_flux_x_R = (i + 1) +
+                                j*(interior_dim_0 + 1);
+                            
+                            const int idx_flux_y_B = i +
+                                j*interior_dim_0;
+                            
+                            const int idx_flux_y_T = i +
+                                (j + 1)*interior_dim_0;
+                            
+                            const int idx_source = i +
+                                j*interior_dim_0;
+                            
+                            Q[ei][idx] += beta[n]*
+                                (-(F_x_intermediate[idx_flux_x_R] - F_x_intermediate[idx_flux_x_L])/dx_0 -
+                                  (F_y_intermediate[idx_flux_y_T] - F_y_intermediate[idx_flux_y_B])/dx_1 +
+                                  S_intermediate[idx_source]);
                         }
                     }
                 }
@@ -1124,7 +1230,8 @@ Euler::advanceSingleStep(
                         for (int i = 0; i < interior_dim_0 + 1; i++)
                         {
                             // Compute linear index.
-                            const int idx_flux_x = i + j*(interior_dim_0 + 1);
+                            const int idx_flux_x = i +
+                                j*(interior_dim_0 + 1);
                             
                             F_x[idx_flux_x] += gamma[n]*F_x_intermediate[idx_flux_x];
                         }                        
@@ -1137,15 +1244,16 @@ Euler::advanceSingleStep(
                     double* F_y = convective_flux->getPointer(1, ei);
                     double* F_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
                     
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int j = 0; j < interior_dim_1 + 1; j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
-                        for (int j = 0; j < interior_dim_1 + 1; j++)
+                        for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute linear index.
-                            const int idx_flux_y = j + i*(interior_dim_1 + 1);
+                            const int idx_flux_y = i +
+                                j*interior_dim_0;
                             
                             F_y[idx_flux_y] += gamma[n]*F_y_intermediate[idx_flux_y];
                         }
@@ -1166,9 +1274,10 @@ Euler::advanceSingleStep(
                         for (int i = 0; i < interior_dim_0; i++)
                         {
                             // Compute linear index.
-                            const int idx_cell = i + j*interior_dim_0;
+                            const int idx = i +
+                                j*interior_dim_0;
                             
-                            S[idx_cell] += gamma[n]*S_intermediate[idx_cell];
+                            S[idx] += gamma[n]*S_intermediate[idx];
                         }
                     }
                 }
@@ -1198,6 +1307,17 @@ Euler::advanceSingleStep(
                     const int ghostcell_dim_0_conservative_var = ghostcell_dims_conservative_var[ei][0];
                     const int ghostcell_dim_1_conservative_var = ghostcell_dims_conservative_var[ei][1];
                     
+                    const int num_ghosts_0_conservative_var_intermediate =
+                        num_ghosts_conservative_var_intermediate[ei][0];
+                    const int num_ghosts_1_conservative_var_intermediate =
+                        num_ghosts_conservative_var_intermediate[ei][1];
+                    const int num_ghosts_2_conservative_var_intermediate =
+                        num_ghosts_conservative_var_intermediate[ei][2];
+                    const int ghostcell_dim_0_conservative_var_intermediate =
+                        ghostcell_dims_conservative_var_intermediate[ei][0];
+                    const int ghostcell_dim_1_conservative_var_intermediate =
+                        ghostcell_dims_conservative_var_intermediate[ei][1];
+                    
                     for (int k = 0; k < interior_dim_2; k++)
                     {
                         for (int j = 0; j < interior_dim_1; j++)
@@ -1207,13 +1327,20 @@ Euler::advanceSingleStep(
 #endif
                             for (int i = 0; i < interior_dim_0; i++)
                             {
-                                // Compute linear index of conservative variable data.
-                                const int idx_cell = (i + num_ghosts_0_conservative_var) +
+                                // Compute linear indices of conservative variable data.
+                                const int idx = (i + num_ghosts_0_conservative_var) +
                                     (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
                                     (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
                                         ghostcell_dim_1_conservative_var;
                                 
-                                Q[ei][idx_cell] += alpha[n]*Q_intermediate[ei][idx_cell];
+                                const int idx_intermediate = (i + num_ghosts_0_conservative_var_intermediate) +
+                                    (j + num_ghosts_1_conservative_var_intermediate)*
+                                        ghostcell_dim_0_conservative_var_intermediate +
+                                    (k + num_ghosts_2_conservative_var_intermediate)*
+                                        ghostcell_dim_0_conservative_var_intermediate*
+                                            ghostcell_dim_1_conservative_var_intermediate;
+                                
+                                Q[ei][idx] += alpha[n]*Q_intermediate[ei][idx_intermediate];
                             }
                         }
                     }
@@ -1245,32 +1372,44 @@ Euler::advanceSingleStep(
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear indices.
-                                const int idx_cell = (i + num_ghosts_0_conservative_var) +
+                                const int idx = (i + num_ghosts_0_conservative_var) +
                                     (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
                                     (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
                                         ghostcell_dim_1_conservative_var;
+                                
+                                const int idx_flux_x_L = i +
+                                    j*(interior_dim_0 + 1) +
+                                    k*(interior_dim_0 + 1)*interior_dim_1;
+                                
+                                const int idx_flux_x_R = (i + 1) +
+                                    j*(interior_dim_0 + 1) +
+                                    k*(interior_dim_0 + 1)*interior_dim_1;
+                                
+                                const int idx_flux_y_B = i +
+                                    j*interior_dim_0 +
+                                    k*interior_dim_0*(interior_dim_1 + 1);
+                                
+                                const int idx_flux_y_T = i +
+                                    (j + 1)*interior_dim_0 +
+                                    k*interior_dim_0*(interior_dim_1 + 1);
+                                
+                                const int idx_flux_z_B = i +
+                                    j*interior_dim_0 +
+                                    k*interior_dim_0*interior_dim_1;
+                                
+                                const int idx_flux_z_F = i +
+                                    j*interior_dim_0 +
+                                    (k + 1)*interior_dim_0*interior_dim_1;
                                 
                                 const int idx_source = i +
                                     j*interior_dim_0 +
                                     k*interior_dim_0*interior_dim_1;
                                 
-                                const int idx_flux_x = (i + 1) +
-                                    j*(interior_dim_0 + 1) +
-                                    k*(interior_dim_0 + 1)*interior_dim_1;
-                                
-                                const int idx_flux_y = (j + 1) +
-                                    k*(interior_dim_1 + 1) +
-                                    i*(interior_dim_1 + 1)*interior_dim_2;
-                                
-                                const int idx_flux_z = (k + 1) +
-                                    i*(interior_dim_2 + 1) +
-                                    j*(interior_dim_2 + 1)*interior_dim_0;
-                                
-                                Q[ei][idx_cell] += beta[n]*
-                                    (-(F_x_intermediate[idx_flux_x] - F_x_intermediate[idx_flux_x - 1])/dx_0 -
-                                    (F_y_intermediate[idx_flux_y] - F_y_intermediate[idx_flux_y - 1])/dx_1 -
-                                    (F_z_intermediate[idx_flux_z] - F_z_intermediate[idx_flux_z - 1])/dx_2 +
-                                    S_intermediate[idx_source]);
+                                Q[ei][idx] += beta[n]*
+                                    (-(F_x_intermediate[idx_flux_x_R] - F_x_intermediate[idx_flux_x_L])/dx_0 -
+                                      (F_y_intermediate[idx_flux_y_T] - F_y_intermediate[idx_flux_y_B])/dx_1 -
+                                      (F_z_intermediate[idx_flux_z_F] - F_z_intermediate[idx_flux_z_B])/dx_2 +
+                                      S_intermediate[idx_source]);
                             }
                         }
                     }
@@ -1311,19 +1450,19 @@ Euler::advanceSingleStep(
                     double* F_y = convective_flux->getPointer(1, ei);
                     double* F_y_intermediate = convective_flux_intermediate->getPointer(1, ei);
                     
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int k = 0; k < interior_dim_2; k++)
                     {
-                        for (int k = 0; k < interior_dim_2; k++)
+                        for (int j = 0; j < interior_dim_1 + 1; j++)
                         {
 #ifdef HAMERS_ENABLE_SIMD
                             #pragma omp simd
 #endif
-                            for (int j = 0; j < interior_dim_1 + 1; j++)
+                            for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear index.
-                                const int idx_flux_y = j +
-                                    k*(interior_dim_1 + 1) +
-                                    i*(interior_dim_1 + 1)*interior_dim_2;
+                                const int idx_flux_y = i +
+                                    j*interior_dim_0 +
+                                    k*interior_dim_0*(interior_dim_1 + 1);
                                 
                                 F_y[idx_flux_y] += gamma[n]*F_y_intermediate[idx_flux_y];
                             }
@@ -1337,19 +1476,19 @@ Euler::advanceSingleStep(
                     double* F_z = convective_flux->getPointer(2, ei);
                     double* F_z_intermediate = convective_flux_intermediate->getPointer(2, ei);
                     
-                    for (int j = 0; j < interior_dim_1; j++)
+                    for (int k = 0; k < interior_dim_2 + 1; k++)
                     {
-                        for (int i = 0; i < interior_dim_0; i++)
+                        for (int j = 0; j < interior_dim_1; j++)
                         {
 #ifdef HAMERS_ENABLE_SIMD
                             #pragma omp simd
 #endif
-                            for (int k = 0; k < interior_dim_2 + 1; k++)
+                            for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear index.
-                                const int idx_flux_z = k +
-                                    i*(interior_dim_2 + 1) +
-                                    j*(interior_dim_2 + 1)*interior_dim_0;
+                                const int idx_flux_z = i +
+                                    j*interior_dim_0 +
+                                    k*interior_dim_0*interior_dim_1;
                                 
                                 F_z[idx_flux_z] += gamma[n]*F_z_intermediate[idx_flux_z];
                             }
@@ -1373,11 +1512,11 @@ Euler::advanceSingleStep(
                             for (int i = 0; i < interior_dim_0; i++)
                             {
                                 // Compute linear index.
-                                const int idx_cell = i +
+                                const int idx = i +
                                     j*interior_dim_0 +
                                     k*interior_dim_0*interior_dim_1;
                                 
-                                S[idx_cell] += gamma[n]*S_intermediate[idx_cell];
+                                S[idx] += gamma[n]*S_intermediate[idx];
                             }
                         }
                     }
@@ -1399,12 +1538,12 @@ Euler::advanceSingleStep(
         }
     }
     
-    t_advance_steps->stop();
+    t_advance_step->stop();
 }
 
 
 void
-Euler::synchronizeHyperbolicFluxes(
+Euler::synchronizeFluxes(
     hier::Patch& patch,
     const double time,
     const double dt)
@@ -1412,7 +1551,7 @@ Euler::synchronizeHyperbolicFluxes(
     NULL_USE(time);
     NULL_USE(dt);
     
-    t_synchronize_hyperbloicfluxes->start();
+    t_synchronize_fluxes->start();
     
     const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
         BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
@@ -1470,8 +1609,8 @@ Euler::synchronizeHyperbolicFluxes(
     // Unregister the patch.
     d_flow_model->unregisterPatch();
     
-    boost::shared_ptr<pdat::FaceData<double> > convective_flux(
-        BOOST_CAST<pdat::FaceData<double>, hier::PatchData>(
+    boost::shared_ptr<pdat::SideData<double> > convective_flux(
+        BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
             patch.getPatchData(d_variable_convective_flux, getDataContext())));
     
     boost::shared_ptr<pdat::CellData<double> > source(
@@ -1503,16 +1642,19 @@ Euler::synchronizeHyperbolicFluxes(
             
             const int num_ghosts_0_conservative_var = num_ghosts_conservative_var[ei][0];
             
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
             for (int i = 0; i < interior_dim_0; i++)
             {
                 // Compute linear indices.
-                const int idx_cell = i + num_ghosts_0_conservative_var;
+                const int idx = i + num_ghosts_0_conservative_var;
+                const int idx_flux_x_L = i;
+                const int idx_flux_x_R = i + 1;
                 const int idx_source = i;
-                const int idx_flux_x = i + 1;
                 
-                Q[ei][idx_cell] +=
-                    (-(F_x[idx_flux_x] - F_x[idx_flux_x - 1])/dx_0 +
-                    S[idx_source]);
+                Q[ei][idx] += (-(F_x[idx_flux_x_R] - F_x[idx_flux_x_L])/dx_0 +
+                                S[idx_source]);
             }
         }
     }
@@ -1540,20 +1682,33 @@ Euler::synchronizeHyperbolicFluxes(
             
             for (int j = 0; j < interior_dim_1; j++)
             {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
                 for (int i = 0; i < interior_dim_0; i++)
                 {
                     // Compute linear indices.
-                    const int idx_cell = (i + num_ghosts_0_conservative_var) +
+                    const int idx = (i + num_ghosts_0_conservative_var) +
                         (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
                     
-                    const int idx_source = i + j*interior_dim_0;
-                    const int idx_flux_x = (i + 1) + j*(interior_dim_0 + 1);
-                    const int idx_flux_y = (j + 1) + i*(interior_dim_1 + 1);
+                    const int idx_flux_x_L = i +
+                        j*(interior_dim_0 + 1);
                     
-                    Q[ei][idx_cell] +=
-                        (-(F_x[idx_flux_x] - F_x[idx_flux_x - 1])/dx_0 -
-                        (F_y[idx_flux_y] - F_y[idx_flux_y - 1])/dx_1 +
-                        S[idx_source]);
+                    const int idx_flux_x_R = (i + 1) +
+                        j*(interior_dim_0 + 1);
+                    
+                    const int idx_flux_y_B = i +
+                        j*interior_dim_0;
+                    
+                    const int idx_flux_y_T = i +
+                        (j + 1)*interior_dim_0;
+                    
+                    const int idx_source = i +
+                        j*interior_dim_0;
+                    
+                    Q[ei][idx] += (-(F_x[idx_flux_x_R] - F_x[idx_flux_x_L])/dx_0 -
+                                    (F_y[idx_flux_y_T] - F_y[idx_flux_y_B])/dx_1 +
+                                    S[idx_source]);
                 }
             }
         }
@@ -1589,35 +1744,49 @@ Euler::synchronizeHyperbolicFluxes(
             {
                 for (int j = 0; j < interior_dim_1; j++)
                 {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
                     for (int i = 0; i < interior_dim_0; i++)
                     {
                         // Compute linear indices.
-                        const int idx_cell = (i + num_ghosts_0_conservative_var) +
+                        const int idx = (i + num_ghosts_0_conservative_var) +
                             (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var +
                             (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
                                 ghostcell_dim_1_conservative_var;
+                        
+                        const int idx_flux_x_L = i +
+                            j*(interior_dim_0 + 1) +
+                            k*(interior_dim_0 + 1)*interior_dim_1;
+                        
+                        const int idx_flux_x_R = (i + 1) +
+                            j*(interior_dim_0 + 1) +
+                            k*(interior_dim_0 + 1)*interior_dim_1;
+                        
+                        const int idx_flux_y_B = i +
+                            j*interior_dim_0 +
+                            k*interior_dim_0*(interior_dim_1 + 1);
+                        
+                        const int idx_flux_y_T = i +
+                            (j + 1)*interior_dim_0 +
+                            k*interior_dim_0*(interior_dim_1 + 1);
+                        
+                        const int idx_flux_z_B = i +
+                            j*interior_dim_0 +
+                            k*interior_dim_0*interior_dim_1;
+                        
+                        const int idx_flux_z_F = i +
+                            j*interior_dim_0 +
+                            (k + 1)*interior_dim_0*interior_dim_1;
                         
                         const int idx_source = i +
                             j*interior_dim_0 +
                             k*interior_dim_0*interior_dim_1;
                         
-                        const int idx_flux_x = (i + 1) +
-                            j*(interior_dim_0 + 1) +
-                            k*(interior_dim_0 + 1)*interior_dim_1;
-                        
-                        const int idx_flux_y = (j + 1) +
-                            k*(interior_dim_1 + 1) +
-                            i*(interior_dim_1 + 1)*interior_dim_2;
-                        
-                        const int idx_flux_z = (k + 1) +
-                            i*(interior_dim_2 + 1) +
-                            j*(interior_dim_2 + 1)*interior_dim_0;
-                        
-                        Q[ei][idx_cell] +=
-                            (-(F_x[idx_flux_x] - F_x[idx_flux_x - 1])/dx_0 -
-                            (F_y[idx_flux_y] - F_y[idx_flux_y - 1])/dx_1 -
-                            (F_z[idx_flux_z] - F_z[idx_flux_z - 1])/dx_2 +
-                            S[idx_source]);
+                        Q[ei][idx] += (-(F_x[idx_flux_x_R] - F_x[idx_flux_x_L])/dx_0 -
+                                        (F_y[idx_flux_y_T] - F_y[idx_flux_y_B])/dx_1 -
+                                        (F_z[idx_flux_z_F] - F_z[idx_flux_z_B])/dx_2 +
+                                        S[idx_source]);
                     }
                 }
             }
@@ -1634,7 +1803,7 @@ Euler::synchronizeHyperbolicFluxes(
     
     d_flow_model->unregisterPatch();
     
-    t_synchronize_hyperbloicfluxes->stop();
+    t_synchronize_fluxes->stop();
 }
 
 
@@ -1642,7 +1811,7 @@ Euler::synchronizeHyperbolicFluxes(
  * Preprocess before tagging cells using value detector.
  */
 void
-Euler::preprocessTagValueDetectorCells(
+Euler::preprocessTagCellsValueDetector(
    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
    const int level_number,
    const double regrid_time,
@@ -1670,7 +1839,7 @@ Euler::preprocessTagValueDetectorCells(
         {
             const boost::shared_ptr<hier::Patch>& patch = *ip;
             
-            d_value_tagger->computeValueTaggerValues(
+            d_value_tagger->computeValueTaggerValuesOnPatch(
                 *patch,
                 getDataContext());
         }
@@ -1687,7 +1856,7 @@ Euler::preprocessTagValueDetectorCells(
  * Tag cells for refinement using value detector.
  */
 void
-Euler::tagValueDetectorCells(
+Euler::tagCellsOnPatchValueDetector(
     hier::Patch& patch,
     const double regrid_time,
     const bool initial_error,
@@ -1724,7 +1893,7 @@ Euler::tagValueDetectorCells(
     // Tag the cells by using d_value_tagger.
     if (d_value_tagger != nullptr)
     {
-        d_value_tagger->tagCells(
+        d_value_tagger->tagCellsOnPatch(
             patch,
             tags,
             getDataContext());
@@ -1735,10 +1904,55 @@ Euler::tagValueDetectorCells(
 
 
 /*
+ * Preprocess before tagging cells using gradient detector.
+ */
+void
+Euler::preprocessTagCellsGradientDetector(
+   const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+   const int level_number,
+   const double regrid_time,
+   const bool initial_error,
+   const bool uses_value_detector_too,
+   const bool uses_multiresolution_detector_too,
+   const bool uses_integral_detector_too,
+   const bool uses_richardson_extrapolation_too)
+{
+    NULL_USE(regrid_time);
+    NULL_USE(initial_error);
+    NULL_USE(uses_value_detector_too);
+    NULL_USE(uses_multiresolution_detector_too);
+    NULL_USE(uses_integral_detector_too);
+    NULL_USE(uses_richardson_extrapolation_too);
+    
+    if (d_gradient_tagger != nullptr)
+    {
+        boost::shared_ptr<hier::PatchLevel> level(
+            patch_hierarchy->getPatchLevel(level_number));
+        
+        for (hier::PatchLevel::iterator ip(level->begin());
+             ip != level->end();
+             ip++)
+        {
+            const boost::shared_ptr<hier::Patch>& patch = *ip;
+            
+            d_gradient_tagger->computeGradientSensorValuesOnPatch(
+                *patch,
+                getDataContext());
+        }
+        
+        d_gradient_tagger->getSensorValueStatistics(
+            patch_hierarchy,
+            level_number,
+            getDataContext());
+    }
+}
+
+
+/*
  * Tag cells for refinement using gradient detector.
  */
 void
-Euler::tagGradientDetectorCells(
+Euler::tagCellsOnPatchGradientDetector(
     hier::Patch& patch,
     const double regrid_time,
     const bool initial_error,
@@ -1775,7 +1989,7 @@ Euler::tagGradientDetectorCells(
     // Tag the cells by using d_gradient_tagger.
     if (d_gradient_tagger != nullptr)
     {
-        d_gradient_tagger->tagCells(
+        d_gradient_tagger->tagCellsOnPatch(
             patch,
             tags,
             getDataContext());
@@ -1789,7 +2003,7 @@ Euler::tagGradientDetectorCells(
  * Preprocess before tagging cells using multiresolution detector.
  */
 void
-Euler::preprocessTagMultiresolutionDetectorCells(
+Euler::preprocessTagCellsMultiresolutionDetector(
    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
    const int level_number,
    const double regrid_time,
@@ -1817,7 +2031,7 @@ Euler::preprocessTagMultiresolutionDetectorCells(
         {
             const boost::shared_ptr<hier::Patch>& patch = *ip;
             
-            d_multiresolution_tagger->computeMultiresolutionSensorValues(
+            d_multiresolution_tagger->computeMultiresolutionSensorValuesOnPatch(
                 *patch,
                 getDataContext());
         }
@@ -1834,7 +2048,7 @@ Euler::preprocessTagMultiresolutionDetectorCells(
  * Tag cells for refinement using multiresolution detector.
  */
 void
-Euler::tagMultiresolutionDetectorCells(
+Euler::tagCellsOnPatchMultiresolutionDetector(
     hier::Patch& patch,
     const double regrid_time,
     const bool initial_error,
@@ -1871,7 +2085,7 @@ Euler::tagMultiresolutionDetectorCells(
     // Tag the cells by using d_multiresolution_tagger.
     if (d_multiresolution_tagger != nullptr)
     {
-        d_multiresolution_tagger->tagCells(
+        d_multiresolution_tagger->tagCellsOnPatch(
             patch,
             tags,
             getDataContext());
@@ -1906,8 +2120,6 @@ Euler::putToRestart(
     TBOX_ASSERT(restart_db);
     
     restart_db->putString("d_project_name", d_project_name);
-    
-    restart_db->putIntegerArray("d_num_ghosts", &d_num_ghosts[0], d_dim.getValue());
     
     restart_db->putInteger("d_num_species", d_num_species);
     
@@ -1999,7 +2211,6 @@ void Euler::printClassData(std::ostream& os) const
     os << "d_project_name = " << d_project_name << std::endl;
     os << "d_dim = " << d_dim.getValue() << std::endl;
     os << "d_grid_geometry = " << d_grid_geometry.get() << std::endl;
-    os << "d_num_ghosts = " << d_num_ghosts << std::endl;
     
     // Print all characteristics of d_flow_model.
     d_flow_model_manager->printClassData(os);
@@ -2331,6 +2542,63 @@ Euler::printDataStatistics(
 }
 
 
+/**
+ * Output the statistics of data.
+ */
+void
+Euler::outputDataStatistics(
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const double output_time)
+{
+    if ((!d_stat_dump_filename.empty()))
+    {
+        const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+        
+        if (mpi.getRank() == 0)
+        {
+            std::ofstream f_out;
+            f_out.open(d_stat_dump_filename.c_str(), std::ios::app);
+            
+            if (!f_out.is_open())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "Failed to open file to output statistics!"
+                    << std::endl);
+            }
+            
+            f_out << std::fixed << std::setprecision(std::numeric_limits<double>::digits10) << output_time;
+            f_out.close();
+        }
+        
+        boost::shared_ptr<FlowModelStatisticsUtilities> flow_model_statistics_utilities =
+            d_flow_model->getFlowModelStatisticsUtilities();
+        
+        flow_model_statistics_utilities->outputStatisticalQuantities(
+            d_stat_dump_filename,
+            patch_hierarchy,
+            getDataContext());
+        
+        if (mpi.getRank() == 0)
+        {
+            std::ofstream f_out;
+            f_out.open(d_stat_dump_filename.c_str(), std::ios::app);
+            
+            if (!f_out.is_open())
+            {
+                TBOX_ERROR(d_object_name
+                    << ": "
+                    << "Failed to open file to output statistics!"
+                    << std::endl);
+            }
+            
+            f_out << std::endl;
+            f_out.close();
+        }
+    }
+}
+
+
 void
 Euler::getFromInput(
     const boost::shared_ptr<tbox::Database>& input_db,
@@ -2521,9 +2789,6 @@ void Euler::getFromRestart()
     boost::shared_ptr<tbox::Database> db(root_db->getDatabase(d_object_name));
     
     d_project_name = db->getString("d_project_name");
-    
-    int* tmp_num_ghosts = &d_num_ghosts[0];
-    db->getIntegerArray("d_num_ghosts", tmp_num_ghosts, d_dim.getValue());
     
     d_num_species = db->getInteger("d_num_species");
     

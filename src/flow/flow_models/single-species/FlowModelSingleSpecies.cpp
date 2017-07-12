@@ -1,19 +1,22 @@
 #include "flow/flow_models/single-species/FlowModelSingleSpecies.hpp"
 
 #include "flow/flow_models/single-species/FlowModelBoundaryUtilitiesSingleSpecies.hpp"
+#include "flow/flow_models/single-species/FlowModelStatisticsUtilitiesSingleSpecies.hpp"
+
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelSingleSpecies::s_variable_density;
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelSingleSpecies::s_variable_momentum;
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelSingleSpecies::s_variable_total_energy;
 
 FlowModelSingleSpecies::FlowModelSingleSpecies(
     const std::string& object_name,
     const tbox::Dimension& dim,
     const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
-    const hier::IntVector& num_ghosts,
     const int& num_species,
     const boost::shared_ptr<tbox::Database>& flow_model_db):
         FlowModel(
             object_name,
             dim,
             grid_geometry,
-            num_ghosts,
             num_species,
             2 + dim.getValue(),
             flow_model_db),
@@ -31,6 +34,7 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
         d_num_subghosts_max_wave_speed_x(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_max_wave_speed_y(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_max_wave_speed_z(-hier::IntVector::getOne(d_dim)),
+        d_num_subghosts_max_diffusivity(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_diffusivities(-hier::IntVector::getOne(d_dim)),
         d_subghost_box_velocity(hier::Box::getEmptyBox(dim)),
         d_subghost_box_internal_energy(hier::Box::getEmptyBox(dim)),
@@ -46,6 +50,7 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
         d_subghost_box_max_wave_speed_x(hier::Box::getEmptyBox(dim)),
         d_subghost_box_max_wave_speed_y(hier::Box::getEmptyBox(dim)),
         d_subghost_box_max_wave_speed_z(hier::Box::getEmptyBox(dim)),
+        d_subghost_box_max_diffusivity(hier::Box::getEmptyBox(dim)),
         d_subghost_box_diffusivities(hier::Box::getEmptyBox(dim)),
         d_subghostcell_dims_velocity(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_internal_energy(hier::IntVector::getZero(d_dim)),
@@ -61,7 +66,83 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
         d_subghostcell_dims_max_wave_speed_x(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_max_wave_speed_y(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_max_wave_speed_z(hier::IntVector::getZero(d_dim)),
-        d_subghostcell_dims_diffusivities(hier::IntVector::getZero(d_dim))
+        d_subghostcell_dims_max_diffusivity(hier::IntVector::getZero(d_dim)),
+        d_subghostcell_dims_diffusivities(hier::IntVector::getZero(d_dim)),
+        d_interior_computed_velocity(false),
+        d_interior_computed_internal_energy(false),
+        d_interior_computed_pressure(false),
+        d_interior_computed_sound_speed(false),
+        d_interior_computed_temperature(false),
+        d_interior_computed_dilatation(false),
+        d_interior_computed_vorticity(false),
+        d_interior_computed_enstrophy(false),
+        d_interior_computed_convective_flux_x(false),
+        d_interior_computed_convective_flux_y(false),
+        d_interior_computed_convective_flux_z(false),
+        d_interior_computed_max_wave_speed_x(false),
+        d_interior_computed_max_wave_speed_y(false),
+        d_interior_computed_max_wave_speed_z(false),
+        d_interior_computed_max_diffusivity(false),
+        d_ghost_x_computed_velocity(false),
+        d_ghost_x_computed_internal_energy(false),
+        d_ghost_x_computed_pressure(false),
+        d_ghost_x_computed_sound_speed(false),
+        d_ghost_x_computed_temperature(false),
+        d_ghost_x_computed_dilatation(false),
+        d_ghost_x_computed_vorticity(false),
+        d_ghost_x_computed_enstrophy(false),
+        d_ghost_x_computed_convective_flux_x(false),
+        d_ghost_x_computed_convective_flux_y(false),
+        d_ghost_x_computed_convective_flux_z(false),
+        d_ghost_x_computed_max_wave_speed_x(false),
+        d_ghost_x_computed_max_wave_speed_y(false),
+        d_ghost_x_computed_max_wave_speed_z(false),
+        d_ghost_x_computed_max_diffusivity(false),
+        d_ghost_y_computed_velocity(false),
+        d_ghost_y_computed_internal_energy(false),
+        d_ghost_y_computed_pressure(false),
+        d_ghost_y_computed_sound_speed(false),
+        d_ghost_y_computed_temperature(false),
+        d_ghost_y_computed_dilatation(false),
+        d_ghost_y_computed_vorticity(false),
+        d_ghost_y_computed_enstrophy(false),
+        d_ghost_y_computed_convective_flux_x(false),
+        d_ghost_y_computed_convective_flux_y(false),
+        d_ghost_y_computed_convective_flux_z(false),
+        d_ghost_y_computed_max_wave_speed_x(false),
+        d_ghost_y_computed_max_wave_speed_y(false),
+        d_ghost_y_computed_max_wave_speed_z(false),
+        d_ghost_y_computed_max_diffusivity(false),
+        d_ghost_z_computed_velocity(false),
+        d_ghost_z_computed_internal_energy(false),
+        d_ghost_z_computed_pressure(false),
+        d_ghost_z_computed_sound_speed(false),
+        d_ghost_z_computed_temperature(false),
+        d_ghost_z_computed_dilatation(false),
+        d_ghost_z_computed_vorticity(false),
+        d_ghost_z_computed_enstrophy(false),
+        d_ghost_z_computed_convective_flux_x(false),
+        d_ghost_z_computed_convective_flux_y(false),
+        d_ghost_z_computed_convective_flux_z(false),
+        d_ghost_z_computed_max_wave_speed_x(false),
+        d_ghost_z_computed_max_wave_speed_y(false),
+        d_ghost_z_computed_max_wave_speed_z(false),
+        d_ghost_z_computed_max_diffusivity(false),
+        d_ghost_corners_computed_velocity(false),
+        d_ghost_corners_computed_internal_energy(false),
+        d_ghost_corners_computed_pressure(false),
+        d_ghost_corners_computed_sound_speed(false),
+        d_ghost_corners_computed_temperature(false),
+        d_ghost_corners_computed_dilatation(false),
+        d_ghost_corners_computed_vorticity(false),
+        d_ghost_corners_computed_enstrophy(false),
+        d_ghost_corners_computed_convective_flux_x(false),
+        d_ghost_corners_computed_convective_flux_y(false),
+        d_ghost_corners_computed_convective_flux_z(false),
+        d_ghost_corners_computed_max_wave_speed_x(false),
+        d_ghost_corners_computed_max_wave_speed_y(false),
+        d_ghost_corners_computed_max_wave_speed_z(false),
+        d_ghost_corners_computed_max_diffusivity(false)
 {
     d_eqn_form.reserve(d_num_eqn);
     
@@ -74,13 +155,13 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
      * Initialize the conservative variables.
      */
     
-    d_variable_density = boost::shared_ptr<pdat::CellVariable<double> > (
+    s_variable_density = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "density", 1));
     
-    d_variable_momentum = boost::shared_ptr<pdat::CellVariable<double> > (
+    s_variable_momentum = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "momentum", d_dim.getValue()));
     
-    d_variable_total_energy = boost::shared_ptr<pdat::CellVariable<double> > (
+    s_variable_total_energy = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "total energy", 1));
     
     /*
@@ -364,6 +445,16 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
     }
     
     /*
+     * Initialize statistics utilities object.
+     */
+    d_flow_model_statistics_utilities.reset(new FlowModelStatisticsUtilitiesSingleSpecies(
+        "d_flow_model_statistics_utilities",
+        d_dim,
+        d_grid_geometry,
+        d_num_species,
+        flow_model_db));
+    
+    /*
      * Initialize the Riemann solvers.
      */
     d_Riemann_solver_HLLC = boost::shared_ptr<RiemannSolverSingleSpeciesHLLC> (
@@ -470,6 +561,11 @@ FlowModelSingleSpecies::putToRestart(
         d_equation_of_thermal_conductivity_mixing_rules->
             putToRestart(restart_equation_of_thermal_conductivity_mixing_rules_db);
     }
+    
+    /*
+     * Put the properties of d_flow_model_statistics_utilities into the restart database.
+     */
+    d_flow_model_statistics_utilities->putToRestart(restart_db);
 }
 
 
@@ -477,27 +573,33 @@ FlowModelSingleSpecies::putToRestart(
  * Register the conservative variables.
  */
 void
-FlowModelSingleSpecies::registerConservativeVariables(RungeKuttaLevelIntegrator* integrator)
+FlowModelSingleSpecies::registerConservativeVariables(
+    RungeKuttaLevelIntegrator* integrator,
+    const hier::IntVector& num_ghosts,
+    const hier::IntVector& num_ghosts_intermediate)
 {
     integrator->registerVariable(
-        d_variable_density,
-        d_num_ghosts,
+        s_variable_density,
+        num_ghosts,
+        num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::TIME_DEP,
         d_grid_geometry,
         "CONSERVATIVE_COARSEN",
         "CONSERVATIVE_LINEAR_REFINE");
     
     integrator->registerVariable(
-        d_variable_momentum,
-        d_num_ghosts,
+        s_variable_momentum,
+        num_ghosts,
+        num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::TIME_DEP,
         d_grid_geometry,
         "CONSERVATIVE_COARSEN",
         "CONSERVATIVE_LINEAR_REFINE");
     
     integrator->registerVariable(
-        d_variable_total_energy,
-        d_num_ghosts,
+        s_variable_total_energy,
+        num_ghosts,
+        num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::TIME_DEP,
         d_grid_geometry,
         "CONSERVATIVE_COARSEN",
@@ -593,9 +695,9 @@ FlowModelSingleSpecies::getConservativeVariables()
     std::vector<boost::shared_ptr<pdat::CellVariable<double> > > conservative_variables;
     conservative_variables.reserve(3);
     
-    conservative_variables.push_back(d_variable_density);
-    conservative_variables.push_back(d_variable_momentum);
-    conservative_variables.push_back(d_variable_total_energy);
+    conservative_variables.push_back(s_variable_density);
+    conservative_variables.push_back(s_variable_momentum);
+    conservative_variables.push_back(s_variable_total_energy);
     
     return conservative_variables;
 }
@@ -621,6 +723,16 @@ FlowModelSingleSpecies::registerPatchWithDataContext(
     d_patch = &patch;
     
     setDataContext(data_context);
+    
+    /*
+     * Set the number of ghost cells of conservative variables.
+     */
+    
+    boost::shared_ptr<pdat::CellData<double> > data_density(
+        BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+            d_patch->getPatchData(s_variable_density, getDataContext())));
+    
+    d_num_ghosts = data_density->getGhostCellWidth();
     
     /*
      * Set the interior and ghost boxes with their dimensions for the conservative cell variables.
@@ -652,6 +764,15 @@ FlowModelSingleSpecies::registerDerivedCellVariable(
         TBOX_ERROR(d_object_name
             << ": FlowModelSingleSpecies::registerDerivedCellVariable()\n"
             << "No patch is registered yet."
+            << std::endl);
+    }
+    
+    // Check whether all or part of derived cell data is alredy computed.
+    if (d_global_derived_cell_data_computed)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::registerDerivedCellVariable()\n"
+            << "Global derived cell data is already computed."
             << std::endl);
     }
     
@@ -790,6 +911,14 @@ FlowModelSingleSpecies::registerDerivedCellVariable(
             "MAX_WAVE_SPEED_Z",
             "MAX_WAVE_SPEED_Z");
     }
+    
+    if (num_subghosts_of_data.find("MAX_DIFFUSIVITY") != num_subghosts_of_data.end())
+    {
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("MAX_DIFFUSIVITY")->second,
+            "MAX_DIFFUSIVITY",
+            "MAX_DIFFUSIVITY");
+    }
 }
 
 
@@ -809,6 +938,16 @@ FlowModelSingleSpecies::registerDerivedVariablesForCharacteristicProjectionOfCon
             << ": FlowModelSingleSpecies::"
             << "registerDerivedVariablesForCharacteristicProjectionOfConservativeVariables()\n"
             << "No patch is registered yet."
+            << std::endl);
+    }
+    
+    // Check whether all or part of derived cell data is already computed.
+    if (d_global_derived_cell_data_computed)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::"
+            << "registerDerivedVariablesForCharacteristicProjectionOfConservativeVariables()\n"
+            << "Global derived cell data is already computed."
             << std::endl);
     }
     
@@ -837,6 +976,16 @@ FlowModelSingleSpecies::registerDerivedVariablesForCharacteristicProjectionOfPri
             << std::endl);
     }
     
+    // Check whether all or part of derived cell data is computed.
+    if (d_global_derived_cell_data_computed)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::"
+            << "registerDerivedVariablesForCharacteristicProjectionOfPrimitiveVariables()\n"
+            << "Global derived cell data is computed."
+            << std::endl);
+    }
+    
     d_proj_var_primitive_averaging = averaging;
     
     setNumberOfSubGhosts(
@@ -853,6 +1002,26 @@ FlowModelSingleSpecies::registerDerivedVariablesForCharacteristicProjectionOfPri
 void
 FlowModelSingleSpecies::registerDiffusiveFlux(const hier::IntVector& num_subghosts)
 {
+    // Check whether a patch is already registered.
+    if (!d_patch)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::"
+            << "registerDiffusiveFlux()\n"
+            << "No patch is registered yet."
+            << std::endl);
+    }
+    
+    // Check whether all or part of derived cell data is already computed.
+    if (d_global_derived_cell_data_computed)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::"
+            << "registerDiffusiveFlux()\n"
+            << "Global derived cell data is already computed."
+            << std::endl);
+    }
+    
     setNumberOfSubGhosts(
         num_subghosts,
         "VELOCITY",
@@ -873,8 +1042,6 @@ FlowModelSingleSpecies::registerDiffusiveFlux(const hier::IntVector& num_subghos
     
     d_num_subghosts_diffusivities =
         hier::IntVector::min(d_num_subghosts_diffusivities, d_num_subghosts_temperature);
-    
-    d_diffusive_flux_var_registered = true;
 }
 
 
@@ -896,6 +1063,7 @@ FlowModelSingleSpecies::unregisterPatch()
     
     d_patch = nullptr;
     
+    d_num_ghosts                      = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_velocity          = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_internal_energy   = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_pressure          = -hier::IntVector::getOne(d_dim);
@@ -910,6 +1078,7 @@ FlowModelSingleSpecies::unregisterPatch()
     d_num_subghosts_max_wave_speed_x  = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_max_wave_speed_y  = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_max_wave_speed_z  = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_max_diffusivity   = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_diffusivities     = -hier::IntVector::getOne(d_dim);
     
     d_interior_box                   = hier::Box::getEmptyBox(d_dim);
@@ -928,6 +1097,7 @@ FlowModelSingleSpecies::unregisterPatch()
     d_subghost_box_max_wave_speed_x  = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_max_wave_speed_y  = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_max_wave_speed_z  = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_max_diffusivity   = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_diffusivities     = hier::Box::getEmptyBox(d_dim);
     
     d_interior_dims                       = hier::IntVector::getZero(d_dim);
@@ -946,6 +1116,7 @@ FlowModelSingleSpecies::unregisterPatch()
     d_subghostcell_dims_max_wave_speed_x  = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_max_wave_speed_y  = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_max_wave_speed_z  = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_max_diffusivity   = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_diffusivities     = hier::IntVector::getZero(d_dim);
     
     d_data_velocity.reset();
@@ -962,7 +1133,10 @@ FlowModelSingleSpecies::unregisterPatch()
     d_data_max_wave_speed_x.reset();
     d_data_max_wave_speed_y.reset();
     d_data_max_wave_speed_z.reset();
+    d_data_max_diffusivity.reset();
     d_data_diffusivities.reset();
+    
+    d_global_derived_cell_data_computed = false;
     
     clearDataContext();
 }
@@ -972,7 +1146,8 @@ FlowModelSingleSpecies::unregisterPatch()
  * Compute global cell data of different registered derived variables with the registered data context.
  */
 void
-FlowModelSingleSpecies::computeGlobalDerivedCellData()
+FlowModelSingleSpecies::computeGlobalDerivedCellData(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     // Check whether a patch is already registered.
     if (!d_patch)
@@ -986,14 +1161,18 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     /*
      * Set the boxes and their dimensions for the derived cell variables.
      */
-    setGhostBoxesAndDimensionsDerivedCellVariables();
+    if (!d_global_derived_cell_data_computed)
+    {
+        setGhostBoxesAndDimensionsDerivedCellVariables();
+    }
     
     // Compute the velocity cell data.
     if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
     {
         if (!d_data_velocity)
         {
-            computeGlobalCellDataVelocity();
+            computeGlobalCellDataVelocity(
+                computing_option);
         }
     }
     
@@ -1002,7 +1181,8 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_internal_energy)
         {
-            computeGlobalCellDataInternalEnergyWithVelocity();
+            computeGlobalCellDataInternalEnergyWithVelocity(
+                computing_option);
         }
     }
     
@@ -1011,7 +1191,8 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithInternalEnergy();
+            computeGlobalCellDataPressureWithInternalEnergy(
+                computing_option);
         }
     }
     
@@ -1020,7 +1201,8 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_sound_speed)
         {
-            computeGlobalCellDataSoundSpeedWithPressure();
+            computeGlobalCellDataSoundSpeedWithPressure(
+                computing_option);
         }
     }
     
@@ -1029,7 +1211,8 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_temperature)
         {
-            computeGlobalCellDataTemperatureWithPressure();
+            computeGlobalCellDataTemperatureWithPressure(
+                computing_option);
         }
     }
     
@@ -1038,7 +1221,8 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_dilatation)
         {
-            computeGlobalCellDataDilatationWithVelocity();
+            computeGlobalCellDataDilatationWithVelocity(
+                computing_option);
         }
     }
     
@@ -1047,7 +1231,8 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_vorticity)
         {
-            computeGlobalCellDataVorticityWithVelocity();
+            computeGlobalCellDataVorticityWithVelocity(
+                computing_option);
         }
     }
     
@@ -1056,7 +1241,8 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_enstrophy)
         {
-            computeGlobalCellDataEnstrophyWithVorticity();
+            computeGlobalCellDataEnstrophyWithVorticity(
+                computing_option);
         }
     }
     
@@ -1065,7 +1251,9 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_convective_flux_x)
         {
-            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(DIRECTION::X_DIRECTION);
+            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
+                DIRECTION::X_DIRECTION,
+                computing_option);
         }
     }
     
@@ -1074,7 +1262,9 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_convective_flux_y)
         {
-            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(DIRECTION::Y_DIRECTION);
+            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
+                DIRECTION::Y_DIRECTION,
+                computing_option);
         }
     }
     
@@ -1083,7 +1273,9 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_convective_flux_z)
         {
-            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(DIRECTION::Z_DIRECTION);
+            computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
+                DIRECTION::Z_DIRECTION,
+                computing_option);
         }
     }
     
@@ -1092,7 +1284,9 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_max_wave_speed_x)
         {
-            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(DIRECTION::X_DIRECTION);
+            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
+                DIRECTION::X_DIRECTION,
+                computing_option);
         }
     }
     
@@ -1101,7 +1295,9 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_max_wave_speed_y)
         {
-            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(DIRECTION::Y_DIRECTION);
+            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
+                DIRECTION::Y_DIRECTION,
+                computing_option);
         }
     }
     
@@ -1110,9 +1306,23 @@ FlowModelSingleSpecies::computeGlobalDerivedCellData()
     {
         if (!d_data_max_wave_speed_z)
         {
-            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(DIRECTION::Z_DIRECTION);
+            computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
+                DIRECTION::Z_DIRECTION,
+                computing_option);
         }
     }
+    
+    // Compute the maximum diffusivity cell data.
+    if (d_num_subghosts_max_diffusivity > -hier::IntVector::getOne(d_dim))
+    {
+        if (!d_data_max_diffusivity)
+        {
+            computeGlobalCellDataMaxDiffusivityWithPressureAndTemperature(
+                computing_option);
+        }
+    }
+    
+    d_global_derived_cell_data_computed = true;
 }
 
 
@@ -1299,6 +1509,17 @@ FlowModelSingleSpecies::getGlobalCellData(const std::string& variable_key)
         }
         cell_data = d_data_max_wave_speed_z;
     }
+    else if (variable_key == "MAX_DIFFUSIVITY")
+    {
+        if (!d_data_max_diffusivity)
+        {
+            TBOX_ERROR(d_object_name
+                << ": FlowModelSingleSpecies::getGlobalCellData()\n"
+                << "Cell data of 'MAX_DIFFUSIVITY' is not registered/computed yet."
+                << std::endl);
+        }
+        cell_data = d_data_max_diffusivity;
+    }
     else
     {
         TBOX_ERROR(d_object_name
@@ -1420,12 +1641,18 @@ FlowModelSingleSpecies::getGlobalCellDataPrimitiveVariables()
     global_cell_data.push_back(getGlobalCellDataDensity());
     if (!d_data_velocity)
     {
-        computeGlobalCellDataVelocity();
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::getGlobalCellDataPrimitiveVariables()\n"
+            << "Cell data of 'VELOCITY' is not registered/computed yet."
+            << std::endl);
     }
     global_cell_data.push_back(d_data_velocity);
     if (!d_data_pressure)
     {
-        computeGlobalCellDataPressureWithInternalEnergy();
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::getGlobalCellDataPrimitiveVariables()\n"
+            << "Cell data of 'PRESSURE' is not registered/computed yet."
+            << std::endl);
     }
     global_cell_data.push_back(d_data_pressure);
     
@@ -4833,6 +5060,8 @@ FlowModelSingleSpecies::getDiffusiveFluxVariablesForDerivative(
             }
         }
     }
+    
+    d_global_derived_cell_data_computed = true;
 }
 
 
@@ -6173,6 +6402,8 @@ FlowModelSingleSpecies::getDiffusiveFluxDiffusivities(
             }
         }
     }
+    
+    d_global_derived_cell_data_computed = true;
 }
 
 
@@ -6213,15 +6444,15 @@ FlowModelSingleSpecies::packDerivedDataIntoDoubleBuffer(
     {
         boost::shared_ptr<pdat::CellData<double> > data_density(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_density, d_plot_context)));
+                patch.getPatchData(s_variable_density, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_momentum(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_momentum, d_plot_context)));
+                patch.getPatchData(s_variable_momentum, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_total_energy(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_total_energy, d_plot_context)));
+                patch.getPatchData(s_variable_total_energy, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_density);
@@ -6331,15 +6562,15 @@ FlowModelSingleSpecies::packDerivedDataIntoDoubleBuffer(
     {
         boost::shared_ptr<pdat::CellData<double> > data_density(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_density, d_plot_context)));
+                patch.getPatchData(s_variable_density, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_momentum(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_momentum, d_plot_context)));
+                patch.getPatchData(s_variable_momentum, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_total_energy(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_total_energy, d_plot_context)));
+                patch.getPatchData(s_variable_total_energy, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_density);
@@ -6468,11 +6699,11 @@ FlowModelSingleSpecies::packDerivedDataIntoDoubleBuffer(
     {
         boost::shared_ptr<pdat::CellData<double> > data_density(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_density, d_plot_context)));
+                patch.getPatchData(s_variable_density, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_momentum(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(d_variable_momentum, d_plot_context)));
+                patch.getPatchData(s_variable_momentum, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_density);
@@ -6582,7 +6813,7 @@ FlowModelSingleSpecies::registerPlotQuantities(
         "density",
         "SCALAR",
         vardb->mapVariableAndContextToIndex(
-           d_variable_density,
+           s_variable_density,
            d_plot_context));
     
     /*
@@ -6590,14 +6821,14 @@ FlowModelSingleSpecies::registerPlotQuantities(
         "momentum",
         "VECTOR",
         vardb->mapVariableAndContextToIndex(
-           d_variable_momentum,
+           s_variable_momentum,
            d_plot_context));
     
     visit_writer->registerPlotQuantity(
         "total energy",
         "SCALAR",
         vardb->mapVariableAndContextToIndex(
-           d_variable_total_energy,
+           s_variable_total_energy,
            d_plot_context));
     */
     
@@ -6626,12 +6857,15 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
     const std::string& variable_name,
     const std::string& parent_variable_name)
 {
+    NULL_USE(parent_variable_name);
+    
     if (variable_name == "VELOCITY")
     {
         if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
         {
             if (num_subghosts > d_num_subghosts_velocity)
             {
+                /*
                 TBOX_ERROR(d_object_name
                     << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
                     << "Number of ghosts of '"
@@ -6641,6 +6875,9 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
                     << variable_name
                     << "'."
                     << std::endl);
+                */
+                
+                d_num_subghosts_velocity = num_subghosts;
             }
         }
         else
@@ -6654,6 +6891,7 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
         {
             if (num_subghosts > d_num_subghosts_internal_energy)
             {
+                /*
                 TBOX_ERROR(d_object_name
                     << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
                     << "Number of ghosts of '"
@@ -6663,6 +6901,9 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
                     << variable_name
                     << "'."
                     << std::endl);
+                */
+                
+                d_num_subghosts_internal_energy = num_subghosts;
             }
         }
         else
@@ -6678,6 +6919,7 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
         {
             if (num_subghosts > d_num_subghosts_pressure)
             {
+                /*
                 TBOX_ERROR(d_object_name
                     << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
                     << "Number of ghosts of '"
@@ -6687,6 +6929,9 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
                     << variable_name
                     << "'."
                     << std::endl);
+                */
+                
+                d_num_subghosts_pressure = num_subghosts;
             }
         }
         else
@@ -6702,6 +6947,7 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
         {
             if (num_subghosts > d_num_subghosts_sound_speed)
             {
+                /*
                 TBOX_ERROR(d_object_name
                     << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
                     << "Number of ghosts of '"
@@ -6711,6 +6957,9 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
                     << variable_name
                     << "'."
                     << std::endl);
+                */
+                
+                d_num_subghosts_sound_speed = num_subghosts;
             }
         }
         else
@@ -6726,6 +6975,7 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
         {
             if (num_subghosts > d_num_subghosts_temperature)
             {
+                /*
                 TBOX_ERROR(d_object_name
                     << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
                     << "Number of ghosts of '"
@@ -6735,6 +6985,9 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
                     << variable_name
                     << "'."
                     << std::endl);
+                */
+                
+                d_num_subghosts_temperature = num_subghosts;
             }
         }
         else
@@ -6750,6 +7003,7 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
         {
             if (num_subghosts > d_num_subghosts_dilatation)
             {
+                /*
                 TBOX_ERROR(d_object_name
                     << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
                     << "Number of ghosts of '"
@@ -6759,6 +7013,9 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
                     << variable_name
                     << "'."
                     << std::endl);
+                */
+                
+                d_num_subghosts_dilatation = num_subghosts;
             }
         }
         else
@@ -6774,6 +7031,7 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
         {
             if (num_subghosts > d_num_subghosts_vorticity)
             {
+                /*
                 TBOX_ERROR(d_object_name
                     << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
                     << "Number of ghosts of '"
@@ -6783,6 +7041,9 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
                     << variable_name
                     << "'."
                     << std::endl);
+                */
+                
+                d_num_subghosts_vorticity = num_subghosts;
             }
         }
         else
@@ -6798,6 +7059,7 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
         {
             if (num_subghosts > d_num_subghosts_enstrophy)
             {
+                /*
                 TBOX_ERROR(d_object_name
                     << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
                     << "Number of ghosts of '"
@@ -6807,6 +7069,9 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
                     << variable_name
                     << "'."
                     << std::endl);
+                */
+                
+                d_num_subghosts_enstrophy = num_subghosts;
             }
         }
         else
@@ -6822,6 +7087,7 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
         {
             if (num_subghosts > d_num_subghosts_convective_flux_x)
             {
+                /*
                 TBOX_ERROR(d_object_name
                     << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
                     << "Number of ghosts of '"
@@ -6831,6 +7097,9 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
                     << variable_name
                     << "'."
                     << std::endl);
+                */
+                
+                d_num_subghosts_convective_flux_x = num_subghosts;
             }
         }
         else
@@ -6847,6 +7116,7 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
         {
             if (num_subghosts > d_num_subghosts_convective_flux_y)
             {
+                /*
                 TBOX_ERROR(d_object_name
                     << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
                     << "Number of ghosts of '"
@@ -6856,6 +7126,9 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
                     << variable_name
                     << "'."
                     << std::endl);
+                */
+                
+                d_num_subghosts_convective_flux_y = num_subghosts;
             }
         }
         else
@@ -6872,6 +7145,7 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
         {
             if (num_subghosts > d_num_subghosts_convective_flux_z)
             {
+                /*
                 TBOX_ERROR(d_object_name
                     << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
                     << "Number of ghosts of '"
@@ -6881,6 +7155,9 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
                     << variable_name
                     << "'."
                     << std::endl);
+                */
+                
+                d_num_subghosts_convective_flux_z = num_subghosts;
             }
         }
         else
@@ -6902,6 +7179,7 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
         {
             if (num_subghosts > d_num_subghosts_max_wave_speed_x)
             {
+                /*
                 TBOX_ERROR(d_object_name
                     << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
                     << "Number of ghosts of '"
@@ -6911,6 +7189,9 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
                     << variable_name
                     << "'."
                     << std::endl);
+                */
+                
+                d_num_subghosts_max_wave_speed_x = num_subghosts;
             }
         }
         else
@@ -6927,6 +7208,7 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
         {
             if (num_subghosts > d_num_subghosts_max_wave_speed_y)
             {
+                /*
                 TBOX_ERROR(d_object_name
                     << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
                     << "Number of ghosts of '"
@@ -6936,6 +7218,9 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
                     << variable_name
                     << "'."
                     << std::endl);
+                */
+                
+                d_num_subghosts_max_wave_speed_y = num_subghosts;
             }
         }
         else
@@ -6952,6 +7237,7 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
         {
             if (num_subghosts > d_num_subghosts_max_wave_speed_z)
             {
+                /*
                 TBOX_ERROR(d_object_name
                     << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
                     << "Number of ghosts of '"
@@ -6961,6 +7247,9 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
                     << variable_name
                     << "'."
                     << std::endl);
+                */
+                
+                d_num_subghosts_max_wave_speed_z = num_subghosts;
             }
         }
         else
@@ -6970,6 +7259,35 @@ FlowModelSingleSpecies::setNumberOfSubGhosts(
         
         setNumberOfSubGhosts(num_subghosts, "VELOCITY", parent_variable_name);
         setNumberOfSubGhosts(num_subghosts, "SOUND_SPEED", parent_variable_name);
+    }
+    else if (variable_name == "MAX_DIFFUSIVITY")
+    {
+        if (d_num_subghosts_max_diffusivity > -hier::IntVector::getOne(d_dim))
+        {
+            if (num_subghosts > d_num_subghosts_max_diffusivity)
+            {
+                /*
+                TBOX_ERROR(d_object_name
+                    << ": FlowModelSingleSpecies::setNumberOfSubGhosts()\n"
+                    << "Number of ghosts of '"
+                    << parent_variable_name
+                    << "' exceeds"
+                    << " number of ghosts of '"
+                    << variable_name
+                    << "'."
+                    << std::endl);
+                */
+                
+                d_num_subghosts_max_diffusivity = num_subghosts;
+            }
+        }
+        else
+        {
+            d_num_subghosts_max_diffusivity = num_subghosts;
+        }
+        
+        setNumberOfSubGhosts(num_subghosts, "PRESSURE", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "TEMPERATURE", parent_variable_name);
     }
 }
 
@@ -7078,6 +7396,13 @@ FlowModelSingleSpecies::setGhostBoxesAndDimensionsDerivedCellVariables()
         d_subghostcell_dims_max_wave_speed_z = d_subghost_box_max_wave_speed_z.numberCells();
     }
     
+    if (d_num_subghosts_max_diffusivity > -hier::IntVector::getOne(d_dim))
+    {
+        d_subghost_box_max_diffusivity = d_interior_box;
+        d_subghost_box_max_diffusivity.grow(d_num_subghosts_max_diffusivity);
+        d_subghostcell_dims_max_diffusivity = d_subghost_box_max_diffusivity.numberCells();
+    }
+    
     if (d_num_subghosts_diffusivities > -hier::IntVector::getOne(d_dim))
     {
         d_subghost_box_diffusivities = d_interior_box;
@@ -7096,7 +7421,7 @@ FlowModelSingleSpecies::getGlobalCellDataDensity()
     // Get the cell data of the registered variable density.
     boost::shared_ptr<pdat::CellData<double> > data_density(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(d_variable_density, getDataContext())));
+            d_patch->getPatchData(s_variable_density, getDataContext())));
     
     return data_density;
 }
@@ -7111,7 +7436,7 @@ FlowModelSingleSpecies::getGlobalCellDataMomentum()
     // Get the cell data of the registered variable momentum.
     boost::shared_ptr<pdat::CellData<double> > data_momentum(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(d_variable_momentum, getDataContext())));
+            d_patch->getPatchData(s_variable_momentum, getDataContext())));
     
     return data_momentum;
 }
@@ -7126,7 +7451,7 @@ FlowModelSingleSpecies::getGlobalCellDataTotalEnergy()
     // Get the cell data of the registered variable total energy.
     boost::shared_ptr<pdat::CellData<double> > data_total_energy(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(d_variable_total_energy, getDataContext())));
+            d_patch->getPatchData(s_variable_total_energy, getDataContext())));
     
     return data_total_energy;
 }
@@ -7136,7 +7461,8 @@ FlowModelSingleSpecies::getGlobalCellDataTotalEnergy()
  * Compute the global cell data of velocity in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataVelocity()
+FlowModelSingleSpecies::computeGlobalCellDataVelocity(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
     {
@@ -7261,7 +7587,8 @@ FlowModelSingleSpecies::computeGlobalCellDataVelocity()
  * Compute the global cell data of internal energy with velocity in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataInternalEnergyWithVelocity()
+FlowModelSingleSpecies::computeGlobalCellDataInternalEnergyWithVelocity(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_internal_energy > -hier::IntVector::getOne(d_dim))
     {
@@ -7400,7 +7727,8 @@ FlowModelSingleSpecies::computeGlobalCellDataInternalEnergyWithVelocity()
  * Compute the global cell data of pressure with internal energy in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataPressureWithInternalEnergy()
+FlowModelSingleSpecies::computeGlobalCellDataPressureWithInternalEnergy(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
     {
@@ -7531,7 +7859,8 @@ FlowModelSingleSpecies::computeGlobalCellDataPressureWithInternalEnergy()
  * Compute the global cell data of sound speed with pressure in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure()
+FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
     {
@@ -7661,7 +7990,8 @@ FlowModelSingleSpecies::computeGlobalCellDataSoundSpeedWithPressure()
  * Compute the global cell data of temperature with pressure in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataTemperatureWithPressure()
+FlowModelSingleSpecies::computeGlobalCellDataTemperatureWithPressure(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_temperature > -hier::IntVector::getOne(d_dim))
     {
@@ -7791,7 +8121,8 @@ FlowModelSingleSpecies::computeGlobalCellDataTemperatureWithPressure()
  * Compute the global cell data of dilatation with velocity in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataDilatationWithVelocity()
+FlowModelSingleSpecies::computeGlobalCellDataDilatationWithVelocity(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_dilatation > -hier::IntVector::getOne(d_dim))
     {
@@ -8147,7 +8478,8 @@ FlowModelSingleSpecies::computeGlobalCellDataDilatationWithVelocity()
  * Compute the global cell data of vorticity with velocity in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataVorticityWithVelocity()
+FlowModelSingleSpecies::computeGlobalCellDataVorticityWithVelocity(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_vorticity > -hier::IntVector::getOne(d_dim))
     {
@@ -8480,7 +8812,8 @@ FlowModelSingleSpecies::computeGlobalCellDataVorticityWithVelocity()
  * Compute the global cell data of enstrophy with vorticity in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataEnstrophyWithVorticity()
+FlowModelSingleSpecies::computeGlobalCellDataEnstrophyWithVorticity(
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_enstrophy > -hier::IntVector::getOne(d_dim))
     {
@@ -8525,7 +8858,7 @@ FlowModelSingleSpecies::computeGlobalCellDataEnstrophyWithVorticity()
                     const int idx_enstrophy = (i + d_num_subghosts_enstrophy[0]) +
                         (j + d_num_subghosts_enstrophy[1])*d_subghostcell_dims_enstrophy[0];
                     
-                    Omega[idx_enstrophy] = 0.5*omega[idx_vorticity]*omega[idx_vorticity];
+                    Omega[idx_enstrophy] = omega[idx_vorticity]*omega[idx_vorticity];
                 }
             }
         }
@@ -8560,7 +8893,7 @@ FlowModelSingleSpecies::computeGlobalCellDataEnstrophyWithVorticity()
                                 (k + d_num_subghosts_enstrophy[2])*d_subghostcell_dims_enstrophy[0]*
                                     d_subghostcell_dims_enstrophy[1];
                         
-                        Omega[idx_enstrophy] = 0.5*(omega_x[idx_vorticity]*omega_x[idx_vorticity] +
+                        Omega[idx_enstrophy] = (omega_x[idx_vorticity]*omega_x[idx_vorticity] +
                             omega_y[idx_vorticity]*omega_y[idx_vorticity] +
                             omega_z[idx_vorticity]*omega_z[idx_vorticity]);
                     }
@@ -8582,7 +8915,9 @@ FlowModelSingleSpecies::computeGlobalCellDataEnstrophyWithVorticity()
  * Compute the global cell data of convective flux with velocity and pressure in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(DIRECTION::TYPE direction)
+FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
+    const DIRECTION::TYPE& direction,
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (direction == DIRECTION::X_DIRECTION)
     {
@@ -8995,7 +9330,9 @@ FlowModelSingleSpecies::computeGlobalCellDataConvectiveFluxWithVelocityAndPressu
  * Compute the global cell data of maximum wave speed with velocity and sound speed in the registered patch.
  */
 void
-FlowModelSingleSpecies::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(DIRECTION::TYPE direction)
+FlowModelSingleSpecies::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
+    const DIRECTION::TYPE& direction,
+    const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (direction == DIRECTION::X_DIRECTION)
     {
@@ -9279,5 +9616,265 @@ FlowModelSingleSpecies::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpe
                 << "Cell data of 'MAX_WAVE_SPEED_Z' is not yet registered."
                 << std::endl);
         }
+    }
+}
+
+
+/*
+ * Compute the global cell data of maximum diffusivity with pressure and temperature in the registered patch.
+ */
+void
+FlowModelSingleSpecies::computeGlobalCellDataMaxDiffusivityWithPressureAndTemperature(
+    const COMPUTING_OPTION::TYPE& computing_option)
+{
+    if (!d_equation_of_shear_viscosity_mixing_rules ||
+        !d_equation_of_bulk_viscosity_mixing_rules ||
+        !d_equation_of_thermal_conductivity_mixing_rules)
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::"
+            << "computeGlobalCellDataMaxDiffusivityWithPressureAndTemperature()\n"
+            << "Either mixing rule of shear viscosity, bulk viscosity or"
+            << " thermal conductivity is not initialized."
+            << std::endl);
+    }
+    
+    if (d_num_subghosts_max_diffusivity > -hier::IntVector::getOne(d_dim))
+    {
+        // Create the cell data of maximum diffusivity.
+        d_data_max_diffusivity.reset(
+            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
+        
+        // Get the cell data of the variable density and pressure.
+        boost::shared_ptr<pdat::CellData<double> > data_density =
+            getGlobalCellDataDensity();
+        
+        if (!d_data_pressure)
+        {
+            computeGlobalCellDataPressureWithInternalEnergy();
+        }
+        
+        if (!d_data_temperature)
+        {
+            computeGlobalCellDataTemperatureWithPressure();
+        }
+        
+        // Get the pointers to the cell data of maximum diffusivity, density, pressure and temperature.
+        double* D_max = d_data_max_diffusivity->getPointer(0);
+        double* rho   = data_density->getPointer(0);
+        double* p     = d_data_pressure->getPointer(0);
+        double* T     = d_data_temperature->getPointer(0);
+        
+        // Get the thermodynamic properties of the species.
+        std::vector<const double*> thermo_properties_ptr;
+        thermo_properties_ptr.reserve(static_cast<int> (d_thermo_properties.size()));
+        for (int ti = 0; ti < static_cast<int> (d_thermo_properties.size()); ti++)
+        {
+            thermo_properties_ptr.push_back(&d_thermo_properties[ti]);
+        }
+        
+        // Get the molecular properties of the species for shear viscosity.
+        std::vector<const double*> molecular_properties_shear_viscosity_ptr;
+        molecular_properties_shear_viscosity_ptr.reserve(
+            static_cast<int> (d_molecular_properties_shear_viscosity.size()));
+        for (int ti = 0; ti < static_cast<int> (d_molecular_properties_shear_viscosity.size()); ti++)
+        {
+            molecular_properties_shear_viscosity_ptr.push_back(
+                &d_molecular_properties_shear_viscosity[ti]);
+        }
+        
+        // Get the molecular properties of the species for bulk viscosity.
+        std::vector<const double*> molecular_properties_bulk_viscosity_ptr;
+        molecular_properties_bulk_viscosity_ptr.reserve(
+            static_cast<int> (d_molecular_properties_bulk_viscosity.size()));
+        for (int ti = 0; ti < static_cast<int> (d_molecular_properties_bulk_viscosity.size()); ti++)
+        {
+            molecular_properties_bulk_viscosity_ptr.push_back(
+                &d_molecular_properties_bulk_viscosity[ti]);
+        }
+        
+        // Get the molecular properties of the species for thermal conductivity.
+        std::vector<const double*> molecular_properties_thermal_conductivity_ptr;
+        molecular_properties_thermal_conductivity_ptr.reserve(
+            static_cast<int> (d_molecular_properties_thermal_conductivity.size()));
+        for (int ti = 0; ti < static_cast<int> (d_molecular_properties_thermal_conductivity.size()); ti++)
+        {
+            molecular_properties_thermal_conductivity_ptr.push_back(
+                &d_molecular_properties_thermal_conductivity[ti]);
+        }
+        
+        if (d_dim == tbox::Dimension(1))
+        {
+            for (int i = -d_num_subghosts_max_diffusivity[0];
+                 i < d_interior_dims[0] + d_num_subghosts_max_diffusivity[0];
+                 i++)
+            {
+                // Compute the linear indices.
+                const int idx = i + d_num_ghosts[0];
+                const int idx_max_diffusivity = i + d_num_subghosts_max_diffusivity[0];
+                const int idx_pressure = i + d_num_subghosts_pressure[0];
+                const int idx_temperature = i + d_num_subghosts_temperature[0];
+                
+                const double c_p = d_equation_of_state_mixing_rules->getEquationOfState()->
+                    getIsobaricSpecificHeatCapacity(
+                        &rho[idx],
+                        &p[idx_pressure],
+                        thermo_properties_ptr);
+                
+                const double mu = d_equation_of_shear_viscosity_mixing_rules->
+                    getEquationOfShearViscosity()->
+                        getShearViscosity(
+                            &p[idx_pressure],
+                            &T[idx_temperature],
+                            molecular_properties_shear_viscosity_ptr);
+                
+                const double mu_v = d_equation_of_bulk_viscosity_mixing_rules->
+                    getEquationOfBulkViscosity()->
+                        getBulkViscosity(
+                            &p[idx_pressure],
+                            &T[idx_temperature],
+                            molecular_properties_bulk_viscosity_ptr);
+                
+                const double kappa = d_equation_of_thermal_conductivity_mixing_rules->
+                        getEquationOfThermalConductivity()->
+                            getThermalConductivity(
+                                &p[idx_pressure],
+                                &T[idx_temperature],
+                                molecular_properties_thermal_conductivity_ptr);
+                
+                D_max[idx_max_diffusivity] = fmax(mu/rho[idx], mu_v/rho[idx]);
+                D_max[idx_max_diffusivity] = fmax(D_max[idx_max_diffusivity], kappa/(rho[idx]*c_p));
+            }
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            for (int j = -d_num_subghosts_max_diffusivity[1];
+                 j < d_interior_dims[1] + d_num_subghosts_max_diffusivity[1];
+                 j++)
+            {
+                for (int i = -d_num_subghosts_max_diffusivity[0];
+                     i < d_interior_dims[0] + d_num_subghosts_max_diffusivity[0];
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx = (i + d_num_ghosts[0]) +
+                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
+                    
+                    const int idx_max_diffusivity = (i + d_num_subghosts_max_diffusivity[0]) +
+                        (j + d_num_subghosts_max_diffusivity[1])*d_subghostcell_dims_max_diffusivity[0];
+                    
+                    const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
+                        (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
+                    
+                    const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
+                        (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0];
+                    
+                    const double c_p = d_equation_of_state_mixing_rules->getEquationOfState()->
+                        getIsobaricSpecificHeatCapacity(
+                            &rho[idx],
+                            &p[idx_pressure],
+                            thermo_properties_ptr);
+                    
+                    const double mu = d_equation_of_shear_viscosity_mixing_rules->
+                        getEquationOfShearViscosity()->
+                            getShearViscosity(
+                                &p[idx_pressure],
+                                &T[idx_temperature],
+                                molecular_properties_shear_viscosity_ptr);
+                    
+                    const double mu_v = d_equation_of_bulk_viscosity_mixing_rules->
+                        getEquationOfBulkViscosity()->
+                            getBulkViscosity(
+                                &p[idx_pressure],
+                                &T[idx_temperature],
+                                molecular_properties_bulk_viscosity_ptr);
+                    
+                    const double kappa = d_equation_of_thermal_conductivity_mixing_rules->
+                            getEquationOfThermalConductivity()->
+                                getThermalConductivity(
+                                    &p[idx_pressure],
+                                    &T[idx_temperature],
+                                    molecular_properties_thermal_conductivity_ptr);
+                    
+                    D_max[idx_max_diffusivity] = fmax(mu/rho[idx], mu_v/rho[idx]);
+                    D_max[idx_max_diffusivity] = fmax(D_max[idx_max_diffusivity], kappa/(rho[idx]*c_p));
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            for (int k = -d_num_subghosts_max_diffusivity[2];
+                 k < d_interior_dims[2] + d_num_subghosts_max_diffusivity[2];
+                 k++)
+            {
+                for (int j = -d_num_subghosts_max_diffusivity[1];
+                     j < d_interior_dims[1] + d_num_subghosts_max_diffusivity[1];
+                     j++)
+                {
+                    for (int i = -d_num_subghosts_max_diffusivity[0];
+                         i < d_interior_dims[0] + d_num_subghosts_max_diffusivity[0];
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx = (i + d_num_ghosts[0]) +
+                            (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
+                            (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
+                        
+                        const int idx_max_diffusivity = (i + d_num_subghosts_max_diffusivity[0]) +
+                            (j + d_num_subghosts_max_diffusivity[1])*d_subghostcell_dims_max_diffusivity[0] +
+                            (k + d_num_subghosts_max_diffusivity[2])*d_subghostcell_dims_max_diffusivity[0]*
+                                d_subghostcell_dims_max_diffusivity[1];
+                        
+                        const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
+                            (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
+                            (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
+                                d_subghostcell_dims_pressure[1];
+                        
+                        const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
+                            (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0] +
+                            (k + d_num_subghosts_temperature[2])*d_subghostcell_dims_temperature[0]*
+                                d_subghostcell_dims_temperature[1];
+                        
+                        const double c_p = d_equation_of_state_mixing_rules->getEquationOfState()->
+                            getIsobaricSpecificHeatCapacity(
+                                &rho[idx],
+                                &p[idx_pressure],
+                                thermo_properties_ptr);
+                        
+                        const double mu = d_equation_of_shear_viscosity_mixing_rules->
+                            getEquationOfShearViscosity()->
+                                getShearViscosity(
+                                    &p[idx_pressure],
+                                    &T[idx_temperature],
+                                    molecular_properties_shear_viscosity_ptr);
+                        
+                        const double mu_v = d_equation_of_bulk_viscosity_mixing_rules->
+                            getEquationOfBulkViscosity()->
+                                getBulkViscosity(
+                                    &p[idx_pressure],
+                                    &T[idx_temperature],
+                                    molecular_properties_bulk_viscosity_ptr);
+                        
+                        const double kappa = d_equation_of_thermal_conductivity_mixing_rules->
+                                getEquationOfThermalConductivity()->
+                                    getThermalConductivity(
+                                        &p[idx_pressure],
+                                        &T[idx_temperature],
+                                        molecular_properties_thermal_conductivity_ptr);
+                        
+                        D_max[idx_max_diffusivity] = fmax(mu/rho[idx], mu_v/rho[idx]);
+                        D_max[idx_max_diffusivity] = fmax(D_max[idx_max_diffusivity], kappa/(rho[idx]*c_p));
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": FlowModelSingleSpecies::"
+            << "computeGlobalCellDataMaxDiffusivityWithPressureAndTemperature()\n"
+            << "Cell data of 'MAX_DIFFUSIVITY' is not yet registered."
+            << std::endl);
     }
 }

@@ -22,8 +22,7 @@ class GradientSensor
             const tbox::Dimension& dim):
                 d_object_name(object_name),
                 d_dim(dim),
-                d_num_gradient_ghosts(hier::IntVector::getZero(d_dim)),
-                d_num_ghosts(hier::IntVector::getZero(d_dim))
+                d_num_gradient_ghosts(hier::IntVector::getZero(d_dim))
         {}
         
         virtual ~GradientSensor() {}
@@ -38,23 +37,14 @@ class GradientSensor
         }
         
         /*
-         * Set the number of ghost cells needed.
-         */
-        void
-        setNumberOfGhostCells(const hier::IntVector& num_ghosts)
-        {
-            d_num_ghosts = num_ghosts;
-        }
-        
-        /*
          * Compute the gradient.
          */
         virtual void
         computeGradient(
+            boost::shared_ptr<pdat::CellData<double> >& gradient,
+            const boost::shared_ptr<pdat::CellData<double> >& cell_data,
             hier::Patch& patch,
-            boost::shared_ptr<pdat::CellData<double> > cell_data,
-            boost::shared_ptr<pdat::CellData<double> > gradient,
-            int depth = 0) = 0;
+            const int depth = 0) = 0;
         
     protected:
         /*
@@ -71,11 +61,6 @@ class GradientSensor
          * Number of ghost cells needed by the gradient sensor.
          */
         hier::IntVector d_num_gradient_ghosts;
-        
-        /*
-         * Number of ghost cells for time-independent variables.
-         */
-        hier::IntVector d_num_ghosts;
         
 };
 

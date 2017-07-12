@@ -34,10 +34,14 @@
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/hier/PatchHierarchy.h"
 #include "SAMRAI/mesh/BergerRigoutsos.h"
+#include "SAMRAI/mesh/TileClustering.h"
 #include "SAMRAI/mesh/GriddingAlgorithm.h"
+#include "SAMRAI/mesh/ChopAndPackLoadBalancer.h"
 #include "SAMRAI/mesh/TreeLoadBalancer.h"
+#include "SAMRAI/mesh/CascadePartitioner.h"
 
 #include "boost/shared_ptr.hpp"
+#include <cmath>
 #include <fstream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -266,7 +270,7 @@ int main(int argc, char *argv[])
     std::string viz_dump_setting;
     int viz_dump_timestep_interval = 0;
     double viz_dump_time_interval = 0.0;
-    std::string visit_dump_dirname;
+    std::string visit_dump_dirname = "";
     int visit_number_procs_per_file = 1;
     
     if (main_db->keyExists("viz_dump_setting"))
@@ -320,6 +324,65 @@ int main(int argc, char *argv[])
         }
     }
     
+    bool is_stat_dumping = false;
+    std::string stat_dump_setting;
+    int stat_dump_timestep_interval = 0;
+    double stat_dump_time_interval = 0.0;
+    std::string stat_dump_filename = "";
+    
+    if (main_db->keyExists("stat_dump_setting"))
+    {
+        stat_dump_setting = main_db->getString("stat_dump_setting");
+        
+        if ((stat_dump_setting != "CONSTANT_TIME_INTERVAL") &&
+            (stat_dump_setting != "CONSTANT_TIMESTEP_INTERVAL"))
+        {
+            TBOX_ERROR("Unknown stat_dump_setting string = "
+                << stat_dump_setting
+                << " found in input."
+                << std::endl);
+        }
+        
+        is_stat_dumping = true;
+    }
+    
+    if (is_stat_dumping)
+    {
+        if (main_db->keyExists("stat_dump_interval"))
+        {
+            if (stat_dump_setting == "CONSTANT_TIME_INTERVAL")
+            {
+                stat_dump_time_interval = main_db->getDouble("stat_dump_interval");
+            }
+            else if (stat_dump_setting == "CONSTANT_TIMESTEP_INTERVAL")
+            {
+                stat_dump_timestep_interval = main_db->getInteger("stat_dump_interval");
+            }
+            else
+            {
+                TBOX_ERROR("Unknown stat_dump_setting = "
+                    << stat_dump_setting
+                    << "."
+                    << std::endl);
+            }
+        }
+        else
+        {
+            TBOX_ERROR("Key data 'stat_dump_interval' not found in input."
+                << std::endl);
+        }
+        
+        if (main_db->keyExists("stat_dump_filename"))
+        {
+            stat_dump_filename = main_db->getString("stat_dump_filename");
+        }
+        else
+        {
+            TBOX_ERROR("Key data 'stat_dump_filename' not found in input."
+                << std::endl);
+        }
+    }
+    
     int restart_interval = 0;
     if (main_db->keyExists("restart_interval"))
     {
@@ -330,6 +393,9 @@ int main(int argc, char *argv[])
         main_db->getStringWithDefault("restart_write_dirname",
                                       base_name + ".restart");
     
+    const bool write_restart = (restart_interval > 0)
+                                && !(restart_write_dirname.empty());
+    
     bool use_refined_timestepping = true;
     if (main_db->keyExists("timestepping"))
     {
@@ -339,9 +405,6 @@ int main(int argc, char *argv[])
             use_refined_timestepping = false;
         }
     }
-    
-    const bool write_restart = (restart_interval > 0)
-                                && !(restart_write_dirname.empty());
     
     /*
      * Get restart manager and root restart database.  If run is from
@@ -433,7 +496,8 @@ int main(int argc, char *argv[])
                 "Euler_app",
                 dim,
                 input_db->getDatabase("Euler"),
-                grid_geometry);
+                grid_geometry,
+                stat_dump_filename);
             
                 RK_level_integrator.reset(new RungeKuttaLevelIntegrator(
                     "Runge-Kutta level integrator",
@@ -449,7 +513,8 @@ int main(int argc, char *argv[])
                 "Navier_Stokes_app",
                 dim,
                 input_db->getDatabase("NavierStokes"),
-                grid_geometry);
+                grid_geometry,
+                stat_dump_filename);
             
             RK_level_integrator.reset(
                 new RungeKuttaLevelIntegrator(
@@ -468,21 +533,111 @@ int main(int argc, char *argv[])
             RK_level_integrator.get(),
             input_db->getDatabase("ExtendedTagAndInitialize")));
     
-    boost::shared_ptr<mesh::BergerRigoutsos> box_generator(
-        new mesh::BergerRigoutsos(
-            dim,
-            input_db->getDatabaseWithDefault(
-                "BergerRigoutsos",
-                boost::shared_ptr<tbox::Database>())));
+    /*
+     * Set up the clustering.
+     */
     
-    boost::shared_ptr<mesh::TreeLoadBalancer> load_balancer(
-        new mesh::TreeLoadBalancer(
-            dim,
-            "LoadBalancer",
-            input_db->getDatabase("LoadBalancer"),
-            boost::shared_ptr<tbox::RankTreeStrategy>(new tbox::BalancedDepthFirstTree)));
+    const std::string clustering_type =
+        main_db->getStringWithDefault("clustering_type", "BergerRigoutsos");
     
-    load_balancer->setSAMRAI_MPI(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    boost::shared_ptr<mesh::BoxGeneratorStrategy> box_generator;
+    
+    if (clustering_type == "BergerRigoutsos")
+    {
+        boost::shared_ptr<tbox::Database> abr_db(
+            input_db->getDatabaseWithDefault("BergerRigoutsos", boost::shared_ptr<tbox::Database>()));
+        
+        boost::shared_ptr<mesh::BoxGeneratorStrategy> berger_rigoutsos(new mesh::BergerRigoutsos(dim, abr_db));
+        box_generator = berger_rigoutsos;
+    }
+    else if (clustering_type == "TileClustering")
+    {
+        boost::shared_ptr<tbox::Database> tc_db(
+            input_db->getDatabaseWithDefault("TileClustering", boost::shared_ptr<tbox::Database>()));
+        
+        boost::shared_ptr<mesh::BoxGeneratorStrategy> tile_clustering(new mesh::TileClustering(dim, tc_db));
+        box_generator = tile_clustering;
+    }
+    
+    /*
+     * Set up the load balancers.
+     */
+    
+    boost::shared_ptr<mesh::LoadBalanceStrategy> load_balancer;
+    boost::shared_ptr<mesh::LoadBalanceStrategy> load_balancer0;
+    
+    const std::string partitioner_type =
+        main_db->getStringWithDefault("partitioner_type", "TreeLoadBalancer");
+    
+    if (partitioner_type == "TreeLoadBalancer")
+    {
+        boost::shared_ptr<mesh::TreeLoadBalancer> tree_load_balancer(
+            new mesh::TreeLoadBalancer(
+                dim,
+                "mesh::TreeLoadBalancer",
+                input_db->getDatabaseWithDefault("TreeLoadBalancer", boost::shared_ptr<tbox::Database>()),
+                boost::shared_ptr<tbox::RankTreeStrategy>(new tbox::BalancedDepthFirstTree)));
+        
+        tree_load_balancer->setSAMRAI_MPI(tbox::SAMRAI_MPI::getSAMRAIWorld());
+        
+        boost::shared_ptr<mesh::TreeLoadBalancer> tree_load_balancer0(
+            new mesh::TreeLoadBalancer(
+                dim,
+                "mesh::TreeLoadBalancer0",
+                input_db->getDatabaseWithDefault("TreeLoadBalancer", boost::shared_ptr<tbox::Database>()),
+                boost::shared_ptr<tbox::RankTreeStrategy>(new tbox::BalancedDepthFirstTree)));
+        
+        tree_load_balancer0->setSAMRAI_MPI(tbox::SAMRAI_MPI::getSAMRAIWorld());
+        
+        load_balancer = tree_load_balancer;
+        load_balancer0 = tree_load_balancer0;
+    }
+    else if (partitioner_type == "CascadePartitioner")
+    {
+        boost::shared_ptr<mesh::CascadePartitioner> cascade_partitioner(
+            new mesh::CascadePartitioner(
+                dim,
+                "mesh::CascadePartitioner",
+                input_db->getDatabaseWithDefault("CascadePartitioner", boost::shared_ptr<tbox::Database>())));
+        
+        cascade_partitioner->setSAMRAI_MPI(tbox::SAMRAI_MPI::getSAMRAIWorld());
+        
+        boost::shared_ptr<mesh::CascadePartitioner> cascade_partitioner0(
+            new mesh::CascadePartitioner(
+                dim,
+                "mesh::CascadePartitioner0",
+                input_db->getDatabaseWithDefault("CascadePartitioner", boost::shared_ptr<tbox::Database>())));
+        
+        cascade_partitioner0->setSAMRAI_MPI(tbox::SAMRAI_MPI::getSAMRAIWorld());
+        
+        load_balancer = cascade_partitioner;
+        load_balancer0 = cascade_partitioner0;
+    }
+    else if (partitioner_type == "ChopAndPackLoadBalancer")
+    {
+        boost::shared_ptr<mesh::ChopAndPackLoadBalancer> cap_load_balancer(
+            new mesh::ChopAndPackLoadBalancer(
+                dim,
+                "mesh::ChopAndPackLoadBalancer",
+                input_db->getDatabaseWithDefault("ChopAndPackLoadBalancer", boost::shared_ptr<tbox::Database>())));
+        
+        load_balancer = cap_load_balancer;
+        
+        /*
+         * ChopAndPackLoadBalancer has trouble on L0 for some reason.
+         * Work around by using the CascadePartitioner for L0.
+         */
+        
+        boost::shared_ptr<mesh::CascadePartitioner> cascade_partitioner0(
+            new mesh::CascadePartitioner(
+                dim,
+                "mesh::CascadePartitioner0",
+                input_db->getDatabaseWithDefault("CascadePartitioner", boost::shared_ptr<tbox::Database>())));
+        
+        cascade_partitioner0->setSAMRAI_MPI(tbox::SAMRAI_MPI::getSAMRAIWorld());
+        
+        load_balancer0 = cascade_partitioner0;
+    }
     
     boost::shared_ptr<mesh::GriddingAlgorithm> gridding_algorithm(
         new mesh::GriddingAlgorithm(
@@ -491,7 +646,8 @@ int main(int argc, char *argv[])
             input_db->getDatabase("GriddingAlgorithm"),
             error_detector,
             box_generator,
-            load_balancer));
+            load_balancer,
+            load_balancer0));
     
     boost::shared_ptr<algs::TimeRefinementIntegrator> time_integrator(
         new algs::TimeRefinementIntegrator(
@@ -548,6 +704,12 @@ int main(int argc, char *argv[])
     
     double dt_now = time_integrator->initializeHierarchy();
     
+    double dt_const = 0.0;
+    if (!(RK_level_integrator->usingRefinedTimestepping()))
+    {
+        dt_const = dt_now;
+    }
+    
     tbox::RestartManager::getManager()->closeRestartFile();
     
     /*
@@ -576,11 +738,16 @@ int main(int argc, char *argv[])
     
     tbox::pout << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
     tbox::pout << std::endl;
+    
     /*
      * Create timers for measuring I/O.
      */
     boost::shared_ptr<tbox::Timer> t_write_viz(
         tbox::TimerManager::getManager()->getTimer("apps::main::write_viz"));
+    
+    boost::shared_ptr<tbox::Timer> t_write_stat(
+        tbox::TimerManager::getManager()->getTimer("apps::main::write_stat"));
+    
     boost::shared_ptr<tbox::Timer> t_write_restart(
         tbox::TimerManager::getManager()->getTimer(
             "apps::main::write_restart"));
@@ -597,6 +764,15 @@ int main(int argc, char *argv[])
 #endif
     t_write_viz->stop();
     
+    t_write_stat->start();
+    if (is_stat_dumping)
+    {
+        RK_level_integrator->outputDataStatistics(
+            patch_hierarchy,
+            time_integrator->getIntegratorTime());
+    }
+    t_write_stat->stop();
+    
     /*
      * Time step loop.  Note that the step count and integration
      * time are maintained by algs::TimeRefinementIntegrator.
@@ -604,9 +780,15 @@ int main(int argc, char *argv[])
     
     double loop_time = time_integrator->getIntegratorTime();
     double loop_time_end = time_integrator->getEndTime();
+    
     double last_viz_dump_time = floor((time_integrator->getIntegratorTime() + DBL_EPSILON)/
         viz_dump_time_interval)*viz_dump_time_interval;
     bool dump_viz = true;
+    
+    double last_stat_dump_time = floor((time_integrator->getIntegratorTime() + DBL_EPSILON)/
+        stat_dump_time_interval)*stat_dump_time_interval;
+    bool dump_stat = true;
+    
     int iteration_num = 0;
     
     tbox::pout << "Start simulation... " << std::endl;
@@ -615,16 +797,53 @@ int main(int argc, char *argv[])
     while (loop_time < loop_time_end && time_integrator->stepsRemaining())
     {
         dump_viz = false;
+        dump_stat = false;
         
         iteration_num = time_integrator->getIntegratorStep() + 1;
         
         // Check whether dt_now is larger than the time interval to next files dumping time.
-        if (viz_dump_setting == "CONSTANT_TIME_INTERVAL")
+        if ((viz_dump_setting == "CONSTANT_TIME_INTERVAL") &&
+            (stat_dump_setting == "CONSTANT_TIME_INTERVAL"))
         {
-            if ((loop_time + dt_now) - (last_viz_dump_time + viz_dump_time_interval) > DBL_EPSILON)
+            if (viz_dump_time_interval == stat_dump_time_interval)
+            {
+                if ((loop_time + dt_now) - (last_viz_dump_time + viz_dump_time_interval) >= -DBL_EPSILON)
+                {
+                    dt_now = last_viz_dump_time + viz_dump_time_interval - loop_time;
+                    dump_viz = true;
+                    dump_stat = true;
+                }
+            }
+            else
+            {
+                if ((loop_time + dt_now) - (last_viz_dump_time + viz_dump_time_interval) >= -DBL_EPSILON)
+                {
+                    dt_now = last_viz_dump_time + viz_dump_time_interval - loop_time;
+                    dump_viz = true;
+                    
+                    if ((loop_time + dt_now) - (last_stat_dump_time + stat_dump_time_interval) >= -DBL_EPSILON)
+                    {
+                        dt_now = last_stat_dump_time + stat_dump_time_interval - loop_time;
+                        dump_viz = false;
+                        dump_stat = true;
+                    }
+                }
+            }
+        }
+        else if (viz_dump_setting == "CONSTANT_TIME_INTERVAL")
+        {
+            if ((loop_time + dt_now) - (last_viz_dump_time + viz_dump_time_interval) >= -DBL_EPSILON)
             {
                 dt_now = last_viz_dump_time + viz_dump_time_interval - loop_time;
                 dump_viz = true;
+            }
+        }
+        else if (stat_dump_setting == "CONSTANT_TIME_INTERVAL")
+        {
+            if ((loop_time + dt_now) - (last_stat_dump_time + stat_dump_time_interval) >= -DBL_EPSILON)
+            {
+                dt_now = last_stat_dump_time + stat_dump_time_interval - loop_time;
+                dump_stat = true;
             }
         }
         
@@ -636,7 +855,20 @@ int main(int argc, char *argv[])
         double dt_new = time_integrator->advanceHierarchy(dt_now);
         
         loop_time += dt_now;
-        dt_now = dt_new;
+        
+        if (!(RK_level_integrator->usingRefinedTimestepping()))
+        {
+            dt_now = dt_const;
+            
+            if (loop_time + dt_now > loop_time_end)
+            {
+                dt_now = loop_time_end - loop_time;
+            }
+        }
+        else
+        {
+            dt_now = dt_new;
+        }
         
         tbox::pout << "At end of timestep # " << iteration_num - 1 << std::endl;
         tbox::pout << "Simulation time is " << loop_time << std::endl;
@@ -730,6 +962,46 @@ int main(int argc, char *argv[])
                     << std::endl); 
             }
         }
+#endif
+        
+        if (is_stat_dumping)
+        {
+            if (stat_dump_setting == "CONSTANT_TIME_INTERVAL")
+            {
+                if (dump_stat)
+                {
+                    t_write_stat->start();
+                    
+                    RK_level_integrator->outputDataStatistics(patch_hierarchy, loop_time);
+                    
+                    t_write_stat->stop();
+                    
+                    last_stat_dump_time = loop_time;
+                    
+                    tbox::pout << "File of statistics is updated." << std::endl;
+                }
+            }
+            else if (stat_dump_setting == "CONSTANT_TIMESTEP_INTERVAL")
+            {
+                if ((iteration_num % stat_dump_timestep_interval) == 0)
+                {
+                    t_write_stat->start();
+                    
+                    RK_level_integrator->outputDataStatistics(patch_hierarchy, loop_time);
+                    
+                    t_write_stat->stop();
+                    
+                    tbox::pout << "File of statistics is updated." << std::endl;
+                }
+            }
+            else
+            {
+                TBOX_ERROR("Unknown stat_dump_setting = "
+                    << stat_dump_setting
+                    << "."
+                    << std::endl); 
+            }
+        }
         
         /*
          * At specified intervals, write restart files.
@@ -752,7 +1024,6 @@ int main(int argc, char *argv[])
         
         tbox::pout << "--------------------------------------------------------------------------------";
         tbox::pout << std::endl;
-#endif
     }
     
 #ifdef HAVE_HDF5
@@ -789,6 +1060,22 @@ int main(int argc, char *argv[])
     }
 #endif
     
+    if (is_stat_dumping)
+    {
+        if (stat_dump_setting == "CONSTANT_TIME_INTERVAL" && !dump_stat)
+        {
+            t_write_stat->start();
+            
+            RK_level_integrator->outputDataStatistics(patch_hierarchy, loop_time);
+            
+            t_write_stat->stop();
+            
+            last_stat_dump_time = loop_time;
+            
+            tbox::pout << "File of statistics at last time step is updated." << std::endl;
+        }
+    }
+    
     tbox::plog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
     tbox::plog << std::endl;
     tbox::plog << "Error statistics:\n";
@@ -824,6 +1111,7 @@ int main(int argc, char *argv[])
     
     box_generator.reset();
     load_balancer.reset();
+    load_balancer0.reset();
     RK_level_integrator.reset();
     error_detector.reset();
     gridding_algorithm.reset();
@@ -844,4 +1132,3 @@ int main(int argc, char *argv[])
    
     return 0;
 }
-

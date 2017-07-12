@@ -5,6 +5,7 @@
 
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
 #include "flow/flow_models/FlowModelBoundaryUtilities.hpp"
+#include "flow/flow_models/FlowModelStatisticsUtilities.hpp"
 #include "util/Directions.hpp"
 #include "util/mixing_rules/equations_of_state/EquationOfStateMixingRulesManager.hpp"
 
@@ -17,7 +18,7 @@
 #include "SAMRAI/pdat/FaceData.h"
 #include "SAMRAI/pdat/SideData.h"
 
-#include "boost/multi_array.hpp"
+#include "boost/enable_shared_from_this.hpp"
 #include "boost/shared_ptr.hpp"
 #include <string>
 #include <unordered_map>
@@ -49,29 +50,41 @@ namespace RIEMANN_SOLVER
                 HLLC_HLL };
 }
 
+namespace COMPUTING_OPTION
+{
+    enum TYPE { ALL,
+                INTERIOR,
+                GHOST_X,
+                GHOST_Y,
+                GHOST_Z,
+                GHOST_CORNERS };
+}
+
+class FlowModelStatisticsUtilities;
+
 /*
  * The class should at least be able to register, compute and get the following cell data of the single-species/mixture:
  * DENSITY, MOMENTUM, TOTAL_ENERGY, PRESSURE, VELOCITY, SOUND_SPEED, DILATATION, VORTICITY, ENSTROPHY, PRIMITIVE_VARIABLES
  * CONVECTIVE_FLUX_X, CONVECTIVE_FLUX_Y, CONVECTIVE_FLUX_Z, MAX_WAVE_SPEED_X, MAX_WAVE_SPEED_Y, MAX_WAVE_SPEED_Z
  */
 class FlowModel:
-    public appu::VisDerivedDataStrategy
+    public appu::VisDerivedDataStrategy,
+    public boost::enable_shared_from_this<FlowModel> 
 {
     public:
         FlowModel(
             const std::string& object_name,
             const tbox::Dimension& dim,
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
-            const hier::IntVector& num_ghosts,
             const int& num_species,
             const int& num_eqn,
             const boost::shared_ptr<tbox::Database>& flow_model_db):
                 d_object_name(object_name),
                 d_dim(dim),
                 d_grid_geometry(grid_geometry),
-                d_num_ghosts(num_ghosts),
                 d_num_species(num_species),
                 d_num_eqn(num_eqn),
+                d_num_ghosts(-hier::IntVector::getOne(d_dim)),
                 d_patch(nullptr),
                 d_patch_registered(false),
                 d_interior_box(hier::Box::getEmptyBox(dim)),
@@ -80,7 +93,7 @@ class FlowModel:
                 d_ghostcell_dims(hier::IntVector::getZero(d_dim)),
                 d_proj_var_conservative_averaging(AVERAGING::SIMPLE),
                 d_proj_var_primitive_averaging(AVERAGING::SIMPLE),
-                d_diffusive_flux_var_registered(false)
+                d_global_derived_cell_data_computed(false)
         {
             NULL_USE(flow_model_db);
         }
@@ -90,7 +103,7 @@ class FlowModel:
         /*
          * Get the total number of equations.
          */
-        const int& getNumberOfEquations() const
+        int getNumberOfEquations() const
         {
             return d_num_eqn;
         }
@@ -101,6 +114,24 @@ class FlowModel:
         const std::vector<EQN_FORM::TYPE>& getEquationsForm() const
         {
             return d_eqn_form;
+        }
+        
+        /*
+         * Get the number of ghost cells of conservative variables.
+         */
+        const hier::IntVector&
+        getNumberOfGhostCells()
+        {
+            // Check whether a patch is already registered.
+            if (!d_patch)
+            {
+                TBOX_ERROR(d_object_name
+                    << ": FlowModel::getNumberOfGhostCells()\n"
+                    << "No patch is registered yet."
+                    << std::endl);
+            }
+            
+            return d_num_ghosts;
         }
         
         /*
@@ -122,6 +153,15 @@ class FlowModel:
         }
         
         /*
+         * Return the boost::shared_ptr to the statistics utilities object.
+         */
+        const boost::shared_ptr<FlowModelStatisticsUtilities>&
+        getFlowModelStatisticsUtilities() const
+        {
+            return d_flow_model_statistics_utilities;
+        }
+        
+        /*
          * Print all characteristics of the flow model class.
          */
         virtual void printClassData(std::ostream& os) const = 0;
@@ -137,7 +177,10 @@ class FlowModel:
          * Register the conservative variables.
          */
         virtual void
-        registerConservativeVariables(RungeKuttaLevelIntegrator* integrator) = 0;
+        registerConservativeVariables(
+            RungeKuttaLevelIntegrator* integrator,
+            const hier::IntVector& num_ghosts,
+            const hier::IntVector& num_ghosts_intermediate) = 0;
         
         /*
          * Get the names of conservative variables.
@@ -219,7 +262,8 @@ class FlowModel:
          * Compute global cell data of different registered derived variables with the registered data context.
          */
         virtual void
-        computeGlobalDerivedCellData() = 0;
+        computeGlobalDerivedCellData(
+            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL) = 0;
         
         /*
          * Get the global cell data of one cell variable in the registered patch.
@@ -420,6 +464,12 @@ class FlowModel:
         }
         
         /*
+         * Setup the statistics utilties object.
+         */
+        void
+        setupStatisticsUtilities();
+        
+        /*
          * Compute derived plot quantities registered with the VisIt data writers from data that
          * is maintained on each patch in the hierarchy.
          */
@@ -440,15 +490,6 @@ class FlowModel:
         registerPlotQuantities(
             const boost::shared_ptr<appu::VisItDataWriter>& visit_writer) = 0;
 #endif
-        
-        /*
-         * Set the number of ghost cells needed.
-         */
-        void
-        setNumberOfGhostCells(const hier::IntVector& num_ghosts)
-        {
-            d_num_ghosts = num_ghosts;
-        }
         
     protected:
         /*
@@ -494,11 +535,6 @@ class FlowModel:
         const boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
         
         /*
-         * Number of ghost cells for registered variables.
-         */
-        hier::IntVector d_num_ghosts;
-        
-        /*
          * A string variable to describe the equation of state used.
          */
         std::string d_equation_of_state_str;
@@ -527,6 +563,11 @@ class FlowModel:
          * Form of each equation.
          */
         std::vector<EQN_FORM::TYPE> d_eqn_form;
+        
+        /*
+         * Number of ghost cells for registered variables.
+         */
+        hier::IntVector d_num_ghosts;
         
         /*
          * Pointer to registered patch.
@@ -562,9 +603,9 @@ class FlowModel:
         AVERAGING::TYPE d_proj_var_primitive_averaging;
         
         /*
-         * Properties of the diffusive fluxes.
+         * Whether all or part of global derived cell data is computed.
          */
-        bool d_diffusive_flux_var_registered;
+        bool d_global_derived_cell_data_computed;
         
         /*
          * boost::shared_ptr to the plotting context.
@@ -575,6 +616,11 @@ class FlowModel:
          * boost::shared_ptr to the boundary utilities object for the flow model.
          */
         boost::shared_ptr<FlowModelBoundaryUtilities> d_flow_model_boundary_utilities;
+        
+        /*
+         * boost::shared_ptr to the statistics utilities object for the flow model.
+         */
+        boost::shared_ptr<FlowModelStatisticsUtilities> d_flow_model_statistics_utilities;
         
 };
 

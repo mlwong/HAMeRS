@@ -1,0 +1,199 @@
+/*************************************************************************
+ *
+ * This file is modified from FlattenedHierarchy.h of the SAMRAI 3.11.2
+ * distribution.  For full copyright information, see COPYRIGHT and
+ * COPYING.LESSER of SAMRAI distribution.
+ *
+ ************************************************************************/
+
+#ifndef EXTENDED_FLATTENED_HIERARCHY
+#define EXTENDED_FLATTENED_HIERARCHY
+
+#include "HAMeRS_config.hpp"
+
+#include "extn/patch_hierarchies/ExtendedUncoveredBoxIterator.hpp"
+
+#include "SAMRAI/hier/HierarchyNeighbors.h"
+#include "SAMRAI/hier/PatchHierarchy.h"
+
+#include "boost/shared_ptr.hpp"
+#include <string>
+#include <vector>
+
+/*!
+ * @brief An extended version of flattened representation of a hierarchy.
+ *
+ * Class ExtendedFlattenedHierarchy provides a way to view a PatchHierarchy or a subset of levels
+ * of PatchHierarchy in a "flattened" representation.  In this representation, only the finest
+ * existing mesh is visible at any given location in the problem space.
+ *
+ * For any Patch in a PatchHierarchy, an associated container of visible boxes is created.  If the
+ * Patch has no Patches from a finer level covering any of its index space, then the container will
+ * simply hold a box that is spatially equivalent to the Patch itself.  If the Patch's index space is
+ * entirely covered by Patches on a finer level, the container will be empty.  If the Patch's index
+ * space is partially covered by a finer level, then the container will hold boxes that compose the
+ * uncovered parts of the Patch.
+ */
+class ExtendedFlattenedHierarchy
+{
+    public:
+        /*!
+         * @brief Constructor of ExtendedFlattenedHierarchy
+         *
+         * A ExtendedFlattenedHierarchy is constructed based on the given PatchHierarchy and a range of
+         * levels.  The range of levels may include the entire hierarchy or a subset of its levels.  Any
+         * levels outside of the given range will be treated by this class as if they do not exist.
+         *
+         * If the coarsest and finest level numbers are equal, the flattened representation will be
+         * equivalent to the boxes of the level.
+         *
+         * @param hierarchy        PatchHierarchy that will be represented
+         * @param coarsest_level   The coarsest level that will be used
+         * @param finest_level     The finest level that will be used
+         *
+         * @pre coarsest_level >= 0;
+         * @pre coarsest_level <= finest_level
+         * @pre finest_level < hierarchy->getNumberOfLevels()
+         */
+        ExtendedFlattenedHierarchy(
+            const SAMRAI::hier::PatchHierarchy& hierarchy,
+            int coarsest_level,
+            int finest_level);
+        
+        /*!
+         * @brief Destructor
+         */ 
+        ~ExtendedFlattenedHierarchy();
+        
+        /*!
+         * @brief Get the coarsest level number represented by this object.
+         */
+        int getCoarsestLevelNumber() const
+        {
+           return d_coarsest_level;
+        }
+        
+        /*!
+         * @brief Get the finest level number represented by this object.
+         */
+        int getFinestLevelNumber() const
+        {
+            return d_finest_level;
+        }
+        
+        /*!
+         * @brief Get the visible boxes for a given Box.
+         *
+         * The visible boxes represent the parts of the Box that cover space that is not covered by finer
+         * levels in the hierarchy.  If the entire index space of the Box is covered by a finer level,
+         * the returned BoxContainer will be empty.
+         *
+         * @param box  The Box for a local patch on the PatchLevel having level number ln.
+         * @param ln   Level number of the box's level of resolution
+         *
+         * @pre ln <= d_finest_level && ln >= d_coarsest_level 
+         */
+        const SAMRAI::hier::BoxContainer& getVisibleBoxes(const SAMRAI::hier::Box& box, int ln) const
+        {
+            TBOX_ASSERT(ln <= d_finest_level && ln >= d_coarsest_level);
+            
+            std::map<SAMRAI::hier::BoxId, SAMRAI::hier::BoxContainer>::const_iterator itr =
+                d_visible_boxes[ln].find(box.getBoxId());
+            
+            if (itr == d_visible_boxes[ln].end())
+            {
+                TBOX_ERROR("ExtendedFlattenedHierarchy::getVisibleBoxes error: Box "
+                    << box << " does not exist locally on level " << ln << ".\n"
+                    << "You must specify the Box of a current local patch.");
+            }
+            
+            return itr->second;
+        }
+        
+        /*!
+         * @brief Get the overlapped visible boxes for a given Box.
+         *
+         * The overlapped visible boxes represent the overlapped parts of the Box in the same level
+         * that cover space that is not covered by finer levels in the hierarchy.  If the entire
+         * index space of the Box is covered by a finer level, the returned BoxContainer will be
+         * empty.  If there is no overlapped part, the returned BoxContainer will also be empty.
+         *
+         * @param box  The Box for a local patch on the PatchLevel having level number ln.
+         * @param ln   Level number of the box's level of resolution
+         *
+         * @pre ln <= d_finest_level && ln >= d_coarsest_level 
+         */
+        const SAMRAI::hier::BoxContainer& getOverlappedVisibleBoxes(const SAMRAI::hier::Box& box, int ln) const
+        {
+            TBOX_ASSERT(ln <= d_finest_level && ln >= d_coarsest_level);
+            
+            std::map<SAMRAI::hier::BoxId, SAMRAI::hier::BoxContainer>::const_iterator itr =
+                d_overlapped_visible_boxes[ln].find(box.getBoxId());
+            
+            if (itr == d_overlapped_visible_boxes[ln].end())
+            {
+                TBOX_ERROR("ExtendedFlattenedHierarchy::getOverlappedVisibleBoxes error: Box "
+                    << box << " does not exist locally on level " << ln << ".\n"
+                    << "You must specify the Box of a current local patch.");
+            }
+            
+            return itr->second;
+        }
+        
+        /*
+         * @brief Get the PatchHierachy associated with this ExtendedFlattenedHierarchy.
+         */
+        const SAMRAI::hier::PatchHierarchy& getPatchHierarchy() const
+        {
+            return *d_patch_hierarchy;
+        }
+    
+        /*!
+         * @brief Returns an iterator to the first uncovered Box in this hierarchy.
+         */
+        ExtendedUncoveredBoxIterator
+        beginUncovered()
+        {
+            return ExtendedUncoveredBoxIterator(this, true);
+        }
+        
+        /*!
+         * @brief Returns an iterator to the last uncovered Box in this hierarchy.
+         */
+        ExtendedUncoveredBoxIterator
+        endUncovered()
+        {
+            return ExtendedUncoveredBoxIterator(this, false);
+        }
+        
+    private:
+        /*!
+         * Level numbers for the range of levels represented in this object.
+         */
+        int d_coarsest_level;
+        int d_finest_level;
+        
+        /*!
+         * @brief Container for the boxes in the flattened hierarchy representation
+         *
+         * The vector is indexed by level number, and for each level, the BoxId of a Patch is mapped to
+         * a BoxContainer holding the visible parts of that Patch's box.
+         */
+        std::vector<std::map<SAMRAI::hier::BoxId, SAMRAI::hier::BoxContainer> > d_visible_boxes;
+        
+        /*!
+         * @brief Container for the overlapped boxes in the flattened hierarchy representation
+         *
+         * The vector is indexed by level number, and for each level, the BoxId of a Patch is mapped to
+         * a BoxContainer holding the overlapped visible parts of that Patch's box.
+         */
+        std::vector<std::map<SAMRAI::hier::BoxId, SAMRAI::hier::BoxContainer> > d_overlapped_visible_boxes;
+        
+        /*!
+         * @brief Pointer to the PatchHierarchy that was used to create this object.
+         */
+        const SAMRAI::hier::PatchHierarchy* d_patch_hierarchy;
+    
+};
+
+#endif /* EXTENDED_FLATTENED_HIERARCHY */

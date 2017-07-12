@@ -57,18 +57,17 @@ ConvectiveFluxReconstructorFirstOrderLLF::putToRestart(
 
 
 /*
- * Compute the convective fluxes and sources due to hyperbolization
- * of the equations.
+ * Compute the convective flux and source due to splitting of convective term on a patch.
  */
 void
-ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
+ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxAndSourceOnPatch(
     hier::Patch& patch,
+    const boost::shared_ptr<pdat::SideVariable<double> >& variable_convective_flux,
+    const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
+    const boost::shared_ptr<hier::VariableContext>& data_context,
     const double time,
     const double dt,
-    const int RK_step_number,
-    const boost::shared_ptr<pdat::FaceVariable<double> >& variable_convective_flux,
-    const boost::shared_ptr<pdat::CellVariable<double> >& variable_source,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
+    const int RK_step_number)
 {
     NULL_USE(time);
     NULL_USE(RK_step_number);
@@ -90,9 +89,9 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
     
     const double* const dx = patch_geom->getDx();
     
-    // Get the face data of convective flux.
-    boost::shared_ptr<pdat::FaceData<double> > convective_flux(
-        BOOST_CAST<pdat::FaceData<double>, hier::PatchData>(
+    // Get the side data of convective flux.
+    boost::shared_ptr<pdat::SideData<double> > convective_flux(
+        BOOST_CAST<pdat::SideData<double>, hier::PatchData>(
             patch.getPatchData(variable_convective_flux, data_context)));
     
     // Get the cell data of source.
@@ -122,12 +121,12 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
     }
     
     // Allocate temporary patch data.
-    boost::shared_ptr<pdat::FaceData<double> > velocity_intercell;
+    boost::shared_ptr<pdat::SideData<double> > velocity_intercell;
     
     if (has_advection_eqn)
     {
         velocity_intercell.reset(
-            new pdat::FaceData<double>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
+            new pdat::SideData<double>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
     }
     
     if (d_dim == tbox::Dimension(1))
@@ -265,7 +264,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
         for (int i = 0; i < interior_dims[0] + 1; i++)
         {
             // Compute the linear indices.
-            const int idx_face_x = i;
+            const int idx_midpoint_x = i;
             const int idx_L_max_wave_speed_x = i - 1 + num_subghosts_max_wave_speed_x[0];
             const int idx_R_max_wave_speed_x = i + num_subghosts_max_wave_speed_x[0];
             const int idx_L_convective_flux_x = i - 1 + num_subghosts_convective_flux_x[0];
@@ -280,7 +279,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
                 const int idx_L_conservative_var = i - 1 + num_subghosts_conservative_var[ei][0];
                 const int idx_R_conservative_var = i + num_subghosts_conservative_var[ei][0];
                 
-                convective_flux->getPointer(0, ei)[idx_face_x] = 0.5*dt*(
+                convective_flux->getPointer(0, ei)[idx_midpoint_x] = 0.5*dt*(
                     F_x_node[ei][idx_L_convective_flux_x] + F_x_node[ei][idx_R_convective_flux_x] -
                         alpha_x*(Q[ei][idx_R_conservative_var] - Q[ei][idx_L_conservative_var]));
             }
@@ -295,7 +294,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
                 const int idx_L_velocity = i - 1 + num_subghosts_velocity[0];
                 const int idx_R_velocity = i + num_subghosts_velocity[0];
                 
-                velocity_intercell->getPointer(0, 0)[idx_face_x] = (p[idx_R_pressure] - p[idx_L_pressure] +
+                velocity_intercell->getPointer(0, 0)[idx_midpoint_x] = (p[idx_R_pressure] - p[idx_L_pressure] +
                     rho[idx_L_density]*u[idx_L_velocity]*(-alpha_x - u[idx_L_velocity]) -
                         rho[idx_R_density]*u[idx_R_velocity]*(alpha_x - u[idx_R_velocity]))/
                             (rho[idx_L_density]*(-alpha_x - u[idx_L_velocity]) -
@@ -320,11 +319,11 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
                         // Compute the linear indices. 
                         const int idx_cell_wghost = i + num_subghosts_conservative_var[ei][0];
                         const int idx_cell_nghost = i;
-                        const int idx_face_x_L = i;
-                        const int idx_face_x_R = i + 1;
+                        const int idx_midpoint_x_L = i;
+                        const int idx_midpoint_x_R = i + 1;
                         
-                        const double& u_L = velocity_intercell->getPointer(0, 0)[idx_face_x_L];
-                        const double& u_R = velocity_intercell->getPointer(0, 0)[idx_face_x_R];
+                        const double& u_L = velocity_intercell->getPointer(0, 0)[idx_midpoint_x_L];
+                        const double& u_R = velocity_intercell->getPointer(0, 0)[idx_midpoint_x_R];
                         
                         S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(u_R - u_L)/dx[0];
                     }
@@ -493,7 +492,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
             for (int i = 0; i < interior_dims[0] + 1; i++)
             {
                 // Compute the linear indices.
-                const int idx_face_x = i +
+                const int idx_midpoint_x = i +
                     j*(interior_dims[0] + 1);
                 
                 const int idx_L_max_wave_speed_x = (i - 1 + num_subghosts_max_wave_speed_x[0]) +
@@ -520,7 +519,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
                     const int idx_R_conservative_var = (i + num_subghosts_conservative_var[ei][0]) +
                         (j + num_subghosts_conservative_var[ei][1])*subghostcell_dims_conservative_var[ei][0];
                     
-                    convective_flux->getPointer(0, ei)[idx_face_x] = 0.5*dt*(
+                    convective_flux->getPointer(0, ei)[idx_midpoint_x] = 0.5*dt*(
                         F_x_node[ei][idx_L_convective_flux_x] + F_x_node[ei][idx_R_convective_flux_x] -
                             alpha_x*(Q[ei][idx_R_conservative_var] - Q[ei][idx_L_conservative_var]));
                 }
@@ -546,13 +545,13 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
                     const int idx_R_velocity = (i + num_subghosts_velocity[0]) +
                         (j + num_subghosts_velocity[1])*subghostcell_dims_velocity[0];
                     
-                    velocity_intercell->getPointer(0, 0)[idx_face_x] = (p[idx_R_pressure] - p[idx_L_pressure] +
+                    velocity_intercell->getPointer(0, 0)[idx_midpoint_x] = (p[idx_R_pressure] - p[idx_L_pressure] +
                         rho[idx_L_density]*u[idx_L_velocity]*(-alpha_x - u[idx_L_velocity]) -
                             rho[idx_R_density]*u[idx_R_velocity]*(alpha_x - u[idx_R_velocity]))/
                                 (rho[idx_L_density]*(-alpha_x - u[idx_L_velocity]) -
                                     rho[idx_R_density]*(alpha_x - u[idx_R_velocity]));
                     
-                    velocity_intercell->getPointer(0, 1)[idx_face_x] =
+                    velocity_intercell->getPointer(0, 1)[idx_midpoint_x] =
                         (rho[idx_L_density]*v[idx_L_velocity]*(-alpha_x - u[idx_L_velocity]) -
                             rho[idx_R_density]*v[idx_R_velocity]*(alpha_x - u[idx_R_velocity]))/
                                 (rho[idx_L_density]*(-alpha_x - u[idx_L_velocity]) -
@@ -565,13 +564,13 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
          * Compute the fluxes in the y direction.
          */
         
-        for (int i = 0; i < interior_dims[0]; i++)
+        for (int j = 0; j < interior_dims[1] + 1; j++)
         {
-            for (int j = 0; j < interior_dims[1] + 1; j++)
+            for (int i = 0; i < interior_dims[0]; i++)
             {
                 // Compute the linear indices.
-                const int idx_face_y = j +
-                    i*(interior_dims[1] + 1);
+                const int idx_midpoint_y = i +
+                    j*interior_dims[0];
                 
                 const int idx_B_max_wave_speed_y = (i + num_subghosts_max_wave_speed_y[0]) +
                     (j - 1 + num_subghosts_max_wave_speed_y[1])*subghostcell_dims_max_wave_speed_y[0];
@@ -597,7 +596,7 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
                     const int idx_T_conservative_var = (i + num_subghosts_conservative_var[ei][0]) +
                         (j + num_subghosts_conservative_var[ei][1])*subghostcell_dims_conservative_var[ei][0];
                     
-                    convective_flux->getPointer(1, ei)[idx_face_y] = 0.5*dt*(
+                    convective_flux->getPointer(1, ei)[idx_midpoint_y] = 0.5*dt*(
                         F_y_node[ei][idx_B_convective_flux_y] + F_y_node[ei][idx_T_convective_flux_y] -
                             alpha_y*(Q[ei][idx_T_conservative_var] - Q[ei][idx_B_conservative_var]));
                 }
@@ -623,13 +622,13 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
                     const int idx_T_velocity = (i + num_subghosts_velocity[0]) +
                         (j + num_subghosts_velocity[1])*subghostcell_dims_velocity[0];
                     
-                    velocity_intercell->getPointer(1, 0)[idx_face_y] =
+                    velocity_intercell->getPointer(1, 0)[idx_midpoint_y] =
                         (rho[idx_B_density]*u[idx_B_velocity]*(-alpha_y - v[idx_B_velocity]) -
                             rho[idx_T_density]*u[idx_T_velocity]*(alpha_y - v[idx_T_velocity]))/
                                 (rho[idx_B_density]*(-alpha_y - v[idx_B_velocity]) -
                                     rho[idx_T_density]*(alpha_y - v[idx_T_velocity]));
                     
-                    velocity_intercell->getPointer(1, 1)[idx_face_y] =
+                    velocity_intercell->getPointer(1, 1)[idx_midpoint_y] =
                         (p[idx_T_pressure] - p[idx_B_pressure] +
                             rho[idx_B_density]*v[idx_B_velocity]*(-alpha_y - v[idx_B_velocity]) -
                                 rho[idx_T_density]*v[idx_T_velocity]*(alpha_y - v[idx_T_velocity]))/
@@ -661,23 +660,23 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
                             
                             const int idx_cell_nghost = i + j*interior_dims[0];
                             
-                            const int idx_face_x_L = i +
+                            const int idx_midpoint_x_L = i +
                                 j*(interior_dims[0] + 1);
                             
-                            const int idx_face_x_R = (i + 1) +
+                            const int idx_midpoint_x_R = (i + 1) +
                                 j*(interior_dims[0] + 1);
                             
-                            const int idx_face_y_B = j +
-                                i*(interior_dims[1] + 1);
+                            const int idx_midpoint_y_B = i +
+                                j*interior_dims[0];
                             
-                            const int idx_face_y_T = (j + 1) +
-                                i*(interior_dims[1] + 1);
+                            const int idx_midpoint_y_T = i +
+                                (j + 1)*interior_dims[0];
                             
-                            const double& u_L = velocity_intercell->getPointer(0, 0)[idx_face_x_L];
-                            const double& u_R = velocity_intercell->getPointer(0, 0)[idx_face_x_R];
+                            const double& u_L = velocity_intercell->getPointer(0, 0)[idx_midpoint_x_L];
+                            const double& u_R = velocity_intercell->getPointer(0, 0)[idx_midpoint_x_R];
                             
-                            const double& v_B = velocity_intercell->getPointer(1, 1)[idx_face_y_B];
-                            const double& v_T = velocity_intercell->getPointer(1, 1)[idx_face_y_T];
+                            const double& v_B = velocity_intercell->getPointer(1, 1)[idx_midpoint_y_B];
+                            const double& v_T = velocity_intercell->getPointer(1, 1)[idx_midpoint_y_T];
                             
                             S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*((u_R - u_L)/dx[0] + (v_T - v_B)/dx[1]);
                         }
@@ -868,29 +867,29 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
                 for (int i = 0; i < interior_dims[0] + 1; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_face_x = i +
+                    const int idx_midpoint_x = i +
                         j*(interior_dims[0] + 1) +
-                            k*(interior_dims[0] + 1)*interior_dims[1];
+                        k*(interior_dims[0] + 1)*interior_dims[1];
                     
                     const int idx_L_max_wave_speed_x = (i - 1 + num_subghosts_max_wave_speed_x[0]) +
                         (j + num_subghosts_max_wave_speed_x[1])*subghostcell_dims_max_wave_speed_x[0] +
-                            (k + num_subghosts_max_wave_speed_x[2])*subghostcell_dims_max_wave_speed_x[0]*
-                                subghostcell_dims_max_wave_speed_x[1];
+                        (k + num_subghosts_max_wave_speed_x[2])*subghostcell_dims_max_wave_speed_x[0]*
+                            subghostcell_dims_max_wave_speed_x[1];
                     
                     const int idx_R_max_wave_speed_x = (i + num_subghosts_max_wave_speed_x[0]) +
                         (j + num_subghosts_max_wave_speed_x[1])*subghostcell_dims_max_wave_speed_x[0] +
-                            (k + num_subghosts_max_wave_speed_x[2])*subghostcell_dims_max_wave_speed_x[0]*
-                                subghostcell_dims_max_wave_speed_x[1];
+                        (k + num_subghosts_max_wave_speed_x[2])*subghostcell_dims_max_wave_speed_x[0]*
+                            subghostcell_dims_max_wave_speed_x[1];
                     
                     const int idx_L_convective_flux_x = (i - 1 + num_subghosts_convective_flux_x[0]) +
                         (j + num_subghosts_convective_flux_x[1])*subghostcell_dims_convective_flux_x[0] +
-                            (k + num_subghosts_convective_flux_x[2])*subghostcell_dims_convective_flux_x[0]*
-                                subghostcell_dims_convective_flux_x[1];
+                        (k + num_subghosts_convective_flux_x[2])*subghostcell_dims_convective_flux_x[0]*
+                            subghostcell_dims_convective_flux_x[1];
                     
                     const int idx_R_convective_flux_x = (i + num_subghosts_convective_flux_x[0]) +
                         (j + num_subghosts_convective_flux_x[1])*subghostcell_dims_convective_flux_x[0] +
-                            (k + num_subghosts_convective_flux_x[2])*subghostcell_dims_convective_flux_x[0]*
-                                subghostcell_dims_convective_flux_x[1];
+                        (k + num_subghosts_convective_flux_x[2])*subghostcell_dims_convective_flux_x[0]*
+                            subghostcell_dims_convective_flux_x[1];
                     
                     const double alpha_x = fmax(max_lambda_x[idx_L_max_wave_speed_x], max_lambda_x[idx_R_max_wave_speed_x]);
                     
@@ -900,15 +899,15 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
                         // Compute the linear indices.
                         const int idx_L_conservative_var = (i - 1 + num_subghosts_conservative_var[ei][0]) +
                             (j + num_subghosts_conservative_var[ei][1])*subghostcell_dims_conservative_var[ei][0] +
-                                (k + num_subghosts_conservative_var[ei][2])*subghostcell_dims_conservative_var[ei][0]*
-                                    subghostcell_dims_conservative_var[ei][1];
+                            (k + num_subghosts_conservative_var[ei][2])*subghostcell_dims_conservative_var[ei][0]*
+                                subghostcell_dims_conservative_var[ei][1];
                         
                         const int idx_R_conservative_var = (i + num_subghosts_conservative_var[ei][0]) +
                             (j + num_subghosts_conservative_var[ei][1])*subghostcell_dims_conservative_var[ei][0] +
-                                (k + num_subghosts_conservative_var[ei][2])*subghostcell_dims_conservative_var[ei][0]*
-                                    subghostcell_dims_conservative_var[ei][1];
+                            (k + num_subghosts_conservative_var[ei][2])*subghostcell_dims_conservative_var[ei][0]*
+                                subghostcell_dims_conservative_var[ei][1];
                         
-                        convective_flux->getPointer(0, ei)[idx_face_x] = 0.5*dt*(
+                        convective_flux->getPointer(0, ei)[idx_midpoint_x] = 0.5*dt*(
                             F_x_node[ei][idx_L_convective_flux_x] + F_x_node[ei][idx_R_convective_flux_x] -
                                 alpha_x*(Q[ei][idx_R_conservative_var] - Q[ei][idx_L_conservative_var]));
                     }
@@ -918,47 +917,47 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
                         // Compute the linear indices.
                         const int idx_L_density = (i - 1 + num_subghosts_density[0]) +
                             (j + num_subghosts_density[1])*subghostcell_dims_density[0] +
-                                (k + num_subghosts_density[2])*subghostcell_dims_density[0]*
-                                    subghostcell_dims_density[1];
+                            (k + num_subghosts_density[2])*subghostcell_dims_density[0]*
+                                subghostcell_dims_density[1];
                         
                         const int idx_R_density = (i + num_subghosts_density[0]) +
                             (j + num_subghosts_density[1])*subghostcell_dims_density[0] +
-                                (k + num_subghosts_density[2])*subghostcell_dims_density[0]*
-                                    subghostcell_dims_density[1];
+                            (k + num_subghosts_density[2])*subghostcell_dims_density[0]*
+                                subghostcell_dims_density[1];
                         
                         const int idx_L_pressure = (i - 1 + num_subghosts_pressure[0]) +
                             (j + num_subghosts_pressure[1])*subghostcell_dims_pressure[0] +
-                                (k + num_subghosts_pressure[2])*subghostcell_dims_pressure[0]*
-                                    subghostcell_dims_pressure[1];
+                            (k + num_subghosts_pressure[2])*subghostcell_dims_pressure[0]*
+                                subghostcell_dims_pressure[1];
                         
                         const int idx_R_pressure = (i + num_subghosts_pressure[0]) +
                             (j + num_subghosts_pressure[1])*subghostcell_dims_pressure[0] +
-                                (k + num_subghosts_pressure[2])*subghostcell_dims_pressure[0]*
-                                    subghostcell_dims_pressure[1];
+                            (k + num_subghosts_pressure[2])*subghostcell_dims_pressure[0]*
+                                subghostcell_dims_pressure[1];
                         
                         const int idx_L_velocity = (i - 1 + num_subghosts_velocity[0]) +
                             (j + num_subghosts_velocity[1])*subghostcell_dims_velocity[0] +
-                                (k + num_subghosts_velocity[2])*subghostcell_dims_velocity[0]*
-                                    subghostcell_dims_velocity[1];
+                            (k + num_subghosts_velocity[2])*subghostcell_dims_velocity[0]*
+                                subghostcell_dims_velocity[1];
                         
                         const int idx_R_velocity = (i + num_subghosts_velocity[0]) +
                             (j + num_subghosts_velocity[1])*subghostcell_dims_velocity[0] +
-                                (k + num_subghosts_density[2])*subghostcell_dims_velocity[0]*
-                                    subghostcell_dims_density[1];
+                            (k + num_subghosts_density[2])*subghostcell_dims_velocity[0]*
+                                subghostcell_dims_density[1];
                         
-                        velocity_intercell->getPointer(0, 0)[idx_face_x] = (p[idx_R_pressure] - p[idx_L_pressure] +
+                        velocity_intercell->getPointer(0, 0)[idx_midpoint_x] = (p[idx_R_pressure] - p[idx_L_pressure] +
                             rho[idx_L_density]*u[idx_L_velocity]*(-alpha_x - u[idx_L_velocity]) -
                                 rho[idx_R_density]*u[idx_R_velocity]*(alpha_x - u[idx_R_velocity]))/
                                     (rho[idx_L_density]*(-alpha_x - u[idx_L_velocity]) -
                                         rho[idx_R_density]*(alpha_x - u[idx_R_velocity]));
                         
-                        velocity_intercell->getPointer(0, 1)[idx_face_x] =
+                        velocity_intercell->getPointer(0, 1)[idx_midpoint_x] =
                             (rho[idx_L_density]*v[idx_L_velocity]*(-alpha_x - u[idx_L_velocity]) -
                                 rho[idx_R_density]*v[idx_R_velocity]*(alpha_x - u[idx_R_velocity]))/
                                     (rho[idx_L_density]*(-alpha_x - u[idx_L_velocity]) -
                                         rho[idx_R_density]*(alpha_x - u[idx_R_velocity]));
                         
-                        velocity_intercell->getPointer(0, 2)[idx_face_x] =
+                        velocity_intercell->getPointer(0, 2)[idx_midpoint_x] =
                             (rho[idx_L_density]*w[idx_L_velocity]*(-alpha_x - u[idx_L_velocity]) -
                                 rho[idx_R_density]*w[idx_R_velocity]*(alpha_x - u[idx_R_velocity]))/
                                     (rho[idx_L_density]*(-alpha_x - u[idx_L_velocity]) -
@@ -972,36 +971,36 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
          * Compute the fluxes in the y direction.
          */
         
-        for (int i = 0; i < interior_dims[0]; i++)
+        for (int k = 0; k < interior_dims[2]; k++)
         {
-            for (int k = 0; k < interior_dims[2]; k++)
+            for (int j = 0; j < interior_dims[1] + 1; j++)
             {
-                for (int j = 0; j < interior_dims[1] + 1; j++)
+                for (int i = 0; i < interior_dims[0]; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_face_y = j +
-                        k*(interior_dims[1] + 1) +
-                            i*(interior_dims[1] + 1)*interior_dims[2];
+                    const int idx_midpoint_y = i +
+                        j*interior_dims[0] +
+                        k*interior_dims[0]*(interior_dims[1] + 1);
                     
                     const int idx_B_max_wave_speed_y = (i + num_subghosts_max_wave_speed_y[0]) +
                         (j - 1 + num_subghosts_max_wave_speed_y[1])*subghostcell_dims_max_wave_speed_y[0] +
-                            (k + num_subghosts_max_wave_speed_y[2])*subghostcell_dims_max_wave_speed_y[0]*
-                                subghostcell_dims_max_wave_speed_y[1];
+                        (k + num_subghosts_max_wave_speed_y[2])*subghostcell_dims_max_wave_speed_y[0]*
+                            subghostcell_dims_max_wave_speed_y[1];
                     
                     const int idx_T_max_wave_speed_y = (i + num_subghosts_max_wave_speed_y[0]) +
                         (j + num_subghosts_max_wave_speed_y[1])*subghostcell_dims_max_wave_speed_y[0] +
-                            (k + num_subghosts_max_wave_speed_y[2])*subghostcell_dims_max_wave_speed_y[0]*
-                                subghostcell_dims_max_wave_speed_y[1];
+                        (k + num_subghosts_max_wave_speed_y[2])*subghostcell_dims_max_wave_speed_y[0]*
+                            subghostcell_dims_max_wave_speed_y[1];
                     
                     const int idx_B_convective_flux_y = (i + num_subghosts_convective_flux_y[0]) +
                         (j - 1 + num_subghosts_convective_flux_y[1])*subghostcell_dims_convective_flux_y[0] +
-                            (k + num_subghosts_convective_flux_y[2])*subghostcell_dims_convective_flux_y[0]*
-                                subghostcell_dims_convective_flux_y[1];
+                        (k + num_subghosts_convective_flux_y[2])*subghostcell_dims_convective_flux_y[0]*
+                            subghostcell_dims_convective_flux_y[1];
                     
                     const int idx_T_convective_flux_y = (i + num_subghosts_convective_flux_y[0]) +
                         (j + num_subghosts_convective_flux_y[1])*subghostcell_dims_convective_flux_y[0] +
-                            (k + num_subghosts_convective_flux_y[2])*subghostcell_dims_convective_flux_y[0]*
-                                subghostcell_dims_convective_flux_y[1];
+                        (k + num_subghosts_convective_flux_y[2])*subghostcell_dims_convective_flux_y[0]*
+                            subghostcell_dims_convective_flux_y[1];
                     
                     const double alpha_y = fmax(max_lambda_y[idx_B_max_wave_speed_y], max_lambda_y[idx_T_max_wave_speed_y]);
                     
@@ -1011,15 +1010,15 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
                         // Compute the linear indices.
                         const int idx_B_conservative_var = (i + num_subghosts_conservative_var[ei][0]) +
                         (j - 1 + num_subghosts_conservative_var[ei][1])*subghostcell_dims_conservative_var[ei][0] +
-                            (k + num_subghosts_conservative_var[ei][2])*subghostcell_dims_conservative_var[ei][0]*
-                                subghostcell_dims_conservative_var[ei][1];
+                        (k + num_subghosts_conservative_var[ei][2])*subghostcell_dims_conservative_var[ei][0]*
+                            subghostcell_dims_conservative_var[ei][1];
                         
                         const int idx_T_conservative_var = (i + num_subghosts_conservative_var[ei][0]) +
                         (j + num_subghosts_conservative_var[ei][1])*subghostcell_dims_conservative_var[ei][0] +
-                            (k + num_subghosts_conservative_var[ei][2])*subghostcell_dims_conservative_var[ei][0]*
-                                subghostcell_dims_conservative_var[ei][1];
+                        (k + num_subghosts_conservative_var[ei][2])*subghostcell_dims_conservative_var[ei][0]*
+                            subghostcell_dims_conservative_var[ei][1];
                         
-                        convective_flux->getPointer(1, ei)[idx_face_y] = 0.5*dt*(
+                        convective_flux->getPointer(1, ei)[idx_midpoint_y] = 0.5*dt*(
                             F_y_node[ei][idx_B_convective_flux_y] + F_y_node[ei][idx_T_convective_flux_y] -
                                 alpha_y*(Q[ei][idx_T_conservative_var] - Q[ei][idx_B_conservative_var]));
                     }
@@ -1057,20 +1056,20 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
                                 (k + num_subghosts_velocity[2])*subghostcell_dims_velocity[0]*
                                     subghostcell_dims_velocity[1];
                         
-                        velocity_intercell->getPointer(1, 0)[idx_face_y] =
+                        velocity_intercell->getPointer(1, 0)[idx_midpoint_y] =
                             (rho[idx_B_density]*u[idx_B_velocity]*(-alpha_y - v[idx_B_velocity]) -
                                 rho[idx_T_density]*u[idx_T_velocity]*(alpha_y - v[idx_T_velocity]))/
                                     (rho[idx_B_density]*(-alpha_y - v[idx_B_velocity]) -
                                         rho[idx_T_density]*(alpha_y - v[idx_T_velocity]));
                         
-                        velocity_intercell->getPointer(1, 1)[idx_face_y] =
+                        velocity_intercell->getPointer(1, 1)[idx_midpoint_y] =
                             (p[idx_T_pressure] - p[idx_B_pressure] +
                                 rho[idx_B_density]*v[idx_B_velocity]*(-alpha_y - v[idx_B_velocity]) -
                                     rho[idx_T_density]*v[idx_T_velocity]*(alpha_y - v[idx_T_velocity]))/
                                         (rho[idx_B_density]*(-alpha_y - v[idx_B_velocity]) -
                                             rho[idx_T_density]*(alpha_y - v[idx_T_velocity]));
                         
-                        velocity_intercell->getPointer(1, 2)[idx_face_y] =
+                        velocity_intercell->getPointer(1, 2)[idx_midpoint_y] =
                             (rho[idx_B_density]*w[idx_B_velocity]*(-alpha_y - v[idx_B_velocity]) -
                                 rho[idx_T_density]*w[idx_T_velocity]*(alpha_y - v[idx_T_velocity]))/
                                     (rho[idx_B_density]*(-alpha_y - v[idx_B_velocity]) -
@@ -1084,36 +1083,36 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
          * Compute the fluxes in the z direction.
          */
         
-        for (int j = 0; j < interior_dims[1]; j++)
+        for (int k = 0; k < interior_dims[2] + 1; k++)
         {
-            for (int i = 0; i < interior_dims[0]; i++)
+            for (int j = 0; j < interior_dims[1]; j++)
             {
-                for (int k = 0; k < interior_dims[2] + 1; k++)
+                for (int i = 0; i < interior_dims[0]; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_face_z = k +
-                        i*(interior_dims[2] + 1) +
-                            j*(interior_dims[2] + 1)*interior_dims[0];
+                    const int idx_midpoint_z = i +
+                        j*interior_dims[0] +
+                        k*interior_dims[0]*interior_dims[1];
                     
                     const int idx_B_max_wave_speed_z = (i + num_subghosts_max_wave_speed_z[0]) +
                         (j + num_subghosts_max_wave_speed_z[1])*subghostcell_dims_max_wave_speed_z[0] +
-                            (k - 1 + num_subghosts_max_wave_speed_z[2])*subghostcell_dims_max_wave_speed_z[0]*
-                                subghostcell_dims_max_wave_speed_z[1];
+                        (k - 1 + num_subghosts_max_wave_speed_z[2])*subghostcell_dims_max_wave_speed_z[0]*
+                            subghostcell_dims_max_wave_speed_z[1];
                         
                     const int idx_F_max_wave_speed_z = (i + num_subghosts_max_wave_speed_z[0]) +
                         (j + num_subghosts_max_wave_speed_z[1])*subghostcell_dims_max_wave_speed_z[0] +
-                            (k + num_subghosts_max_wave_speed_z[2])*subghostcell_dims_max_wave_speed_z[0]*
-                                subghostcell_dims_max_wave_speed_z[1];
+                        (k + num_subghosts_max_wave_speed_z[2])*subghostcell_dims_max_wave_speed_z[0]*
+                            subghostcell_dims_max_wave_speed_z[1];
                     
                     const int idx_B_convective_flux_z = (i + num_subghosts_convective_flux_z[0]) +
                         (j + num_subghosts_convective_flux_z[1])*subghostcell_dims_convective_flux_z[0] +
-                            (k - 1 + num_subghosts_convective_flux_z[2])*subghostcell_dims_convective_flux_z[0]*
-                                subghostcell_dims_convective_flux_z[1];
+                        (k - 1 + num_subghosts_convective_flux_z[2])*subghostcell_dims_convective_flux_z[0]*
+                            subghostcell_dims_convective_flux_z[1];
                         
                     const int idx_F_convective_flux_z = (i + num_subghosts_convective_flux_z[0]) +
                         (j + num_subghosts_convective_flux_z[1])*subghostcell_dims_convective_flux_z[0] +
-                            (k + num_subghosts_convective_flux_z[2])*subghostcell_dims_convective_flux_z[0]*
-                                subghostcell_dims_convective_flux_z[1];
+                        (k + num_subghosts_convective_flux_z[2])*subghostcell_dims_convective_flux_z[0]*
+                            subghostcell_dims_convective_flux_z[1];
                     
                     const double alpha_z = fmax(max_lambda_z[idx_B_max_wave_speed_z], max_lambda_z[idx_F_max_wave_speed_z]);
                     
@@ -1122,15 +1121,15 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
                     {
                         const int idx_B_conservative_var = (i + num_subghosts_conservative_var[ei][0]) +
                             (j + num_subghosts_conservative_var[ei][1])*subghostcell_dims_conservative_var[ei][0] +
-                                (k - 1 + num_subghosts_conservative_var[ei][2])*subghostcell_dims_conservative_var[ei][0]*
-                                    subghostcell_dims_conservative_var[ei][1];
+                            (k - 1 + num_subghosts_conservative_var[ei][2])*subghostcell_dims_conservative_var[ei][0]*
+                                subghostcell_dims_conservative_var[ei][1];
                             
                         const int idx_F_conservative_var = (i + num_subghosts_conservative_var[ei][0]) +
                             (j + num_subghosts_conservative_var[ei][1])*subghostcell_dims_conservative_var[ei][0] +
-                                (k + num_subghosts_conservative_var[ei][2])*subghostcell_dims_conservative_var[ei][0]*
-                                    subghostcell_dims_conservative_var[ei][1];
+                            (k + num_subghosts_conservative_var[ei][2])*subghostcell_dims_conservative_var[ei][0]*
+                                subghostcell_dims_conservative_var[ei][1];
                         
-                        convective_flux->getPointer(2, ei)[idx_face_z] = 0.5*dt*(
+                        convective_flux->getPointer(2, ei)[idx_midpoint_z] = 0.5*dt*(
                             F_z_node[ei][idx_B_convective_flux_z] + F_z_node[ei][idx_F_convective_flux_z] -
                                 alpha_z*(Q[ei][idx_F_conservative_var] - Q[ei][idx_B_conservative_var]));       
                     }
@@ -1140,47 +1139,47 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
                         // Compute the linear indices.
                         const int idx_B_density = (i + num_subghosts_density[0]) +
                             (j + num_subghosts_density[1])*subghostcell_dims_density[0] +
-                                (k - 1 + num_subghosts_density[2])*subghostcell_dims_density[0]*
-                                    subghostcell_dims_density[1];
+                            (k - 1 + num_subghosts_density[2])*subghostcell_dims_density[0]*
+                                subghostcell_dims_density[1];
                             
                         const int idx_F_density = (i + num_subghosts_density[0]) +
                             (j + num_subghosts_density[1])*subghostcell_dims_density[0] +
-                                (k + num_subghosts_density[2])*subghostcell_dims_density[0]*
-                                    subghostcell_dims_density[1];
+                            (k + num_subghosts_density[2])*subghostcell_dims_density[0]*
+                                subghostcell_dims_density[1];
                         
                         const int idx_B_pressure = (i + num_subghosts_pressure[0]) +
                             (j + num_subghosts_pressure[1])*subghostcell_dims_pressure[0] +
-                                (k - 1 + num_subghosts_pressure[2])*subghostcell_dims_pressure[0]*
-                                    subghostcell_dims_pressure[1];
+                            (k - 1 + num_subghosts_pressure[2])*subghostcell_dims_pressure[0]*
+                                subghostcell_dims_pressure[1];
                             
                         const int idx_F_pressure = (i + num_subghosts_pressure[0]) +
                             (j + num_subghosts_pressure[1])*subghostcell_dims_pressure[0] +
-                                (k + num_subghosts_pressure[2])*subghostcell_dims_pressure[0]*
-                                    subghostcell_dims_pressure[1];
+                            (k + num_subghosts_pressure[2])*subghostcell_dims_pressure[0]*
+                                subghostcell_dims_pressure[1];
                         
                         const int idx_B_velocity = (i + num_subghosts_velocity[0]) +
                             (j + num_subghosts_velocity[1])*subghostcell_dims_velocity[0] +
-                                (k - 1 + num_subghosts_velocity[2])*subghostcell_dims_velocity[0]*
-                                    subghostcell_dims_velocity[1];
+                            (k - 1 + num_subghosts_velocity[2])*subghostcell_dims_velocity[0]*
+                                subghostcell_dims_velocity[1];
                             
                         const int idx_F_velocity = (i + num_subghosts_velocity[0]) +
                             (j + num_subghosts_velocity[1])*subghostcell_dims_velocity[0] +
                                 (k + num_subghosts_velocity[2])*subghostcell_dims_velocity[0]*
                                     subghostcell_dims_velocity[1];
                         
-                        velocity_intercell->getPointer(2, 0)[idx_face_z] =
+                        velocity_intercell->getPointer(2, 0)[idx_midpoint_z] =
                             (rho[idx_B_density]*u[idx_B_velocity]*(-alpha_z - w[idx_B_velocity]) -
                                 rho[idx_F_density]*u[idx_F_velocity]*(alpha_z - w[idx_F_velocity]))/
                                     (rho[idx_B_density]*(-alpha_z - w[idx_B_velocity]) -
                                         rho[idx_F_density]*(alpha_z - w[idx_F_velocity]));
                         
-                        velocity_intercell->getPointer(2, 1)[idx_face_z] =
+                        velocity_intercell->getPointer(2, 1)[idx_midpoint_z] =
                             (rho[idx_B_density]*v[idx_B_velocity]*(-alpha_z - w[idx_B_velocity]) -
                                 rho[idx_F_density]*v[idx_F_velocity]*(alpha_z - w[idx_F_velocity]))/
                                     (rho[idx_B_density]*(-alpha_z - w[idx_B_velocity]) -
                                         rho[idx_F_density]*(alpha_z - w[idx_F_density]));
                         
-                        velocity_intercell->getPointer(2, 2)[idx_face_z] =
+                        velocity_intercell->getPointer(2, 2)[idx_midpoint_z] =
                             (p[idx_F_pressure] - p[idx_B_pressure] +
                                 rho[idx_B_density]*w[idx_B_velocity]*(-alpha_z - w[idx_B_velocity]) -
                                     rho[idx_F_density]*w[idx_F_velocity]*(alpha_z - w[idx_F_velocity]))/
@@ -1219,38 +1218,38 @@ ConvectiveFluxReconstructorFirstOrderLLF::computeConvectiveFluxesAndSources(
                                     j*interior_dims[0] +
                                     k*interior_dims[0]*interior_dims[1];
                                 
-                                const int idx_face_x_L = i +
+                                const int idx_midpoint_x_L = i +
                                     j*(interior_dims[0] + 1) +
                                     k*(interior_dims[0] + 1)*interior_dims[1];
                                 
-                                const int idx_face_x_R = (i + 1) +
+                                const int idx_midpoint_x_R = (i + 1) +
                                     j*(interior_dims[0] + 1) +
                                     k*(interior_dims[0] + 1)*interior_dims[1];
                                 
-                                const int idx_face_y_B = j +
-                                    k*(interior_dims[1] + 1) +
-                                    i*(interior_dims[1] + 1)*interior_dims[2];
+                                const int idx_midpoint_y_B = i +
+                                    j*interior_dims[0] +
+                                    k*interior_dims[0]*(interior_dims[1] + 1);
                                 
-                                const int idx_face_y_T = (j + 1) +
-                                    k*(interior_dims[1] + 1) +
-                                    i*(interior_dims[1] + 1)*interior_dims[2];
+                                const int idx_midpoint_y_T = i +
+                                    (j + 1)*interior_dims[0] +
+                                    k*interior_dims[0]*(interior_dims[1] + 1);
                                 
-                                const int idx_face_z_B = k +
-                                    i*(interior_dims[2] + 1) +
-                                    j*(interior_dims[2] + 1)*interior_dims[0];
+                                const int idx_midpoint_z_B = i +
+                                    j*interior_dims[0] +
+                                    k*interior_dims[0]*interior_dims[1];
                                 
-                                const int idx_face_z_F = (k + 1) +
-                                    i*(interior_dims[2] + 1) +
-                                    j*(interior_dims[2] + 1)*interior_dims[0];
+                                const int idx_midpoint_z_F = i +
+                                    j*interior_dims[0] +
+                                    (k + 1)*interior_dims[0]*interior_dims[1];
                                 
-                                const double& u_L = velocity_intercell->getPointer(0, 0)[idx_face_x_L];
-                                const double& u_R = velocity_intercell->getPointer(0, 0)[idx_face_x_R];
+                                const double& u_L = velocity_intercell->getPointer(0, 0)[idx_midpoint_x_L];
+                                const double& u_R = velocity_intercell->getPointer(0, 0)[idx_midpoint_x_R];
                                 
-                                const double& v_B = velocity_intercell->getPointer(1, 1)[idx_face_y_B];
-                                const double& v_T = velocity_intercell->getPointer(1, 1)[idx_face_y_T];
+                                const double& v_B = velocity_intercell->getPointer(1, 1)[idx_midpoint_y_B];
+                                const double& v_T = velocity_intercell->getPointer(1, 1)[idx_midpoint_y_T];
                                 
-                                const double& w_B = velocity_intercell->getPointer(2, 2)[idx_face_z_B];
-                                const double& w_F = velocity_intercell->getPointer(2, 2)[idx_face_z_F];
+                                const double& w_B = velocity_intercell->getPointer(2, 2)[idx_midpoint_z_B];
+                                const double& w_F = velocity_intercell->getPointer(2, 2)[idx_midpoint_z_F];
                                 
                                 S[idx_cell_nghost] += dt*Q[ei][idx_cell_wghost]*(
                                     (u_R - u_L)/dx[0] + (v_T - v_B)/dx[1] + (w_F - w_B)/dx[2]);

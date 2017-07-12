@@ -47,7 +47,7 @@ endif()
 # Intel compiler suite
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
     if (CMAKE_BUILD_TYPE MATCHES "Release")
-        set(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wall -Wno-deprecated -openmp -xhost -qopt-report")
+        set(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wall -Wno-deprecated -qopenmp -qoverride-limits -xhost -qopt-report")
     elseif (CMAKE_BUILD_TYPE MATCHES "Debug")
         set(CMAKE_CXX_FLAGS "-std=c++11 -g -O0 -Wall -Wno-deprecated")
     endif()
@@ -73,7 +73,9 @@ link_directories(${HAMeRS_BINARY_DIR}/algs/patch_strategy
                  ${HAMeRS_BINARY_DIR}/flow/flow_models
                  ${HAMeRS_BINARY_DIR}/flow/convective_flux_reconstructors
                  ${HAMeRS_BINARY_DIR}/flow/diffusive_flux_reconstructors
+                 ${HAMeRS_BINARY_DIR}/flow/nonconservative_diffusive_flux_divergence_operators
                  ${HAMeRS_BINARY_DIR}/flow/refinement_taggers
+                 ${HAMeRS_BINARY_DIR}/extn/patch_hierarchies
                  ${HAMeRS_BINARY_DIR}/util
                  ${HAMeRS_BINARY_DIR}/util/basic_boundary_conditions
                  ${HAMeRS_BINARY_DIR}/util/mixing_rules
@@ -88,7 +90,9 @@ add_subdirectory(src/exec)
 add_subdirectory(src/flow/flow_models)
 add_subdirectory(src/flow/convective_flux_reconstructors)
 add_subdirectory(src/flow/diffusive_flux_reconstructors)
+add_subdirectory(src/flow/nonconservative_diffusive_flux_divergence_operators)
 add_subdirectory(src/flow/refinement_taggers)
+add_subdirectory(src/extn/patch_hierarchies)
 add_subdirectory(src/util)
 add_subdirectory(src/util/basic_boundary_conditions)
 add_subdirectory(src/util/mixing_rules)

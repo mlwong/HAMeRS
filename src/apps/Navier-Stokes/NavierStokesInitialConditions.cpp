@@ -487,7 +487,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                                     x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
                                     x[2] = patch_xlo[2] + (k + 0.5)*dx[2];
                                     
-                                    double phi = x[0]/H;
+                                    double phi = x[2]/H;
                                     double v = v_w*phi;
                                     
                                     rho[idx_cell] = rho_avg;
@@ -531,7 +531,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                                     x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
                                     x[2] = patch_xlo[2] + (k + 0.5)*dx[2];
                                     
-                                    double phi = x[1]/H;
+                                    double phi = x[0]/H;
                                     double w = w_w*phi;
                                     
                                     rho[idx_cell] = rho_avg;
@@ -591,14 +591,108 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                 }
                 else if (d_dim == tbox::Dimension(2))
                 {
-                    if (d_project_name == "2D binary diffusion in x-direction")
+                    if (d_project_name == "2D multi-species Couette flow in x-direction")
                     {
                         if (d_num_species != 2)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
                                 << "Please provide only two-species for the problem"
-                                << " '2D binary diffustion'."
+                                << " '2D multi-species Couette flow'."
+                                << std::endl);
+                        }
+                        
+                        const double gamma = 1.4;
+                        const double rho_avg = 1.159750086791891;
+                        const double u_w = 69.445;
+                        const double p_c = 1.0e5;
+                        
+                        double* rho_Y_1   = partial_density->getPointer(0);
+                        double* rho_Y_2   = partial_density->getPointer(1);
+                        double* rho_u     = momentum->getPointer(0);
+                        double* rho_v     = momentum->getPointer(1);
+                        double* E         = total_energy->getPointer(0);
+                        
+                        const double H = 1.0;
+                        
+                        for (int j = 0; j < patch_dims[1]; j++)
+                        {
+                            for (int i = 0; i < patch_dims[0]; i++)
+                            {
+                                // Compute index into linear data array.
+                                int idx_cell = i + j*patch_dims[0];
+                                
+                                // Compute the coordinates.
+                                double x[2];
+                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                
+                                double phi = x[1]/H;
+                                double u = u_w*phi;
+                                
+                                rho_Y_1[idx_cell] = 0.5*rho_avg;
+                                rho_Y_2[idx_cell] = 0.5*rho_avg;
+                                rho_u[idx_cell] = rho_avg*u;
+                                rho_v[idx_cell] = 0.0;
+                                E[idx_cell] = p_c/(gamma - 1.0) + 0.5*rho_avg*u*u;
+                            }
+                        }
+                    }
+                    else if (d_project_name == "2D multi-species Couette flow in y-direction")
+                    {
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Please provide only two-species for the problem"
+                                << " '2D multi-species Couette flow'."
+                                << std::endl);
+                        }
+                        
+                        const double gamma = 1.4;
+                        const double rho_avg = 1.159750086791891;
+                        const double v_w = 69.445;
+                        const double p_c = 1.0e5;
+                        
+                        double* rho_Y_1   = partial_density->getPointer(0);
+                        double* rho_Y_2   = partial_density->getPointer(1);
+                        double* rho_u     = momentum->getPointer(0);
+                        double* rho_v     = momentum->getPointer(1);
+                        double* E         = total_energy->getPointer(0);
+                        
+                        const double H = 1.0;
+                        
+                        for (int j = 0; j < patch_dims[1]; j++)
+                        {
+                            for (int i = 0; i < patch_dims[0]; i++)
+                            {
+                                // Compute index into linear data array.
+                                int idx_cell = i + j*patch_dims[0];
+                                
+                                // Compute the coordinates.
+                                double x[2];
+                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                
+                                double phi = x[0]/H;
+                                double v = v_w*phi;
+                                
+                                rho_Y_1[idx_cell] = 0.5*rho_avg;
+                                rho_Y_2[idx_cell] = 0.5*rho_avg;
+                                rho_u[idx_cell] = rho_avg*v;
+                                rho_v[idx_cell] = 0.0;
+                                E[idx_cell] = p_c/(gamma - 1.0) + 0.5*rho_avg*v*v;
+                            }
+                        }
+                    }
+                    else if (d_project_name == "2D binary mass diffusion in x-direction")
+                    {
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Please provide only two-species for the problem"
+                                << " '2D binary mass diffusion'."
                                 << std::endl);
                         }
                         
@@ -642,14 +736,14 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                             }
                         }
                     }
-                    else if (d_project_name == "2D binary diffusion in y-direction")
+                    else if (d_project_name == "2D binary mass diffusion in y-direction")
                     {
                         if (d_num_species != 2)
                         {
                             TBOX_ERROR(d_object_name
                                 << ": "
                                 << "Please provide only two-species for the problem"
-                                << " '2D binary diffustion'."
+                                << " '2D binary mass diffusion'."
                                 << std::endl);
                         }
                         
@@ -930,19 +1024,108 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         
                         std::string A_idx_str;
                         std::string m_idx_str;
-                        std::string prime_idx_str;
+                        std::string random_seed_str;
                         
                         std::getline(ss, A_idx_str, '-');
                         std::getline(ss, m_idx_str, '-');
-                        std::getline(ss, prime_idx_str);
+                        std::getline(ss, random_seed_str);
                         
-                        double A_candidates[] = {0.5e-3, 0.35355339e-3, 0.25e-3};
+                        double A_candidates[] = {0.01e-3, 0.04e-3, 0.16e-3};
                         int m_min_candidates[] = {40, 30, 20};
                         int m_max_candidates[] = {60, 60, 60};
                         
-                        // Prime number for "random" phase shifts.
-                        double prime_num = static_cast<double> (
-                            boost::math::prime(std::stoi(prime_idx_str) + 2));
+                        // Seed for "random" phase shifts.
+                        int random_seed = std::stoi(random_seed_str) - 1;
+                        
+                        double phase_shifts[41];
+                        if (random_seed == 0)
+                        {
+                            phase_shifts[0] = 5.119059895756811000e+000;
+                            phase_shifts[1] = 5.691258590395267300e+000;
+                            phase_shifts[2] = 7.978816983408705300e-001;
+                            phase_shifts[3] = 5.738909759225261800e+000;
+                            phase_shifts[4] = 3.973230324742651500e+000;
+                            phase_shifts[5] = 6.128644395486362300e-001;
+                            phase_shifts[6] = 1.749855916861123200e+000;
+                            phase_shifts[7] = 3.436157926236805200e+000;
+                            phase_shifts[8] = 6.016192879924800800e+000;
+                            phase_shifts[9] = 6.062573467430127000e+000;
+                            phase_shifts[10] = 9.903121990156674700e-001;
+                            phase_shifts[11] = 6.098414305612863000e+000;
+                            phase_shifts[12] = 6.014057305717998700e+000;
+                            phase_shifts[13] = 3.049705144518116000e+000;
+                            phase_shifts[14] = 5.028310483744898600e+000;
+                            phase_shifts[15] = 8.914981581520268200e-001;
+                            phase_shifts[16] = 2.650004294134627800e+000;
+                            phase_shifts[17] = 5.753735997130328400e+000;
+                            phase_shifts[18] = 4.977585453328568800e+000;
+                            phase_shifts[19] = 6.028668715861979200e+000;
+                            phase_shifts[20] = 4.120140326260335300e+000;
+                            phase_shifts[21] = 2.243830941120678300e-001;
+                            phase_shifts[22] = 5.335236778530300800e+000;
+                            phase_shifts[23] = 5.868452651315184500e+000;
+                            phase_shifts[24] = 4.264618752468623900e+000;
+                            phase_shifts[25] = 4.761021655110125600e+000;
+                            phase_shifts[26] = 4.669239005010575200e+000;
+                            phase_shifts[27] = 2.464435046215926100e+000;
+                            phase_shifts[28] = 4.118489048744698300e+000;
+                            phase_shifts[29] = 1.075597681642343600e+000;
+                            phase_shifts[30] = 4.436218406436430500e+000;
+                            phase_shifts[31] = 2.000116726443145200e-001;
+                            phase_shifts[32] = 1.739958430326577400e+000;
+                            phase_shifts[33] = 2.901034032257156500e-001;
+                            phase_shifts[34] = 6.102969807212590400e-001;
+                            phase_shifts[35] = 5.173938128028055400e+000;
+                            phase_shifts[36] = 4.365736994889477500e+000;
+                            phase_shifts[37] = 1.992394794032684900e+000;
+                            phase_shifts[38] = 5.970421215819234500e+000;
+                            phase_shifts[39] = 2.164311069058015300e-001;
+                            phase_shifts[40] = 2.756712114200997400e+000;
+                        }
+                        else
+                        {
+                            phase_shifts[0] = 2.620226532717789200e+000;
+                            phase_shifts[1] = 4.525932273597345700e+000;
+                            phase_shifts[2] = 7.186381718527406600e-004;
+                            phase_shifts[3] = 1.899611578242180700e+000;
+                            phase_shifts[4] = 9.220944569241362700e-001;
+                            phase_shifts[5] = 5.801805019369201700e-001;
+                            phase_shifts[6] = 1.170307423440345900e+000;
+                            phase_shifts[7] = 2.171222082895173200e+000;
+                            phase_shifts[8] = 2.492963564452900500e+000;
+                            phase_shifts[9] = 3.385485386352383500e+000;
+                            phase_shifts[10] = 2.633876813749063600e+000;
+                            phase_shifts[11] = 4.305361097085856200e+000;
+                            phase_shifts[12] = 1.284611371532881700e+000;
+                            phase_shifts[13] = 5.517374574309792800e+000;
+                            phase_shifts[14] = 1.720813231802212400e-001;
+                            phase_shifts[15] = 4.212671608894216200e+000;
+                            phase_shifts[16] = 2.622003402848613000e+000;
+                            phase_shifts[17] = 3.510351721361030500e+000;
+                            phase_shifts[18] = 8.820771499014955500e-001;
+                            phase_shifts[19] = 1.244708365548507600e+000;
+                            phase_shifts[20] = 5.031226508705986900e+000;
+                            phase_shifts[21] = 6.083766906066673000e+000;
+                            phase_shifts[22] = 1.969302191124991500e+000;
+                            phase_shifts[23] = 4.349991286601573700e+000;
+                            phase_shifts[24] = 5.506515445078040500e+000;
+                            phase_shifts[25] = 5.620979443832325700e+000;
+                            phase_shifts[26] = 5.343485393392637400e-001;
+                            phase_shifts[27] = 2.453884401839301100e-001;
+                            phase_shifts[28] = 1.067075996920243900e+000;
+                            phase_shifts[29] = 5.517532075157587800e+000;
+                            phase_shifts[30] = 6.179313813474526200e-001;
+                            phase_shifts[31] = 2.645897242173034700e+000;
+                            phase_shifts[32] = 6.018597421742790700e+000;
+                            phase_shifts[33] = 3.349976284840678000e+000;
+                            phase_shifts[34] = 4.347192116747430100e+000;
+                            phase_shifts[35] = 1.982443176922790600e+000;
+                            phase_shifts[36] = 4.313412542174082100e+000;
+                            phase_shifts[37] = 5.244107758660463900e+000;
+                            phase_shifts[38] = 1.149086355026512600e-001;
+                            phase_shifts[39] = 4.713295737926515900e+000;
+                            phase_shifts[40] = 6.213197464658893700e+000;
+                        }
                         
                         // Amplitude.
                         double A = A_candidates[std::stoi(A_idx_str) - 1];
@@ -991,8 +1174,8 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                         const double v_air   = 0.0;
                         const double p_air   = 101325.0;
                         
-                        // Shock hits the interface after 0.1 ms.
-                        const double L_x_shock = 0.180254509478037;
+                        // Shock hits the interface after 0.05 ms.
+                        const double L_x_shock = 0.190127254739019;
                         const double L_x_interface = 0.2;
                         
                         for (int j = 0; j < patch_dims[1]; j++)
@@ -1010,8 +1193,196 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                                 double S = 0.0;
                                 for (int m = m_min; m <= m_max; m++)
                                 {
-                                    S += A*cos(2.0*M_PI*m/0.05*x[1] +
-                                        tan(prime_num*(double)m));
+                                    S += A*cos(2.0*M_PI*m/0.05*x[1] + phase_shifts[60 - m]);
+                                }
+                                
+                                if (x[0] < L_x_shock)
+                                {
+                                    rho_Y_0[idx_cell] = rho_shocked;
+                                    rho_Y_1[idx_cell] = 0.0;
+                                    rho_u[idx_cell]   = rho_shocked*u_shocked;
+                                    rho_v[idx_cell]   = rho_shocked*v_shocked;
+                                    E[idx_cell]       = p_shocked/(gamma_0 - 1.0) +
+                                        0.5*rho_shocked*(u_shocked*u_shocked + v_shocked*v_shocked);
+                                }
+                                else
+                                {
+                                    const double f_sm = 0.5*(1.0 + erf((x[0] - (L_x_interface + S))/epsilon_i));
+                                    
+                                    // Smooth the primitive variables.
+                                    const double rho_Y_0_i = rho_unshocked*(1.0 - f_sm);
+                                    const double rho_Y_1_i = rho_air*f_sm;
+                                    const double u_i = u_unshocked*(1.0 - f_sm) + u_air*f_sm;
+                                    const double v_i = v_unshocked*(1.0 - f_sm) + v_air*f_sm;
+                                    const double p_i = p_unshocked*(1.0 - f_sm) + p_air*f_sm;
+                                    
+                                    const double rho_i = rho_Y_0_i + rho_Y_1_i;
+                                    const double Y_0_i = rho_Y_0_i/rho_i;
+                                    const double Y_1_i = 1.0 - Y_0_i;
+                                    
+                                    const double gamma_i = (Y_0_i*c_p_SF6 + Y_1_i*c_p_air)/
+                                        (Y_0_i*c_v_SF6 + Y_1_i*c_v_air);
+                                    
+                                    rho_Y_0[idx_cell] = rho_Y_0_i;
+                                    rho_Y_1[idx_cell] = rho_Y_1_i;
+                                    rho_u[idx_cell]   = rho_i*u_i;
+                                    rho_v[idx_cell]   = rho_i*v_i;
+                                    E[idx_cell]       = p_i/(gamma_i - 1.0) + 0.5*rho_i*(u_i*u_i + v_i*v_i);
+                                }
+                            }
+                        }
+                    }
+                    else if (d_project_name.find("2D Poggi's RMI 1mm smooth interface reduced domain size") != std::string::npos)
+                    {
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Please provide only two-species for the problem"
+                                << " '2D Poggi's RMI'."
+                                << std::endl);
+                        }
+                        
+                        /*
+                         * Get the settings.
+                         */
+                        
+                        std::string settings = d_project_name.substr(56);
+                        
+                        std::stringstream ss(settings);
+                        
+                        std::string A_idx_str;
+                        std::string m_idx_str;
+                        std::string random_seed_str;
+                        
+                        std::getline(ss, A_idx_str, '-');
+                        std::getline(ss, m_idx_str, '-');
+                        std::getline(ss, random_seed_str);
+                        
+                        double A_candidates[] = {sqrt(2.0)*0.01e-3, sqrt(2.0)*0.04e-3, sqrt(2.0)*0.16e-3};
+                        int m_min_candidates[] = {20, 15, 10};
+                        int m_max_candidates[] = {30, 30, 30};
+                        
+                        // Seed for "random" phase shifts.
+                        int random_seed = std::stoi(random_seed_str) - 1;
+                        
+                        double phase_shifts[21];
+                        if (random_seed == 0)
+                        {
+                            phase_shifts[0] = 5.119059895756811000e+000;
+                            phase_shifts[1] = 5.691258590395267300e+000;
+                            phase_shifts[2] = 7.978816983408705300e-001;
+                            phase_shifts[3] = 5.738909759225261800e+000;
+                            phase_shifts[4] = 3.973230324742651500e+000;
+                            phase_shifts[5] = 6.128644395486362300e-001;
+                            phase_shifts[6] = 1.749855916861123200e+000;
+                            phase_shifts[7] = 3.436157926236805200e+000;
+                            phase_shifts[8] = 6.016192879924800800e+000;
+                            phase_shifts[9] = 6.062573467430127000e+000;
+                            phase_shifts[10] = 9.903121990156674700e-001;
+                            phase_shifts[11] = 6.098414305612863000e+000;
+                            phase_shifts[12] = 6.014057305717998700e+000;
+                            phase_shifts[13] = 3.049705144518116000e+000;
+                            phase_shifts[14] = 5.028310483744898600e+000;
+                            phase_shifts[15] = 8.914981581520268200e-001;
+                            phase_shifts[16] = 2.650004294134627800e+000;
+                            phase_shifts[17] = 5.753735997130328400e+000;
+                            phase_shifts[18] = 4.977585453328568800e+000;
+                            phase_shifts[19] = 6.028668715861979200e+000;
+                            phase_shifts[20] = 4.120140326260335300e+000;
+                        }
+                        else
+                        {
+                            phase_shifts[0] = 2.620226532717789200e+000;
+                            phase_shifts[1] = 4.525932273597345700e+000;
+                            phase_shifts[2] = 7.186381718527406600e-004;
+                            phase_shifts[3] = 1.899611578242180700e+000;
+                            phase_shifts[4] = 9.220944569241362700e-001;
+                            phase_shifts[5] = 5.801805019369201700e-001;
+                            phase_shifts[6] = 1.170307423440345900e+000;
+                            phase_shifts[7] = 2.171222082895173200e+000;
+                            phase_shifts[8] = 2.492963564452900500e+000;
+                            phase_shifts[9] = 3.385485386352383500e+000;
+                            phase_shifts[10] = 2.633876813749063600e+000;
+                            phase_shifts[11] = 4.305361097085856200e+000;
+                            phase_shifts[12] = 1.284611371532881700e+000;
+                            phase_shifts[13] = 5.517374574309792800e+000;
+                            phase_shifts[14] = 1.720813231802212400e-001;
+                            phase_shifts[15] = 4.212671608894216200e+000;
+                            phase_shifts[16] = 2.622003402848613000e+000;
+                            phase_shifts[17] = 3.510351721361030500e+000;
+                            phase_shifts[18] = 8.820771499014955500e-001;
+                            phase_shifts[19] = 1.244708365548507600e+000;
+                            phase_shifts[20] = 5.031226508705986900e+000;
+                        }
+                        
+                        // Amplitude.
+                        double A = A_candidates[std::stoi(A_idx_str) - 1];
+                        
+                        // Bounds of wavenumbers for initial perturbations.
+                        int m_min = m_min_candidates[std::stoi(m_idx_str) - 1];
+                        int m_max = m_max_candidates[std::stoi(m_idx_str) - 1];
+                        
+                        // Characteristic length of the initial interface thickness.
+                        const double epsilon_i = 0.001;
+                        
+                        double* rho_Y_0   = partial_density->getPointer(0);
+                        double* rho_Y_1   = partial_density->getPointer(1);
+                        double* rho_u     = momentum->getPointer(0);
+                        double* rho_v     = momentum->getPointer(1);
+                        double* E         = total_energy->getPointer(0);
+                        
+                        // species 0: SF6.
+                        // species 1: air.
+                        const double gamma_0 = 1.09312;
+                        const double gamma_1 = 1.39909;
+                        
+                        const double c_p_SF6 = 668.286;
+                        const double c_p_air = 1040.50;
+                        
+                        const double c_v_SF6 = 611.359;
+                        const double c_v_air = 743.697;
+                        
+                        NULL_USE(gamma_1);
+                        
+                        // Unshocked SF6.
+                        const double rho_unshocked = 5.97286552525647;
+                        const double u_unshocked   = 0.0;
+                        const double v_unshocked   = 0.0;
+                        const double p_unshocked   = 101325.0;
+                        
+                        // Shocked SF6.
+                        const double rho_shocked = 11.9708247309869;
+                        const double u_shocked   = 98.9344103891513;
+                        const double v_shocked   = 0.0;
+                        const double p_shocked   = 218005.430874;
+                        
+                        // Air.
+                        const double rho_air = 1.14560096494103;
+                        const double u_air   = 0.0;
+                        const double v_air   = 0.0;
+                        const double p_air   = 101325.0;
+                        
+                        // Shock hits the interface after 0.05 ms.
+                        const double L_x_shock = 0.190127254739019;
+                        const double L_x_interface = 0.2;
+                        
+                        for (int j = 0; j < patch_dims[1]; j++)
+                        {
+                            for (int i = 0; i < patch_dims[0]; i++)
+                            {
+                                // Compute the linear index.
+                                int idx_cell = i + j*patch_dims[0];
+                                
+                                // Compute the coordinates.
+                                double x[2];
+                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                
+                                double S = 0.0;
+                                for (int m = m_min; m <= m_max; m++)
+                                {
+                                    S += A*cos(2.0*M_PI*m/0.025*x[1] + phase_shifts[30 - m]);
                                 }
                                 
                                 if (x[0] < L_x_shock)
@@ -1768,8 +2139,606 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                 }
                 else if (d_dim == tbox::Dimension(3))
                 {
-                    if (false)
-                    {}
+                    if (d_project_name == "3D binary mass diffusion in x-direction")
+                    {
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Please provide only two-species for the problem"
+                                << " '3D binary mass diffusion'."
+                                << std::endl);
+                        }
+                        
+                        // Characteristic length of the problem.
+                        const double K = 0.1*0.1;
+                        
+                        double* rho_Y_1  = partial_density->getPointer(0);
+                        double* rho_Y_2  = partial_density->getPointer(1);
+                        double* rho_u    = momentum->getPointer(0);
+                        double* rho_v    = momentum->getPointer(1);
+                        double* rho_w    = momentum->getPointer(2);
+                        double* E        = total_energy->getPointer(0);
+                        
+                        // Initial conditions of mixture.
+                        const double rho = 1.0;
+                        const double u   = 0.0;
+                        const double v   = 0.0;
+                        const double w   = 0.0;
+                        const double p   = 1.0;
+                        
+                        for (int k = 0; k < patch_dims[2]; k++)
+                        {
+                            for (int j = 0; j < patch_dims[1]; j++)
+                            {
+                                for (int i = 0; i < patch_dims[0]; i++)
+                                {
+                                    // Compute index into linear data array.
+                                    int idx_cell = i + j*patch_dims[0] + k*patch_dims[0]*patch_dims[1];
+                                    
+                                    // Compute the coordinates.
+                                    double x[3];
+                                    x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                    x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                    x[2] = patch_xlo[2] + (k + 0.5)*dx[2];
+                                    
+                                    const double Y_1 = exp(-x[0]*x[0]/K);
+                                    const double Y_2 = 1.0 - Y_1;
+                                    
+                                    const double gamma = 1.4;
+                                    
+                                    rho_Y_1[idx_cell] = rho*Y_1;
+                                    rho_Y_2[idx_cell] = rho*Y_2;
+                                    rho_u[idx_cell]   = rho*u;
+                                    rho_v[idx_cell]   = rho*v;
+                                    rho_w[idx_cell]   = rho*w;
+                                    E[idx_cell]       = p/(gamma - 1.0) + 0.5*rho*(u*u + v*v + w*w);
+                                }
+                            }
+                        }
+                    }
+                    else if (d_project_name == "3D binary mass diffusion in y-direction")
+                    {
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Please provide only two-species for the problem"
+                                << " '3D binary mass diffusion'."
+                                << std::endl);
+                        }
+                        
+                        // Characteristic length of the problem.
+                        const double K = 0.1*0.1;
+                        
+                        double* rho_Y_1  = partial_density->getPointer(0);
+                        double* rho_Y_2  = partial_density->getPointer(1);
+                        double* rho_u    = momentum->getPointer(0);
+                        double* rho_v    = momentum->getPointer(1);
+                        double* rho_w    = momentum->getPointer(2);
+                        double* E        = total_energy->getPointer(0);
+                        
+                        // Initial conditions of mixture.
+                        const double rho = 1.0;
+                        const double u   = 0.0;
+                        const double v   = 0.0;
+                        const double w   = 0.0;
+                        const double p   = 1.0;
+                        
+                        for (int k = 0; k < patch_dims[2]; k++)
+                        {
+                            for (int j = 0; j < patch_dims[1]; j++)
+                            {
+                                for (int i = 0; i < patch_dims[0]; i++)
+                                {
+                                    // Compute index into linear data array.
+                                    int idx_cell = i + j*patch_dims[0] + k*patch_dims[0]*patch_dims[1];
+                                    
+                                    // Compute the coordinates.
+                                    double x[3];
+                                    x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                    x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                    x[2] = patch_xlo[2] + (k + 0.5)*dx[2];
+                                    
+                                    const double Y_1 = exp(-x[1]*x[1]/K);
+                                    const double Y_2 = 1.0 - Y_1;
+                                    
+                                    const double gamma = 1.4;
+                                    
+                                    rho_Y_1[idx_cell] = rho*Y_1;
+                                    rho_Y_2[idx_cell] = rho*Y_2;
+                                    rho_u[idx_cell]   = rho*u;
+                                    rho_v[idx_cell]   = rho*v;
+                                    rho_w[idx_cell]   = rho*w;
+                                    E[idx_cell]       = p/(gamma - 1.0) + 0.5*rho*(u*u + v*v + w*w);
+                                }
+                            }
+                        }
+                    }
+                    else if (d_project_name == "3D binary mass diffusion in z-direction")
+                    {
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Please provide only two-species for the problem"
+                                << " '3D binary mass diffusion'."
+                                << std::endl);
+                        }
+                        
+                        // Characteristic length of the problem.
+                        const double K = 0.1*0.1;
+                        
+                        double* rho_Y_1  = partial_density->getPointer(0);
+                        double* rho_Y_2  = partial_density->getPointer(1);
+                        double* rho_u    = momentum->getPointer(0);
+                        double* rho_v    = momentum->getPointer(1);
+                        double* rho_w    = momentum->getPointer(2);
+                        double* E        = total_energy->getPointer(0);
+                        
+                        // Initial conditions of mixture.
+                        const double rho = 1.0;
+                        const double u   = 0.0;
+                        const double v   = 0.0;
+                        const double w   = 0.0;
+                        const double p   = 1.0;
+                        
+                        for (int k = 0; k < patch_dims[2]; k++)
+                        {
+                            for (int j = 0; j < patch_dims[1]; j++)
+                            {
+                                for (int i = 0; i < patch_dims[0]; i++)
+                                {
+                                    // Compute index into linear data array.
+                                    int idx_cell = i + j*patch_dims[0] + k*patch_dims[0]*patch_dims[1];
+                                    
+                                    // Compute the coordinates.
+                                    double x[3];
+                                    x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                    x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                    x[2] = patch_xlo[2] + (k + 0.5)*dx[2];
+                                    
+                                    const double Y_1 = exp(-x[2]*x[2]/K);
+                                    const double Y_2 = 1.0 - Y_1;
+                                    
+                                    const double gamma = 1.4;
+                                    
+                                    rho_Y_1[idx_cell] = rho*Y_1;
+                                    rho_Y_2[idx_cell] = rho*Y_2;
+                                    rho_u[idx_cell]   = rho*u;
+                                    rho_v[idx_cell]   = rho*v;
+                                    rho_w[idx_cell]   = rho*w;
+                                    E[idx_cell]       = p/(gamma - 1.0) + 0.5*rho*(u*u + v*v + w*w);
+                                }
+                            }
+                        }
+                    }
+                    else if (d_project_name.find("3D Poggi's RMI 1mm smooth interface") != std::string::npos)
+                    {
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Please provide only two-species for the problem"
+                                << " '3D Poggi's RMI'."
+                                << std::endl);
+                        }
+                        
+                        /*
+                         * Get the settings.
+                         */
+                        
+                        std::string settings = d_project_name.substr(36);
+                        
+                        std::stringstream ss(settings);
+                        
+                        std::string A_idx_str;
+                        std::string m_idx_str;
+                        
+                        std::getline(ss, A_idx_str, '-');
+                        std::getline(ss, m_idx_str);
+                        
+                        double A_candidates[] = {0.01e-3, 0.04e-3, 0.16e-3};
+                        int m_min_candidates[] = {40, 30, 20};
+                        int m_max_candidates[] = {60, 60, 60};
+                        
+                        double phase_shifts_x[41];
+                        double phase_shifts_y[41];
+                        
+                        phase_shifts_x[0] = 5.119059895756811000e+000;
+                        phase_shifts_x[1] = 5.691258590395267300e+000;
+                        phase_shifts_x[2] = 7.978816983408705300e-001;
+                        phase_shifts_x[3] = 5.738909759225261800e+000;
+                        phase_shifts_x[4] = 3.973230324742651500e+000;
+                        phase_shifts_x[5] = 6.128644395486362300e-001;
+                        phase_shifts_x[6] = 1.749855916861123200e+000;
+                        phase_shifts_x[7] = 3.436157926236805200e+000;
+                        phase_shifts_x[8] = 6.016192879924800800e+000;
+                        phase_shifts_x[9] = 6.062573467430127000e+000;
+                        phase_shifts_x[10] = 9.903121990156674700e-001;
+                        phase_shifts_x[11] = 6.098414305612863000e+000;
+                        phase_shifts_x[12] = 6.014057305717998700e+000;
+                        phase_shifts_x[13] = 3.049705144518116000e+000;
+                        phase_shifts_x[14] = 5.028310483744898600e+000;
+                        phase_shifts_x[15] = 8.914981581520268200e-001;
+                        phase_shifts_x[16] = 2.650004294134627800e+000;
+                        phase_shifts_x[17] = 5.753735997130328400e+000;
+                        phase_shifts_x[18] = 4.977585453328568800e+000;
+                        phase_shifts_x[19] = 6.028668715861979200e+000;
+                        phase_shifts_x[20] = 4.120140326260335300e+000;
+                        phase_shifts_x[21] = 2.243830941120678300e-001;
+                        phase_shifts_x[22] = 5.335236778530300800e+000;
+                        phase_shifts_x[23] = 5.868452651315184500e+000;
+                        phase_shifts_x[24] = 4.264618752468623900e+000;
+                        phase_shifts_x[25] = 4.761021655110125600e+000;
+                        phase_shifts_x[26] = 4.669239005010575200e+000;
+                        phase_shifts_x[27] = 2.464435046215926100e+000;
+                        phase_shifts_x[28] = 4.118489048744698300e+000;
+                        phase_shifts_x[29] = 1.075597681642343600e+000;
+                        phase_shifts_x[30] = 4.436218406436430500e+000;
+                        phase_shifts_x[31] = 2.000116726443145200e-001;
+                        phase_shifts_x[32] = 1.739958430326577400e+000;
+                        phase_shifts_x[33] = 2.901034032257156500e-001;
+                        phase_shifts_x[34] = 6.102969807212590400e-001;
+                        phase_shifts_x[35] = 5.173938128028055400e+000;
+                        phase_shifts_x[36] = 4.365736994889477500e+000;
+                        phase_shifts_x[37] = 1.992394794032684900e+000;
+                        phase_shifts_x[38] = 5.970421215819234500e+000;
+                        phase_shifts_x[39] = 2.164311069058015300e-001;
+                        phase_shifts_x[40] = 2.756712114200997400e+000;
+                        
+                        phase_shifts_y[0] = 2.620226532717789200e+000;
+                        phase_shifts_y[1] = 4.525932273597345700e+000;
+                        phase_shifts_y[2] = 7.186381718527406600e-004;
+                        phase_shifts_y[3] = 1.899611578242180700e+000;
+                        phase_shifts_y[4] = 9.220944569241362700e-001;
+                        phase_shifts_y[5] = 5.801805019369201700e-001;
+                        phase_shifts_y[6] = 1.170307423440345900e+000;
+                        phase_shifts_y[7] = 2.171222082895173200e+000;
+                        phase_shifts_y[8] = 2.492963564452900500e+000;
+                        phase_shifts_y[9] = 3.385485386352383500e+000;
+                        phase_shifts_y[10] = 2.633876813749063600e+000;
+                        phase_shifts_y[11] = 4.305361097085856200e+000;
+                        phase_shifts_y[12] = 1.284611371532881700e+000;
+                        phase_shifts_y[13] = 5.517374574309792800e+000;
+                        phase_shifts_y[14] = 1.720813231802212400e-001;
+                        phase_shifts_y[15] = 4.212671608894216200e+000;
+                        phase_shifts_y[16] = 2.622003402848613000e+000;
+                        phase_shifts_y[17] = 3.510351721361030500e+000;
+                        phase_shifts_y[18] = 8.820771499014955500e-001;
+                        phase_shifts_y[19] = 1.244708365548507600e+000;
+                        phase_shifts_y[20] = 5.031226508705986900e+000;
+                        phase_shifts_y[21] = 6.083766906066673000e+000;
+                        phase_shifts_y[22] = 1.969302191124991500e+000;
+                        phase_shifts_y[23] = 4.349991286601573700e+000;
+                        phase_shifts_y[24] = 5.506515445078040500e+000;
+                        phase_shifts_y[25] = 5.620979443832325700e+000;
+                        phase_shifts_y[26] = 5.343485393392637400e-001;
+                        phase_shifts_y[27] = 2.453884401839301100e-001;
+                        phase_shifts_y[28] = 1.067075996920243900e+000;
+                        phase_shifts_y[29] = 5.517532075157587800e+000;
+                        phase_shifts_y[30] = 6.179313813474526200e-001;
+                        phase_shifts_y[31] = 2.645897242173034700e+000;
+                        phase_shifts_y[32] = 6.018597421742790700e+000;
+                        phase_shifts_y[33] = 3.349976284840678000e+000;
+                        phase_shifts_y[34] = 4.347192116747430100e+000;
+                        phase_shifts_y[35] = 1.982443176922790600e+000;
+                        phase_shifts_y[36] = 4.313412542174082100e+000;
+                        phase_shifts_y[37] = 5.244107758660463900e+000;
+                        phase_shifts_y[38] = 1.149086355026512600e-001;
+                        phase_shifts_y[39] = 4.713295737926515900e+000;
+                        phase_shifts_y[40] = 6.213197464658893700e+000;
+                        
+                        // Amplitude.
+                        double A = A_candidates[std::stoi(A_idx_str) - 1];
+                        
+                        // Bounds of wavenumbers for initial perturbations.
+                        int m_min = m_min_candidates[std::stoi(m_idx_str) - 1];
+                        int m_max = m_max_candidates[std::stoi(m_idx_str) - 1];
+                        
+                        // Characteristic length of the initial interface thickness.
+                        const double epsilon_i = 0.001;
+                        
+                        double* rho_Y_0   = partial_density->getPointer(0);
+                        double* rho_Y_1   = partial_density->getPointer(1);
+                        double* rho_u     = momentum->getPointer(0);
+                        double* rho_v     = momentum->getPointer(1);
+                        double* rho_w     = momentum->getPointer(2);
+                        double* E         = total_energy->getPointer(0);
+                        
+                        // species 0: SF6.
+                        // species 1: air.
+                        const double gamma_0 = 1.09312;
+                        const double gamma_1 = 1.39909;
+                        
+                        const double c_p_SF6 = 668.286;
+                        const double c_p_air = 1040.50;
+                        
+                        const double c_v_SF6 = 611.359;
+                        const double c_v_air = 743.697;
+                        
+                        NULL_USE(gamma_1);
+                        
+                        // Unshocked SF6.
+                        const double rho_unshocked = 5.97286552525647;
+                        const double u_unshocked   = 0.0;
+                        const double v_unshocked   = 0.0;
+                        const double w_unshocked   = 0.0;
+                        const double p_unshocked   = 101325.0;
+                        
+                        // Shocked SF6.
+                        const double rho_shocked = 11.9708247309869;
+                        const double u_shocked   = 98.9344103891513;
+                        const double v_shocked   = 0.0;
+                        const double w_shocked   = 0.0;
+                        const double p_shocked   = 218005.430874;
+                        
+                        // Air.
+                        const double rho_air = 1.14560096494103;
+                        const double u_air   = 0.0;
+                        const double v_air   = 0.0;
+                        const double w_air   = 0.0;
+                        const double p_air   = 101325.0;
+                        
+                        // Shock hits the interface after 0.05 ms.
+                        const double L_x_shock = 0.190127254739019;
+                        const double L_x_interface = 0.2;
+                        
+                        for (int k = 0; k < patch_dims[2]; k++)
+                        {
+                            for (int j = 0; j < patch_dims[1]; j++)
+                            {
+                                for (int i = 0; i < patch_dims[0]; i++)
+                                {
+                                    // Compute the linear index.
+                                    int idx_cell = i + j*patch_dims[0] + k*patch_dims[0]*patch_dims[1];
+                                    
+                                    // Compute the coordinates.
+                                    double x[3];
+                                    x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                    x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                    x[2] = patch_xlo[2] + (k + 0.5)*dx[2];
+                                    
+                                    double S = 0.0;
+                                    for (int m = m_min; m <= m_max; m++)
+                                    {
+                                        S += A*cos(2.0*M_PI*m/0.05*x[1] + phase_shifts_x[60 - m])*
+                                            cos(2.0*M_PI*m/0.05*x[2] + phase_shifts_y[60 - m]);
+                                    }
+                                    
+                                    if (x[0] < L_x_shock)
+                                    {
+                                        rho_Y_0[idx_cell] = rho_shocked;
+                                        rho_Y_1[idx_cell] = 0.0;
+                                        rho_u[idx_cell]   = rho_shocked*u_shocked;
+                                        rho_v[idx_cell]   = rho_shocked*v_shocked;
+                                        rho_w[idx_cell]   = rho_shocked*w_shocked;
+                                        E[idx_cell]       = p_shocked/(gamma_0 - 1.0) +
+                                            0.5*rho_shocked*(u_shocked*u_shocked + v_shocked*v_shocked + w_shocked*w_shocked);
+                                    }
+                                    else
+                                    {
+                                        const double f_sm = 0.5*(1.0 + erf((x[0] - (L_x_interface + S))/epsilon_i));
+                                        
+                                        // Smooth the primitive variables.
+                                        const double rho_Y_0_i = rho_unshocked*(1.0 - f_sm);
+                                        const double rho_Y_1_i = rho_air*f_sm;
+                                        const double u_i = u_unshocked*(1.0 - f_sm) + u_air*f_sm;
+                                        const double v_i = v_unshocked*(1.0 - f_sm) + v_air*f_sm;
+                                        const double w_i = w_unshocked*(1.0 - f_sm) + w_air*f_sm;
+                                        const double p_i = p_unshocked*(1.0 - f_sm) + p_air*f_sm;
+                                        
+                                        const double rho_i = rho_Y_0_i + rho_Y_1_i;
+                                        const double Y_0_i = rho_Y_0_i/rho_i;
+                                        const double Y_1_i = 1.0 - Y_0_i;
+                                        
+                                        const double gamma_i = (Y_0_i*c_p_SF6 + Y_1_i*c_p_air)/
+                                            (Y_0_i*c_v_SF6 + Y_1_i*c_v_air);
+                                        
+                                        rho_Y_0[idx_cell] = rho_Y_0_i;
+                                        rho_Y_1[idx_cell] = rho_Y_1_i;
+                                        rho_u[idx_cell]   = rho_i*u_i;
+                                        rho_v[idx_cell]   = rho_i*v_i;
+                                        rho_w[idx_cell]   = rho_i*w_i;
+                                        E[idx_cell]       = p_i/(gamma_i - 1.0) + 0.5*rho_i*(u_i*u_i + v_i*v_i + w_i*w_i);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if (d_project_name.find("3D Poggi's RMI 1mm smooth interface reduced domain size") != std::string::npos)
+                    {
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Please provide only two-species for the problem"
+                                << " '3D Poggi's RMI'."
+                                << std::endl);
+                        }
+                        
+                        /*
+                         * Get the settings.
+                         */
+                        
+                        std::string settings = d_project_name.substr(56);
+                        
+                        std::stringstream ss(settings);
+                        
+                        std::string A_idx_str;
+                        std::string m_idx_str;
+                        
+                        std::getline(ss, A_idx_str, '-');
+                        std::getline(ss, m_idx_str);
+                        
+                        double A_candidates[] = {sqrt(2.0)*0.01e-3, sqrt(2.0)*0.04e-3, sqrt(2.0)*0.16e-3};
+                        int m_min_candidates[] = {20, 15, 10};
+                        int m_max_candidates[] = {30, 30, 30};
+                        
+                        double phase_shifts_x[21];
+                        double phase_shifts_y[21];
+                        
+                        phase_shifts_x[0] = 5.119059895756811000e+000;
+                        phase_shifts_x[1] = 5.691258590395267300e+000;
+                        phase_shifts_x[2] = 7.978816983408705300e-001;
+                        phase_shifts_x[3] = 5.738909759225261800e+000;
+                        phase_shifts_x[4] = 3.973230324742651500e+000;
+                        phase_shifts_x[5] = 6.128644395486362300e-001;
+                        phase_shifts_x[6] = 1.749855916861123200e+000;
+                        phase_shifts_x[7] = 3.436157926236805200e+000;
+                        phase_shifts_x[8] = 6.016192879924800800e+000;
+                        phase_shifts_x[9] = 6.062573467430127000e+000;
+                        phase_shifts_x[10] = 9.903121990156674700e-001;
+                        phase_shifts_x[11] = 6.098414305612863000e+000;
+                        phase_shifts_x[12] = 6.014057305717998700e+000;
+                        phase_shifts_x[13] = 3.049705144518116000e+000;
+                        phase_shifts_x[14] = 5.028310483744898600e+000;
+                        phase_shifts_x[15] = 8.914981581520268200e-001;
+                        phase_shifts_x[16] = 2.650004294134627800e+000;
+                        phase_shifts_x[17] = 5.753735997130328400e+000;
+                        phase_shifts_x[18] = 4.977585453328568800e+000;
+                        phase_shifts_x[19] = 6.028668715861979200e+000;
+                        phase_shifts_x[20] = 4.120140326260335300e+000;
+                        
+                        phase_shifts_y[0] = 2.620226532717789200e+000;
+                        phase_shifts_y[1] = 4.525932273597345700e+000;
+                        phase_shifts_y[2] = 7.186381718527406600e-004;
+                        phase_shifts_y[3] = 1.899611578242180700e+000;
+                        phase_shifts_y[4] = 9.220944569241362700e-001;
+                        phase_shifts_y[5] = 5.801805019369201700e-001;
+                        phase_shifts_y[6] = 1.170307423440345900e+000;
+                        phase_shifts_y[7] = 2.171222082895173200e+000;
+                        phase_shifts_y[8] = 2.492963564452900500e+000;
+                        phase_shifts_y[9] = 3.385485386352383500e+000;
+                        phase_shifts_y[10] = 2.633876813749063600e+000;
+                        phase_shifts_y[11] = 4.305361097085856200e+000;
+                        phase_shifts_y[12] = 1.284611371532881700e+000;
+                        phase_shifts_y[13] = 5.517374574309792800e+000;
+                        phase_shifts_y[14] = 1.720813231802212400e-001;
+                        phase_shifts_y[15] = 4.212671608894216200e+000;
+                        phase_shifts_y[16] = 2.622003402848613000e+000;
+                        phase_shifts_y[17] = 3.510351721361030500e+000;
+                        phase_shifts_y[18] = 8.820771499014955500e-001;
+                        phase_shifts_y[19] = 1.244708365548507600e+000;
+                        phase_shifts_y[20] = 5.031226508705986900e+000;
+                        
+                        // Amplitude.
+                        double A = A_candidates[std::stoi(A_idx_str) - 1];
+                        
+                        // Bounds of wavenumbers for initial perturbations.
+                        int m_min = m_min_candidates[std::stoi(m_idx_str) - 1];
+                        int m_max = m_max_candidates[std::stoi(m_idx_str) - 1];
+                        
+                        // Characteristic length of the initial interface thickness.
+                        const double epsilon_i = 0.001;
+                        
+                        double* rho_Y_0   = partial_density->getPointer(0);
+                        double* rho_Y_1   = partial_density->getPointer(1);
+                        double* rho_u     = momentum->getPointer(0);
+                        double* rho_v     = momentum->getPointer(1);
+                        double* rho_w     = momentum->getPointer(2);
+                        double* E         = total_energy->getPointer(0);
+                        
+                        // species 0: SF6.
+                        // species 1: air.
+                        const double gamma_0 = 1.09312;
+                        const double gamma_1 = 1.39909;
+                        
+                        const double c_p_SF6 = 668.286;
+                        const double c_p_air = 1040.50;
+                        
+                        const double c_v_SF6 = 611.359;
+                        const double c_v_air = 743.697;
+                        
+                        NULL_USE(gamma_1);
+                        
+                        // Unshocked SF6.
+                        const double rho_unshocked = 5.97286552525647;
+                        const double u_unshocked   = 0.0;
+                        const double v_unshocked   = 0.0;
+                        const double w_unshocked   = 0.0;
+                        const double p_unshocked   = 101325.0;
+                        
+                        // Shocked SF6.
+                        const double rho_shocked = 11.9708247309869;
+                        const double u_shocked   = 98.9344103891513;
+                        const double v_shocked   = 0.0;
+                        const double w_shocked   = 0.0;
+                        const double p_shocked   = 218005.430874;
+                        
+                        // Air.
+                        const double rho_air = 1.14560096494103;
+                        const double u_air   = 0.0;
+                        const double v_air   = 0.0;
+                        const double w_air   = 0.0;
+                        const double p_air   = 101325.0;
+                        
+                        // Shock hits the interface after 0.05 ms.
+                        const double L_x_shock = 0.190127254739019;
+                        const double L_x_interface = 0.2;
+                        
+                        for (int k = 0; k < patch_dims[2]; k++)
+                        {
+                            for (int j = 0; j < patch_dims[1]; j++)
+                            {
+                                for (int i = 0; i < patch_dims[0]; i++)
+                                {
+                                    // Compute the linear index.
+                                    int idx_cell = i + j*patch_dims[0] + k*patch_dims[0]*patch_dims[1];
+                                    
+                                    // Compute the coordinates.
+                                    double x[3];
+                                    x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                    x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                    x[2] = patch_xlo[2] + (k + 0.5)*dx[2];
+                                    
+                                    double S = 0.0;
+                                    for (int m = m_min; m <= m_max; m++)
+                                    {
+                                        S += A*cos(2.0*M_PI*m/0.025*x[1] + phase_shifts_x[30 - m])*
+                                            cos(2.0*M_PI*m/0.025*x[2] + phase_shifts_y[30 - m]);
+                                    }
+                                    
+                                    if (x[0] < L_x_shock)
+                                    {
+                                        rho_Y_0[idx_cell] = rho_shocked;
+                                        rho_Y_1[idx_cell] = 0.0;
+                                        rho_u[idx_cell]   = rho_shocked*u_shocked;
+                                        rho_v[idx_cell]   = rho_shocked*v_shocked;
+                                        rho_w[idx_cell]   = rho_shocked*w_shocked;
+                                        E[idx_cell]       = p_shocked/(gamma_0 - 1.0) +
+                                            0.5*rho_shocked*(u_shocked*u_shocked + v_shocked*v_shocked + w_shocked*w_shocked);
+                                    }
+                                    else
+                                    {
+                                        const double f_sm = 0.5*(1.0 + erf((x[0] - (L_x_interface + S))/epsilon_i));
+                                        
+                                        // Smooth the primitive variables.
+                                        const double rho_Y_0_i = rho_unshocked*(1.0 - f_sm);
+                                        const double rho_Y_1_i = rho_air*f_sm;
+                                        const double u_i = u_unshocked*(1.0 - f_sm) + u_air*f_sm;
+                                        const double v_i = v_unshocked*(1.0 - f_sm) + v_air*f_sm;
+                                        const double w_i = w_unshocked*(1.0 - f_sm) + w_air*f_sm;
+                                        const double p_i = p_unshocked*(1.0 - f_sm) + p_air*f_sm;
+                                        
+                                        const double rho_i = rho_Y_0_i + rho_Y_1_i;
+                                        const double Y_0_i = rho_Y_0_i/rho_i;
+                                        const double Y_1_i = 1.0 - Y_0_i;
+                                        
+                                        const double gamma_i = (Y_0_i*c_p_SF6 + Y_1_i*c_p_air)/
+                                            (Y_0_i*c_v_SF6 + Y_1_i*c_v_air);
+                                        
+                                        rho_Y_0[idx_cell] = rho_Y_0_i;
+                                        rho_Y_1[idx_cell] = rho_Y_1_i;
+                                        rho_u[idx_cell]   = rho_i*u_i;
+                                        rho_v[idx_cell]   = rho_i*v_i;
+                                        rho_w[idx_cell]   = rho_i*w_i;
+                                        E[idx_cell]       = p_i/(gamma_i - 1.0) + 0.5*rho_i*(u_i*u_i + v_i*v_i + w_i*w_i);
+                                    }
+                                }
+                            }
+                        }
+                    }
                     else
                     {
                         TBOX_ERROR(d_object_name

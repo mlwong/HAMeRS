@@ -23,7 +23,6 @@ FlowModelManager::FlowModelManager(
             "d_flow_model",
             d_dim,
             d_grid_geometry,
-            hier::IntVector::getZero(d_dim),
             d_num_species,
             flow_model_db));
     }
@@ -35,7 +34,6 @@ FlowModelManager::FlowModelManager(
             "d_flow_model",
             d_dim,
             d_grid_geometry,
-            hier::IntVector::getZero(d_dim),
             d_num_species,
             flow_model_db));
     }
@@ -47,7 +45,6 @@ FlowModelManager::FlowModelManager(
             "d_flow_model",
             d_dim,
             d_grid_geometry,
-            hier::IntVector::getZero(d_dim),
             d_num_species,
             flow_model_db));
     }
