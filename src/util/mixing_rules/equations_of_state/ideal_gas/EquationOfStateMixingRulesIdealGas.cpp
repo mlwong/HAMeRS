@@ -241,7 +241,7 @@ EquationOfStateMixingRulesIdealGas::getPressure(
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
                 (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
-
+    
     TBOX_ASSERT(data_pressure);
     TBOX_ASSERT(data_density);
     TBOX_ASSERT(data_internal_energy);
@@ -251,8 +251,56 @@ EquationOfStateMixingRulesIdealGas::getPressure(
                 (data_mass_fraction->getDepth() == d_num_species - 1));
 #endif
     
-
-
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = data_pressure->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_internal_energy->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_mass_fraction->getBox().numberCells() == interior_dims);
+#endif
+    
+    /*
+     * Get the numbers of ghost cells.
+     */
+    
+    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+    const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
+    const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+    
+    /*
+     * Get the minimum number of ghost cells for mixture thermodynamic properties.
+     */
+    
+    hier::IntVector num_ghosts_min(d_dim);
+    
+    num_ghosts_min = num_ghosts_pressure;
+    num_ghosts_min = hier::IntVector::min(num_ghosts_density, num_ghosts_min);
+    num_ghosts_min = hier::IntVector::min(num_ghosts_internal_energy, num_ghosts_min);
+    num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fraction, num_ghosts_min);
+    
+    /*
+     * Get the mixture thermodyanmic properties.
+     */
+    
+    const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
+    
+    boost::shared_ptr<pdat::CellData<double> > data_mixture_thermo_properties(
+        new pdat::CellData<double>(interior_box, num_thermo_properties, num_ghosts_min));
+    
+    getMixtureThermodynamicProperties(
+        data_mixture_thermo_properties,
+        data_mass_fraction,
+        domain);
+    
+    d_equation_of_state->getPressure(
+        data_pressure,
+        data_density,
+        data_internal_energy,
+        data_mixture_thermo_properties,
+        domain);
 }
 
 
@@ -268,8 +316,6 @@ EquationOfStateMixingRulesIdealGas::getPressure(
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
-    TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
-                (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
     TBOX_ASSERT((static_cast<int>(volume_fraction.size()) == d_num_species) ||
                 (static_cast<int>(volume_fraction.size()) == d_num_species - 1));
 #endif
@@ -316,7 +362,70 @@ EquationOfStateMixingRulesIdealGas::getPressure(
     const boost::shared_ptr<pdat::CellData<double> >& data_volume_fraction,
     const hier::Box& domain) const
 {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     
+    TBOX_ASSERT(data_pressure);
+    TBOX_ASSERT(data_density);
+    TBOX_ASSERT(data_internal_energy);
+    TBOX_ASSERT(data_volume_fraction);
+    
+    TBOX_ASSERT((data_volume_fraction->getDepth() == d_num_species) ||
+                (data_volume_fraction->getDepth() == d_num_species - 1));
+#endif
+    
+    NULL_USE(data_mass_fraction);
+    
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = data_pressure->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_internal_energy->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_volume_fraction->getBox().numberCells() == interior_dims);
+#endif
+    
+    /*
+     * Get the numbers of ghost cells.
+     */
+    
+    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+    const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
+    const hier::IntVector num_ghosts_volume_fraction = data_volume_fraction->getGhostCellWidth();
+    
+    /*
+     * Get the minimum number of ghost cells for mixture thermodynamic properties.
+     */
+    
+    hier::IntVector num_ghosts_min(d_dim);
+    
+    num_ghosts_min = num_ghosts_pressure;
+    num_ghosts_min = hier::IntVector::min(num_ghosts_density, num_ghosts_min);
+    num_ghosts_min = hier::IntVector::min(num_ghosts_internal_energy, num_ghosts_min);
+    num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fraction, num_ghosts_min);
+    
+    /*
+     * Get the mixture thermodyanmic properties.
+     */
+    
+    const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
+    
+    boost::shared_ptr<pdat::CellData<double> > data_mixture_thermo_properties(
+        new pdat::CellData<double>(interior_box, num_thermo_properties, num_ghosts_min));
+    
+    getMixtureThermodynamicProperties(
+        data_mixture_thermo_properties,
+        data_volume_fraction,
+        domain);
+    
+    d_equation_of_state->getPressure(
+        data_pressure,
+        data_density,
+        data_internal_energy,
+        data_mixture_thermo_properties,
+        domain);
 }
 
 
@@ -375,7 +484,69 @@ EquationOfStateMixingRulesIdealGas::getSoundSpeed(
     const boost::shared_ptr<pdat::CellData<double> >& data_mass_fraction,
     const hier::Box& domain) const
 {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
+                (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
     
+    TBOX_ASSERT(data_sound_speed);
+    TBOX_ASSERT(data_density);
+    TBOX_ASSERT(data_pressure);
+    TBOX_ASSERT(data_mass_fraction);
+    
+    TBOX_ASSERT((data_mass_fraction->getDepth() == d_num_species) ||
+                (data_mass_fraction->getDepth() == d_num_species - 1));
+#endif
+    
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = data_sound_speed->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_mass_fraction->getBox().numberCells() == interior_dims);
+#endif
+    
+    /*
+     * Get the numbers of ghost cells.
+     */
+    
+    const hier::IntVector num_ghosts_sound_speed = data_sound_speed->getGhostCellWidth();
+    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+    const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+    
+    /*
+     * Get the minimum number of ghost cells for mixture thermodynamic properties.
+     */
+    
+    hier::IntVector num_ghosts_min(d_dim);
+    
+    num_ghosts_min = num_ghosts_sound_speed;
+    num_ghosts_min = hier::IntVector::min(num_ghosts_density, num_ghosts_min);
+    num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
+    num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fraction, num_ghosts_min);
+    
+    /*
+     * Get the mixture thermodyanmic properties.
+     */
+    
+    const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
+    
+    boost::shared_ptr<pdat::CellData<double> > data_mixture_thermo_properties(
+        new pdat::CellData<double>(interior_box, num_thermo_properties, num_ghosts_min));
+    
+    getMixtureThermodynamicProperties(
+        data_mixture_thermo_properties,
+        data_mass_fraction,
+        domain);
+    
+    d_equation_of_state->getSoundSpeed(
+        data_sound_speed,
+        data_density,
+        data_pressure,
+        data_mixture_thermo_properties,
+        domain);
 }
 
 
@@ -391,8 +562,6 @@ EquationOfStateMixingRulesIdealGas::getSoundSpeed(
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
-    TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
-                (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
     TBOX_ASSERT((static_cast<int>(volume_fraction.size()) == d_num_species) ||
                 (static_cast<int>(volume_fraction.size()) == d_num_species - 1));
 #endif
@@ -439,7 +608,70 @@ EquationOfStateMixingRulesIdealGas::getSoundSpeed(
     const boost::shared_ptr<pdat::CellData<double> >& data_volume_fraction,
     const hier::Box& domain) const
 {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     
+    TBOX_ASSERT(data_sound_speed);
+    TBOX_ASSERT(data_density);
+    TBOX_ASSERT(data_pressure);
+    TBOX_ASSERT(data_volume_fraction);
+    
+    TBOX_ASSERT((data_volume_fraction->getDepth() == d_num_species) ||
+                (data_volume_fraction->getDepth() == d_num_species - 1));
+#endif
+    
+    NULL_USE(data_mass_fraction);
+    
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = data_sound_speed->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_volume_fraction->getBox().numberCells() == interior_dims);
+#endif
+    
+    /*
+     * Get the numbers of ghost cells.
+     */
+    
+    const hier::IntVector num_ghosts_sound_speed = data_sound_speed->getGhostCellWidth();
+    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+    const hier::IntVector num_ghosts_volume_fraction = data_volume_fraction->getGhostCellWidth();
+    
+    /*
+     * Get the minimum number of ghost cells for mixture thermodynamic properties.
+     */
+    
+    hier::IntVector num_ghosts_min(d_dim);
+    
+    num_ghosts_min = num_ghosts_sound_speed;
+    num_ghosts_min = hier::IntVector::min(num_ghosts_density, num_ghosts_min);
+    num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
+    num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fraction, num_ghosts_min);
+    
+    /*
+     * Get the mixture thermodyanmic properties.
+     */
+    
+    const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
+    
+    boost::shared_ptr<pdat::CellData<double> > data_mixture_thermo_properties(
+        new pdat::CellData<double>(interior_box, num_thermo_properties, num_ghosts_min));
+    
+    getMixtureThermodynamicProperties(
+        data_mixture_thermo_properties,
+        data_volume_fraction,
+        domain);
+    
+    d_equation_of_state->getSoundSpeed(
+        data_sound_speed,
+        data_density,
+        data_pressure,
+        data_mixture_thermo_properties,
+        domain);
 }
 
 
@@ -498,7 +730,69 @@ EquationOfStateMixingRulesIdealGas::getInternalEnergy(
     const boost::shared_ptr<pdat::CellData<double> >& data_mass_fraction,
     const hier::Box& domain) const
 {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
+                (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
     
+    TBOX_ASSERT(data_internal_energy);
+    TBOX_ASSERT(data_density);
+    TBOX_ASSERT(data_pressure);
+    TBOX_ASSERT(data_mass_fraction);
+    
+    TBOX_ASSERT((data_mass_fraction->getDepth() == d_num_species) ||
+                (data_mass_fraction->getDepth() == d_num_species - 1));
+#endif
+    
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = data_internal_energy->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_mass_fraction->getBox().numberCells() == interior_dims);
+#endif
+    
+    /*
+     * Get the numbers of ghost cells.
+     */
+    
+    const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
+    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+    const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+    
+    /*
+     * Get the minimum number of ghost cells for mixture thermodynamic properties.
+     */
+    
+    hier::IntVector num_ghosts_min(d_dim);
+    
+    num_ghosts_min = num_ghosts_internal_energy;
+    num_ghosts_min = hier::IntVector::min(num_ghosts_density, num_ghosts_min);
+    num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
+    num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fraction, num_ghosts_min);
+    
+    /*
+     * Get the mixture thermodyanmic properties.
+     */
+    
+    const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
+    
+    boost::shared_ptr<pdat::CellData<double> > data_mixture_thermo_properties(
+        new pdat::CellData<double>(interior_box, num_thermo_properties, num_ghosts_min));
+    
+    getMixtureThermodynamicProperties(
+        data_mixture_thermo_properties,
+        data_mass_fraction,
+        domain);
+    
+    d_equation_of_state->getInternalEnergy(
+        data_internal_energy,
+        data_density,
+        data_pressure,
+        data_mixture_thermo_properties,
+        domain);
 }
 
 
@@ -514,8 +808,6 @@ EquationOfStateMixingRulesIdealGas::getInternalEnergy(
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
-    TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
-                (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
     TBOX_ASSERT((static_cast<int>(volume_fraction.size()) == d_num_species) ||
                 (static_cast<int>(volume_fraction.size()) == d_num_species - 1));
 #endif
@@ -562,7 +854,70 @@ EquationOfStateMixingRulesIdealGas::getInternalEnergy(
     const boost::shared_ptr<pdat::CellData<double> >& data_volume_fraction,
     const hier::Box& domain) const
 {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
     
+    TBOX_ASSERT(data_internal_energy);
+    TBOX_ASSERT(data_density);
+    TBOX_ASSERT(data_pressure);
+    TBOX_ASSERT(data_volume_fraction);
+    
+    TBOX_ASSERT((data_volume_fraction->getDepth() == d_num_species) ||
+                (data_volume_fraction->getDepth() == d_num_species - 1));
+#endif
+    
+    NULL_USE(data_mass_fraction);
+    
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = data_internal_energy->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_volume_fraction->getBox().numberCells() == interior_dims);
+#endif
+    
+    /*
+     * Get the numbers of ghost cells.
+     */
+    
+    const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
+    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+    const hier::IntVector num_ghosts_volume_fraction = data_volume_fraction->getGhostCellWidth();
+    
+    /*
+     * Get the minimum number of ghost cells for mixture thermodynamic properties.
+     */
+    
+    hier::IntVector num_ghosts_min(d_dim);
+    
+    num_ghosts_min = num_ghosts_internal_energy;
+    num_ghosts_min = hier::IntVector::min(num_ghosts_density, num_ghosts_min);
+    num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
+    num_ghosts_min = hier::IntVector::min(num_ghosts_volume_fraction, num_ghosts_min);
+    
+    /*
+     * Get the mixture thermodyanmic properties.
+     */
+    
+    const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
+    
+    boost::shared_ptr<pdat::CellData<double> > data_mixture_thermo_properties(
+        new pdat::CellData<double>(interior_box, num_thermo_properties, num_ghosts_min));
+    
+    getMixtureThermodynamicProperties(
+        data_mixture_thermo_properties,
+        data_volume_fraction,
+        domain);
+    
+    d_equation_of_state->getInternalEnergy(
+        data_internal_energy,
+        data_density,
+        data_pressure,
+        data_mixture_thermo_properties,
+        domain);
 }
 
 
@@ -621,7 +976,69 @@ EquationOfStateMixingRulesIdealGas::getTemperature(
     const boost::shared_ptr<pdat::CellData<double> >& data_mass_fraction,
     const hier::Box& domain) const
 {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
+                (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
     
+    TBOX_ASSERT(data_temperature);
+    TBOX_ASSERT(data_density);
+    TBOX_ASSERT(data_pressure);
+    TBOX_ASSERT(data_mass_fraction);
+    
+    TBOX_ASSERT((data_mass_fraction->getDepth() == d_num_species) ||
+                (data_mass_fraction->getDepth() == d_num_species - 1));
+#endif
+    
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = data_temperature->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_mass_fraction->getBox().numberCells() == interior_dims);
+#endif
+    
+    /*
+     * Get the numbers of ghost cells.
+     */
+    
+    const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+    const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+    
+    /*
+     * Get the minimum number of ghost cells for mixture thermodynamic properties.
+     */
+    
+    hier::IntVector num_ghosts_min(d_dim);
+    
+    num_ghosts_min = num_ghosts_temperature;
+    num_ghosts_min = hier::IntVector::min(num_ghosts_density, num_ghosts_min);
+    num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
+    num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fraction, num_ghosts_min);
+    
+    /*
+     * Get the mixture thermodyanmic properties.
+     */
+    
+    const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
+    
+    boost::shared_ptr<pdat::CellData<double> > data_mixture_thermo_properties(
+        new pdat::CellData<double>(interior_box, num_thermo_properties, num_ghosts_min));
+    
+    getMixtureThermodynamicProperties(
+        data_mixture_thermo_properties,
+        data_mass_fraction,
+        domain);
+    
+    d_equation_of_state->getTemperature(
+        data_temperature,
+        data_density,
+        data_pressure,
+        data_mixture_thermo_properties,
+        domain);
 }
 
 
@@ -682,7 +1099,69 @@ EquationOfStateMixingRulesIdealGas::getInternalEnergyFromTemperature(
     const boost::shared_ptr<pdat::CellData<double> >& data_mass_fraction,
     const hier::Box& domain) const
 {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
+                (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
     
+    TBOX_ASSERT(data_internal_energy);
+    TBOX_ASSERT(data_density);
+    TBOX_ASSERT(data_temperature);
+    TBOX_ASSERT(data_mass_fraction);
+    
+    TBOX_ASSERT((data_mass_fraction->getDepth() == d_num_species) ||
+                (data_mass_fraction->getDepth() == d_num_species - 1));
+#endif
+    
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = data_internal_energy->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_density->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_temperature->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_mass_fraction->getBox().numberCells() == interior_dims);
+#endif
+    
+    /*
+     * Get the numbers of ghost cells.
+     */
+    
+    const hier::IntVector num_ghosts_internal_energy = data_internal_energy->getGhostCellWidth();
+    const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+    const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+    const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+    
+    /*
+     * Get the minimum number of ghost cells for mixture thermodynamic properties.
+     */
+    
+    hier::IntVector num_ghosts_min(d_dim);
+    
+    num_ghosts_min = num_ghosts_internal_energy;
+    num_ghosts_min = hier::IntVector::min(num_ghosts_density, num_ghosts_min);
+    num_ghosts_min = hier::IntVector::min(num_ghosts_temperature, num_ghosts_min);
+    num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fraction, num_ghosts_min);
+    
+    /*
+     * Get the mixture thermodyanmic properties.
+     */
+    
+    const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
+    
+    boost::shared_ptr<pdat::CellData<double> > data_mixture_thermo_properties(
+        new pdat::CellData<double>(interior_box, num_thermo_properties, num_ghosts_min));
+    
+    getMixtureThermodynamicProperties(
+        data_mixture_thermo_properties,
+        data_mass_fraction,
+        domain);
+    
+    d_equation_of_state->getInternalEnergyFromTemperature(
+        data_internal_energy,
+        data_density,
+        data_temperature,
+        data_mixture_thermo_properties,
+        domain);
 }
 
 
@@ -695,6 +1174,16 @@ EquationOfStateMixingRulesIdealGas::getIsochoricSpecificHeatCapacity(
     const double* const pressure,
     const std::vector<const double*>& mass_fraction) const
 {
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
+                (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
+    TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
+                (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
+#endif
+    
+    NULL_USE(density);
+    NULL_USE(pressure);
+    
     double c_v = 0.0;
     
     if (static_cast<int>(mass_fraction.size()) == d_num_species)
@@ -743,7 +1232,499 @@ EquationOfStateMixingRulesIdealGas::getIsochoricSpecificHeatCapacity(
     const boost::shared_ptr<pdat::CellData<double> >& data_mass_fraction,
     const hier::Box& domain) const
 {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
+                (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
     
+    TBOX_ASSERT(data_isochoric_specific_heat_capacity);
+    TBOX_ASSERT(data_mass_fraction);
+    
+    TBOX_ASSERT((data_mass_fraction->getDepth() == d_num_species) ||
+                (data_mass_fraction->getDepth() == d_num_species - 1));
+#endif
+    
+    NULL_USE(data_density);
+    NULL_USE(data_pressure);
+    
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = data_isochoric_specific_heat_capacity->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_mass_fraction->getBox().numberCells() == interior_dims);
+#endif
+    
+    /*
+     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
+     */
+    
+    const hier::IntVector num_ghosts_isochoric_specific_heat_capacity =
+        data_isochoric_specific_heat_capacity->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_isochoric_specific_heat_capacity =
+        data_isochoric_specific_heat_capacity->getGhostBox().numberCells();
+    
+    const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_mass_fraction =
+        data_mass_fraction->getGhostBox().numberCells();
+    
+    /*
+     * Get the local lower indices and number of cells in each direction of the domain.
+     */
+    
+    hier::IntVector domain_lo(d_dim);
+    hier::IntVector domain_dims(d_dim);
+    
+    if (domain.empty())
+    {
+        hier::IntVector num_ghosts_min(d_dim);
+        
+        num_ghosts_min = num_ghosts_isochoric_specific_heat_capacity;
+        num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fraction, num_ghosts_min);
+        
+        hier::Box ghost_box = interior_box;
+        ghost_box.grow(num_ghosts_min);
+        
+        domain_lo = -num_ghosts_min;
+        domain_dims = ghost_box.numberCells();
+    }
+    else
+    {
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+        TBOX_ASSERT(data_isochoric_specific_heat_capacity->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_mass_fraction->getGhostBox().contains(domain));
+#endif
+        
+        domain_lo = domain.lower() - interior_box.lower();
+        domain_dims = domain.numberCells();
+    }
+    
+    /*
+     * Get the pointers to the cell data of isochoric specific heat capacity.
+     */
+    
+    double* c_v = data_isochoric_specific_heat_capacity->getPointer(0);
+    
+    /*
+     * Fill zeros for c_v.
+     */
+    
+    data_isochoric_specific_heat_capacity->fill(0.0, domain);
+    
+    if (data_mass_fraction->getDepth() == d_num_species)
+    {
+        /*
+         * Get the pointers to the cell data of mass fraction.
+         */
+        
+        std::vector<double*> Y;
+        Y.reserve(d_num_species);
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Y.push_back(data_mass_fraction->getPointer(si));
+        }
+        
+        if (d_dim == tbox::Dimension(1))
+        {
+            /*
+             * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_dim_0 = domain_dims[0];
+            
+            const int num_ghosts_0_isochoric_specific_heat_capacity =
+                num_ghosts_isochoric_specific_heat_capacity[0];
+            const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+            
+            // Compute c_v.
+            for (int si = 0; si < d_num_species; si++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0;
+                     i < domain_dim_0;
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_isochoric_specific_heat_capacity = i + num_ghosts_0_isochoric_specific_heat_capacity;
+                    const int idx_mass_fraction = i + num_ghosts_0_mass_fraction;
+                    
+                    c_v[idx_isochoric_specific_heat_capacity] += Y[si][idx_mass_fraction]*d_species_c_v[si];
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            
+            const int num_ghosts_0_isochoric_specific_heat_capacity = num_ghosts_isochoric_specific_heat_capacity[0];
+            const int num_ghosts_1_isochoric_specific_heat_capacity = num_ghosts_isochoric_specific_heat_capacity[1];
+            const int ghostcell_dim_0_isochoric_specific_heat_capacity =
+                ghostcell_dims_isochoric_specific_heat_capacity[0];
+            
+            const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+            const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+            const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+            
+            // Compute c_v.
+            for (int si = 0; si < d_num_species; si++)
+            {
+                for (int j = domain_lo_1;
+                     j < domain_dim_1;
+                     j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0;
+                         i < domain_dim_0;
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_isochoric_specific_heat_capacity =
+                            (i + num_ghosts_0_isochoric_specific_heat_capacity) +
+                            (j + num_ghosts_1_isochoric_specific_heat_capacity)*
+                                ghostcell_dim_0_isochoric_specific_heat_capacity;
+                        
+                        const int idx_mass_fraction = (i + num_ghosts_0_mass_fraction) +
+                            (j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                        
+                        c_v[idx_isochoric_specific_heat_capacity] += Y[si][idx_mass_fraction]*d_species_c_v[si];
+                    }
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_lo_2 = domain_lo[2];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            const int domain_dim_2 = domain_dims[2];
+            
+            const int num_ghosts_0_isochoric_specific_heat_capacity = num_ghosts_isochoric_specific_heat_capacity[0];
+            const int num_ghosts_1_isochoric_specific_heat_capacity = num_ghosts_isochoric_specific_heat_capacity[1];
+            const int num_ghosts_2_isochoric_specific_heat_capacity = num_ghosts_isochoric_specific_heat_capacity[2];
+            const int ghostcell_dim_0_isochoric_specific_heat_capacity =
+                ghostcell_dims_isochoric_specific_heat_capacity[0];
+            const int ghostcell_dim_1_isochoric_specific_heat_capacity =
+                ghostcell_dims_isochoric_specific_heat_capacity[1];
+            
+            const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+            const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+            const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
+            const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+            const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+            
+            // Compute c_v.
+            for (int si = 0; si < d_num_species; si++)
+            {
+                for (int k = domain_lo_2;
+                     k < domain_dim_2;
+                     k++)
+                {
+                    for (int j = domain_lo_1;
+                         j < domain_dim_1;
+                         j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = domain_lo_0;
+                             i < domain_dim_0;
+                             i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_isochoric_specific_heat_capacity =
+                                (i + num_ghosts_0_isochoric_specific_heat_capacity) +
+                                (j + num_ghosts_1_isochoric_specific_heat_capacity)*
+                                    ghostcell_dim_0_isochoric_specific_heat_capacity +
+                                (k + num_ghosts_2_isochoric_specific_heat_capacity)*
+                                    ghostcell_dim_0_isochoric_specific_heat_capacity*
+                                        ghostcell_dim_1_isochoric_specific_heat_capacity;
+                            
+                            const int idx_mass_fraction = (i + num_ghosts_0_mass_fraction) +
+                                (j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                (k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                    ghostcell_dim_1_mass_fraction;
+                            
+                            c_v[idx_isochoric_specific_heat_capacity] += Y[si][idx_mass_fraction]*d_species_c_v[si];
+                        }
+                    }
+                }
+            }
+        }
+    }
+    else if (data_mass_fraction->getDepth() == d_num_species - 1)
+    {
+        boost::shared_ptr<pdat::CellData<double> > data_mass_fraction_last(
+            new pdat::CellData<double>(interior_box, 1, num_ghosts_mass_fraction));
+        
+        data_mass_fraction_last->fill(1.0, domain);
+        
+        /*
+         * Get the pointers to the cell data of mass fraction.
+         */
+        
+        std::vector<double*> Y;
+        Y.reserve(d_num_species - 1);
+        for (int si = 0; si < d_num_species - 1; si++)
+        {
+            Y.push_back(data_mass_fraction->getPointer(si));
+        }
+        
+        double* Y_last = data_mass_fraction_last->getPointer(0);
+        
+        if (d_dim == tbox::Dimension(1))
+        {
+            /*
+             * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_dim_0 = domain_dims[0];
+            
+            const int num_ghosts_0_isochoric_specific_heat_capacity =
+                num_ghosts_isochoric_specific_heat_capacity[0];
+            const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+            
+            // Compute c_v.
+            for (int si = 0; si < d_num_species - 1; si++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0;
+                     i < domain_dim_0;
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_isochoric_specific_heat_capacity = i + num_ghosts_0_isochoric_specific_heat_capacity;
+                    const int idx_mass_fraction = i + num_ghosts_0_mass_fraction;
+                    
+                    c_v[idx_isochoric_specific_heat_capacity] += Y[si][idx_mass_fraction]*d_species_c_v[si];
+                    
+                    // Compute the mass fraction of the last species.
+                    Y_last[idx_mass_fraction] -= Y[si][idx_mass_fraction];
+                }
+            }
+            
+            // Add the contribution from the last species.
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0;
+                 i < domain_dim_0;
+                 i++)
+            {
+                // Compute the linear indices.
+                const int idx_isochoric_specific_heat_capacity = i + num_ghosts_0_isochoric_specific_heat_capacity;
+                const int idx_mass_fraction = i + num_ghosts_0_mass_fraction;
+                
+                c_v[idx_isochoric_specific_heat_capacity] += Y_last[idx_mass_fraction]*d_species_c_v.back();
+            }
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            
+            const int num_ghosts_0_isochoric_specific_heat_capacity = num_ghosts_isochoric_specific_heat_capacity[0];
+            const int num_ghosts_1_isochoric_specific_heat_capacity = num_ghosts_isochoric_specific_heat_capacity[1];
+            const int ghostcell_dim_0_isochoric_specific_heat_capacity =
+                ghostcell_dims_isochoric_specific_heat_capacity[0];
+            
+            const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+            const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+            const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+            
+            // Compute c_v.
+            for (int si = 0; si < d_num_species - 1; si++)
+            {
+                for (int j = domain_lo_1;
+                     j < domain_dim_1;
+                     j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0;
+                         i < domain_dim_0;
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_isochoric_specific_heat_capacity =
+                            (i + num_ghosts_0_isochoric_specific_heat_capacity) +
+                            (j + num_ghosts_1_isochoric_specific_heat_capacity)*
+                                ghostcell_dim_0_isochoric_specific_heat_capacity;
+                        
+                        const int idx_mass_fraction = (i + num_ghosts_0_mass_fraction) +
+                            (j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                        
+                        c_v[idx_isochoric_specific_heat_capacity] += Y[si][idx_mass_fraction]*d_species_c_v[si];
+                        
+                        // Compute the mass fraction of the last species.
+                        Y_last[idx_mass_fraction] -= Y[si][idx_mass_fraction];
+                    }
+                }
+            }
+            
+            // Add the contribution from the last species.
+            for (int j = domain_lo_1;
+                 j < domain_dim_1;
+                 j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0;
+                     i < domain_dim_0;
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_isochoric_specific_heat_capacity =
+                        (i + num_ghosts_0_isochoric_specific_heat_capacity) +
+                        (j + num_ghosts_1_isochoric_specific_heat_capacity)*
+                            ghostcell_dim_0_isochoric_specific_heat_capacity;
+                    
+                    const int idx_mass_fraction = (i + num_ghosts_0_mass_fraction) +
+                        (j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                    
+                    c_v[idx_isochoric_specific_heat_capacity] += Y_last[idx_mass_fraction]*d_species_c_v.back();
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_lo_2 = domain_lo[2];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            const int domain_dim_2 = domain_dims[2];
+            
+            const int num_ghosts_0_isochoric_specific_heat_capacity = num_ghosts_isochoric_specific_heat_capacity[0];
+            const int num_ghosts_1_isochoric_specific_heat_capacity = num_ghosts_isochoric_specific_heat_capacity[1];
+            const int num_ghosts_2_isochoric_specific_heat_capacity = num_ghosts_isochoric_specific_heat_capacity[2];
+            const int ghostcell_dim_0_isochoric_specific_heat_capacity =
+                ghostcell_dims_isochoric_specific_heat_capacity[0];
+            const int ghostcell_dim_1_isochoric_specific_heat_capacity =
+                ghostcell_dims_isochoric_specific_heat_capacity[1];
+            
+            const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+            const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+            const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
+            const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+            const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+            
+            // Compute c_v.
+            for (int si = 0; si < d_num_species - 1; si++)
+            {
+                for (int k = domain_lo_2;
+                     k < domain_dim_2;
+                     k++)
+                {
+                    for (int j = domain_lo_1;
+                         j < domain_dim_1;
+                         j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = domain_lo_0;
+                             i < domain_dim_0;
+                             i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_isochoric_specific_heat_capacity =
+                                (i + num_ghosts_0_isochoric_specific_heat_capacity) +
+                                (j + num_ghosts_1_isochoric_specific_heat_capacity)*
+                                    ghostcell_dim_0_isochoric_specific_heat_capacity +
+                                (k + num_ghosts_2_isochoric_specific_heat_capacity)*
+                                    ghostcell_dim_0_isochoric_specific_heat_capacity*
+                                        ghostcell_dim_1_isochoric_specific_heat_capacity;
+                            
+                            const int idx_mass_fraction = (i + num_ghosts_0_mass_fraction) +
+                                (j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                (k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                    ghostcell_dim_1_mass_fraction;
+                            
+                            c_v[idx_isochoric_specific_heat_capacity] += Y[si][idx_mass_fraction]*d_species_c_v[si];
+                            
+                            // Compute the mass fraction of the last species.
+                            Y_last[idx_mass_fraction] -= Y[si][idx_mass_fraction];
+                        }
+                    }
+                }
+            }
+            
+            // Add the contribution from the last species.
+            for (int k = domain_lo_2;
+                 k < domain_dim_2;
+                 k++)
+            {
+                for (int j = domain_lo_1;
+                     j < domain_dim_1;
+                     j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0;
+                         i < domain_dim_0;
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_isochoric_specific_heat_capacity =
+                            (i + num_ghosts_0_isochoric_specific_heat_capacity) +
+                            (j + num_ghosts_1_isochoric_specific_heat_capacity)*
+                                ghostcell_dim_0_isochoric_specific_heat_capacity +
+                            (k + num_ghosts_2_isochoric_specific_heat_capacity)*
+                                ghostcell_dim_0_isochoric_specific_heat_capacity*
+                                    ghostcell_dim_1_isochoric_specific_heat_capacity;
+                        
+                        const int idx_mass_fraction = (i + num_ghosts_0_mass_fraction) +
+                            (j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                            (k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                ghostcell_dim_1_mass_fraction;
+                            
+                        c_v[idx_isochoric_specific_heat_capacity] += Y_last[idx_mass_fraction]*d_species_c_v.back();
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "Number of components in the data of mass fraction provided is not"
+            << " equal to the total number of species or (total number of species - 1)."
+            << std::endl);
+    }
 }
 
 
@@ -756,6 +1737,13 @@ EquationOfStateMixingRulesIdealGas::getIsobaricSpecificHeatCapacity(
     const double* const pressure,
     const std::vector<const double*>& mass_fraction) const
 {
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
+                (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
+    TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
+                (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
+#endif
+    
     double c_p = 0.0;
     
     if (static_cast<int>(mass_fraction.size()) == d_num_species)
@@ -804,7 +1792,499 @@ EquationOfStateMixingRulesIdealGas::getIsobaricSpecificHeatCapacity(
     const boost::shared_ptr<pdat::CellData<double> >& data_mass_fraction,
     const hier::Box& domain) const
 {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
+                (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
     
+    TBOX_ASSERT(data_isobaric_specific_heat_capacity);
+    TBOX_ASSERT(data_mass_fraction);
+    
+    TBOX_ASSERT((data_mass_fraction->getDepth() == d_num_species) ||
+                (data_mass_fraction->getDepth() == d_num_species - 1));
+#endif
+    
+    NULL_USE(data_density);
+    NULL_USE(data_pressure);
+    
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = data_isobaric_specific_heat_capacity->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_mass_fraction->getBox().numberCells() == interior_dims);
+#endif
+    
+    /*
+     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
+     */
+    
+    const hier::IntVector num_ghosts_isobaric_specific_heat_capacity =
+        data_isobaric_specific_heat_capacity->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_isobaric_specific_heat_capacity =
+        data_isobaric_specific_heat_capacity->getGhostBox().numberCells();
+    
+    const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_mass_fraction =
+        data_mass_fraction->getGhostBox().numberCells();
+    
+    /*
+     * Get the local lower indices and number of cells in each direction of the domain.
+     */
+    
+    hier::IntVector domain_lo(d_dim);
+    hier::IntVector domain_dims(d_dim);
+    
+    if (domain.empty())
+    {
+        hier::IntVector num_ghosts_min(d_dim);
+        
+        num_ghosts_min = num_ghosts_isobaric_specific_heat_capacity;
+        num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fraction, num_ghosts_min);
+        
+        hier::Box ghost_box = interior_box;
+        ghost_box.grow(num_ghosts_min);
+        
+        domain_lo = -num_ghosts_min;
+        domain_dims = ghost_box.numberCells();
+    }
+    else
+    {
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+        TBOX_ASSERT(data_isobaric_specific_heat_capacity->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_mass_fraction->getGhostBox().contains(domain));
+#endif
+        
+        domain_lo = domain.lower() - interior_box.lower();
+        domain_dims = domain.numberCells();
+    }
+    
+    /*
+     * Get the pointers to the cell data of isobaric specific heat capacity.
+     */
+    
+    double* c_p = data_isobaric_specific_heat_capacity->getPointer(0);
+    
+    /*
+     * Fill zeros for c_p.
+     */
+    
+    data_isobaric_specific_heat_capacity->fill(0.0, domain);
+    
+    if (data_mass_fraction->getDepth() == d_num_species)
+    {
+        /*
+         * Get the pointers to the cell data of mass fraction.
+         */
+        
+        std::vector<double*> Y;
+        Y.reserve(d_num_species);
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Y.push_back(data_mass_fraction->getPointer(si));
+        }
+        
+        if (d_dim == tbox::Dimension(1))
+        {
+            /*
+             * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_dim_0 = domain_dims[0];
+            
+            const int num_ghosts_0_isobaric_specific_heat_capacity =
+                num_ghosts_isobaric_specific_heat_capacity[0];
+            const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+            
+            // Compute c_p.
+            for (int si = 0; si < d_num_species; si++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0;
+                     i < domain_dim_0;
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_isobaric_specific_heat_capacity = i + num_ghosts_0_isobaric_specific_heat_capacity;
+                    const int idx_mass_fraction = i + num_ghosts_0_mass_fraction;
+                    
+                    c_p[idx_isobaric_specific_heat_capacity] += Y[si][idx_mass_fraction]*d_species_c_p[si];
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            
+            const int num_ghosts_0_isobaric_specific_heat_capacity = num_ghosts_isobaric_specific_heat_capacity[0];
+            const int num_ghosts_1_isobaric_specific_heat_capacity = num_ghosts_isobaric_specific_heat_capacity[1];
+            const int ghostcell_dim_0_isobaric_specific_heat_capacity =
+                ghostcell_dims_isobaric_specific_heat_capacity[0];
+            
+            const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+            const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+            const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+            
+            // Compute c_p.
+            for (int si = 0; si < d_num_species; si++)
+            {
+                for (int j = domain_lo_1;
+                     j < domain_dim_1;
+                     j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0;
+                         i < domain_dim_0;
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_isobaric_specific_heat_capacity =
+                            (i + num_ghosts_0_isobaric_specific_heat_capacity) +
+                            (j + num_ghosts_1_isobaric_specific_heat_capacity)*
+                                ghostcell_dim_0_isobaric_specific_heat_capacity;
+                        
+                        const int idx_mass_fraction = (i + num_ghosts_0_mass_fraction) +
+                            (j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                        
+                        c_p[idx_isobaric_specific_heat_capacity] += Y[si][idx_mass_fraction]*d_species_c_p[si];
+                    }
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_lo_2 = domain_lo[2];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            const int domain_dim_2 = domain_dims[2];
+            
+            const int num_ghosts_0_isobaric_specific_heat_capacity = num_ghosts_isobaric_specific_heat_capacity[0];
+            const int num_ghosts_1_isobaric_specific_heat_capacity = num_ghosts_isobaric_specific_heat_capacity[1];
+            const int num_ghosts_2_isobaric_specific_heat_capacity = num_ghosts_isobaric_specific_heat_capacity[2];
+            const int ghostcell_dim_0_isobaric_specific_heat_capacity =
+                ghostcell_dims_isobaric_specific_heat_capacity[0];
+            const int ghostcell_dim_1_isobaric_specific_heat_capacity =
+                ghostcell_dims_isobaric_specific_heat_capacity[1];
+            
+            const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+            const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+            const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
+            const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+            const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+            
+            // Compute c_p.
+            for (int si = 0; si < d_num_species; si++)
+            {
+                for (int k = domain_lo_2;
+                     k < domain_dim_2;
+                     k++)
+                {
+                    for (int j = domain_lo_1;
+                         j < domain_dim_1;
+                         j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = domain_lo_0;
+                             i < domain_dim_0;
+                             i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_isobaric_specific_heat_capacity =
+                                (i + num_ghosts_0_isobaric_specific_heat_capacity) +
+                                (j + num_ghosts_1_isobaric_specific_heat_capacity)*
+                                    ghostcell_dim_0_isobaric_specific_heat_capacity +
+                                (k + num_ghosts_2_isobaric_specific_heat_capacity)*
+                                    ghostcell_dim_0_isobaric_specific_heat_capacity*
+                                        ghostcell_dim_1_isobaric_specific_heat_capacity;
+                            
+                            const int idx_mass_fraction = (i + num_ghosts_0_mass_fraction) +
+                                (j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                (k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                    ghostcell_dim_1_mass_fraction;
+                            
+                            c_p[idx_isobaric_specific_heat_capacity] += Y[si][idx_mass_fraction]*d_species_c_p[si];
+                        }
+                    }
+                }
+            }
+        }
+    }
+    else if (data_mass_fraction->getDepth() == d_num_species - 1)
+    {
+        boost::shared_ptr<pdat::CellData<double> > data_mass_fraction_last(
+            new pdat::CellData<double>(interior_box, 1, num_ghosts_mass_fraction));
+        
+        data_mass_fraction_last->fill(1.0, domain);
+        
+        /*
+         * Get the pointers to the cell data of mass fraction.
+         */
+        
+        std::vector<double*> Y;
+        Y.reserve(d_num_species - 1);
+        for (int si = 0; si < d_num_species - 1; si++)
+        {
+            Y.push_back(data_mass_fraction->getPointer(si));
+        }
+        
+        double* Y_last = data_mass_fraction_last->getPointer(0);
+        
+        if (d_dim == tbox::Dimension(1))
+        {
+            /*
+             * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_dim_0 = domain_dims[0];
+            
+            const int num_ghosts_0_isobaric_specific_heat_capacity =
+                num_ghosts_isobaric_specific_heat_capacity[0];
+            const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+            
+            // Compute c_p.
+            for (int si = 0; si < d_num_species - 1; si++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0;
+                     i < domain_dim_0;
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_isobaric_specific_heat_capacity = i + num_ghosts_0_isobaric_specific_heat_capacity;
+                    const int idx_mass_fraction = i + num_ghosts_0_mass_fraction;
+                    
+                    c_p[idx_isobaric_specific_heat_capacity] += Y[si][idx_mass_fraction]*d_species_c_p[si];
+                    
+                    // Compute the mass fraction of the last species.
+                    Y_last[idx_mass_fraction] -= Y[si][idx_mass_fraction];
+                }
+            }
+            
+            // Add the contribution from the last species.
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0;
+                 i < domain_dim_0;
+                 i++)
+            {
+                // Compute the linear indices.
+                const int idx_isobaric_specific_heat_capacity = i + num_ghosts_0_isobaric_specific_heat_capacity;
+                const int idx_mass_fraction = i + num_ghosts_0_mass_fraction;
+                
+                c_p[idx_isobaric_specific_heat_capacity] += Y_last[idx_mass_fraction]*d_species_c_p.back();
+            }
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            
+            const int num_ghosts_0_isobaric_specific_heat_capacity = num_ghosts_isobaric_specific_heat_capacity[0];
+            const int num_ghosts_1_isobaric_specific_heat_capacity = num_ghosts_isobaric_specific_heat_capacity[1];
+            const int ghostcell_dim_0_isobaric_specific_heat_capacity =
+                ghostcell_dims_isobaric_specific_heat_capacity[0];
+            
+            const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+            const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+            const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+            
+            // Compute c_p.
+            for (int si = 0; si < d_num_species - 1; si++)
+            {
+                for (int j = domain_lo_1;
+                     j < domain_dim_1;
+                     j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0;
+                         i < domain_dim_0;
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_isobaric_specific_heat_capacity =
+                            (i + num_ghosts_0_isobaric_specific_heat_capacity) +
+                            (j + num_ghosts_1_isobaric_specific_heat_capacity)*
+                                ghostcell_dim_0_isobaric_specific_heat_capacity;
+                        
+                        const int idx_mass_fraction = (i + num_ghosts_0_mass_fraction) +
+                            (j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                        
+                        c_p[idx_isobaric_specific_heat_capacity] += Y[si][idx_mass_fraction]*d_species_c_p[si];
+                        
+                        // Compute the mass fraction of the last species.
+                        Y_last[idx_mass_fraction] -= Y[si][idx_mass_fraction];
+                    }
+                }
+            }
+            
+            // Add the contribution from the last species.
+            for (int j = domain_lo_1;
+                 j < domain_dim_1;
+                 j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0;
+                     i < domain_dim_0;
+                     i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_isobaric_specific_heat_capacity =
+                        (i + num_ghosts_0_isobaric_specific_heat_capacity) +
+                        (j + num_ghosts_1_isobaric_specific_heat_capacity)*
+                            ghostcell_dim_0_isobaric_specific_heat_capacity;
+                    
+                    const int idx_mass_fraction = (i + num_ghosts_0_mass_fraction) +
+                        (j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                    
+                    c_p[idx_isobaric_specific_heat_capacity] += Y_last[idx_mass_fraction]*d_species_c_p.back();
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_lo_2 = domain_lo[2];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            const int domain_dim_2 = domain_dims[2];
+            
+            const int num_ghosts_0_isobaric_specific_heat_capacity = num_ghosts_isobaric_specific_heat_capacity[0];
+            const int num_ghosts_1_isobaric_specific_heat_capacity = num_ghosts_isobaric_specific_heat_capacity[1];
+            const int num_ghosts_2_isobaric_specific_heat_capacity = num_ghosts_isobaric_specific_heat_capacity[2];
+            const int ghostcell_dim_0_isobaric_specific_heat_capacity =
+                ghostcell_dims_isobaric_specific_heat_capacity[0];
+            const int ghostcell_dim_1_isobaric_specific_heat_capacity =
+                ghostcell_dims_isobaric_specific_heat_capacity[1];
+            
+            const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+            const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+            const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
+            const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+            const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+            
+            // Compute c_p.
+            for (int si = 0; si < d_num_species - 1; si++)
+            {
+                for (int k = domain_lo_2;
+                     k < domain_dim_2;
+                     k++)
+                {
+                    for (int j = domain_lo_1;
+                         j < domain_dim_1;
+                         j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = domain_lo_0;
+                             i < domain_dim_0;
+                             i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_isobaric_specific_heat_capacity =
+                                (i + num_ghosts_0_isobaric_specific_heat_capacity) +
+                                (j + num_ghosts_1_isobaric_specific_heat_capacity)*
+                                    ghostcell_dim_0_isobaric_specific_heat_capacity +
+                                (k + num_ghosts_2_isobaric_specific_heat_capacity)*
+                                    ghostcell_dim_0_isobaric_specific_heat_capacity*
+                                        ghostcell_dim_1_isobaric_specific_heat_capacity;
+                            
+                            const int idx_mass_fraction = (i + num_ghosts_0_mass_fraction) +
+                                (j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                (k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                    ghostcell_dim_1_mass_fraction;
+                            
+                            c_p[idx_isobaric_specific_heat_capacity] += Y[si][idx_mass_fraction]*d_species_c_p[si];
+                            
+                            // Compute the mass fraction of the last species.
+                            Y_last[idx_mass_fraction] -= Y[si][idx_mass_fraction];
+                        }
+                    }
+                }
+            }
+            
+            // Add the contribution from the last species.
+            for (int k = domain_lo_2;
+                 k < domain_dim_2;
+                 k++)
+            {
+                for (int j = domain_lo_1;
+                     j < domain_dim_1;
+                     j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0;
+                         i < domain_dim_0;
+                         i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_isobaric_specific_heat_capacity =
+                            (i + num_ghosts_0_isobaric_specific_heat_capacity) +
+                            (j + num_ghosts_1_isobaric_specific_heat_capacity)*
+                                ghostcell_dim_0_isobaric_specific_heat_capacity +
+                            (k + num_ghosts_2_isobaric_specific_heat_capacity)*
+                                ghostcell_dim_0_isobaric_specific_heat_capacity*
+                                    ghostcell_dim_1_isobaric_specific_heat_capacity;
+                        
+                        const int idx_mass_fraction = (i + num_ghosts_0_mass_fraction) +
+                            (j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                            (k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                ghostcell_dim_1_mass_fraction;
+                            
+                        c_p[idx_isobaric_specific_heat_capacity] += Y_last[idx_mass_fraction]*d_species_c_p.back();
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "Number of components in the data of mass fraction provided is not"
+            << " equal to the total number of species or (total number of species - 1)."
+            << std::endl);
+    }
 }
 
 
@@ -863,7 +2343,69 @@ EquationOfStateMixingRulesIdealGas::getMixtureDensity(
     const boost::shared_ptr<pdat::CellData<double> >& data_mass_fraction,
     const hier::Box& domain) const
 {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
+                (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
+
+    TBOX_ASSERT(data_mixture_density);
+    TBOX_ASSERT(data_pressure);
+    TBOX_ASSERT(data_temperature);
+    TBOX_ASSERT(data_mass_fraction);
     
+    TBOX_ASSERT((data_mass_fraction->getDepth() == d_num_species) ||
+                (data_mass_fraction->getDepth() == d_num_species - 1));
+#endif
+    
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = data_mixture_density->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_temperature->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_mass_fraction->getBox().numberCells() == interior_dims);
+#endif
+    
+    /*
+     * Get the numbers of ghost cells.
+     */
+    
+    const hier::IntVector num_ghosts_mixture_density = data_mixture_density->getGhostCellWidth();
+    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+    const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+    const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+    
+    /*
+     * Get the minimum number of ghost cells for mixture thermodynamic properties.
+     */
+    
+    hier::IntVector num_ghosts_min(d_dim);
+    
+    num_ghosts_min = num_ghosts_mixture_density;
+    num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
+    num_ghosts_min = hier::IntVector::min(num_ghosts_temperature, num_ghosts_min);
+    num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fraction, num_ghosts_min);
+    
+    /*
+     * Get the mixture thermodyanmic properties.
+     */
+    
+    const int num_thermo_properties = getNumberOfMixtureThermodynamicProperties();
+    
+    boost::shared_ptr<pdat::CellData<double> > data_mixture_thermo_properties(
+        new pdat::CellData<double>(interior_box, num_thermo_properties, num_ghosts_min));
+    
+    getMixtureThermodynamicProperties(
+        data_mixture_thermo_properties,
+        data_mass_fraction,
+        domain);
+    
+    d_equation_of_state->getDensity(
+        data_mixture_density,
+        data_pressure,
+        data_temperature,
+        data_mixture_thermo_properties,
+        domain);
 }
 
 
@@ -954,6 +2496,50 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicProperties(
             getMixtureThermodynamicPropertiesWithVolumeFraction(
                 mixture_thermo_properties,
                 species_fraction);
+            
+            break;
+        }
+        case MIXING_CLOSURE_MODEL::NO_MODEL:
+        {
+            TBOX_WARNING(d_object_name
+                << ": "
+                << "No thermodynamic properties of mixture are returned!\n"
+                << "d_mixing_closure_model = "
+                << d_mixing_closure_model
+                << std::endl);
+            
+            break;
+        }
+    }
+}
+
+
+/*
+ * Compute the thermodynamic properties of the mixture.
+ */
+void
+EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicProperties(
+    boost::shared_ptr<pdat::CellData<double> >& data_mixture_thermo_properties,
+    const boost::shared_ptr<pdat::CellData<double> >& data_species_fraction,
+    const hier::Box& domain) const
+{
+    switch (d_mixing_closure_model)
+    {
+        case MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC:
+        {
+            getMixtureThermodynamicPropertiesWithMassFraction(
+                data_mixture_thermo_properties,
+                data_species_fraction,
+                domain);
+            
+            break;
+        }
+        case MIXING_CLOSURE_MODEL::ISOBARIC:
+        {
+            getMixtureThermodynamicPropertiesWithVolumeFraction(
+                data_mixture_thermo_properties,
+                data_species_fraction,
+                domain);
             
             break;
         }
@@ -1203,7 +2789,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithMassFra
                      j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
+                    #pragma omp simd
 #endif
                     for (int i = domain_lo_0;
                          i < domain_dim_0;
@@ -1228,7 +2814,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithMassFra
                  j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
+                #pragma omp simd
 #endif
                 for (int i = domain_lo_0;
                      i < domain_dim_0;
@@ -1439,7 +3025,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithMassFra
                      j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
+                    #pragma omp simd
 #endif
                     for (int i = domain_lo_0;
                          i < domain_dim_0;
@@ -1820,7 +3406,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeF
                      j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
+                    #pragma omp simd
 #endif
                     for (int i = domain_lo_0;
                          i < domain_dim_0;
@@ -1844,7 +3430,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeF
                  j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
+                #pragma omp simd
 #endif
                 for (int i = domain_lo_0;
                      i < domain_dim_0;
@@ -2049,7 +3635,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeF
                      j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
+                    #pragma omp simd
 #endif
                     for (int i = domain_lo_0;
                          i < domain_dim_0;

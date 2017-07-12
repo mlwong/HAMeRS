@@ -287,6 +287,15 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const std::vector<const double*>& species_fraction) const;
         
         /*
+         * Get the thermodynamic properties of the mixture.
+         */
+        void
+        getMixtureThermodynamicProperties(
+            boost::shared_ptr<pdat::CellData<double> >& data_mixture_thermo_properties,
+            const boost::shared_ptr<pdat::CellData<double> >& data_species_fraction,
+            const hier::Box& domain) const;
+        
+        /*
          * Compute the thermodynamic properties of the mixture with mass fraction.
          */
         void
