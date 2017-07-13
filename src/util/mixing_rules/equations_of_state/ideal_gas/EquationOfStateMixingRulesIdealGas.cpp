@@ -1343,7 +1343,7 @@ EquationOfStateMixingRulesIdealGas::getIsochoricSpecificHeatCapacity(
                 #pragma omp simd
 #endif
                 for (int i = domain_lo_0;
-                     i < domain_dim_0;
+                     i < domain_lo_0 + domain_dim_0;
                      i++)
                 {
                     // Compute the linear indices.
@@ -1378,14 +1378,14 @@ EquationOfStateMixingRulesIdealGas::getIsochoricSpecificHeatCapacity(
             for (int si = 0; si < d_num_species; si++)
             {
                 for (int j = domain_lo_1;
-                     j < domain_dim_1;
+                     j < domain_lo_1 + domain_dim_1;
                      j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
                     for (int i = domain_lo_0;
-                         i < domain_dim_0;
+                         i < domain_lo_0 + domain_dim_0;
                          i++)
                     {
                         // Compute the linear indices.
@@ -1433,18 +1433,18 @@ EquationOfStateMixingRulesIdealGas::getIsochoricSpecificHeatCapacity(
             for (int si = 0; si < d_num_species; si++)
             {
                 for (int k = domain_lo_2;
-                     k < domain_dim_2;
+                     k < domain_lo_2 + domain_dim_2;
                      k++)
                 {
                     for (int j = domain_lo_1;
-                         j < domain_dim_1;
+                         j < domain_lo_1 + domain_dim_1;
                          j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
                         for (int i = domain_lo_0;
-                             i < domain_dim_0;
+                             i < domain_lo_0 + domain_dim_0;
                              i++)
                         {
                             // Compute the linear indices.
@@ -1508,7 +1508,7 @@ EquationOfStateMixingRulesIdealGas::getIsochoricSpecificHeatCapacity(
                 #pragma omp simd
 #endif
                 for (int i = domain_lo_0;
-                     i < domain_dim_0;
+                     i < domain_lo_0 + domain_dim_0;
                      i++)
                 {
                     // Compute the linear indices.
@@ -1527,7 +1527,7 @@ EquationOfStateMixingRulesIdealGas::getIsochoricSpecificHeatCapacity(
             #pragma omp simd
 #endif
             for (int i = domain_lo_0;
-                 i < domain_dim_0;
+                 i < domain_lo_0 + domain_dim_0;
                  i++)
             {
                 // Compute the linear indices.
@@ -1561,14 +1561,14 @@ EquationOfStateMixingRulesIdealGas::getIsochoricSpecificHeatCapacity(
             for (int si = 0; si < d_num_species - 1; si++)
             {
                 for (int j = domain_lo_1;
-                     j < domain_dim_1;
+                     j < domain_lo_1 + domain_dim_1;
                      j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
                     for (int i = domain_lo_0;
-                         i < domain_dim_0;
+                         i < domain_lo_0 + domain_dim_0;
                          i++)
                     {
                         // Compute the linear indices.
@@ -1590,14 +1590,14 @@ EquationOfStateMixingRulesIdealGas::getIsochoricSpecificHeatCapacity(
             
             // Add the contribution from the last species.
             for (int j = domain_lo_1;
-                 j < domain_dim_1;
+                 j < domain_lo_1 + domain_dim_1;
                  j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
                 for (int i = domain_lo_0;
-                     i < domain_dim_0;
+                     i < domain_lo_0 + domain_dim_0;
                      i++)
                 {
                     // Compute the linear indices.
@@ -1644,18 +1644,18 @@ EquationOfStateMixingRulesIdealGas::getIsochoricSpecificHeatCapacity(
             for (int si = 0; si < d_num_species - 1; si++)
             {
                 for (int k = domain_lo_2;
-                     k < domain_dim_2;
+                     k < domain_lo_2 + domain_dim_2;
                      k++)
                 {
                     for (int j = domain_lo_1;
-                         j < domain_dim_1;
+                         j < domain_lo_1 + domain_dim_1;
                          j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
                         for (int i = domain_lo_0;
-                             i < domain_dim_0;
+                             i < domain_lo_0 + domain_dim_0;
                              i++)
                         {
                             // Compute the linear indices.
@@ -1683,18 +1683,18 @@ EquationOfStateMixingRulesIdealGas::getIsochoricSpecificHeatCapacity(
             
             // Add the contribution from the last species.
             for (int k = domain_lo_2;
-                 k < domain_dim_2;
+                 k < domain_lo_2 + domain_dim_2;
                  k++)
             {
                 for (int j = domain_lo_1;
-                     j < domain_dim_1;
+                     j < domain_lo_1 + domain_dim_1;
                      j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
                     for (int i = domain_lo_0;
-                         i < domain_dim_0;
+                         i < domain_lo_0 + domain_dim_0;
                          i++)
                     {
                         // Compute the linear indices.
@@ -1903,7 +1903,7 @@ EquationOfStateMixingRulesIdealGas::getIsobaricSpecificHeatCapacity(
                 #pragma omp simd
 #endif
                 for (int i = domain_lo_0;
-                     i < domain_dim_0;
+                     i < domain_lo_0 + domain_dim_0;
                      i++)
                 {
                     // Compute the linear indices.
@@ -1938,14 +1938,14 @@ EquationOfStateMixingRulesIdealGas::getIsobaricSpecificHeatCapacity(
             for (int si = 0; si < d_num_species; si++)
             {
                 for (int j = domain_lo_1;
-                     j < domain_dim_1;
+                     j < domain_lo_1 + domain_dim_1;
                      j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
                     for (int i = domain_lo_0;
-                         i < domain_dim_0;
+                         i < domain_lo_0 + domain_dim_0;
                          i++)
                     {
                         // Compute the linear indices.
@@ -1993,18 +1993,18 @@ EquationOfStateMixingRulesIdealGas::getIsobaricSpecificHeatCapacity(
             for (int si = 0; si < d_num_species; si++)
             {
                 for (int k = domain_lo_2;
-                     k < domain_dim_2;
+                     k < domain_lo_2 + domain_dim_2;
                      k++)
                 {
                     for (int j = domain_lo_1;
-                         j < domain_dim_1;
+                         j < domain_lo_1 + domain_dim_1;
                          j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
                         for (int i = domain_lo_0;
-                             i < domain_dim_0;
+                             i < domain_lo_0 + domain_dim_0;
                              i++)
                         {
                             // Compute the linear indices.
@@ -2068,7 +2068,7 @@ EquationOfStateMixingRulesIdealGas::getIsobaricSpecificHeatCapacity(
                 #pragma omp simd
 #endif
                 for (int i = domain_lo_0;
-                     i < domain_dim_0;
+                     i < domain_lo_0 + domain_dim_0;
                      i++)
                 {
                     // Compute the linear indices.
@@ -2087,7 +2087,7 @@ EquationOfStateMixingRulesIdealGas::getIsobaricSpecificHeatCapacity(
             #pragma omp simd
 #endif
             for (int i = domain_lo_0;
-                 i < domain_dim_0;
+                 i < domain_lo_0 + domain_dim_0;
                  i++)
             {
                 // Compute the linear indices.
@@ -2121,14 +2121,14 @@ EquationOfStateMixingRulesIdealGas::getIsobaricSpecificHeatCapacity(
             for (int si = 0; si < d_num_species - 1; si++)
             {
                 for (int j = domain_lo_1;
-                     j < domain_dim_1;
+                     j < domain_lo_1 + domain_dim_1;
                      j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
                     for (int i = domain_lo_0;
-                         i < domain_dim_0;
+                         i < domain_lo_0 + domain_dim_0;
                          i++)
                     {
                         // Compute the linear indices.
@@ -2150,14 +2150,14 @@ EquationOfStateMixingRulesIdealGas::getIsobaricSpecificHeatCapacity(
             
             // Add the contribution from the last species.
             for (int j = domain_lo_1;
-                 j < domain_dim_1;
+                 j < domain_lo_1 + domain_dim_1;
                  j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
                 for (int i = domain_lo_0;
-                     i < domain_dim_0;
+                     i < domain_lo_0 + domain_dim_0;
                      i++)
                 {
                     // Compute the linear indices.
@@ -2204,18 +2204,18 @@ EquationOfStateMixingRulesIdealGas::getIsobaricSpecificHeatCapacity(
             for (int si = 0; si < d_num_species - 1; si++)
             {
                 for (int k = domain_lo_2;
-                     k < domain_dim_2;
+                     k < domain_lo_2 + domain_dim_2;
                      k++)
                 {
                     for (int j = domain_lo_1;
-                         j < domain_dim_1;
+                         j < domain_lo_1 + domain_dim_1;
                          j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
                         for (int i = domain_lo_0;
-                             i < domain_dim_0;
+                             i < domain_lo_0 + domain_dim_0;
                              i++)
                         {
                             // Compute the linear indices.
@@ -2243,18 +2243,18 @@ EquationOfStateMixingRulesIdealGas::getIsobaricSpecificHeatCapacity(
             
             // Add the contribution from the last species.
             for (int k = domain_lo_2;
-                 k < domain_dim_2;
+                 k < domain_lo_2 + domain_dim_2;
                  k++)
             {
                 for (int j = domain_lo_1;
-                     j < domain_dim_1;
+                     j < domain_lo_1 + domain_dim_1;
                      j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
                     for (int i = domain_lo_0;
-                         i < domain_dim_0;
+                         i < domain_lo_0 + domain_dim_0;
                          i++)
                     {
                         // Compute the linear indices.
@@ -2733,7 +2733,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithMassFra
                 #pragma omp simd
 #endif
                 for (int i = domain_lo_0;
-                     i < domain_dim_0;
+                     i < domain_lo_0 + domain_dim_0;
                      i++)
                 {
                     // Compute the linear indices.
@@ -2750,7 +2750,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithMassFra
             #pragma omp simd
 #endif
             for (int i = domain_lo_0;
-                 i < domain_dim_0;
+                 i < domain_lo_0 + domain_dim_0;
                  i++)
             {
                 // Compute the linear indices.
@@ -2785,14 +2785,14 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithMassFra
             for (int si = 0; si < d_num_species; si++)
             {
                 for (int j = domain_lo_1;
-                     j < domain_dim_1;
+                     j < domain_lo_1 + domain_dim_1;
                      j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
                     for (int i = domain_lo_0;
-                         i < domain_dim_0;
+                         i < domain_lo_0 + domain_dim_0;
                          i++)
                     {
                         // Compute the linear indices.
@@ -2810,14 +2810,14 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithMassFra
             
             // Compute gamma and R.
             for (int j = domain_lo_1;
-                 j < domain_dim_1;
+                 j < domain_lo_1 + domain_dim_1;
                  j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
                 for (int i = domain_lo_0;
-                     i < domain_dim_0;
+                     i < domain_lo_0 + domain_dim_0;
                      i++)
                 {
                     // Compute the linear indices.
@@ -2860,18 +2860,18 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithMassFra
             for (int si = 0; si < d_num_species; si++)
             {
                 for (int k = domain_lo_2;
-                     k < domain_dim_2;
+                     k < domain_lo_2 + domain_dim_2;
                      k++)
                 {
                     for (int j = domain_lo_1;
-                         j < domain_dim_1;
+                         j < domain_lo_1 + domain_dim_1;
                          j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
                         for (int i = domain_lo_0;
-                             i < domain_dim_0;
+                             i < domain_lo_0 + domain_dim_0;
                              i++)
                         {
                             // Compute the linear indices.
@@ -2894,18 +2894,18 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithMassFra
             
             // Compute gamma and R.
             for (int k = domain_lo_2;
-                 k < domain_dim_2;
+                 k < domain_lo_2 + domain_dim_2;
                  k++)
             {
                 for (int j = domain_lo_1;
-                     j < domain_dim_1;
+                     j < domain_lo_1 + domain_dim_1;
                      j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
                     for (int i = domain_lo_0;
-                         i < domain_dim_0;
+                         i < domain_lo_0 + domain_dim_0;
                          i++)
                     {
                         // Compute the linear indices.
@@ -2962,7 +2962,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithMassFra
                 #pragma omp simd
 #endif
                 for (int i = domain_lo_0;
-                     i < domain_dim_0;
+                     i < domain_lo_0 + domain_dim_0;
                      i++)
                 {
                     // Compute the linear indices.
@@ -2982,7 +2982,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithMassFra
             #pragma omp simd
 #endif
             for (int i = domain_lo_0;
-                 i < domain_dim_0;
+                 i < domain_lo_0 + domain_dim_0;
                  i++)
             {
                 // Compute the linear indices.
@@ -3021,14 +3021,14 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithMassFra
             for (int si = 0; si < d_num_species - 1; si++)
             {
                 for (int j = domain_lo_1;
-                     j < domain_dim_1;
+                     j < domain_lo_1 + domain_dim_1;
                      j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
                     for (int i = domain_lo_0;
-                         i < domain_dim_0;
+                         i < domain_lo_0 + domain_dim_0;
                          i++)
                     {
                         // Compute the linear indices.
@@ -3049,14 +3049,14 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithMassFra
             
             // Add the contribution from the last species and compute gamma and R.
             for (int j = domain_lo_1;
-                 j < domain_dim_1;
+                 j < domain_lo_1 + domain_dim_1;
                  j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
                 for (int i = domain_lo_0;
-                     i < domain_dim_0;
+                     i < domain_lo_0 + domain_dim_0;
                      i++)
                 {
                     // Compute the linear indices.
@@ -3105,18 +3105,18 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithMassFra
             for (int si = 0; si < d_num_species - 1; si++)
             {
                 for (int k = domain_lo_2;
-                     k < domain_dim_2;
+                     k < domain_lo_2 + domain_dim_2;
                      k++)
                 {
                     for (int j = domain_lo_1;
-                         j < domain_dim_1;
+                         j < domain_lo_1 + domain_dim_1;
                          j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
                         for (int i = domain_lo_0;
-                             i < domain_dim_0;
+                             i < domain_lo_0 + domain_dim_0;
                              i++)
                         {
                             // Compute the linear indices.
@@ -3142,18 +3142,18 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithMassFra
             
             // Add the contribution from the last species and compute gamma and R.
             for (int k = domain_lo_2;
-                 k < domain_dim_2;
+                 k < domain_lo_2 + domain_dim_2;
                  k++)
             {
                 for (int j = domain_lo_1;
-                     j < domain_dim_1;
+                     j < domain_lo_1 + domain_dim_1;
                      j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
                     for (int i = domain_lo_0;
-                         i < domain_dim_0;
+                         i < domain_lo_0 + domain_dim_0;
                          i++)
                     {
                         // Compute the linear indices.
@@ -3352,7 +3352,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeF
                 #pragma omp simd
 #endif
                 for (int i = domain_lo_0;
-                     i < domain_dim_0;
+                     i < domain_lo_0 + domain_dim_0;
                      i++)
                 {
                     // Compute the linear indices.
@@ -3368,7 +3368,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeF
             #pragma omp simd
 #endif
             for (int i = domain_lo_0;
-                 i < domain_dim_0;
+                 i < domain_lo_0 + domain_dim_0;
                  i++)
             {
                 // Compute the linear index.
@@ -3402,14 +3402,14 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeF
                 const double one_over_denominator = 1.0/(d_species_gamma[si] - 1.0);
                 
                 for (int j = domain_lo_1;
-                     j < domain_dim_1;
+                     j < domain_lo_1 + domain_dim_1;
                      j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
                     for (int i = domain_lo_0;
-                         i < domain_dim_0;
+                         i < domain_lo_0 + domain_dim_0;
                          i++)
                     {
                         // Compute the linear indices.
@@ -3426,14 +3426,14 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeF
             
             // Compute gamma.
             for (int j = domain_lo_1;
-                 j < domain_dim_1;
+                 j < domain_lo_1 + domain_dim_1;
                  j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
                 for (int i = domain_lo_0;
-                     i < domain_dim_0;
+                     i < domain_lo_0 + domain_dim_0;
                      i++)
                 {
                     // Compute the linear index.
@@ -3475,18 +3475,18 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeF
                 const double one_over_denominator = 1.0/(d_species_gamma[si] - 1.0);
                 
                 for (int k = domain_lo_2;
-                     k < domain_dim_2;
+                     k < domain_lo_2 + domain_dim_2;
                      k++)
                 {
                     for (int j = domain_lo_1;
-                         j < domain_dim_1;
+                         j < domain_lo_1 + domain_dim_1;
                          j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
                         for (int i = domain_lo_0;
-                             i < domain_dim_0;
+                             i < domain_lo_0 + domain_dim_0;
                              i++)
                         {
                             // Compute the linear indices.
@@ -3508,18 +3508,18 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeF
             
             // Compute gamma.
             for (int k = domain_lo_2;
-                 k < domain_dim_2;
+                 k < domain_lo_2 + domain_dim_2;
                  k++)
             {
                 for (int j = domain_lo_1;
-                     j < domain_dim_1;
+                     j < domain_lo_1 + domain_dim_1;
                      j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
                     for (int i = domain_lo_0;
-                         i < domain_dim_0;
+                         i < domain_lo_0 + domain_dim_0;
                          i++)
                     {
                         // Compute the linear index.
@@ -3575,7 +3575,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeF
                 #pragma omp simd
 #endif
                 for (int i = domain_lo_0;
-                     i < domain_dim_0;
+                     i < domain_lo_0 + domain_dim_0;
                      i++)
                 {
                     // Compute the linear indices.
@@ -3594,7 +3594,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeF
             #pragma omp simd
 #endif
             for (int i = domain_lo_0;
-                 i < domain_dim_0;
+                 i < domain_lo_0 + domain_dim_0;
                  i++)
             {
                 // Compute the linear indices.
@@ -3631,14 +3631,14 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeF
                 const double one_over_denominator = 1.0/(d_species_gamma[si] - 1.0);
                 
                 for (int j = domain_lo_1;
-                     j < domain_dim_1;
+                     j < domain_lo_1 + domain_dim_1;
                      j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
                     for (int i = domain_lo_0;
-                         i < domain_dim_0;
+                         i < domain_lo_0 + domain_dim_0;
                          i++)
                     {
                         // Compute the linear indices.
@@ -3658,14 +3658,14 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeF
             
             // Add the contribution from the last species and compute gamma.
             for (int j = domain_lo_1;
-                 j < domain_dim_1;
+                 j < domain_lo_1 + domain_dim_1;
                  j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
                 for (int i = domain_lo_0;
-                     i < domain_dim_0;
+                     i < domain_lo_0 + domain_dim_0;
                      i++)
                 {
                     // Compute the linear indices.
@@ -3712,18 +3712,18 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeF
                 const double one_over_denominator = 1.0/(d_species_gamma[si] - 1.0);
                 
                 for (int k = domain_lo_2;
-                     k < domain_dim_2;
+                     k < domain_lo_2 + domain_dim_2;
                      k++)
                 {
                     for (int j = domain_lo_1;
-                         j < domain_dim_1;
+                         j < domain_lo_1 + domain_dim_1;
                          j++)
                     {
 #ifdef HAMERS_ENABLE_SIMD
                         #pragma omp simd
 #endif
                         for (int i = domain_lo_0;
-                             i < domain_dim_0;
+                             i < domain_lo_0 + domain_dim_0;
                              i++)
                         {
                             // Compute the linear indices.
@@ -3748,18 +3748,18 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeF
             
             // Add the contribution from the last species and compute gamma.
             for (int k = domain_lo_2;
-                 k < domain_dim_2;
+                 k < domain_lo_2 + domain_dim_2;
                  k++)
             {
                 for (int j = domain_lo_1;
-                     j < domain_dim_1;
+                     j < domain_lo_1 + domain_dim_1;
                      j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
                     for (int i = domain_lo_0;
-                         i < domain_dim_0;
+                         i < domain_lo_0 + domain_dim_0;
                          i++)
                     {
                         // Compute the linear indices.

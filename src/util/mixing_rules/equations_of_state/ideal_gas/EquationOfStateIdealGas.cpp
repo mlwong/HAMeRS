@@ -156,7 +156,7 @@ EquationOfStateIdealGas::getPressure(
         #pragma omp simd
 #endif
         for (int i = domain_lo_0;
-             i < domain_dim_0;
+             i < domain_lo_0 + domain_dim_0;
              i++)
         {
             // Compute the linear indices.
@@ -197,14 +197,14 @@ EquationOfStateIdealGas::getPressure(
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         
         for (int j = domain_lo_1;
-             j < domain_dim_1;
+             j < domain_lo_1 + domain_dim_1;
              j++)
         {
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
 #endif
             for (int i = domain_lo_0;
-                 i < domain_dim_0;
+                 i < domain_lo_0 + domain_dim_0;
                  i++)
             {
                 // Compute the linear indices.
@@ -263,18 +263,18 @@ EquationOfStateIdealGas::getPressure(
         const int ghostcell_dim_1_thermo_properties = ghostcell_dims_thermo_properties[1];
         
         for (int k = domain_lo_2;
-             k < domain_dim_2;
+             k < domain_lo_2 + domain_dim_2;
              k++)
         {
             for (int j = domain_lo_1;
-                 j < domain_dim_1;
+                 j < domain_lo_1 + domain_dim_1;
                  j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
                 for (int i = domain_lo_0;
-                     i < domain_dim_0;
+                     i < domain_lo_0 + domain_dim_0;
                      i++)
                 {
                     // Compute the linear indices.
@@ -441,7 +441,7 @@ EquationOfStateIdealGas::getSoundSpeed(
         #pragma omp simd
 #endif
         for (int i = domain_lo_0;
-             i < domain_dim_0;
+             i < domain_lo_0 + domain_dim_0;
              i++)
         {
             // Compute the linear indices.
@@ -482,14 +482,14 @@ EquationOfStateIdealGas::getSoundSpeed(
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         
         for (int j = domain_lo_1;
-             j < domain_dim_1;
+             j < domain_lo_1 + domain_dim_1;
              j++)
         {
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
 #endif
             for (int i = domain_lo_0;
-                 i < domain_dim_0;
+                 i < domain_lo_0 + domain_dim_0;
                  i++)
             {
                 // Compute the linear indices.
@@ -548,18 +548,18 @@ EquationOfStateIdealGas::getSoundSpeed(
         const int ghostcell_dim_1_thermo_properties = ghostcell_dims_thermo_properties[1];
         
         for (int k = domain_lo_2;
-             k < domain_dim_2;
+             k < domain_lo_2 + domain_dim_2;
              k++)
         {
             for (int j = domain_lo_1;
-                 j < domain_dim_1;
+                 j < domain_lo_1 + domain_dim_1;
                  j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
                 for (int i = domain_lo_0;
-                     i < domain_dim_0;
+                     i < domain_lo_0 + domain_dim_0;
                      i++)
                 {
                     // Compute the linear indices.
@@ -726,7 +726,7 @@ EquationOfStateIdealGas::getInternalEnergy(
         #pragma omp simd
 #endif
         for (int i = domain_lo_0;
-             i < domain_dim_0;
+             i < domain_lo_0 + domain_dim_0;
              i++)
         {
             // Compute the linear indices.
@@ -767,14 +767,14 @@ EquationOfStateIdealGas::getInternalEnergy(
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         
         for (int j = domain_lo_1;
-             j < domain_dim_1;
+             j < domain_lo_1 + domain_dim_1;
              j++)
         {
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
 #endif
             for (int i = domain_lo_0;
-                 i < domain_dim_0;
+                 i < domain_lo_0 + domain_dim_0;
                  i++)
             {
                 // Compute the linear indices.
@@ -833,18 +833,18 @@ EquationOfStateIdealGas::getInternalEnergy(
         const int ghostcell_dim_1_thermo_properties = ghostcell_dims_thermo_properties[1];
         
         for (int k = domain_lo_2;
-             k < domain_dim_2;
+             k < domain_lo_2 + domain_dim_2;
              k++)
         {
             for (int j = domain_lo_1;
-                 j < domain_dim_1;
+                 j < domain_lo_1 + domain_dim_1;
                  j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
                 for (int i = domain_lo_0;
-                     i < domain_dim_0;
+                     i < domain_lo_0 + domain_dim_0;
                      i++)
                 {
                     // Compute the linear indices.
@@ -1011,7 +1011,7 @@ EquationOfStateIdealGas::getEnthalpy(
         #pragma omp simd
 #endif
         for (int i = domain_lo_0;
-             i < domain_dim_0;
+             i < domain_lo_0 + domain_dim_0;
              i++)
         {
             // Compute the linear indices.
@@ -1052,14 +1052,14 @@ EquationOfStateIdealGas::getEnthalpy(
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         
         for (int j = domain_lo_1;
-             j < domain_dim_1;
+             j < domain_lo_1 + domain_dim_1;
              j++)
         {
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
 #endif
             for (int i = domain_lo_0;
-                 i < domain_dim_0;
+                 i < domain_lo_0 + domain_dim_0;
                  i++)
             {
                 // Compute the linear indices.
@@ -1118,18 +1118,18 @@ EquationOfStateIdealGas::getEnthalpy(
         const int ghostcell_dim_1_thermo_properties = ghostcell_dims_thermo_properties[1];
         
         for (int k = domain_lo_2;
-             k < domain_dim_2;
+             k < domain_lo_2 + domain_dim_2;
              k++)
         {
             for (int j = domain_lo_1;
-                 j < domain_dim_1;
+                 j < domain_lo_1 + domain_dim_1;
                  j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
                 for (int i = domain_lo_0;
-                     i < domain_dim_0;
+                     i < domain_lo_0 + domain_dim_0;
                      i++)
                 {
                     // Compute the linear indices.
@@ -1298,7 +1298,7 @@ EquationOfStateIdealGas::getTemperature(
         #pragma omp simd
 #endif
         for (int i = domain_lo_0;
-             i < domain_dim_0;
+             i < domain_lo_0 + domain_dim_0;
              i++)
         {
             // Compute the linear indices.
@@ -1339,14 +1339,14 @@ EquationOfStateIdealGas::getTemperature(
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         
         for (int j = domain_lo_1;
-             j < domain_dim_1;
+             j < domain_lo_1 + domain_dim_1;
              j++)
         {
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
 #endif
             for (int i = domain_lo_0;
-                 i < domain_dim_0;
+                 i < domain_lo_0 + domain_dim_0;
                  i++)
             {
                 // Compute the linear indices.
@@ -1405,18 +1405,18 @@ EquationOfStateIdealGas::getTemperature(
         const int ghostcell_dim_1_thermo_properties = ghostcell_dims_thermo_properties[1];
         
         for (int k = domain_lo_2;
-             k < domain_dim_2;
+             k < domain_lo_2 + domain_dim_2;
              k++)
         {
             for (int j = domain_lo_1;
-                 j < domain_dim_1;
+                 j < domain_lo_1 + domain_dim_1;
                  j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
                 for (int i = domain_lo_0;
-                     i < domain_dim_0;
+                     i < domain_lo_0 + domain_dim_0;
                      i++)
                 {
                     // Compute the linear indices.
@@ -1576,7 +1576,7 @@ EquationOfStateIdealGas::getInternalEnergyFromTemperature(
         #pragma omp simd
 #endif
         for (int i = domain_lo_0;
-             i < domain_dim_0;
+             i < domain_lo_0 + domain_dim_0;
              i++)
         {
             // Compute the linear indices.
@@ -1611,14 +1611,14 @@ EquationOfStateIdealGas::getInternalEnergyFromTemperature(
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         
         for (int j = domain_lo_1;
-             j < domain_dim_1;
+             j < domain_lo_1 + domain_dim_1;
              j++)
         {
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
 #endif
             for (int i = domain_lo_0;
-                 i < domain_dim_0;
+                 i < domain_lo_0 + domain_dim_0;
                  i++)
             {
                 // Compute the linear indices.
@@ -1667,18 +1667,18 @@ EquationOfStateIdealGas::getInternalEnergyFromTemperature(
         const int ghostcell_dim_1_thermo_properties = ghostcell_dims_thermo_properties[1];
         
         for (int k = domain_lo_2;
-             k < domain_dim_2;
+             k < domain_lo_2 + domain_dim_2;
              k++)
         {
             for (int j = domain_lo_1;
-                 j < domain_dim_1;
+                 j < domain_lo_1 + domain_dim_1;
                  j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
                 for (int i = domain_lo_0;
-                     i < domain_dim_0;
+                     i < domain_lo_0 + domain_dim_0;
                      i++)
                 {
                     // Compute the linear indices.
@@ -1823,7 +1823,7 @@ EquationOfStateIdealGas::getIsochoricSpecificHeatCapacity(
         #pragma omp simd
 #endif
         for (int i = domain_lo_0;
-             i < domain_dim_0;
+             i < domain_lo_0 + domain_dim_0;
              i++)
         {
             // Compute the linear indices.
@@ -1858,14 +1858,14 @@ EquationOfStateIdealGas::getIsochoricSpecificHeatCapacity(
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         
         for (int j = domain_lo_1;
-             j < domain_dim_1;
+             j < domain_lo_1 + domain_dim_1;
              j++)
         {
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
 #endif
             for (int i = domain_lo_0;
-                 i < domain_dim_0;
+                 i < domain_lo_0 + domain_dim_0;
                  i++)
             {
                 // Compute the linear indices.
@@ -1912,18 +1912,18 @@ EquationOfStateIdealGas::getIsochoricSpecificHeatCapacity(
         const int ghostcell_dim_1_thermo_properties = ghostcell_dims_thermo_properties[1];
         
         for (int k = domain_lo_2;
-             k < domain_dim_2;
+             k < domain_lo_2 + domain_dim_2;
              k++)
         {
             for (int j = domain_lo_1;
-                 j < domain_dim_1;
+                 j < domain_lo_1 + domain_dim_1;
                  j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
                 for (int i = domain_lo_0;
-                     i < domain_dim_0;
+                     i < domain_lo_0 + domain_dim_0;
                      i++)
                 {
                     // Compute the linear indices.
@@ -2066,7 +2066,7 @@ EquationOfStateIdealGas::getIsobaricSpecificHeatCapacity(
         #pragma omp simd
 #endif
         for (int i = domain_lo_0;
-             i < domain_dim_0;
+             i < domain_lo_0 + domain_dim_0;
              i++)
         {
             // Compute the linear indices.
@@ -2101,14 +2101,14 @@ EquationOfStateIdealGas::getIsobaricSpecificHeatCapacity(
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         
         for (int j = domain_lo_1;
-             j < domain_dim_1;
+             j < domain_lo_1 + domain_dim_1;
              j++)
         {
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
 #endif
             for (int i = domain_lo_0;
-                 i < domain_dim_0;
+                 i < domain_lo_0 + domain_dim_0;
                  i++)
             {
                 // Compute the linear indices.
@@ -2155,18 +2155,18 @@ EquationOfStateIdealGas::getIsobaricSpecificHeatCapacity(
         const int ghostcell_dim_1_thermo_properties = ghostcell_dims_thermo_properties[1];
         
         for (int k = domain_lo_2;
-             k < domain_dim_2;
+             k < domain_lo_2 + domain_dim_2;
              k++)
         {
             for (int j = domain_lo_1;
-                 j < domain_dim_1;
+                 j < domain_lo_1 + domain_dim_1;
                  j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
                 for (int i = domain_lo_0;
-                     i < domain_dim_0;
+                     i < domain_lo_0 + domain_dim_0;
                      i++)
                 {
                     // Compute the linear indices.
@@ -2311,7 +2311,7 @@ EquationOfStateIdealGas::getIsochoricPartialInternalEnergyPartialPressure(
         #pragma omp simd
 #endif
         for (int i = domain_lo_0;
-             i < domain_dim_0;
+             i < domain_lo_0 + domain_dim_0;
              i++)
         {
             // Compute the linear indices.
@@ -2346,14 +2346,14 @@ EquationOfStateIdealGas::getIsochoricPartialInternalEnergyPartialPressure(
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         
         for (int j = domain_lo_1;
-             j < domain_dim_1;
+             j < domain_lo_1 + domain_dim_1;
              j++)
         {
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
 #endif
             for (int i = domain_lo_0;
-                 i < domain_dim_0;
+                 i < domain_lo_0 + domain_dim_0;
                  i++)
             {
                 // Compute the linear indices.
@@ -2400,18 +2400,18 @@ EquationOfStateIdealGas::getIsochoricPartialInternalEnergyPartialPressure(
         const int ghostcell_dim_1_thermo_properties = ghostcell_dims_thermo_properties[1];
         
         for (int k = domain_lo_2;
-             k < domain_dim_2;
+             k < domain_lo_2 + domain_dim_2;
              k++)
         {
             for (int j = domain_lo_1;
-                 j < domain_dim_1;
+                 j < domain_lo_1 + domain_dim_1;
                  j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
                 for (int i = domain_lo_0;
-                     i < domain_dim_0;
+                     i < domain_lo_0 + domain_dim_0;
                      i++)
                 {
                     // Compute the linear indices.
@@ -2617,7 +2617,7 @@ EquationOfStateIdealGas::getDensity(
         #pragma omp simd
 #endif
         for (int i = domain_lo_0;
-             i < domain_dim_0;
+             i < domain_lo_0 + domain_dim_0;
              i++)
         {
             // Compute the linear indices.
@@ -2657,14 +2657,14 @@ EquationOfStateIdealGas::getDensity(
         const int ghostcell_dim_0_thermo_properties = ghostcell_dims_thermo_properties[0];
         
         for (int j = domain_lo_1;
-             j < domain_dim_1;
+             j < domain_lo_1 + domain_dim_1;
              j++)
         {
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
 #endif
             for (int i = domain_lo_0;
-                 i < domain_dim_0;
+                 i < domain_lo_0 + domain_dim_0;
                  i++)
             {
                 // Compute the linear indices.
@@ -2722,18 +2722,18 @@ EquationOfStateIdealGas::getDensity(
         const int ghostcell_dim_1_thermo_properties = ghostcell_dims_thermo_properties[1];
         
         for (int k = domain_lo_2;
-             k < domain_dim_2;
+             k < domain_lo_2 + domain_dim_2;
              k++)
         {
             for (int j = domain_lo_1;
-                 j < domain_dim_1;
+                 j < domain_lo_1 + domain_dim_1;
                  j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
                 for (int i = domain_lo_0;
-                     i < domain_dim_0;
+                     i < domain_lo_0 + domain_dim_0;
                      i++)
                 {
                     // Compute the linear indices.
