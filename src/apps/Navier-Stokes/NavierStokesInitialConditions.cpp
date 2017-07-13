@@ -1003,6 +1003,195 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                             }
                         }
                     }
+                    else if (d_project_name.find("2D Poggi's RMI 1mm smooth interface reduced domain size") != std::string::npos)
+                    {
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Please provide only two-species for the problem"
+                                << " '2D Poggi's RMI'."
+                                << std::endl);
+                        }
+                        
+                        /*
+                         * Get the settings.
+                         */
+                        
+                        std::string settings = d_project_name.substr(56);
+                        
+                        std::stringstream ss(settings);
+                        
+                        std::string A_idx_str;
+                        std::string m_idx_str;
+                        std::string random_seed_str;
+                        
+                        std::getline(ss, A_idx_str, '-');
+                        std::getline(ss, m_idx_str, '-');
+                        std::getline(ss, random_seed_str);
+                        
+                        double A_candidates[] = {sqrt(2.0)*0.01e-3, sqrt(2.0)*0.04e-3, sqrt(2.0)*0.16e-3};
+                        int m_min_candidates[] = {20, 15, 10};
+                        int m_max_candidates[] = {30, 30, 30};
+                        
+                        // Seed for "random" phase shifts.
+                        int random_seed = std::stoi(random_seed_str) - 1;
+                        
+                        double phase_shifts[21];
+                        if (random_seed == 0)
+                        {
+                            phase_shifts[0] = 5.119059895756811000e+000;
+                            phase_shifts[1] = 5.691258590395267300e+000;
+                            phase_shifts[2] = 7.978816983408705300e-001;
+                            phase_shifts[3] = 5.738909759225261800e+000;
+                            phase_shifts[4] = 3.973230324742651500e+000;
+                            phase_shifts[5] = 6.128644395486362300e-001;
+                            phase_shifts[6] = 1.749855916861123200e+000;
+                            phase_shifts[7] = 3.436157926236805200e+000;
+                            phase_shifts[8] = 6.016192879924800800e+000;
+                            phase_shifts[9] = 6.062573467430127000e+000;
+                            phase_shifts[10] = 9.903121990156674700e-001;
+                            phase_shifts[11] = 6.098414305612863000e+000;
+                            phase_shifts[12] = 6.014057305717998700e+000;
+                            phase_shifts[13] = 3.049705144518116000e+000;
+                            phase_shifts[14] = 5.028310483744898600e+000;
+                            phase_shifts[15] = 8.914981581520268200e-001;
+                            phase_shifts[16] = 2.650004294134627800e+000;
+                            phase_shifts[17] = 5.753735997130328400e+000;
+                            phase_shifts[18] = 4.977585453328568800e+000;
+                            phase_shifts[19] = 6.028668715861979200e+000;
+                            phase_shifts[20] = 4.120140326260335300e+000;
+                        }
+                        else
+                        {
+                            phase_shifts[0] = 2.620226532717789200e+000;
+                            phase_shifts[1] = 4.525932273597345700e+000;
+                            phase_shifts[2] = 7.186381718527406600e-004;
+                            phase_shifts[3] = 1.899611578242180700e+000;
+                            phase_shifts[4] = 9.220944569241362700e-001;
+                            phase_shifts[5] = 5.801805019369201700e-001;
+                            phase_shifts[6] = 1.170307423440345900e+000;
+                            phase_shifts[7] = 2.171222082895173200e+000;
+                            phase_shifts[8] = 2.492963564452900500e+000;
+                            phase_shifts[9] = 3.385485386352383500e+000;
+                            phase_shifts[10] = 2.633876813749063600e+000;
+                            phase_shifts[11] = 4.305361097085856200e+000;
+                            phase_shifts[12] = 1.284611371532881700e+000;
+                            phase_shifts[13] = 5.517374574309792800e+000;
+                            phase_shifts[14] = 1.720813231802212400e-001;
+                            phase_shifts[15] = 4.212671608894216200e+000;
+                            phase_shifts[16] = 2.622003402848613000e+000;
+                            phase_shifts[17] = 3.510351721361030500e+000;
+                            phase_shifts[18] = 8.820771499014955500e-001;
+                            phase_shifts[19] = 1.244708365548507600e+000;
+                            phase_shifts[20] = 5.031226508705986900e+000;
+                        }
+                        
+                        // Amplitude.
+                        double A = A_candidates[std::stoi(A_idx_str) - 1];
+                        
+                        // Bounds of wavenumbers for initial perturbations.
+                        int m_min = m_min_candidates[std::stoi(m_idx_str) - 1];
+                        int m_max = m_max_candidates[std::stoi(m_idx_str) - 1];
+                        
+                        // Characteristic length of the initial interface thickness.
+                        const double epsilon_i = 0.001;
+                        
+                        double* rho_Y_0   = partial_density->getPointer(0);
+                        double* rho_Y_1   = partial_density->getPointer(1);
+                        double* rho_u     = momentum->getPointer(0);
+                        double* rho_v     = momentum->getPointer(1);
+                        double* E         = total_energy->getPointer(0);
+                        
+                        // species 0: SF6.
+                        // species 1: air.
+                        const double gamma_0 = 1.09312;
+                        const double gamma_1 = 1.39909;
+                        
+                        const double c_p_SF6 = 668.286;
+                        const double c_p_air = 1040.50;
+                        
+                        const double c_v_SF6 = 611.359;
+                        const double c_v_air = 743.697;
+                        
+                        NULL_USE(gamma_1);
+                        
+                        // Unshocked SF6.
+                        const double rho_unshocked = 5.97286552525647;
+                        const double u_unshocked   = 0.0;
+                        const double v_unshocked   = 0.0;
+                        const double p_unshocked   = 101325.0;
+                        
+                        // Shocked SF6.
+                        const double rho_shocked = 11.9708247309869;
+                        const double u_shocked   = 98.9344103891513;
+                        const double v_shocked   = 0.0;
+                        const double p_shocked   = 218005.430874;
+                        
+                        // Air.
+                        const double rho_air = 1.14560096494103;
+                        const double u_air   = 0.0;
+                        const double v_air   = 0.0;
+                        const double p_air   = 101325.0;
+                        
+                        // Shock hits the interface after 0.05 ms.
+                        const double L_x_shock = 0.190127254739019;
+                        const double L_x_interface = 0.2;
+                        
+                        for (int j = 0; j < patch_dims[1]; j++)
+                        {
+                            for (int i = 0; i < patch_dims[0]; i++)
+                            {
+                                // Compute the linear index.
+                                int idx_cell = i + j*patch_dims[0];
+                                
+                                // Compute the coordinates.
+                                double x[2];
+                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                
+                                double S = 0.0;
+                                for (int m = m_min; m <= m_max; m++)
+                                {
+                                    S += A*cos(2.0*M_PI*m/0.025*x[1] + phase_shifts[30 - m]);
+                                }
+                                
+                                if (x[0] < L_x_shock)
+                                {
+                                    rho_Y_0[idx_cell] = rho_shocked;
+                                    rho_Y_1[idx_cell] = 0.0;
+                                    rho_u[idx_cell]   = rho_shocked*u_shocked;
+                                    rho_v[idx_cell]   = rho_shocked*v_shocked;
+                                    E[idx_cell]       = p_shocked/(gamma_0 - 1.0) +
+                                        0.5*rho_shocked*(u_shocked*u_shocked + v_shocked*v_shocked);
+                                }
+                                else
+                                {
+                                    const double f_sm = 0.5*(1.0 + erf((x[0] - (L_x_interface + S))/epsilon_i));
+                                    
+                                    // Smooth the primitive variables.
+                                    const double rho_Y_0_i = rho_unshocked*(1.0 - f_sm);
+                                    const double rho_Y_1_i = rho_air*f_sm;
+                                    const double u_i = u_unshocked*(1.0 - f_sm) + u_air*f_sm;
+                                    const double v_i = v_unshocked*(1.0 - f_sm) + v_air*f_sm;
+                                    const double p_i = p_unshocked*(1.0 - f_sm) + p_air*f_sm;
+                                    
+                                    const double rho_i = rho_Y_0_i + rho_Y_1_i;
+                                    const double Y_0_i = rho_Y_0_i/rho_i;
+                                    const double Y_1_i = 1.0 - Y_0_i;
+                                    
+                                    const double gamma_i = (Y_0_i*c_p_SF6 + Y_1_i*c_p_air)/
+                                        (Y_0_i*c_v_SF6 + Y_1_i*c_v_air);
+                                    
+                                    rho_Y_0[idx_cell] = rho_Y_0_i;
+                                    rho_Y_1[idx_cell] = rho_Y_1_i;
+                                    rho_u[idx_cell]   = rho_i*u_i;
+                                    rho_v[idx_cell]   = rho_i*v_i;
+                                    E[idx_cell]       = p_i/(gamma_i - 1.0) + 0.5*rho_i*(u_i*u_i + v_i*v_i);
+                                }
+                            }
+                        }
+                    }
                     else if (d_project_name.find("2D Poggi's RMI 1mm smooth interface") != std::string::npos)
                     {
                         if (d_num_species != 2)
@@ -1194,195 +1383,6 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                                 for (int m = m_min; m <= m_max; m++)
                                 {
                                     S += A*cos(2.0*M_PI*m/0.05*x[1] + phase_shifts[60 - m]);
-                                }
-                                
-                                if (x[0] < L_x_shock)
-                                {
-                                    rho_Y_0[idx_cell] = rho_shocked;
-                                    rho_Y_1[idx_cell] = 0.0;
-                                    rho_u[idx_cell]   = rho_shocked*u_shocked;
-                                    rho_v[idx_cell]   = rho_shocked*v_shocked;
-                                    E[idx_cell]       = p_shocked/(gamma_0 - 1.0) +
-                                        0.5*rho_shocked*(u_shocked*u_shocked + v_shocked*v_shocked);
-                                }
-                                else
-                                {
-                                    const double f_sm = 0.5*(1.0 + erf((x[0] - (L_x_interface + S))/epsilon_i));
-                                    
-                                    // Smooth the primitive variables.
-                                    const double rho_Y_0_i = rho_unshocked*(1.0 - f_sm);
-                                    const double rho_Y_1_i = rho_air*f_sm;
-                                    const double u_i = u_unshocked*(1.0 - f_sm) + u_air*f_sm;
-                                    const double v_i = v_unshocked*(1.0 - f_sm) + v_air*f_sm;
-                                    const double p_i = p_unshocked*(1.0 - f_sm) + p_air*f_sm;
-                                    
-                                    const double rho_i = rho_Y_0_i + rho_Y_1_i;
-                                    const double Y_0_i = rho_Y_0_i/rho_i;
-                                    const double Y_1_i = 1.0 - Y_0_i;
-                                    
-                                    const double gamma_i = (Y_0_i*c_p_SF6 + Y_1_i*c_p_air)/
-                                        (Y_0_i*c_v_SF6 + Y_1_i*c_v_air);
-                                    
-                                    rho_Y_0[idx_cell] = rho_Y_0_i;
-                                    rho_Y_1[idx_cell] = rho_Y_1_i;
-                                    rho_u[idx_cell]   = rho_i*u_i;
-                                    rho_v[idx_cell]   = rho_i*v_i;
-                                    E[idx_cell]       = p_i/(gamma_i - 1.0) + 0.5*rho_i*(u_i*u_i + v_i*v_i);
-                                }
-                            }
-                        }
-                    }
-                    else if (d_project_name.find("2D Poggi's RMI 1mm smooth interface reduced domain size") != std::string::npos)
-                    {
-                        if (d_num_species != 2)
-                        {
-                            TBOX_ERROR(d_object_name
-                                << ": "
-                                << "Please provide only two-species for the problem"
-                                << " '2D Poggi's RMI'."
-                                << std::endl);
-                        }
-                        
-                        /*
-                         * Get the settings.
-                         */
-                        
-                        std::string settings = d_project_name.substr(56);
-                        
-                        std::stringstream ss(settings);
-                        
-                        std::string A_idx_str;
-                        std::string m_idx_str;
-                        std::string random_seed_str;
-                        
-                        std::getline(ss, A_idx_str, '-');
-                        std::getline(ss, m_idx_str, '-');
-                        std::getline(ss, random_seed_str);
-                        
-                        double A_candidates[] = {sqrt(2.0)*0.01e-3, sqrt(2.0)*0.04e-3, sqrt(2.0)*0.16e-3};
-                        int m_min_candidates[] = {20, 15, 10};
-                        int m_max_candidates[] = {30, 30, 30};
-                        
-                        // Seed for "random" phase shifts.
-                        int random_seed = std::stoi(random_seed_str) - 1;
-                        
-                        double phase_shifts[21];
-                        if (random_seed == 0)
-                        {
-                            phase_shifts[0] = 5.119059895756811000e+000;
-                            phase_shifts[1] = 5.691258590395267300e+000;
-                            phase_shifts[2] = 7.978816983408705300e-001;
-                            phase_shifts[3] = 5.738909759225261800e+000;
-                            phase_shifts[4] = 3.973230324742651500e+000;
-                            phase_shifts[5] = 6.128644395486362300e-001;
-                            phase_shifts[6] = 1.749855916861123200e+000;
-                            phase_shifts[7] = 3.436157926236805200e+000;
-                            phase_shifts[8] = 6.016192879924800800e+000;
-                            phase_shifts[9] = 6.062573467430127000e+000;
-                            phase_shifts[10] = 9.903121990156674700e-001;
-                            phase_shifts[11] = 6.098414305612863000e+000;
-                            phase_shifts[12] = 6.014057305717998700e+000;
-                            phase_shifts[13] = 3.049705144518116000e+000;
-                            phase_shifts[14] = 5.028310483744898600e+000;
-                            phase_shifts[15] = 8.914981581520268200e-001;
-                            phase_shifts[16] = 2.650004294134627800e+000;
-                            phase_shifts[17] = 5.753735997130328400e+000;
-                            phase_shifts[18] = 4.977585453328568800e+000;
-                            phase_shifts[19] = 6.028668715861979200e+000;
-                            phase_shifts[20] = 4.120140326260335300e+000;
-                        }
-                        else
-                        {
-                            phase_shifts[0] = 2.620226532717789200e+000;
-                            phase_shifts[1] = 4.525932273597345700e+000;
-                            phase_shifts[2] = 7.186381718527406600e-004;
-                            phase_shifts[3] = 1.899611578242180700e+000;
-                            phase_shifts[4] = 9.220944569241362700e-001;
-                            phase_shifts[5] = 5.801805019369201700e-001;
-                            phase_shifts[6] = 1.170307423440345900e+000;
-                            phase_shifts[7] = 2.171222082895173200e+000;
-                            phase_shifts[8] = 2.492963564452900500e+000;
-                            phase_shifts[9] = 3.385485386352383500e+000;
-                            phase_shifts[10] = 2.633876813749063600e+000;
-                            phase_shifts[11] = 4.305361097085856200e+000;
-                            phase_shifts[12] = 1.284611371532881700e+000;
-                            phase_shifts[13] = 5.517374574309792800e+000;
-                            phase_shifts[14] = 1.720813231802212400e-001;
-                            phase_shifts[15] = 4.212671608894216200e+000;
-                            phase_shifts[16] = 2.622003402848613000e+000;
-                            phase_shifts[17] = 3.510351721361030500e+000;
-                            phase_shifts[18] = 8.820771499014955500e-001;
-                            phase_shifts[19] = 1.244708365548507600e+000;
-                            phase_shifts[20] = 5.031226508705986900e+000;
-                        }
-                        
-                        // Amplitude.
-                        double A = A_candidates[std::stoi(A_idx_str) - 1];
-                        
-                        // Bounds of wavenumbers for initial perturbations.
-                        int m_min = m_min_candidates[std::stoi(m_idx_str) - 1];
-                        int m_max = m_max_candidates[std::stoi(m_idx_str) - 1];
-                        
-                        // Characteristic length of the initial interface thickness.
-                        const double epsilon_i = 0.001;
-                        
-                        double* rho_Y_0   = partial_density->getPointer(0);
-                        double* rho_Y_1   = partial_density->getPointer(1);
-                        double* rho_u     = momentum->getPointer(0);
-                        double* rho_v     = momentum->getPointer(1);
-                        double* E         = total_energy->getPointer(0);
-                        
-                        // species 0: SF6.
-                        // species 1: air.
-                        const double gamma_0 = 1.09312;
-                        const double gamma_1 = 1.39909;
-                        
-                        const double c_p_SF6 = 668.286;
-                        const double c_p_air = 1040.50;
-                        
-                        const double c_v_SF6 = 611.359;
-                        const double c_v_air = 743.697;
-                        
-                        NULL_USE(gamma_1);
-                        
-                        // Unshocked SF6.
-                        const double rho_unshocked = 5.97286552525647;
-                        const double u_unshocked   = 0.0;
-                        const double v_unshocked   = 0.0;
-                        const double p_unshocked   = 101325.0;
-                        
-                        // Shocked SF6.
-                        const double rho_shocked = 11.9708247309869;
-                        const double u_shocked   = 98.9344103891513;
-                        const double v_shocked   = 0.0;
-                        const double p_shocked   = 218005.430874;
-                        
-                        // Air.
-                        const double rho_air = 1.14560096494103;
-                        const double u_air   = 0.0;
-                        const double v_air   = 0.0;
-                        const double p_air   = 101325.0;
-                        
-                        // Shock hits the interface after 0.05 ms.
-                        const double L_x_shock = 0.190127254739019;
-                        const double L_x_interface = 0.2;
-                        
-                        for (int j = 0; j < patch_dims[1]; j++)
-                        {
-                            for (int i = 0; i < patch_dims[0]; i++)
-                            {
-                                // Compute the linear index.
-                                int idx_cell = i + j*patch_dims[0];
-                                
-                                // Compute the coordinates.
-                                double x[2];
-                                x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
-                                x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
-                                
-                                double S = 0.0;
-                                for (int m = m_min; m <= m_max; m++)
-                                {
-                                    S += A*cos(2.0*M_PI*m/0.025*x[1] + phase_shifts[30 - m]);
                                 }
                                 
                                 if (x[0] < L_x_shock)
@@ -2313,6 +2313,199 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                             }
                         }
                     }
+                    else if (d_project_name.find("3D Poggi's RMI 1mm smooth interface reduced domain size") != std::string::npos)
+                    {
+                        if (d_num_species != 2)
+                        {
+                            TBOX_ERROR(d_object_name
+                                << ": "
+                                << "Please provide only two-species for the problem"
+                                << " '3D Poggi's RMI'."
+                                << std::endl);
+                        }
+                        
+                        /*
+                         * Get the settings.
+                         */
+                        
+                        std::string settings = d_project_name.substr(56);
+                        
+                        std::stringstream ss(settings);
+                        
+                        std::string A_idx_str;
+                        std::string m_idx_str;
+                        
+                        std::getline(ss, A_idx_str, '-');
+                        std::getline(ss, m_idx_str);
+                        
+                        double A_candidates[] = {sqrt(2.0)*0.01e-3, sqrt(2.0)*0.04e-3, sqrt(2.0)*0.16e-3};
+                        int m_min_candidates[] = {20, 15, 10};
+                        int m_max_candidates[] = {30, 30, 30};
+                        
+                        double phase_shifts_x[21];
+                        double phase_shifts_y[21];
+                        
+                        phase_shifts_x[0] = 5.119059895756811000e+000;
+                        phase_shifts_x[1] = 5.691258590395267300e+000;
+                        phase_shifts_x[2] = 7.978816983408705300e-001;
+                        phase_shifts_x[3] = 5.738909759225261800e+000;
+                        phase_shifts_x[4] = 3.973230324742651500e+000;
+                        phase_shifts_x[5] = 6.128644395486362300e-001;
+                        phase_shifts_x[6] = 1.749855916861123200e+000;
+                        phase_shifts_x[7] = 3.436157926236805200e+000;
+                        phase_shifts_x[8] = 6.016192879924800800e+000;
+                        phase_shifts_x[9] = 6.062573467430127000e+000;
+                        phase_shifts_x[10] = 9.903121990156674700e-001;
+                        phase_shifts_x[11] = 6.098414305612863000e+000;
+                        phase_shifts_x[12] = 6.014057305717998700e+000;
+                        phase_shifts_x[13] = 3.049705144518116000e+000;
+                        phase_shifts_x[14] = 5.028310483744898600e+000;
+                        phase_shifts_x[15] = 8.914981581520268200e-001;
+                        phase_shifts_x[16] = 2.650004294134627800e+000;
+                        phase_shifts_x[17] = 5.753735997130328400e+000;
+                        phase_shifts_x[18] = 4.977585453328568800e+000;
+                        phase_shifts_x[19] = 6.028668715861979200e+000;
+                        phase_shifts_x[20] = 4.120140326260335300e+000;
+                        
+                        phase_shifts_y[0] = 2.620226532717789200e+000;
+                        phase_shifts_y[1] = 4.525932273597345700e+000;
+                        phase_shifts_y[2] = 7.186381718527406600e-004;
+                        phase_shifts_y[3] = 1.899611578242180700e+000;
+                        phase_shifts_y[4] = 9.220944569241362700e-001;
+                        phase_shifts_y[5] = 5.801805019369201700e-001;
+                        phase_shifts_y[6] = 1.170307423440345900e+000;
+                        phase_shifts_y[7] = 2.171222082895173200e+000;
+                        phase_shifts_y[8] = 2.492963564452900500e+000;
+                        phase_shifts_y[9] = 3.385485386352383500e+000;
+                        phase_shifts_y[10] = 2.633876813749063600e+000;
+                        phase_shifts_y[11] = 4.305361097085856200e+000;
+                        phase_shifts_y[12] = 1.284611371532881700e+000;
+                        phase_shifts_y[13] = 5.517374574309792800e+000;
+                        phase_shifts_y[14] = 1.720813231802212400e-001;
+                        phase_shifts_y[15] = 4.212671608894216200e+000;
+                        phase_shifts_y[16] = 2.622003402848613000e+000;
+                        phase_shifts_y[17] = 3.510351721361030500e+000;
+                        phase_shifts_y[18] = 8.820771499014955500e-001;
+                        phase_shifts_y[19] = 1.244708365548507600e+000;
+                        phase_shifts_y[20] = 5.031226508705986900e+000;
+                        
+                        // Amplitude.
+                        double A = A_candidates[std::stoi(A_idx_str) - 1];
+                        
+                        // Bounds of wavenumbers for initial perturbations.
+                        int m_min = m_min_candidates[std::stoi(m_idx_str) - 1];
+                        int m_max = m_max_candidates[std::stoi(m_idx_str) - 1];
+                        
+                        // Characteristic length of the initial interface thickness.
+                        const double epsilon_i = 0.001;
+                        
+                        double* rho_Y_0   = partial_density->getPointer(0);
+                        double* rho_Y_1   = partial_density->getPointer(1);
+                        double* rho_u     = momentum->getPointer(0);
+                        double* rho_v     = momentum->getPointer(1);
+                        double* rho_w     = momentum->getPointer(2);
+                        double* E         = total_energy->getPointer(0);
+                        
+                        // species 0: SF6.
+                        // species 1: air.
+                        const double gamma_0 = 1.09312;
+                        const double gamma_1 = 1.39909;
+                        
+                        const double c_p_SF6 = 668.286;
+                        const double c_p_air = 1040.50;
+                        
+                        const double c_v_SF6 = 611.359;
+                        const double c_v_air = 743.697;
+                        
+                        NULL_USE(gamma_1);
+                        
+                        // Unshocked SF6.
+                        const double rho_unshocked = 5.97286552525647;
+                        const double u_unshocked   = 0.0;
+                        const double v_unshocked   = 0.0;
+                        const double w_unshocked   = 0.0;
+                        const double p_unshocked   = 101325.0;
+                        
+                        // Shocked SF6.
+                        const double rho_shocked = 11.9708247309869;
+                        const double u_shocked   = 98.9344103891513;
+                        const double v_shocked   = 0.0;
+                        const double w_shocked   = 0.0;
+                        const double p_shocked   = 218005.430874;
+                        
+                        // Air.
+                        const double rho_air = 1.14560096494103;
+                        const double u_air   = 0.0;
+                        const double v_air   = 0.0;
+                        const double w_air   = 0.0;
+                        const double p_air   = 101325.0;
+                        
+                        // Shock hits the interface after 0.05 ms.
+                        const double L_x_shock = 0.190127254739019;
+                        const double L_x_interface = 0.2;
+                        
+                        for (int k = 0; k < patch_dims[2]; k++)
+                        {
+                            for (int j = 0; j < patch_dims[1]; j++)
+                            {
+                                for (int i = 0; i < patch_dims[0]; i++)
+                                {
+                                    // Compute the linear index.
+                                    int idx_cell = i + j*patch_dims[0] + k*patch_dims[0]*patch_dims[1];
+                                    
+                                    // Compute the coordinates.
+                                    double x[3];
+                                    x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
+                                    x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
+                                    x[2] = patch_xlo[2] + (k + 0.5)*dx[2];
+                                    
+                                    double S = 0.0;
+                                    for (int m = m_min; m <= m_max; m++)
+                                    {
+                                        S += A*cos(2.0*M_PI*m/0.025*x[1] + phase_shifts_x[30 - m])*
+                                            cos(2.0*M_PI*m/0.025*x[2] + phase_shifts_y[30 - m]);
+                                    }
+                                    
+                                    if (x[0] < L_x_shock)
+                                    {
+                                        rho_Y_0[idx_cell] = rho_shocked;
+                                        rho_Y_1[idx_cell] = 0.0;
+                                        rho_u[idx_cell]   = rho_shocked*u_shocked;
+                                        rho_v[idx_cell]   = rho_shocked*v_shocked;
+                                        rho_w[idx_cell]   = rho_shocked*w_shocked;
+                                        E[idx_cell]       = p_shocked/(gamma_0 - 1.0) +
+                                            0.5*rho_shocked*(u_shocked*u_shocked + v_shocked*v_shocked + w_shocked*w_shocked);
+                                    }
+                                    else
+                                    {
+                                        const double f_sm = 0.5*(1.0 + erf((x[0] - (L_x_interface + S))/epsilon_i));
+                                        
+                                        // Smooth the primitive variables.
+                                        const double rho_Y_0_i = rho_unshocked*(1.0 - f_sm);
+                                        const double rho_Y_1_i = rho_air*f_sm;
+                                        const double u_i = u_unshocked*(1.0 - f_sm) + u_air*f_sm;
+                                        const double v_i = v_unshocked*(1.0 - f_sm) + v_air*f_sm;
+                                        const double w_i = w_unshocked*(1.0 - f_sm) + w_air*f_sm;
+                                        const double p_i = p_unshocked*(1.0 - f_sm) + p_air*f_sm;
+                                        
+                                        const double rho_i = rho_Y_0_i + rho_Y_1_i;
+                                        const double Y_0_i = rho_Y_0_i/rho_i;
+                                        const double Y_1_i = 1.0 - Y_0_i;
+                                        
+                                        const double gamma_i = (Y_0_i*c_p_SF6 + Y_1_i*c_p_air)/
+                                            (Y_0_i*c_v_SF6 + Y_1_i*c_v_air);
+                                        
+                                        rho_Y_0[idx_cell] = rho_Y_0_i;
+                                        rho_Y_1[idx_cell] = rho_Y_1_i;
+                                        rho_u[idx_cell]   = rho_i*u_i;
+                                        rho_v[idx_cell]   = rho_i*v_i;
+                                        rho_w[idx_cell]   = rho_i*w_i;
+                                        E[idx_cell]       = p_i/(gamma_i - 1.0) + 0.5*rho_i*(u_i*u_i + v_i*v_i + w_i*w_i);
+                                    }
+                                }
+                            }
+                        }
+                    }
                     else if (d_project_name.find("3D Poggi's RMI 1mm smooth interface") != std::string::npos)
                     {
                         if (d_num_species != 2)
@@ -2504,199 +2697,6 @@ NavierStokesInitialConditions::initializeDataOnPatch(
                                     {
                                         S += A*cos(2.0*M_PI*m/0.05*x[1] + phase_shifts_x[60 - m])*
                                             cos(2.0*M_PI*m/0.05*x[2] + phase_shifts_y[60 - m]);
-                                    }
-                                    
-                                    if (x[0] < L_x_shock)
-                                    {
-                                        rho_Y_0[idx_cell] = rho_shocked;
-                                        rho_Y_1[idx_cell] = 0.0;
-                                        rho_u[idx_cell]   = rho_shocked*u_shocked;
-                                        rho_v[idx_cell]   = rho_shocked*v_shocked;
-                                        rho_w[idx_cell]   = rho_shocked*w_shocked;
-                                        E[idx_cell]       = p_shocked/(gamma_0 - 1.0) +
-                                            0.5*rho_shocked*(u_shocked*u_shocked + v_shocked*v_shocked + w_shocked*w_shocked);
-                                    }
-                                    else
-                                    {
-                                        const double f_sm = 0.5*(1.0 + erf((x[0] - (L_x_interface + S))/epsilon_i));
-                                        
-                                        // Smooth the primitive variables.
-                                        const double rho_Y_0_i = rho_unshocked*(1.0 - f_sm);
-                                        const double rho_Y_1_i = rho_air*f_sm;
-                                        const double u_i = u_unshocked*(1.0 - f_sm) + u_air*f_sm;
-                                        const double v_i = v_unshocked*(1.0 - f_sm) + v_air*f_sm;
-                                        const double w_i = w_unshocked*(1.0 - f_sm) + w_air*f_sm;
-                                        const double p_i = p_unshocked*(1.0 - f_sm) + p_air*f_sm;
-                                        
-                                        const double rho_i = rho_Y_0_i + rho_Y_1_i;
-                                        const double Y_0_i = rho_Y_0_i/rho_i;
-                                        const double Y_1_i = 1.0 - Y_0_i;
-                                        
-                                        const double gamma_i = (Y_0_i*c_p_SF6 + Y_1_i*c_p_air)/
-                                            (Y_0_i*c_v_SF6 + Y_1_i*c_v_air);
-                                        
-                                        rho_Y_0[idx_cell] = rho_Y_0_i;
-                                        rho_Y_1[idx_cell] = rho_Y_1_i;
-                                        rho_u[idx_cell]   = rho_i*u_i;
-                                        rho_v[idx_cell]   = rho_i*v_i;
-                                        rho_w[idx_cell]   = rho_i*w_i;
-                                        E[idx_cell]       = p_i/(gamma_i - 1.0) + 0.5*rho_i*(u_i*u_i + v_i*v_i + w_i*w_i);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else if (d_project_name.find("3D Poggi's RMI 1mm smooth interface reduced domain size") != std::string::npos)
-                    {
-                        if (d_num_species != 2)
-                        {
-                            TBOX_ERROR(d_object_name
-                                << ": "
-                                << "Please provide only two-species for the problem"
-                                << " '3D Poggi's RMI'."
-                                << std::endl);
-                        }
-                        
-                        /*
-                         * Get the settings.
-                         */
-                        
-                        std::string settings = d_project_name.substr(56);
-                        
-                        std::stringstream ss(settings);
-                        
-                        std::string A_idx_str;
-                        std::string m_idx_str;
-                        
-                        std::getline(ss, A_idx_str, '-');
-                        std::getline(ss, m_idx_str);
-                        
-                        double A_candidates[] = {sqrt(2.0)*0.01e-3, sqrt(2.0)*0.04e-3, sqrt(2.0)*0.16e-3};
-                        int m_min_candidates[] = {20, 15, 10};
-                        int m_max_candidates[] = {30, 30, 30};
-                        
-                        double phase_shifts_x[21];
-                        double phase_shifts_y[21];
-                        
-                        phase_shifts_x[0] = 5.119059895756811000e+000;
-                        phase_shifts_x[1] = 5.691258590395267300e+000;
-                        phase_shifts_x[2] = 7.978816983408705300e-001;
-                        phase_shifts_x[3] = 5.738909759225261800e+000;
-                        phase_shifts_x[4] = 3.973230324742651500e+000;
-                        phase_shifts_x[5] = 6.128644395486362300e-001;
-                        phase_shifts_x[6] = 1.749855916861123200e+000;
-                        phase_shifts_x[7] = 3.436157926236805200e+000;
-                        phase_shifts_x[8] = 6.016192879924800800e+000;
-                        phase_shifts_x[9] = 6.062573467430127000e+000;
-                        phase_shifts_x[10] = 9.903121990156674700e-001;
-                        phase_shifts_x[11] = 6.098414305612863000e+000;
-                        phase_shifts_x[12] = 6.014057305717998700e+000;
-                        phase_shifts_x[13] = 3.049705144518116000e+000;
-                        phase_shifts_x[14] = 5.028310483744898600e+000;
-                        phase_shifts_x[15] = 8.914981581520268200e-001;
-                        phase_shifts_x[16] = 2.650004294134627800e+000;
-                        phase_shifts_x[17] = 5.753735997130328400e+000;
-                        phase_shifts_x[18] = 4.977585453328568800e+000;
-                        phase_shifts_x[19] = 6.028668715861979200e+000;
-                        phase_shifts_x[20] = 4.120140326260335300e+000;
-                        
-                        phase_shifts_y[0] = 2.620226532717789200e+000;
-                        phase_shifts_y[1] = 4.525932273597345700e+000;
-                        phase_shifts_y[2] = 7.186381718527406600e-004;
-                        phase_shifts_y[3] = 1.899611578242180700e+000;
-                        phase_shifts_y[4] = 9.220944569241362700e-001;
-                        phase_shifts_y[5] = 5.801805019369201700e-001;
-                        phase_shifts_y[6] = 1.170307423440345900e+000;
-                        phase_shifts_y[7] = 2.171222082895173200e+000;
-                        phase_shifts_y[8] = 2.492963564452900500e+000;
-                        phase_shifts_y[9] = 3.385485386352383500e+000;
-                        phase_shifts_y[10] = 2.633876813749063600e+000;
-                        phase_shifts_y[11] = 4.305361097085856200e+000;
-                        phase_shifts_y[12] = 1.284611371532881700e+000;
-                        phase_shifts_y[13] = 5.517374574309792800e+000;
-                        phase_shifts_y[14] = 1.720813231802212400e-001;
-                        phase_shifts_y[15] = 4.212671608894216200e+000;
-                        phase_shifts_y[16] = 2.622003402848613000e+000;
-                        phase_shifts_y[17] = 3.510351721361030500e+000;
-                        phase_shifts_y[18] = 8.820771499014955500e-001;
-                        phase_shifts_y[19] = 1.244708365548507600e+000;
-                        phase_shifts_y[20] = 5.031226508705986900e+000;
-                        
-                        // Amplitude.
-                        double A = A_candidates[std::stoi(A_idx_str) - 1];
-                        
-                        // Bounds of wavenumbers for initial perturbations.
-                        int m_min = m_min_candidates[std::stoi(m_idx_str) - 1];
-                        int m_max = m_max_candidates[std::stoi(m_idx_str) - 1];
-                        
-                        // Characteristic length of the initial interface thickness.
-                        const double epsilon_i = 0.001;
-                        
-                        double* rho_Y_0   = partial_density->getPointer(0);
-                        double* rho_Y_1   = partial_density->getPointer(1);
-                        double* rho_u     = momentum->getPointer(0);
-                        double* rho_v     = momentum->getPointer(1);
-                        double* rho_w     = momentum->getPointer(2);
-                        double* E         = total_energy->getPointer(0);
-                        
-                        // species 0: SF6.
-                        // species 1: air.
-                        const double gamma_0 = 1.09312;
-                        const double gamma_1 = 1.39909;
-                        
-                        const double c_p_SF6 = 668.286;
-                        const double c_p_air = 1040.50;
-                        
-                        const double c_v_SF6 = 611.359;
-                        const double c_v_air = 743.697;
-                        
-                        NULL_USE(gamma_1);
-                        
-                        // Unshocked SF6.
-                        const double rho_unshocked = 5.97286552525647;
-                        const double u_unshocked   = 0.0;
-                        const double v_unshocked   = 0.0;
-                        const double w_unshocked   = 0.0;
-                        const double p_unshocked   = 101325.0;
-                        
-                        // Shocked SF6.
-                        const double rho_shocked = 11.9708247309869;
-                        const double u_shocked   = 98.9344103891513;
-                        const double v_shocked   = 0.0;
-                        const double w_shocked   = 0.0;
-                        const double p_shocked   = 218005.430874;
-                        
-                        // Air.
-                        const double rho_air = 1.14560096494103;
-                        const double u_air   = 0.0;
-                        const double v_air   = 0.0;
-                        const double w_air   = 0.0;
-                        const double p_air   = 101325.0;
-                        
-                        // Shock hits the interface after 0.05 ms.
-                        const double L_x_shock = 0.190127254739019;
-                        const double L_x_interface = 0.2;
-                        
-                        for (int k = 0; k < patch_dims[2]; k++)
-                        {
-                            for (int j = 0; j < patch_dims[1]; j++)
-                            {
-                                for (int i = 0; i < patch_dims[0]; i++)
-                                {
-                                    // Compute the linear index.
-                                    int idx_cell = i + j*patch_dims[0] + k*patch_dims[0]*patch_dims[1];
-                                    
-                                    // Compute the coordinates.
-                                    double x[3];
-                                    x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
-                                    x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
-                                    x[2] = patch_xlo[2] + (k + 0.5)*dx[2];
-                                    
-                                    double S = 0.0;
-                                    for (int m = m_min; m <= m_max; m++)
-                                    {
-                                        S += A*cos(2.0*M_PI*m/0.025*x[1] + phase_shifts_x[30 - m])*
-                                            cos(2.0*M_PI*m/0.025*x[2] + phase_shifts_y[30 - m]);
                                     }
                                     
                                     if (x[0] < L_x_shock)
