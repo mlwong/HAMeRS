@@ -10772,107 +10772,11 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataDensity(
         boost::shared_ptr<pdat::CellData<double> > data_partial_density =
             getGlobalCellDataPartialDensity();
         
-        // Get the pointers to the cell data of density and partial density.
-        double* rho = d_data_density->getPointer(0);
-        std::vector<double*> Z_rho;
-        Z_rho.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Z_rho.push_back(data_partial_density->getPointer(si));
-        }
-        
-        if (d_dim == tbox::Dimension(1))
-        {
-            // Compute the density field.
-            for (int i = -d_num_subghosts_density[0];
-                 i < d_interior_dims[0] + d_num_subghosts_density[0];
-                 i++)
-            {
-                // Compute the linear indices.
-                const int idx = i + d_num_ghosts[0];
-                const int idx_density = i + d_num_subghosts_density[0];
-                
-                std::vector<const double*> Z_rho_ptr;
-                Z_rho_ptr.reserve(d_num_species);
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    Z_rho_ptr.push_back(&Z_rho[si][idx]);
-                }
-                
-                rho[idx_density] = d_equation_of_state_mixing_rules->
-                    getMixtureDensity(
-                        Z_rho_ptr);
-            }
-        }
-        else if (d_dim == tbox::Dimension(2))
-        {
-            // Compute the density field.
-            for (int j = -d_num_subghosts_density[1];
-                 j < d_interior_dims[1] + d_num_subghosts_density[1];
-                 j++)
-            {
-                for (int i = -d_num_subghosts_density[0];
-                     i < d_interior_dims[0] + d_num_subghosts_density[0];
-                     i++)
-                {
-                    // Compute the linear indices.
-                    const int idx = (i + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
-                    
-                    const int idx_density = (i + d_num_subghosts_density[0]) +
-                        (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
-                    
-                    std::vector<const double*> Z_rho_ptr;
-                    Z_rho_ptr.reserve(d_num_species);
-                    for (int si = 0; si < d_num_species; si++)
-                    {
-                        Z_rho_ptr.push_back(&Z_rho[si][idx]);
-                    }
-                    
-                    rho[idx_density] = d_equation_of_state_mixing_rules->
-                        getMixtureDensity(
-                            Z_rho_ptr);
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            // Compute the density field.
-            for (int k = -d_num_subghosts_density[2];
-                 k < d_interior_dims[2] + d_num_subghosts_density[2];
-                 k++)
-            {
-                for (int j = -d_num_subghosts_density[1];
-                     j < d_interior_dims[1] + d_num_subghosts_density[1];
-                     j++)
-                {
-                    for (int i = -d_num_subghosts_density[0];
-                         i < d_interior_dims[0] + d_num_subghosts_density[0];
-                         i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
-                        
-                        const int idx_density = (i + d_num_subghosts_density[0]) +
-                            (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
-                            (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*d_subghostcell_dims_density[1];
-                        
-                        std::vector<const double*> Z_rho_ptr;
-                        Z_rho_ptr.reserve(d_num_species);
-                        for (int si = 0; si < d_num_species; si++)
-                        {
-                            Z_rho_ptr.push_back(&Z_rho[si][idx]);
-                        }
-                        
-                        rho[idx_density] = d_equation_of_state_mixing_rules->
-                            getMixtureDensity(
-                                Z_rho_ptr);
-                    }
-                }
-            }
-        }
+        // Compute the density field.
+        d_equation_of_state_mixing_rules->computeMixtureDensity(
+            d_data_density,
+            data_partial_density,
+            d_subghost_box_density);
     }
     else
     {
@@ -11327,174 +11231,14 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataPressureWithDensityMassFractionAnd
             computeGlobalCellDataInternalEnergyWithDensityAndVelocity();
         }
         
-        // Get the pointers to the cell data of pressure, volume fraction, density, mass fraction
-        // and internal energy.
-        double* p   = d_data_pressure->getPointer(0);
-        std::vector<double*> Z;
-        Z.reserve(d_num_species - 1);
-        for (int si = 0; si < d_num_species - 1; si++)
-        {
-            Z.push_back(data_volume_fraction->getPointer(si));
-        }
-        double* rho = d_data_density->getPointer(0);
-        std::vector<double*> Y;
-        Y.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y.push_back(d_data_mass_fraction->getPointer(si));
-        }
-        double* epsilon = d_data_internal_energy->getPointer(0);
-        
-        if (d_dim == tbox::Dimension(1))
-        {
-            // Compute the pressure field.
-            for (int i = -d_num_subghosts_pressure[0];
-                 i < d_interior_dims[0] + d_num_subghosts_pressure[0];
-                 i++)
-            {
-                // Compute the linear indices.
-                const int idx = i + d_num_ghosts[0];
-                const int idx_density = i + d_num_subghosts_density[0];
-                const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
-                const int idx_internal_energy = i + d_num_subghosts_internal_energy[0];
-                const int idx_pressure = i + d_num_subghosts_pressure[0];
-                
-                std::vector<const double*> Y_ptr;
-                Y_ptr.reserve(d_num_species);
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    Y_ptr.push_back(&Y[si][idx_mass_fraction]);
-                }
-                
-                std::vector<const double*> Z_ptr;
-                Z_ptr.reserve(d_num_species - 1);
-                for (int si = 0; si < d_num_species - 1; si++)
-                {
-                    Z_ptr.push_back(&Z[si][idx]);
-                }
-                
-                p[idx_pressure] = d_equation_of_state_mixing_rules->
-                    getPressure(
-                        &rho[idx_density],
-                        &epsilon[idx_internal_energy],
-                        Y_ptr,
-                        Z_ptr);
-            }
-        }
-        else if (d_dim == tbox::Dimension(2))
-        {
-            // Compute the pressure field.
-            for (int j = -d_num_subghosts_pressure[1];
-                 j < d_interior_dims[1] + d_num_subghosts_pressure[1];
-                 j++)
-            {
-                for (int i = -d_num_subghosts_pressure[0];
-                     i < d_interior_dims[0] + d_num_subghosts_pressure[0];
-                     i++)
-                {
-                    // Compute the linear indices.
-                    const int idx = (i + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
-                    
-                    const int idx_density = (i + d_num_subghosts_density[0]) +
-                        (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
-                    
-                    const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                        (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
-                    
-                    const int idx_internal_energy = (i + d_num_subghosts_internal_energy[0]) +
-                        (j + d_num_subghosts_internal_energy[1])*d_subghostcell_dims_internal_energy[0];
-                    
-                    const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                        (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
-                    
-                    std::vector<const double*> Y_ptr;
-                    Y_ptr.reserve(d_num_species);
-                    for (int si = 0; si < d_num_species; si++)
-                    {
-                        Y_ptr.push_back(&Y[si][idx_mass_fraction]);
-                    }
-                    
-                    std::vector<const double*> Z_ptr;
-                    Z_ptr.reserve(d_num_species - 1);
-                    for (int si = 0; si < d_num_species - 1; si++)
-                    {
-                        Z_ptr.push_back(&Z[si][idx]);
-                    }
-                    
-                    p[idx_pressure] = d_equation_of_state_mixing_rules->
-                        getPressure(
-                            &rho[idx_density],
-                            &epsilon[idx_internal_energy],
-                            Y_ptr,
-                            Z_ptr);
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            // Compute the pressure field.
-            for (int k = -d_num_subghosts_pressure[2];
-                 k < d_interior_dims[2] + d_num_subghosts_pressure[2];
-                 k++)
-            {
-                for (int j = -d_num_subghosts_pressure[1];
-                     j < d_interior_dims[1] + d_num_subghosts_pressure[1];
-                     j++)
-                {
-                    for (int i = -d_num_subghosts_pressure[0];
-                         i < d_interior_dims[0] + d_num_subghosts_pressure[0];
-                         i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
-                        
-                        const int idx_density = (i + d_num_subghosts_density[0]) +
-                            (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
-                            (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
-                                d_subghostcell_dims_density[1];
-                        
-                        const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                            (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
-                            (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*
-                                d_subghostcell_dims_mass_fraction[1];
-                        
-                        const int idx_internal_energy = (i + d_num_subghosts_internal_energy[0]) +
-                            (j + d_num_subghosts_internal_energy[1])*d_subghostcell_dims_internal_energy[0] +
-                            (k + d_num_subghosts_internal_energy[2])*d_subghostcell_dims_internal_energy[0]*
-                                d_subghostcell_dims_internal_energy[1];
-                        
-                        const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                            (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
-                            (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
-                                d_subghostcell_dims_pressure[1];
-                        
-                        std::vector<const double*> Y_ptr;
-                        Y_ptr.reserve(d_num_species);
-                        for (int si = 0; si < d_num_species; si++)
-                        {
-                            Y_ptr.push_back(&Y[si][idx_mass_fraction]);
-                        }
-                        
-                        std::vector<const double*> Z_ptr;
-                        Z_ptr.reserve(d_num_species - 1);
-                        for (int si = 0; si < d_num_species - 1; si++)
-                        {
-                            Z_ptr.push_back(&Z[si][idx]);
-                        }
-                        
-                        p[idx_pressure] = d_equation_of_state_mixing_rules->
-                            getPressure(
-                                &rho[idx_density],
-                                &epsilon[idx_internal_energy],
-                                Y_ptr,
-                                Z_ptr);
-                    }
-                }
-            }
-        }
+        // Compute the pressure field.
+        d_equation_of_state_mixing_rules->computePressure(
+            d_data_pressure,
+            d_data_density,
+            d_data_internal_energy,
+            d_data_mass_fraction,
+            data_volume_fraction,
+            d_subghost_box_pressure);
     }
     else
     {
@@ -11540,174 +11284,14 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityMassFractionA
             computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
         }
         
-        // Get the pointers to the cell data of sound speed, density, mass fraction, pressure and
-        // volume fraction.
-        double* c   = d_data_sound_speed->getPointer(0);
-        double* rho = d_data_density->getPointer(0);
-        std::vector<double*> Y;
-        Y.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y.push_back(d_data_mass_fraction->getPointer(si));
-        }
-        double* p   = d_data_pressure->getPointer(0);
-        std::vector<double*> Z;
-        Z.reserve(d_num_species - 1);
-        for (int si = 0; si < d_num_species - 1; si++)
-        {
-            Z.push_back(data_volume_fraction->getPointer(si));
-        }
-        
-        if (d_dim == tbox::Dimension(1))
-        {
-            // Compute the sound speed field.
-            for (int i = -d_num_subghosts_sound_speed[0];
-                 i < d_interior_dims[0] + d_num_subghosts_sound_speed[0];
-                 i++)
-            {
-                // Compute the linear indices.
-                const int idx = i + d_num_ghosts[0];
-                const int idx_density = i + d_num_subghosts_density[0];
-                const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
-                const int idx_pressure = i + d_num_subghosts_pressure[0];
-                const int idx_sound_speed = i + d_num_subghosts_sound_speed[0];
-                
-                std::vector<const double*> Y_ptr;
-                Y_ptr.reserve(d_num_species);
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    Y_ptr.push_back(&Y[si][idx_mass_fraction]);
-                }
-                
-                std::vector<const double*> Z_ptr;
-                Z_ptr.reserve(d_num_species - 1);
-                for (int si = 0; si < d_num_species - 1; si++)
-                {
-                    Z_ptr.push_back(&Z[si][idx]);
-                }
-                
-                c[idx_sound_speed] = d_equation_of_state_mixing_rules->
-                    getSoundSpeed(
-                        &rho[idx_density],
-                        &p[idx_pressure],
-                        Y_ptr,
-                        Z_ptr);
-            }
-        }
-        else if (d_dim == tbox::Dimension(2))
-        {
-            // Compute the sound speed field.
-            for (int j = -d_num_subghosts_sound_speed[1];
-                 j < d_interior_dims[1] + d_num_subghosts_sound_speed[1];
-                 j++)
-            {
-                for (int i = -d_num_subghosts_sound_speed[0];
-                     i < d_interior_dims[0] + d_num_subghosts_sound_speed[0];
-                     i++)
-                {
-                    // Compute the linear indices.
-                    const int idx = (i + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
-                    
-                    const int idx_density = (i + d_num_subghosts_density[0]) +
-                        (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
-                    
-                    const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                        (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
-                    
-                    const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                        (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
-                    
-                    const int idx_sound_speed = (i + d_num_subghosts_sound_speed[0]) +
-                        (j + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
-                    
-                    std::vector<const double*> Y_ptr;
-                    Y_ptr.reserve(d_num_species);
-                    for (int si = 0; si < d_num_species; si++)
-                    {
-                        Y_ptr.push_back(&Y[si][idx_mass_fraction]);
-                    }
-                    
-                    std::vector<const double*> Z_ptr;
-                    Z_ptr.reserve(d_num_species - 1);
-                    for (int si = 0; si < d_num_species - 1; si++)
-                    {
-                        Z_ptr.push_back(&Z[si][idx]);
-                    }
-                    
-                    c[idx_sound_speed] = d_equation_of_state_mixing_rules->
-                        getSoundSpeed(
-                            &rho[idx_density],
-                            &p[idx_pressure],
-                            Y_ptr,
-                            Z_ptr);
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            // Compute the sound speed field.
-            for (int k = -d_num_subghosts_sound_speed[2];
-                 k < d_interior_dims[2] + d_num_subghosts_sound_speed[2];
-                 k++)
-            {
-                for (int j = -d_num_subghosts_sound_speed[1];
-                     j < d_interior_dims[1] + d_num_subghosts_sound_speed[1];
-                     j++)
-                {
-                    for (int i = -d_num_subghosts_sound_speed[0];
-                         i < d_interior_dims[0] + d_num_subghosts_sound_speed[0];
-                         i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
-                        
-                        const int idx_density = (i + d_num_subghosts_density[0]) +
-                            (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
-                            (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
-                                d_subghostcell_dims_density[1];
-                        
-                        const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                            (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
-                            (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*
-                                d_subghostcell_dims_mass_fraction[1];
-                        
-                        const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                            (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
-                            (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
-                                d_subghostcell_dims_pressure[1];
-                        
-                        const int idx_sound_speed = (i + d_num_subghosts_sound_speed[0]) +
-                            (j + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
-                            (k + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
-                                d_subghostcell_dims_sound_speed[1];
-                        
-                        std::vector<const double*> Y_ptr;
-                        Y_ptr.reserve(d_num_species);
-                        for (int si = 0; si < d_num_species; si++)
-                        {
-                            Y_ptr.push_back(&Y[si][idx_mass_fraction]);
-                        }
-                        
-                        std::vector<const double*> Z_ptr;
-                        Z_ptr.reserve(d_num_species - 1);
-                        for (int si = 0; si < d_num_species - 1; si++)
-                        {
-                            Z_ptr.push_back(&Z[si][idx]);
-                        }
-                        
-                        c[idx_sound_speed] = d_equation_of_state_mixing_rules->
-                            getSoundSpeed(
-                                &rho[idx_density],
-                                &p[idx_pressure],
-                                Y_ptr,
-                                Z_ptr);
-                    }
-                }
-            }
-        }
+        // Compute the sound speed field.
+        d_equation_of_state_mixing_rules->computeSoundSpeed(
+            d_data_sound_speed,
+            d_data_density,
+            d_data_pressure,
+            d_data_mass_fraction,
+            data_volume_fraction,
+            d_subghost_box_sound_speed);
     }
     else
     {
@@ -11746,15 +11330,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataTemperatureWithPressure(
         boost::shared_ptr<pdat::CellData<double> > data_volume_fraction =
             getGlobalCellDataVolumeFraction();
         
-        // Get the pointers to the cell data of temperature, pressure, partial density and
-        // volume fraction.
-        std::vector<double*> T;
-        T.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            T.push_back(d_data_temperature->getPointer(si));
-        }
-        double* p = d_data_pressure->getPointer(0);
+        // Get the pointers to the cell data of partial density and volume fraction.
         std::vector<double*> Z_rho;
         Z_rho.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
@@ -11769,14 +11345,18 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataTemperatureWithPressure(
         }
         
         // Compute the density of each species.
-        boost::shared_ptr<pdat::CellData<double> > data_density(
-            new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_temperature));
+        std::vector<boost::shared_ptr<pdat::CellData<double> > > data_density_species;
+        data_density_species.resize(d_num_species);
         
         std::vector<double*> rho;
         rho.reserve(d_num_species);
+        
         for (int si = 0; si < d_num_species; si++)
         {
-            rho.push_back(data_density->getPointer(si));
+            data_density_species[si].reset(
+                new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_temperature));
+            
+            rho.push_back(data_density_species[si]->getPointer(0));
         }
         
         boost::shared_ptr<pdat::CellData<double> > data_volume_fraction_last(
@@ -11923,14 +11503,18 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataTemperatureWithPressure(
         }
         
         // Compute the temperature of each species.
-        if (d_dim == tbox::Dimension(1))
+        
+        boost::shared_ptr<pdat::CellData<double> > data_temperature_species(
+            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_temperature));
+        
+        for (int si = 0; si < d_num_species; si++)
         {
             std::vector<double> species_thermo_properties;
             std::vector<double*> species_thermo_properties_ptr;
             std::vector<const double*> species_thermo_properties_const_ptr;
             
             const int num_thermo_properties = d_equation_of_state_mixing_rules->
-                getNumberOfSpeciesThermodynamicProperties();
+                getNumberOfSpeciesThermodynamicProperties(si);
             
             species_thermo_properties.resize(num_thermo_properties);
             species_thermo_properties_ptr.reserve(num_thermo_properties);
@@ -11942,137 +11526,19 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataTemperatureWithPressure(
                 species_thermo_properties_const_ptr.push_back(&species_thermo_properties[ti]);
             }
             
-            for (int si = 0; si < d_num_species; si++)
-            {
-                d_equation_of_state_mixing_rules->getSpeciesThermodynamicProperties(
-                    species_thermo_properties_ptr,
-                    si);
-                
-                for (int i = -d_num_subghosts_temperature[0];
-                     i < d_interior_dims[0] + d_num_subghosts_temperature[0];
-                     i++)
-                {
-                    // Compute the linear indices.
-                    const int idx_temperature = i + d_num_subghosts_temperature[0];
-                    const int idx_pressure = i + d_num_subghosts_pressure[0];
-                    
-                    T[si][idx_temperature] =
-                        d_equation_of_state_mixing_rules->getEquationOfState()->
-                            getTemperature(
-                                &rho[si][idx_temperature],
-                                &p[idx_pressure],
-                                species_thermo_properties_const_ptr);
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(2))
-        {
-            std::vector<double> species_thermo_properties;
-            std::vector<double*> species_thermo_properties_ptr;
-            std::vector<const double*> species_thermo_properties_const_ptr;
+            d_equation_of_state_mixing_rules->getSpeciesThermodynamicProperties(
+                species_thermo_properties_ptr,
+                si);
             
-            const int num_thermo_properties = d_equation_of_state_mixing_rules->
-                getNumberOfSpeciesThermodynamicProperties();
+            d_equation_of_state_mixing_rules->getEquationOfState(si)->
+                computeTemperature(
+                    data_temperature_species,
+                    data_density_species[si],
+                    d_data_pressure,
+                    species_thermo_properties_const_ptr,
+                    d_subghost_box_temperature);
             
-            species_thermo_properties.resize(num_thermo_properties);
-            species_thermo_properties_ptr.reserve(num_thermo_properties);
-            species_thermo_properties_const_ptr.reserve(num_thermo_properties);
-            
-            for (int ti = 0; ti < num_thermo_properties; ti++)
-            {
-                species_thermo_properties_ptr.push_back(&species_thermo_properties[ti]);
-                species_thermo_properties_const_ptr.push_back(&species_thermo_properties[ti]);
-            }
-            
-            for (int si = 0; si < d_num_species; si++)
-            {
-                d_equation_of_state_mixing_rules->getSpeciesThermodynamicProperties(
-                    species_thermo_properties_ptr,
-                    si);
-                
-                for (int j = -d_num_subghosts_temperature[1];
-                         j < d_interior_dims[1] + d_num_subghosts_temperature[1];
-                         j++)
-                {
-                    for (int i = -d_num_subghosts_temperature[0];
-                         i < d_interior_dims[0] + d_num_subghosts_temperature[0];
-                         i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                            (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0];
-                        
-                        const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                            (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
-                        
-                        T[si][idx_temperature] =
-                            d_equation_of_state_mixing_rules->getEquationOfState()->
-                                getTemperature(
-                                    &rho[si][idx_temperature],
-                                    &p[idx_pressure],
-                                    species_thermo_properties_const_ptr);
-                    }
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            std::vector<double> species_thermo_properties;
-            std::vector<double*> species_thermo_properties_ptr;
-            std::vector<const double*> species_thermo_properties_const_ptr;
-            
-            const int num_thermo_properties = d_equation_of_state_mixing_rules->
-                getNumberOfSpeciesThermodynamicProperties();
-            
-            species_thermo_properties.resize(num_thermo_properties);
-            species_thermo_properties_ptr.reserve(num_thermo_properties);
-            species_thermo_properties_const_ptr.reserve(num_thermo_properties);
-            
-            for (int ti = 0; ti < num_thermo_properties; ti++)
-            {
-                species_thermo_properties_ptr.push_back(&species_thermo_properties[ti]);
-                species_thermo_properties_const_ptr.push_back(&species_thermo_properties[ti]);
-            }
-            
-            for (int si = 0; si < d_num_species; si++)
-            {
-                d_equation_of_state_mixing_rules->getSpeciesThermodynamicProperties(
-                    species_thermo_properties_ptr,
-                    si);
-                
-                for (int k = -d_num_subghosts_temperature[2];
-                         k < d_interior_dims[2] + d_num_subghosts_temperature[2];
-                         k++)
-                {
-                    for (int j = -d_num_subghosts_temperature[1];
-                         j < d_interior_dims[1] + d_num_subghosts_temperature[1];
-                         j++)
-                    {
-                        for (int i = -d_num_subghosts_temperature[0];
-                             i < d_interior_dims[0] + d_num_subghosts_temperature[0];
-                             i++)
-                        {
-                            // Compute the linear indices.
-                            const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                                (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0] +
-                                (k + d_num_subghosts_temperature[2])*d_subghostcell_dims_temperature[0]*
-                                    d_subghostcell_dims_temperature[1];
-                            
-                            const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                                (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
-                                (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
-                                    d_subghostcell_dims_pressure[1];
-                            
-                            T[si][idx_temperature] =
-                                d_equation_of_state_mixing_rules->getEquationOfState()->
-                                    getTemperature(
-                                        &rho[si][idx_temperature],
-                                        &p[idx_pressure],
-                                        species_thermo_properties_const_ptr);
-                        }
-                    }
-                }
-            }
+            d_data_temperature->copyDepth(si, *data_temperature_species, 0);
         }
     }
     else

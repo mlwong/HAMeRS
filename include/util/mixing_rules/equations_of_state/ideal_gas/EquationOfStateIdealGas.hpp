@@ -35,7 +35,18 @@ class EquationOfStateIdealGas: public EquationOfState
          * Compute the pressure.
          */
         void
-        getPressure(
+        computePressure(
+            boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
+            const std::vector<const double*>& thermo_properties,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the pressure.
+         */
+        void
+        computePressure(
             boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
@@ -55,7 +66,18 @@ class EquationOfStateIdealGas: public EquationOfState
          * Compute the sound speed.
          */
         void
-        getSoundSpeed(
+        computeSoundSpeed(
+            boost::shared_ptr<pdat::CellData<double> >& data_sound_speed,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the sound speed.
+         */
+        void
+        computeSoundSpeed(
             boost::shared_ptr<pdat::CellData<double> >& data_sound_speed,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
@@ -75,7 +97,18 @@ class EquationOfStateIdealGas: public EquationOfState
          * Compute the specific internal energy.
          */
         void
-        getInternalEnergy(
+        computeInternalEnergy(
+            boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the specific internal energy.
+         */
+        void
+        computeInternalEnergy(
             boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
@@ -95,7 +128,18 @@ class EquationOfStateIdealGas: public EquationOfState
          * Compute the specific enthalpy.
          */
         void
-        getEnthalpy(
+        computeEnthalpy(
+            boost::shared_ptr<pdat::CellData<double> >& data_enthalpy,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the specific enthalpy.
+         */
+        void
+        computeEnthalpy(
             boost::shared_ptr<pdat::CellData<double> >& data_enthalpy,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
@@ -115,7 +159,17 @@ class EquationOfStateIdealGas: public EquationOfState
          * Compute the temperature.
          */
         void
-        getTemperature(
+        computeTemperature(
+            boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            const hier::Box& domain) const;
+        /*
+         * Compute the temperature.
+         */
+        void
+        computeTemperature(
             boost::shared_ptr<pdat::CellData<double> >& data_temperature,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
@@ -135,7 +189,18 @@ class EquationOfStateIdealGas: public EquationOfState
          * Compute the specific internal energy from temperature.
          */
         void
-        getInternalEnergyFromTemperature(
+        computeInternalEnergyFromTemperature(
+            boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const std::vector<const double*>& thermo_properties,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the specific internal energy from temperature.
+         */
+        void
+        computeInternalEnergyFromTemperature(
             boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
@@ -155,7 +220,18 @@ class EquationOfStateIdealGas: public EquationOfState
          * Compute the isochoric specific heat capacity.
          */
         void
-        getIsochoricSpecificHeatCapacity(
+        computeIsochoricSpecificHeatCapacity(
+            boost::shared_ptr<pdat::CellData<double> >& data_isochoric_specific_heat_capacity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the isochoric specific heat capacity.
+         */
+        void
+        computeIsochoricSpecificHeatCapacity(
             boost::shared_ptr<pdat::CellData<double> >& data_isochoric_specific_heat_capacity,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
@@ -175,7 +251,18 @@ class EquationOfStateIdealGas: public EquationOfState
          * Compute the isobaric specific heat capacity.
          */
         void
-        getIsobaricSpecificHeatCapacity(
+        computeIsobaricSpecificHeatCapacity(
+            boost::shared_ptr<pdat::CellData<double> >& data_isobaric_specific_heat_capacity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the isobaric specific heat capacity.
+         */
+        void
+        computeIsobaricSpecificHeatCapacity(
             boost::shared_ptr<pdat::CellData<double> >& data_isobaric_specific_heat_capacity,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
@@ -195,7 +282,18 @@ class EquationOfStateIdealGas: public EquationOfState
          * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
          */
         void
-        getIsochoricPartialInternalEnergyPartialPressure(
+        computeIsochoricPartialInternalEnergyPartialPressure(
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_internal_energy_partial_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+         */
+        void
+        computeIsochoricPartialInternalEnergyPartialPressure(
             boost::shared_ptr<pdat::CellData<double> >& data_partial_internal_energy_partial_pressure,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
@@ -215,7 +313,18 @@ class EquationOfStateIdealGas: public EquationOfState
          * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
          */
         void
-        getIsobaricPartialInternalEnergyPartialDensity(
+        computeIsobaricPartialInternalEnergyPartialDensity(
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_internal_energy_partial_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+         */
+        void
+        computeIsobaricPartialInternalEnergyPartialDensity(
             boost::shared_ptr<pdat::CellData<double> >& data_partial_internal_energy_partial_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
@@ -235,7 +344,18 @@ class EquationOfStateIdealGas: public EquationOfState
          * Compute the density.
          */
         void
-        getDensity(
+        computeDensity(
+            boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const std::vector<const double*>& thermo_properties,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the density.
+         */
+        void
+        computeDensity(
             boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
