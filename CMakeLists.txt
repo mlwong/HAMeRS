@@ -66,7 +66,6 @@ include_directories(${HAMeRS_SOURCE_DIR}/include)
 
 # Directories to look for libraries
 link_directories(${HAMeRS_BINARY_DIR}/algs/patch_strategy
-                 ${HAMeRS_BINARY_DIR}/algs/integrator/fortran
                  ${HAMeRS_BINARY_DIR}/algs/integrator
                  ${HAMeRS_BINARY_DIR}/apps/Euler
                  ${HAMeRS_BINARY_DIR}/apps/Navier-Stokes
@@ -76,12 +75,12 @@ link_directories(${HAMeRS_BINARY_DIR}/algs/patch_strategy
                  ${HAMeRS_BINARY_DIR}/flow/nonconservative_diffusive_flux_divergence_operators
                  ${HAMeRS_BINARY_DIR}/flow/refinement_taggers
                  ${HAMeRS_BINARY_DIR}/extn/patch_hierarchies
+                 ${HAMeRS_BINARY_DIR}/extn/visit_data_writer
                  ${HAMeRS_BINARY_DIR}/util
                  ${HAMeRS_BINARY_DIR}/util/basic_boundary_conditions
                  ${HAMeRS_BINARY_DIR}/util/mixing_rules
                  ${HAMeRS_BINARY_DIR}/util/mixing_rules/equations_of_state)
 
-add_subdirectory(src/algs/integrator/fortran)
 add_subdirectory(src/algs/patch_strategy)
 add_subdirectory(src/algs/integrator)
 add_subdirectory(src/apps/Euler)
@@ -93,6 +92,7 @@ add_subdirectory(src/flow/diffusive_flux_reconstructors)
 add_subdirectory(src/flow/nonconservative_diffusive_flux_divergence_operators)
 add_subdirectory(src/flow/refinement_taggers)
 add_subdirectory(src/extn/patch_hierarchies)
+add_subdirectory(src/extn/visit_data_writer)
 add_subdirectory(src/util)
 add_subdirectory(src/util/basic_boundary_conditions)
 add_subdirectory(src/util/mixing_rules)
