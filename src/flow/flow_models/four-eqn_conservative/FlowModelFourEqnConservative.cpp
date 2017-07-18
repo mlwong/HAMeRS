@@ -3,7 +3,7 @@
 #include "flow/flow_models/four-eqn_conservative/FlowModelBoundaryUtilitiesFourEqnConservative.hpp"
 #include "flow/flow_models/four-eqn_conservative/FlowModelStatisticsUtilitiesFourEqnConservative.hpp"
 
-boost::shared_ptr<pdat::CellVariable<double> > FlowModelFourEqnConservative::s_variable_partial_density;
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelFourEqnConservative::s_variable_partial_densities;
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelFourEqnConservative::s_variable_momentum;
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelFourEqnConservative::s_variable_total_energy;
 
@@ -21,7 +21,7 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
             num_species + dim.getValue() + 1,
             flow_model_db),
         d_num_subghosts_density(-hier::IntVector::getOne(d_dim)),
-        d_num_subghosts_mass_fraction(-hier::IntVector::getOne(d_dim)),
+        d_num_subghosts_mass_fractions(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_velocity(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_internal_energy(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_pressure(-hier::IntVector::getOne(d_dim)),
@@ -39,7 +39,7 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
         d_num_subghosts_max_diffusivity(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_diffusivities(-hier::IntVector::getOne(d_dim)),
         d_subghost_box_density(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_mass_fraction(hier::Box::getEmptyBox(dim)),
+        d_subghost_box_mass_fractions(hier::Box::getEmptyBox(dim)),
         d_subghost_box_velocity(hier::Box::getEmptyBox(dim)),
         d_subghost_box_internal_energy(hier::Box::getEmptyBox(dim)),
         d_subghost_box_pressure(hier::Box::getEmptyBox(dim)),
@@ -57,7 +57,7 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
         d_subghost_box_max_diffusivity(hier::Box::getEmptyBox(dim)),
         d_subghost_box_diffusivities(hier::Box::getEmptyBox(dim)),
         d_subghostcell_dims_density(hier::IntVector::getZero(d_dim)),
-        d_subghostcell_dims_mass_fraction(hier::IntVector::getZero(d_dim)),
+        d_subghostcell_dims_mass_fractions(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_velocity(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_internal_energy(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_pressure(hier::IntVector::getZero(d_dim)),
@@ -77,7 +77,7 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
 {
     d_eqn_form.reserve(d_num_eqn);
     
-    // Set the equation forms for partial density.
+    // Set the equation forms for partial densities.
     for (int si = 0; si < d_num_species; si++)
     {
         d_eqn_form.push_back(EQN_FORM::CONSERVATIVE);
@@ -100,8 +100,8 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
      * Initialize the conservative variables.
      */
     
-    s_variable_partial_density = boost::shared_ptr<pdat::CellVariable<double> > (
-        new pdat::CellVariable<double>(d_dim, "partial density", d_num_species));
+    s_variable_partial_densities = boost::shared_ptr<pdat::CellVariable<double> > (
+        new pdat::CellVariable<double>(d_dim, "partial densities", d_num_species));
     
     s_variable_momentum = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "momentum", d_dim.getValue()));
@@ -524,7 +524,7 @@ FlowModelFourEqnConservative::registerConservativeVariables(
     const hier::IntVector& num_ghosts_intermediate)
 {
     integrator->registerVariable(
-        s_variable_partial_density,
+        s_variable_partial_densities,
         num_ghosts,
         num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::TIME_DEP,
@@ -563,13 +563,13 @@ FlowModelFourEqnConservative::getNamesOfConservativeVariables(bool have_undersco
     
     if (have_underscores)
     {
-        names.push_back("partial_density");
+        names.push_back("partial_densities");
         names.push_back("momentum");
         names.push_back("total_energy");
     }
     else
     {
-        names.push_back("partial density");
+        names.push_back("partial densities");
         names.push_back("momentum");
         names.push_back("total energy");
     }
@@ -588,13 +588,13 @@ std::vector<std::string> FlowModelFourEqnConservative::getNamesOfPrimitiveVariab
     
     if (have_underscores)
     {
-        names.push_back("partial_density");
+        names.push_back("partial_densities");
         names.push_back("velocity");
         names.push_back("pressure");
     }
     else
     {
-        names.push_back("partial density");
+        names.push_back("partial densities");
         names.push_back("velocity");
         names.push_back("pressure");
     }
@@ -646,7 +646,7 @@ FlowModelFourEqnConservative::getConservativeVariables()
     std::vector<boost::shared_ptr<pdat::CellVariable<double> > > conservative_variables;
     conservative_variables.reserve(3);
     
-    conservative_variables.push_back(s_variable_partial_density);
+    conservative_variables.push_back(s_variable_partial_densities);
     conservative_variables.push_back(s_variable_momentum);
     conservative_variables.push_back(s_variable_total_energy);
     
@@ -679,11 +679,11 @@ FlowModelFourEqnConservative::registerPatchWithDataContext(
      * Set the number of ghost cells of conservative variables.
      */
     
-    boost::shared_ptr<pdat::CellData<double> > data_partial_density(
+    boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(s_variable_partial_density, getDataContext())));
+            d_patch->getPatchData(s_variable_partial_densities, getDataContext())));
     
-    d_num_ghosts = data_partial_density->getGhostCellWidth();
+    d_num_ghosts = data_partial_densities->getGhostCellWidth();
     
     /*
      * Set the interior and ghost boxes with their dimensions for the conservative cell variables.
@@ -750,12 +750,12 @@ FlowModelFourEqnConservative::registerDerivedCellVariable(
             "DENSITY");
     }
     
-    if (num_subghosts_of_data.find("MASS_FRACTION") != num_subghosts_of_data.end())
+    if (num_subghosts_of_data.find("MASS_FRACTIONS") != num_subghosts_of_data.end())
     {
         setNumberOfSubGhosts(
-            num_subghosts_of_data.find("MASS_FRACTION")->second,
-            "MASS_FRACTION",
-            "MASS_FRACTION");
+            num_subghosts_of_data.find("MASS_FRACTIONS")->second,
+            "MASS_FRACTIONS",
+            "MASS_FRACTIONS");
     }
     
     if (num_subghosts_of_data.find("VELOCITY") != num_subghosts_of_data.end())
@@ -995,7 +995,7 @@ FlowModelFourEqnConservative::registerDiffusiveFlux(const hier::IntVector& num_s
     
     setNumberOfSubGhosts(
         num_subghosts,
-        "MASS_FRACTION",
+        "MASS_FRACTIONS",
         "DIFFUSIVE_FLUX");
     
     setNumberOfSubGhosts(
@@ -1014,7 +1014,7 @@ FlowModelFourEqnConservative::registerDiffusiveFlux(const hier::IntVector& num_s
         "DIFFUSIVE_FLUX");
     
     d_num_subghosts_diffusivities = 
-        hier::IntVector::min(d_num_subghosts_density, d_num_subghosts_mass_fraction);
+        hier::IntVector::min(d_num_subghosts_density, d_num_subghosts_mass_fractions);
     
     d_num_subghosts_diffusivities =
         hier::IntVector::min(d_num_subghosts_diffusivities, d_num_subghosts_velocity);
@@ -1047,7 +1047,7 @@ FlowModelFourEqnConservative::unregisterPatch()
     
     d_num_ghosts                      = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_density           = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_mass_fraction     = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_mass_fractions    = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_velocity          = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_internal_energy   = -hier::IntVector::getOne(d_dim);
     d_num_subghosts_pressure          = -hier::IntVector::getOne(d_dim);
@@ -1068,7 +1068,7 @@ FlowModelFourEqnConservative::unregisterPatch()
     d_interior_box                   = hier::Box::getEmptyBox(d_dim);
     d_ghost_box                      = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_density           = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_mass_fraction     = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_mass_fractions    = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_velocity          = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_internal_energy   = hier::Box::getEmptyBox(d_dim);
     d_subghost_box_pressure          = hier::Box::getEmptyBox(d_dim);
@@ -1089,7 +1089,7 @@ FlowModelFourEqnConservative::unregisterPatch()
     d_interior_dims                       = hier::IntVector::getZero(d_dim);
     d_ghostcell_dims                      = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_density           = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_mass_fraction     = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_mass_fractions    = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_velocity          = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_internal_energy   = hier::IntVector::getZero(d_dim);
     d_subghostcell_dims_pressure          = hier::IntVector::getZero(d_dim);
@@ -1108,7 +1108,7 @@ FlowModelFourEqnConservative::unregisterPatch()
     d_subghostcell_dims_diffusivities     = hier::IntVector::getZero(d_dim);
     
     d_data_density.reset();
-    d_data_mass_fraction.reset();
+    d_data_mass_fractions.reset();
     d_data_velocity.reset();
     d_data_internal_energy.reset();
     d_data_pressure.reset();
@@ -1167,11 +1167,11 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData(
     }
     
     // Compute the mass fraction cell data.
-    if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
+    if (d_num_subghosts_mass_fractions > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_data_mass_fraction)
+        if (!d_data_mass_fractions)
         {
-            computeGlobalCellDataMassFractionWithDensity(
+            computeGlobalCellDataMassFractionsWithDensity(
                 computing_option);
         }
     }
@@ -1201,7 +1201,7 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData(
     {
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy(
+            computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy(
                 computing_option);
         }
     }
@@ -1211,7 +1211,7 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData(
     {
         if (!d_data_sound_speed)
         {
-            computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure(
+            computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure(
                 computing_option);
         }
     }
@@ -1221,7 +1221,7 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData(
     {
         if (!d_data_temperature)
         {
-            computeGlobalCellDataTemperatureWithDensityMassFractionAndPressure(
+            computeGlobalCellDataTemperatureWithDensityMassFractionsAndPressure(
                 computing_option);
         }
     }
@@ -1327,7 +1327,7 @@ FlowModelFourEqnConservative::computeGlobalDerivedCellData(
     {
         if (!d_data_max_diffusivity)
         {
-            computeGlobalCellDataMaxDiffusivityWithDensityMassFractionPressureAndTemperature(
+            computeGlobalCellDataMaxDiffusivityWithDensityMassFractionsPressureAndTemperature(
                 computing_option);
         }
     }
@@ -1355,7 +1355,7 @@ FlowModelFourEqnConservative::getGlobalCellData(const std::string& variable_key)
     
     if (variable_key == "PARTIAL_DENSITY")
     {
-        cell_data = getGlobalCellDataPartialDensity();
+        cell_data = getGlobalCellDataPartialDensities();
     }
     else if (variable_key == "MOMENTUM")
     {
@@ -1376,16 +1376,16 @@ FlowModelFourEqnConservative::getGlobalCellData(const std::string& variable_key)
         }
         cell_data = d_data_density;
     }
-    else if (variable_key == "MASS_FRACTION")
+    else if (variable_key == "MASS_FRACTIONS")
     {
-        if (!d_data_mass_fraction)
+        if (!d_data_mass_fractions)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFourEqnConservative::getGlobalCellData()\n"
                 << "Cell data of 'MASS_FRACTION' is not registered/computed yet."
                 << std::endl);
         }
-        cell_data = d_data_mass_fraction;
+        cell_data = d_data_mass_fractions;
     }
     else if (variable_key == "VELOCITY")
     {
@@ -1599,11 +1599,11 @@ FlowModelFourEqnConservative::fillZeroGlobalCellDataConservativeVariables()
             << std::endl);
     }
     
-    boost::shared_ptr<pdat::CellData<double> > data_partial_density = getGlobalCellDataPartialDensity();
+    boost::shared_ptr<pdat::CellData<double> > data_partial_densities = getGlobalCellDataPartialDensities();
     boost::shared_ptr<pdat::CellData<double> > data_momentum = getGlobalCellDataMomentum();
     boost::shared_ptr<pdat::CellData<double> > data_total_energy = getGlobalCellDataTotalEnergy();
     
-    data_partial_density->fillAll(0.0, d_interior_box);
+    data_partial_densities->fillAll(0.0, d_interior_box);
     data_momentum->fillAll(0.0, d_interior_box);
     data_total_energy->fillAll(0.0, d_interior_box);
 }
@@ -1644,7 +1644,7 @@ FlowModelFourEqnConservative::getGlobalCellDataConservativeVariables()
     std::vector<boost::shared_ptr<pdat::CellData<double> > > global_cell_data;
     global_cell_data.reserve(3);
     
-    global_cell_data.push_back(getGlobalCellDataPartialDensity());
+    global_cell_data.push_back(getGlobalCellDataPartialDensities());
     global_cell_data.push_back(getGlobalCellDataMomentum());
     global_cell_data.push_back(getGlobalCellDataTotalEnergy());
     
@@ -1670,7 +1670,7 @@ FlowModelFourEqnConservative::getGlobalCellDataPrimitiveVariables()
     std::vector<boost::shared_ptr<pdat::CellData<double> > > global_cell_data;
     global_cell_data.reserve(3);
     
-    global_cell_data.push_back(getGlobalCellDataPartialDensity());
+    global_cell_data.push_back(getGlobalCellDataPartialDensities());
     if (!d_data_velocity)
     {
         TBOX_ERROR(d_object_name
@@ -1816,16 +1816,16 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
             << std::endl);
     }
     
-    // Get the cell data of the variable partial density.
-    boost::shared_ptr<pdat::CellData<double> > data_partial_density =
-        getGlobalCellDataPartialDensity();
+    // Get the cell data of the variable partial densities.
+    boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+        getGlobalCellDataPartialDensities();
     
-    // Get the pointers to the cell data of partial density, total density and sound speed.
+    // Get the pointers to the cell data of partial densities, total density and sound speed.
     std::vector<double*> rho_Y;
     rho_Y.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
-        rho_Y.push_back(data_partial_density->getPointer(si));
+        rho_Y.push_back(data_partial_densities->getPointer(si));
     }
     if (!d_data_density)
     {
@@ -1834,7 +1834,7 @@ FlowModelFourEqnConservative::computeGlobalSideDataProjectionVariablesForPrimiti
     double* rho = d_data_density->getPointer(0);
     if (!d_data_sound_speed)
     {
-        computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
+        computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure();
     }
     double* c = d_data_sound_speed->getPointer(0);
     
@@ -5625,9 +5625,9 @@ FlowModelFourEqnConservative::getDiffusiveFluxVariablesForDerivative(
     derivative_var_data.resize(d_num_eqn);
     derivative_var_component_idx.resize(d_num_eqn);
     
-    if (!d_data_mass_fraction)
+    if (!d_data_mass_fractions)
     {
-        computeGlobalCellDataMassFractionWithDensity();
+        computeGlobalCellDataMassFractionsWithDensity();
     }
     
     if (!d_data_velocity)
@@ -5637,7 +5637,7 @@ FlowModelFourEqnConservative::getDiffusiveFluxVariablesForDerivative(
     
     if (!d_data_temperature)
     {
-        computeGlobalCellDataTemperatureWithDensityMassFractionAndPressure();
+        computeGlobalCellDataTemperatureWithDensityMassFractionsAndPressure();
     }
     
     if (d_dim == tbox::Dimension(1))
@@ -5659,12 +5659,12 @@ FlowModelFourEqnConservative::getDiffusiveFluxVariablesForDerivative(
                             derivative_var_data[si].resize(d_num_species + 1);
                             derivative_var_component_idx[si].resize(d_num_species + 1);
                             
-                            derivative_var_data[si][0] = d_data_mass_fraction;
+                            derivative_var_data[si][0] = d_data_mass_fractions;
                             derivative_var_component_idx[si][0] = si;
                             
                             for (int sj = 0; sj < d_num_species; sj++)
                             {
-                                derivative_var_data[si][1 + sj] = d_data_mass_fraction;
+                                derivative_var_data[si][1 + sj] = d_data_mass_fractions;
                                 derivative_var_component_idx[si][1 + sj] = sj;
                             }
                         }
@@ -5700,14 +5700,14 @@ FlowModelFourEqnConservative::getDiffusiveFluxVariablesForDerivative(
                         for (int si = 0; si < d_num_species; si++)
                         {
                             derivative_var_data[d_num_species + 1][2 + si*(d_num_species + 1)] =
-                                d_data_mass_fraction;
+                                d_data_mass_fractions;
                             derivative_var_component_idx[d_num_species + 1][2 + si*(d_num_species + 1)] =
                                 si;
                             
                             for (int sj = 0; sj < d_num_species; sj++)
                             {
                                 derivative_var_data[d_num_species + 1][3 + si*(d_num_species + 1) + sj] =
-                                    d_data_mass_fraction;
+                                    d_data_mass_fractions;
                                 derivative_var_component_idx[d_num_species + 1][3 + si*(d_num_species + 1) + sj] =
                                     sj;
                             }
@@ -5754,12 +5754,12 @@ FlowModelFourEqnConservative::getDiffusiveFluxVariablesForDerivative(
                             derivative_var_data[si].resize(d_num_species + 1);
                             derivative_var_component_idx[si].resize(d_num_species + 1);
                             
-                            derivative_var_data[si][0] = d_data_mass_fraction;
+                            derivative_var_data[si][0] = d_data_mass_fractions;
                             derivative_var_component_idx[si][0] = si;
                             
                             for (int sj = 0; sj < d_num_species; sj++)
                             {
-                                derivative_var_data[si][1 + sj] = d_data_mass_fraction;
+                                derivative_var_data[si][1 + sj] = d_data_mass_fractions;
                                 derivative_var_component_idx[si][1 + sj] = sj;
                             }
                         }
@@ -5806,14 +5806,14 @@ FlowModelFourEqnConservative::getDiffusiveFluxVariablesForDerivative(
                         for (int si = 0; si < d_num_species; si++)
                         {
                             derivative_var_data[d_num_species + 2][3 + si*(d_num_species + 1)] =
-                                d_data_mass_fraction;
+                                d_data_mass_fractions;
                             derivative_var_component_idx[d_num_species + 2][3 + si*(d_num_species + 1)] =
                                 si;
                             
                             for (int sj = 0; sj < d_num_species; sj++)
                             {
                                 derivative_var_data[d_num_species + 2][4 + si*(d_num_species + 1) + sj] =
-                                    d_data_mass_fraction;
+                                    d_data_mass_fractions;
                                 derivative_var_component_idx[d_num_species + 2][4 + si*(d_num_species + 1) + sj] =
                                     sj;
                             }
@@ -5941,12 +5941,12 @@ FlowModelFourEqnConservative::getDiffusiveFluxVariablesForDerivative(
                             derivative_var_data[si].resize(d_num_species + 1);
                             derivative_var_component_idx[si].resize(d_num_species + 1);
                             
-                            derivative_var_data[si][0] = d_data_mass_fraction;
+                            derivative_var_data[si][0] = d_data_mass_fractions;
                             derivative_var_component_idx[si][0] = si;
                             
                             for (int sj = 0; sj < d_num_species; sj++)
                             {
-                                derivative_var_data[si][1 + sj] = d_data_mass_fraction;
+                                derivative_var_data[si][1 + sj] = d_data_mass_fractions;
                                 derivative_var_component_idx[si][1 + sj] = sj;
                             }
                         }
@@ -5993,14 +5993,14 @@ FlowModelFourEqnConservative::getDiffusiveFluxVariablesForDerivative(
                         for (int si = 0; si < d_num_species; si++)
                         {
                             derivative_var_data[d_num_species + 2][3 + si*(d_num_species + 1)] =
-                                d_data_mass_fraction;
+                                d_data_mass_fractions;
                             derivative_var_component_idx[d_num_species + 2][3 + si*(d_num_species + 1)] =
                                 si;
                             
                             for (int sj = 0; sj < d_num_species; sj++)
                             {
                                 derivative_var_data[d_num_species + 2][4 + si*(d_num_species + 1) + sj] =
-                                    d_data_mass_fraction;
+                                    d_data_mass_fractions;
                                 derivative_var_component_idx[d_num_species + 2][4 + si*(d_num_species + 1) + sj] =
                                     sj;
                             }
@@ -6047,12 +6047,12 @@ FlowModelFourEqnConservative::getDiffusiveFluxVariablesForDerivative(
                             derivative_var_data[si].resize(d_num_species + 1);
                             derivative_var_component_idx[si].resize(d_num_species + 1);
                             
-                            derivative_var_data[si][0] = d_data_mass_fraction;
+                            derivative_var_data[si][0] = d_data_mass_fractions;
                             derivative_var_component_idx[si][0] = si;
                             
                             for (int sj = 0; sj < d_num_species; sj++)
                             {
-                                derivative_var_data[si][1 + sj] = d_data_mass_fraction;
+                                derivative_var_data[si][1 + sj] = d_data_mass_fractions;
                                 derivative_var_component_idx[si][1 + sj] = sj;
                             }
                         }
@@ -6110,14 +6110,14 @@ FlowModelFourEqnConservative::getDiffusiveFluxVariablesForDerivative(
                         for (int si = 0; si < d_num_species; si++)
                         {
                             derivative_var_data[d_num_species + 3][4 + si*(d_num_species + 1)] =
-                                d_data_mass_fraction;
+                                d_data_mass_fractions;
                             derivative_var_component_idx[d_num_species + 3][4 + si*(d_num_species + 1)] =
                                 si;
                             
                             for (int sj = 0; sj < d_num_species; sj++)
                             {
                                 derivative_var_data[d_num_species + 3][5 + si*(d_num_species + 1) + sj] =
-                                    d_data_mass_fraction;
+                                    d_data_mass_fractions;
                                 derivative_var_component_idx[d_num_species + 3][5 + si*(d_num_species + 1) + sj] =
                                     sj;
                             }
@@ -6301,12 +6301,12 @@ FlowModelFourEqnConservative::getDiffusiveFluxVariablesForDerivative(
                             derivative_var_data[si].resize(d_num_species + 1);
                             derivative_var_component_idx[si].resize(d_num_species + 1);
                             
-                            derivative_var_data[si][0] = d_data_mass_fraction;
+                            derivative_var_data[si][0] = d_data_mass_fractions;
                             derivative_var_component_idx[si][0] = si;
                             
                             for (int sj = 0; sj < d_num_species; sj++)
                             {
-                                derivative_var_data[si][1 + sj] = d_data_mass_fraction;
+                                derivative_var_data[si][1 + sj] = d_data_mass_fractions;
                                 derivative_var_component_idx[si][1 + sj] = sj;
                             }
                         }
@@ -6364,14 +6364,14 @@ FlowModelFourEqnConservative::getDiffusiveFluxVariablesForDerivative(
                         for (int si = 0; si < d_num_species; si++)
                         {
                             derivative_var_data[d_num_species + 3][4 + si*(d_num_species + 1)] =
-                                d_data_mass_fraction;
+                                d_data_mass_fractions;
                             derivative_var_component_idx[d_num_species + 3][4 + si*(d_num_species + 1)] =
                                 si;
                             
                             for (int sj = 0; sj < d_num_species; sj++)
                             {
                                 derivative_var_data[d_num_species + 3][5 + si*(d_num_species + 1) + sj] =
-                                    d_data_mass_fraction;
+                                    d_data_mass_fractions;
                                 derivative_var_component_idx[d_num_species + 3][5 + si*(d_num_species + 1) + sj] =
                                     sj;
                             }
@@ -6555,12 +6555,12 @@ FlowModelFourEqnConservative::getDiffusiveFluxVariablesForDerivative(
                             derivative_var_data[si].resize(d_num_species + 1);
                             derivative_var_component_idx[si].resize(d_num_species + 1);
                             
-                            derivative_var_data[si][0] = d_data_mass_fraction;
+                            derivative_var_data[si][0] = d_data_mass_fractions;
                             derivative_var_component_idx[si][0] = si;
                             
                             for (int sj = 0; sj < d_num_species; sj++)
                             {
-                                derivative_var_data[si][1 + sj] = d_data_mass_fraction;
+                                derivative_var_data[si][1 + sj] = d_data_mass_fractions;
                                 derivative_var_component_idx[si][1 + sj] = sj;
                             }
                         }
@@ -6618,14 +6618,14 @@ FlowModelFourEqnConservative::getDiffusiveFluxVariablesForDerivative(
                         for (int si = 0; si < d_num_species; si++)
                         {
                             derivative_var_data[d_num_species + 3][4 + si*(d_num_species + 1)] =
-                                d_data_mass_fraction;
+                                d_data_mass_fractions;
                             derivative_var_component_idx[d_num_species + 3][4 + si*(d_num_species + 1)] =
                                 si;
                             
                             for (int sj = 0; sj < d_num_species; sj++)
                             {
                                 derivative_var_data[d_num_species + 3][5 + si*(d_num_species + 1) + sj] =
-                                    d_data_mass_fraction;
+                                    d_data_mass_fractions;
                                 derivative_var_component_idx[d_num_species + 3][5 + si*(d_num_species + 1) + sj] =
                                     sj;
                             }
@@ -6690,9 +6690,9 @@ FlowModelFourEqnConservative::getDiffusiveFluxDiffusivities(
             computeGlobalCellDataDensity();
         }
         
-        if (!d_data_mass_fraction)
+        if (!d_data_mass_fractions)
         {
-            computeGlobalCellDataMassFractionWithDensity();
+            computeGlobalCellDataMassFractionsWithDensity();
         }
         
         if (!d_data_velocity)
@@ -6702,21 +6702,21 @@ FlowModelFourEqnConservative::getDiffusiveFluxDiffusivities(
         
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+            computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy();
         }
         
         if (!d_data_temperature)
         {
-            computeGlobalCellDataTemperatureWithDensityMassFractionAndPressure();
+            computeGlobalCellDataTemperatureWithDensityMassFractionsAndPressure();
         }
         
-        // Get the pointers to the cell data of density, mass fraction, pressure and temperature.
+        // Get the pointers to the cell data of density, mass fractions, pressure and temperature.
         double* rho = d_data_density->getPointer(0);
         std::vector<double*> Y;
         Y.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            Y.push_back(d_data_mass_fraction->getPointer(si));
+            Y.push_back(d_data_mass_fractions->getPointer(si));
         }
         double* p = d_data_pressure->getPointer(0);
         double* T = d_data_temperature->getPointer(0);
@@ -6745,7 +6745,7 @@ FlowModelFourEqnConservative::getDiffusiveFluxDiffusivities(
                 const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
                 const int idx_pressure = i + d_num_subghosts_pressure[0];
                 const int idx_temperature = i + d_num_subghosts_temperature[0];
-                const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
+                const int idx_mass_fractions = i + d_num_subghosts_mass_fractions[0];
                 
                 std::vector<double*> D_ptr;
                 D_ptr.reserve(d_num_species);
@@ -6758,7 +6758,7 @@ FlowModelFourEqnConservative::getDiffusiveFluxDiffusivities(
                 Y_ptr.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                    Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                 }
                 
                 d_equation_of_mass_diffusivity_mixing_rules->
@@ -6789,8 +6789,8 @@ FlowModelFourEqnConservative::getDiffusiveFluxDiffusivities(
                     const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
                         (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0];
                     
-                    const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                        (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
+                    const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
+                        (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0];
                     
                     std::vector<double*> D_ptr;
                     D_ptr.reserve(d_num_species);
@@ -6803,7 +6803,7 @@ FlowModelFourEqnConservative::getDiffusiveFluxDiffusivities(
                     Y_ptr.reserve(d_num_species);
                     for (int si = 0; si < d_num_species; si++)
                     {
-                        Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                        Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                     }
                     
                     d_equation_of_mass_diffusivity_mixing_rules->
@@ -6844,10 +6844,10 @@ FlowModelFourEqnConservative::getDiffusiveFluxDiffusivities(
                             (k + d_num_subghosts_temperature[2])*d_subghostcell_dims_temperature[0]*
                                 d_subghostcell_dims_temperature[1];
                         
-                        const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                            (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
-                            (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*
-                                d_subghostcell_dims_mass_fraction[1];
+                        const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
+                            (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0] +
+                            (k + d_num_subghosts_mass_fractions[2])*d_subghostcell_dims_mass_fractions[0]*
+                                d_subghostcell_dims_mass_fractions[1];
                         
                         std::vector<double*> D_ptr;
                         D_ptr.reserve(d_num_species);
@@ -6860,7 +6860,7 @@ FlowModelFourEqnConservative::getDiffusiveFluxDiffusivities(
                         Y_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
-                            Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                            Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                         }
                         
                         d_equation_of_mass_diffusivity_mixing_rules->
@@ -6893,13 +6893,13 @@ FlowModelFourEqnConservative::getDiffusiveFluxDiffusivities(
                 const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
                 const int idx_pressure = i + d_num_subghosts_pressure[0];
                 const int idx_temperature = i + d_num_subghosts_temperature[0];
-                const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
+                const int idx_mass_fractions = i + d_num_subghosts_mass_fractions[0];
                 
                 std::vector<const double*> Y_ptr;
                 Y_ptr.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                    Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                 }
                 
                 mu[idx_diffusivities] = d_equation_of_shear_viscosity_mixing_rules->
@@ -6929,14 +6929,14 @@ FlowModelFourEqnConservative::getDiffusiveFluxDiffusivities(
                     const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
                         (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0];
                     
-                    const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                        (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
+                    const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
+                        (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0];
                     
                     std::vector<const double*> Y_ptr;
                     Y_ptr.reserve(d_num_species);
                     for (int si = 0; si < d_num_species; si++)
                     {
-                        Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                        Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                     }
                     
                     mu[idx_diffusivities] = d_equation_of_shear_viscosity_mixing_rules->
@@ -6976,16 +6976,16 @@ FlowModelFourEqnConservative::getDiffusiveFluxDiffusivities(
                             (k + d_num_subghosts_temperature[2])*d_subghostcell_dims_temperature[0]*
                                 d_subghostcell_dims_temperature[1];
                         
-                        const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                            (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
-                            (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*
-                                d_subghostcell_dims_mass_fraction[1];
+                        const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
+                            (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0] +
+                            (k + d_num_subghosts_mass_fractions[2])*d_subghostcell_dims_mass_fractions[0]*
+                                d_subghostcell_dims_mass_fractions[1];
                         
                         std::vector<const double*> Y_ptr;
                         Y_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
-                            Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                            Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                         }
                         
                         mu[idx_diffusivities] = d_equation_of_shear_viscosity_mixing_rules->
@@ -7017,13 +7017,13 @@ FlowModelFourEqnConservative::getDiffusiveFluxDiffusivities(
                 const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
                 const int idx_pressure = i + d_num_subghosts_pressure[0];
                 const int idx_temperature = i + d_num_subghosts_temperature[0];
-                const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
+                const int idx_mass_fractions = i + d_num_subghosts_mass_fractions[0];
                 
                 std::vector<const double*> Y_ptr;
                 Y_ptr.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                    Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                 }
                 
                 mu_v[idx_diffusivities] = d_equation_of_bulk_viscosity_mixing_rules->
@@ -7053,14 +7053,14 @@ FlowModelFourEqnConservative::getDiffusiveFluxDiffusivities(
                     const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
                         (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0];
                     
-                    const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                        (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
+                    const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
+                        (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0];
                     
                     std::vector<const double*> Y_ptr;
                     Y_ptr.reserve(d_num_species);
                     for (int si = 0; si < d_num_species; si++)
                     {
-                        Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                        Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                     }
                     
                     mu_v[idx_diffusivities] = d_equation_of_bulk_viscosity_mixing_rules->
@@ -7100,16 +7100,16 @@ FlowModelFourEqnConservative::getDiffusiveFluxDiffusivities(
                             (k + d_num_subghosts_temperature[2])*d_subghostcell_dims_temperature[0]*
                                 d_subghostcell_dims_temperature[1];
                         
-                        const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                            (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
-                            (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*
-                                d_subghostcell_dims_mass_fraction[1];
+                        const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
+                            (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0] +
+                            (k + d_num_subghosts_mass_fractions[2])*d_subghostcell_dims_mass_fractions[0]*
+                                d_subghostcell_dims_mass_fractions[1];
                         
                         std::vector<const double*> Y_ptr;
                         Y_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
-                            Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                            Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                         }
                         
                         mu_v[idx_diffusivities] = d_equation_of_bulk_viscosity_mixing_rules->
@@ -7141,13 +7141,13 @@ FlowModelFourEqnConservative::getDiffusiveFluxDiffusivities(
                 const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
                 const int idx_pressure = i + d_num_subghosts_pressure[0];
                 const int idx_temperature = i + d_num_subghosts_temperature[0];
-                const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
+                const int idx_mass_fractions = i + d_num_subghosts_mass_fractions[0];
                 
                 std::vector<const double*> Y_ptr;
                 Y_ptr.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                    Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                 }
                 
                 kappa[idx_diffusivities] = d_equation_of_thermal_conductivity_mixing_rules->
@@ -7177,14 +7177,14 @@ FlowModelFourEqnConservative::getDiffusiveFluxDiffusivities(
                     const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
                         (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0];
                     
-                    const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                        (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
+                    const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
+                        (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0];
                     
                     std::vector<const double*> Y_ptr;
                     Y_ptr.reserve(d_num_species);
                     for (int si = 0; si < d_num_species; si++)
                     {
-                        Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                        Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                     }
                     
                     kappa[idx_diffusivities] = d_equation_of_thermal_conductivity_mixing_rules->
@@ -7224,16 +7224,16 @@ FlowModelFourEqnConservative::getDiffusiveFluxDiffusivities(
                             (k + d_num_subghosts_temperature[2])*d_subghostcell_dims_temperature[0]*
                                 d_subghostcell_dims_temperature[1];
                         
-                        const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                            (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
-                            (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*
-                                d_subghostcell_dims_mass_fraction[1];
+                        const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
+                            (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0] +
+                            (k + d_num_subghosts_mass_fractions[2])*d_subghostcell_dims_mass_fractions[0]*
+                                d_subghostcell_dims_mass_fractions[1];
                         
                         std::vector<const double*> Y_ptr;
                         Y_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
-                            Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                            Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                         }
                         
                         kappa[idx_diffusivities] = d_equation_of_thermal_conductivity_mixing_rules->
@@ -7500,10 +7500,10 @@ FlowModelFourEqnConservative::getDiffusiveFluxDiffusivities(
                         // Compute the linear indices.
                         const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
                         const int idx_density = i + d_num_subghosts_density[0];
-                        const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
+                        const int idx_mass_fractions = i + d_num_subghosts_mass_fractions[0];
                         
                         D_ptr[component_idx][idx_diffusivities] =
-                            rho[idx_density]*Y[si][idx_mass_fraction]*D[sj][idx_diffusivities];
+                            rho[idx_density]*Y[si][idx_mass_fractions]*D[sj][idx_diffusivities];
                     }
                 }
             }
@@ -7559,10 +7559,10 @@ FlowModelFourEqnConservative::getDiffusiveFluxDiffusivities(
                         // Compute the linear indices.
                         const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
                         const int idx_density = i + d_num_subghosts_density[0];
-                        const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
+                        const int idx_mass_fractions = i + d_num_subghosts_mass_fractions[0];
                         
                         D_ptr[component_idx][idx_diffusivities] =
-                            rho[idx_density]*Y[si][idx_mass_fraction]*D[sj][idx_diffusivities]*
+                            rho[idx_density]*Y[si][idx_mass_fractions]*D[sj][idx_diffusivities]*
                                 h[si][idx_diffusivities];
                     }
                 }
@@ -7638,11 +7638,11 @@ FlowModelFourEqnConservative::getDiffusiveFluxDiffusivities(
                             const int idx_density = (i + d_num_subghosts_density[0]) +
                                 (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
                             
-                            const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                                (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
+                            const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
+                                (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0];
                             
                             D_ptr[component_idx][idx_diffusivities] =
-                                rho[idx_density]*Y[si][idx_mass_fraction]*D[sj][idx_diffusivities];
+                                rho[idx_density]*Y[si][idx_mass_fractions]*D[sj][idx_diffusivities];
                         }
                     }
                 }
@@ -7737,11 +7737,11 @@ FlowModelFourEqnConservative::getDiffusiveFluxDiffusivities(
                             const int idx_density = (i + d_num_subghosts_density[0]) +
                                 (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
                             
-                            const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                                (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
+                            const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
+                                (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0];
                             
                             D_ptr[component_idx][idx_diffusivities] =
-                                rho[idx_density]*Y[si][idx_mass_fraction]*D[sj][idx_diffusivities]*
+                                rho[idx_density]*Y[si][idx_mass_fractions]*D[sj][idx_diffusivities]*
                                     h[si][idx_diffusivities];
                         }
                     }
@@ -7836,13 +7836,13 @@ FlowModelFourEqnConservative::getDiffusiveFluxDiffusivities(
                                     (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
                                         d_subghostcell_dims_density[1];
                                 
-                                const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                                    (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
-                                    (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*
-                                        d_subghostcell_dims_mass_fraction[1];
+                                const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
+                                    (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0] +
+                                    (k + d_num_subghosts_mass_fractions[2])*d_subghostcell_dims_mass_fractions[0]*
+                                        d_subghostcell_dims_mass_fractions[1];
                                 
                                 D_ptr[component_idx][idx_diffusivities] =
-                                    rho[idx_density]*Y[si][idx_mass_fraction]*D[sj][idx_diffusivities];
+                                    rho[idx_density]*Y[si][idx_mass_fractions]*D[sj][idx_diffusivities];
                             }
                         }
                     }
@@ -7970,13 +7970,13 @@ FlowModelFourEqnConservative::getDiffusiveFluxDiffusivities(
                                     (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
                                         d_subghostcell_dims_density[1];
                                 
-                                const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                                    (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
-                                    (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*
-                                        d_subghostcell_dims_mass_fraction[1];
+                                const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
+                                    (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0] +
+                                    (k + d_num_subghosts_mass_fractions[2])*d_subghostcell_dims_mass_fractions[0]*
+                                        d_subghostcell_dims_mass_fractions[1];
                                 
                                 D_ptr[component_idx][idx_diffusivities] =
-                                    rho[idx_density]*Y[si][idx_mass_fraction]*D[sj][idx_diffusivities]*
+                                    rho[idx_density]*Y[si][idx_mass_fractions]*D[sj][idx_diffusivities]*
                                         h[si][idx_diffusivities];
                             }
                         }
@@ -9111,17 +9111,17 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
     
     if (variable_name == "density")
     {
-        boost::shared_ptr<pdat::CellData<double> > data_partial_density(
+        boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(s_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        TBOX_ASSERT(data_partial_density);
-        TBOX_ASSERT(data_partial_density->getGhostBox().isSpatiallyEqual(patch.getBox()));
+        TBOX_ASSERT(data_partial_densities);
+        TBOX_ASSERT(data_partial_densities->getGhostBox().isSpatiallyEqual(patch.getBox()));
 #endif
         
         // Get the dimensions of box that covers the data.
-        const hier::Box data_box = data_partial_density->getGhostBox();
+        const hier::Box data_box = data_partial_densities->getGhostBox();
         const hier::IntVector data_dims = data_box.numberCells();
         
         // Get the pointers to the conservative variables.
@@ -9129,7 +9129,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
         rho_Y.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            rho_Y.push_back(data_partial_density->getPointer(si));
+            rho_Y.push_back(data_partial_densities->getPointer(si));
         }
         
         size_t offset_data = data_box.offset(region.lower());
@@ -9210,9 +9210,9 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
     }
     else if (variable_name == "pressure")
     {
-        boost::shared_ptr<pdat::CellData<double> > data_partial_density(
+        boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(s_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_momentum(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -9223,16 +9223,16 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                 patch.getPatchData(s_variable_total_energy, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        TBOX_ASSERT(data_partial_density);
+        TBOX_ASSERT(data_partial_densities);
         TBOX_ASSERT(data_momentum);
         TBOX_ASSERT(data_total_energy);
-        TBOX_ASSERT(data_partial_density->getGhostBox().isSpatiallyEqual(patch.getBox()));
+        TBOX_ASSERT(data_partial_densities->getGhostBox().isSpatiallyEqual(patch.getBox()));
         TBOX_ASSERT(data_momentum->getGhostBox().isSpatiallyEqual(patch.getBox()));
         TBOX_ASSERT(data_total_energy->getGhostBox().isSpatiallyEqual(patch.getBox()));
 #endif
         
         // Get the dimensions of box that covers the data.
-        const hier::Box data_box = data_partial_density->getGhostBox();
+        const hier::Box data_box = data_partial_densities->getGhostBox();
         const hier::IntVector data_dims = data_box.numberCells();
         
         // Get the pointers to conservative variables
@@ -9240,7 +9240,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
         rho_Y.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            rho_Y.push_back(data_partial_density->getPointer(si));
+            rho_Y.push_back(data_partial_densities->getPointer(si));
         }
         const double* const rho_u = data_momentum->getPointer(0);
         const double* const rho_v = d_dim > tbox::Dimension(1) ? data_momentum->getPointer(1) : NULL;
@@ -9472,9 +9472,9 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
     }
     else if (variable_name == "sound speed")
     {
-        boost::shared_ptr<pdat::CellData<double> > data_partial_density(
+        boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(s_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_momentum(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -9485,16 +9485,16 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
                 patch.getPatchData(s_variable_total_energy, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        TBOX_ASSERT(data_partial_density);
+        TBOX_ASSERT(data_partial_densities);
         TBOX_ASSERT(data_momentum);
         TBOX_ASSERT(data_total_energy);
-        TBOX_ASSERT(data_partial_density->getGhostBox().isSpatiallyEqual(patch.getBox()));
+        TBOX_ASSERT(data_partial_densities->getGhostBox().isSpatiallyEqual(patch.getBox()));
         TBOX_ASSERT(data_momentum->getGhostBox().isSpatiallyEqual(patch.getBox()));
         TBOX_ASSERT(data_total_energy->getGhostBox().isSpatiallyEqual(patch.getBox()));
 #endif
         
         // Get the dimensions of box that covers the data.
-        const hier::Box data_box = data_partial_density->getGhostBox();
+        const hier::Box data_box = data_partial_densities->getGhostBox();
         const hier::IntVector data_dims = data_box.numberCells();
         
         // Get the pointers to the conservative variables.
@@ -9502,7 +9502,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
         rho_Y.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            rho_Y.push_back(data_partial_density->getPointer(si));
+            rho_Y.push_back(data_partial_densities->getPointer(si));
         }
         const double* const rho_u = data_momentum->getPointer(0);
         const double* const rho_v = d_dim > tbox::Dimension(1) ? data_momentum->getPointer(1) : NULL;
@@ -9752,23 +9752,23 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
     }
     else if (variable_name == "velocity")
     {
-        boost::shared_ptr<pdat::CellData<double> > data_partial_density(
+        boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(s_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_momentum(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(s_variable_momentum, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        TBOX_ASSERT(data_partial_density);
+        TBOX_ASSERT(data_partial_densities);
         TBOX_ASSERT(data_momentum);
-        TBOX_ASSERT(data_partial_density->getGhostBox().isSpatiallyEqual(patch.getBox()));
+        TBOX_ASSERT(data_partial_densities->getGhostBox().isSpatiallyEqual(patch.getBox()));
         TBOX_ASSERT(data_momentum->getGhostBox().isSpatiallyEqual(patch.getBox()));
 #endif
         
         // Get the dimensions of box that covers the data.
-        const hier::Box data_box = data_partial_density->getGhostBox();
+        const hier::Box data_box = data_partial_densities->getGhostBox();
         const hier::IntVector data_dims = data_box.numberCells();
         
         // Get the pointers to the conservative variables.
@@ -9776,7 +9776,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
         rho_Y.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            rho_Y.push_back(data_partial_density->getPointer(si));
+            rho_Y.push_back(data_partial_densities->getPointer(si));
         }
         const double* const m = data_momentum->getPointer(depth_id);
         
@@ -9866,17 +9866,17 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
     {
         int species_idx = std::stoi(variable_name.substr(14));
         
-        boost::shared_ptr<pdat::CellData<double> > data_partial_density(
+        boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(s_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        TBOX_ASSERT(data_partial_density);
-        TBOX_ASSERT(data_partial_density->getGhostBox().isSpatiallyEqual(patch.getBox()));
+        TBOX_ASSERT(data_partial_densities);
+        TBOX_ASSERT(data_partial_densities->getGhostBox().isSpatiallyEqual(patch.getBox()));
 #endif
         
         // Get the dimensions of box that covers the data.
-        const hier::Box data_box = data_partial_density->getGhostBox();
+        const hier::Box data_box = data_partial_densities->getGhostBox();
         const hier::IntVector data_dims = data_box.numberCells();
         
         // Get the pointers to conservative variables.
@@ -9884,7 +9884,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
         rho_Y.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            rho_Y.push_back(data_partial_density->getPointer(si));
+            rho_Y.push_back(data_partial_densities->getPointer(si));
         }
         
         size_t offset_data = data_box.offset(region.lower());
@@ -10007,14 +10007,14 @@ FlowModelFourEqnConservative::registerPlotQuantities(
     
     for (int si = 0; si < d_num_species; si++)
     {
-        std::string partial_density_name =
+        std::string partial_densities_name =
             "partial density " + tbox::Utilities::intToString(si);
         
         visit_writer->registerPlotQuantity(
-            partial_density_name,
+            partial_densities_name,
             "SCALAR",
             vardb->mapVariableAndContextToIndex(
-                s_variable_partial_density,
+                s_variable_partial_densities,
                 d_plot_context),
             si);
     }
@@ -10052,10 +10052,10 @@ FlowModelFourEqnConservative::registerPlotQuantities(
     
     for (int si = 0; si < d_num_species - 1; si++)
     {
-        std::string mass_fraction_name =
+        std::string mass_fractions_name =
             "mass fraction " + tbox::Utilities::intToString(si);
             
-        visit_writer->registerDerivedPlotQuantity(mass_fraction_name,
+        visit_writer->registerDerivedPlotQuantity(mass_fractions_name,
             "SCALAR",
             this);
     }
@@ -10101,11 +10101,11 @@ FlowModelFourEqnConservative::setNumberOfSubGhosts(
             d_num_subghosts_density = num_subghosts;
         }
     }
-    else if (variable_name == "MASS_FRACTION")
+    else if (variable_name == "MASS_FRACTIONS")
     {
-        if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
+        if (d_num_subghosts_mass_fractions > -hier::IntVector::getOne(d_dim))
         {
-            if (num_subghosts > d_num_subghosts_mass_fraction)
+            if (num_subghosts > d_num_subghosts_mass_fractions)
             {
                 /*
                 TBOX_ERROR(d_object_name
@@ -10119,12 +10119,12 @@ FlowModelFourEqnConservative::setNumberOfSubGhosts(
                     << std::endl);
                 */
                 
-                d_num_subghosts_mass_fraction = num_subghosts;
+                d_num_subghosts_mass_fractions = num_subghosts;
             }
         }
         else
         {
-            d_num_subghosts_mass_fraction = num_subghosts;
+            d_num_subghosts_mass_fractions = num_subghosts;
         }
         
         setNumberOfSubGhosts(num_subghosts, "DENSITY", parent_variable_name);
@@ -10213,7 +10213,7 @@ FlowModelFourEqnConservative::setNumberOfSubGhosts(
         }
         
         setNumberOfSubGhosts(num_subghosts, "DENSITY", parent_variable_name);
-        setNumberOfSubGhosts(num_subghosts, "MASS_FRACTION", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "MASS_FRACTIONS", parent_variable_name);
         setNumberOfSubGhosts(num_subghosts, "INTERNAL_ENERGY", parent_variable_name);
     }
     else if (variable_name == "SOUND_SPEED")
@@ -10243,7 +10243,7 @@ FlowModelFourEqnConservative::setNumberOfSubGhosts(
         }
         
         setNumberOfSubGhosts(num_subghosts, "DENSITY", parent_variable_name);
-        setNumberOfSubGhosts(num_subghosts, "MASS_FRACTION", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "MASS_FRACTIONS", parent_variable_name);
         setNumberOfSubGhosts(num_subghosts, "PRESSURE", parent_variable_name);
     }
     else if (variable_name == "TEMPERATURE")
@@ -10273,7 +10273,7 @@ FlowModelFourEqnConservative::setNumberOfSubGhosts(
         }
         
         setNumberOfSubGhosts(num_subghosts, "DENSITY", parent_variable_name);
-        setNumberOfSubGhosts(num_subghosts, "MASS_FRACTION", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "MASS_FRACTIONS", parent_variable_name);
         setNumberOfSubGhosts(num_subghosts, "PRESSURE", parent_variable_name);
     }
     else if (variable_name == "DILATATION")
@@ -10568,7 +10568,7 @@ FlowModelFourEqnConservative::setNumberOfSubGhosts(
         }
         
         setNumberOfSubGhosts(num_subghosts, "DENSITY", parent_variable_name);
-        setNumberOfSubGhosts(num_subghosts, "MASS_FRACTION", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "MASS_FRACTIONS", parent_variable_name);
         setNumberOfSubGhosts(num_subghosts, "PRESSURE", parent_variable_name);
         setNumberOfSubGhosts(num_subghosts, "TEMPERATURE", parent_variable_name);
     }
@@ -10588,11 +10588,11 @@ FlowModelFourEqnConservative::setGhostBoxesAndDimensionsDerivedCellVariables()
         d_subghostcell_dims_density = d_subghost_box_density.numberCells();
     }
     
-    if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
+    if (d_num_subghosts_mass_fractions > -hier::IntVector::getOne(d_dim))
     {
-        d_subghost_box_mass_fraction = d_interior_box;
-        d_subghost_box_mass_fraction.grow(d_num_subghosts_mass_fraction);
-        d_subghostcell_dims_mass_fraction = d_subghost_box_mass_fraction.numberCells();
+        d_subghost_box_mass_fractions = d_interior_box;
+        d_subghost_box_mass_fractions.grow(d_num_subghosts_mass_fractions);
+        d_subghostcell_dims_mass_fractions = d_subghost_box_mass_fractions.numberCells();
     }
     
     if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
@@ -10710,17 +10710,17 @@ FlowModelFourEqnConservative::setGhostBoxesAndDimensionsDerivedCellVariables()
 
 
 /*
- * Get the global cell data of partial density in the registered patch.
+ * Get the global cell data of partial densities in the registered patch.
  */
 boost::shared_ptr<pdat::CellData<double> >
-FlowModelFourEqnConservative::getGlobalCellDataPartialDensity()
+FlowModelFourEqnConservative::getGlobalCellDataPartialDensities()
 {
-    // Get the cell data of the registered variable partial density.
-    boost::shared_ptr<pdat::CellData<double> > data_partial_density(
+    // Get the cell data of the registered variable partial densities.
+    boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(s_variable_partial_density, getDataContext())));
+            d_patch->getPatchData(s_variable_partial_densities, getDataContext())));
     
-    return data_partial_density;
+    return data_partial_densities;
 }
 
 
@@ -10767,14 +10767,14 @@ FlowModelFourEqnConservative::computeGlobalCellDataDensity(
         d_data_density.reset(
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_density));
         
-        // Get the cell data of the variable partial density.
-        boost::shared_ptr<pdat::CellData<double> > data_partial_density =
-            getGlobalCellDataPartialDensity();
+        // Get the cell data of the variable partial densities.
+        boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+            getGlobalCellDataPartialDensities();
         
         // Compute the density field.
         d_equation_of_state_mixing_rules->computeMixtureDensity(
             d_data_density,
-            data_partial_density,
+            data_partial_densities,
             d_subghost_box_density);
     }
     else
@@ -10788,69 +10788,69 @@ FlowModelFourEqnConservative::computeGlobalCellDataDensity(
 
 
 /*
- * Compute the global cell data of mass fraction with density in the registered patch.
+ * Compute the global cell data of mass fractions with density in the registered patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataMassFractionWithDensity(
+FlowModelFourEqnConservative::computeGlobalCellDataMassFractionsWithDensity(
     const COMPUTING_OPTION::TYPE& computing_option)
 {
-    if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
+    if (d_num_subghosts_mass_fractions > -hier::IntVector::getOne(d_dim))
     {
-        // Create the cell data of mass fraction.
-        d_data_mass_fraction.reset(
-            new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_mass_fraction));
+        // Create the cell data of mass fractions.
+        d_data_mass_fractions.reset(
+            new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_mass_fractions));
         
-        // Get the cell data of the variable partial density.
-        boost::shared_ptr<pdat::CellData<double> > data_partial_density =
-            getGlobalCellDataPartialDensity();
+        // Get the cell data of the variable partial densities.
+        boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+            getGlobalCellDataPartialDensities();
         
         if (!d_data_density)
         {
             computeGlobalCellDataDensity();
         }
         
-        // Get the pointers to the cell data of mass fraction, denisty and partial density.
+        // Get the pointers to the cell data of mass fractions, denisty and partial densities.
         std::vector<double*> Y;
         Y.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            Y.push_back(d_data_mass_fraction->getPointer(si));
+            Y.push_back(d_data_mass_fractions->getPointer(si));
         }
         double* rho = d_data_density->getPointer(0);
         std::vector<double*> rho_Y;
         rho_Y.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            rho_Y.push_back(data_partial_density->getPointer(si));
+            rho_Y.push_back(data_partial_densities->getPointer(si));
         }
         
         if (d_dim == tbox::Dimension(1))
         {
             // Compute the mass fraction field.
-            for (int i = -d_num_subghosts_mass_fraction[0];
-                 i < d_interior_dims[0] + d_num_subghosts_mass_fraction[0];
+            for (int i = -d_num_subghosts_mass_fractions[0];
+                 i < d_interior_dims[0] + d_num_subghosts_mass_fractions[0];
                  i++)
             {
                 // Compute the linear indices.
                 const int idx = i + d_num_ghosts[0];
                 const int idx_density = i + d_num_subghosts_density[0];
-                const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
+                const int idx_mass_fractions = i + d_num_subghosts_mass_fractions[0];
                 
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y[si][idx_mass_fraction] = rho_Y[si][idx]/rho[idx_density];
+                    Y[si][idx_mass_fractions] = rho_Y[si][idx]/rho[idx_density];
                 }
             }
         }
         else if (d_dim == tbox::Dimension(2))
         {
             // Compute the mass fraction field.
-            for (int j = -d_num_subghosts_mass_fraction[1];
-                 j < d_interior_dims[1] + d_num_subghosts_mass_fraction[1];
+            for (int j = -d_num_subghosts_mass_fractions[1];
+                 j < d_interior_dims[1] + d_num_subghosts_mass_fractions[1];
                  j++)
             {
-                for (int i = -d_num_subghosts_mass_fraction[0];
-                     i < d_interior_dims[0] + d_num_subghosts_mass_fraction[0];
+                for (int i = -d_num_subghosts_mass_fractions[0];
+                     i < d_interior_dims[0] + d_num_subghosts_mass_fractions[0];
                      i++)
                 {
                     // Compute the linear indices.
@@ -10860,12 +10860,12 @@ FlowModelFourEqnConservative::computeGlobalCellDataMassFractionWithDensity(
                     const int idx_density = (i + d_num_subghosts_density[0]) +
                         (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
                     
-                    const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                        (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
+                    const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
+                        (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0];
                     
                     for (int si = 0; si < d_num_species; si++)
                     {
-                        Y[si][idx_mass_fraction] = rho_Y[si][idx]/rho[idx_density];
+                        Y[si][idx_mass_fractions] = rho_Y[si][idx]/rho[idx_density];
                     }
                 }
             }
@@ -10873,16 +10873,16 @@ FlowModelFourEqnConservative::computeGlobalCellDataMassFractionWithDensity(
         else if (d_dim == tbox::Dimension(3))
         {
             // Compute the mass fraction field.
-            for (int k = -d_num_subghosts_mass_fraction[2];
-                 k < d_interior_dims[2] + d_num_subghosts_mass_fraction[2];
+            for (int k = -d_num_subghosts_mass_fractions[2];
+                 k < d_interior_dims[2] + d_num_subghosts_mass_fractions[2];
                  k++)
             {
-                for (int j = -d_num_subghosts_mass_fraction[1];
-                     j < d_interior_dims[1] + d_num_subghosts_mass_fraction[1];
+                for (int j = -d_num_subghosts_mass_fractions[1];
+                     j < d_interior_dims[1] + d_num_subghosts_mass_fractions[1];
                      j++)
                 {
-                    for (int i = -d_num_subghosts_mass_fraction[0];
-                         i < d_interior_dims[0] + d_num_subghosts_mass_fraction[0];
+                    for (int i = -d_num_subghosts_mass_fractions[0];
+                         i < d_interior_dims[0] + d_num_subghosts_mass_fractions[0];
                          i++)
                     {
                         // Compute the linear indices.
@@ -10895,14 +10895,14 @@ FlowModelFourEqnConservative::computeGlobalCellDataMassFractionWithDensity(
                             (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
                                 d_subghostcell_dims_density[1];
                         
-                        const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                            (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
-                            (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*
-                                d_subghostcell_dims_mass_fraction[1];
+                        const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
+                            (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0] +
+                            (k + d_num_subghosts_mass_fractions[2])*d_subghostcell_dims_mass_fractions[0]*
+                                d_subghostcell_dims_mass_fractions[1];
                         
                         for (int si = 0; si < d_num_species; si++)
                         {
-                            Y[si][idx_mass_fraction] = rho_Y[si][idx]/rho[idx_density];
+                            Y[si][idx_mass_fractions] = rho_Y[si][idx]/rho[idx_density];
                         }
                     }
                 }
@@ -10912,7 +10912,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMassFractionWithDensity(
     else
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFourEqnConservative::computeGlobalCellDataMassFractionWithDensity()\n"
+            << ": FlowModelFourEqnConservative::computeGlobalCellDataMassFractionsWithDensity()\n"
             << "Cell data of 'MASS_FRACTION' is not yet registered."
             << std::endl);
     }
@@ -11201,11 +11201,11 @@ FlowModelFourEqnConservative::computeGlobalCellDataInternalEnergyWithDensityAndV
 
 
 /*
- * Compute the global cell data of pressure with density, mass fraction and internal energy in
+ * Compute the global cell data of pressure with density, mass fractions and internal energy in
  * the registered patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy(
+FlowModelFourEqnConservative::computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy(
     const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
@@ -11219,9 +11219,9 @@ FlowModelFourEqnConservative::computeGlobalCellDataPressureWithDensityMassFracti
             computeGlobalCellDataDensity();
         }
         
-        if (!d_data_mass_fraction)
+        if (!d_data_mass_fractions)
         {
-            computeGlobalCellDataMassFractionWithDensity();
+            computeGlobalCellDataMassFractionsWithDensity();
         }
         
         if (!d_data_internal_energy)
@@ -11234,14 +11234,14 @@ FlowModelFourEqnConservative::computeGlobalCellDataPressureWithDensityMassFracti
             d_data_pressure,
             d_data_density,
             d_data_internal_energy,
-            d_data_mass_fraction,
+            d_data_mass_fractions,
             d_subghost_box_pressure);
     }
     else
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy()\n"
+            << "computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy()\n"
             << "Cell data of 'PRESSURE' is not yet registered."
             << std::endl);
     }
@@ -11249,11 +11249,11 @@ FlowModelFourEqnConservative::computeGlobalCellDataPressureWithDensityMassFracti
 
 
 /*
- * Compute the global cell data of sound speed with density, mass fraction and pressure in the
+ * Compute the global cell data of sound speed with density, mass fractions and pressure in the
  * registered patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure(
+FlowModelFourEqnConservative::computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure(
     const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
@@ -11267,14 +11267,14 @@ FlowModelFourEqnConservative::computeGlobalCellDataSoundSpeedWithDensityMassFrac
             computeGlobalCellDataDensity();
         }
         
-        if (!d_data_mass_fraction)
+        if (!d_data_mass_fractions)
         {
-            computeGlobalCellDataMassFractionWithDensity();
+            computeGlobalCellDataMassFractionsWithDensity();
         }
         
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+            computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy();
         }
         
         // Compute the sound speed field.
@@ -11282,14 +11282,14 @@ FlowModelFourEqnConservative::computeGlobalCellDataSoundSpeedWithDensityMassFrac
             d_data_sound_speed,
             d_data_density,
             d_data_pressure,
-            d_data_mass_fraction,
+            d_data_mass_fractions,
             d_subghost_box_sound_speed);
     }
     else
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure()\n"
+            << "computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure()\n"
             << "Cell data of 'SOUND_SPEED' is not yet registered."
             << std::endl);
     }
@@ -11297,11 +11297,11 @@ FlowModelFourEqnConservative::computeGlobalCellDataSoundSpeedWithDensityMassFrac
 
 
 /*
- * Compute the global cell data of temperature with density, mass fraction and pressure in the
+ * Compute the global cell data of temperature with density, mass fractions and pressure in the
  * registered patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataTemperatureWithDensityMassFractionAndPressure(
+FlowModelFourEqnConservative::computeGlobalCellDataTemperatureWithDensityMassFractionsAndPressure(
     const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_temperature > -hier::IntVector::getOne(d_dim))
@@ -11315,14 +11315,14 @@ FlowModelFourEqnConservative::computeGlobalCellDataTemperatureWithDensityMassFra
             computeGlobalCellDataDensity();
         }
         
-        if (!d_data_mass_fraction)
+        if (!d_data_mass_fractions)
         {
-            computeGlobalCellDataMassFractionWithDensity();
+            computeGlobalCellDataMassFractionsWithDensity();
         }
         
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+            computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy();
         }
         
         // Compute the temperature field.
@@ -11330,14 +11330,14 @@ FlowModelFourEqnConservative::computeGlobalCellDataTemperatureWithDensityMassFra
             d_data_temperature,
             d_data_density,
             d_data_pressure,
-            d_data_mass_fraction,
+            d_data_mass_fractions,
             d_subghost_box_temperature);
     }
     else
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "computeGlobalCellDataTemperatureWithDensityMassFractionAndPressure()\n"
+            << "computeGlobalCellDataTemperatureWithDensityMassFractionsAndPressure()\n"
             << "Cell data of 'TEMPERATURE' is not yet registered."
             << std::endl);
     }
@@ -13413,8 +13413,8 @@ FlowModelFourEqnConservative::computeGlobalCellDataConvectiveFluxWithVelocityAnd
                 F_x.push_back(d_data_convective_flux_x->getPointer(ei));
             }
             
-            boost::shared_ptr<pdat::CellData<double> > data_partial_density =
-                getGlobalCellDataPartialDensity();
+            boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+                getGlobalCellDataPartialDensities();
             
             boost::shared_ptr<pdat::CellData<double> > data_momentum =
                 getGlobalCellDataMomentum();
@@ -13429,15 +13429,15 @@ FlowModelFourEqnConservative::computeGlobalCellDataConvectiveFluxWithVelocityAnd
             
             if (!d_data_pressure)
             {
-                computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+                computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy();
             }
             
-            // Get the pointers to the cell data of partial density, total energy and pressure.
+            // Get the pointers to the cell data of partial densities, total energy and pressure.
             std::vector<double*> rho_Y;
             rho_Y.reserve(d_num_species);
             for (int si = 0; si < d_num_species; si++)
             {
-                rho_Y.push_back(data_partial_density->getPointer(si));
+                rho_Y.push_back(data_partial_densities->getPointer(si));
             }
             double* E = data_total_energy->getPointer(0);
             double* p = d_data_pressure->getPointer(0);
@@ -13590,8 +13590,8 @@ FlowModelFourEqnConservative::computeGlobalCellDataConvectiveFluxWithVelocityAnd
                 F_y.push_back(d_data_convective_flux_y->getPointer(ei));
             }
             
-            boost::shared_ptr<pdat::CellData<double> > data_partial_density =
-                getGlobalCellDataPartialDensity();
+            boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+                getGlobalCellDataPartialDensities();
             
             boost::shared_ptr<pdat::CellData<double> > data_momentum =
                 getGlobalCellDataMomentum();
@@ -13601,7 +13601,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataConvectiveFluxWithVelocityAnd
             
             if (!d_data_pressure)
             {
-                computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+                computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy();
             }
             
             if (!d_data_velocity)
@@ -13609,13 +13609,13 @@ FlowModelFourEqnConservative::computeGlobalCellDataConvectiveFluxWithVelocityAnd
                 computeGlobalCellDataVelocityWithDensity();
             }
             
-            // Get the pointers to the cell data of partial density, total energy, volume fraction
+            // Get the pointers to the cell data of partial densities, total energy, volume fraction
             // and pressure.
             std::vector<double*> rho_Y;
             rho_Y.reserve(d_num_species);
             for (int si = 0; si < d_num_species; si++)
             {
-                rho_Y.push_back(data_partial_density->getPointer(si));
+                rho_Y.push_back(data_partial_densities->getPointer(si));
             }
             double* E = data_total_energy->getPointer(0);
             double* p = d_data_pressure->getPointer(0);
@@ -13750,8 +13750,8 @@ FlowModelFourEqnConservative::computeGlobalCellDataConvectiveFluxWithVelocityAnd
                 F_z.push_back(d_data_convective_flux_z->getPointer(ei));
             }
             
-            boost::shared_ptr<pdat::CellData<double> > data_partial_density =
-                getGlobalCellDataPartialDensity();
+            boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+                getGlobalCellDataPartialDensities();
             
             boost::shared_ptr<pdat::CellData<double> > data_momentum =
                 getGlobalCellDataMomentum();
@@ -13761,7 +13761,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataConvectiveFluxWithVelocityAnd
             
             if (!d_data_pressure)
             {
-                computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+                computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy();
             }
             
             if (!d_data_velocity)
@@ -13769,13 +13769,13 @@ FlowModelFourEqnConservative::computeGlobalCellDataConvectiveFluxWithVelocityAnd
                 computeGlobalCellDataVelocityWithDensity();
             }
             
-            // Get the pointers to the cell data of partial density, total energy, volume fraction
+            // Get the pointers to the cell data of partial densities, total energy, volume fraction
             // and pressure.
             std::vector<double*> rho_Y;
             rho_Y.reserve(d_num_species);
             for (int si = 0; si < d_num_species; si++)
             {
-                rho_Y.push_back(data_partial_density->getPointer(si));
+                rho_Y.push_back(data_partial_densities->getPointer(si));
             }
             double* E = data_total_energy->getPointer(0);
             double* p = d_data_pressure->getPointer(0);
@@ -13880,7 +13880,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSo
             
             if (!d_data_sound_speed)
             {
-                computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
+                computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure();
             }
             
             // Get the pointers to the cell data of maximum wave speed and velocity in x-direction and sound speed.
@@ -13984,7 +13984,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSo
             
             if (!d_data_sound_speed)
             {
-                computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
+                computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure();
             }
             
             if (!d_data_velocity)
@@ -14086,7 +14086,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSo
             
             if (!d_data_sound_speed)
             {
-                computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
+                computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure();
             }
             
             if (!d_data_velocity)
@@ -14157,11 +14157,11 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSo
 
 
 /*
- * Compute the global cell data of maximum diffusivity with density, mass fraction, pressure
+ * Compute the global cell data of maximum diffusivity with density, mass fractions, pressure
  * and temperature in the registered patch.
  */
 void
-FlowModelFourEqnConservative::computeGlobalCellDataMaxDiffusivityWithDensityMassFractionPressureAndTemperature(
+FlowModelFourEqnConservative::computeGlobalCellDataMaxDiffusivityWithDensityMassFractionsPressureAndTemperature(
     const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (!d_equation_of_mass_diffusivity_mixing_rules ||
@@ -14171,7 +14171,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxDiffusivityWithDensityMass
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "computeGlobalCellDataMaxDiffusivityWithDensityMassFractionPressureAndTemperature()\n"
+            << "computeGlobalCellDataMaxDiffusivityWithDensityMassFractionsPressureAndTemperature()\n"
             << "Either mixing rule of mass diffusivity, shear viscosity, bulk viscosity or"
             << " thermal conductivity is not initialized."
             << std::endl);
@@ -14188,22 +14188,22 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxDiffusivityWithDensityMass
             computeGlobalCellDataDensity();
         }
         
-        if (!d_data_mass_fraction)
+        if (!d_data_mass_fractions)
         {
-            computeGlobalCellDataMassFractionWithDensity();
+            computeGlobalCellDataMassFractionsWithDensity();
         }
         
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+            computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy();
         }
         
         if (!d_data_temperature)
         {
-            computeGlobalCellDataTemperatureWithDensityMassFractionAndPressure();
+            computeGlobalCellDataTemperatureWithDensityMassFractionsAndPressure();
         }
         
-        // Get the pointers to the cell data of maximum diffusivity, density, mass fraction, pressure
+        // Get the pointers to the cell data of maximum diffusivity, density, mass fractions, pressure
         // and temperature.
         double* D_max = d_data_max_diffusivity->getPointer(0);
         double* rho = d_data_density->getPointer(0);
@@ -14211,7 +14211,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxDiffusivityWithDensityMass
         Y.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            Y.push_back(d_data_mass_fraction->getPointer(si));
+            Y.push_back(d_data_mass_fractions->getPointer(si));
         }
         double* p = d_data_pressure->getPointer(0);
         double* T = d_data_temperature->getPointer(0);
@@ -14225,7 +14225,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxDiffusivityWithDensityMass
                 // Compute the linear indices.
                 const int idx_max_diffusivity = i + d_num_subghosts_max_diffusivity[0];
                 const int idx_density = i + d_num_subghosts_density[0];
-                const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
+                const int idx_mass_fractions = i + d_num_subghosts_mass_fractions[0];
                 const int idx_pressure = i + d_num_subghosts_pressure[0];
                 const int idx_temperature = i + d_num_subghosts_temperature[0];
                 
@@ -14233,7 +14233,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxDiffusivityWithDensityMass
                 Y_ptr.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                    Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                 }
                 
                 const double c_p = d_equation_of_state_mixing_rules->
@@ -14305,8 +14305,8 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxDiffusivityWithDensityMass
                     const int idx_density = (i + d_num_subghosts_density[0]) +
                         (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
                     
-                    const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                        (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
+                    const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
+                        (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0];
                     
                     const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
                         (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
@@ -14318,7 +14318,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxDiffusivityWithDensityMass
                     Y_ptr.reserve(d_num_species);
                     for (int si = 0; si < d_num_species; si++)
                     {
-                        Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                        Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                     }
                     
                     const double c_p = d_equation_of_state_mixing_rules->
@@ -14399,10 +14399,10 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxDiffusivityWithDensityMass
                             (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
                                 d_subghostcell_dims_density[1];
                         
-                        const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                            (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
-                            (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*
-                                d_subghostcell_dims_mass_fraction[1];
+                        const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
+                            (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0] +
+                            (k + d_num_subghosts_mass_fractions[2])*d_subghostcell_dims_mass_fractions[0]*
+                                d_subghostcell_dims_mass_fractions[1];
                         
                         const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
                             (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
@@ -14418,7 +14418,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxDiffusivityWithDensityMass
                         Y_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
-                            Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                            Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                         }
                         
                         const double c_p = d_equation_of_state_mixing_rules->
@@ -14480,7 +14480,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxDiffusivityWithDensityMass
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFourEqnConservative::"
-            << "computeGlobalCellDataMaxDiffusivityWithDensityMassFractionPressureAndTemperature()\n"
+            << "computeGlobalCellDataMaxDiffusivityWithDensityMassFractionsPressureAndTemperature()\n"
             << "Cell data of 'MAX_DIFFUSIVITY' is not yet registered."
             << std::endl);
     }

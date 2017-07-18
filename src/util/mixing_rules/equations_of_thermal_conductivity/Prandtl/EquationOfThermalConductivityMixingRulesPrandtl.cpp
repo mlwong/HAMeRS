@@ -293,19 +293,19 @@ EquationOfThermalConductivityMixingRulesPrandtl::putToRestart(
 
 
 /*
- * Compute the thermal conductivity of the mixture with isothermal and isobaric assumptions.
+ * Compute the thermal conductivity of the mixture with isothermal and isobaric equilibria assumptions.
  */
 double
 EquationOfThermalConductivityMixingRulesPrandtl::getThermalConductivity(
     const double* const pressure,
     const double* const temperature,
-    const std::vector<const double*>& mass_fraction) const
+    const std::vector<const double*>& mass_fractions) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
                 (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
-    TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
-                (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
+    TBOX_ASSERT((static_cast<int>(mass_fractions.size()) == d_num_species) ||
+                (static_cast<int>(mass_fractions.size()) == d_num_species - 1));
 #endif
     
     double kappa = 0.0;
@@ -334,7 +334,23 @@ EquationOfThermalConductivityMixingRulesPrandtl::getThermalConductivity(
         species_molecular_properties_const_ptr.push_back(&species_molecular_properties[mi]);
     }
     
-    if (static_cast<int>(mass_fraction.size()) == d_num_species - 1)
+    if (static_cast<int>(mass_fractions.size()) == d_num_species)
+    {
+        for (int si = 0; si < d_num_species; si++)
+        {
+            getSpeciesMolecularProperties(species_molecular_properties_ptr, si);
+            
+            const double kappa_i = d_equation_of_thermal_conductivity->
+                getThermalConductivity(
+                    pressure,
+                    temperature,
+                    species_molecular_properties_const_ptr);
+            
+            num += kappa_i*(*(mass_fractions[si]))/(sqrt(species_molecular_properties[2]));
+            den += *(mass_fractions[si])/(sqrt(species_molecular_properties[2]));
+        }
+    }
+    else if (static_cast<int>(mass_fractions.size()) == d_num_species - 1)
     {
         double Y_last = 1.0;
         
@@ -348,11 +364,11 @@ EquationOfThermalConductivityMixingRulesPrandtl::getThermalConductivity(
                     temperature,
                     species_molecular_properties_const_ptr);
             
-            num += kappa_i*(*(mass_fraction[si]))/(sqrt(species_molecular_properties[2]));
-            den += *(mass_fraction[si])/(sqrt(species_molecular_properties[2]));
+            num += kappa_i*(*(mass_fractions[si]))/(sqrt(species_molecular_properties[2]));
+            den += *(mass_fractions[si])/(sqrt(species_molecular_properties[2]));
             
             // Compute the mass fraction of the last species.
-            Y_last -= *(mass_fraction[si]);
+            Y_last -= *(mass_fractions[si]);
         }
         
         /*
@@ -371,19 +387,11 @@ EquationOfThermalConductivityMixingRulesPrandtl::getThermalConductivity(
     }
     else
     {
-        for (int si = 0; si < d_num_species; si++)
-        {
-            getSpeciesMolecularProperties(species_molecular_properties_ptr, si);
-            
-            const double kappa_i = d_equation_of_thermal_conductivity->
-                getThermalConductivity(
-                    pressure,
-                    temperature,
-                    species_molecular_properties_const_ptr);
-            
-            num += kappa_i*(*(mass_fraction[si]))/(sqrt(species_molecular_properties[2]));
-            den += *(mass_fraction[si])/(sqrt(species_molecular_properties[2]));
-        }
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "Number of mass fractions provided is not"
+            << " equal to the total number of species or (total number of species - 1)."
+            << std::endl);
     }
     
     kappa = num/den;
@@ -393,12 +401,27 @@ EquationOfThermalConductivityMixingRulesPrandtl::getThermalConductivity(
 
 
 /*
+ * Compute the thermal conductivity of the mixture with isothermal and isobaric equilibria assumptions.
+ */
+void
+EquationOfThermalConductivityMixingRulesPrandtl::computeThermalConductivity(
+    boost::shared_ptr<pdat::CellData<double> >& data_thermal_conductivity,
+    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+    const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+    const hier::Box& domain) const
+{
+
+}
+
+
+/*
  * Get the molecular properties of a species.
  */
 void
 EquationOfThermalConductivityMixingRulesPrandtl::getSpeciesMolecularProperties(
     std::vector<double*>& species_molecular_properties,
-    const int& species_index) const
+    const int species_index) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(species_molecular_properties.size()) >=
@@ -440,3 +463,4 @@ EquationOfThermalConductivityMixingRulesPrandtl::getSpeciesMolecularProperties(
         *(species_molecular_properties[3 + mi]) = mu_molecular_properties[mi];
     }
 }
+

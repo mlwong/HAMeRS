@@ -3,10 +3,10 @@
 #include "flow/flow_models/five-eqn_Allaire/FlowModelBoundaryUtilitiesFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelStatisticsUtilitiesFiveEqnAllaire.hpp"
 
-boost::shared_ptr<pdat::CellVariable<double> > FlowModelFiveEqnAllaire::s_variable_partial_density;
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelFiveEqnAllaire::s_variable_partial_densities;
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelFiveEqnAllaire::s_variable_momentum;
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelFiveEqnAllaire::s_variable_total_energy;
-boost::shared_ptr<pdat::CellVariable<double> > FlowModelFiveEqnAllaire::s_variable_volume_fraction;
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelFiveEqnAllaire::s_variable_volume_fractions;
 
 FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
     const std::string& object_name,
@@ -22,12 +22,12 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
             dim.getValue() + 2*num_species,
             flow_model_db),
         d_num_subghosts_density(-hier::IntVector::getOne(d_dim)),
-        d_num_subghosts_mass_fraction(-hier::IntVector::getOne(d_dim)),
+        d_num_subghosts_mass_fractions(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_velocity(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_internal_energy(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_pressure(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_sound_speed(-hier::IntVector::getOne(d_dim)),
-        d_num_subghosts_temperature(-hier::IntVector::getOne(d_dim)),
+        d_num_subghosts_species_temperatures(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_dilatation(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_vorticity(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_enstrophy(-hier::IntVector::getOne(d_dim)),
@@ -40,12 +40,12 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
         d_num_subghosts_max_diffusivity(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_diffusivities(-hier::IntVector::getOne(d_dim)),
         d_subghost_box_density(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_mass_fraction(hier::Box::getEmptyBox(dim)),
+        d_subghost_box_mass_fractions(hier::Box::getEmptyBox(dim)),
         d_subghost_box_velocity(hier::Box::getEmptyBox(dim)),
         d_subghost_box_internal_energy(hier::Box::getEmptyBox(dim)),
         d_subghost_box_pressure(hier::Box::getEmptyBox(dim)),
         d_subghost_box_sound_speed(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_temperature(hier::Box::getEmptyBox(dim)),
+        d_subghost_box_species_temperatures(hier::Box::getEmptyBox(dim)),
         d_subghost_box_dilatation(hier::Box::getEmptyBox(dim)),
         d_subghost_box_vorticity(hier::Box::getEmptyBox(dim)),
         d_subghost_box_enstrophy(hier::Box::getEmptyBox(dim)),
@@ -58,12 +58,12 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
         d_subghost_box_max_diffusivity(hier::Box::getEmptyBox(dim)),
         d_subghost_box_diffusivities(hier::Box::getEmptyBox(dim)),
         d_subghostcell_dims_density(hier::IntVector::getZero(d_dim)),
-        d_subghostcell_dims_mass_fraction(hier::IntVector::getZero(d_dim)),
+        d_subghostcell_dims_mass_fractions(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_velocity(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_internal_energy(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_pressure(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_sound_speed(hier::IntVector::getZero(d_dim)),
-        d_subghostcell_dims_temperature(hier::IntVector::getZero(d_dim)),
+        d_subghostcell_dims_species_temperatures(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_dilatation(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_vorticity(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_enstrophy(hier::IntVector::getZero(d_dim)),
@@ -78,7 +78,7 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
 {
     d_eqn_form.reserve(d_num_eqn);
     
-    // Set the equations form for partial density.
+    // Set the equations form for partial densities.
     for (int si = 0; si < d_num_species; si++)
     {
         d_eqn_form.push_back(EQN_FORM::CONSERVATIVE);
@@ -93,7 +93,7 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
     // Set the equation form for total energy.
     d_eqn_form.push_back(EQN_FORM::CONSERVATIVE);
     
-    // Set the equation forms for volume fraction
+    // Set the equation forms for volume fractions.
     for (int si = 0; si < d_num_species - 1; si++)
     {
         d_eqn_form.push_back(EQN_FORM::ADVECTIVE);
@@ -109,8 +109,8 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
      * Initialize the conservative variables.
      */
     
-    s_variable_partial_density = boost::shared_ptr<pdat::CellVariable<double> > (
-        new pdat::CellVariable<double>(d_dim, "partial density", d_num_species));
+    s_variable_partial_densities = boost::shared_ptr<pdat::CellVariable<double> > (
+        new pdat::CellVariable<double>(d_dim, "partial densities", d_num_species));
     
     s_variable_momentum = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "momentum", d_dim.getValue()));
@@ -118,8 +118,8 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
     s_variable_total_energy = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "total energy", 1));
     
-    s_variable_volume_fraction = boost::shared_ptr<pdat::CellVariable<double> > (
-        new pdat::CellVariable<double>(d_dim, "volume fraction", d_num_species));
+    s_variable_volume_fractions = boost::shared_ptr<pdat::CellVariable<double> > (
+        new pdat::CellVariable<double>(d_dim, "volume fractions", d_num_species));
     
     /*
      * Initialize d_equation_of_state_mixing_rules_manager and get the equation of state mixing rules object.
@@ -399,7 +399,7 @@ FlowModelFiveEqnAllaire::registerConservativeVariables(
     const hier::IntVector& num_ghosts_intermediate)
 {
     integrator->registerVariable(
-        s_variable_partial_density,
+        s_variable_partial_densities,
         num_ghosts,
         num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::TIME_DEP,
@@ -426,7 +426,7 @@ FlowModelFiveEqnAllaire::registerConservativeVariables(
         "CONSERVATIVE_LINEAR_REFINE");
     
     integrator->registerVariable(
-        s_variable_volume_fraction,
+        s_variable_volume_fractions,
         num_ghosts,
         num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::TIME_DEP,
@@ -447,17 +447,17 @@ FlowModelFiveEqnAllaire::getNamesOfConservativeVariables(bool have_underscores)
     
     if (have_underscores)
     {
-        names.push_back("partial_density");
+        names.push_back("partial_densities");
         names.push_back("momentum");
         names.push_back("total_energy");
-        names.push_back("volume_fraction");
+        names.push_back("volume_fractions");
     }
     else
     {
-        names.push_back("partial density");
+        names.push_back("partial densities");
         names.push_back("momentum");
         names.push_back("total energy");
-        names.push_back("volume fraction");
+        names.push_back("volume fractions");
     }
     
     return names;
@@ -475,14 +475,14 @@ FlowModelFiveEqnAllaire::getNamesOfPrimitiveVariables(bool have_underscores)
     
     if (have_underscores)
     {
-        names.push_back("partial_density");
+        names.push_back("partial_densities");
         names.push_back("velocity");
         names.push_back("pressure");
-        names.push_back("volume_fraction");
+        names.push_back("volume_fractions");
     }
     else
     {
-        names.push_back("partial density");
+        names.push_back("partial densities");
         names.push_back("velocity");
         names.push_back("pressure");
         names.push_back("volume fraction");
@@ -537,10 +537,10 @@ FlowModelFiveEqnAllaire::getConservativeVariables()
     std::vector<boost::shared_ptr<pdat::CellVariable<double> > > conservative_variables;
     conservative_variables.reserve(4);
     
-    conservative_variables.push_back(s_variable_partial_density);
+    conservative_variables.push_back(s_variable_partial_densities);
     conservative_variables.push_back(s_variable_momentum);
     conservative_variables.push_back(s_variable_total_energy);
-    conservative_variables.push_back(s_variable_volume_fraction);
+    conservative_variables.push_back(s_variable_volume_fractions);
     
     return conservative_variables;
 }
@@ -571,11 +571,11 @@ FlowModelFiveEqnAllaire::registerPatchWithDataContext(
      * Set the number of ghost cells of conservative variables.
      */
     
-    boost::shared_ptr<pdat::CellData<double> > data_partial_density(
+    boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(s_variable_partial_density, getDataContext())));
+            d_patch->getPatchData(s_variable_partial_densities, getDataContext())));
     
-    d_num_ghosts = data_partial_density->getGhostCellWidth();
+    d_num_ghosts = data_partial_densities->getGhostCellWidth();
     
     /*
      * Set the interior and ghost boxes with their dimensions for the conservative cell variables.
@@ -642,12 +642,12 @@ FlowModelFiveEqnAllaire::registerDerivedCellVariable(
             "DENSITY");
     }
     
-    if (num_subghosts_of_data.find("MASS_FRACTION") != num_subghosts_of_data.end())
+    if (num_subghosts_of_data.find("MASS_FRACTIONS") != num_subghosts_of_data.end())
     {
         setNumberOfSubGhosts(
-            num_subghosts_of_data.find("MASS_FRACTION")->second,
-            "MASS_FRACTION",
-            "MASS_FRACTION");
+            num_subghosts_of_data.find("MASS_FRACTIONS")->second,
+            "MASS_FRACTIONS",
+            "MASS_FRACTIONS");
     }
     
     if (num_subghosts_of_data.find("VELOCITY") != num_subghosts_of_data.end())
@@ -873,7 +873,7 @@ FlowModelFiveEqnAllaire::registerDiffusiveFlux(
     
     setNumberOfSubGhosts(
         num_subghosts,
-        "MASS_FRACTION",
+        "MASS_FRACTIONS",
         "DIFFUSIVE_FLUX");
     
     setNumberOfSubGhosts(
@@ -888,17 +888,17 @@ FlowModelFiveEqnAllaire::registerDiffusiveFlux(
     
     setNumberOfSubGhosts(
         num_subghosts,
-        "TEMPERATURE",
+        "SPECIES_TEMPERATURE",
         "DIFFUSIVE_FLUX");
     
     d_num_subghosts_diffusivities = 
-        hier::IntVector::min(d_num_subghosts_mass_fraction, d_num_subghosts_velocity);
+        hier::IntVector::min(d_num_subghosts_mass_fractions, d_num_subghosts_velocity);
     
     d_num_subghosts_diffusivities = 
         hier::IntVector::min(d_num_subghosts_diffusivities, d_num_subghosts_pressure);
     
     d_num_subghosts_diffusivities = 
-        hier::IntVector::min(d_num_subghosts_diffusivities, d_num_subghosts_temperature);
+        hier::IntVector::min(d_num_subghosts_diffusivities, d_num_subghosts_species_temperatures);
 }
 
 
@@ -919,76 +919,76 @@ void FlowModelFiveEqnAllaire::unregisterPatch()
     
     d_patch = nullptr;
     
-    d_num_ghosts                      = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_density           = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_mass_fraction     = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_velocity          = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_internal_energy   = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_pressure          = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_sound_speed       = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_temperature       = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_dilatation        = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_vorticity         = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_enstrophy         = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_convective_flux_x = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_convective_flux_y = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_convective_flux_z = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_max_wave_speed_x  = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_max_wave_speed_y  = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_max_wave_speed_z  = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_max_diffusivity   = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_diffusivities     = -hier::IntVector::getOne(d_dim);
+    d_num_ghosts                         = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_density              = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_mass_fractions       = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_velocity             = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_internal_energy      = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_pressure             = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_sound_speed          = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_species_temperatures = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_dilatation           = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_vorticity            = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_enstrophy            = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_convective_flux_x    = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_convective_flux_y    = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_convective_flux_z    = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_max_wave_speed_x     = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_max_wave_speed_y     = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_max_wave_speed_z     = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_max_diffusivity      = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_diffusivities        = -hier::IntVector::getOne(d_dim);
     
-    d_interior_box                   = hier::Box::getEmptyBox(d_dim);
-    d_ghost_box                      = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_density           = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_mass_fraction     = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_velocity          = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_internal_energy   = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_pressure          = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_sound_speed       = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_temperature       = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_dilatation        = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_vorticity         = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_enstrophy         = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_convective_flux_x = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_convective_flux_y = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_convective_flux_z = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_max_wave_speed_x  = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_max_wave_speed_y  = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_max_wave_speed_z  = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_max_diffusivity   = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_diffusivities     = hier::Box::getEmptyBox(d_dim);
+    d_interior_box                      = hier::Box::getEmptyBox(d_dim);
+    d_ghost_box                         = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_density              = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_mass_fractions       = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_velocity             = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_internal_energy      = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_pressure             = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_sound_speed          = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_species_temperatures = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_dilatation           = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_vorticity            = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_enstrophy            = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_convective_flux_x    = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_convective_flux_y    = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_convective_flux_z    = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_max_wave_speed_x     = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_max_wave_speed_y     = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_max_wave_speed_z     = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_max_diffusivity      = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_diffusivities        = hier::Box::getEmptyBox(d_dim);
     
     
-    d_interior_dims                       = hier::IntVector::getZero(d_dim);
-    d_ghostcell_dims                      = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_density           = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_mass_fraction     = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_velocity          = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_internal_energy   = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_pressure          = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_sound_speed       = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_temperature       = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_dilatation        = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_vorticity         = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_enstrophy         = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_convective_flux_x = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_convective_flux_y = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_convective_flux_z = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_max_wave_speed_x  = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_max_wave_speed_y  = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_max_wave_speed_z  = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_max_diffusivity   = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_diffusivities     = hier::IntVector::getZero(d_dim);
+    d_interior_dims                          = hier::IntVector::getZero(d_dim);
+    d_ghostcell_dims                         = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_density              = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_mass_fractions       = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_velocity             = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_internal_energy      = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_pressure             = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_sound_speed          = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_species_temperatures = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_dilatation           = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_vorticity            = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_enstrophy            = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_convective_flux_x    = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_convective_flux_y    = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_convective_flux_z    = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_max_wave_speed_x     = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_max_wave_speed_y     = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_max_wave_speed_z     = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_max_diffusivity      = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_diffusivities        = hier::IntVector::getZero(d_dim);
     
     d_data_density.reset();
-    d_data_mass_fraction.reset();
+    d_data_mass_fractions.reset();
     d_data_velocity.reset();
     d_data_internal_energy.reset();
     d_data_pressure.reset();
     d_data_sound_speed.reset();
-    d_data_temperature.reset();
+    d_data_species_temperatures.reset();
     d_data_dilatation.reset();
     d_data_vorticity.reset();
     d_data_enstrophy.reset();
@@ -1042,11 +1042,11 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData(
     }
     
     // Compute the mass fraction cell data.
-    if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
+    if (d_num_subghosts_mass_fractions > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_data_mass_fraction)
+        if (!d_data_mass_fractions)
         {
-            computeGlobalCellDataMassFractionWithDensity(
+            computeGlobalCellDataMassFractionsWithDensity(
                 computing_option);
         }
     }
@@ -1076,7 +1076,7 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData(
     {
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy(
+            computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy(
                 computing_option);
         }
     }
@@ -1086,17 +1086,17 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData(
     {
         if (!d_data_sound_speed)
         {
-            computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure(
+            computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure(
                 computing_option);
         }
     }
     
-    // Compute the temperature cell data.
-    if (d_num_subghosts_temperature > -hier::IntVector::getOne(d_dim))
+    // Compute the species temperatures cell data.
+    if (d_num_subghosts_species_temperatures > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_data_temperature)
+        if (!d_data_species_temperatures)
         {
-            computeGlobalCellDataTemperatureWithPressure(
+            computeGlobalCellDataSpeciesTemperaturesWithPressure(
                 computing_option);
         }
     }
@@ -1202,7 +1202,7 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData(
     {
         if (!d_data_max_diffusivity)
         {
-            computeGlobalCellDataMaxDiffusivityWithDensityMassFractionPressureAndTemperature(
+            computeGlobalCellDataMaxDiffusivityWithDensityMassFractionsPressureAndTemperature(
                 computing_option);
         }
     }
@@ -1231,7 +1231,7 @@ FlowModelFiveEqnAllaire::getGlobalCellData(
     
     if (variable_key == "PARTIAL_DENSITY")
     {
-        cell_data = getGlobalCellDataPartialDensity();
+        cell_data = getGlobalCellDataPartialDensities();
     }
     else if (variable_key == "MOMENTUM")
     {
@@ -1241,9 +1241,9 @@ FlowModelFiveEqnAllaire::getGlobalCellData(
     {
         cell_data = getGlobalCellDataTotalEnergy();
     }
-    else if (variable_key == "VOLUME_FRACTION")
+    else if (variable_key == "VOLUME_FRACTIONS")
     {
-        cell_data = getGlobalCellDataVolumeFraction();
+        cell_data = getGlobalCellDataVolumeFractions();
     }
     else if (variable_key == "DENSITY")
     {
@@ -1256,16 +1256,16 @@ FlowModelFiveEqnAllaire::getGlobalCellData(
         }
         cell_data = d_data_density;
     }
-    else if (variable_key == "MASS_FRACTION")
+    else if (variable_key == "MASS_FRACTIONS")
     {
-        if (!d_data_mass_fraction)
+        if (!d_data_mass_fractions)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFiveEqnAllaire::getGlobalCellData()\n"
                 << "Cell data of 'MASS_FRACTION' is not registered/computed yet."
                 << std::endl);
         }
-        cell_data = d_data_mass_fraction;
+        cell_data = d_data_mass_fractions;
     }
     else if (variable_key == "VELOCITY")
     {
@@ -1311,16 +1311,16 @@ FlowModelFiveEqnAllaire::getGlobalCellData(
         }
         cell_data = d_data_sound_speed;
     }
-    else if (variable_key == "TEMPERATURE")
+    else if (variable_key == "SPECIES_TEMPERATURE")
     {
-        if (!d_data_temperature)
+        if (!d_data_species_temperatures)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFiveEqnAllaire::getGlobalCellData()\n"
-                << "Cell data of 'TEMPERATURE' is not registered/computed yet."
+                << "Cell data of 'SPECIES_TEMPERATURE' is not registered/computed yet."
                 << std::endl);
         }
-        cell_data = d_data_temperature;
+        cell_data = d_data_species_temperatures;
     }
     else if (variable_key == "DILATATION")
     {
@@ -1479,15 +1479,15 @@ FlowModelFiveEqnAllaire::fillZeroGlobalCellDataConservativeVariables()
             << std::endl);
     }
     
-    boost::shared_ptr<pdat::CellData<double> > data_partial_density = getGlobalCellDataPartialDensity();
+    boost::shared_ptr<pdat::CellData<double> > data_partial_densities = getGlobalCellDataPartialDensities();
     boost::shared_ptr<pdat::CellData<double> > data_momentum = getGlobalCellDataMomentum();
     boost::shared_ptr<pdat::CellData<double> > data_total_energy = getGlobalCellDataTotalEnergy();
-    boost::shared_ptr<pdat::CellData<double> > data_volume_fraction = getGlobalCellDataVolumeFraction();
+    boost::shared_ptr<pdat::CellData<double> > data_volume_fractions = getGlobalCellDataVolumeFractions();
     
-    data_partial_density->fillAll(0.0, d_interior_box);
+    data_partial_densities->fillAll(0.0, d_interior_box);
     data_momentum->fillAll(0.0, d_interior_box);
     data_total_energy->fillAll(0.0, d_interior_box);
-    data_volume_fraction->fillAll(0.0, d_interior_box);
+    data_volume_fractions->fillAll(0.0, d_interior_box);
 }
 
 
@@ -1506,13 +1506,13 @@ FlowModelFiveEqnAllaire::updateGlobalCellDataConservativeVariables()
             << std::endl);
     }
     
-    boost::shared_ptr<pdat::CellData<double> > data_volume_fraction = getGlobalCellDataVolumeFraction();
+    boost::shared_ptr<pdat::CellData<double> > data_volume_fractions = getGlobalCellDataVolumeFractions();
     
     std::vector<double*> Z;
     Z.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
-        Z.push_back(data_volume_fraction->getPointer(si));
+        Z.push_back(data_volume_fractions->getPointer(si));
     }
     
     if (d_dim == tbox::Dimension(1))
@@ -1593,10 +1593,10 @@ FlowModelFiveEqnAllaire::getGlobalCellDataConservativeVariables()
     std::vector<boost::shared_ptr<pdat::CellData<double> > > global_cell_data;
     global_cell_data.reserve(4);
     
-    global_cell_data.push_back(getGlobalCellDataPartialDensity());
+    global_cell_data.push_back(getGlobalCellDataPartialDensities());
     global_cell_data.push_back(getGlobalCellDataMomentum());
     global_cell_data.push_back(getGlobalCellDataTotalEnergy());
-    global_cell_data.push_back(getGlobalCellDataVolumeFraction());
+    global_cell_data.push_back(getGlobalCellDataVolumeFractions());
     
     return global_cell_data;
 }
@@ -1620,7 +1620,7 @@ FlowModelFiveEqnAllaire::getGlobalCellDataPrimitiveVariables()
     std::vector<boost::shared_ptr<pdat::CellData<double> > > global_cell_data;
     global_cell_data.reserve(4);
     
-    global_cell_data.push_back(getGlobalCellDataPartialDensity());
+    global_cell_data.push_back(getGlobalCellDataPartialDensities());
     if (!d_data_velocity)
     {
         TBOX_ERROR(d_object_name
@@ -1637,7 +1637,7 @@ FlowModelFiveEqnAllaire::getGlobalCellDataPrimitiveVariables()
             << std::endl);
     }
     global_cell_data.push_back(d_data_pressure);
-    global_cell_data.push_back(getGlobalCellDataVolumeFraction());
+    global_cell_data.push_back(getGlobalCellDataVolumeFractions());
     
     return global_cell_data;
 }
@@ -1767,16 +1767,16 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
             << std::endl);
     }
     
-    // Get the cell data of the variable partial density.
-    boost::shared_ptr<pdat::CellData<double> > data_partial_density =
-        getGlobalCellDataPartialDensity();
+    // Get the cell data of the variable partial densities.
+    boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+        getGlobalCellDataPartialDensities();
     
-    // Get the pointers to the cell data of partial density, total density and sound speed.
+    // Get the pointers to the cell data of partial densities, total density and sound speed.
     std::vector<double*> Z_rho;
     Z_rho.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
-        Z_rho.push_back(data_partial_density->getPointer(si));
+        Z_rho.push_back(data_partial_densities->getPointer(si));
     }
     if (!d_data_density)
     {
@@ -1785,7 +1785,7 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
     double* rho = d_data_density->getPointer(0);
     if (!d_data_sound_speed)
     {
-        computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
+        computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure();
     }
     double* c = d_data_sound_speed->getPointer(0);
     
@@ -4306,10 +4306,10 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
     bounded_flag->fillAll(1);
     
     // Create the side data for last volume fraction.
-    boost::shared_ptr<pdat::SideData<double> > data_last_volume_fraction(
+    boost::shared_ptr<pdat::SideData<double> > data_last_volume_fractions(
         new pdat::SideData<double>(d_interior_box, 1, num_ghosts_conservative_var));
     
-    data_last_volume_fraction->fillAll(1.0);
+    data_last_volume_fractions->fillAll(1.0);
     
     // Create the side data of density.
     boost::shared_ptr<pdat::SideData<double> > data_density(
@@ -4347,7 +4347,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
             Q[ei] = conservative_variables[ei]->getPointer(0);
         }
         
-        Z_last = data_last_volume_fraction->getPointer(0);
+        Z_last = data_last_volume_fractions->getPointer(0);
         
         rho = data_density->getPointer(0);
         
@@ -4492,7 +4492,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
             Q[ei] = conservative_variables[ei]->getPointer(0);
         }
         
-        Z_last = data_last_volume_fraction->getPointer(0);
+        Z_last = data_last_volume_fractions->getPointer(0);
         
         rho = data_density->getPointer(0);
         
@@ -4648,7 +4648,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
             Q[ei] = conservative_variables[ei]->getPointer(1);
         }
         
-        Z_last = data_last_volume_fraction->getPointer(1);
+        Z_last = data_last_volume_fractions->getPointer(1);
         
         rho = data_density->getPointer(1);
         
@@ -4816,7 +4816,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
             Q[ei] = conservative_variables[ei]->getPointer(0);
         }
         
-        Z_last = data_last_volume_fraction->getPointer(0);
+        Z_last = data_last_volume_fractions->getPointer(0);
         
         rho = data_density->getPointer(0);
         
@@ -4997,7 +4997,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
             Q[ei] = conservative_variables[ei]->getPointer(1);
         }
         
-        Z_last = data_last_volume_fraction->getPointer(1);
+        Z_last = data_last_volume_fractions->getPointer(1);
         
         rho = data_density->getPointer(1);
         
@@ -5178,7 +5178,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
             Q[ei] = conservative_variables[ei]->getPointer(2);
         }
         
-        Z_last = data_last_volume_fraction->getPointer(2);
+        Z_last = data_last_volume_fractions->getPointer(2);
         
         rho = data_density->getPointer(2);
         
@@ -5441,10 +5441,10 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
     bounded_flag->fillAll(1);
     
     // Create the side data for last volume fraction.
-    boost::shared_ptr<pdat::SideData<double> > data_last_volume_fraction(
+    boost::shared_ptr<pdat::SideData<double> > data_last_volume_fractions(
         new pdat::SideData<double>(d_interior_box, 1, num_ghosts_primitive_var));
     
-    data_last_volume_fraction->fillAll(1.0);
+    data_last_volume_fractions->fillAll(1.0);
     
     // Create the side data of density.
     boost::shared_ptr<pdat::SideData<double> > data_density(
@@ -5482,7 +5482,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
         
-        Z_last = data_last_volume_fraction->getPointer(0);
+        Z_last = data_last_volume_fractions->getPointer(0);
         
         rho = data_density->getPointer(0);
         
@@ -5627,7 +5627,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
         
-        Z_last = data_last_volume_fraction->getPointer(0);
+        Z_last = data_last_volume_fractions->getPointer(0);
         
         rho = data_density->getPointer(0);
         
@@ -5783,7 +5783,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
             V[ei] = primitive_variables[ei]->getPointer(1);
         }
         
-        Z_last = data_last_volume_fraction->getPointer(1);
+        Z_last = data_last_volume_fractions->getPointer(1);
         
         rho = data_density->getPointer(1);
         
@@ -5951,7 +5951,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
         
-        Z_last = data_last_volume_fraction->getPointer(0);
+        Z_last = data_last_volume_fractions->getPointer(0);
         
         rho = data_density->getPointer(0);
         
@@ -6132,7 +6132,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
             V[ei] = primitive_variables[ei]->getPointer(1);
         }
         
-        Z_last = data_last_volume_fraction->getPointer(1);
+        Z_last = data_last_volume_fractions->getPointer(1);
         
         rho = data_density->getPointer(1);
         
@@ -6313,7 +6313,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
             V[ei] = primitive_variables[ei]->getPointer(2);
         }
         
-        Z_last = data_last_volume_fraction->getPointer(2);
+        Z_last = data_last_volume_fractions->getPointer(2);
         
         rho = data_density->getPointer(2);
         
@@ -7573,9 +7573,9 @@ FlowModelFiveEqnAllaire::getDiffusiveFluxDiffusivities(
     
     if (!d_data_diffusivities)
     {
-        if (!d_data_mass_fraction)
+        if (!d_data_mass_fractions)
         {
-            computeGlobalCellDataMassFractionWithDensity();
+            computeGlobalCellDataMassFractionsWithDensity();
         }
         
         if (!d_data_velocity)
@@ -7585,38 +7585,38 @@ FlowModelFiveEqnAllaire::getDiffusiveFluxDiffusivities(
         
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+            computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy();
         }
         
-        if (!d_data_temperature)
+        if (!d_data_species_temperatures)
         {
-            computeGlobalCellDataTemperatureWithPressure();
+            computeGlobalCellDataSpeciesTemperaturesWithPressure();
         }
         
-        // Get the cell data of the variable volume fraction.
-        boost::shared_ptr<pdat::CellData<double> > data_volume_fraction =
-            getGlobalCellDataVolumeFraction();
+        // Get the cell data of the variable volume fractions.
+        boost::shared_ptr<pdat::CellData<double> > data_volume_fractions =
+            getGlobalCellDataVolumeFractions();
         
-        // Get the pointers to the cell data of mass fraction, pressure, temperature and
-        // volume fraction.
+        // Get the pointers to the cell data of mass fractions, pressure, species temperatures and
+        // volume fractions.
         std::vector<double*> Y;
         Y.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            Y.push_back(d_data_mass_fraction->getPointer(si));
+            Y.push_back(d_data_mass_fractions->getPointer(si));
         }
         double* p = d_data_pressure->getPointer(0);
         std::vector<double*> T;
         T.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            T.push_back(d_data_temperature->getPointer(si));
+            T.push_back(d_data_species_temperatures->getPointer(si));
         }
         std::vector<double*> Z;
         Z.reserve(d_num_species - 1);
         for (int si = 0; si < d_num_species - 1; si++)
         {
-            Z.push_back(data_volume_fraction->getPointer(si));
+            Z.push_back(data_volume_fractions->getPointer(si));
         }
         
         /*
@@ -7637,22 +7637,22 @@ FlowModelFiveEqnAllaire::getDiffusiveFluxDiffusivities(
                 // Compute the linear indices.
                 const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
                 const int idx_pressure = i + d_num_subghosts_pressure[0];
-                const int idx_temperature = i + d_num_subghosts_temperature[0];
-                const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
+                const int idx_species_temperatures = i + d_num_subghosts_species_temperatures[0];
+                const int idx_mass_fractions = i + d_num_subghosts_mass_fractions[0];
                 const int idx = i + d_num_ghosts[0];
                 
                 std::vector<const double*> T_ptr;
                 T_ptr.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    T_ptr.push_back(&T[si][idx_temperature]);
+                    T_ptr.push_back(&T[si][idx_species_temperatures]);
                 }
                 
                 std::vector<const double*> Y_ptr;
                 Y_ptr.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                    Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                 }
                 
                 std::vector<const double*> Z_ptr;
@@ -7687,11 +7687,11 @@ FlowModelFiveEqnAllaire::getDiffusiveFluxDiffusivities(
                     const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
                         (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
                     
-                    const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                        (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0];
+                    const int idx_species_temperatures = (i + d_num_subghosts_species_temperatures[0]) +
+                        (j + d_num_subghosts_species_temperatures[1])*d_subghostcell_dims_species_temperatures[0];
                     
-                    const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                        (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
+                    const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
+                        (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0];
                     
                     const int idx = (i + d_num_ghosts[0]) +
                         (j + d_num_ghosts[1])*d_ghostcell_dims[0];
@@ -7700,14 +7700,14 @@ FlowModelFiveEqnAllaire::getDiffusiveFluxDiffusivities(
                     T_ptr.reserve(d_num_species);
                     for (int si = 0; si < d_num_species; si++)
                     {
-                        T_ptr.push_back(&T[si][idx_temperature]);
+                        T_ptr.push_back(&T[si][idx_species_temperatures]);
                     }
                     
                     std::vector<const double*> Y_ptr;
                     Y_ptr.reserve(d_num_species);
                     for (int si = 0; si < d_num_species; si++)
                     {
-                        Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                        Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                     }
                     
                     std::vector<const double*> Z_ptr;
@@ -7750,15 +7750,15 @@ FlowModelFiveEqnAllaire::getDiffusiveFluxDiffusivities(
                             (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
                                 d_subghostcell_dims_pressure[1];
                         
-                        const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                            (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0] +
-                            (k + d_num_subghosts_temperature[2])*d_subghostcell_dims_temperature[0]*
-                                d_subghostcell_dims_temperature[1];
+                        const int idx_species_temperatures = (i + d_num_subghosts_species_temperatures[0]) +
+                            (j + d_num_subghosts_species_temperatures[1])*d_subghostcell_dims_species_temperatures[0] +
+                            (k + d_num_subghosts_species_temperatures[2])*d_subghostcell_dims_species_temperatures[0]*
+                                d_subghostcell_dims_species_temperatures[1];
                         
-                        const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                            (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
-                            (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*
-                                d_subghostcell_dims_mass_fraction[1];
+                        const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
+                            (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0] +
+                            (k + d_num_subghosts_mass_fractions[2])*d_subghostcell_dims_mass_fractions[0]*
+                                d_subghostcell_dims_mass_fractions[1];
                         
                         const int idx = (i + d_num_ghosts[0]) +
                             (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
@@ -7768,14 +7768,14 @@ FlowModelFiveEqnAllaire::getDiffusiveFluxDiffusivities(
                         T_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
-                            T_ptr.push_back(&T[si][idx_temperature]);
+                            T_ptr.push_back(&T[si][idx_species_temperatures]);
                         }
                         
                         std::vector<const double*> Y_ptr;
                         Y_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
-                            Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                            Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                         }
                         
                         std::vector<const double*> Z_ptr;
@@ -7814,22 +7814,22 @@ FlowModelFiveEqnAllaire::getDiffusiveFluxDiffusivities(
                 // Compute the linear indices.
                 const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
                 const int idx_pressure = i + d_num_subghosts_pressure[0];
-                const int idx_temperature = i + d_num_subghosts_temperature[0];
-                const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
+                const int idx_species_temperatures = i + d_num_subghosts_species_temperatures[0];
+                const int idx_mass_fractions = i + d_num_subghosts_mass_fractions[0];
                 const int idx = i + d_num_ghosts[0];
                 
                 std::vector<const double*> T_ptr;
                 T_ptr.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    T_ptr.push_back(&T[si][idx_temperature]);
+                    T_ptr.push_back(&T[si][idx_species_temperatures]);
                 }
                 
                 std::vector<const double*> Y_ptr;
                 Y_ptr.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                    Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                 }
                 
                 std::vector<const double*> Z_ptr;
@@ -7864,11 +7864,11 @@ FlowModelFiveEqnAllaire::getDiffusiveFluxDiffusivities(
                     const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
                         (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
                     
-                    const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                        (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0];
+                    const int idx_species_temperatures = (i + d_num_subghosts_species_temperatures[0]) +
+                        (j + d_num_subghosts_species_temperatures[1])*d_subghostcell_dims_species_temperatures[0];
                     
-                    const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                        (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
+                    const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
+                        (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0];
                     
                     const int idx = (i + d_num_ghosts[0]) +
                         (j + d_num_ghosts[1])*d_ghostcell_dims[0];
@@ -7877,14 +7877,14 @@ FlowModelFiveEqnAllaire::getDiffusiveFluxDiffusivities(
                     T_ptr.reserve(d_num_species);
                     for (int si = 0; si < d_num_species; si++)
                     {
-                        T_ptr.push_back(&T[si][idx_temperature]);
+                        T_ptr.push_back(&T[si][idx_species_temperatures]);
                     }
                     
                     std::vector<const double*> Y_ptr;
                     Y_ptr.reserve(d_num_species);
                     for (int si = 0; si < d_num_species; si++)
                     {
-                        Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                        Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                     }
                     
                     std::vector<const double*> Z_ptr;
@@ -7927,15 +7927,15 @@ FlowModelFiveEqnAllaire::getDiffusiveFluxDiffusivities(
                             (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
                                 d_subghostcell_dims_pressure[1];
                         
-                        const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                            (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0] +
-                            (k + d_num_subghosts_temperature[2])*d_subghostcell_dims_temperature[0]*
-                                d_subghostcell_dims_temperature[1];
+                        const int idx_species_temperatures = (i + d_num_subghosts_species_temperatures[0]) +
+                            (j + d_num_subghosts_species_temperatures[1])*d_subghostcell_dims_species_temperatures[0] +
+                            (k + d_num_subghosts_species_temperatures[2])*d_subghostcell_dims_species_temperatures[0]*
+                                d_subghostcell_dims_species_temperatures[1];
                         
-                        const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                            (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
-                            (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*
-                                d_subghostcell_dims_mass_fraction[1];
+                        const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
+                            (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0] +
+                            (k + d_num_subghosts_mass_fractions[2])*d_subghostcell_dims_mass_fractions[0]*
+                                d_subghostcell_dims_mass_fractions[1];
                         
                         const int idx = (i + d_num_ghosts[0]) +
                             (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
@@ -7945,14 +7945,14 @@ FlowModelFiveEqnAllaire::getDiffusiveFluxDiffusivities(
                         T_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
-                            T_ptr.push_back(&T[si][idx_temperature]);
+                            T_ptr.push_back(&T[si][idx_species_temperatures]);
                         }
                         
                         std::vector<const double*> Y_ptr;
                         Y_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
-                            Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                            Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                         }
                         
                         std::vector<const double*> Z_ptr;
@@ -9011,17 +9011,17 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
     
     if (variable_name == "density")
     {
-        boost::shared_ptr<pdat::CellData<double> > data_partial_density(
+        boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(s_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        TBOX_ASSERT(data_partial_density);
-        TBOX_ASSERT(data_partial_density->getGhostBox().isSpatiallyEqual(patch.getBox()));
+        TBOX_ASSERT(data_partial_densities);
+        TBOX_ASSERT(data_partial_densities->getGhostBox().isSpatiallyEqual(patch.getBox()));
 #endif
         
         // Get the dimensions of box that covers the data.
-        const hier::Box data_box = data_partial_density->getGhostBox();
+        const hier::Box data_box = data_partial_densities->getGhostBox();
         const hier::IntVector data_dims = data_box.numberCells();
         
         // Get the pointers to the conservative variables.
@@ -9029,7 +9029,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
         Z_rho.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            Z_rho.push_back(data_partial_density->getPointer(si));
+            Z_rho.push_back(data_partial_densities->getPointer(si));
         }
         
         size_t offset_data = data_box.offset(region.lower());
@@ -9110,9 +9110,9 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
     }
     else if (variable_name == "pressure")
     {
-        boost::shared_ptr<pdat::CellData<double> > data_partial_density(
+        boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(s_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_momentum(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -9122,23 +9122,23 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(s_variable_total_energy, d_plot_context)));
         
-        boost::shared_ptr<pdat::CellData<double> > data_volume_fraction(
+        boost::shared_ptr<pdat::CellData<double> > data_volume_fractions(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(s_variable_volume_fraction, d_plot_context)));
+                patch.getPatchData(s_variable_volume_fractions, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        TBOX_ASSERT(data_partial_density);
+        TBOX_ASSERT(data_partial_densities);
         TBOX_ASSERT(data_momentum);
         TBOX_ASSERT(data_total_energy);
-        TBOX_ASSERT(data_volume_fraction);
-        TBOX_ASSERT(data_partial_density->getGhostBox().isSpatiallyEqual(patch.getBox()));
+        TBOX_ASSERT(data_volume_fractions);
+        TBOX_ASSERT(data_partial_densities->getGhostBox().isSpatiallyEqual(patch.getBox()));
         TBOX_ASSERT(data_momentum->getGhostBox().isSpatiallyEqual(patch.getBox()));
         TBOX_ASSERT(data_total_energy->getGhostBox().isSpatiallyEqual(patch.getBox()));
-        TBOX_ASSERT(data_volume_fraction->getGhostBox().isSpatiallyEqual(patch.getBox()));
+        TBOX_ASSERT(data_volume_fractions->getGhostBox().isSpatiallyEqual(patch.getBox()));
 #endif
         
         // Get the dimensions of box that covers the data.
-        const hier::Box data_box = data_partial_density->getGhostBox();
+        const hier::Box data_box = data_partial_densities->getGhostBox();
         const hier::IntVector data_dims = data_box.numberCells();
         
         // Get the pointers to the conservative variables.
@@ -9146,7 +9146,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
         Z_rho.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            Z_rho.push_back(data_partial_density->getPointer(si));
+            Z_rho.push_back(data_partial_densities->getPointer(si));
         }
         const double* const rho_u = data_momentum->getPointer(0);
         const double* const rho_v = d_dim > tbox::Dimension(1) ? data_momentum->getPointer(1) : NULL;
@@ -9156,7 +9156,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
         Z.reserve(d_num_species - 1);
         for (int si = 0; si < d_num_species - 1; si++)
         {
-            Z.push_back(data_volume_fraction->getPointer(si));
+            Z.push_back(data_volume_fractions->getPointer(si));
         }
         
         size_t offset_data = data_box.offset(region.lower());
@@ -9405,9 +9405,9 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
     }
     else if (variable_name == "sound speed")
     {
-        boost::shared_ptr<pdat::CellData<double> > data_partial_density(
+        boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(s_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_momentum(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -9417,23 +9417,23 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(s_variable_total_energy, d_plot_context)));
         
-        boost::shared_ptr<pdat::CellData<double> > data_volume_fraction(
+        boost::shared_ptr<pdat::CellData<double> > data_volume_fractions(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(s_variable_volume_fraction, d_plot_context)));
+                patch.getPatchData(s_variable_volume_fractions, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        TBOX_ASSERT(data_partial_density);
+        TBOX_ASSERT(data_partial_densities);
         TBOX_ASSERT(data_momentum);
         TBOX_ASSERT(data_total_energy);
-        TBOX_ASSERT(data_volume_fraction);
-        TBOX_ASSERT(data_partial_density->getGhostBox().isSpatiallyEqual(patch.getBox()));
+        TBOX_ASSERT(data_volume_fractions);
+        TBOX_ASSERT(data_partial_densities->getGhostBox().isSpatiallyEqual(patch.getBox()));
         TBOX_ASSERT(data_momentum->getGhostBox().isSpatiallyEqual(patch.getBox()));
         TBOX_ASSERT(data_total_energy->getGhostBox().isSpatiallyEqual(patch.getBox()));
-        TBOX_ASSERT(data_volume_fraction->getGhostBox().isSpatiallyEqual(patch.getBox()));
+        TBOX_ASSERT(data_volume_fractions->getGhostBox().isSpatiallyEqual(patch.getBox()));
 #endif
         
         // Get the dimensions of box that covers the data.
-        const hier::Box data_box = data_partial_density->getGhostBox();
+        const hier::Box data_box = data_partial_densities->getGhostBox();
         const hier::IntVector data_dims = data_box.numberCells();
         
         // Get the pointers to the conservative variables.
@@ -9441,7 +9441,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
         Z_rho.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            Z_rho.push_back(data_partial_density->getPointer(si));
+            Z_rho.push_back(data_partial_densities->getPointer(si));
         }
         const double* const rho_u = data_momentum->getPointer(0);
         const double* const rho_v = d_dim > tbox::Dimension(1) ? data_momentum->getPointer(1) : NULL;
@@ -9451,7 +9451,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
         Z.reserve(d_num_species - 1);
         for (int si = 0; si < d_num_species - 1; si++)
         {
-            Z.push_back(data_volume_fraction->getPointer(si));
+            Z.push_back(data_volume_fractions->getPointer(si));
         }
         
         size_t offset_data = data_box.offset(region.lower());
@@ -9721,23 +9721,23 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
     }
     else if (variable_name == "velocity")
     {
-        boost::shared_ptr<pdat::CellData<double> > data_partial_density(
+        boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(s_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_momentum(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(s_variable_momentum, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        TBOX_ASSERT(data_partial_density);
+        TBOX_ASSERT(data_partial_densities);
         TBOX_ASSERT(data_momentum);
-        TBOX_ASSERT(data_partial_density->getGhostBox().isSpatiallyEqual(patch.getBox()));
+        TBOX_ASSERT(data_partial_densities->getGhostBox().isSpatiallyEqual(patch.getBox()));
         TBOX_ASSERT(data_momentum->getGhostBox().isSpatiallyEqual(patch.getBox()));
 #endif
         
         // Get the dimensions of box that covers the data.
-        const hier::Box data_box = data_partial_density->getGhostBox();
+        const hier::Box data_box = data_partial_densities->getGhostBox();
         const hier::IntVector data_dims = data_box.numberCells();
         
         // Get the pointers to the conservative variables.
@@ -9745,7 +9745,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
         Z_rho.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            Z_rho.push_back(data_partial_density->getPointer(si));
+            Z_rho.push_back(data_partial_densities->getPointer(si));
         }
         const double* const m = data_momentum->getPointer(depth_id);
         
@@ -9838,17 +9838,17 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
     {
         int species_idx = std::stoi(variable_name.substr(14));
         
-        boost::shared_ptr<pdat::CellData<double> > data_partial_density(
+        boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(s_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        TBOX_ASSERT(data_partial_density);
-        TBOX_ASSERT(data_partial_density->getGhostBox().isSpatiallyEqual(patch.getBox()));
+        TBOX_ASSERT(data_partial_densities);
+        TBOX_ASSERT(data_partial_densities->getGhostBox().isSpatiallyEqual(patch.getBox()));
 #endif
         
         // Get the dimensions of box that covers the data.
-        const hier::Box data_box = data_partial_density->getGhostBox();
+        const hier::Box data_box = data_partial_densities->getGhostBox();
         const hier::IntVector data_dims = data_box.numberCells();
         
         // Get the pointers to conservative variables.
@@ -9856,7 +9856,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
         Z_rho.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            Z_rho.push_back(data_partial_density->getPointer(si));
+            Z_rho.push_back(data_partial_densities->getPointer(si));
         }
         
         size_t offset_data = data_box.offset(region.lower());
@@ -9981,14 +9981,14 @@ FlowModelFiveEqnAllaire::registerPlotQuantities(
     /*
     for (int si = 0; si < d_num_species; si++)
     {
-        std::string partial_density_name =
+        std::string partial_densities_name =
             "partial density " + tbox::Utilities::intToString(si);
         
         visit_writer->registerPlotQuantity(
-            partial_density_name,
+            partial_densities_name,
             "SCALAR",
             vardb->mapVariableAndContextToIndex(
-                s_variable_partial_density,
+                s_variable_partial_densities,
                 d_plot_context),
             si);
     }
@@ -10010,14 +10010,14 @@ FlowModelFiveEqnAllaire::registerPlotQuantities(
     
     for (int si = 0; si < d_num_species - 1; si++)
     {
-        std::string volume_fraction_name =
+        std::string volume_fractions_name =
             "volume fraction " + tbox::Utilities::intToString(si);
             
         visit_writer->registerPlotQuantity(
-            volume_fraction_name,
+            volume_fractions_name,
             "SCALAR",
             vardb->mapVariableAndContextToIndex(
-               s_variable_volume_fraction,
+               s_variable_volume_fractions,
                d_plot_context),
             si);
     }
@@ -10040,10 +10040,10 @@ FlowModelFiveEqnAllaire::registerPlotQuantities(
     
     for (int si = 0; si < d_num_species - 1; si++)
     {
-        std::string mass_fraction_name =
+        std::string mass_fractions_name =
             "mass fraction " + tbox::Utilities::intToString(si);
             
-        visit_writer->registerDerivedPlotQuantity(mass_fraction_name,
+        visit_writer->registerDerivedPlotQuantity(mass_fractions_name,
             "SCALAR",
             this);
     }
@@ -10089,11 +10089,11 @@ FlowModelFiveEqnAllaire::setNumberOfSubGhosts(
             d_num_subghosts_density = num_subghosts;
         }
     }
-    else if (variable_name == "MASS_FRACTION")
+    else if (variable_name == "MASS_FRACTIONS")
     {
-        if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
+        if (d_num_subghosts_mass_fractions > -hier::IntVector::getOne(d_dim))
         {
-            if (num_subghosts > d_num_subghosts_mass_fraction)
+            if (num_subghosts > d_num_subghosts_mass_fractions)
             {
                 /*
                 TBOX_ERROR(d_object_name
@@ -10107,12 +10107,12 @@ FlowModelFiveEqnAllaire::setNumberOfSubGhosts(
                     << std::endl);
                 */
                 
-                d_num_subghosts_mass_fraction = num_subghosts;
+                d_num_subghosts_mass_fractions = num_subghosts;
             }
         }
         else
         {
-            d_num_subghosts_mass_fraction = num_subghosts;
+            d_num_subghosts_mass_fractions = num_subghosts;
         }
         
         setNumberOfSubGhosts(num_subghosts, "DENSITY", parent_variable_name);
@@ -10201,7 +10201,7 @@ FlowModelFiveEqnAllaire::setNumberOfSubGhosts(
         }
         
         setNumberOfSubGhosts(num_subghosts, "DENSITY", parent_variable_name);
-        setNumberOfSubGhosts(num_subghosts, "MASS_FRACTION", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "MASS_FRACTIONS", parent_variable_name);
         setNumberOfSubGhosts(num_subghosts, "INTERNAL_ENERGY", parent_variable_name);
     }
     else if (variable_name == "SOUND_SPEED")
@@ -10231,14 +10231,14 @@ FlowModelFiveEqnAllaire::setNumberOfSubGhosts(
         }
         
         setNumberOfSubGhosts(num_subghosts, "DENSITY", parent_variable_name);
-        setNumberOfSubGhosts(num_subghosts, "MASS_FRACTION", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "MASS_FRACTIONS", parent_variable_name);
         setNumberOfSubGhosts(num_subghosts, "PRESSURE", parent_variable_name);
     }
-    else if (variable_name == "TEMPERATURE")
+    else if (variable_name == "SPECIES_TEMPERATURE")
     {
-        if (d_num_subghosts_temperature > -hier::IntVector::getOne(d_dim))
+        if (d_num_subghosts_species_temperatures > -hier::IntVector::getOne(d_dim))
         {
-            if (num_subghosts > d_num_subghosts_temperature)
+            if (num_subghosts > d_num_subghosts_species_temperatures)
             {
                 /*
                 TBOX_ERROR(d_object_name
@@ -10252,12 +10252,12 @@ FlowModelFiveEqnAllaire::setNumberOfSubGhosts(
                     << std::endl);
                 */
                 
-                d_num_subghosts_temperature = num_subghosts;
+                d_num_subghosts_species_temperatures = num_subghosts;
             }
         }
         else
         {
-            d_num_subghosts_temperature = num_subghosts;
+            d_num_subghosts_species_temperatures = num_subghosts;
         }
         
         setNumberOfSubGhosts(num_subghosts, "PRESSURE", parent_variable_name);
@@ -10554,9 +10554,9 @@ FlowModelFiveEqnAllaire::setNumberOfSubGhosts(
         }
         
         setNumberOfSubGhosts(num_subghosts, "DENSITY", parent_variable_name);
-        setNumberOfSubGhosts(num_subghosts, "MASS_FRACTION", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "MASS_FRACTIONS", parent_variable_name);
         setNumberOfSubGhosts(num_subghosts, "PRESSURE", parent_variable_name);
-        setNumberOfSubGhosts(num_subghosts, "TEMPERATURE", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "SPECIES_TEMPERATURE", parent_variable_name);
     }
 }
 
@@ -10574,11 +10574,11 @@ FlowModelFiveEqnAllaire::setGhostBoxesAndDimensionsDerivedCellVariables()
         d_subghostcell_dims_density = d_subghost_box_density.numberCells();
     }
     
-    if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
+    if (d_num_subghosts_mass_fractions > -hier::IntVector::getOne(d_dim))
     {
-        d_subghost_box_mass_fraction = d_interior_box;
-        d_subghost_box_mass_fraction.grow(d_num_subghosts_mass_fraction);
-        d_subghostcell_dims_mass_fraction = d_subghost_box_mass_fraction.numberCells();
+        d_subghost_box_mass_fractions = d_interior_box;
+        d_subghost_box_mass_fractions.grow(d_num_subghosts_mass_fractions);
+        d_subghostcell_dims_mass_fractions = d_subghost_box_mass_fractions.numberCells();
     }
     
     if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
@@ -10609,11 +10609,11 @@ FlowModelFiveEqnAllaire::setGhostBoxesAndDimensionsDerivedCellVariables()
         d_subghostcell_dims_sound_speed = d_subghost_box_sound_speed.numberCells();
     }
     
-    if (d_num_subghosts_temperature > -hier::IntVector::getOne(d_dim))
+    if (d_num_subghosts_species_temperatures > -hier::IntVector::getOne(d_dim))
     {
-        d_subghost_box_temperature = d_interior_box;
-        d_subghost_box_temperature.grow(d_num_subghosts_temperature);
-        d_subghostcell_dims_temperature = d_subghost_box_temperature.numberCells();
+        d_subghost_box_species_temperatures = d_interior_box;
+        d_subghost_box_species_temperatures.grow(d_num_subghosts_species_temperatures);
+        d_subghostcell_dims_species_temperatures = d_subghost_box_species_temperatures.numberCells();
     }
     
     if (d_num_subghosts_dilatation > -hier::IntVector::getOne(d_dim))
@@ -10696,17 +10696,17 @@ FlowModelFiveEqnAllaire::setGhostBoxesAndDimensionsDerivedCellVariables()
 
 
 /*
- * Get the global cell data of partial density in the registered patch.
+ * Get the global cell data of partial densities in the registered patch.
  */
 boost::shared_ptr<pdat::CellData<double> >
-FlowModelFiveEqnAllaire::getGlobalCellDataPartialDensity()
+FlowModelFiveEqnAllaire::getGlobalCellDataPartialDensities()
 {
-    // Get the cell data of the registered variable partial density.
-    boost::shared_ptr<pdat::CellData<double> > data_partial_density(
+    // Get the cell data of the registered variable partial densities.
+    boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(s_variable_partial_density, getDataContext())));
+            d_patch->getPatchData(s_variable_partial_densities, getDataContext())));
     
-    return data_partial_density;
+    return data_partial_densities;
 }
 
 
@@ -10741,17 +10741,17 @@ FlowModelFiveEqnAllaire::getGlobalCellDataTotalEnergy()
 
 
 /*
- * Get the global cell data of volume fraction in the registered patch.
+ * Get the global cell data of volume fractions in the registered patch.
  */
 boost::shared_ptr<pdat::CellData<double> >
-FlowModelFiveEqnAllaire::getGlobalCellDataVolumeFraction()
+FlowModelFiveEqnAllaire::getGlobalCellDataVolumeFractions()
 {
-    // Get the cell data of the registered variable volume fraction.
-    boost::shared_ptr<pdat::CellData<double> > data_volume_fraction(
+    // Get the cell data of the registered variable volume fractions.
+    boost::shared_ptr<pdat::CellData<double> > data_volume_fractions(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(s_variable_volume_fraction, getDataContext())));
+            d_patch->getPatchData(s_variable_volume_fractions, getDataContext())));
     
-    return data_volume_fraction;
+    return data_volume_fractions;
 }
 
 
@@ -10768,14 +10768,14 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataDensity(
         d_data_density.reset(
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_density));
         
-        // Get the cell data of the variable partial density.
-        boost::shared_ptr<pdat::CellData<double> > data_partial_density =
-            getGlobalCellDataPartialDensity();
+        // Get the cell data of the variable partial densities.
+        boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+            getGlobalCellDataPartialDensities();
         
         // Compute the density field.
         d_equation_of_state_mixing_rules->computeMixtureDensity(
             d_data_density,
-            data_partial_density,
+            data_partial_densities,
             d_subghost_box_density);
     }
     else
@@ -10789,69 +10789,69 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataDensity(
 
 
 /*
- * Compute the global cell data of mass fraction with density in the registered patch.
+ * Compute the global cell data of mass fractions with density in the registered patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataMassFractionWithDensity(
+FlowModelFiveEqnAllaire::computeGlobalCellDataMassFractionsWithDensity(
     const COMPUTING_OPTION::TYPE& computing_option)
 {
-    if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
+    if (d_num_subghosts_mass_fractions > -hier::IntVector::getOne(d_dim))
     {
-        // Create the cell data of mass fraction.
-        d_data_mass_fraction.reset(
-            new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_mass_fraction));
+        // Create the cell data of mass fractions.
+        d_data_mass_fractions.reset(
+            new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_mass_fractions));
         
-        // Get the cell data of the variable partial density.
-        boost::shared_ptr<pdat::CellData<double> > data_partial_density =
-            getGlobalCellDataPartialDensity();
+        // Get the cell data of the variable partial densities.
+        boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+            getGlobalCellDataPartialDensities();
         
         if (!d_data_density)
         {
             computeGlobalCellDataDensity();
         }
         
-        // Get the pointers to the cell data of mass fraction, density and partial density.
+        // Get the pointers to the cell data of mass fractions, density and partial densities.
         std::vector<double*> Y;
         Y.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            Y.push_back(d_data_mass_fraction->getPointer(si));
+            Y.push_back(d_data_mass_fractions->getPointer(si));
         }
         double* rho = d_data_density->getPointer(0);
         std::vector<double*> Z_rho;
         Z_rho.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            Z_rho.push_back(data_partial_density->getPointer(si));
+            Z_rho.push_back(data_partial_densities->getPointer(si));
         }
         
         if (d_dim == tbox::Dimension(1))
         {
             // Compute the mass fraction field.
-            for (int i = -d_num_subghosts_mass_fraction[0];
-                 i < d_interior_dims[0] + d_num_subghosts_mass_fraction[0];
+            for (int i = -d_num_subghosts_mass_fractions[0];
+                 i < d_interior_dims[0] + d_num_subghosts_mass_fractions[0];
                  i++)
             {
                 // Compute the linear indices.
                 const int idx = i + d_num_ghosts[0];
                 const int idx_density = i + d_num_subghosts_density[0];
-                const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
+                const int idx_mass_fractions = i + d_num_subghosts_mass_fractions[0];
                 
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y[si][idx_mass_fraction] = Z_rho[si][idx]/rho[idx_density];
+                    Y[si][idx_mass_fractions] = Z_rho[si][idx]/rho[idx_density];
                 }
             }
         }
         else if (d_dim == tbox::Dimension(2))
         {
             // Compute the mass fraction field.
-            for (int j = -d_num_subghosts_mass_fraction[1];
-                 j < d_interior_dims[1] + d_num_subghosts_mass_fraction[1];
+            for (int j = -d_num_subghosts_mass_fractions[1];
+                 j < d_interior_dims[1] + d_num_subghosts_mass_fractions[1];
                  j++)
             {
-                for (int i = -d_num_subghosts_mass_fraction[0];
-                     i < d_interior_dims[0] + d_num_subghosts_mass_fraction[0];
+                for (int i = -d_num_subghosts_mass_fractions[0];
+                     i < d_interior_dims[0] + d_num_subghosts_mass_fractions[0];
                      i++)
                 {
                     // Compute the linear indices.
@@ -10861,12 +10861,12 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMassFractionWithDensity(
                     const int idx_density = (i + d_num_subghosts_density[0]) +
                         (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
                     
-                    const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                        (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
+                    const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
+                        (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0];
                     
                     for (int si = 0; si < d_num_species; si++)
                     {
-                        Y[si][idx_mass_fraction] = Z_rho[si][idx]/rho[idx_density];
+                        Y[si][idx_mass_fractions] = Z_rho[si][idx]/rho[idx_density];
                     }
                 }
             }
@@ -10874,16 +10874,16 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMassFractionWithDensity(
         else if (d_dim == tbox::Dimension(3))
         {
             // Compute the mass fraction field.
-            for (int k = -d_num_subghosts_mass_fraction[2];
-                 k < d_interior_dims[2] + d_num_subghosts_mass_fraction[2];
+            for (int k = -d_num_subghosts_mass_fractions[2];
+                 k < d_interior_dims[2] + d_num_subghosts_mass_fractions[2];
                  k++)
             {
-                for (int j = -d_num_subghosts_mass_fraction[1];
-                     j < d_interior_dims[1] + d_num_subghosts_mass_fraction[1];
+                for (int j = -d_num_subghosts_mass_fractions[1];
+                     j < d_interior_dims[1] + d_num_subghosts_mass_fractions[1];
                      j++)
                 {
-                    for (int i = -d_num_subghosts_mass_fraction[0];
-                         i < d_interior_dims[0] + d_num_subghosts_mass_fraction[0];
+                    for (int i = -d_num_subghosts_mass_fractions[0];
+                         i < d_interior_dims[0] + d_num_subghosts_mass_fractions[0];
                          i++)
                     {
                         // Compute the linear indices.
@@ -10895,13 +10895,13 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMassFractionWithDensity(
                             (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
                             (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*d_subghostcell_dims_density[1];
                         
-                        const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                            (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
-                            (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*d_subghostcell_dims_mass_fraction[1];
+                        const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
+                            (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0] +
+                            (k + d_num_subghosts_mass_fractions[2])*d_subghostcell_dims_mass_fractions[0]*d_subghostcell_dims_mass_fractions[1];
                         
                         for (int si = 0; si < d_num_species; si++)
                         {
-                            Y[si][idx_mass_fraction] = Z_rho[si][idx]/rho[idx_density];
+                            Y[si][idx_mass_fractions] = Z_rho[si][idx]/rho[idx_density];
                         }
                     }
                 }
@@ -10911,7 +10911,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMassFractionWithDensity(
     else
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::computeGlobalCellDataMassFractionWithDensity()\n"
+            << ": FlowModelFiveEqnAllaire::computeGlobalCellDataMassFractionsWithDensity()\n"
             << "Cell data of 'MASS_FRACTION' is not yet registered."
             << std::endl);
     }
@@ -11068,7 +11068,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataInternalEnergyWithDensityAndVeloci
         d_data_internal_energy.reset(
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_internal_energy));
         
-        // Get the cell data of the variables total energy and volume fraction.
+        // Get the cell data of the variables total energy and volume fractions.
         boost::shared_ptr<pdat::CellData<double> > data_total_energy =
             getGlobalCellDataTotalEnergy();
         
@@ -11199,11 +11199,11 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataInternalEnergyWithDensityAndVeloci
 
 
 /*
- * Compute the global cell data of pressure with density, mass fraction and internal energy in
+ * Compute the global cell data of pressure with density, mass fractions and internal energy in
  * the registered patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy(
+FlowModelFiveEqnAllaire::computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy(
     const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
@@ -11212,18 +11212,18 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataPressureWithDensityMassFractionAnd
         d_data_pressure.reset(
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_pressure));
         
-        // Get the cell data of the variable volume fraction.
-        boost::shared_ptr<pdat::CellData<double> > data_volume_fraction =
-            getGlobalCellDataVolumeFraction();
+        // Get the cell data of the variable volume fractions.
+        boost::shared_ptr<pdat::CellData<double> > data_volume_fractions =
+            getGlobalCellDataVolumeFractions();
         
         if (!d_data_density)
         {
             computeGlobalCellDataDensity();
         }
         
-        if (!d_data_mass_fraction)
+        if (!d_data_mass_fractions)
         {
-            computeGlobalCellDataMassFractionWithDensity();
+            computeGlobalCellDataMassFractionsWithDensity();
         }
         
         if (!d_data_internal_energy)
@@ -11236,15 +11236,15 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataPressureWithDensityMassFractionAnd
             d_data_pressure,
             d_data_density,
             d_data_internal_energy,
-            d_data_mass_fraction,
-            data_volume_fraction,
+            d_data_mass_fractions,
+            data_volume_fractions,
             d_subghost_box_pressure);
     }
     else
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFiveEqnAllaire::"
-            << "computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy()\n"
+            << "computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy()\n"
             << "Cell data of 'PRESSURE' is not yet registered."
             << std::endl);
     }
@@ -11252,11 +11252,11 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataPressureWithDensityMassFractionAnd
 
 
 /*
- * Compute the global cell data of sound speed with density, mass fraction and pressure in the
+ * Compute the global cell data of sound speed with density, mass fractions and pressure in the
  * registered patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure(
+FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure(
     const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
@@ -11265,23 +11265,23 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityMassFractionA
         d_data_sound_speed.reset(
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_sound_speed));
         
-        // Get the cell data of the variable volume fraction.
-        boost::shared_ptr<pdat::CellData<double> > data_volume_fraction =
-            getGlobalCellDataVolumeFraction();
+        // Get the cell data of the variable volume fractions.
+        boost::shared_ptr<pdat::CellData<double> > data_volume_fractions =
+            getGlobalCellDataVolumeFractions();
         
         if (!d_data_density)
         {
             computeGlobalCellDataDensity();
         }
         
-        if (!d_data_mass_fraction)
+        if (!d_data_mass_fractions)
         {
-            computeGlobalCellDataMassFractionWithDensity();
+            computeGlobalCellDataMassFractionsWithDensity();
         }
         
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+            computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy();
         }
         
         // Compute the sound speed field.
@@ -11289,15 +11289,15 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityMassFractionA
             d_data_sound_speed,
             d_data_density,
             d_data_pressure,
-            d_data_mass_fraction,
-            data_volume_fraction,
+            d_data_mass_fractions,
+            data_volume_fractions,
             d_subghost_box_sound_speed);
     }
     else
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFiveEqnAllaire::"
-            << "computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure()\n"
+            << "computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure()\n"
             << "Cell data of 'SOUND_SPEED' is not yet registered."
             << std::endl);
     }
@@ -11305,94 +11305,94 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityMassFractionA
 
 
 /*
- * Compute the global cell data of temperature with pressure in the registered patch.
+ * Compute the global cell data of species temperatures with pressure in the registered patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataTemperatureWithPressure(
+FlowModelFiveEqnAllaire::computeGlobalCellDataSpeciesTemperaturesWithPressure(
     const COMPUTING_OPTION::TYPE& computing_option)
 {
-    if (d_num_subghosts_temperature > -hier::IntVector::getOne(d_dim))
+    if (d_num_subghosts_species_temperatures > -hier::IntVector::getOne(d_dim))
     {
-        // Create the cell data of temperature.
-        d_data_temperature.reset(
-            new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_temperature));
+        // Create the cell data of species temperatures.
+        d_data_species_temperatures.reset(
+            new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_species_temperatures));
         
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+            computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy();
         }
         
-        // Get the cell data of the variable partial density.
-        boost::shared_ptr<pdat::CellData<double> > data_partial_density =
-            getGlobalCellDataPartialDensity();
+        // Get the cell data of the variable partial densities.
+        boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+            getGlobalCellDataPartialDensities();
         
-        // Get the cell data of the variable volume fraction.
-        boost::shared_ptr<pdat::CellData<double> > data_volume_fraction =
-            getGlobalCellDataVolumeFraction();
+        // Get the cell data of the variable volume fractions.
+        boost::shared_ptr<pdat::CellData<double> > data_volume_fractions =
+            getGlobalCellDataVolumeFractions();
         
-        // Get the pointers to the cell data of partial density and volume fraction.
+        // Get the pointers to the cell data of partial densities and volume fractions.
         std::vector<double*> Z_rho;
         Z_rho.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            Z_rho.push_back(data_partial_density->getPointer(si));
+            Z_rho.push_back(data_partial_densities->getPointer(si));
         }
         std::vector<double*> Z;
         Z.reserve(d_num_species - 1);
         for (int si = 0; si < d_num_species - 1; si++)
         {
-            Z.push_back(data_volume_fraction->getPointer(si));
+            Z.push_back(data_volume_fractions->getPointer(si));
         }
         
         // Compute the density of each species.
-        std::vector<boost::shared_ptr<pdat::CellData<double> > > data_density_species;
-        data_density_species.resize(d_num_species);
+        std::vector<boost::shared_ptr<pdat::CellData<double> > > data_species_densities;
+        data_species_densities.resize(d_num_species);
         
         std::vector<double*> rho;
         rho.reserve(d_num_species);
         
         for (int si = 0; si < d_num_species; si++)
         {
-            data_density_species[si].reset(
-                new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_temperature));
+            data_species_densities[si].reset(
+                new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_species_temperatures));
             
-            rho.push_back(data_density_species[si]->getPointer(0));
+            rho.push_back(data_species_densities[si]->getPointer(0));
         }
         
-        boost::shared_ptr<pdat::CellData<double> > data_volume_fraction_last(
+        boost::shared_ptr<pdat::CellData<double> > data_volume_fractions_last(
             new pdat::CellData<double>(d_interior_box, 1, d_num_ghosts));
         
-        data_volume_fraction_last->fillAll(1.0);
+        data_volume_fractions_last->fillAll(1.0);
         
-        double* Z_last = data_volume_fraction_last->getPointer(0);
+        double* Z_last = data_volume_fractions_last->getPointer(0);
         
         if (d_dim == tbox::Dimension(1))
         {
             // Compute the species density field.
             for (int si = 0; si < d_num_species - 1; si++)
             {
-                for (int i = -d_num_subghosts_temperature[0];
-                     i < d_interior_dims[0] + d_num_subghosts_temperature[0];
+                for (int i = -d_num_subghosts_species_temperatures[0];
+                     i < d_interior_dims[0] + d_num_subghosts_species_temperatures[0];
                      i++)
                 {
                     // Compute the linear indices.
                     const int idx = i + d_num_ghosts[0];
-                    const int idx_temperature = i + d_num_subghosts_temperature[0];
+                    const int idx_species_temperatures = i + d_num_subghosts_species_temperatures[0];
                     
-                    rho[si][idx_temperature] = Z_rho[si][idx]/Z[si][idx];
+                    rho[si][idx_species_temperatures] = Z_rho[si][idx]/Z[si][idx];
                     Z_last[idx] -= Z[si][idx];
                 }
             }
             
-            for (int i = -d_num_subghosts_temperature[0];
-                     i < d_interior_dims[0] + d_num_subghosts_temperature[0];
+            for (int i = -d_num_subghosts_species_temperatures[0];
+                     i < d_interior_dims[0] + d_num_subghosts_species_temperatures[0];
                      i++)
             {
                 // Compute the linear indices.
                 const int idx = i + d_num_ghosts[0];
-                const int idx_temperature = i + d_num_subghosts_temperature[0];
+                const int idx_species_temperatures = i + d_num_subghosts_species_temperatures[0];
                 
-                rho[d_num_species - 1][idx_temperature] = Z_rho[d_num_species - 1][idx]/Z_last[idx];
+                rho[d_num_species - 1][idx_species_temperatures] = Z_rho[d_num_species - 1][idx]/Z_last[idx];
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -11400,43 +11400,43 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataTemperatureWithPressure(
             // Compute the species density field.
             for (int si = 0; si < d_num_species - 1; si++)
             {
-                for (int j = -d_num_subghosts_temperature[1];
-                     j < d_interior_dims[1] + d_num_subghosts_temperature[1];
+                for (int j = -d_num_subghosts_species_temperatures[1];
+                     j < d_interior_dims[1] + d_num_subghosts_species_temperatures[1];
                      j++)
                 {
-                    for (int i = -d_num_subghosts_temperature[0];
-                         i < d_interior_dims[0] + d_num_subghosts_temperature[0];
+                    for (int i = -d_num_subghosts_species_temperatures[0];
+                         i < d_interior_dims[0] + d_num_subghosts_species_temperatures[0];
                          i++)
                     {
                         // Compute the linear indices.
                         const int idx = (i + d_num_ghosts[0]) +
                             (j + d_num_ghosts[1])*d_ghostcell_dims[0];
                         
-                        const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                            (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0];
+                        const int idx_species_temperatures = (i + d_num_subghosts_species_temperatures[0]) +
+                            (j + d_num_subghosts_species_temperatures[1])*d_subghostcell_dims_species_temperatures[0];
                         
-                        rho[si][idx_temperature] = Z_rho[si][idx]/Z[si][idx];
+                        rho[si][idx_species_temperatures] = Z_rho[si][idx]/Z[si][idx];
                         Z_last[idx] -= Z[si][idx];
                     }
                 }
             }
             
-            for (int j = -d_num_subghosts_temperature[1];
-                     j < d_interior_dims[1] + d_num_subghosts_temperature[1];
+            for (int j = -d_num_subghosts_species_temperatures[1];
+                     j < d_interior_dims[1] + d_num_subghosts_species_temperatures[1];
                      j++)
             {
-                for (int i = -d_num_subghosts_temperature[0];
-                     i < d_interior_dims[0] + d_num_subghosts_temperature[0];
+                for (int i = -d_num_subghosts_species_temperatures[0];
+                     i < d_interior_dims[0] + d_num_subghosts_species_temperatures[0];
                      i++)
                 {
                     // Compute the linear indices.
                     const int idx = (i + d_num_ghosts[0]) +
                         (j + d_num_ghosts[1])*d_ghostcell_dims[0];
                     
-                    const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                        (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0];
+                    const int idx_species_temperatures = (i + d_num_subghosts_species_temperatures[0]) +
+                        (j + d_num_subghosts_species_temperatures[1])*d_subghostcell_dims_species_temperatures[0];
                     
-                    rho[d_num_species - 1][idx_temperature] = Z_rho[d_num_species - 1][idx]/Z_last[idx];
+                    rho[d_num_species - 1][idx_species_temperatures] = Z_rho[d_num_species - 1][idx]/Z_last[idx];
                 }
             }
         }
@@ -11445,16 +11445,16 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataTemperatureWithPressure(
             // Compute the species density field.
             for (int si = 0; si < d_num_species - 1; si++)
             {
-                for (int k = -d_num_subghosts_temperature[2];
-                     k < d_interior_dims[2] + d_num_subghosts_temperature[2];
+                for (int k = -d_num_subghosts_species_temperatures[2];
+                     k < d_interior_dims[2] + d_num_subghosts_species_temperatures[2];
                      k++)
                 {
-                    for (int j = -d_num_subghosts_temperature[1];
-                         j < d_interior_dims[1] + d_num_subghosts_temperature[1];
+                    for (int j = -d_num_subghosts_species_temperatures[1];
+                         j < d_interior_dims[1] + d_num_subghosts_species_temperatures[1];
                          j++)
                     {
-                        for (int i = -d_num_subghosts_temperature[0];
-                             i < d_interior_dims[0] + d_num_subghosts_temperature[0];
+                        for (int i = -d_num_subghosts_species_temperatures[0];
+                             i < d_interior_dims[0] + d_num_subghosts_species_temperatures[0];
                              i++)
                         {
                             // Compute the linear indices.
@@ -11462,28 +11462,28 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataTemperatureWithPressure(
                                 (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
                                 (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
                             
-                            const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                                (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0] +
-                                (k + d_num_subghosts_temperature[2])*d_subghostcell_dims_temperature[0]*
-                                    d_subghostcell_dims_temperature[1];
+                            const int idx_species_temperatures = (i + d_num_subghosts_species_temperatures[0]) +
+                                (j + d_num_subghosts_species_temperatures[1])*d_subghostcell_dims_species_temperatures[0] +
+                                (k + d_num_subghosts_species_temperatures[2])*d_subghostcell_dims_species_temperatures[0]*
+                                    d_subghostcell_dims_species_temperatures[1];
                             
-                            rho[si][idx_temperature] = Z_rho[si][idx]/Z[si][idx];
+                            rho[si][idx_species_temperatures] = Z_rho[si][idx]/Z[si][idx];
                             Z_last[idx] -= Z[si][idx];
                         }
                     }
                 }
             }
             
-            for (int k = -d_num_subghosts_temperature[2];
-                 k < d_interior_dims[2] + d_num_subghosts_temperature[2];
+            for (int k = -d_num_subghosts_species_temperatures[2];
+                 k < d_interior_dims[2] + d_num_subghosts_species_temperatures[2];
                  k++)
             {
-                for (int j = -d_num_subghosts_temperature[1];
-                     j < d_interior_dims[1] + d_num_subghosts_temperature[1];
+                for (int j = -d_num_subghosts_species_temperatures[1];
+                     j < d_interior_dims[1] + d_num_subghosts_species_temperatures[1];
                      j++)
                 {
-                    for (int i = -d_num_subghosts_temperature[0];
-                         i < d_interior_dims[0] + d_num_subghosts_temperature[0];
+                    for (int i = -d_num_subghosts_species_temperatures[0];
+                         i < d_interior_dims[0] + d_num_subghosts_species_temperatures[0];
                          i++)
                     {
                         // Compute the linear indices.
@@ -11491,12 +11491,12 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataTemperatureWithPressure(
                             (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
                             (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
                         
-                        const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                            (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0] +
-                            (k + d_num_subghosts_temperature[2])*d_subghostcell_dims_temperature[0]*
-                                d_subghostcell_dims_temperature[1];
+                        const int idx_species_temperatures = (i + d_num_subghosts_species_temperatures[0]) +
+                            (j + d_num_subghosts_species_temperatures[1])*d_subghostcell_dims_species_temperatures[0] +
+                            (k + d_num_subghosts_species_temperatures[2])*d_subghostcell_dims_species_temperatures[0]*
+                                d_subghostcell_dims_species_temperatures[1];
                         
-                        rho[d_num_species - 1][idx_temperature] = Z_rho[d_num_species - 1][idx]/Z_last[idx];
+                        rho[d_num_species - 1][idx_species_temperatures] = Z_rho[d_num_species - 1][idx]/Z_last[idx];
                     }
                 }
             }
@@ -11504,8 +11504,8 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataTemperatureWithPressure(
         
         // Compute the temperature of each species.
         
-        boost::shared_ptr<pdat::CellData<double> > data_temperature_species(
-            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_temperature));
+        boost::shared_ptr<pdat::CellData<double> > data_species_temperatures(
+            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_species_temperatures));
         
         for (int si = 0; si < d_num_species; si++)
         {
@@ -11532,21 +11532,21 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataTemperatureWithPressure(
             
             d_equation_of_state_mixing_rules->getEquationOfState(si)->
                 computeTemperature(
-                    data_temperature_species,
-                    data_density_species[si],
+                    data_species_temperatures,
+                    data_species_densities[si],
                     d_data_pressure,
                     species_thermo_properties_const_ptr,
-                    d_subghost_box_temperature);
+                    d_subghost_box_species_temperatures);
             
-            d_data_temperature->copyDepth(si, *data_temperature_species, 0);
+            d_data_species_temperatures->copyDepth(si, *data_species_temperatures, 0);
         }
     }
     else
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFiveEqnAllaire::"
-            << "computeGlobalCellDataTemperatureWithPressure()\n"
-            << "Cell data of 'TEMPERATURE' is not yet registered."
+            << "computeGlobalCellDataSpeciesTemperaturesWithPressure()\n"
+            << "Cell data of 'SPECIES_TEMPERATURE' is not yet registered."
             << std::endl);
     }
 }
@@ -12381,8 +12381,8 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
                 F_x.push_back(d_data_convective_flux_x->getPointer(ei));
             }
             
-            boost::shared_ptr<pdat::CellData<double> > data_partial_density =
-                getGlobalCellDataPartialDensity();
+            boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+                getGlobalCellDataPartialDensities();
             
             boost::shared_ptr<pdat::CellData<double> > data_momentum =
                 getGlobalCellDataMomentum();
@@ -12390,8 +12390,8 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
             boost::shared_ptr<pdat::CellData<double> > data_total_energy =
                 getGlobalCellDataTotalEnergy();
             
-            boost::shared_ptr<pdat::CellData<double> > data_volume_fraction =
-                getGlobalCellDataVolumeFraction();
+            boost::shared_ptr<pdat::CellData<double> > data_volume_fractions =
+                getGlobalCellDataVolumeFractions();
             
             if (!d_data_velocity)
             {
@@ -12400,23 +12400,23 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
             
             if (!d_data_pressure)
             {
-                computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+                computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy();
             }
             
-            // Get the pointers to the cell data of partial density, total energy, volume fraction
+            // Get the pointers to the cell data of partial densities, total energy, volume fractions
             // and pressure.
             std::vector<double*> Z_rho;
             Z_rho.reserve(d_num_species);
             for (int si = 0; si < d_num_species; si++)
             {
-                Z_rho.push_back(data_partial_density->getPointer(si));
+                Z_rho.push_back(data_partial_densities->getPointer(si));
             }
             double* E = data_total_energy->getPointer(0);
             std::vector<double*> Z;
             Z.reserve(d_num_species - 1);
             for (int si = 0; si < d_num_species - 1; si++)
             {
-                Z.push_back(data_volume_fraction->getPointer(si));
+                Z.push_back(data_volume_fractions->getPointer(si));
             }
             double* p = d_data_pressure->getPointer(0);
             
@@ -12580,8 +12580,8 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
                 F_y.push_back(d_data_convective_flux_y->getPointer(ei));
             }
             
-            boost::shared_ptr<pdat::CellData<double> > data_partial_density =
-                getGlobalCellDataPartialDensity();
+            boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+                getGlobalCellDataPartialDensities();
             
             boost::shared_ptr<pdat::CellData<double> > data_momentum =
                 getGlobalCellDataMomentum();
@@ -12589,12 +12589,12 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
             boost::shared_ptr<pdat::CellData<double> > data_total_energy =
                 getGlobalCellDataTotalEnergy();
             
-            boost::shared_ptr<pdat::CellData<double> > data_volume_fraction =
-                getGlobalCellDataVolumeFraction();
+            boost::shared_ptr<pdat::CellData<double> > data_volume_fractions =
+                getGlobalCellDataVolumeFractions();
             
             if (!d_data_pressure)
             {
-                computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+                computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy();
             }
             
             if (!d_data_velocity)
@@ -12602,20 +12602,20 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
                 computeGlobalCellDataVelocityWithDensity();
             }
             
-            // Get the pointers to the cell data of partial density, total energy, volume fraction
+            // Get the pointers to the cell data of partial densities, total energy, volume fractions
             // and pressure.
             std::vector<double*> Z_rho;
             Z_rho.reserve(d_num_species);
             for (int si = 0; si < d_num_species; si++)
             {
-                Z_rho.push_back(data_partial_density->getPointer(si));
+                Z_rho.push_back(data_partial_densities->getPointer(si));
             }
             double* E = data_total_energy->getPointer(0);
             std::vector<double*> Z;
             Z.reserve(d_num_species - 1);
             for (int si = 0; si < d_num_species - 1; si++)
             {
-                Z.push_back(data_volume_fraction->getPointer(si));
+                Z.push_back(data_volume_fractions->getPointer(si));
             }
             double* p = d_data_pressure->getPointer(0);
             
@@ -12757,8 +12757,8 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
                 F_z.push_back(d_data_convective_flux_z->getPointer(ei));
             }
             
-            boost::shared_ptr<pdat::CellData<double> > data_partial_density =
-                getGlobalCellDataPartialDensity();
+            boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+                getGlobalCellDataPartialDensities();
             
             boost::shared_ptr<pdat::CellData<double> > data_momentum =
                 getGlobalCellDataMomentum();
@@ -12766,12 +12766,12 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
             boost::shared_ptr<pdat::CellData<double> > data_total_energy =
                 getGlobalCellDataTotalEnergy();
             
-            boost::shared_ptr<pdat::CellData<double> > data_volume_fraction =
-                getGlobalCellDataVolumeFraction();
+            boost::shared_ptr<pdat::CellData<double> > data_volume_fractions =
+                getGlobalCellDataVolumeFractions();
             
             if (!d_data_pressure)
             {
-                computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+                computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy();
             }
             
             if (!d_data_velocity)
@@ -12779,20 +12779,20 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
                 computeGlobalCellDataVelocityWithDensity();
             }
             
-            // Get the pointers to the cell data of partial density, total energy, volume fraction
+            // Get the pointers to the cell data of partial densities, total energy, volume fractions
             // and pressure.
             std::vector<double*> Z_rho;
             Z_rho.reserve(d_num_species);
             for (int si = 0; si < d_num_species; si++)
             {
-                Z_rho.push_back(data_partial_density->getPointer(si));
+                Z_rho.push_back(data_partial_densities->getPointer(si));
             }
             double* E = data_total_energy->getPointer(0);
             std::vector<double*> Z;
             Z.reserve(d_num_species - 1);
             for (int si = 0; si < d_num_species - 1; si++)
             {
-                Z.push_back(data_volume_fraction->getPointer(si));
+                Z.push_back(data_volume_fractions->getPointer(si));
             }
             double* p = d_data_pressure->getPointer(0);
             
@@ -12900,7 +12900,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSp
             
             if (!d_data_sound_speed)
             {
-                computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
+                computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure();
             }
             
             // Get the pointers to the cell data of maximum wave speed and velocity in x-direction, and sound speed.
@@ -13004,7 +13004,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSp
             
             if (!d_data_sound_speed)
             {
-                computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
+                computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure();
             }
             
             if (!d_data_velocity)
@@ -13106,7 +13106,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSp
             
             if (!d_data_sound_speed)
             {
-                computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
+                computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure();
             }
             
             if (!d_data_velocity)
@@ -13177,11 +13177,11 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSp
 
 
 /*
- * Compute the global cell data of maximum diffusivity with density, mass fraction, pressure
+ * Compute the global cell data of maximum diffusivity with density, mass fractions, pressure
  * and temperature in the registered patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataMaxDiffusivityWithDensityMassFractionPressureAndTemperature(
+FlowModelFiveEqnAllaire::computeGlobalCellDataMaxDiffusivityWithDensityMassFractionsPressureAndTemperature(
     const COMPUTING_OPTION::TYPE& computing_option)
 {
     if (!d_equation_of_shear_viscosity_mixing_rules ||
@@ -13189,7 +13189,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxDiffusivityWithDensityMassFract
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFiveEqnAllaire::"
-            << "computeGlobalCellDataMaxDiffusivityWithDensityMassFractionPressureAndTemperature()\n"
+            << "computeGlobalCellDataMaxDiffusivityWithDensityMassFractionsPressureAndTemperature()\n"
             << "Either mixing rule of shear diffusivity or bulk viscosity"
             << " is not initialized."
             << std::endl);
@@ -13206,47 +13206,47 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxDiffusivityWithDensityMassFract
             computeGlobalCellDataDensity();
         }
         
-        if (!d_data_mass_fraction)
+        if (!d_data_mass_fractions)
         {
-            computeGlobalCellDataMassFractionWithDensity();
+            computeGlobalCellDataMassFractionsWithDensity();
         }
         
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+            computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy();
         }
         
-        if (!d_data_temperature)
+        if (!d_data_species_temperatures)
         {
-            computeGlobalCellDataTemperatureWithPressure();
+            computeGlobalCellDataSpeciesTemperaturesWithPressure();
         }
         
-        // Get the cell data of the variable volume fraction.
-        boost::shared_ptr<pdat::CellData<double> > data_volume_fraction =
-            getGlobalCellDataVolumeFraction();
+        // Get the cell data of the variable volume fractions.
+        boost::shared_ptr<pdat::CellData<double> > data_volume_fractions =
+            getGlobalCellDataVolumeFractions();
         
-        // Get the pointers to the cell data of maximum diffusivity, density, mass fraction, pressure,
-        // temperature and volume fraction.
+        // Get the pointers to the cell data of maximum diffusivity, density, mass fractions, pressure,
+        // species temperatures and volume fractions.
         double* D_max = d_data_max_diffusivity->getPointer(0);
         double* rho = d_data_density->getPointer(0);
         std::vector<double*> Y;
         Y.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            Y.push_back(d_data_mass_fraction->getPointer(si));
+            Y.push_back(d_data_mass_fractions->getPointer(si));
         }
         double* p = d_data_pressure->getPointer(0);
         std::vector<double*> T;
         T.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            T.push_back(d_data_temperature->getPointer(si));
+            T.push_back(d_data_species_temperatures->getPointer(si));
         }
         std::vector<double*> Z;
         Z.reserve(d_num_species - 1);
         for (int si = 0; si < d_num_species - 1; si++)
         {
-            Z.push_back(data_volume_fraction->getPointer(si));
+            Z.push_back(data_volume_fractions->getPointer(si));
         }
         
         if (d_dim == tbox::Dimension(1))
@@ -13259,22 +13259,22 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxDiffusivityWithDensityMassFract
                 const int idx = i + d_num_ghosts[0];
                 const int idx_max_diffusivity = i + d_num_subghosts_max_diffusivity[0];
                 const int idx_density = i + d_num_subghosts_density[0];
-                const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
+                const int idx_mass_fractions = i + d_num_subghosts_mass_fractions[0];
                 const int idx_pressure = i + d_num_subghosts_pressure[0];
-                const int idx_temperature = i + d_num_subghosts_temperature[0];
+                const int idx_species_temperatures = i + d_num_subghosts_species_temperatures[0];
                 
                 std::vector<const double*> T_ptr;
                 T_ptr.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    T_ptr.push_back(&T[si][idx_temperature]);
+                    T_ptr.push_back(&T[si][idx_species_temperatures]);
                 }
                 
                 std::vector<const double*> Y_ptr;
                 Y_ptr.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                    Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                 }
                 
                 std::vector<const double*> Z_ptr;
@@ -13321,27 +13321,27 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxDiffusivityWithDensityMassFract
                     const int idx_density = (i + d_num_subghosts_density[0]) +
                         (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
                     
-                    const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                        (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
+                    const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
+                        (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0];
                     
                     const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
                         (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
                     
-                    const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                        (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0];
+                    const int idx_species_temperatures = (i + d_num_subghosts_species_temperatures[0]) +
+                        (j + d_num_subghosts_species_temperatures[1])*d_subghostcell_dims_species_temperatures[0];
                     
                     std::vector<const double*> T_ptr;
                     T_ptr.reserve(d_num_species);
                     for (int si = 0; si < d_num_species; si++)
                     {
-                        T_ptr.push_back(&T[si][idx_temperature]);
+                        T_ptr.push_back(&T[si][idx_species_temperatures]);
                     }
                     
                     std::vector<const double*> Y_ptr;
                     Y_ptr.reserve(d_num_species);
                     for (int si = 0; si < d_num_species; si++)
                     {
-                        Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                        Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                     }
                     
                     std::vector<const double*> Z_ptr;
@@ -13398,33 +13398,33 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxDiffusivityWithDensityMassFract
                             (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
                                 d_subghostcell_dims_density[1];
                         
-                        const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                            (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
-                            (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*
-                                d_subghostcell_dims_mass_fraction[1];
+                        const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
+                            (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0] +
+                            (k + d_num_subghosts_mass_fractions[2])*d_subghostcell_dims_mass_fractions[0]*
+                                d_subghostcell_dims_mass_fractions[1];
                         
                         const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
                             (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
                             (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
                                 d_subghostcell_dims_pressure[1];
                         
-                        const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                            (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0] +
-                            (k + d_num_subghosts_temperature[2])*d_subghostcell_dims_temperature[0]*
-                                d_subghostcell_dims_temperature[1];
+                        const int idx_species_temperatures = (i + d_num_subghosts_species_temperatures[0]) +
+                            (j + d_num_subghosts_species_temperatures[1])*d_subghostcell_dims_species_temperatures[0] +
+                            (k + d_num_subghosts_species_temperatures[2])*d_subghostcell_dims_species_temperatures[0]*
+                                d_subghostcell_dims_species_temperatures[1];
                         
                         std::vector<const double*> T_ptr;
                         T_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
-                            T_ptr.push_back(&T[si][idx_temperature]);
+                            T_ptr.push_back(&T[si][idx_species_temperatures]);
                         }
                         
                         std::vector<const double*> Y_ptr;
                         Y_ptr.reserve(d_num_species);
                         for (int si = 0; si < d_num_species; si++)
                         {
-                            Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                            Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                         }
                         
                         std::vector<const double*> Z_ptr;
@@ -13458,7 +13458,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxDiffusivityWithDensityMassFract
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFiveEqnAllaire::"
-            << "computeGlobalCellDataMaxDiffusivityWithDensityMassFractionPressureAndTemperature()\n"
+            << "computeGlobalCellDataMaxDiffusivityWithDensityMassFractionsPressureAndTemperature()\n"
             << "Cell data of 'MAX_DIFFUSIVITY' is not yet registered."
             << std::endl);
     }

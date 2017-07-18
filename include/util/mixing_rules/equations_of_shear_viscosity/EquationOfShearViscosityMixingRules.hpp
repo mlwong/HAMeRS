@@ -31,11 +31,8 @@ class EquationOfShearViscosityMixingRules
         /*
          * Return the boost::shared_ptr to the equation of shear viscosity.
          */
-        const boost::shared_ptr<EquationOfShearViscosity>&
-        getEquationOfShearViscosity() const
-        {
-            return d_equation_of_shear_viscosity;
-        }
+        virtual const boost::shared_ptr<EquationOfShearViscosity>&
+        getEquationOfShearViscosity(const int species_index = 0) const = 0;
         
         /*
          * Print all characteristics of the equation of shear viscosity mixing rules class.
@@ -52,29 +49,93 @@ class EquationOfShearViscosityMixingRules
             const boost::shared_ptr<tbox::Database>& restart_db) const = 0;
         
         /*
-         * Compute the shear viscosity of the mixture with isothermal and isobaric assumptions.
+         * Compute the shear viscosity of the mixture with isothermal and isobaric equilibria assumptions.
          */
         virtual double
         getShearViscosity(
             const double* const pressure,
             const double* const temperature,
-            const std::vector<const double*>& mass_fraction) const = 0;
+            const std::vector<const double*>& mass_fractions) const = 0;
         
         /*
-         * Compute the shear viscosity of the mixture with isobaric assumption.
+         * Compute the shear viscosity of the mixture with isothermal and isobaric equilibria assumptions.
+         */
+        void
+        computeShearViscosity(
+            boost::shared_ptr<pdat::CellData<double> >& data_shear_viscosity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeShearViscosity(
+                data_shear_viscosity,
+                data_pressure,
+                data_temperature,
+                data_mass_fractions,
+                empty_box);
+        }
+        
+        /*
+         * Compute the shear viscosity of the mixture with isothermal and isobaric equilibria assumptions.
+         */
+        virtual void
+        computeShearViscosity(
+            boost::shared_ptr<pdat::CellData<double> >& data_shear_viscosity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the shear viscosity of the mixture with isobaric equilibrium assumption.
          */
         virtual double
         getShearViscosity(
             const double* const pressure,
-            const std::vector<const double*>& temperature,
-            const std::vector<const double*>& mass_fraction,
-            const std::vector<const double*>& volume_fraction) const = 0;
+            const std::vector<const double*>& species_temperatures,
+            const std::vector<const double*>& mass_fractions,
+            const std::vector<const double*>& volume_fractions) const = 0;
+        
+        /*
+         * Compute the shear viscosity of the mixture with isobaric equilibrium assumption.
+         */
+        void
+        computeShearViscosity(
+            boost::shared_ptr<pdat::CellData<double> >& data_shear_viscosity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_species_temperatures,
+            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeShearViscosity(
+                data_shear_viscosity,
+                data_pressure,
+                data_species_temperatures,
+                data_mass_fractions,
+                data_volume_fractions,
+                empty_box);
+            
+        }
+        
+        /*
+         * Compute the shear viscosity of the mixture with isobaric equilibrium assumption.
+         */
+        virtual void
+        computeShearViscosity(
+            boost::shared_ptr<pdat::CellData<double> >& data_shear_viscosity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_species_temperatures,
+            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
+            const hier::Box& domain) const = 0;
         
         /*
          * Get the number of molecular properties of a species.
          */
         virtual int
-        getNumberOfSpeciesMolecularProperties() const = 0;
+        getNumberOfSpeciesMolecularProperties(const int species_index = 0) const = 0;
         
         /*
          * Get the molecular properties of a species.
@@ -82,7 +143,7 @@ class EquationOfShearViscosityMixingRules
         virtual void
         getSpeciesMolecularProperties(
             std::vector<double*>& species_molecular_properties,
-            const int& species_index) const = 0;
+            const int species_index = 0) const = 0;
         
     protected:
         /*
@@ -109,11 +170,6 @@ class EquationOfShearViscosityMixingRules
          * boost::shared_ptr to the database of equation of shear viscosity mixing rules.
          */
         const boost::shared_ptr<tbox::Database> d_equation_of_shear_viscosity_mixing_rules_db;
-        
-        /*
-         * boost::shared_ptr to EquationOfShearViscosity.
-         */
-        boost::shared_ptr<EquationOfShearViscosity> d_equation_of_shear_viscosity;
         
 };
     

@@ -174,7 +174,7 @@ class ValueTagger
         boost::shared_ptr<pdat::CellVariable<double> > d_value_tagger_variable_pressure;
         boost::shared_ptr<pdat::CellVariable<double> > d_value_tagger_variable_dilatation;
         boost::shared_ptr<pdat::CellVariable<double> > d_value_tagger_variable_enstrophy;
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_value_tagger_variable_mass_fraction;
+        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_value_tagger_variable_mass_fractions;
         
         /*
          * Statistics of data values.
@@ -184,7 +184,7 @@ class ValueTagger
         double d_value_tagger_max_pressure;
         double d_value_tagger_max_dilatation;
         double d_value_tagger_max_enstrophy;
-        std::vector<double> d_value_tagger_max_mass_fraction;
+        std::vector<double> d_value_tagger_max_mass_fractions;
         
 };
 

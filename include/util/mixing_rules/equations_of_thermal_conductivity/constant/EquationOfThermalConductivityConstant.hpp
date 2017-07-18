@@ -29,6 +29,28 @@ class EquationOfThermalConductivityConstant: public EquationOfThermalConductivit
             const double* const temperature,
             const std::vector<const double*>& molecular_properties) const;
         
+        /*
+         * Compute the thermal conductivity.
+         */
+        void
+        computeThermalConductivity(
+            boost::shared_ptr<pdat::CellData<double> >& data_thermal_conductivity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const std::vector<const double*>& molecular_properties,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the thermal conductivity.
+         */
+        void
+        computeThermalConductivity(
+            boost::shared_ptr<pdat::CellData<double> >& data_thermal_conductivity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::CellData<double> >& data_molecular_properties,
+            const hier::Box& domain) const;
+        
     private:
         
 };

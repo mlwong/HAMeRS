@@ -1,6 +1,7 @@
 #ifndef EQUATION_OF_SHEAR_VISCOSITY_HPP
 #define EQUATION_OF_SHEAR_VISCOSITY_HPP
 
+#include "SAMRAI/pdat/CellData.h"
 #include "SAMRAI/tbox/Dimension.h"
 
 #include <string>
@@ -32,6 +33,66 @@ class EquationOfShearViscosity
             const double* const pressure,
             const double* const temperature,
             const std::vector<const double*>& molecular_properties) const = 0;
+        
+        /*
+         * Compute the shear viscosity.
+         */
+        void
+        computeShearViscosity(
+            boost::shared_ptr<pdat::CellData<double> >& data_shear_viscosity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const std::vector<const double*>& molecular_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeShearViscosity(
+                data_shear_viscosity,
+                data_pressure,
+                data_temperature,
+                molecular_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the shear viscosity.
+         */
+        virtual void
+        computeShearViscosity(
+            boost::shared_ptr<pdat::CellData<double> >& data_shear_viscosity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const std::vector<const double*>& molecular_properties,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the shear viscosity.
+         */
+        void
+        computeShearViscosity(
+            boost::shared_ptr<pdat::CellData<double> >& data_shear_viscosity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::CellData<double> >& data_molecular_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeShearViscosity(
+                data_shear_viscosity,
+                data_pressure,
+                data_temperature,
+                data_molecular_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the shear viscosity.
+         */
+        virtual void
+        computeShearViscosity(
+            boost::shared_ptr<pdat::CellData<double> >& data_shear_viscosity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::CellData<double> >& data_molecular_properties,
+            const hier::Box& domain) const = 0;
         
     protected:
         /*

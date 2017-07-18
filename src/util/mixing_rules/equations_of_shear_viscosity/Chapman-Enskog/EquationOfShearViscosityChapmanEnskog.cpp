@@ -61,3 +61,34 @@ EquationOfShearViscosityChapmanEnskog::getShearViscosity(
     
     return mu;
 }
+
+
+/*
+ * Compute the shear viscosity.
+ */
+void
+EquationOfShearViscosityChapmanEnskog::computeShearViscosity(
+    boost::shared_ptr<pdat::CellData<double> >& data_shear_viscosity,
+    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+    const std::vector<const double*>& molecular_properties,
+    const hier::Box& domain) const
+{
+
+}
+
+
+/*
+ * Compute the shear viscosity.
+ */
+void
+EquationOfShearViscosityChapmanEnskog::computeShearViscosity(
+    boost::shared_ptr<pdat::CellData<double> >& data_shear_viscosity,
+    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+    const boost::shared_ptr<pdat::CellData<double> >& data_molecular_properties,
+    const hier::Box& domain) const
+{
+
+}
+

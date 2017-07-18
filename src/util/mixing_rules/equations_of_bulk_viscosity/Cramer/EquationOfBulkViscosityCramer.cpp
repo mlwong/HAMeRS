@@ -56,3 +56,31 @@ EquationOfBulkViscosityCramer::getBulkViscosity(
     
     return mu_v;
 }
+
+
+/*
+ * Compute the bulk viscosity.
+ */
+void
+EquationOfBulkViscosityCramer::computeBulkViscosity(
+    boost::shared_ptr<pdat::CellData<double> >& data_bulk_viscosity,
+    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+    const std::vector<const double*>& molecular_properties,
+    const hier::Box& domain) const
+{
+}
+
+
+/*
+ * Compute the bulk viscosity.
+ */
+void
+EquationOfBulkViscosityCramer::computeBulkViscosity(
+    boost::shared_ptr<pdat::CellData<double> >& data_bulk_viscosity,
+    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+    const boost::shared_ptr<pdat::CellData<double> >& data_molecular_properties,
+    const hier::Box& domain) const
+{
+}

@@ -410,7 +410,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
                 /*
-                 * Register the patch and mass fraction in the flow model and compute the
+                 * Register the patch and mass fractions in the flow model and compute the
                  * corresponding cell data.
                  */
                 
@@ -421,20 +421,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointer to mass fraction data inside the flow model.
+                 * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
                 
-                double* Y = data_mass_fraction->getPointer(0);
+                double* Y = data_mass_fractions->getPointer(0);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -446,9 +446,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -493,7 +493,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                          * Compute the linear index and the data to add.
                          */
                         
-                        const int idx = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
+                        const int idx = relative_idx_lo_0 + i + num_ghosts_0_mass_fractions;
                         
                         const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)/((double) n_overlapped);
                         
@@ -616,7 +616,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch and mass fraction in the flow model and compute the
+                 * Register the patch and mass fractions in the flow model and compute the
                  * corresponding cell data.
                  */
                 
@@ -627,20 +627,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointer to mass fraction data inside the flow model.
+                 * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
                 
-                double* Y = data_mass_fraction->getPointer(0);
+                double* Y = data_mass_fractions->getPointer(0);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -652,12 +652,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fractions = data_mass_fractions->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+                const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
+                const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
                 
                 const double weight = dx[1]/L_y;
                 
@@ -709,8 +709,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                              * Compute the linear index and the data to add.
                              */
                             
-                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                             
                             const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)*weight/((double) n_overlapped);
                             
@@ -835,7 +835,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch and mass fraction in the flow model and compute the
+                 * Register the patch and mass fractions in the flow model and compute the
                  * corresponding cell data.
                  */
                 
@@ -846,20 +846,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointer to mass fraction data inside the flow model.
+                 * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
                 
-                double* Y = data_mass_fraction->getPointer(0);
+                double* Y = data_mass_fractions->getPointer(0);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -871,14 +871,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fractions = data_mass_fractions->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+                const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
+                const int num_ghosts_2_mass_fractions = num_ghosts_mass_fractions[2];
+                const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
+                const int ghostcell_dim_1_mass_fractions = ghostcell_dims_mass_fractions[1];
                 
                 const double weight = (dx[1]*dx[2])/(L_y*L_z);
                 
@@ -935,10 +935,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
                                  * Compute the linear index and the data to add.
                                  */
                                 
-                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                        ghostcell_dim_1_mass_fraction;
+                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                        ghostcell_dim_1_mass_fractions;
                                 
                                 const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)*weight/((double) n_overlapped);
                                 
@@ -1160,7 +1160,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch and mass fraction in the flow model and compute the
+                 * Register the patch and mass fractions in the flow model and compute the
                  * corresponding cell data.
                  */
                 
@@ -1171,20 +1171,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointer to mass fraction data inside the flow model.
+                 * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
                 
-                double* Y = data_mass_fraction->getPointer(0);
+                double* Y = data_mass_fractions->getPointer(0);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -1196,12 +1196,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fractions = data_mass_fractions->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+                const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
+                const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
                 
                 const double weight = dx[0]/L_x;
                 
@@ -1253,8 +1253,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
                              * Compute the linear index and the data to add.
                              */
                             
-                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                             
                             const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)*weight/((double) n_overlapped);
                             
@@ -1379,7 +1379,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch and mass fraction in the flow model and compute the
+                 * Register the patch and mass fractions in the flow model and compute the
                  * corresponding cell data.
                  */
                 
@@ -1390,20 +1390,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointer to mass fraction data inside the flow model.
+                 * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
                 
-                double* Y = data_mass_fraction->getPointer(0);
+                double* Y = data_mass_fractions->getPointer(0);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -1415,14 +1415,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fractions = data_mass_fractions->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+                const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
+                const int num_ghosts_2_mass_fractions = num_ghosts_mass_fractions[2];
+                const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
+                const int ghostcell_dim_1_mass_fractions = ghostcell_dims_mass_fractions[1];
                 
                 const double weight = (dx[0]*dx[2])/(L_x*L_z);
                 
@@ -1479,10 +1479,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
                                  * Compute the linear index and the data to add.
                                  */
                                 
-                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                        ghostcell_dim_1_mass_fraction;
+                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                        ghostcell_dim_1_mass_fractions;
                                 
                                 const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)*weight/((double) n_overlapped);
                                 
@@ -1712,7 +1712,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInZDirection(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch and mass fraction in the flow model and compute the
+                 * Register the patch and mass fractions in the flow model and compute the
                  * corresponding cell data.
                  */
                 
@@ -1723,20 +1723,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInZDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointer to mass fraction data inside the flow model.
+                 * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
                 
-                double* Y = data_mass_fraction->getPointer(0);
+                double* Y = data_mass_fractions->getPointer(0);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -1748,14 +1748,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInZDirection(
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fractions = data_mass_fractions->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+                const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
+                const int num_ghosts_2_mass_fractions = num_ghosts_mass_fractions[2];
+                const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
+                const int ghostcell_dim_1_mass_fractions = ghostcell_dims_mass_fractions[1];
                 
                 const double weight = (dx[0]*dx[1])/(L_x*L_y);
                 
@@ -1812,10 +1812,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInZDirection(
                                  * Compute the linear index and the data to add.
                                  */
                                 
-                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                        ghostcell_dim_1_mass_fraction;
+                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                        ghostcell_dim_1_mass_fractions;
                                 
                                 const double value_to_add = fmax(fmin(Y[idx], 1.0), 0.0)*weight/((double) n_overlapped);
                                 
@@ -2021,7 +2021,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                 const hier::Index& patch_index_lo = patch_box.lower();
                 
                 /*
-                 * Register the patch and mass fraction in the flow model and compute the
+                 * Register the patch and mass fractions in the flow model and compute the
                  * corresponding cell data.
                  */
                 
@@ -2032,20 +2032,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointer to mass fraction data inside the flow model.
+                 * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
                 
-                double* Y = data_mass_fraction->getPointer(0);
+                double* Y = data_mass_fractions->getPointer(0);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -2057,9 +2057,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -2104,7 +2104,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                          * Compute the linear index and the data to add.
                          */
                         
-                        const int idx = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
+                        const int idx = relative_idx_lo_0 + i + num_ghosts_0_mass_fractions;
                         
                         const double Y_bounded = fmax(fmin(Y[idx], 1.0), 0.0);
                         
@@ -2250,7 +2250,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch and mass fraction in the flow model and compute the
+                 * Register the patch and mass fractions in the flow model and compute the
                  * corresponding cell data.
                  */
                 
@@ -2261,20 +2261,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointer to mass fraction data inside the flow model.
+                 * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
                 
-                double* Y = data_mass_fraction->getPointer(0);
+                double* Y = data_mass_fractions->getPointer(0);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -2286,12 +2286,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fractions = data_mass_fractions->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+                const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
+                const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
                 
                 const double weight = dx[1]/L_y;
                 
@@ -2343,8 +2343,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                              * Compute the linear index and the data to add.
                              */
                             
-                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                             
                             const double Y_bounded = fmax(fmin(Y[idx], 1.0), 0.0);
                             
@@ -2492,7 +2492,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch and mass fraction in the flow model and compute the
+                 * Register the patch and mass fractions in the flow model and compute the
                  * corresponding cell data.
                  */
                 
@@ -2503,20 +2503,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointer to mass fraction data inside the flow model.
+                 * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
                 
-                double* Y = data_mass_fraction->getPointer(0);
+                double* Y = data_mass_fractions->getPointer(0);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -2528,14 +2528,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fractions = data_mass_fractions->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+                const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
+                const int num_ghosts_2_mass_fractions = num_ghosts_mass_fractions[2];
+                const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
+                const int ghostcell_dim_1_mass_fractions = ghostcell_dims_mass_fractions[1];
                 
                 const double weight = (dx[1]*dx[2])/(L_y*L_z);
                 
@@ -2592,10 +2592,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
                                  * Compute the linear index and the data to add.
                                  */
                                 
-                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                        ghostcell_dim_1_mass_fraction;
+                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                        ghostcell_dim_1_mass_fractions;
                                 
                                 const double Y_bounded = fmax(fmin(Y[idx], 1.0), 0.0);
                                 
@@ -2840,7 +2840,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch and mass fraction in the flow model and compute the
+                 * Register the patch and mass fractions in the flow model and compute the
                  * corresponding cell data.
                  */
                 
@@ -2851,20 +2851,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointer to mass fraction data inside the flow model.
+                 * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
                 
-                double* Y = data_mass_fraction->getPointer(0);
+                double* Y = data_mass_fractions->getPointer(0);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -2876,12 +2876,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fractions = data_mass_fractions->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+                const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
+                const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
                 
                 const double weight = dx[0]/L_x;
                 
@@ -2933,8 +2933,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
                              * Compute the linear index and the data to add.
                              */
                             
-                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                            const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                             
                             const double Y_bounded = fmax(fmin(Y[idx], 1.0), 0.0);
                             
@@ -3082,7 +3082,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch and mass fraction in the flow model and compute the
+                 * Register the patch and mass fractions in the flow model and compute the
                  * corresponding cell data.
                  */
                 
@@ -3093,20 +3093,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointer to mass fraction data inside the flow model.
+                 * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
                 
-                double* Y = data_mass_fraction->getPointer(0);
+                double* Y = data_mass_fractions->getPointer(0);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -3118,14 +3118,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fractions = data_mass_fractions->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+                const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
+                const int num_ghosts_2_mass_fractions = num_ghosts_mass_fractions[2];
+                const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
+                const int ghostcell_dim_1_mass_fractions = ghostcell_dims_mass_fractions[1];
                 
                 const double weight = (dx[0]*dx[2])/(L_x*L_z);
                 
@@ -3182,10 +3182,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
                                  * Compute the linear index and the data to add.
                                  */
                                 
-                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                        ghostcell_dim_1_mass_fraction;
+                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                        ghostcell_dim_1_mass_fractions;
                                 
                                 const double Y_bounded = fmax(fmin(Y[idx], 1.0), 0.0);
                                 
@@ -3438,7 +3438,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInZDirection(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch and mass fraction in the flow model and compute the
+                 * Register the patch and mass fractions in the flow model and compute the
                  * corresponding cell data.
                  */
                 
@@ -3449,20 +3449,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInZDirection(
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
                 d_flow_model_tmp->computeGlobalDerivedCellData();
                 
                 /*
-                 * Get the pointer to mass fraction data inside the flow model.
+                 * Get the pointer to first mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
                 
-                double* Y = data_mass_fraction->getPointer(0);
+                double* Y = data_mass_fractions->getPointer(0);
                 
                 const hier::BoxContainer& patch_visible_boxes =
                     flattened_hierarchy->getVisibleBoxes(
@@ -3474,14 +3474,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInZDirection(
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fractions = data_mass_fractions->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+                const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
+                const int num_ghosts_2_mass_fractions = num_ghosts_mass_fractions[2];
+                const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
+                const int ghostcell_dim_1_mass_fractions = ghostcell_dims_mass_fractions[1];
                 
                 const double weight = (dx[0]*dx[1])/(L_x*L_y);
                 
@@ -3538,10 +3538,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInZDirection(
                                  * Compute the linear index and the data to add.
                                  */
                                 
-                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                        ghostcell_dim_1_mass_fraction;
+                                const int idx = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                        ghostcell_dim_1_mass_fractions;
                                 
                                 const double Y_bounded = fmax(fmin(Y[idx], 1.0), 0.0);
                                 
@@ -7037,7 +7037,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, pressure and temperature in the flow model
+                 * Register the patch, mass fractions, pressure and temperature in the flow model
                  * and compute the corresponding cell data.
                  */
                 
@@ -7048,7 +7048,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", num_ghosts));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
@@ -7064,8 +7064,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getGlobalCellData("PRESSURE");
@@ -7077,7 +7077,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                 Y.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    Y.push_back(data_mass_fractions->getPointer(si));
                 }
                 double* p = data_pressure->getPointer(0);
                 double* T = data_temperature->getPointer(0);
@@ -7092,11 +7092,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
                 const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
                 const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
                 const int num_ghosts_0_pressure = num_ghosts_pressure[0];
                 const int num_ghosts_0_temperature = num_ghosts_temperature[0];
                 
@@ -7118,7 +7118,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                     const int idx_lo_0 = index_lo[0];
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     
-                    if (false) // (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*4)
+                    if (false) // (num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim)*4)
                     {
                         for (int i = 0; i < interior_dim_0; i++)
                         {
@@ -7144,15 +7144,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                             }
                             
                             // Compute indices of current and neighboring cells.
-                            const int idx_mass_fraction = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
-                            const int idx_x_LLLL = relative_idx_lo_0 + i - 4 + num_ghosts_0_mass_fraction;
-                            const int idx_x_LLL = relative_idx_lo_0 + i - 3 + num_ghosts_0_mass_fraction;
-                            const int idx_x_LL = relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fraction;
-                            const int idx_x_L = relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction;
-                            const int idx_x_R = relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction;
-                            const int idx_x_RR = relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fraction;
-                            const int idx_x_RRR = relative_idx_lo_0 + i + 3 + num_ghosts_0_mass_fraction;
-                            const int idx_x_RRRR = relative_idx_lo_0 + i + 4 + num_ghosts_0_mass_fraction;
+                            const int idx_mass_fractions = relative_idx_lo_0 + i + num_ghosts_0_mass_fractions;
+                            const int idx_x_LLLL = relative_idx_lo_0 + i - 4 + num_ghosts_0_mass_fractions;
+                            const int idx_x_LLL = relative_idx_lo_0 + i - 3 + num_ghosts_0_mass_fractions;
+                            const int idx_x_LL = relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fractions;
+                            const int idx_x_L = relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions;
+                            const int idx_x_R = relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions;
+                            const int idx_x_RR = relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fractions;
+                            const int idx_x_RRR = relative_idx_lo_0 + i + 3 + num_ghosts_0_mass_fractions;
+                            const int idx_x_RRRR = relative_idx_lo_0 + i + 4 + num_ghosts_0_mass_fractions;
                             
                             // Compute linear indices of pressure and temperature.
                             const int idx_pressure = relative_idx_lo_0 + i + num_ghosts_0_pressure;
@@ -7177,7 +7177,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                             Y_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
-                                Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                                Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                             }
                             
                             d_equation_of_mass_diffusivity_mixing_rules->
@@ -7190,7 +7190,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                             Chi_to_add += D[0]*dYdx*dYdx/((double) n_overlapped);
                         }
                     }
-                    else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*3)
+                    else if (num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim)*3)
                     {
                         for (int i = 0; i < interior_dim_0; i++)
                         {
@@ -7216,13 +7216,13 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                             }
                             
                             // Compute indices of current and neighboring cells.
-                            const int idx_mass_fraction = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
-                            const int idx_x_LLL = relative_idx_lo_0 + i - 3 + num_ghosts_0_mass_fraction;
-                            const int idx_x_LL = relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fraction;
-                            const int idx_x_L = relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction;
-                            const int idx_x_R = relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction;
-                            const int idx_x_RR = relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fraction;
-                            const int idx_x_RRR = relative_idx_lo_0 + i + 3 + num_ghosts_0_mass_fraction;
+                            const int idx_mass_fractions = relative_idx_lo_0 + i + num_ghosts_0_mass_fractions;
+                            const int idx_x_LLL = relative_idx_lo_0 + i - 3 + num_ghosts_0_mass_fractions;
+                            const int idx_x_LL = relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fractions;
+                            const int idx_x_L = relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions;
+                            const int idx_x_R = relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions;
+                            const int idx_x_RR = relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fractions;
+                            const int idx_x_RRR = relative_idx_lo_0 + i + 3 + num_ghosts_0_mass_fractions;
                             
                             // Compute linear indices of pressure and temperature.
                             const int idx_pressure = relative_idx_lo_0 + i + num_ghosts_0_pressure;
@@ -7246,7 +7246,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                             Y_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
-                                Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                                Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                             }
                             
                             d_equation_of_mass_diffusivity_mixing_rules->
@@ -7259,7 +7259,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                             Chi_to_add += D[0]*dYdx*dYdx/((double) n_overlapped);
                         }
                     }
-                    else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*2)
+                    else if (num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim)*2)
                     {
                         for (int i = 0; i < interior_dim_0; i++)
                         {
@@ -7285,11 +7285,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                             }
                             
                             // Compute indices of current and neighboring cells.
-                            const int idx_mass_fraction = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
-                            const int idx_x_LL = relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fraction;
-                            const int idx_x_L = relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction;
-                            const int idx_x_R = relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction;
-                            const int idx_x_RR = relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fraction;
+                            const int idx_mass_fractions = relative_idx_lo_0 + i + num_ghosts_0_mass_fractions;
+                            const int idx_x_LL = relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fractions;
+                            const int idx_x_L = relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions;
+                            const int idx_x_R = relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions;
+                            const int idx_x_RR = relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fractions;
                             
                             // Compute linear indices of pressure and temperature.
                             const int idx_pressure = relative_idx_lo_0 + i + num_ghosts_0_pressure;
@@ -7312,7 +7312,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                             Y_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
-                                Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                                Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                             }
                             
                             d_equation_of_mass_diffusivity_mixing_rules->
@@ -7325,7 +7325,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                             Chi_to_add += D[0]*dYdx*dYdx/((double) n_overlapped);
                         }
                     }
-                    else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim))
+                    else if (num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim))
                     {
                         for (int i = 0; i < interior_dim_0; i++)
                         {
@@ -7351,9 +7351,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                             }
                             
                             // Compute indices of current and neighboring cells.
-                            const int idx_mass_fraction = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
-                            const int idx_x_L = relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction;
-                            const int idx_x_R = relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction;
+                            const int idx_mass_fractions = relative_idx_lo_0 + i + num_ghosts_0_mass_fractions;
+                            const int idx_x_L = relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions;
+                            const int idx_x_R = relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions;
                             
                             // Compute linear indices of pressure and temperature.
                             const int idx_pressure = relative_idx_lo_0 + i + num_ghosts_0_pressure;
@@ -7375,7 +7375,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                             Y_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
-                                Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                                Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                             }
                             
                             d_equation_of_mass_diffusivity_mixing_rules->
@@ -7414,9 +7414,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                             }
                             
                             // Compute indices of current and neighboring cells.
-                            const int idx_mass_fraction = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
-                            const int idx_x_L = relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction;
-                            const int idx_x_R = relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction;
+                            const int idx_mass_fractions = relative_idx_lo_0 + i + num_ghosts_0_mass_fractions;
+                            const int idx_x_L = relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions;
+                            const int idx_x_R = relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions;
                             
                             // Compute linear indices of pressure and temperature.
                             const int idx_pressure = relative_idx_lo_0 + i + num_ghosts_0_pressure;
@@ -7424,13 +7424,13 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                             
                             double dYdx;
                             
-                            if (i == -num_ghosts_0_mass_fraction)
+                            if (i == -num_ghosts_0_mass_fractions)
                             {
-                                dYdx = (Y[0][idx_x_R] - Y[0][idx_mass_fraction])/dx[0];
+                                dYdx = (Y[0][idx_x_R] - Y[0][idx_mass_fractions])/dx[0];
                             }
-                            else if (i == interior_dim_0 + num_ghosts_0_mass_fraction - 1)
+                            else if (i == interior_dim_0 + num_ghosts_0_mass_fractions - 1)
                             {
-                                dYdx = (Y[0][idx_mass_fraction] - Y[0][idx_x_L])/dx[0];
+                                dYdx = (Y[0][idx_mass_fractions] - Y[0][idx_x_L])/dx[0];
                             }
                             else
                             {
@@ -7451,7 +7451,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                             Y_ptr.reserve(d_num_species);
                             for (int si = 0; si < d_num_species; si++)
                             {
-                                Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                                Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                             }
                             
                             d_equation_of_mass_diffusivity_mixing_rules->
@@ -7534,7 +7534,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, pressure and temperature in the flow model
+                 * Register the patch, mass fractions, pressure and temperature in the flow model
                  * and compute the corresponding cell data.
                  */
                 
@@ -7545,7 +7545,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", num_ghosts));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
@@ -7561,8 +7561,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getGlobalCellData("PRESSURE");
@@ -7574,7 +7574,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                 Y.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    Y.push_back(data_mass_fractions->getPointer(si));
                 }
                 double* p = data_pressure->getPointer(0);
                 double* T = data_temperature->getPointer(0);
@@ -7589,8 +7589,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fractions = data_mass_fractions->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
@@ -7598,9 +7598,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                 const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_temperature = data_temperature->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+                const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
+                const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
                 
                 const int num_ghosts_0_pressure = num_ghosts_pressure[0];
                 const int num_ghosts_1_pressure = num_ghosts_pressure[1];
@@ -7631,7 +7631,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
-                    if (false) // (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*4)
+                    if (false) // (num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim)*4)
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
@@ -7658,57 +7658,57 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                     }
                                 }
                                 
-                                // Compute indices of current and neighboring cells of mass fraction.
-                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                // Compute indices of current and neighboring cells of mass fraction data.
+                                const int idx_mass_fractions = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_LLLL = (relative_idx_lo_0 + i - 4 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_LLLL = (relative_idx_lo_0 + i - 4 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_LLL = (relative_idx_lo_0 + i - 3 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_LLL = (relative_idx_lo_0 + i - 3 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_LL = (relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_LL = (relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_RR = (relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_RR = (relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_RRR = (relative_idx_lo_0 + i + 3 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_RRR = (relative_idx_lo_0 + i + 3 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_RRRR = (relative_idx_lo_0 + i + 4 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_RRRR = (relative_idx_lo_0 + i + 4 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_BBBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j - 4 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_BBBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j - 4 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j - 3 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j - 3 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_TT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_TT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + 2 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + 3 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + 3 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_TTTT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + 4 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_TTTT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + 4 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
                                 // Compute linear indices of pressure and temperature.
                                 const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
@@ -7741,7 +7741,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                 Y_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                                    Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                                 }
                                 
                                 d_equation_of_mass_diffusivity_mixing_rules->
@@ -7755,7 +7755,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                             }
                         }
                     }
-                    else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*3)
+                    else if (num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim)*3)
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
@@ -7782,45 +7782,45 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                     }
                                 }
                                 
-                                // Compute indices of current and neighboring cells of mass fraction.
-                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                // Compute indices of current and neighboring cells of mass fraction data.
+                                const int idx_mass_fractions = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_LLL = (relative_idx_lo_0 + i - 3 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_LLL = (relative_idx_lo_0 + i - 3 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_LL = (relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_LL = (relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_RR = (relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_RR = (relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_RRR = (relative_idx_lo_0 + i + 3 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_RRR = (relative_idx_lo_0 + i + 3 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j - 3 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j - 3 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_TT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_TT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + 2 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + 3 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + 3 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
                                 // Compute linear indices of pressure and temperature.
                                 const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
@@ -7851,7 +7851,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                 Y_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                                    Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                                 }
                                 
                                 d_equation_of_mass_diffusivity_mixing_rules->
@@ -7865,7 +7865,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                             }
                         }
                     }
-                    else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*2)
+                    else if (num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim)*2)
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
@@ -7892,33 +7892,33 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                     }
                                 }
                                 
-                                // Compute indices of current and neighboring cells of mass fraction.
-                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                // Compute indices of current and neighboring cells of mass fraction data.
+                                const int idx_mass_fractions = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_LL = (relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_LL = (relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_RR = (relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_RR = (relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_TT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_TT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + 2 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
                                 // Compute linear indices of pressure and temperature.
                                 const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
@@ -7947,7 +7947,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                 Y_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                                    Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                                 }
                                 
                                 d_equation_of_mass_diffusivity_mixing_rules->
@@ -7961,7 +7961,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                             }
                         }
                     }
-                    else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim))
+                    else if (num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim))
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
@@ -7988,21 +7988,21 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                     }
                                 }
                                 
-                                // Compute indices of current and neighboring cells of mass fraction.
-                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                // Compute indices of current and neighboring cells of mass fraction data.
+                                const int idx_mass_fractions = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
                                 // Compute linear indices of pressure and temperature.
                                 const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
@@ -8028,7 +8028,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                 Y_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                                    Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                                 }
                                 
                                 d_equation_of_mass_diffusivity_mixing_rules->
@@ -8069,21 +8069,21 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                     }
                                 }
                                 
-                                // Compute indices of current and neighboring cells of mass fraction.
-                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                // Compute indices of current and neighboring cells of mass fraction data.
+                                const int idx_mass_fractions = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
                                 // Compute linear indices of pressure and temperature.
                                 const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
@@ -8094,26 +8094,26 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                 
                                 double dYdx, dYdy;
                                 
-                                if (i == -num_ghosts_0_mass_fraction)
+                                if (i == -num_ghosts_0_mass_fractions)
                                 {
-                                    dYdx = (Y[0][idx_x_R] - Y[0][idx_mass_fraction])/dx[0];
+                                    dYdx = (Y[0][idx_x_R] - Y[0][idx_mass_fractions])/dx[0];
                                 }
-                                else if (i == interior_dim_0 + num_ghosts_0_mass_fraction - 1)
+                                else if (i == interior_dim_0 + num_ghosts_0_mass_fractions - 1)
                                 {
-                                    dYdx = (Y[0][idx_mass_fraction] - Y[0][idx_x_L])/dx[0];
+                                    dYdx = (Y[0][idx_mass_fractions] - Y[0][idx_x_L])/dx[0];
                                 }
                                 else
                                 {
                                     dYdx = (0.5*Y[0][idx_x_R] - 0.5*Y[0][idx_x_L])/dx[0];
                                 }
                                 
-                                if (j == -num_ghosts_1_mass_fraction)
+                                if (j == -num_ghosts_1_mass_fractions)
                                 {
-                                    dYdy = (Y[0][idx_y_T] - Y[0][idx_mass_fraction])/dx[1];
+                                    dYdy = (Y[0][idx_y_T] - Y[0][idx_mass_fractions])/dx[1];
                                 }
-                                else if (j == interior_dim_1 + num_ghosts_1_mass_fraction - 1)
+                                else if (j == interior_dim_1 + num_ghosts_1_mass_fractions - 1)
                                 {
-                                    dYdy = (Y[0][idx_mass_fraction] - Y[0][idx_y_B])/dx[1];
+                                    dYdy = (Y[0][idx_mass_fractions] - Y[0][idx_y_B])/dx[1];
                                 }
                                 else
                                 {
@@ -8134,7 +8134,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                 Y_ptr.reserve(d_num_species);
                                 for (int si = 0; si < d_num_species; si++)
                                 {
-                                    Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                                    Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                                 }
                                 
                                 d_equation_of_mass_diffusivity_mixing_rules->
@@ -8218,7 +8218,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction, pressure and temperature in the flow model
+                 * Register the patch, mass fractions, pressure and temperature in the flow model
                  * and compute the corresponding cell data.
                  */
                 
@@ -8229,7 +8229,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", num_ghosts));
                 
                 num_subghosts_of_data.insert(
                     std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
@@ -8245,8 +8245,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                  * Get the pointers to mass fraction, pressure and temperature data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
                 
                 boost::shared_ptr<pdat::CellData<double> > data_pressure =
                     d_flow_model_tmp->getGlobalCellData("PRESSURE");
@@ -8258,7 +8258,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                 Y.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    Y.push_back(data_mass_fractions->getPointer(si));
                 }
                 double* p = data_pressure->getPointer(0);
                 double* T = data_temperature->getPointer(0);
@@ -8273,8 +8273,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fractions = data_mass_fractions->getGhostBox().numberCells();
                 
                 const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_pressure = data_pressure->getGhostBox().numberCells();
@@ -8282,11 +8282,11 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                 const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_temperature = data_temperature->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+                const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
+                const int num_ghosts_2_mass_fractions = num_ghosts_mass_fractions[2];
+                const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
+                const int ghostcell_dim_1_mass_fractions = ghostcell_dims_mass_fractions[1];
                 
                 const int num_ghosts_0_pressure = num_ghosts_pressure[0];
                 const int num_ghosts_1_pressure = num_ghosts_pressure[1];
@@ -8324,7 +8324,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
                     
-                    if (false) // (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*4)
+                    if (false) // (num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim)*4)
                     {
                         for (int k = 0; k < interior_dim_2; k++)
                         {
@@ -8354,130 +8354,130 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                     }
                                     
                                     // Compute indices of current and neighboring cells.
-                                    const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_mass_fractions = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_LLLL = (relative_idx_lo_0 + i - 4 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_LLLL = (relative_idx_lo_0 + i - 4 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_LLL = (relative_idx_lo_0 + i - 3 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_LLL = (relative_idx_lo_0 + i - 3 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_LL = (relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_LL = (relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_RR = (relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_RR = (relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_RRR = (relative_idx_lo_0 + i + 3 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_RRR = (relative_idx_lo_0 + i + 3 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_RRRR = (relative_idx_lo_0 + i + 4 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_RRRR = (relative_idx_lo_0 + i + 4 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_BBBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j - 4 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_BBBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j - 4 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j - 3 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j - 3 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_TT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_TT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + 2 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + 3 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + 3 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_TTTT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + 4 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_TTTT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + 4 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_BBBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k - 4 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_BBBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k - 4 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_BBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k - 3 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_BBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k - 3 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k - 2 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k - 2 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k - 1 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k - 1 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_F = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + 1 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_F = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + 1 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_FF = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + 2 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_FF = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + 2 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_FFF = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + 3 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_FFF = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + 3 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_FFFF = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + 4 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_FFFF = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + 4 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
                                     // Compute linear indices of pressure and temperature.
                                     const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
@@ -8519,7 +8519,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                     Y_ptr.reserve(d_num_species);
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                                        Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                                     }
                                     
                                     d_equation_of_mass_diffusivity_mixing_rules->
@@ -8534,7 +8534,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                             }
                         }
                     }
-                    else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*3)
+                    else if (num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim)*3)
                     {
                         for (int k = 0; k < interior_dim_2; k++)
                         {
@@ -8564,100 +8564,100 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                     }
                                     
                                     // Compute indices of current and neighboring cells.
-                                    const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_mass_fractions = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_LLL = (relative_idx_lo_0 + i - 3 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_LLL = (relative_idx_lo_0 + i - 3 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_LL = (relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_LL = (relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_RR = (relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_RR = (relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_RRR = (relative_idx_lo_0 + i + 3 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_RRR = (relative_idx_lo_0 + i + 3 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j - 3 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j - 3 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_TT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_TT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + 2 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + 3 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + 3 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_BBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k - 3 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_BBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k - 3 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k - 2 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k - 2 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k - 1 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k - 1 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_F = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + 1 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_F = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + 1 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_FF = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + 2 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_FF = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + 2 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_FFF = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + 3 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_FFF = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + 3 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
                                     // Compute linear indices of pressure and temperature.
                                     const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
@@ -8696,7 +8696,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                     Y_ptr.reserve(d_num_species);
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                                        Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                                     }
                                     
                                     d_equation_of_mass_diffusivity_mixing_rules->
@@ -8711,7 +8711,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                             }
                         }
                     }
-                    else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*2)
+                    else if (num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim)*2)
                     {
                         for (int k = 0; k < interior_dim_2; k++)
                         {
@@ -8741,70 +8741,70 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                     }
                                     
                                     // Compute indices of current and neighboring cells.
-                                    const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_mass_fractions = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_LL = (relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_LL = (relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_RR = (relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_RR = (relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_TT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_TT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + 2 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k - 2 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k - 2 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k - 1 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k - 1 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_F = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + 1 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_F = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + 1 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_FF = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + 2 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_FF = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + 2 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
                                     // Compute linear indices of pressure and temperature.
                                     const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
@@ -8840,7 +8840,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                     Y_ptr.reserve(d_num_species);
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                                        Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                                     }
                                     
                                     d_equation_of_mass_diffusivity_mixing_rules->
@@ -8855,7 +8855,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                             }
                         }
                     }
-                    else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim))
+                    else if (num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim))
                     {
                         for (int k = 0; k < interior_dim_2; k++)
                         {
@@ -8885,40 +8885,40 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                     }
                                     
                                     // Compute indices of current and neighboring cells.
-                                    const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_mass_fractions = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k - 1 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k - 1 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_F = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + 1 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_F = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + 1 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
                                     // Compute linear indices of pressure and temperature.
                                     const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
@@ -8949,7 +8949,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                     Y_ptr.reserve(d_num_species);
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                                        Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                                     }
                                     
                                     d_equation_of_mass_diffusivity_mixing_rules->
@@ -8994,40 +8994,40 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                     }
                                     
                                     // Compute indices of current and neighboring cells.
-                                    const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_mass_fractions = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k - 1 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k - 1 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_F = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + 1 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_F = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + 1 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
                                     // Compute linear indices of pressure and temperature.
                                     const int idx_pressure = (relative_idx_lo_0 + i + num_ghosts_0_pressure) +
@@ -9042,39 +9042,39 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                     
                                     double dYdx, dYdy, dYdz;
                                     
-                                    if (i == -num_ghosts_0_mass_fraction)
+                                    if (i == -num_ghosts_0_mass_fractions)
                                     {
-                                        dYdx = (Y[0][idx_x_R] - Y[0][idx_mass_fraction])/dx[0];
+                                        dYdx = (Y[0][idx_x_R] - Y[0][idx_mass_fractions])/dx[0];
                                     }
-                                    else if (i == interior_dim_0 + num_ghosts_0_mass_fraction - 1)
+                                    else if (i == interior_dim_0 + num_ghosts_0_mass_fractions - 1)
                                     {
-                                        dYdx = (Y[0][idx_mass_fraction] - Y[0][idx_x_L])/dx[0];
+                                        dYdx = (Y[0][idx_mass_fractions] - Y[0][idx_x_L])/dx[0];
                                     }
                                     else
                                     {
                                         dYdx = (0.5*Y[0][idx_x_R] - 0.5*Y[0][idx_x_L])/dx[0];
                                     }
                                     
-                                    if (j == -num_ghosts_1_mass_fraction)
+                                    if (j == -num_ghosts_1_mass_fractions)
                                     {
-                                        dYdy = (Y[0][idx_y_T] - Y[0][idx_mass_fraction])/dx[1];
+                                        dYdy = (Y[0][idx_y_T] - Y[0][idx_mass_fractions])/dx[1];
                                     }
-                                    else if (j == interior_dim_1 + num_ghosts_1_mass_fraction - 1)
+                                    else if (j == interior_dim_1 + num_ghosts_1_mass_fractions - 1)
                                     {
-                                        dYdy = (Y[0][idx_mass_fraction] - Y[0][idx_y_B])/dx[1];
+                                        dYdy = (Y[0][idx_mass_fractions] - Y[0][idx_y_B])/dx[1];
                                     }
                                     else
                                     {
                                         dYdy = (0.5*Y[0][idx_y_T] - 0.5*Y[0][idx_y_B])/dx[1];
                                     }
                                     
-                                    if (k == -num_ghosts_2_mass_fraction)
+                                    if (k == -num_ghosts_2_mass_fractions)
                                     {
-                                        dYdz = (Y[0][idx_z_F] - Y[0][idx_mass_fraction])/dx[2];
+                                        dYdz = (Y[0][idx_z_F] - Y[0][idx_mass_fractions])/dx[2];
                                     }
-                                    else if (k == interior_dim_2 + num_ghosts_2_mass_fraction - 1)
+                                    else if (k == interior_dim_2 + num_ghosts_2_mass_fractions - 1)
                                     {
-                                        dYdz = (Y[0][idx_mass_fraction] - Y[0][idx_z_B])/dx[2];
+                                        dYdz = (Y[0][idx_mass_fractions] - Y[0][idx_z_B])/dx[2];
                                     }
                                     else
                                     {
@@ -9095,7 +9095,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                                     Y_ptr.reserve(d_num_species);
                                     for (int si = 0; si < d_num_species; si++)
                                     {
-                                        Y_ptr.push_back(&Y[si][idx_mass_fraction]);
+                                        Y_ptr.push_back(&Y[si][idx_mass_fractions]);
                                     }
                                     
                                     d_equation_of_mass_diffusivity_mixing_rules->
@@ -9255,7 +9255,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction in the flow model and compute the corresponding
+                 * Register the patch, mass fractions in the flow model and compute the corresponding
                  * cell data.
                  */
                 
@@ -9266,7 +9266,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", num_ghosts));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
@@ -9276,14 +9276,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                  * Get the pointers to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    Y.push_back(data_mass_fractions->getPointer(si));
                 }
                 
                 const hier::BoxContainer& patch_visible_boxes =
@@ -9291,9 +9291,9 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -9310,19 +9310,19 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                     
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     
-                    if (false) // (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*4)
+                    if (false) // (num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim)*4)
                     {
                         for (int i = 0; i < interior_dim_0; i++)
                         {
-                            // Compute indices of current and neighboring cells of mass fraction.
-                            const int idx_x_LLLL = relative_idx_lo_0 + i - 4 + num_ghosts_0_mass_fraction;
-                            const int idx_x_LLL = relative_idx_lo_0 + i - 3 + num_ghosts_0_mass_fraction;
-                            const int idx_x_LL = relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fraction;
-                            const int idx_x_L = relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction;
-                            const int idx_x_R = relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction;
-                            const int idx_x_RR = relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fraction;
-                            const int idx_x_RRR = relative_idx_lo_0 + i + 3 + num_ghosts_0_mass_fraction;
-                            const int idx_x_RRRR = relative_idx_lo_0 + i + 4 + num_ghosts_0_mass_fraction;
+                            // Compute indices of current and neighboring cells of mass fraction data.
+                            const int idx_x_LLLL = relative_idx_lo_0 + i - 4 + num_ghosts_0_mass_fractions;
+                            const int idx_x_LLL = relative_idx_lo_0 + i - 3 + num_ghosts_0_mass_fractions;
+                            const int idx_x_LL = relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fractions;
+                            const int idx_x_L = relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions;
+                            const int idx_x_R = relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions;
+                            const int idx_x_RR = relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fractions;
+                            const int idx_x_RRR = relative_idx_lo_0 + i + 3 + num_ghosts_0_mass_fractions;
+                            const int idx_x_RRRR = relative_idx_lo_0 + i + 4 + num_ghosts_0_mass_fractions;
                             
                             const double dYdx = (-1.0/280.0*Y[0][idx_x_RRRR] + 4.0/105.0*Y[0][idx_x_RRR] -
                                                  1.0/5.0*Y[0][idx_x_RR] + 4.0/5.0*Y[0][idx_x_R] -
@@ -9333,17 +9333,17 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                             grad_mag_max_local = fmax(grad_mag_max_local, grad_mag);
                         }
                     }
-                    else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*3)
+                    else if (num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim)*3)
                     {
                         for (int i = 0; i < interior_dim_0; i++)
                         {
-                            // Compute indices of current and neighboring cells of mass fraction.
-                            const int idx_x_LLL = relative_idx_lo_0 + i - 3 + num_ghosts_0_mass_fraction;
-                            const int idx_x_LL = relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fraction;
-                            const int idx_x_L = relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction;
-                            const int idx_x_R = relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction;
-                            const int idx_x_RR = relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fraction;
-                            const int idx_x_RRR = relative_idx_lo_0 + i + 3 + num_ghosts_0_mass_fraction;
+                            // Compute indices of current and neighboring cells of mass fraction data.
+                            const int idx_x_LLL = relative_idx_lo_0 + i - 3 + num_ghosts_0_mass_fractions;
+                            const int idx_x_LL = relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fractions;
+                            const int idx_x_L = relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions;
+                            const int idx_x_R = relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions;
+                            const int idx_x_RR = relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fractions;
+                            const int idx_x_RRR = relative_idx_lo_0 + i + 3 + num_ghosts_0_mass_fractions;
                             
                             const double dYdx = (1.0/60.0*Y[0][idx_x_RRR] - 3.0/20.0*Y[0][idx_x_RR] +
                                                  3.0/4.0*Y[0][idx_x_R] - 3.0/4.0*Y[0][idx_x_L] +
@@ -9353,15 +9353,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                             grad_mag_max_local = fmax(grad_mag_max_local, grad_mag);
                         }
                     }
-                    else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*2)
+                    else if (num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim)*2)
                     {
                         for (int i = 0; i < interior_dim_0; i++)
                         {
-                            // Compute indices of current and neighboring cells of mass fraction.
-                            const int idx_x_LL = relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fraction;
-                            const int idx_x_L = relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction;
-                            const int idx_x_R = relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction;
-                            const int idx_x_RR = relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fraction;
+                            // Compute indices of current and neighboring cells of mass fraction data.
+                            const int idx_x_LL = relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fractions;
+                            const int idx_x_L = relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions;
+                            const int idx_x_R = relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions;
+                            const int idx_x_RR = relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fractions;
                             
                             const double dYdx = (-1.0/12.0*Y[0][idx_x_RR] + 2.0/3.0*Y[0][idx_x_R] -
                                                  2.0/3.0*Y[0][idx_x_L] + 1.0/12.0*Y[0][idx_x_LL])/dx[0];
@@ -9370,13 +9370,13 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                             grad_mag_max_local = fmax(grad_mag_max_local, grad_mag);
                         }
                     }
-                    else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim))
+                    else if (num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim))
                     {
                         for (int i = 0; i < interior_dim_0; i++)
                         {
-                            // Compute indices of current and neighboring cells of mass fraction.
-                            const int idx_x_L = relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction;
-                            const int idx_x_R = relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction;
+                            // Compute indices of current and neighboring cells of mass fraction data.
+                            const int idx_x_L = relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions;
+                            const int idx_x_R = relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions;
                             
                             const double dYdx = (0.5*Y[0][idx_x_R] - 0.5*Y[0][idx_x_L])/dx[0];
                             
@@ -9388,20 +9388,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                     {
                         for (int i = 0; i < interior_dim_0; i++)
                         {
-                            // Compute indices of current and neighboring cells of mass fraction.
-                            const int idx_mass_fraction = relative_idx_lo_0 + i + num_ghosts_0_mass_fraction;
-                            const int idx_x_L = relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction;
-                            const int idx_x_R = relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction;
+                            // Compute indices of current and neighboring cells of mass fraction data.
+                            const int idx_mass_fractions = relative_idx_lo_0 + i + num_ghosts_0_mass_fractions;
+                            const int idx_x_L = relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions;
+                            const int idx_x_R = relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions;
                             
                             double dYdx;
                             
-                            if (i == -num_ghosts_0_mass_fraction)
+                            if (i == -num_ghosts_0_mass_fractions)
                             {
-                                dYdx = (Y[0][idx_x_R] - Y[0][idx_mass_fraction])/dx[0];
+                                dYdx = (Y[0][idx_x_R] - Y[0][idx_mass_fractions])/dx[0];
                             }
-                            else if (i == interior_dim_0 + num_ghosts_0_mass_fraction - 1)
+                            else if (i == interior_dim_0 + num_ghosts_0_mass_fractions - 1)
                             {
-                                dYdx = (Y[0][idx_mass_fraction] - Y[0][idx_x_L])/dx[0];
+                                dYdx = (Y[0][idx_mass_fractions] - Y[0][idx_x_L])/dx[0];
                             }
                             else
                             {
@@ -9486,7 +9486,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction in the flow model and compute the corresponding
+                 * Register the patch, mass fractions in the flow model and compute the corresponding
                  * cell data.
                  */
                 
@@ -9497,7 +9497,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", num_ghosts));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
@@ -9507,14 +9507,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                  * Get the pointers to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    Y.push_back(data_mass_fractions->getPointer(si));
                 }
                 
                 const hier::BoxContainer& patch_visible_boxes =
@@ -9522,12 +9522,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fractions = data_mass_fractions->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+                const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
+                const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -9546,60 +9546,60 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                     const int relative_idx_lo_0 = relative_index_lo[0];
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     
-                    if (false) // (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*4)
+                    if (false) // (num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim)*4)
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
                             for (int i = 0; i < interior_dim_0; i++)
                             {
-                                // Compute indices of current and neighboring cells of mass fraction.
-                                const int idx_x_LLLL = (relative_idx_lo_0 + i - 4 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                // Compute indices of current and neighboring cells of mass fraction data.
+                                const int idx_x_LLLL = (relative_idx_lo_0 + i - 4 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_LLL = (relative_idx_lo_0 + i - 3 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_LLL = (relative_idx_lo_0 + i - 3 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_LL = (relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_LL = (relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_RR = (relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_RR = (relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_RRR = (relative_idx_lo_0 + i + 3 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_RRR = (relative_idx_lo_0 + i + 3 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_RRRR = (relative_idx_lo_0 + i + 4 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_RRRR = (relative_idx_lo_0 + i + 4 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_BBBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j - 4 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_BBBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j - 4 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j - 3 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j - 3 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_TT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_TT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + 2 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + 3 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + 3 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_TTTT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + 4 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_TTTT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + 4 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
                                 const double dYdx = (-1.0/280.0*Y[0][idx_x_RRRR] + 4.0/105.0*Y[0][idx_x_RRR] -
                                                      1.0/5.0*Y[0][idx_x_RR] + 4.0/5.0*Y[0][idx_x_R] -
@@ -9616,48 +9616,48 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                             }
                         }
                     }
-                    else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*3)
+                    else if (num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim)*3)
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
                             for (int i = 0; i < interior_dim_0; i++)
                             {
-                                // Compute indices of current and neighboring cells of mass fraction.
-                                const int idx_x_LLL = (relative_idx_lo_0 + i - 3 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                // Compute indices of current and neighboring cells of mass fraction data.
+                                const int idx_x_LLL = (relative_idx_lo_0 + i - 3 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_LL = (relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_LL = (relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_RR = (relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_RR = (relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_RRR = (relative_idx_lo_0 + i + 3 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_RRR = (relative_idx_lo_0 + i + 3 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j - 3 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j - 3 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_TT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_TT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + 2 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + 3 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + 3 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
                                 const double dYdx = (1.0/60.0*Y[0][idx_x_RRR] - 3.0/20.0*Y[0][idx_x_RR] +
                                                      3.0/4.0*Y[0][idx_x_R] - 3.0/4.0*Y[0][idx_x_L] +
@@ -9672,36 +9672,36 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                             }
                         }
                     }
-                    else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*2)
+                    else if (num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim)*2)
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
                             for (int i = 0; i < interior_dim_0; i++)
                             {
-                                // Compute indices of current and neighboring cells of mass fraction.
-                                const int idx_x_LL = (relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                // Compute indices of current and neighboring cells of mass fraction data.
+                                const int idx_x_LL = (relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_RR = (relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_RR = (relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_TT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_TT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + 2 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
                                 const double dYdx = (-1.0/12.0*Y[0][idx_x_RR] + 2.0/3.0*Y[0][idx_x_R] -
                                                      2.0/3.0*Y[0][idx_x_L] + 1.0/12.0*Y[0][idx_x_LL])/dx[0];
@@ -9714,24 +9714,24 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                             }
                         }
                     }
-                    else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim))
+                    else if (num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim))
                     {
                         for (int j = 0; j < interior_dim_1; j++)
                         {
                             for (int i = 0; i < interior_dim_0; i++)
                             {
-                                // Compute indices of current and neighboring cells of mass fraction.
-                                const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                // Compute indices of current and neighboring cells of mass fraction data.
+                                const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
                                 const double dYdx = (0.5*Y[0][idx_x_R] - 0.5*Y[0][idx_x_L])/dx[0];
                                 const double dYdy = (0.5*Y[0][idx_y_T] - 0.5*Y[0][idx_y_B])/dx[1];
@@ -9747,44 +9747,44 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                         {
                             for (int i = 0; i < interior_dim_0; i++)
                             {
-                                // Compute indices of current and neighboring cells of mass fraction.
-                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                // Compute indices of current and neighboring cells of mass fraction data.
+                                const int idx_mass_fractions = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
-                                const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                    (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction;
+                                const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                    (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                                 
                                 double dYdx, dYdy;
                                 
-                                if (i == -num_ghosts_0_mass_fraction)
+                                if (i == -num_ghosts_0_mass_fractions)
                                 {
-                                    dYdx = (Y[0][idx_x_R] - Y[0][idx_mass_fraction])/dx[0];
+                                    dYdx = (Y[0][idx_x_R] - Y[0][idx_mass_fractions])/dx[0];
                                 }
-                                else if (i == interior_dim_0 + num_ghosts_0_mass_fraction - 1)
+                                else if (i == interior_dim_0 + num_ghosts_0_mass_fractions - 1)
                                 {
-                                    dYdx = (Y[0][idx_mass_fraction] - Y[0][idx_x_L])/dx[0];
+                                    dYdx = (Y[0][idx_mass_fractions] - Y[0][idx_x_L])/dx[0];
                                 }
                                 else
                                 {
                                     dYdx = (0.5*Y[0][idx_x_R] - 0.5*Y[0][idx_x_L])/dx[0];
                                 }
                                 
-                                if (j == -num_ghosts_1_mass_fraction)
+                                if (j == -num_ghosts_1_mass_fractions)
                                 {
-                                    dYdy = (Y[0][idx_y_T] - Y[0][idx_mass_fraction])/dx[1];
+                                    dYdy = (Y[0][idx_y_T] - Y[0][idx_mass_fractions])/dx[1];
                                 }
-                                else if (j == interior_dim_1 + num_ghosts_1_mass_fraction - 1)
+                                else if (j == interior_dim_1 + num_ghosts_1_mass_fractions - 1)
                                 {
-                                    dYdy = (Y[0][idx_mass_fraction] - Y[0][idx_y_B])/dx[1];
+                                    dYdy = (Y[0][idx_mass_fractions] - Y[0][idx_y_B])/dx[1];
                                 }
                                 else
                                 {
@@ -9872,7 +9872,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, mass fraction in the flow model and compute the corresponding
+                 * Register the patch, mass fractions in the flow model and compute the corresponding
                  * cell data.
                  */
                 
@@ -9883,7 +9883,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
-                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", num_ghosts));
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", num_ghosts));
                 
                 d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
                 
@@ -9893,14 +9893,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                  * Get the pointers to mass fraction data inside the flow model.
                  */
                 
-                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
-                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                boost::shared_ptr<pdat::CellData<double> > data_mass_fractions =
+                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTIONS");
                 
                 std::vector<double*> Y;
                 Y.reserve(d_num_species);
                 for (int si = 0; si < d_num_species; si++)
                 {
-                    Y.push_back(data_mass_fraction->getPointer(si));
+                    Y.push_back(data_mass_fractions->getPointer(si));
                 }
                 
                 const hier::BoxContainer& patch_visible_boxes =
@@ -9908,14 +9908,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                         patch_box,
                         li);
                 
-                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
-                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fractions = data_mass_fractions->getGhostBox().numberCells();
                 
-                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
-                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
-                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
-                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
-                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+                const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
+                const int num_ghosts_2_mass_fractions = num_ghosts_mass_fractions[2];
+                const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
+                const int ghostcell_dim_1_mass_fractions = ghostcell_dims_mass_fractions[1];
                 
                 for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
                      ib != patch_visible_boxes.end();
@@ -9936,7 +9936,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                     const int relative_idx_lo_1 = relative_index_lo[1];
                     const int relative_idx_lo_2 = relative_index_lo[2];
                     
-                    if (false) // (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*4)
+                    if (false) // (num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim)*4)
                     {
                         for (int k = 0; k < interior_dim_2; k++)
                         {
@@ -9945,125 +9945,125 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute indices of current and neighboring cells.
-                                    const int idx_x_LLLL = (relative_idx_lo_0 + i - 4 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_LLLL = (relative_idx_lo_0 + i - 4 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_LLL = (relative_idx_lo_0 + i - 3 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_LLL = (relative_idx_lo_0 + i - 3 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_LL = (relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_LL = (relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_RR = (relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_RR = (relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_RRR = (relative_idx_lo_0 + i + 3 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_RRR = (relative_idx_lo_0 + i + 3 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_RRRR = (relative_idx_lo_0 + i + 4 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_RRRR = (relative_idx_lo_0 + i + 4 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_BBBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j - 4 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_BBBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j - 4 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j - 3 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j - 3 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_TT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_TT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + 2 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + 3 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + 3 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_TTTT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + 4 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_TTTT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + 4 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_BBBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k - 4 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_BBBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k - 4 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_BBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k - 3 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_BBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k - 3 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k - 2 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k - 2 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k - 1 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k - 1 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_F = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + 1 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_F = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + 1 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_FF = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + 2 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_FF = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + 2 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_FFF = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + 3 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_FFF = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + 3 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_FFFF = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + 4 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_FFFF = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + 4 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                         
                                     const double dYdx = (-1.0/280.0*Y[0][idx_x_RRRR] + 4.0/105.0*Y[0][idx_x_RRR] -
                                                          1.0/5.0*Y[0][idx_x_RR] + 4.0/5.0*Y[0][idx_x_R] -
@@ -10086,7 +10086,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                             }
                         }
                     }
-                    else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*3)
+                    else if (num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim)*3)
                     {
                         for (int k = 0; k < interior_dim_2; k++)
                         {
@@ -10095,95 +10095,95 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute indices of current and neighboring cells.
-                                    const int idx_x_LLL = (relative_idx_lo_0 + i - 3 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_LLL = (relative_idx_lo_0 + i - 3 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_LL = (relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_LL = (relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_RR = (relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_RR = (relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_RRR = (relative_idx_lo_0 + i + 3 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_RRR = (relative_idx_lo_0 + i + 3 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j - 3 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_BBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j - 3 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_TT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_TT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + 2 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + 3 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_TTT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + 3 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_BBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k - 3 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_BBB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k - 3 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k - 2 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k - 2 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k - 1 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k - 1 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_F = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + 1 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_F = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + 1 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_FF = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + 2 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_FF = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + 2 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_FFF = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + 3 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_FFF = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + 3 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
                                     const double dYdx = (1.0/60.0*Y[0][idx_x_RRR] - 3.0/20.0*Y[0][idx_x_RR] +
                                                          3.0/4.0*Y[0][idx_x_R] - 3.0/4.0*Y[0][idx_x_L] +
@@ -10203,7 +10203,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                             }
                         }
                     }
-                    else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim)*2)
+                    else if (num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim)*2)
                     {
                         for (int k = 0; k < interior_dim_2; k++)
                         {
@@ -10212,65 +10212,65 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute indices of current and neighboring cells.
-                                    const int idx_x_LL = (relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_LL = (relative_idx_lo_0 + i - 2 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_RR = (relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_RR = (relative_idx_lo_0 + i + 2 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j - 2 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_TT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + 2 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_TT = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + 2 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k - 2 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_BB = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k - 2 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k - 1 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k - 1 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_F = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + 1 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_F = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + 1 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_FF = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + 2 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_FF = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + 2 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
                                     const double dYdx = (-1.0/12.0*Y[0][idx_x_RR] + 2.0/3.0*Y[0][idx_x_R] -
                                                          2.0/3.0*Y[0][idx_x_L] + 1.0/12.0*Y[0][idx_x_LL])/dx[0];
@@ -10287,7 +10287,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                             }
                         }
                     }
-                    else if (num_ghosts_mass_fraction >= hier::IntVector::getOne(d_dim))
+                    else if (num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim))
                     {
                         for (int k = 0; k < interior_dim_2; k++)
                         {
@@ -10296,35 +10296,35 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute indices of current and neighboring cells.
-                                    const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k - 1 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k - 1 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_F = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + 1 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_F = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + 1 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
                                     const double dYdx = (0.5*Y[0][idx_x_R] - 0.5*Y[0][idx_x_L])/dx[0];
                                     const double dYdy = (0.5*Y[0][idx_y_T] - 0.5*Y[0][idx_y_B])/dx[1];
@@ -10345,76 +10345,76 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
                                 for (int i = 0; i < interior_dim_0; i++)
                                 {
                                     // Compute indices of current and neighboring cells.
-                                    const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_mass_fractions = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_L = (relative_idx_lo_0 + i - 1 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_x_R = (relative_idx_lo_0 + i + 1 + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j - 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_y_T = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + 1 + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k - 1 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_B = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k - 1 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
-                                    const int idx_z_F = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
-                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
-                                        (relative_idx_lo_2 + k + 1 + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
-                                            ghostcell_dim_1_mass_fraction;
+                                    const int idx_z_F = (relative_idx_lo_0 + i + num_ghosts_0_mass_fractions) +
+                                        (relative_idx_lo_1 + j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                        (relative_idx_lo_2 + k + 1 + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                            ghostcell_dim_1_mass_fractions;
                                     
                                     double dYdx, dYdy, dYdz;
                                     
-                                    if (i == -num_ghosts_0_mass_fraction)
+                                    if (i == -num_ghosts_0_mass_fractions)
                                     {
-                                        dYdx = (Y[0][idx_x_R] - Y[0][idx_mass_fraction])/dx[0];
+                                        dYdx = (Y[0][idx_x_R] - Y[0][idx_mass_fractions])/dx[0];
                                     }
-                                    else if (i == interior_dim_0 + num_ghosts_0_mass_fraction - 1)
+                                    else if (i == interior_dim_0 + num_ghosts_0_mass_fractions - 1)
                                     {
-                                        dYdx = (Y[0][idx_mass_fraction] - Y[0][idx_x_L])/dx[0];
+                                        dYdx = (Y[0][idx_mass_fractions] - Y[0][idx_x_L])/dx[0];
                                     }
                                     else
                                     {
                                         dYdx = (0.5*Y[0][idx_x_R] - 0.5*Y[0][idx_x_L])/dx[0];
                                     }
                                     
-                                    if (j == -num_ghosts_1_mass_fraction)
+                                    if (j == -num_ghosts_1_mass_fractions)
                                     {
-                                        dYdy = (Y[0][idx_y_T] - Y[0][idx_mass_fraction])/dx[1];
+                                        dYdy = (Y[0][idx_y_T] - Y[0][idx_mass_fractions])/dx[1];
                                     }
-                                    else if (j == interior_dim_1 + num_ghosts_1_mass_fraction - 1)
+                                    else if (j == interior_dim_1 + num_ghosts_1_mass_fractions - 1)
                                     {
-                                        dYdy = (Y[0][idx_mass_fraction] - Y[0][idx_y_B])/dx[1];
+                                        dYdy = (Y[0][idx_mass_fractions] - Y[0][idx_y_B])/dx[1];
                                     }
                                     else
                                     {
                                         dYdy = (0.5*Y[0][idx_y_T] - 0.5*Y[0][idx_y_B])/dx[1];
                                     }
                                     
-                                    if (k == -num_ghosts_2_mass_fraction)
+                                    if (k == -num_ghosts_2_mass_fractions)
                                     {
-                                        dYdz = (Y[0][idx_z_F] - Y[0][idx_mass_fraction])/dx[2];
+                                        dYdz = (Y[0][idx_z_F] - Y[0][idx_mass_fractions])/dx[2];
                                     }
-                                    else if (k == interior_dim_2 + num_ghosts_2_mass_fraction - 1)
+                                    else if (k == interior_dim_2 + num_ghosts_2_mass_fractions - 1)
                                     {
-                                        dYdz = (Y[0][idx_mass_fraction] - Y[0][idx_z_B])/dx[2];
+                                        dYdz = (Y[0][idx_mass_fractions] - Y[0][idx_z_B])/dx[2];
                                     }
                                     else
                                     {

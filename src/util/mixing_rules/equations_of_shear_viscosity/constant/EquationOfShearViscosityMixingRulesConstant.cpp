@@ -176,19 +176,19 @@ EquationOfShearViscosityMixingRulesConstant::putToRestart(
 
 
 /*
- * Compute the shear viscosity of the mixture with isothermal and isobaric assumptions.
+ * Compute the shear viscosity of the mixture with isothermal and isobaric equilibria assumptions.
  */
 double
 EquationOfShearViscosityMixingRulesConstant::getShearViscosity(
     const double* const pressure,
     const double* const temperature,
-    const std::vector<const double*>& mass_fraction) const
+    const std::vector<const double*>& mass_fractions) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
                 (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
-    TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
-                (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
+    TBOX_ASSERT((static_cast<int>(mass_fractions.size()) == d_num_species) ||
+                (static_cast<int>(mass_fractions.size()) == d_num_species - 1));
 #endif
     
     double mu = 0.0;
@@ -217,7 +217,23 @@ EquationOfShearViscosityMixingRulesConstant::getShearViscosity(
         species_molecular_properties_const_ptr.push_back(&species_molecular_properties[mi]);
     }
     
-    if (static_cast<int>(mass_fraction.size()) == d_num_species - 1)
+    if (static_cast<int>(mass_fractions.size()) == d_num_species)
+    {
+        for (int si = 0; si < d_num_species; si++)
+        {
+            getSpeciesMolecularProperties(species_molecular_properties_ptr, si);
+            
+            const double mu_i = d_equation_of_shear_viscosity->
+                getShearViscosity(
+                    pressure,
+                    temperature,
+                    species_molecular_properties_const_ptr);
+            
+            num += mu_i*(*(mass_fractions[si]))/(sqrt(species_molecular_properties[1]));
+            den += *(mass_fractions[si])/(sqrt(species_molecular_properties[1]));
+        }
+    }
+    else if (static_cast<int>(mass_fractions.size()) == d_num_species - 1)
     {
         double Y_last = 1.0;
         
@@ -231,11 +247,11 @@ EquationOfShearViscosityMixingRulesConstant::getShearViscosity(
                     temperature,
                     species_molecular_properties_const_ptr);
             
-            num += mu_i*(*(mass_fraction[si]))/(sqrt(species_molecular_properties[1]));
-            den += *(mass_fraction[si])/(sqrt(species_molecular_properties[1]));
+            num += mu_i*(*(mass_fractions[si]))/(sqrt(species_molecular_properties[1]));
+            den += *(mass_fractions[si])/(sqrt(species_molecular_properties[1]));
             
             // Compute the mass fraction of the last species.
-            Y_last -= *(mass_fraction[si]);
+            Y_last -= *(mass_fractions[si]);
         }
         
         /*
@@ -255,19 +271,11 @@ EquationOfShearViscosityMixingRulesConstant::getShearViscosity(
     }
     else
     {
-        for (int si = 0; si < d_num_species; si++)
-        {
-            getSpeciesMolecularProperties(species_molecular_properties_ptr, si);
-            
-            const double mu_i = d_equation_of_shear_viscosity->
-                getShearViscosity(
-                    pressure,
-                    temperature,
-                    species_molecular_properties_const_ptr);
-            
-            num += mu_i*(*(mass_fraction[si]))/(sqrt(species_molecular_properties[1]));
-            den += *(mass_fraction[si])/(sqrt(species_molecular_properties[1]));
-        }
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "Number of mass fractions provided is not"
+            << " equal to the total number of species or (total number of species - 1)."
+            << std::endl);
     }
     
     mu = num/den;
@@ -277,23 +285,38 @@ EquationOfShearViscosityMixingRulesConstant::getShearViscosity(
 
 
 /*
- * Compute the shear viscosity of the mixture with isobaric assumption.
+ * Compute the shear viscosity of the mixture with isothermal and isobaric equilibria assumptions.
+ */
+void
+EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
+    boost::shared_ptr<pdat::CellData<double> >& data_shear_viscosity,
+    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+    const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+    const hier::Box& domain) const
+{
+
+}
+
+
+/*
+ * Compute the shear viscosity of the mixture with isobaric equilibrium assumption.
  */
 double
 EquationOfShearViscosityMixingRulesConstant::getShearViscosity(
     const double* const pressure,
-    const std::vector<const double*>& temperature,
-    const std::vector<const double*>& mass_fraction,
-    const std::vector<const double*>& volume_fraction) const
+    const std::vector<const double*>& species_temperatures,
+    const std::vector<const double*>& mass_fractions,
+    const std::vector<const double*>& volume_fractions) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
-    TBOX_ASSERT((static_cast<int>(temperature.size()) == d_num_species);
-    TBOX_ASSERT((static_cast<int>(volume_fraction.size()) == d_num_species) ||
-                (static_cast<int>(volume_fraction.size()) == d_num_species - 1));
+    TBOX_ASSERT((static_cast<int>(species_temperatures.size()) == d_num_species);
+    TBOX_ASSERT((static_cast<int>(volume_fractions.size()) == d_num_species) ||
+                (static_cast<int>(volume_fractions.size()) == d_num_species - 1));
 #endif
     
-    NULL_USE(mass_fraction);
+    NULL_USE(mass_fractions);
     
     double mu = 0.0;
     
@@ -318,7 +341,22 @@ EquationOfShearViscosityMixingRulesConstant::getShearViscosity(
         species_molecular_properties_const_ptr.push_back(&species_molecular_properties[mi]);
     }
     
-    if (static_cast<int>(volume_fraction.size()) == d_num_species - 1)
+    if (static_cast<int>(volume_fractions.size()) == d_num_species)
+    {
+        for (int si = 0; si < d_num_species; si++)
+        {
+            getSpeciesMolecularProperties(species_molecular_properties_ptr, si);
+            
+            const double mu_i = d_equation_of_shear_viscosity->
+                getShearViscosity(
+                    pressure,
+                    species_temperatures[si],
+                    species_molecular_properties_const_ptr);
+            
+            mu += *(volume_fractions[si])*mu_i;
+        }
+    }
+    else if (static_cast<int>(volume_fractions.size()) == d_num_species - 1)
     {
         double Z_last = 1.0;
         
@@ -329,13 +367,13 @@ EquationOfShearViscosityMixingRulesConstant::getShearViscosity(
             const double mu_i = d_equation_of_shear_viscosity->
                 getShearViscosity(
                     pressure,
-                    temperature[si],
+                    species_temperatures[si],
                     species_molecular_properties_const_ptr);
             
-            mu += *(volume_fraction[si])*mu_i;
+            mu += *(volume_fractions[si])*mu_i;
             
             // Compute the volume fraction of the last species.
-            Z_last -= *(volume_fraction[si]);
+            Z_last -= *(volume_fractions[si]);
         }
         
         /*
@@ -347,25 +385,18 @@ EquationOfShearViscosityMixingRulesConstant::getShearViscosity(
         const double mu_last = d_equation_of_shear_viscosity->
             getShearViscosity(
                 pressure,
-                temperature[d_num_species - 1],
+                species_temperatures[d_num_species - 1],
                 species_molecular_properties_const_ptr);
         
         mu += Z_last*mu_last;
     }
     else
     {
-        for (int si = 0; si < d_num_species; si++)
-        {
-            getSpeciesMolecularProperties(species_molecular_properties_ptr, si);
-            
-            const double mu_i = d_equation_of_shear_viscosity->
-                getShearViscosity(
-                    pressure,
-                    temperature[si],
-                    species_molecular_properties_const_ptr);
-            
-            mu += *(volume_fraction[si])*mu_i;
-        }
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "Number of volume fractions provided is not"
+            << " equal to the total number of species or (total number of species - 1)."
+            << std::endl);
     }
     
     return mu;
@@ -373,12 +404,28 @@ EquationOfShearViscosityMixingRulesConstant::getShearViscosity(
 
 
 /*
+ * Compute the shear viscosity of the mixture with isobaric equilibrium assumption.
+ */
+void
+EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
+    boost::shared_ptr<pdat::CellData<double> >& data_shear_viscosity,
+    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::CellData<double> >& data_species_temperatures,
+    const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+    const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
+    const hier::Box& domain) const
+{
+
+}
+
+        
+/*
  * Get the molecular properties of a species.
  */
 void
 EquationOfShearViscosityMixingRulesConstant::getSpeciesMolecularProperties(
     std::vector<double*>& species_molecular_properties,
-    const int& species_index) const
+    const int species_index) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(species_molecular_properties.size()) >= 2);

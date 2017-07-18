@@ -5,10 +5,10 @@
  */
 double
 EquationOfStateMixingRules::getMixtureDensity(
-    const std::vector<const double*>& partial_density) const
+    const std::vector<const double*>& partial_densities) const
 {
 #ifdef DEBUG_CHECK_DEV_ASSERTIONS
-    if (static_cast<int>(partial_density.size()) != d_num_species)
+    if (static_cast<int>(partial_densities.size()) != d_num_species)
     {
         TBOX_ERROR(d_object_name
             << ": "
@@ -22,7 +22,7 @@ EquationOfStateMixingRules::getMixtureDensity(
     
     for (int si = 0; si < d_num_species; si++)
     {
-        const double& Z_rho = *(partial_density[si]);
+        const double& Z_rho = *(partial_densities[si]);
         
         rho += Z_rho;
     }
@@ -37,12 +37,12 @@ EquationOfStateMixingRules::getMixtureDensity(
 void
 EquationOfStateMixingRules::computeMixtureDensity(
     boost::shared_ptr<pdat::CellData<double> >& data_mixture_density,
-    const boost::shared_ptr<pdat::CellData<double> >& data_partial_density,
+    const boost::shared_ptr<pdat::CellData<double> >& data_partial_densities,
     const hier::Box& domain) const
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(data_mixture_density);
-    TBOX_ASSERT(data_partial_density);
+    TBOX_ASSERT(data_partial_densities);
 #endif
     
     // Get the dimensions of box that covers the interior of patch.
@@ -50,7 +50,7 @@ EquationOfStateMixingRules::computeMixtureDensity(
     const hier::IntVector interior_dims = interior_box.numberCells();
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(data_partial_density->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_partial_densities->getBox().numberCells() == interior_dims);
 #endif
     
     /*
@@ -61,9 +61,9 @@ EquationOfStateMixingRules::computeMixtureDensity(
     const hier::IntVector ghostcell_dims_mixture_density =
         data_mixture_density->getGhostBox().numberCells();
     
-    const hier::IntVector num_ghosts_partial_density = data_partial_density->getGhostCellWidth();
-    const hier::IntVector ghostcell_dims_partial_density =
-        data_partial_density->getGhostBox().numberCells();
+    const hier::IntVector num_ghosts_partial_densities = data_partial_densities->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_partial_densities =
+        data_partial_densities->getGhostBox().numberCells();
     
     /*
      * Get the local lower indices and number of cells in each direction of the domain.
@@ -77,7 +77,7 @@ EquationOfStateMixingRules::computeMixtureDensity(
         hier::IntVector num_ghosts_min(d_dim);
         
         num_ghosts_min = num_ghosts_mixture_density;
-        num_ghosts_min = hier::IntVector::min(num_ghosts_partial_density, num_ghosts_min);
+        num_ghosts_min = hier::IntVector::min(num_ghosts_partial_densities, num_ghosts_min);
         
         hier::Box ghost_box = interior_box;
         ghost_box.grow(num_ghosts_min);
@@ -89,7 +89,7 @@ EquationOfStateMixingRules::computeMixtureDensity(
     {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         TBOX_ASSERT(data_mixture_density->getGhostBox().contains(domain));
-        TBOX_ASSERT(data_partial_density->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_partial_densities->getGhostBox().contains(domain));
 #endif
         
         domain_lo = domain.lower() - interior_box.lower();
@@ -106,7 +106,7 @@ EquationOfStateMixingRules::computeMixtureDensity(
     Z_rho.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
-        Z_rho.push_back(data_partial_density->getPointer(si));
+        Z_rho.push_back(data_partial_densities->getPointer(si));
     }
     
     /*
@@ -125,7 +125,7 @@ EquationOfStateMixingRules::computeMixtureDensity(
         const int domain_dim_0 = domain_dims[0];
         
         const int num_ghosts_0_mixture_density = num_ghosts_mixture_density[0];
-        const int num_ghosts_0_partial_density = num_ghosts_partial_density[0];
+        const int num_ghosts_0_partial_densities = num_ghosts_partial_densities[0];
         
         for (int si = 0; si < d_num_species; si++)
         {
@@ -138,9 +138,9 @@ EquationOfStateMixingRules::computeMixtureDensity(
             {
                 // Compute the linear indices.
                 const int idx_mixture_density = i + num_ghosts_0_mixture_density;
-                const int idx_partial_density = i + num_ghosts_0_partial_density;
+                const int idx_partial_densities = i + num_ghosts_0_partial_densities;
                 
-                rho[idx_mixture_density] += Z_rho[si][idx_partial_density];
+                rho[idx_mixture_density] += Z_rho[si][idx_partial_densities];
             }
         }
     }
@@ -159,9 +159,9 @@ EquationOfStateMixingRules::computeMixtureDensity(
         const int num_ghosts_1_mixture_density = num_ghosts_mixture_density[1];
         const int ghostcell_dim_0_mixture_density = ghostcell_dims_mixture_density[0];
         
-        const int num_ghosts_0_partial_density = num_ghosts_partial_density[0];
-        const int num_ghosts_1_partial_density = num_ghosts_partial_density[1];
-        const int ghostcell_dim_0_partial_density = ghostcell_dims_partial_density[0];
+        const int num_ghosts_0_partial_densities = num_ghosts_partial_densities[0];
+        const int num_ghosts_1_partial_densities = num_ghosts_partial_densities[1];
+        const int ghostcell_dim_0_partial_densities = ghostcell_dims_partial_densities[0];
         
         for (int si = 0; si < d_num_species; si++)
         {
@@ -180,10 +180,10 @@ EquationOfStateMixingRules::computeMixtureDensity(
                     const int idx_mixture_density = (i + num_ghosts_0_mixture_density) +
                         (j + num_ghosts_1_mixture_density)*ghostcell_dim_0_mixture_density;
                     
-                    const int idx_partial_density = (i + num_ghosts_0_partial_density) +
-                        (j + num_ghosts_1_partial_density)*ghostcell_dim_0_partial_density;
+                    const int idx_partial_densities = (i + num_ghosts_0_partial_densities) +
+                        (j + num_ghosts_1_partial_densities)*ghostcell_dim_0_partial_densities;
                     
-                    rho[idx_mixture_density] += Z_rho[si][idx_partial_density];
+                    rho[idx_mixture_density] += Z_rho[si][idx_partial_densities];
                 }
             }
         }
@@ -207,11 +207,11 @@ EquationOfStateMixingRules::computeMixtureDensity(
         const int ghostcell_dim_0_mixture_density = ghostcell_dims_mixture_density[0];
         const int ghostcell_dim_1_mixture_density = ghostcell_dims_mixture_density[1];
         
-        const int num_ghosts_0_partial_density = num_ghosts_partial_density[0];
-        const int num_ghosts_1_partial_density = num_ghosts_partial_density[1];
-        const int num_ghosts_2_partial_density = num_ghosts_partial_density[2];
-        const int ghostcell_dim_0_partial_density = ghostcell_dims_partial_density[0];
-        const int ghostcell_dim_1_partial_density = ghostcell_dims_partial_density[1];
+        const int num_ghosts_0_partial_densities = num_ghosts_partial_densities[0];
+        const int num_ghosts_1_partial_densities = num_ghosts_partial_densities[1];
+        const int num_ghosts_2_partial_densities = num_ghosts_partial_densities[2];
+        const int ghostcell_dim_0_partial_densities = ghostcell_dims_partial_densities[0];
+        const int ghostcell_dim_1_partial_densities = ghostcell_dims_partial_densities[1];
         
         for (int si = 0; si < d_num_species; si++)
         {
@@ -236,12 +236,12 @@ EquationOfStateMixingRules::computeMixtureDensity(
                             (k + num_ghosts_2_mixture_density)*ghostcell_dim_0_mixture_density*
                                 ghostcell_dim_1_mixture_density;
                         
-                        const int idx_partial_density = (i + num_ghosts_0_partial_density) +
-                            (j + num_ghosts_1_partial_density)*ghostcell_dim_0_partial_density +
-                            (k + num_ghosts_2_partial_density)*ghostcell_dim_0_partial_density*
-                                ghostcell_dim_1_partial_density;
+                        const int idx_partial_densities = (i + num_ghosts_0_partial_densities) +
+                            (j + num_ghosts_1_partial_densities)*ghostcell_dim_0_partial_densities +
+                            (k + num_ghosts_2_partial_densities)*ghostcell_dim_0_partial_densities*
+                                ghostcell_dim_1_partial_densities;
                         
-                        rho[idx_mixture_density] += Z_rho[si][idx_partial_density];
+                        rho[idx_mixture_density] += Z_rho[si][idx_partial_densities];
                     }
                 }
             }

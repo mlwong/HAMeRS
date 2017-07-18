@@ -350,10 +350,10 @@ class FlowModelFourEqnConservative: public FlowModel
         setGhostBoxesAndDimensionsDerivedCellVariables();
         
         /*
-         * Get the global cell data of partial density in the registered patch.
+         * Get the global cell data of partial densities in the registered patch.
          */
         boost::shared_ptr<pdat::CellData<double> >
-        getGlobalCellDataPartialDensity();
+        getGlobalCellDataPartialDensities();
         
         /*
          * Get the global cell data of momentum in the registered patch.
@@ -374,9 +374,9 @@ class FlowModelFourEqnConservative: public FlowModel
             const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
         
         /*
-         * Compute the global cell data of mass fraction with density in the registered patch.
+         * Compute the global cell data of mass fractions with density in the registered patch.
          */
-        void computeGlobalCellDataMassFractionWithDensity(
+        void computeGlobalCellDataMassFractionsWithDensity(
             const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
         
         /*
@@ -393,24 +393,24 @@ class FlowModelFourEqnConservative: public FlowModel
             const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
         
         /*
-         * Compute the global cell data of pressure with density, mass fraction and internal energy in
+         * Compute the global cell data of pressure with density, mass fractions and internal energy in
          * the registered patch.
          */
-        void computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy(
+        void computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy(
             const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
         
         /*
-         * Compute the global cell data of sound speed with density, mass fraction and pressure in the
+         * Compute the global cell data of sound speed with density, mass fractions and pressure in the
          * registered patch.
          */
-        void computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure(
+        void computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure(
             const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
         
         /*
-         * Compute the global cell data of temperature with density, mass fraction and pressure in the
+         * Compute the global cell data of temperature with density, mass fractions and pressure in the
          * registered patch.
          */
-        void computeGlobalCellDataTemperatureWithDensityMassFractionAndPressure(
+        void computeGlobalCellDataTemperatureWithDensityMassFractionsAndPressure(
             const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
         
         /*
@@ -448,16 +448,16 @@ class FlowModelFourEqnConservative: public FlowModel
             const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
         
         /*
-         * Compute the global cell data of maximum diffusivity with density, mass fraction, pressure
+         * Compute the global cell data of maximum diffusivity with density, mass fractions, pressure
          * and temperature in the registered patch.
          */
-        void computeGlobalCellDataMaxDiffusivityWithDensityMassFractionPressureAndTemperature(
+        void computeGlobalCellDataMaxDiffusivityWithDensityMassFractionsPressureAndTemperature(
             const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
         
         /*
          * boost::shared_ptr to registered conservative variables.
          */
-        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_partial_density;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_partial_densities;
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_momentum;
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_total_energy;
         
@@ -465,7 +465,7 @@ class FlowModelFourEqnConservative: public FlowModel
          * Number of sub-ghost cells of derived cell data.
          */
         hier::IntVector d_num_subghosts_density;
-        hier::IntVector d_num_subghosts_mass_fraction;
+        hier::IntVector d_num_subghosts_mass_fractions;
         hier::IntVector d_num_subghosts_velocity;
         hier::IntVector d_num_subghosts_internal_energy;
         hier::IntVector d_num_subghosts_pressure;
@@ -487,7 +487,7 @@ class FlowModelFourEqnConservative: public FlowModel
          * Boxes with sub-ghost cells of derived cell data.
          */
         hier::Box d_subghost_box_density;
-        hier::Box d_subghost_box_mass_fraction;
+        hier::Box d_subghost_box_mass_fractions;
         hier::Box d_subghost_box_velocity;
         hier::Box d_subghost_box_internal_energy;
         hier::Box d_subghost_box_pressure;
@@ -509,7 +509,7 @@ class FlowModelFourEqnConservative: public FlowModel
          * Dimensions of boxes with sub-ghost cells of derived cell data.
          */
         hier::IntVector d_subghostcell_dims_density;
-        hier::IntVector d_subghostcell_dims_mass_fraction;
+        hier::IntVector d_subghostcell_dims_mass_fractions;
         hier::IntVector d_subghostcell_dims_velocity;
         hier::IntVector d_subghostcell_dims_internal_energy;
         hier::IntVector d_subghostcell_dims_pressure;
@@ -531,7 +531,7 @@ class FlowModelFourEqnConservative: public FlowModel
          * boost::shared_ptr to derived cell data.
          */
         boost::shared_ptr<pdat::CellData<double> > d_data_density;
-        boost::shared_ptr<pdat::CellData<double> > d_data_mass_fraction;
+        boost::shared_ptr<pdat::CellData<double> > d_data_mass_fractions;
         boost::shared_ptr<pdat::CellData<double> > d_data_velocity;
         boost::shared_ptr<pdat::CellData<double> > d_data_internal_energy;
         boost::shared_ptr<pdat::CellData<double> > d_data_pressure;

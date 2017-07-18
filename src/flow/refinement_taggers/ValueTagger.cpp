@@ -54,7 +54,7 @@ ValueTagger::ValueTagger(
                   (variable_key == "PRESSURE") ||
                   (variable_key == "DILATATION") ||
                   (variable_key == "ENSTROPHY") ||
-                  (variable_key == "MASS_FRACTION")))
+                  (variable_key == "MASS_FRACTIONS")))
             {
                 TBOX_ERROR(d_object_name
                     << ":"
@@ -367,24 +367,24 @@ ValueTagger::registerValueTaggerVariables(
                 "Value tagger enstrophy",
                 1);
         }
-        else if (variable_key == "MASS_FRACTION")
+        else if (variable_key == "MASS_FRACTIONS")
         {
-            d_value_tagger_variable_mass_fraction.reserve(d_num_species);
+            d_value_tagger_variable_mass_fractions.reserve(d_num_species);
             
             for (int si = 0; si < d_num_species; si++)
             {
-                d_value_tagger_variable_mass_fraction.push_back(
+                d_value_tagger_variable_mass_fractions.push_back(
                     boost::make_shared<pdat::CellVariable<double> >(
                         d_dim,
                         "Value tagger mass fraction "  + boost::lexical_cast<std::string>(si),
                         1));
             }
             
-            d_value_tagger_max_mass_fraction.reserve(d_num_species);
+            d_value_tagger_max_mass_fractions.reserve(d_num_species);
             
             for (int si = 0; si < d_num_species; si++)
             {
-                d_value_tagger_max_mass_fraction.push_back(0.0);
+                d_value_tagger_max_mass_fractions.push_back(0.0);
             }
         }
         else
@@ -459,12 +459,12 @@ ValueTagger::registerValueTaggerVariables(
                     "NO_COARSEN",
                     "NO_REFINE");
         }
-        else if (variable_key == "MASS_FRACTION")
+        else if (variable_key == "MASS_FRACTIONS")
         {
             for (int si = 0; si < d_num_species; si++)
             {
                 integrator->registerVariable(
-                    d_value_tagger_variable_mass_fraction[si],
+                    d_value_tagger_variable_mass_fractions[si],
                     d_num_value_ghosts,
                     d_num_value_ghosts,
                     RungeKuttaLevelIntegrator::TEMPORARY,
@@ -892,10 +892,10 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             
             d_flow_model->unregisterPatch();
         }
-        else if (variable_key == "MASS_FRACTION")
+        else if (variable_key == "MASS_FRACTIONS")
         {
             /*
-             * Register the patch and mass fraction in the flow model and compute the corresponding cell data.
+             * Register the patch and mass fractions in the flow model and compute the corresponding cell data.
              */
             
             d_flow_model->registerPatchWithDataContext(patch, data_context);
@@ -903,7 +903,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
             
             num_subghosts_of_data.insert(
-                std::pair<std::string, hier::IntVector>("MASS_FRACTION", d_num_value_ghosts));
+                std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", d_num_value_ghosts));
             
             d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
             
@@ -913,8 +913,8 @@ ValueTagger::computeValueTaggerValuesOnPatch(
              * Get the pointer to mass fraction data inside the flow model.
              */
             
-            boost::shared_ptr<pdat::CellData<double> > flow_model_data_mass_fraction =
-                d_flow_model->getGlobalCellData("MASS_FRACTION");
+            boost::shared_ptr<pdat::CellData<double> > flow_model_data_mass_fractions =
+                d_flow_model->getGlobalCellData("MASS_FRACTIONS");
             
             /*
              * Transfer data from flow model to the class variable.
@@ -925,8 +925,8 @@ ValueTagger::computeValueTaggerValuesOnPatch(
                 transferDataOnPatchToClassVariable(
                     patch,
                     data_context,
-                    flow_model_data_mass_fraction,
-                    d_value_tagger_variable_mass_fraction[si],
+                    flow_model_data_mass_fractions,
+                    d_value_tagger_variable_mass_fractions[si],
                     si);
             }
             
@@ -1043,20 +1043,20 @@ ValueTagger::getValueStatistics(
                     MPI_DOUBLE,
                     MPI_MAX);
             }
-            else if (variable_key == "MASS_FRACTION")
+            else if (variable_key == "MASS_FRACTIONS")
             {
                 for (int si = 0; si < d_num_species; si++)
                 {
                     const int Y_id = variable_db->mapVariableAndContextToIndex(
-                        d_value_tagger_variable_mass_fraction[si],
+                        d_value_tagger_variable_mass_fractions[si],
                         data_context);
                     
                     double Y_max_local = cell_double_operator.max(Y_id);
-                    d_value_tagger_max_mass_fraction[si] = 0.0;
+                    d_value_tagger_max_mass_fractions[si] = 0.0;
                     
                     mpi.Allreduce(
                         &Y_max_local,
-                        &d_value_tagger_max_mass_fraction[si],
+                        &d_value_tagger_max_mass_fractions[si],
                         1,
                         MPI_DOUBLE,
                         MPI_MAX);
@@ -1206,7 +1206,7 @@ ValueTagger::tagCellsOnPatch(
                 local_tol_up,
                 local_tol_lo);
         }
-        else if (variable_key == "MASS_FRACTION")
+        else if (variable_key == "MASS_FRACTIONS")
         {
             for (int si = 0; si < d_num_species; si++)
             {
@@ -1214,8 +1214,8 @@ ValueTagger::tagCellsOnPatch(
                     patch,
                     data_context,
                     tags,
-                    d_value_tagger_variable_mass_fraction[si],
-                    d_value_tagger_max_mass_fraction[si],
+                    d_value_tagger_variable_mass_fractions[si],
+                    d_value_tagger_max_mass_fractions[si],
                     uses_global_tol_up,
                     uses_global_tol_lo,
                     uses_local_tol_up,
