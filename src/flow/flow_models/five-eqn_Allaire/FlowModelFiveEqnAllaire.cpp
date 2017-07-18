@@ -11504,7 +11504,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataSpeciesTemperaturesWithPressure(
         
         // Compute the temperature of each species.
         
-        boost::shared_ptr<pdat::CellData<double> > data_species_temperatures(
+        boost::shared_ptr<pdat::CellData<double> > data_temperature_species(
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_species_temperatures));
         
         for (int si = 0; si < d_num_species; si++)
@@ -11532,13 +11532,13 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataSpeciesTemperaturesWithPressure(
             
             d_equation_of_state_mixing_rules->getEquationOfState(si)->
                 computeTemperature(
-                    data_species_temperatures,
+                    data_temperature_species,
                     data_species_densities[si],
                     d_data_pressure,
                     species_thermo_properties_const_ptr,
                     d_subghost_box_species_temperatures);
             
-            d_data_species_temperatures->copyDepth(si, *data_species_temperatures, 0);
+            d_data_species_temperatures->copyDepth(si, *data_temperature_species, 0);
         }
     }
     else
