@@ -329,7 +329,7 @@ class FlowModelFourEqnConservative: public FlowModel
 #ifdef HAVE_HDF5
         void
         registerPlotQuantities(
-            const boost::shared_ptr<appu::VisItDataWriter>& visit_writer);
+            const boost::shared_ptr<ExtendedVisItDataWriter>& visit_writer);
 #endif
         
     private:

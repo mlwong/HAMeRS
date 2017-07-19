@@ -4,6 +4,7 @@
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
 #include "apps/Euler/Euler.hpp"
 #include "apps/Navier-Stokes/NavierStokes.hpp"
+#include "extn/visit_data_writer/ExtendedVisItDataWriter.hpp"
 
 // Headers for basic SAMRAI objects
 
@@ -30,7 +31,7 @@
 
 #include "SAMRAI/algs/TimeRefinementIntegrator.h"
 #include "SAMRAI/algs/TimeRefinementLevelStrategy.h"
-#include "SAMRAI/appu/VisItDataWriter.h"
+// #include "SAMRAI/appu/VisItDataWriter.h"
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/hier/PatchHierarchy.h"
 #include "SAMRAI/mesh/BergerRigoutsos.h"
@@ -271,6 +272,7 @@ int main(int argc, char *argv[])
     int viz_dump_timestep_interval = 0;
     double viz_dump_time_interval = 0.0;
     std::string visit_dump_dirname = "";
+    int visit_dump_directory_name_zero_padding_length = 5;
     int visit_number_procs_per_file = 1;
     
     if (main_db->keyExists("viz_dump_setting"))
@@ -318,9 +320,15 @@ int main(int argc, char *argv[])
         visit_dump_dirname =
             main_db->getStringWithDefault("viz_dump_dirname", base_name + ".visit");
         
+        if (main_db->keyExists("visit_dump_directory_name_zero_padding_length"))
+        {
+            visit_dump_directory_name_zero_padding_length =
+                main_db->getInteger("visit_dump_directory_name_zero_padding_length");
+        }
+        
         if (main_db->keyExists("visit_number_procs_per_file"))
         {
-           visit_number_procs_per_file = main_db->getInteger("visit_number_procs_per_file");
+            visit_number_procs_per_file = main_db->getInteger("visit_number_procs_per_file");
         }
     }
     
@@ -664,17 +672,18 @@ int main(int argc, char *argv[])
      * is not necessary.
      */
 #ifdef HAVE_HDF5
-    boost::shared_ptr<appu::VisItDataWriter> visit_data_writer;
+    boost::shared_ptr<ExtendedVisItDataWriter> visit_data_writer;
     
     switch (app_label)
     {
         case EULER:
         {
             visit_data_writer.reset(
-                new appu::VisItDataWriter(
+                new ExtendedVisItDataWriter(
                     dim,
                     "Euler VisIt Writer",
                     visit_dump_dirname,
+                    visit_dump_directory_name_zero_padding_length,
                     visit_number_procs_per_file));
             
             Euler_app->registerVisItDataWriter(visit_data_writer);
@@ -684,10 +693,11 @@ int main(int argc, char *argv[])
         case NAVIER_STOKES:
         {
             visit_data_writer.reset(
-                new appu::VisItDataWriter(
+                new ExtendedVisItDataWriter(
                     dim,
                     "Navier-Stokes VisIt Writer",
                     visit_dump_dirname,
+                    visit_dump_directory_name_zero_padding_length,
                     visit_number_procs_per_file));
             
             Navier_Stokes_app->registerVisItDataWriter(visit_data_writer);

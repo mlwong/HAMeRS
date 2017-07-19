@@ -25,7 +25,7 @@ set(mixing_rules_source_files
 # source files defined in mixing_rules_source_files
 add_library(mixing_rules ${mixing_rules_source_files})
 
-TARGET_LINK_LIBRARIES(mixing_rules equations_of_state algs_fortran
+TARGET_LINK_LIBRARIES(mixing_rules equations_of_state
   SAMRAI_appu SAMRAI_geom SAMRAI_solv SAMRAI_algs SAMRAI_mesh
   SAMRAI_math SAMRAI_pdat SAMRAI_xfer SAMRAI_hier SAMRAI_tbox
   hdf5 gfortran)

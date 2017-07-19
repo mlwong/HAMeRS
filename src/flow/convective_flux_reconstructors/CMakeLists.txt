@@ -16,8 +16,7 @@ set(convective_flux_reconstructors_source_files
 # source files defined in convective_flux_reconstructors_source_files
 add_library(convective_flux_reconstructors ${convective_flux_reconstructors_source_files})
 
-TARGET_LINK_LIBRARIES(convective_flux_reconstructors
-  flow_models algs_fortran
+TARGET_LINK_LIBRARIES(convective_flux_reconstructors flow_models
   SAMRAI_appu SAMRAI_geom SAMRAI_solv SAMRAI_algs SAMRAI_mesh
   SAMRAI_math SAMRAI_pdat SAMRAI_xfer SAMRAI_hier SAMRAI_tbox
   hdf5 gfortran)
