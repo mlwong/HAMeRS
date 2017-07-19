@@ -4,13 +4,14 @@
 #include "HAMeRS_config.hpp"
 
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
+#include "extn/visit_data_writer/ExtendedVisItDataWriter.hpp"
 #include "flow/flow_models/FlowModelBoundaryUtilities.hpp"
 #include "flow/flow_models/FlowModelStatisticsUtilities.hpp"
 #include "util/Directions.hpp"
 #include "util/mixing_rules/equations_of_state/EquationOfStateMixingRulesManager.hpp"
 
 #include "SAMRAI/appu/VisDerivedDataStrategy.h"
-#include "SAMRAI/appu/VisItDataWriter.h"
+// #include "SAMRAI/appu/VisItDataWriter.h"
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 #include "SAMRAI/pdat/CellData.h"
@@ -488,7 +489,7 @@ class FlowModel:
 #ifdef HAVE_HDF5
         virtual void
         registerPlotQuantities(
-            const boost::shared_ptr<appu::VisItDataWriter>& visit_writer) = 0;
+            const boost::shared_ptr<ExtendedVisItDataWriter>& visit_writer) = 0;
 #endif
         
     protected:

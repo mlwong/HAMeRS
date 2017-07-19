@@ -109,6 +109,7 @@ ExtendedVisItDataWriter::ExtendedVisItDataWriter(
    const SAMRAI::tbox::Dimension& dim,
    const std::string& object_name,
    const std::string& dump_directory_name,
+   int dump_directory_name_zero_padding_length,
    int number_procs_per_file,
    bool is_multiblock):
    d_dim(dim),
@@ -152,6 +153,8 @@ ExtendedVisItDataWriter::ExtendedVisItDataWriter(
    d_number_levels = 1;
 
    d_worker_min_max = 0;
+
+   d_dump_directory_name_zero_padding_length = dump_directory_name_zero_padding_length;
 
    d_is_multiblock = is_multiblock;
 }
@@ -1613,7 +1616,7 @@ ExtendedVisItDataWriter::writeHDFFiles(
       d_processor_in_file_cluster_number[i] = i / d_file_cluster_size;
    }
 
-   sprintf(temp_buf, "%05d", d_time_step_number);
+   sprintf(temp_buf, "%0*d", d_dump_directory_name_zero_padding_length, d_time_step_number);
    d_current_dump_directory_name = "visit_dump.";
    d_current_dump_directory_name += temp_buf;
    if (!d_top_level_directory_name.empty() &&
@@ -1635,7 +1638,8 @@ ExtendedVisItDataWriter::writeHDFFiles(
 #endif
    {
       // cluster_leader guaranteed to enter this section before anyone else
-      sprintf(temp_buf, "/processor_cluster.%05d.samrai",
+      sprintf(temp_buf, "/processor_cluster.%0*d.samrai",
+         d_dump_directory_name_zero_padding_length,
          d_my_file_cluster_number);
       std::string database_name(temp_buf);
       std::string visit_HDFFilename = dump_dirname + database_name;
@@ -1659,7 +1663,7 @@ ExtendedVisItDataWriter::writeHDFFiles(
       }
 
       // create group for this proc
-      sprintf(temp_buf, "processor.%05d", my_proc);
+      sprintf(temp_buf, "processor.%0*d", d_dump_directory_name_zero_padding_length, my_proc);
       boost::shared_ptr<SAMRAI::tbox::Database> processor_HDFGroup(
          visit_HDFFilePointer->putDatabase(std::string(temp_buf)));
       writeVisItVariablesToHDFFile(processor_HDFGroup,

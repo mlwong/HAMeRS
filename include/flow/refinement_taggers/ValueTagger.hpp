@@ -4,9 +4,10 @@
 #include "HAMeRS_config.hpp"
 
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
+#include "extn/visit_data_writer/ExtendedVisItDataWriter.hpp"
 #include "flow/flow_models/FlowModels.hpp"
 
-#include "SAMRAI/appu/VisItDataWriter.h"
+// #include "SAMRAI/appu/VisItDataWriter.h"
 #include "SAMRAI/math/HierarchyCellDataOpsReal.h"
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
@@ -50,7 +51,7 @@ class ValueTagger
          */
         void
         registerPlotQuantities(
-            const boost::shared_ptr<appu::VisItDataWriter>& visit_writer,
+            const boost::shared_ptr<ExtendedVisItDataWriter>& visit_writer,
             const boost::shared_ptr<hier::VariableContext>& plot_context);
         
         /*

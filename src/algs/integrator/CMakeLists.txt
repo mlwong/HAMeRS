@@ -2,7 +2,7 @@
 # a list of the source files for the Runge_Kutta_level_integrator library
 set(Runge_Kutta_level_integrator_source_files
     ExtendedTagAndInitialize.cpp
-    ExtendedTagAndInitializeConnectorWidthRequestor
+    ExtendedTagAndInitializeConnectorWidthRequestor.cpp
     ExtendedTagAndInitStrategy.cpp
     RungeKuttaLevelIntegrator.cpp
     ./fortran/algs_upfluxsum3d.m4

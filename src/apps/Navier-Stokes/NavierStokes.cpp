@@ -3125,7 +3125,7 @@ NavierStokes::putToRestart(
 #ifdef HAVE_HDF5
 void
 NavierStokes::registerVisItDataWriter(
-    const boost::shared_ptr<appu::VisItDataWriter>& viz_writer)
+    const boost::shared_ptr<ExtendedVisItDataWriter>& viz_writer)
 {
     TBOX_ASSERT(viz_writer);
     d_visit_writer = viz_writer;

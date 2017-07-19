@@ -9991,7 +9991,7 @@ FlowModelFourEqnConservative::packDerivedDataIntoDoubleBuffer(
 #ifdef HAVE_HDF5
 void
 FlowModelFourEqnConservative::registerPlotQuantities(
-    const boost::shared_ptr<appu::VisItDataWriter>& visit_writer)
+    const boost::shared_ptr<ExtendedVisItDataWriter>& visit_writer)
 {
     if (!d_plot_context)
     {

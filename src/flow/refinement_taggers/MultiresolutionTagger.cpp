@@ -753,7 +753,7 @@ MultiresolutionTagger::registerMultiresolutionTaggerVariables(
  */
 void
 MultiresolutionTagger::registerPlotQuantities(
-    const boost::shared_ptr<appu::VisItDataWriter>& visit_writer,
+    const boost::shared_ptr<ExtendedVisItDataWriter>& visit_writer,
     const boost::shared_ptr<hier::VariableContext>& plot_context)
 {
 #ifdef HAMERS_PLOTTING_MULTIRESOLUTION_TAGGER
