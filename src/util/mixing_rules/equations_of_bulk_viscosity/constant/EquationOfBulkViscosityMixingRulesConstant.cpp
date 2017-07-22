@@ -733,6 +733,8 @@ EquationOfBulkViscosityMixingRulesConstant::computeBulkViscosity(
                     data_temperature,
                     species_molecular_properties_const_ptr);
             
+            const double factor = 1.0/(sqrt(species_molecular_properties[1]));
+            
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
 #endif
@@ -743,8 +745,8 @@ EquationOfBulkViscosityMixingRulesConstant::computeBulkViscosity(
                 const int idx_min = i + num_ghosts_0_min;
                 const int idx_mass_fractions = i + num_ghosts_0_mass_fractions;
                 
-                num[idx_min] += mu_v_i[idx_min]*Y_last[idx_mass_fractions]/(sqrt(species_molecular_properties[1]));
-                den[idx_min] += Y_last[idx_mass_fractions]/(sqrt(species_molecular_properties[1]));
+                num[idx_min] += mu_v_i[idx_min]*Y_last[idx_mass_fractions]*factor;
+                den[idx_min] += Y_last[idx_mass_fractions]*factor;
                 
                 mu_v[idx_bulk_viscosity] = num[idx_min]/den[idx_min];
             }
@@ -818,6 +820,8 @@ EquationOfBulkViscosityMixingRulesConstant::computeBulkViscosity(
                     data_temperature,
                     species_molecular_properties_const_ptr);
             
+            const double factor = 1.0/(sqrt(species_molecular_properties[1]));
+            
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
@@ -835,8 +839,8 @@ EquationOfBulkViscosityMixingRulesConstant::computeBulkViscosity(
                     const int idx_mass_fractions = (i + num_ghosts_0_mass_fractions) +
                         (j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                     
-                    num[idx_min] += mu_v_i[idx_min]*Y_last[idx_mass_fractions]/(sqrt(species_molecular_properties[1]));
-                    den[idx_min] += Y_last[idx_mass_fractions]/(sqrt(species_molecular_properties[1]));
+                    num[idx_min] += mu_v_i[idx_min]*Y_last[idx_mass_fractions]*factor;
+                    den[idx_min] += Y_last[idx_mass_fractions]*factor;
                     
                     mu_v[idx_bulk_viscosity] = num[idx_min]/den[idx_min];
                 }
@@ -926,6 +930,8 @@ EquationOfBulkViscosityMixingRulesConstant::computeBulkViscosity(
                     data_temperature,
                     species_molecular_properties_const_ptr);
             
+            const double factor = 1.0/(sqrt(species_molecular_properties[1]));
+            
             for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
@@ -951,8 +957,8 @@ EquationOfBulkViscosityMixingRulesConstant::computeBulkViscosity(
                             (k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
                                 ghostcell_dim_1_mass_fractions;
                         
-                        num[idx_min] += mu_v_i[idx_min]*Y_last[idx_mass_fractions]/(sqrt(species_molecular_properties[1]));
-                        den[idx_min] += Y_last[idx_mass_fractions]/(sqrt(species_molecular_properties[1]));
+                        num[idx_min] += mu_v_i[idx_min]*Y_last[idx_mass_fractions]*factor;
+                        den[idx_min] += Y_last[idx_mass_fractions]*factor;
                         
                         mu_v[idx_bulk_viscosity] = num[idx_min]/den[idx_min];
                     }

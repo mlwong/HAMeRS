@@ -163,7 +163,6 @@ EquationOfBulkViscosityConstant::computeBulkViscosity(
         const int domain_dim_0 = domain_dims[0];
         
         const int num_ghosts_0_bulk_viscosity = num_ghosts_bulk_viscosity[0];
-        
         const int num_ghosts_0_molecular_properties = num_ghosts_molecular_properties[0];
         
 #ifdef HAMERS_ENABLE_SIMD
@@ -173,7 +172,6 @@ EquationOfBulkViscosityConstant::computeBulkViscosity(
         {
             // Compute the linear indices.
             const int idx_bulk_viscosity = i + num_ghosts_0_bulk_viscosity;
-            
             const int idx_molecular_properties = i + num_ghosts_0_molecular_properties;
             
             mu_v[idx_bulk_viscosity] = mu_v_src[idx_molecular_properties];
