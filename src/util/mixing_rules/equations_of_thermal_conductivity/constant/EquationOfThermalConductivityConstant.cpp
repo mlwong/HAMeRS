@@ -59,6 +59,8 @@ EquationOfThermalConductivityConstant::computeThermalConductivity(
     NULL_USE(data_temperature);
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_thermal_conductivity);
+    
     TBOX_ASSERT(static_cast<int>(molecular_properties.size()) >= 1);
 #endif
     
@@ -92,6 +94,7 @@ EquationOfThermalConductivityConstant::computeThermalConductivity(
     NULL_USE(data_temperature);
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_thermal_conductivity);
     TBOX_ASSERT(data_molecular_properties);
     
     TBOX_ASSERT(data_molecular_properties->getDepth() >= 1);

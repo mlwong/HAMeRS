@@ -1308,7 +1308,14 @@ EquationOfStateMixingRulesIdealGas::computeIsochoricSpecificHeatCapacity(
      * Fill zeros for c_v.
      */
     
-    data_isochoric_specific_heat_capacity->fill(0.0, domain);
+    if (domain.empty())
+    {
+        data_isochoric_specific_heat_capacity->fillAll(0.0);
+    }
+    else
+    {
+        data_isochoric_specific_heat_capacity->fillAll(0.0, domain);
+    }
     
     if (data_mass_fractions->getDepth() == d_num_species)
     {
@@ -1461,7 +1468,14 @@ EquationOfStateMixingRulesIdealGas::computeIsochoricSpecificHeatCapacity(
         boost::shared_ptr<pdat::CellData<double> > data_mass_fractions_last(
             new pdat::CellData<double>(interior_box, 1, num_ghosts_mass_fractions));
         
-        data_mass_fractions_last->fill(1.0, domain);
+        if (domain.empty())
+        {
+            data_mass_fractions_last->fillAll(1.0);
+        }
+        else
+        {
+            data_mass_fractions_last->fill(1.0, domain);
+        }
         
         /*
          * Get the pointers to the cell data of mass fractions.
@@ -1832,7 +1846,14 @@ EquationOfStateMixingRulesIdealGas::computeIsobaricSpecificHeatCapacity(
      * Fill zeros for c_p.
      */
     
-    data_isobaric_specific_heat_capacity->fill(0.0, domain);
+    if (domain.empty())
+    {
+        data_isobaric_specific_heat_capacity->fillAll(0.0);
+    }
+    else
+    {
+        data_isobaric_specific_heat_capacity->fillAll(0.0, domain);
+    }
     
     if (data_mass_fractions->getDepth() == d_num_species)
     {
@@ -1985,7 +2006,14 @@ EquationOfStateMixingRulesIdealGas::computeIsobaricSpecificHeatCapacity(
         boost::shared_ptr<pdat::CellData<double> > data_mass_fractions_last(
             new pdat::CellData<double>(interior_box, 1, num_ghosts_mass_fractions));
         
-        data_mass_fractions_last->fill(1.0, domain);
+        if (domain.empty())
+        {
+            data_mass_fractions_last->fillAll(1.0);
+        }
+        else
+        {
+            data_mass_fractions_last->fillAll(1.0, domain);
+        }
         
         /*
          * Get the pointers to the cell data of mass fractions.
@@ -2626,8 +2654,16 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMas
      * Fill zeros for c_p and c_v.
      */
     
-    data_mixture_thermo_properties->fill(0.0, domain, 2);
-    data_mixture_thermo_properties->fill(0.0, domain, 3);
+    if (domain.empty())
+    {
+        data_mixture_thermo_properties->fill(0.0, 2);
+        data_mixture_thermo_properties->fill(0.0, 3);
+    }
+    else
+    {
+        data_mixture_thermo_properties->fill(0.0, domain, 2);
+        data_mixture_thermo_properties->fill(0.0, domain, 3);
+    }
     
     if (data_mass_fractions->getDepth() == d_num_species)
     {
@@ -2832,7 +2868,14 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMas
         boost::shared_ptr<pdat::CellData<double> > data_mass_fractions_last(
             new pdat::CellData<double>(interior_box, 1, num_ghosts_mass_fractions));
         
-        data_mass_fractions_last->fill(1.0, domain);
+        if (domain.empty())
+        {
+            data_mass_fractions_last->fillAll(1.0);
+        }
+        else
+        {
+            data_mass_fractions_last->fillAll(1.0, domain);
+        }
         
         /*
          * Get the pointers to the cell data of mass fractions.
@@ -3196,7 +3239,14 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
      * Fill zeros for gamma.
      */
     
-    data_mixture_thermo_properties->fill(0.0, domain, 0);
+    if (domain.empty())
+    {
+        data_mixture_thermo_properties->fill(0.0, 0);
+    }
+    else
+    {
+        data_mixture_thermo_properties->fill(0.0, domain, 0);
+    }
     
     if (data_volume_fractions->getDepth() == d_num_species)
     {
@@ -3395,7 +3445,14 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
         boost::shared_ptr<pdat::CellData<double> > data_volume_fractions_last(
             new pdat::CellData<double>(interior_box, 1, num_ghosts_volume_fractions));
         
-        data_volume_fractions_last->fill(1.0, domain);
+        if (domain.empty())
+        {
+            data_volume_fractions_last->fillAll(1.0);
+        }
+        else
+        {
+            data_volume_fractions_last->fillAll(1.0, domain);
+        }
         
         /*
          * Get the pointers to the cell data of volume fractions.

@@ -126,11 +126,10 @@ EquationOfMassDiffusivityMixingRulesConstant::getMassDiffusivities(
     NULL_USE(mass_fractions);
     
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(mass_diffusivities.size()) == d_num_species);
     TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
                 (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
-    TBOX_ASSERT((static_cast<int>(mass_fractions.size()) == d_num_species) ||
-                (static_cast<int>(mass_fractions.size()) == d_num_species - 1));
+    
+    TBOX_ASSERT(static_cast<int>(mass_diffusivities.size()) == d_num_species);
 #endif
     
     for (int si = 0; si < d_num_species; si++)
@@ -151,7 +150,34 @@ EquationOfMassDiffusivityMixingRulesConstant::computeMassDiffusivities(
     const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
     const hier::Box& domain) const
 {
-
+    NULL_USE(data_pressure);
+    NULL_USE(data_temperature);
+    NULL_USE(data_mass_fractions);
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
+                (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
+    
+    TBOX_ASSERT(data_mass_diffusivities.getDepth() == d_num_species);
+#endif
+    
+    if (domain.empty())
+    {
+        for (int si = 0; si < d_num_species; si++)
+        {
+            data_mass_diffusivities->fill(d_species_D[si], si);
+        }
+    }
+    else
+    {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_bulk_viscosity->getGhostBox().contains(domain));
+#endif
+        for (int si = 0; si < d_num_species; si++)
+        {
+            data_mass_diffusivities->fill(d_species_D[si], domain, si);
+        }
+    }
 }
 
 

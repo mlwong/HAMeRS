@@ -1005,7 +1005,14 @@ EquationOfBulkViscosityMixingRulesCramer::computeBulkViscosity(
         boost::shared_ptr<pdat::CellData<double> > data_mass_fractions_last(
             new pdat::CellData<double>(interior_box, 1, num_ghosts_mass_fractions));
         
-        data_mass_fractions_last->fill(1.0, domain);
+        if (domain.empty())
+        {
+            data_mass_fractions_last->fillAll(1.0);
+        }
+        else
+        {
+            data_mass_fractions_last->fillAll(1.0, domain);
+        }
         
         /*
          * Get the pointers to the cell data of mass fractions.
@@ -1572,7 +1579,14 @@ EquationOfBulkViscosityMixingRulesCramer::computeBulkViscosity(
      * Fill zeros for mixture bulk viscosity.
      */
     
-    data_bulk_viscosity->fill(0.0, domain);
+    if (domain.empty())
+    {
+        data_bulk_viscosity->fillAll(0.0);
+    }
+    else
+    {
+        data_bulk_viscosity->fillAll(0.0, domain);
+    }
     
     if (data_volume_fractions->getDepth() == d_num_species)
     {
@@ -1769,7 +1783,14 @@ EquationOfBulkViscosityMixingRulesCramer::computeBulkViscosity(
         boost::shared_ptr<pdat::CellData<double> > data_volume_fractions_last(
             new pdat::CellData<double>(interior_box, 1, num_ghosts_volume_fractions));
         
-        data_volume_fractions_last->fill(1.0, domain);
+        if (domain.empty())
+        {
+            data_volume_fractions_last->fillAll(1.0);
+        }
+        else
+        {
+            data_volume_fractions_last->fillAll(1.0, domain);
+        }
         
         /*
          * Get the pointers to the cell data of volume fractions.

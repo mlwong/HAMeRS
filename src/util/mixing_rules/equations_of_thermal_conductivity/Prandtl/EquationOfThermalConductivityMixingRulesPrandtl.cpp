@@ -790,7 +790,14 @@ EquationOfThermalConductivityMixingRulesPrandtl::computeThermalConductivity(
         boost::shared_ptr<pdat::CellData<double> > data_mass_fractions_last(
             new pdat::CellData<double>(interior_box, 1, num_ghosts_mass_fractions));
         
-        data_mass_fractions_last->fill(1.0, domain);
+        if (domain.empty())
+        {
+            data_mass_fractions_last->fillAll(1.0);
+        }
+        else
+        {
+            data_mass_fractions_last->fillAll(1.0, domain);
+        }
         
         /*
          * Get the pointers to the cell data of mass fractions.
