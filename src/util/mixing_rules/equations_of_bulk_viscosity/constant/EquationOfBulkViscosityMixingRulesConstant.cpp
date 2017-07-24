@@ -1023,7 +1023,7 @@ EquationOfBulkViscosityMixingRulesConstant::getBulkViscosity(
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOBARIC);
-    TBOX_ASSERT((static_cast<int>(species_temperatures.size()) == d_num_species);
+    TBOX_ASSERT((static_cast<int>(species_temperatures.size()) == d_num_species));
     TBOX_ASSERT((static_cast<int>(volume_fractions.size()) == d_num_species) ||
                 (static_cast<int>(volume_fractions.size()) == d_num_species - 1));
 #endif

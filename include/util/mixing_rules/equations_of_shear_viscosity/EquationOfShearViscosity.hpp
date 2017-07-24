@@ -1,6 +1,8 @@
 #ifndef EQUATION_OF_SHEAR_VISCOSITY_HPP
 #define EQUATION_OF_SHEAR_VISCOSITY_HPP
 
+#include "HAMeRS_config.hpp"
+
 #include "SAMRAI/pdat/CellData.h"
 #include "SAMRAI/tbox/Dimension.h"
 

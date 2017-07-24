@@ -1474,7 +1474,7 @@ EquationOfStateMixingRulesIdealGas::computeIsochoricSpecificHeatCapacity(
         }
         else
         {
-            data_mass_fractions_last->fill(1.0, domain);
+            data_mass_fractions_last->fillAll(1.0, domain);
         }
         
         /*

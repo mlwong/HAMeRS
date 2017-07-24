@@ -158,7 +158,7 @@ EquationOfMassDiffusivityMixingRulesConstant::computeMassDiffusivities(
     TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
                 (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
     
-    TBOX_ASSERT(data_mass_diffusivities.getDepth() == d_num_species);
+    TBOX_ASSERT(data_mass_diffusivities->getDepth() == d_num_species);
 #endif
     
     if (domain.empty())
@@ -171,7 +171,7 @@ EquationOfMassDiffusivityMixingRulesConstant::computeMassDiffusivities(
     else
     {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        TBOX_ASSERT(data_bulk_viscosity->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_mass_diffusivities->getGhostBox().contains(domain));
 #endif
         for (int si = 0; si < d_num_species; si++)
         {
