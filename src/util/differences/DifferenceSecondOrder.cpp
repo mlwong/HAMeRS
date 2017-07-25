@@ -1,6 +1,6 @@
-#include "util/differences/DifferenceSecondDerivative.hpp"
+#include "util/differences/DifferenceSecondOrder.hpp"
 
-DifferenceSecondDerivative::DifferenceSecondDerivative(
+DifferenceSecondOrder::DifferenceSecondOrder(
     const std::string& object_name,
     const tbox::Dimension& dim):
         Difference(
@@ -15,15 +15,17 @@ DifferenceSecondDerivative::DifferenceSecondDerivative(
  * Compute the difference with the given cell data.
  */
 void
-DifferenceSecondDerivative::computeDifference(
+DifferenceSecondOrder::computeDifference(
     boost::shared_ptr<pdat::CellData<double> >& difference,
     const boost::shared_ptr<pdat::CellData<double> >& cell_data,
-    hier::Patch& patch,
+    const hier::Box& domain,
     const int depth)
 {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(difference);
     TBOX_ASSERT(cell_data);
     TBOX_ASSERT(depth < cell_data->getDepth());
+#endif
     
     // Declare a null pointer.
     boost::shared_ptr<pdat::CellData<double> > variable_local_mean;
@@ -32,7 +34,7 @@ DifferenceSecondDerivative::computeDifference(
         difference,
         variable_local_mean,
         cell_data,
-        patch,
+        domain,
         depth);
 }
 
@@ -41,21 +43,27 @@ DifferenceSecondDerivative::computeDifference(
  * Compute the difference and the local mean of the given cell data.
  */
 void
-DifferenceSecondDerivative::computeDifferenceWithVariableLocalMean(
+DifferenceSecondOrder::computeDifferenceWithVariableLocalMean(
     boost::shared_ptr<pdat::CellData<double> >& difference,
     boost::shared_ptr<pdat::CellData<double> >& variable_local_mean,
     const boost::shared_ptr<pdat::CellData<double> >& cell_data,
-    hier::Patch& patch,
+    const hier::Box& domain,
     const int depth)
 {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(difference);
     TBOX_ASSERT(cell_data);
     TBOX_ASSERT(depth < cell_data->getDepth());
+#endif
     
     // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = patch.getBox();
+    const hier::Box interior_box = cell_data->getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
     
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(difference->getBox().numberCells() == interior_dims);
+#endif
+
     // Get the number of ghost cells of the cell data and difference data.
     const hier::IntVector num_ghosts_cell_data = cell_data->getGhostCellWidth();
     const hier::IntVector num_ghosts_difference = difference->getGhostCellWidth();
@@ -68,33 +76,75 @@ DifferenceSecondDerivative::computeDifferenceWithVariableLocalMean(
     const hier::IntVector ghostcell_dims_difference = ghost_box_difference.numberCells();
     
     /*
-     * Check potential failures.
+     * Get the local lower indices and number of cells in each direction of the domain.
      */
     
-    if (num_ghosts_cell_data < d_num_difference_ghosts)
+    hier::IntVector domain_lo(d_dim);
+    hier::IntVector domain_dims(d_dim);
+    
+    if (domain.empty())
     {
-        TBOX_ERROR(d_object_name
-            << ": DifferenceSecondDerivative::computeDifferenceWithVariableLocalMean()\n"
-            << "The ghost cell width of cell data is smaller than required."
-            << std::endl);
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        /*
+         * Check potential failures.
+         */
+        
+        if (num_ghosts_cell_data < d_num_difference_ghosts)
+        {
+            TBOX_ERROR(d_object_name
+                << ": DifferenceSecondOrder::computeDifferenceWithVariableLocalMean()\n"
+                << "The ghost cell width of cell data is smaller than required."
+                << std::endl);
+        }
+#endif
+        
+        hier::IntVector num_ghosts_min(d_dim);
+        
+        num_ghosts_min = num_ghosts_cell_data - d_num_difference_ghosts;
+        num_ghosts_min = hier::IntVector::min(num_ghosts_difference, num_ghosts_min);
+        
+        hier::Box ghost_box = interior_box;
+        ghost_box.grow(num_ghosts_min);
+        
+        domain_lo = -num_ghosts_min;
+        domain_dims = ghost_box.numberCells();
+    }
+    else
+    {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        hier::Box shrinked_ghost_box_cell_data(ghost_box_cell_data);
+        shrinked_ghost_box_cell_data.grow(-d_num_difference_ghosts);
+        
+        TBOX_ASSERT(shrinked_ghost_box_cell_data.contains(domain));
+        TBOX_ASSERT(ghost_box_difference.contains(domain));
+#endif        
+        
+        domain_lo = domain.lower() - interior_box.lower();
+        domain_dims = domain.numberCells();
     }
     
     // Determine whether local mean is requred to be completed.
     bool compute_variable_local_mean = false;
     if (variable_local_mean)
     {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(variable_local_mean->getBox().numberCells() == interior_dims);
+#endif
+        
         compute_variable_local_mean = true;
         
         const hier::IntVector num_ghosts_local_means = variable_local_mean->getGhostCellWidth();
         
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
         if (num_ghosts_local_means != num_ghosts_difference)
         {
             TBOX_ERROR(d_object_name
-                << ": DifferenceSecondDerivative::computeDifferenceWithVariableLocalMean()\n"
+                << ": DifferenceSecondOrder::computeDifferenceWithVariableLocalMean()\n"
                 << "The number of ghost cells of variable local means doesn't match that of difference."
                 << std::endl);
         }
     }
+#endif
     
     // Get the pointer to the current depth component of the given cell data.
     double* f = cell_data->getPointer(depth);
@@ -110,7 +160,12 @@ DifferenceSecondDerivative::computeDifferenceWithVariableLocalMean(
     
     if (d_dim == tbox::Dimension(1))
     {
-        const int interior_dim_0 = interior_dims[0];
+        /*
+         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_dim_0 = domain_dims[0];
         
         const int num_ghosts_0_cell_data = num_ghosts_cell_data[0];
         const int num_ghosts_0_difference = num_ghosts_difference[0];
@@ -118,7 +173,7 @@ DifferenceSecondDerivative::computeDifferenceWithVariableLocalMean(
 #ifdef HAMERS_ENABLE_SIMD
         #pragma omp simd
 #endif
-        for (int i = 0; i < interior_dim_0; i++)
+        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
         {
             // Compute the linear indices.
             const int idx = i + num_ghosts_0_difference;
@@ -135,7 +190,7 @@ DifferenceSecondDerivative::computeDifferenceWithVariableLocalMean(
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
 #endif
-            for (int i = 0; i < interior_dim_0; i++)
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
                 const int idx = i + num_ghosts_0_difference;
@@ -150,8 +205,14 @@ DifferenceSecondDerivative::computeDifferenceWithVariableLocalMean(
     }
     else if (d_dim == tbox::Dimension(2))
     {
-        const int interior_dim_0 = interior_dims[0];
-        const int interior_dim_1 = interior_dims[1];
+        /*
+         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
         
         const int num_ghosts_0_cell_data = num_ghosts_cell_data[0];
         const int num_ghosts_1_cell_data = num_ghosts_cell_data[1];
@@ -161,13 +222,13 @@ DifferenceSecondDerivative::computeDifferenceWithVariableLocalMean(
         const int num_ghosts_1_difference = num_ghosts_difference[1];
         const int ghostcell_dim_0_difference = ghostcell_dims_difference[0];
         
-        for (int j = 0; j < interior_dim_1; j++)
+        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
         {
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
 #endif
-            for (int i = 0; i < interior_dim_0; i++)
-            {
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {        
                 // Compute the linear indices.
                 const int idx = (i + num_ghosts_0_difference) +
                     (j + num_ghosts_1_difference)*ghostcell_dim_0_difference;
@@ -196,12 +257,12 @@ DifferenceSecondDerivative::computeDifferenceWithVariableLocalMean(
         
         if (compute_variable_local_mean)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
                     const int idx = (i + num_ghosts_0_difference) +
@@ -232,9 +293,16 @@ DifferenceSecondDerivative::computeDifferenceWithVariableLocalMean(
     }
     else if (d_dim == tbox::Dimension(3))
     {
-        const int interior_dim_0 = interior_dims[0];
-        const int interior_dim_1 = interior_dims[1];
-        const int interior_dim_2 = interior_dims[2];
+        /*
+         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_lo_2 = domain_lo[2];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        const int domain_dim_2 = domain_dims[2];
         
         const int num_ghosts_0_cell_data = num_ghosts_cell_data[0];
         const int num_ghosts_1_cell_data = num_ghosts_cell_data[1];
@@ -248,14 +316,14 @@ DifferenceSecondDerivative::computeDifferenceWithVariableLocalMean(
         const int ghostcell_dim_0_difference = ghostcell_dims_difference[0];
         const int ghostcell_dim_1_difference = ghostcell_dims_difference[1];
         
-        for (int k = 0; k < interior_dim_2; k++)
+        for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
         {
-            for (int j = 0; j < interior_dim_1; j++)
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
-                for (int i = 0; i < interior_dim_0; i++)
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
                     const int idx = (i + num_ghosts_0_difference) +
@@ -309,14 +377,14 @@ DifferenceSecondDerivative::computeDifferenceWithVariableLocalMean(
         
         if (compute_variable_local_mean)
         {
-            for (int k = 0; k < interior_dim_2; k++)
+            for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
-                for (int j = 0; j < interior_dim_1; j++)
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
 #ifdef HAMERS_ENABLE_SIMD
                     #pragma omp simd
 #endif
-                    for (int i = 0; i < interior_dim_0; i++)
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
                         const int idx = (i + num_ghosts_0_difference) +

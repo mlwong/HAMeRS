@@ -1,7 +1,5 @@
 #include "util/wavelet_transform/WaveletTransformHarten.hpp"
 
-#include "SAMRAI/geom/CartesianPatchGeometry.h"
-
 #include <algorithm>
 #include <cfloat>
 

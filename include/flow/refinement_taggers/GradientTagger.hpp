@@ -6,8 +6,8 @@
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
 #include "extn/visit_data_writer/ExtendedVisItDataWriter.hpp"
 #include "flow/flow_models/FlowModels.hpp"
-#include "util/differences/DifferenceFirstDerivative.hpp"
-#include "util/differences/DifferenceSecondDerivative.hpp"
+#include "util/differences/DifferenceFirstOrder.hpp"
+#include "util/differences/DifferenceSecondOrder.hpp"
 #include "util/gradient_sensors/GradientSensorJameson.hpp"
 
 // #include "SAMRAI/appu/VisItDataWriter.h"
@@ -163,8 +163,8 @@ class GradientTagger
         /*
          * boost::shared_ptr to difference operators.
          */
-        boost::shared_ptr<DifferenceFirstDerivative> d_difference_first_derivative;
-        boost::shared_ptr<DifferenceSecondDerivative> d_difference_second_derivative;
+        boost::shared_ptr<Difference> d_difference_first_order;
+        boost::shared_ptr<Difference> d_difference_second_order;
         
         /*
          * boost::shared_ptr to GradientSensorJameson.
@@ -174,17 +174,17 @@ class GradientTagger
         /*
          * Variables, tolerances and settings for the gradient sensors.
          */
-        std::vector<std::string> d_difference_first_derivative_variables;
-        std::vector<double> d_difference_first_derivative_global_tol;
-        std::vector<double> d_difference_first_derivative_local_tol;
-        std::vector<bool> d_difference_first_derivative_uses_global_tol;
-        std::vector<bool> d_difference_first_derivative_uses_local_tol;
+        std::vector<std::string> d_difference_first_order_variables;
+        std::vector<double> d_difference_first_order_global_tol;
+        std::vector<double> d_difference_first_order_local_tol;
+        std::vector<bool> d_difference_first_order_uses_global_tol;
+        std::vector<bool> d_difference_first_order_uses_local_tol;
         
-        std::vector<std::string> d_difference_second_derivative_variables;
-        std::vector<double> d_difference_second_derivative_global_tol;
-        std::vector<double> d_difference_second_derivative_local_tol;
-        std::vector<bool> d_difference_second_derivative_uses_global_tol;
-        std::vector<bool> d_difference_second_derivative_uses_local_tol;
+        std::vector<std::string> d_difference_second_order_variables;
+        std::vector<double> d_difference_second_order_global_tol;
+        std::vector<double> d_difference_second_order_local_tol;
+        std::vector<bool> d_difference_second_order_uses_global_tol;
+        std::vector<bool> d_difference_second_order_uses_local_tol;
         
         /*
          * Variables and tolerances for the Jameson gradient sensors.
@@ -195,13 +195,13 @@ class GradientTagger
         /*
          * boost::shared_ptr to differences.
          */
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_derivative_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_derivative_total_energy;
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_derivative_pressure;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_order_density;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_order_total_energy;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_order_pressure;
         
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_derivative_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_derivative_total_energy;
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_derivative_pressure;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_order_density;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_order_total_energy;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_order_pressure;
         
         /*
          * boost::shared_ptr to values of Jameson gradient sensor.
@@ -213,21 +213,21 @@ class GradientTagger
         /*
          * Statistics of sensor values.
          */
-        double d_difference_first_derivative_max_density;
-        double d_difference_first_derivative_max_total_energy;
-        double d_difference_first_derivative_max_pressure;
+        double d_difference_first_order_max_density;
+        double d_difference_first_order_max_total_energy;
+        double d_difference_first_order_max_pressure;
         
-        double d_difference_second_derivative_max_density;
-        double d_difference_second_derivative_max_total_energy;
-        double d_difference_second_derivative_max_pressure;
+        double d_difference_second_order_max_density;
+        double d_difference_second_order_max_total_energy;
+        double d_difference_second_order_max_pressure;
         
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_derivative_local_mean_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_derivative_local_mean_total_energy;
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_derivative_local_mean_pressure;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_order_local_mean_density;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_order_local_mean_total_energy;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_first_order_local_mean_pressure;
         
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_derivative_local_mean_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_derivative_local_mean_total_energy;
-        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_derivative_local_mean_pressure;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_order_local_mean_density;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_order_local_mean_total_energy;
+        boost::shared_ptr<pdat::CellVariable<double> > d_difference_second_order_local_mean_pressure;
         
 };
 

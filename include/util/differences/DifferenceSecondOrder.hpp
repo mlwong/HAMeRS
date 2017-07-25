@@ -1,16 +1,16 @@
-#ifndef DIFFERENCE_FIRST_DERIVATIVE_HPP
-#define DIFFERENCE_FIRST_DERIVATIVE_HPP
+#ifndef DIFFERENCE_SECOND_ORDER_HPP
+#define DIFFERENCE_SECOND_ORDER_HPP
 
 #include "util/differences/Difference.hpp"
 
-class DifferenceFirstDerivative: public Difference
+class DifferenceSecondOrder: public Difference
 {
     public:
-        DifferenceFirstDerivative(
+        DifferenceSecondOrder(
             const std::string& object_name,
             const tbox::Dimension& dim);
         
-        ~DifferenceFirstDerivative() {}
+        ~DifferenceSecondOrder() {}
         
         /*
          * Compute the difference with the given cell data.
@@ -19,7 +19,7 @@ class DifferenceFirstDerivative: public Difference
         computeDifference(
             boost::shared_ptr<pdat::CellData<double> >& difference,
             const boost::shared_ptr<pdat::CellData<double> >& cell_data,
-            hier::Patch& patch,
+            const hier::Box& domain,
             const int depth = 0);
         
         /*
@@ -30,9 +30,9 @@ class DifferenceFirstDerivative: public Difference
             boost::shared_ptr<pdat::CellData<double> >& difference,
             boost::shared_ptr<pdat::CellData<double> >& variable_local_mean,
             const boost::shared_ptr<pdat::CellData<double> >& cell_data,
-            hier::Patch& patch,
+            const hier::Box& domain,
             const int depth = 0);
         
 };
 
-#endif /* DIFFERENCE_FIRST_DERIVATIVE_HPP */
+#endif /* DIFFERENCE_SECOND_ORDER_HPP */
