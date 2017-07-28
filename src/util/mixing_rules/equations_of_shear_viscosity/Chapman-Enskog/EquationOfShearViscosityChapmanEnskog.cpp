@@ -39,7 +39,7 @@ EquationOfShearViscosityChapmanEnskog::getShearViscosity(
     TBOX_ASSERT(static_cast<int>(molecular_properties.size()) >= 3);
 #endif
     
-    double mu = 0.0;
+    double mu = double(0);
     
     const double& epsilon_by_k = *(molecular_properties[0]);
     const double& sigma = *(molecular_properties[1]);
@@ -47,17 +47,17 @@ EquationOfShearViscosityChapmanEnskog::getShearViscosity(
     
     const double& T = *temperature;
     
-    const double A = 1.16145;
-    const double B = -0.14874;
-    const double C = 0.52487;
-    const double D = -0.7732;
-    const double E = 2.16178;
-    const double F = -2.43787;
+    const double A = double(1.16145);
+    const double B = double(-0.14874);
+    const double C = double(0.52487);
+    const double D = double(-0.7732);
+    const double E = double(2.16178);
+    const double F = double(-2.43787);
     
     const double T_star = T/epsilon_by_k;
     const double Omega = A*pow(T_star, B) + C*exp(D*T_star) + E*exp(F*T_star);
     
-    mu = 2.6693e-6*sqrt(M*T)/(Omega*sigma*sigma);
+    mu = double(2.6693e-6)*sqrt(M*T)/(Omega*sigma*sigma);
     
     return mu;
 }
@@ -145,12 +145,12 @@ EquationOfShearViscosityChapmanEnskog::computeShearViscosity(
     const double& sigma = *(molecular_properties[1]);
     const double& M = *(molecular_properties[2]);
     
-    const double A = 1.16145;
-    const double B = -0.14874;
-    const double C = 0.52487;
-    const double D = -0.7732;
-    const double E = 2.16178;
-    const double F = -2.43787;
+    const double A = double(1.16145);
+    const double B = double(-0.14874);
+    const double C = double(0.52487);
+    const double D = double(-0.7732);
+    const double E = double(2.16178);
+    const double F = double(-2.43787);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -176,7 +176,7 @@ EquationOfShearViscosityChapmanEnskog::computeShearViscosity(
             const double T_star = T[idx_temperature]/epsilon_by_k;
             const double Omega = A*pow(T_star, B) + C*exp(D*T_star) + E*exp(F*T_star);
             
-            mu[idx_shear_viscosity] = 2.6693e-6*sqrt(M*T[idx_temperature])/(Omega*sigma*sigma);
+            mu[idx_shear_viscosity] = double(2.6693e-6)*sqrt(M*T[idx_temperature])/(Omega*sigma*sigma);
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -215,7 +215,7 @@ EquationOfShearViscosityChapmanEnskog::computeShearViscosity(
                 const double T_star = T[idx_temperature]/epsilon_by_k;
                 const double Omega = A*pow(T_star, B) + C*exp(D*T_star) + E*exp(F*T_star);
                 
-                mu[idx_shear_viscosity] = 2.6693e-6*sqrt(M*T[idx_temperature])/(Omega*sigma*sigma);
+                mu[idx_shear_viscosity] = double(2.6693e-6)*sqrt(M*T[idx_temperature])/(Omega*sigma*sigma);
             }
         }
     }
@@ -267,7 +267,7 @@ EquationOfShearViscosityChapmanEnskog::computeShearViscosity(
                     const double T_star = T[idx_temperature]/epsilon_by_k;
                     const double Omega = A*pow(T_star, B) + C*exp(D*T_star) + E*exp(F*T_star);
                     
-                    mu[idx_shear_viscosity] = 2.6693e-6*sqrt(M*T[idx_temperature])/(Omega*sigma*sigma);
+                    mu[idx_shear_viscosity] = double(2.6693e-6)*sqrt(M*T[idx_temperature])/(Omega*sigma*sigma);
                 }
             }
         }
@@ -365,12 +365,12 @@ EquationOfShearViscosityChapmanEnskog::computeShearViscosity(
     double* sigma = data_molecular_properties->getPointer(1);
     double* M = data_molecular_properties->getPointer(2);
     
-    const double A = 1.16145;
-    const double B = -0.14874;
-    const double C = 0.52487;
-    const double D = -0.7732;
-    const double E = 2.16178;
-    const double F = -2.43787;
+    const double A = double(1.16145);
+    const double B = double(-0.14874);
+    const double C = double(0.52487);
+    const double D = double(-0.7732);
+    const double E = double(2.16178);
+    const double F = double(-2.43787);
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -398,7 +398,7 @@ EquationOfShearViscosityChapmanEnskog::computeShearViscosity(
             const double T_star = T[idx_temperature]/epsilon_by_k[idx_molecular_properties];
             const double Omega = A*pow(T_star, B) + C*exp(D*T_star) + E*exp(F*T_star);
             
-            mu[idx_shear_viscosity] = 2.6693e-6*sqrt(M[idx_molecular_properties]*T[idx_temperature])/
+            mu[idx_shear_viscosity] = double(2.6693e-6)*sqrt(M[idx_molecular_properties]*T[idx_temperature])/
                 (Omega*sigma[idx_molecular_properties]*sigma[idx_molecular_properties]);
         }
     }
@@ -445,7 +445,7 @@ EquationOfShearViscosityChapmanEnskog::computeShearViscosity(
                 const double T_star = T[idx_temperature]/epsilon_by_k[idx_molecular_properties];
                 const double Omega = A*pow(T_star, B) + C*exp(D*T_star) + E*exp(F*T_star);
                 
-                mu[idx_shear_viscosity] = 2.6693e-6*sqrt(M[idx_molecular_properties]*T[idx_temperature])/
+                mu[idx_shear_viscosity] = double(2.6693e-6)*sqrt(M[idx_molecular_properties]*T[idx_temperature])/
                     (Omega*sigma[idx_molecular_properties]*sigma[idx_molecular_properties]);
             }
         }
@@ -509,7 +509,7 @@ EquationOfShearViscosityChapmanEnskog::computeShearViscosity(
                     const double T_star = T[idx_temperature]/epsilon_by_k[idx_molecular_properties];
                     const double Omega = A*pow(T_star, B) + C*exp(D*T_star) + E*exp(F*T_star);
                     
-                    mu[idx_shear_viscosity] = 2.6693e-6*sqrt(M[idx_molecular_properties]*T[idx_temperature])/
+                    mu[idx_shear_viscosity] = double(2.6693e-6)*sqrt(M[idx_molecular_properties]*T[idx_temperature])/
                         (Omega*sigma[idx_molecular_properties]*sigma[idx_molecular_properties]);
                 }
             }

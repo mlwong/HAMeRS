@@ -18,7 +18,7 @@ EquationOfStateMixingRules::getMixtureDensity(
     }
 #endif
     
-    double rho = 0.0;
+    double rho = double(0);
     
     for (int si = 0; si < d_num_species; si++)
     {
@@ -113,7 +113,7 @@ EquationOfStateMixingRules::computeMixtureDensity(
      * Fill zeros for rho.
      */
     
-    data_mixture_density->fill(0.0, domain);
+    data_mixture_density->fill(double(0), domain);
     
     if (d_dim == tbox::Dimension(1))
     {

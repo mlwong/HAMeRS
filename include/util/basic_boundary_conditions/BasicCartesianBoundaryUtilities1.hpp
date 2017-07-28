@@ -156,7 +156,7 @@ struct BasicCartesianBoundaryUtilities1
             const std::vector<double>& bdry_node_values,
             const hier::IntVector& ghost_width_to_fill = -hier::IntVector::getOne(tbox::Dimension(1)));
         
-private:
+    private:
         static void
         read1dBdryNodes(
             BoundaryUtilityStrategy* bdry_strategy,

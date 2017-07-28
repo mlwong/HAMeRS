@@ -40,7 +40,7 @@ EquationOfStateIdealGas::getPressure(
     const double& rho = *density;
     const double& epsilon = *internal_energy;
     
-    return (gamma - 1.0)*rho*epsilon; // Return p.
+    return (gamma - double(1))*rho*epsilon; // Return p.
 }
 
 
@@ -154,7 +154,7 @@ EquationOfStateIdealGas::computePressure(
             const int idx_density = i + num_ghosts_0_density;
             const int idx_internal_energy = i + num_ghosts_0_internal_energy;
             
-            p[idx_pressure] = (gamma - 1.0)*rho[idx_density]*epsilon[idx_internal_energy];
+            p[idx_pressure] = (gamma - double(1))*rho[idx_density]*epsilon[idx_internal_energy];
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -197,7 +197,7 @@ EquationOfStateIdealGas::computePressure(
                 const int idx_internal_energy = (i + num_ghosts_0_internal_energy) +
                     (j + num_ghosts_1_internal_energy)*ghostcell_dim_0_internal_energy;
                 
-                p[idx_pressure] = (gamma - 1.0)*rho[idx_density]*epsilon[idx_internal_energy];
+                p[idx_pressure] = (gamma - double(1))*rho[idx_density]*epsilon[idx_internal_energy];
             }
         }
     }
@@ -257,7 +257,7 @@ EquationOfStateIdealGas::computePressure(
                         (k + num_ghosts_2_internal_energy)*ghostcell_dim_0_internal_energy*
                             ghostcell_dim_1_internal_energy;
                     
-                    p[idx_pressure] = (gamma - 1.0)*rho[idx_density]*epsilon[idx_internal_energy];
+                    p[idx_pressure] = (gamma - double(1))*rho[idx_density]*epsilon[idx_internal_energy];
                 }
             }
         }
@@ -384,7 +384,7 @@ EquationOfStateIdealGas::computePressure(
             const int idx_internal_energy = i + num_ghosts_0_internal_energy;
             const int idx_thermo_properties = i + num_ghosts_0_thermo_properties;
             
-            p[idx_pressure] = (gamma[idx_thermo_properties] - 1.0)*rho[idx_density]*
+            p[idx_pressure] = (gamma[idx_thermo_properties] - double(1))*rho[idx_density]*
                 epsilon[idx_internal_energy];
         }
     }
@@ -435,7 +435,7 @@ EquationOfStateIdealGas::computePressure(
                 const int idx_thermo_properties = (i + num_ghosts_0_thermo_properties) +
                     (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
                 
-                p[idx_pressure] = (gamma[idx_thermo_properties] - 1.0)*rho[idx_density]*
+                p[idx_pressure] = (gamma[idx_thermo_properties] - double(1))*rho[idx_density]*
                     epsilon[idx_internal_energy];
             }
         }
@@ -507,7 +507,7 @@ EquationOfStateIdealGas::computePressure(
                         (k + num_ghosts_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
                             ghostcell_dim_1_thermo_properties;
                     
-                    p[idx_pressure] = (gamma[idx_thermo_properties] - 1.0)*rho[idx_density]*
+                    p[idx_pressure] = (gamma[idx_thermo_properties] - double(1))*rho[idx_density]*
                         epsilon[idx_internal_energy];
                 }
             }
@@ -1028,7 +1028,7 @@ EquationOfStateIdealGas::getInternalEnergy(
     const double& rho = *density;
     const double& p = *pressure;
     
-    return p/((gamma - 1.0)*rho); // Return epsilon.
+    return p/((gamma - double(1))*rho); // Return epsilon.
 }
 
 
@@ -1142,7 +1142,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
             const int idx_density = i + num_ghosts_0_density;
             const int idx_pressure = i + num_ghosts_0_pressure;
             
-            epsilon[idx_internal_energy] = p[idx_pressure]/((gamma - 1.0)*rho[idx_density]);
+            epsilon[idx_internal_energy] = p[idx_pressure]/((gamma - double(1))*rho[idx_density]);
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -1185,7 +1185,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
                 const int idx_pressure = (i + num_ghosts_0_pressure) +
                     (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
                 
-                epsilon[idx_internal_energy] = p[idx_pressure]/((gamma - 1.0)*rho[idx_density]);
+                epsilon[idx_internal_energy] = p[idx_pressure]/((gamma - double(1))*rho[idx_density]);
             }
         }
     }
@@ -1245,7 +1245,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
                         (k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
                             ghostcell_dim_1_pressure;
                     
-                    epsilon[idx_internal_energy] = p[idx_pressure]/((gamma - 1.0)*rho[idx_density]);
+                    epsilon[idx_internal_energy] = p[idx_pressure]/((gamma - double(1))*rho[idx_density]);
                 }
             }
         }
@@ -1372,7 +1372,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
             const int idx_pressure = i + num_ghosts_0_pressure;
             const int idx_thermo_properties = i + num_ghosts_0_thermo_properties;
             
-            epsilon[idx_internal_energy] = p[idx_pressure]/((gamma[idx_thermo_properties] - 1.0)*
+            epsilon[idx_internal_energy] = p[idx_pressure]/((gamma[idx_thermo_properties] - double(1))*
                 rho[idx_density]);
         }
     }
@@ -1423,7 +1423,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
                 const int idx_thermo_properties = (i + num_ghosts_0_thermo_properties) +
                     (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
                 
-                epsilon[idx_internal_energy] = p[idx_pressure]/((gamma[idx_thermo_properties] - 1.0)*
+                epsilon[idx_internal_energy] = p[idx_pressure]/((gamma[idx_thermo_properties] - double(1))*
                     rho[idx_density]);
             }
         }
@@ -1495,7 +1495,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
                         (k + num_ghosts_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
                             ghostcell_dim_1_thermo_properties;
                     
-                    epsilon[idx_internal_energy] = p[idx_pressure]/((gamma[idx_thermo_properties] - 1.0)*
+                    epsilon[idx_internal_energy] = p[idx_pressure]/((gamma[idx_thermo_properties] - double(1))*
                         rho[idx_density]);
                 }
             }
@@ -1522,7 +1522,7 @@ EquationOfStateIdealGas::getEnthalpy(
     const double& rho = *density;
     const double& p = *pressure;
     
-    return gamma*p/((gamma - 1.0)*rho); // Return h.
+    return gamma*p/((gamma - double(1))*rho); // Return h.
 }
 
 
@@ -1636,7 +1636,7 @@ EquationOfStateIdealGas::computeEnthalpy(
             const int idx_density = i + num_ghosts_0_density;
             const int idx_pressure = i + num_ghosts_0_pressure;
             
-            h[idx_enthalpy] = gamma*p[idx_pressure]/((gamma - 1.0)*rho[idx_density]);
+            h[idx_enthalpy] = gamma*p[idx_pressure]/((gamma - double(1))*rho[idx_density]);
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -1679,7 +1679,7 @@ EquationOfStateIdealGas::computeEnthalpy(
                 const int idx_pressure = (i + num_ghosts_0_pressure) +
                     (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
                 
-                h[idx_enthalpy] = gamma*p[idx_pressure]/((gamma - 1.0)*rho[idx_density]);
+                h[idx_enthalpy] = gamma*p[idx_pressure]/((gamma - double(1))*rho[idx_density]);
             }
         }
     }
@@ -1739,7 +1739,7 @@ EquationOfStateIdealGas::computeEnthalpy(
                         (k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
                             ghostcell_dim_1_pressure;
                     
-                    h[idx_enthalpy] = gamma*p[idx_pressure]/((gamma - 1.0)*rho[idx_density]);
+                    h[idx_enthalpy] = gamma*p[idx_pressure]/((gamma - double(1))*rho[idx_density]);
                 }
             }
         }
@@ -1867,7 +1867,7 @@ EquationOfStateIdealGas::computeEnthalpy(
             const int idx_thermo_properties = i + num_ghosts_0_thermo_properties;
             
             h[idx_enthalpy] = gamma[idx_thermo_properties]*p[idx_pressure]/
-                ((gamma[idx_thermo_properties] - 1.0)*rho[idx_density]);
+                ((gamma[idx_thermo_properties] - double(1))*rho[idx_density]);
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -1918,7 +1918,7 @@ EquationOfStateIdealGas::computeEnthalpy(
                     (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
                 
                 h[idx_enthalpy] = gamma[idx_thermo_properties]*p[idx_pressure]/
-                    ((gamma[idx_thermo_properties] - 1.0)*rho[idx_density]);
+                    ((gamma[idx_thermo_properties] - double(1))*rho[idx_density]);
             }
         }
     }
@@ -1990,7 +1990,7 @@ EquationOfStateIdealGas::computeEnthalpy(
                             ghostcell_dim_1_thermo_properties;
                     
                     h[idx_enthalpy] = gamma[idx_thermo_properties]*p[idx_pressure]/
-                        ((gamma[idx_thermo_properties] - 1.0)*rho[idx_density]);
+                        ((gamma[idx_thermo_properties] - double(1))*rho[idx_density]);
                 }
             }
         }
@@ -2017,7 +2017,7 @@ EquationOfStateIdealGas::getTemperature(
     const double& rho = *density;
     const double& p = *pressure;
     
-    return p/((gamma - 1.0)*c_v*rho); // Return T.
+    return p/((gamma - double(1))*c_v*rho); // Return T.
 }
 
 
@@ -2133,7 +2133,7 @@ EquationOfStateIdealGas::computeTemperature(
             const int idx_density = i + num_ghosts_0_density;
             const int idx_pressure = i + num_ghosts_0_pressure;
             
-            T[idx_temperature] = p[idx_pressure]/((gamma - 1.0)*c_v*rho[idx_density]);
+            T[idx_temperature] = p[idx_pressure]/((gamma - double(1))*c_v*rho[idx_density]);
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -2176,7 +2176,7 @@ EquationOfStateIdealGas::computeTemperature(
                 const int idx_pressure = (i + num_ghosts_0_pressure) +
                     (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
                 
-                T[idx_temperature] = p[idx_pressure]/((gamma - 1.0)*c_v*rho[idx_density]);
+                T[idx_temperature] = p[idx_pressure]/((gamma - double(1))*c_v*rho[idx_density]);
             }
         }
     }
@@ -2236,7 +2236,7 @@ EquationOfStateIdealGas::computeTemperature(
                         (k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
                             ghostcell_dim_1_pressure;
                     
-                    T[idx_temperature] = p[idx_pressure]/((gamma - 1.0)*c_v*rho[idx_density]);
+                    T[idx_temperature] = p[idx_pressure]/((gamma - double(1))*c_v*rho[idx_density]);
                 }
             }
         }
@@ -2364,7 +2364,7 @@ EquationOfStateIdealGas::computeTemperature(
             const int idx_pressure = i + num_ghosts_0_pressure;
             const int idx_thermo_properties = i + num_ghosts_0_thermo_properties;
             
-            T[idx_temperature] = p[idx_pressure]/((gamma[idx_thermo_properties] - 1.0)*
+            T[idx_temperature] = p[idx_pressure]/((gamma[idx_thermo_properties] - double(1))*
                 c_v[idx_thermo_properties]*rho[idx_density]);
         }
     }
@@ -2415,7 +2415,7 @@ EquationOfStateIdealGas::computeTemperature(
                 const int idx_thermo_properties = (i + num_ghosts_0_thermo_properties) +
                     (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
                 
-                T[idx_temperature] = p[idx_pressure]/((gamma[idx_thermo_properties] - 1.0)*
+                T[idx_temperature] = p[idx_pressure]/((gamma[idx_thermo_properties] - double(1))*
                     c_v[idx_thermo_properties]*rho[idx_density]);
             }
         }
@@ -2487,7 +2487,7 @@ EquationOfStateIdealGas::computeTemperature(
                         (k + num_ghosts_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
                             ghostcell_dim_1_thermo_properties;
                     
-                    T[idx_temperature] = p[idx_pressure]/((gamma[idx_thermo_properties] - 1.0)*
+                    T[idx_temperature] = p[idx_pressure]/((gamma[idx_thermo_properties] - double(1))*
                         c_v[idx_thermo_properties]*rho[idx_density]);
                 }
             }
@@ -3488,7 +3488,7 @@ EquationOfStateIdealGas::getIsochoricPartialInternalEnergyPartialPressure(
     
     const double& gamma = *(thermo_properties[0]);
     
-    return 1.0/(gamma - 1.0); // Return xi.
+    return double(1)/(gamma - double(1)); // Return xi.
 }
 
 
@@ -3513,7 +3513,7 @@ EquationOfStateIdealGas::computeIsochoricPartialInternalEnergyPartialPressure(
 #endif
     
     const double& gamma = *(thermo_properties[0]);
-    const double xi = 1.0/(gamma - 1.0);
+    const double xi = double(1)/(gamma - double(1));
     
     if (domain.empty())
     {
@@ -3635,7 +3635,8 @@ EquationOfStateIdealGas::computeIsochoricPartialInternalEnergyPartialPressure(
             
             const int idx_thermo_properties = i + num_ghosts_0_thermo_properties;
             
-            xi[idx_partial_internal_energy_partial_pressure] = 1.0/(gamma[idx_thermo_properties] - 1.0);
+            xi[idx_partial_internal_energy_partial_pressure] =
+                double(1)/(gamma[idx_thermo_properties] - double(1));
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -3676,7 +3677,8 @@ EquationOfStateIdealGas::computeIsochoricPartialInternalEnergyPartialPressure(
                 const int idx_thermo_properties = (i + num_ghosts_0_thermo_properties) +
                     (j + num_ghosts_1_thermo_properties)*ghostcell_dim_0_thermo_properties;
                 
-                xi[idx_partial_internal_energy_partial_pressure] = 1.0/(gamma[idx_thermo_properties] - 1.0);
+                xi[idx_partial_internal_energy_partial_pressure] =
+                    double(1)/(gamma[idx_thermo_properties] - double(1));
             }
         }
     }
@@ -3733,7 +3735,8 @@ EquationOfStateIdealGas::computeIsochoricPartialInternalEnergyPartialPressure(
                         (k + num_ghosts_2_thermo_properties)*ghostcell_dim_0_thermo_properties*
                             ghostcell_dim_1_thermo_properties;
                     
-                    xi[idx_partial_internal_energy_partial_pressure] = 1.0/(gamma[idx_thermo_properties] - 1.0);
+                    xi[idx_partial_internal_energy_partial_pressure] =
+                        double(1)/(gamma[idx_thermo_properties] - double(1));
                 }
             }
         }
@@ -3754,7 +3757,7 @@ EquationOfStateIdealGas::getIsobaricPartialInternalEnergyPartialDensity(
     NULL_USE(pressure);
     NULL_USE(thermo_properties);
     
-    return 0.0; // Return delta.
+    return double(0); // Return delta.
 }
 
 
@@ -3779,7 +3782,7 @@ EquationOfStateIdealGas::computeIsobaricPartialInternalEnergyPartialDensity(
     
     if (domain.empty())
     {
-        data_partial_internal_energy_partial_density->fillAll(0.0);
+        data_partial_internal_energy_partial_density->fillAll(double(0));
     }
     else
     {
@@ -3787,7 +3790,7 @@ EquationOfStateIdealGas::computeIsobaricPartialInternalEnergyPartialDensity(
         TBOX_ASSERT(data_partial_internal_energy_partial_density->getGhostBox().contains(domain));
 #endif
         
-        data_partial_internal_energy_partial_density->fillAll(0.0, domain);
+        data_partial_internal_energy_partial_density->fillAll(double(0), domain);
     }
 }
 
@@ -3813,7 +3816,7 @@ EquationOfStateIdealGas::computeIsobaricPartialInternalEnergyPartialDensity(
     
     if (domain.empty())
     {
-        data_partial_internal_energy_partial_density->fillAll(0.0);
+        data_partial_internal_energy_partial_density->fillAll(double(0));
     }
     else
     {
@@ -3821,7 +3824,7 @@ EquationOfStateIdealGas::computeIsobaricPartialInternalEnergyPartialDensity(
         TBOX_ASSERT(data_partial_internal_energy_partial_density->getGhostBox().contains(domain));
 #endif
         
-        data_partial_internal_energy_partial_density->fillAll(0.0, domain);
+        data_partial_internal_energy_partial_density->fillAll(double(0), domain);
     }
 }
 

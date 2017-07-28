@@ -110,13 +110,13 @@ EquationOfStateMixingRulesIdealGas::EquationOfStateMixingRulesIdealGas(
     d_species_c_p.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
-        d_species_c_p.push_back(d_species_gamma[si]/(d_species_gamma[si] - 1.0)*d_species_R[si]);
+        d_species_c_p.push_back(d_species_gamma[si]/(d_species_gamma[si] - double(1))*d_species_R[si]);
     }
     
     d_species_c_v.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
-        d_species_c_v.push_back(1.0/(d_species_gamma[si] - 1.0)*d_species_R[si]);
+        d_species_c_v.push_back(double(1)/(d_species_gamma[si] - double(1))*d_species_R[si]);
     }
 }
 
@@ -1184,7 +1184,7 @@ EquationOfStateMixingRulesIdealGas::getIsochoricSpecificHeatCapacity(
     NULL_USE(density);
     NULL_USE(pressure);
     
-    double c_v = 0.0;
+    double c_v = double(0);
     
     if (static_cast<int>(mass_fractions.size()) == d_num_species)
     {
@@ -1195,7 +1195,7 @@ EquationOfStateMixingRulesIdealGas::getIsochoricSpecificHeatCapacity(
     }
     else if (static_cast<int>(mass_fractions.size()) == d_num_species - 1)
     {
-        double Y_last = 1.0;
+        double Y_last = double(1);
         
         for (int si = 0; si < d_num_species - 1; si++)
         {
@@ -1310,11 +1310,11 @@ EquationOfStateMixingRulesIdealGas::computeIsochoricSpecificHeatCapacity(
     
     if (domain.empty())
     {
-        data_isochoric_specific_heat_capacity->fillAll(0.0);
+        data_isochoric_specific_heat_capacity->fillAll(double(0));
     }
     else
     {
-        data_isochoric_specific_heat_capacity->fillAll(0.0, domain);
+        data_isochoric_specific_heat_capacity->fillAll(double(0), domain);
     }
     
     if (data_mass_fractions->getDepth() == d_num_species)
@@ -1470,11 +1470,11 @@ EquationOfStateMixingRulesIdealGas::computeIsochoricSpecificHeatCapacity(
         
         if (domain.empty())
         {
-            data_mass_fractions_last->fillAll(1.0);
+            data_mass_fractions_last->fillAll(double(1));
         }
         else
         {
-            data_mass_fractions_last->fillAll(1.0, domain);
+            data_mass_fractions_last->fillAll(double(1), domain);
         }
         
         /*
@@ -1722,7 +1722,7 @@ EquationOfStateMixingRulesIdealGas::getIsobaricSpecificHeatCapacity(
                 (static_cast<int>(mass_fractions.size()) == d_num_species - 1));
 #endif
     
-    double c_p = 0.0;
+    double c_p = double(0);
     
     if (static_cast<int>(mass_fractions.size()) == d_num_species)
     {
@@ -1733,7 +1733,7 @@ EquationOfStateMixingRulesIdealGas::getIsobaricSpecificHeatCapacity(
     }
     else if (static_cast<int>(mass_fractions.size()) == d_num_species - 1)
     {
-        double Y_last = 1.0;
+        double Y_last = double(1);
         
         for (int si = 0; si < d_num_species - 1; si++)
         {
@@ -1848,11 +1848,11 @@ EquationOfStateMixingRulesIdealGas::computeIsobaricSpecificHeatCapacity(
     
     if (domain.empty())
     {
-        data_isobaric_specific_heat_capacity->fillAll(0.0);
+        data_isobaric_specific_heat_capacity->fillAll(double(0));
     }
     else
     {
-        data_isobaric_specific_heat_capacity->fillAll(0.0, domain);
+        data_isobaric_specific_heat_capacity->fillAll(double(0), domain);
     }
     
     if (data_mass_fractions->getDepth() == d_num_species)
@@ -2008,11 +2008,11 @@ EquationOfStateMixingRulesIdealGas::computeIsobaricSpecificHeatCapacity(
         
         if (domain.empty())
         {
-            data_mass_fractions_last->fillAll(1.0);
+            data_mass_fractions_last->fillAll(double(1));
         }
         else
         {
-            data_mass_fractions_last->fillAll(1.0, domain);
+            data_mass_fractions_last->fillAll(double(1), domain);
         }
         
         /*
@@ -2534,8 +2534,8 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithMassFra
     double& c_p = *(mixture_thermo_properties[2]);
     double& c_v = *(mixture_thermo_properties[3]);
     
-    c_p = 0.0;
-    c_v = 0.0;
+    c_p = double(0);
+    c_v = double(0);
     
     if (static_cast<int>(mass_fractions.size()) == d_num_species)
     {
@@ -2547,7 +2547,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithMassFra
     }
     else if (static_cast<int>(mass_fractions.size()) == d_num_species - 1)
     {
-        double Y_last = 1.0;
+        double Y_last = double(1);
         
         for (int si = 0; si < d_num_species - 1; si++)
         {
@@ -2656,13 +2656,13 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMas
     
     if (domain.empty())
     {
-        data_mixture_thermo_properties->fill(0.0, 2);
-        data_mixture_thermo_properties->fill(0.0, 3);
+        data_mixture_thermo_properties->fill(double(0), 2);
+        data_mixture_thermo_properties->fill(double(0), 3);
     }
     else
     {
-        data_mixture_thermo_properties->fill(0.0, domain, 2);
-        data_mixture_thermo_properties->fill(0.0, domain, 3);
+        data_mixture_thermo_properties->fill(double(0), domain, 2);
+        data_mixture_thermo_properties->fill(double(0), domain, 3);
     }
     
     if (data_mass_fractions->getDepth() == d_num_species)
@@ -2870,11 +2870,11 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithMas
         
         if (domain.empty())
         {
-            data_mass_fractions_last->fillAll(1.0);
+            data_mass_fractions_last->fillAll(double(1));
         }
         else
         {
-            data_mass_fractions_last->fillAll(1.0, domain);
+            data_mass_fractions_last->fillAll(double(1), domain);
         }
         
         /*
@@ -3127,29 +3127,29 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeF
     
     // Get reference to gamma of mixture.
     double& gamma = *(mixture_thermo_properties[0]);
-    double xi = 0.0;
+    double xi = double(0);
     
     if (static_cast<int>(volume_fractions.size()) == d_num_species)
     {
         for (int si = 0; si < d_num_species; si++)
         {
-            xi += *(volume_fractions[si])/(d_species_gamma[si] - 1.0);
+            xi += *(volume_fractions[si])/(d_species_gamma[si] - double(1));
         }
     }
     else if (static_cast<int>(volume_fractions.size()) == d_num_species - 1)
     {
-        double Z_last = 1.0;
+        double Z_last = double(1);
         
         for (int si = 0; si < d_num_species - 1; si++)
         {
-            xi += *(volume_fractions[si])/(d_species_gamma[si] - 1.0);
+            xi += *(volume_fractions[si])/(d_species_gamma[si] - double(1));
             
             // Compute the volume fraction of the last species.
             Z_last -= *(volume_fractions[si]);
         }
         
         // Add the contribution from the last species.
-        xi += Z_last/(d_species_gamma.back() - 1.0);
+        xi += Z_last/(d_species_gamma.back() - double(1));
     }
     else
     {
@@ -3160,7 +3160,7 @@ EquationOfStateMixingRulesIdealGas::getMixtureThermodynamicPropertiesWithVolumeF
             << std::endl);
     }
     
-    gamma = 1.0/xi + 1.0;
+    gamma = double(1)/xi + double(1);
 }
 
 
@@ -3241,11 +3241,11 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
     
     if (domain.empty())
     {
-        data_mixture_thermo_properties->fill(0.0, 0);
+        data_mixture_thermo_properties->fill(double(0), 0);
     }
     else
     {
-        data_mixture_thermo_properties->fill(0.0, domain, 0);
+        data_mixture_thermo_properties->fill(double(0), domain, 0);
     }
     
     if (data_volume_fractions->getDepth() == d_num_species)
@@ -3276,7 +3276,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
             // Compute xi and store it in the data of gamma temporarily.
             for (int si = 0; si < d_num_species; si++)
             {
-                const double one_over_denominator = 1.0/(d_species_gamma[si] - 1.0);
+                const double one_over_denominator = double(1)/(d_species_gamma[si] - double(1));
                 
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
@@ -3300,7 +3300,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
                 // Compute the linear index.
                 const int idx_mixture_thermo_properties = i + num_ghosts_0_mixture_thermo_properties;
                 
-                gamma[idx_mixture_thermo_properties] = 1.0/gamma[idx_mixture_thermo_properties] + 1.0;
+                gamma[idx_mixture_thermo_properties] = double(1)/gamma[idx_mixture_thermo_properties] + double(1);
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -3325,7 +3325,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
             // Compute xi and store it in the data of gamma temporarily.
             for (int si = 0; si < d_num_species; si++)
             {
-                const double one_over_denominator = 1.0/(d_species_gamma[si] - 1.0);
+                const double one_over_denominator = double(1)/(d_species_gamma[si] - double(1));
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
@@ -3358,7 +3358,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
                     const int idx_mixture_thermo_properties = (i + num_ghosts_0_mixture_thermo_properties) +
                         (j + num_ghosts_1_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties;
                     
-                    gamma[idx_mixture_thermo_properties] = 1.0/gamma[idx_mixture_thermo_properties] + 1.0;
+                    gamma[idx_mixture_thermo_properties] = double(1)/gamma[idx_mixture_thermo_properties] + double(1);
                 }
             }
         }
@@ -3390,7 +3390,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
             // Compute xi and store it in the data of gamma temporarily.
             for (int si = 0; si < d_num_species; si++)
             {
-                const double one_over_denominator = 1.0/(d_species_gamma[si] - 1.0);
+                const double one_over_denominator = double(1)/(d_species_gamma[si] - double(1));
                 
                 for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
                 {
@@ -3434,7 +3434,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
                             (k + num_ghosts_2_mixture_thermo_properties)*ghostcell_dim_0_mixture_thermo_properties*
                                 ghostcell_dim_1_mixture_thermo_properties;
                         
-                        gamma[idx_mixture_thermo_properties] = 1.0/gamma[idx_mixture_thermo_properties] + 1.0;
+                        gamma[idx_mixture_thermo_properties] = double(1)/gamma[idx_mixture_thermo_properties] + double(1);
                     }
                 }
             }
@@ -3447,11 +3447,11 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
         
         if (domain.empty())
         {
-            data_volume_fractions_last->fillAll(1.0);
+            data_volume_fractions_last->fillAll(double(1));
         }
         else
         {
-            data_volume_fractions_last->fillAll(1.0, domain);
+            data_volume_fractions_last->fillAll(double(1), domain);
         }
         
         /*
@@ -3482,7 +3482,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
             // Compute xi and store it in the data of gamma temporarily.
             for (int si = 0; si < d_num_species - 1; si++)
             {
-                const double one_over_denominator = 1.0/(d_species_gamma[si] - 1.0);
+                const double one_over_denominator = double(1)/(d_species_gamma[si] - double(1));
                 
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
@@ -3511,8 +3511,8 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
                 const int idx_volume_fractions = i + num_ghosts_0_volume_fractions;
                 
                 gamma[idx_mixture_thermo_properties] += Z_last[idx_volume_fractions]/
-                    (d_species_gamma.back() - 1.0);
-                gamma[idx_mixture_thermo_properties] = 1.0/gamma[idx_mixture_thermo_properties] + 1.0;
+                    (d_species_gamma.back() - double(1));
+                gamma[idx_mixture_thermo_properties] = double(1)/gamma[idx_mixture_thermo_properties] + double(1);
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -3537,7 +3537,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
             // Compute xi and store it in the data of gamma temporarily.
             for (int si = 0; si < d_num_species - 1; si++)
             {
-                const double one_over_denominator = 1.0/(d_species_gamma[si] - 1.0);
+                const double one_over_denominator = double(1)/(d_species_gamma[si] - double(1));
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
@@ -3577,8 +3577,8 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
                         (j + num_ghosts_1_volume_fractions)*ghostcell_dim_0_volume_fractions;
                     
                     gamma[idx_mixture_thermo_properties] += Z_last[idx_volume_fractions]/
-                        (d_species_gamma.back() - 1.0);
-                    gamma[idx_mixture_thermo_properties] = 1.0/gamma[idx_mixture_thermo_properties] + 1.0;
+                        (d_species_gamma.back() - double(1));
+                    gamma[idx_mixture_thermo_properties] = double(1)/gamma[idx_mixture_thermo_properties] + double(1);
                 }
             }
         }
@@ -3610,7 +3610,7 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
             // Compute xi and store it in the data of gamma temporarily.
             for (int si = 0; si < d_num_species - 1; si++)
             {
-                const double one_over_denominator = 1.0/(d_species_gamma[si] - 1.0);
+                const double one_over_denominator = double(1)/(d_species_gamma[si] - double(1));
                 
                 for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
                 {
@@ -3663,8 +3663,8 @@ EquationOfStateMixingRulesIdealGas::computeMixtureThermodynamicPropertiesWithVol
                                 ghostcell_dim_1_volume_fractions;
                             
                         gamma[idx_mixture_thermo_properties] += Z_last[idx_volume_fractions]/
-                            (d_species_gamma.back() - 1.0);
-                        gamma[idx_mixture_thermo_properties] = 1.0/gamma[idx_mixture_thermo_properties] + 1.0;
+                            (d_species_gamma.back() - double(1));
+                        gamma[idx_mixture_thermo_properties] = double(1)/gamma[idx_mixture_thermo_properties] + double(1);
                     }
                 }
             }

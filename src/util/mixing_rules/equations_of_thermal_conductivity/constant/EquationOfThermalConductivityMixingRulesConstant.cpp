@@ -187,10 +187,10 @@ EquationOfThermalConductivityMixingRulesConstant::getThermalConductivity(
                 (static_cast<int>(mass_fractions.size()) == d_num_species - 1));
 #endif
     
-    double kappa = 0.0;
+    double kappa = double(0);
     
-    double num = 0.0;
-    double den = 0.0;
+    double num = double(0);
+    double den = double(0);
     
     /*
      * Initialize the container and pointers to the container for the molecular properties
@@ -233,7 +233,7 @@ EquationOfThermalConductivityMixingRulesConstant::getThermalConductivity(
     }
     else if (static_cast<int>(mass_fractions.size()) == d_num_species - 1)
     {
-        double Y_last = 1.0;
+        double Y_last = double(1);
         
         for (int si = 0; si < d_num_species - 1; si++)
         {
@@ -455,7 +455,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-                const double factor = 1.0/(sqrt(species_molecular_properties[1]));
+                const double factor = double(1)/(sqrt(species_molecular_properties[1]));
                 
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
@@ -521,7 +521,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-                const double factor = 1.0/(sqrt(species_molecular_properties[1]));
+                const double factor = double(1)/(sqrt(species_molecular_properties[1]));
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
@@ -607,7 +607,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-                const double factor = 1.0/(sqrt(species_molecular_properties[1]));
+                const double factor = double(1)/(sqrt(species_molecular_properties[1]));
                 
                 for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
                 {
@@ -671,11 +671,11 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
         
         if (domain.empty())
         {
-            data_mass_fractions_last->fillAll(1.0);
+            data_mass_fractions_last->fillAll(double(1));
         }
         else
         {
-            data_mass_fractions_last->fillAll(1.0, domain);
+            data_mass_fractions_last->fillAll(double(1), domain);
         }
         
         /*
@@ -717,7 +717,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-                const double factor = 1.0/(sqrt(species_molecular_properties[1]));
+                const double factor = double(1)/(sqrt(species_molecular_properties[1]));
                 
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
@@ -748,7 +748,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                     species_molecular_properties_const_ptr,
                     domain);
             
-            const double factor = 1.0/(sqrt(species_molecular_properties[1]));
+            const double factor = double(1)/(sqrt(species_molecular_properties[1]));
             
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
@@ -804,7 +804,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-                const double factor = 1.0/(sqrt(species_molecular_properties[1]));
+                const double factor = double(1)/(sqrt(species_molecular_properties[1]));
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
@@ -841,7 +841,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                     species_molecular_properties_const_ptr,
                     domain);
             
-            const double factor = 1.0/(sqrt(species_molecular_properties[1]));
+            const double factor = double(1)/(sqrt(species_molecular_properties[1]));
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
@@ -913,7 +913,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-                const double factor = 1.0/(sqrt(species_molecular_properties[1]));
+                const double factor = double(1)/(sqrt(species_molecular_properties[1]));
                 
                 for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
                 {
@@ -957,7 +957,7 @@ EquationOfThermalConductivityMixingRulesConstant::computeThermalConductivity(
                     species_molecular_properties_const_ptr,
                     domain);
             
-            const double factor = 1.0/(sqrt(species_molecular_properties[1]));
+            const double factor = double(1)/(sqrt(species_molecular_properties[1]));
             
             for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {

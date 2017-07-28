@@ -522,10 +522,10 @@ EquationOfBulkViscosityMixingRulesCramer::getBulkViscosity(
                 (static_cast<int>(mass_fractions.size()) == d_num_species - 1));
 #endif
     
-    double mu_v = 0.0;
+    double mu_v = double(0);
     
-    double num = 0.0;
-    double den = 0.0;
+    double num = double(0);
+    double den = double(0);
     
     /*
      * Initialize the container and pointers to the container for the molecular properties
@@ -568,7 +568,7 @@ EquationOfBulkViscosityMixingRulesCramer::getBulkViscosity(
     }
     else if (static_cast<int>(mass_fractions.size()) == d_num_species - 1)
     {
-        double Y_last = 1.0;
+        double Y_last = double(1);
         
         for (int si = 0; si < d_num_species - 1; si++)
         {
@@ -791,7 +791,7 @@ EquationOfBulkViscosityMixingRulesCramer::computeBulkViscosity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-                const double factor = 1.0/(sqrt(species_molecular_properties[7]));
+                const double factor = double(1)/(sqrt(species_molecular_properties[7]));
                 
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
@@ -857,7 +857,7 @@ EquationOfBulkViscosityMixingRulesCramer::computeBulkViscosity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-                const double factor = 1.0/(sqrt(species_molecular_properties[7]));
+                const double factor = double(1)/(sqrt(species_molecular_properties[7]));
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
@@ -943,7 +943,7 @@ EquationOfBulkViscosityMixingRulesCramer::computeBulkViscosity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-                const double factor = 1.0/(sqrt(species_molecular_properties[7]));
+                const double factor = double(1)/(sqrt(species_molecular_properties[7]));
                 
                 for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
                 {
@@ -1007,11 +1007,11 @@ EquationOfBulkViscosityMixingRulesCramer::computeBulkViscosity(
         
         if (domain.empty())
         {
-            data_mass_fractions_last->fillAll(1.0);
+            data_mass_fractions_last->fillAll(double(1));
         }
         else
         {
-            data_mass_fractions_last->fillAll(1.0, domain);
+            data_mass_fractions_last->fillAll(double(1), domain);
         }
         
         /*
@@ -1053,7 +1053,7 @@ EquationOfBulkViscosityMixingRulesCramer::computeBulkViscosity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-                const double factor = 1.0/(sqrt(species_molecular_properties[7]));
+                const double factor = double(1)/(sqrt(species_molecular_properties[7]));
                 
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
@@ -1084,7 +1084,7 @@ EquationOfBulkViscosityMixingRulesCramer::computeBulkViscosity(
                     species_molecular_properties_const_ptr,
                     domain);
             
-            const double factor = 1.0/(sqrt(species_molecular_properties[7]));
+            const double factor = double(1)/(sqrt(species_molecular_properties[7]));
             
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
@@ -1140,7 +1140,7 @@ EquationOfBulkViscosityMixingRulesCramer::computeBulkViscosity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-                const double factor = 1.0/(sqrt(species_molecular_properties[7]));
+                const double factor = double(1)/(sqrt(species_molecular_properties[7]));
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
@@ -1177,7 +1177,7 @@ EquationOfBulkViscosityMixingRulesCramer::computeBulkViscosity(
                     species_molecular_properties_const_ptr,
                     domain);
             
-            const double factor = 1.0/(sqrt(species_molecular_properties[7]));
+            const double factor = double(1)/(sqrt(species_molecular_properties[7]));
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
@@ -1249,7 +1249,7 @@ EquationOfBulkViscosityMixingRulesCramer::computeBulkViscosity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-                const double factor = 1.0/(sqrt(species_molecular_properties[7]));
+                const double factor = double(1)/(sqrt(species_molecular_properties[7]));
                 
                 for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
                 {
@@ -1293,7 +1293,7 @@ EquationOfBulkViscosityMixingRulesCramer::computeBulkViscosity(
                     species_molecular_properties_const_ptr,
                     domain);
             
-            const double factor = 1.0/(sqrt(species_molecular_properties[7]));
+            const double factor = double(1)/(sqrt(species_molecular_properties[7]));
             
             for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
@@ -1361,7 +1361,7 @@ EquationOfBulkViscosityMixingRulesCramer::getBulkViscosity(
     
     NULL_USE(mass_fractions);
     
-    double mu_v = 0.0;
+    double mu_v = double(0);
     
     /*
      * Initialize the container and pointers to the container for the molecular properties
@@ -1401,7 +1401,7 @@ EquationOfBulkViscosityMixingRulesCramer::getBulkViscosity(
     }
     else if (static_cast<int>(volume_fractions.size()) == d_num_species - 1)
     {
-        double Z_last = 1.0;
+        double Z_last = double(1);
         
         for (int si = 0; si < d_num_species - 1; si++)
         {
@@ -1581,11 +1581,11 @@ EquationOfBulkViscosityMixingRulesCramer::computeBulkViscosity(
     
     if (domain.empty())
     {
-        data_bulk_viscosity->fillAll(0.0);
+        data_bulk_viscosity->fillAll(double(0));
     }
     else
     {
-        data_bulk_viscosity->fillAll(0.0, domain);
+        data_bulk_viscosity->fillAll(double(0), domain);
     }
     
     if (data_volume_fractions->getDepth() == d_num_species)
@@ -1785,11 +1785,11 @@ EquationOfBulkViscosityMixingRulesCramer::computeBulkViscosity(
         
         if (domain.empty())
         {
-            data_volume_fractions_last->fillAll(1.0);
+            data_volume_fractions_last->fillAll(double(1));
         }
         else
         {
-            data_volume_fractions_last->fillAll(1.0, domain);
+            data_volume_fractions_last->fillAll(double(1), domain);
         }
         
         /*

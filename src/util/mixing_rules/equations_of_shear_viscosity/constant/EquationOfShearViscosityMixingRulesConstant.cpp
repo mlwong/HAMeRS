@@ -191,10 +191,10 @@ EquationOfShearViscosityMixingRulesConstant::getShearViscosity(
                 (static_cast<int>(mass_fractions.size()) == d_num_species - 1));
 #endif
     
-    double mu = 0.0;
+    double mu = double(0);
     
-    double num = 0.0;
-    double den = 0.0;
+    double num = double(0);
+    double den = double(0);
     
     /*
      * Initialize the container and pointers to the container for the molecular properties
@@ -237,7 +237,7 @@ EquationOfShearViscosityMixingRulesConstant::getShearViscosity(
     }
     else if (static_cast<int>(mass_fractions.size()) == d_num_species - 1)
     {
-        double Y_last = 1.0;
+        double Y_last = double(1);
         
         for (int si = 0; si < d_num_species - 1; si++)
         {
@@ -460,7 +460,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-                const double factor = 1.0/(sqrt(species_molecular_properties[1]));
+                const double factor = double(1)/(sqrt(species_molecular_properties[1]));
                 
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
@@ -526,7 +526,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-                const double factor = 1.0/(sqrt(species_molecular_properties[1]));
+                const double factor = double(1)/(sqrt(species_molecular_properties[1]));
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
@@ -612,7 +612,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-                const double factor = 1.0/(sqrt(species_molecular_properties[1]));
+                const double factor = double(1)/(sqrt(species_molecular_properties[1]));
                 
                 for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
                 {
@@ -676,11 +676,11 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
         
         if (domain.empty())
         {
-            data_mass_fractions_last->fillAll(1.0);
+            data_mass_fractions_last->fillAll(double(1));
         }
         else
         {
-            data_mass_fractions_last->fillAll(1.0, domain);
+            data_mass_fractions_last->fillAll(double(1), domain);
         }
         
         /*
@@ -722,7 +722,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-                const double factor = 1.0/(sqrt(species_molecular_properties[1]));
+                const double factor = double(1)/(sqrt(species_molecular_properties[1]));
                 
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
@@ -753,7 +753,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                     species_molecular_properties_const_ptr,
                     domain);
             
-            const double factor = 1.0/(sqrt(species_molecular_properties[1]));
+            const double factor = double(1)/(sqrt(species_molecular_properties[1]));
             
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
@@ -809,7 +809,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-                const double factor = 1.0/(sqrt(species_molecular_properties[1]));
+                const double factor = double(1)/(sqrt(species_molecular_properties[1]));
                 
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
@@ -846,7 +846,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                     species_molecular_properties_const_ptr,
                     domain);
             
-            const double factor = 1.0/(sqrt(species_molecular_properties[1]));
+            const double factor = double(1)/(sqrt(species_molecular_properties[1]));
             
             for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
@@ -918,7 +918,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                         species_molecular_properties_const_ptr,
                         domain);
                 
-                const double factor = 1.0/(sqrt(species_molecular_properties[1]));
+                const double factor = double(1)/(sqrt(species_molecular_properties[1]));
                 
                 for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
                 {
@@ -962,7 +962,7 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
                     species_molecular_properties_const_ptr,
                     domain);
             
-            const double factor = 1.0/(sqrt(species_molecular_properties[1]));
+            const double factor = double(1)/(sqrt(species_molecular_properties[1]));
             
             for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
@@ -1030,7 +1030,7 @@ EquationOfShearViscosityMixingRulesConstant::getShearViscosity(
     
     NULL_USE(mass_fractions);
     
-    double mu = 0.0;
+    double mu = double(0);
     
     /*
      * Initialize the container and pointers to the container for the molecular properties
@@ -1070,7 +1070,7 @@ EquationOfShearViscosityMixingRulesConstant::getShearViscosity(
     }
     else if (static_cast<int>(volume_fractions.size()) == d_num_species - 1)
     {
-        double Z_last = 1.0;
+        double Z_last = double(1);
         
         for (int si = 0; si < d_num_species - 1; si++)
         {
@@ -1250,11 +1250,11 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
     
     if (domain.empty())
     {
-        data_shear_viscosity->fillAll(0.0);
+        data_shear_viscosity->fillAll(double(0));
     }
     else
     {
-        data_shear_viscosity->fillAll(0.0, domain);
+        data_shear_viscosity->fillAll(double(0), domain);
     }
     
     if (data_volume_fractions->getDepth() == d_num_species)
@@ -1454,11 +1454,11 @@ EquationOfShearViscosityMixingRulesConstant::computeShearViscosity(
         
         if (domain.empty())
         {
-            data_volume_fractions_last->fillAll(1.0);
+            data_volume_fractions_last->fillAll(double(1));
         }
         else
         {
-            data_volume_fractions_last->fillAll(1.0, domain);
+            data_volume_fractions_last->fillAll(double(1), domain);
         }
         
         /*

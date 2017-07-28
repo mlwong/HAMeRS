@@ -267,7 +267,7 @@ struct BasicCartesianBoundaryUtilities2
             int node_loc,
             int node_btype);
         
-private:
+    private:
         static void
         read2dBdryEdges(
             BoundaryUtilityStrategy* bdry_strategy,

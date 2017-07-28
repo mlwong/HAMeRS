@@ -297,8 +297,8 @@ EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivities(
             
             for (int j = i + 1; j < d_num_species; j++)
             {
-                const int idx_ij = 0.5*(d_num_species - 1)*d_num_species -
-                    0.5*(d_num_species - 1 - i)*(d_num_species - i) +
+                const int idx_ij = (d_num_species - 1)*d_num_species/2 -
+                    (d_num_species - 1 - i)*(d_num_species - i)/2 +
                     (j - (i + 1));
                 
                 getSpeciesMolecularProperties(species_molecular_properties_ptr_j, j);
@@ -318,7 +318,7 @@ EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivities(
         std::vector<double> X;
         X.reserve(d_num_species);
         
-        double sum = 0.0;
+        double sum = double(0);
         
         if (static_cast<int>(mass_fractions.size()) == d_num_species)
         {
@@ -326,19 +326,19 @@ EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivities(
             {
                 getSpeciesMolecularProperties(species_molecular_properties_ptr_i, si);
                 X.push_back((*(mass_fractions[si]))/(species_molecular_properties_i[2]));
-                X[si] = std::max(0.0, X[si]);
+                X[si] = std::max(double(0), X[si]);
                 sum += X[si];
             }
         }
         else if (static_cast<int>(mass_fractions.size()) == d_num_species - 1)
         {
-            double Y_last = 1.0;
+            double Y_last = double(1);
             
             for (int si = 0; si < d_num_species - 1; si++)
             {
                 getSpeciesMolecularProperties(species_molecular_properties_ptr_i, si);
                 X.push_back((*(mass_fractions[si]))/(species_molecular_properties_i[2]));
-                X[si] = std::max(0.0, X[si]);
+                X[si] = std::max(double(0), X[si]);
                 sum += X[si];
                 
                 // Compute the mass fraction of the last species.
@@ -347,7 +347,7 @@ EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivities(
             
             getSpeciesMolecularProperties(species_molecular_properties_ptr_i, d_num_species - 1);
             X.push_back(Y_last/(species_molecular_properties_i[2]));
-            X[d_num_species - 1] = std::max(0.0, X[d_num_species - 1]);
+            X[d_num_species - 1] = std::max(double(0), X[d_num_species - 1]);
             sum += X[d_num_species - 1];
         }
         else
@@ -371,36 +371,36 @@ EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivities(
         for (int si = 0; si < d_num_species; si++)
         {
             double& D = *(mass_diffusivities[si]);
-            D = 0.0;
+            D = double(0);
             
             for (int sj = 0; sj < d_num_species; sj++)
             {
                 if (si != sj)
                 {
-                    int idx = 0.0;
+                    int idx = 0;
                     if (sj > si)
                     {
-                        idx = 0.5*(d_num_species - 1)*d_num_species -
-                            0.5*(d_num_species - 1 - si)*(d_num_species - si) +
+                        idx = (d_num_species - 1)*d_num_species/2 -
+                            (d_num_species - 1 - si)*(d_num_species - si)/2 +
                             (sj - (si + 1));
                     }
                     else
                     {
-                        idx = 0.5*(d_num_species - 1)*d_num_species -
-                            0.5*(d_num_species - 1 - sj)*(d_num_species - sj) +
+                        idx = (d_num_species - 1)*d_num_species/2 -
+                            (d_num_species - 1 - sj)*(d_num_species - sj)/2 +
                             (si - (sj + 1));
                     }
                     
-                    D += (X[sj] + EPSILON)/(D_ij[idx] + EPSILON);
+                    D += (X[sj] + double(EPSILON))/(D_ij[idx] + double(EPSILON));
                 }
             }
             
-            D = (1.0 - X[si] + EPSILON)/D;
+            D = (double(1) - X[si] + double(EPSILON))/D;
         }
     }
     else
     {
-        *(mass_diffusivities[0]) = 0.0;
+        *(mass_diffusivities[0]) = double(0);
     }
 }
 
@@ -439,7 +439,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
     {
         if (domain.empty())
         {
-            data_mass_diffusivities->fillAll(0.0);
+            data_mass_diffusivities->fillAll(double(0));
         }
         else
         {
@@ -447,7 +447,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
             TBOX_ASSERT(data_mass_diffusivities->getGhostBox().contains(domain));
 #endif
             
-            data_mass_diffusivities->fillAll(0.0, domain);
+            data_mass_diffusivities->fillAll(double(0), domain);
         }
         
         return;
@@ -530,11 +530,11 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
     
     if (domain.empty())
     {
-        data_sum->fillAll(0.0);
+        data_sum->fillAll(double(0));
     }
     else
     {
-        data_sum->fillAll(0.0, domain);
+        data_sum->fillAll(double(0), domain);
     }
     
     /*
@@ -568,14 +568,14 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
      */
     
     {
-        const double A = 1.06036;
-        const double B = -0.1561;
-        const double C = 0.19300;
-        const double D = -0.47635;
-        const double E = 1.03587;
-        const double F = -1.52996;
-        const double G = 1.76474;
-        const double H = -3.89411;
+        const double A = double(1.06036);
+        const double B = double(-0.1561);
+        const double C = double(0.19300);
+        const double D = double(-0.47635);
+        const double E = double(1.03587);
+        const double F = double(-1.52996);
+        const double G = double(1.76474);
+        const double H = double(-3.89411);
         
         /*
          * Initialize the containers and pointers to the containers for the molecular properties of
@@ -617,13 +617,13 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                 const double& M_j = species_molecular_properties_j[2];
                 
                 const double T_epsilon_ij = sqrt(epsilon_by_k_i*epsilon_by_k_j);
-                const double sigma_ij = 0.5*(sigma_i + sigma_j);
+                const double sigma_ij = double(1)/double(2)*(sigma_i + sigma_j);
                 const double sigma_ij_sq = sigma_ij*sigma_ij;
-                const double M_ij = 2.0/(1.0/M_i + 1.0/M_j);
+                const double M_ij = double(2)/(double(1)/M_i + double(1)/M_j);
                 const double M_ij_sqrt = sqrt(M_ij);
                 
-                const int idx_ij = 0.5*(d_num_species - 1)*d_num_species -
-                    0.5*(d_num_species - 1 - si)*(d_num_species - si) +
+                const int idx_ij = (d_num_species - 1)*d_num_species/2 -
+                    (d_num_species - 1 - si)*(d_num_species - si)/2 +
                     (sj - (si + 1));
                 
                 if (d_dim == tbox::Dimension(1))
@@ -653,7 +653,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                         const double Omega_D_ij = A*pow(T_star_ij, B) + C*exp(D*T_star_ij) + E*exp(F*T_star_ij) +
                             G*exp(H*T_star_ij);
                         
-                        D_ij[idx_ij][idx_min] = 0.0266*pow(T[idx_temperature], 1.5)/
+                        D_ij[idx_ij][idx_min] = double(0.0266)*pow(T[idx_temperature], double(3)/double(2))/
                             (Omega_D_ij*p[idx_pressure]*M_ij_sqrt*sigma_ij_sq);
                     }
                 }
@@ -701,7 +701,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                             const double Omega_D_ij = A*pow(T_star_ij, B) + C*exp(D*T_star_ij) + E*exp(F*T_star_ij) +
                                 G*exp(H*T_star_ij);
                             
-                            D_ij[idx_ij][idx_min] = 0.0266*pow(T[idx_temperature], 1.5)/
+                            D_ij[idx_ij][idx_min] = double(0.0266)*pow(T[idx_temperature], double(3)/double(2))/
                                 (Omega_D_ij*p[idx_pressure]*M_ij_sqrt*sigma_ij_sq);
                         }
                     }
@@ -766,7 +766,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                                 const double Omega_D_ij = A*pow(T_star_ij, B) + C*exp(D*T_star_ij) +
                                     E*exp(F*T_star_ij) + G*exp(H*T_star_ij);
                                 
-                                D_ij[idx_ij][idx_min] = 0.0266*pow(T[idx_temperature], 1.5)/
+                                D_ij[idx_ij][idx_min] = double(0.0266)*pow(T[idx_temperature], double(3)/double(2))/
                                     (Omega_D_ij*p[idx_pressure]*M_ij_sqrt*sigma_ij_sq);
                             }
                         }
@@ -836,7 +836,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                     const int idx_mass_fractions = i + num_ghosts_0_mass_fractions;
                     
                     X[si][idx_min] = Y[si][idx_mass_fractions]/species_molecular_properties[2];
-                    X[si][idx_min] = std::max(0.0, X[si][idx_min]);
+                    X[si][idx_min] = std::max(double(0), X[si][idx_min]);
                     sum[idx_min] += X[si][idx_min];
                 }
             }
@@ -879,7 +879,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                             (j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                         
                         X[si][idx_min] = Y[si][idx_mass_fractions]/species_molecular_properties[2];
-                        X[si][idx_min] = std::max(0.0, X[si][idx_min]);
+                        X[si][idx_min] = std::max(double(0), X[si][idx_min]);
                         sum[idx_min] += X[si][idx_min];
                     }
                 }
@@ -935,7 +935,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                                     ghostcell_dim_1_mass_fractions;
                             
                             X[si][idx_min] = Y[si][idx_mass_fractions]/species_molecular_properties[2];
-                            X[si][idx_min] = std::max(0.0, X[si][idx_min]);
+                            X[si][idx_min] = std::max(double(0), X[si][idx_min]);
                             sum[idx_min] += X[si][idx_min];
                         }
                     }
@@ -950,11 +950,11 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
         
         if (domain.empty())
         {
-            data_mass_fractions_last->fillAll(1.0);
+            data_mass_fractions_last->fillAll(double(1));
         }
         else
         {
-            data_mass_fractions_last->fillAll(1.0, domain);
+            data_mass_fractions_last->fillAll(double(1), domain);
         }
         
         /*
@@ -1013,7 +1013,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                     const int idx_mass_fractions = i + num_ghosts_0_mass_fractions;
                     
                     X[si][idx_min] = Y[si][idx_mass_fractions]/species_molecular_properties[2];
-                    X[si][idx_min] = std::max(0.0, X[si][idx_min]);
+                    X[si][idx_min] = std::max(double(0), X[si][idx_min]);
                     sum[idx_min] += X[si][idx_min];
                     
                     // Compute the mass fraction of the last species.
@@ -1033,7 +1033,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                 const int idx_mass_fractions = i + num_ghosts_0_mass_fractions;
                 
                 X[d_num_species - 1][idx_min] = Y_last[idx_mass_fractions]/species_molecular_properties[2];
-                X[d_num_species - 1][idx_min] = std::max(0.0, X[d_num_species - 1][idx_min]);
+                X[d_num_species - 1][idx_min] = std::max(double(0), X[d_num_species - 1][idx_min]);
                 sum[idx_min] += X[d_num_species - 1][idx_min];
             }
         }
@@ -1075,7 +1075,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                             (j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                         
                         X[si][idx_min] = Y[si][idx_mass_fractions]/species_molecular_properties[2];
-                        X[si][idx_min] = std::max(0.0, X[si][idx_min]);
+                        X[si][idx_min] = std::max(double(0), X[si][idx_min]);
                         sum[idx_min] += X[si][idx_min];
                         
                         // Compute the mass fraction of the last species.
@@ -1101,7 +1101,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                         (j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
                     
                     X[d_num_species - 1][idx_min] = Y_last[idx_mass_fractions]/species_molecular_properties[2];
-                    X[d_num_species - 1][idx_min] = std::max(0.0, X[d_num_species - 1][idx_min]);
+                    X[d_num_species - 1][idx_min] = std::max(double(0), X[d_num_species - 1][idx_min]);
                     sum[idx_min] += X[d_num_species - 1][idx_min];
                 }
             }
@@ -1156,7 +1156,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                                     ghostcell_dim_1_mass_fractions;
                             
                             X[si][idx_min] = Y[si][idx_mass_fractions]/species_molecular_properties[2];
-                            X[si][idx_min] = std::max(0.0, X[si][idx_min]);
+                            X[si][idx_min] = std::max(double(0), X[si][idx_min]);
                             sum[idx_min] += X[si][idx_min];
                             
                             // Compute the mass fraction of the last species.
@@ -1189,7 +1189,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                                 ghostcell_dim_1_mass_fractions;
                         
                         X[d_num_species - 1][idx_min] = Y_last[idx_mass_fractions]/species_molecular_properties[2];
-                        X[d_num_species - 1][idx_min] = std::max(0.0, X[d_num_species - 1][idx_min]);
+                        X[d_num_species - 1][idx_min] = std::max(double(0), X[d_num_species - 1][idx_min]);
                         sum[idx_min] += X[d_num_species - 1][idx_min];
                     }
                 }
@@ -1312,11 +1312,11 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
     
     if (domain.empty())
     {
-        data_mass_diffusivities->fillAll(0.0);
+        data_mass_diffusivities->fillAll(double(0));
     }
     else
     {
-        data_mass_diffusivities->fillAll(0.0, domain);
+        data_mass_diffusivities->fillAll(double(0), domain);
     }
     
     if (d_dim == tbox::Dimension(1))
@@ -1337,17 +1337,17 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
             {
                 if (si != sj)
                 {
-                    int idx_ij = 0.0;
+                    int idx_ij = 0;
                     if (sj > si)
                     {
-                        idx_ij = 0.5*(d_num_species - 1)*d_num_species -
-                            0.5*(d_num_species - 1 - si)*(d_num_species - si) +
+                        idx_ij = (d_num_species - 1)*d_num_species/2 -
+                            (d_num_species - 1 - si)*(d_num_species - si)/2 +
                             (sj - (si + 1));
                     }
                     else
                     {
-                        idx_ij = 0.5*(d_num_species - 1)*d_num_species -
-                            0.5*(d_num_species - 1 - sj)*(d_num_species - sj) +
+                        idx_ij = (d_num_species - 1)*d_num_species/2 -
+                            (d_num_species - 1 - sj)*(d_num_species - sj)/2 +
                             (si - (sj + 1));
                     }
                     
@@ -1360,8 +1360,8 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                         const int idx_mass_diffusivities = i + num_ghosts_0_mass_diffusivities;
                         const int idx_min = i + num_ghosts_0_min;
                         
-                        D[si][idx_mass_diffusivities] += (X[sj][idx_min] + EPSILON)/
-                            (D_ij[idx_ij][idx_min] + EPSILON);
+                        D[si][idx_mass_diffusivities] += (X[sj][idx_min] + double(EPSILON))/
+                            (D_ij[idx_ij][idx_min] + double(EPSILON));
                     }
                 }
             }
@@ -1375,7 +1375,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                 const int idx_mass_diffusivities = i + num_ghosts_0_mass_diffusivities;
                 const int idx_min = i + num_ghosts_0_min;
                 
-                D[si][idx_mass_diffusivities] = (1.0 - X[si][idx_min] + EPSILON)/
+                D[si][idx_mass_diffusivities] = (double(1) - X[si][idx_min] + double(EPSILON))/
                     D[si][idx_mass_diffusivities];
             }
         }
@@ -1405,17 +1405,17 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
             {
                 if (si != sj)
                 {
-                    int idx_ij = 0.0;
+                    int idx_ij = 0;
                     if (sj > si)
                     {
-                        idx_ij = 0.5*(d_num_species - 1)*d_num_species -
-                            0.5*(d_num_species - 1 - si)*(d_num_species - si) +
+                        idx_ij = (d_num_species - 1)*d_num_species/2 -
+                            (d_num_species - 1 - si)*(d_num_species - si)/2 +
                             (sj - (si + 1));
                     }
                     else
                     {
-                        idx_ij = 0.5*(d_num_species - 1)*d_num_species -
-                            0.5*(d_num_species - 1 - sj)*(d_num_species - sj) +
+                        idx_ij = (d_num_species - 1)*d_num_species/2 -
+                            (d_num_species - 1 - sj)*(d_num_species - sj)/2 +
                             (si - (sj + 1));
                     }
                     
@@ -1433,8 +1433,8 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                             const int idx_min = (i + num_ghosts_0_min) +
                                 (j + num_ghosts_1_min)*ghostcell_dim_0_min;
                             
-                            D[si][idx_mass_diffusivities] += (X[sj][idx_min] + EPSILON)/
-                                (D_ij[idx_ij][idx_min] + EPSILON);
+                            D[si][idx_mass_diffusivities] += (X[sj][idx_min] + double(EPSILON))/
+                                (D_ij[idx_ij][idx_min] + double(EPSILON));
                         }
                     }
                 }
@@ -1454,7 +1454,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                     const int idx_min = (i + num_ghosts_0_min) +
                         (j + num_ghosts_1_min)*ghostcell_dim_0_min;
                     
-                    D[si][idx_mass_diffusivities] = (1.0 - X[si][idx_min] + EPSILON)/
+                    D[si][idx_mass_diffusivities] = (double(1) - X[si][idx_min] + double(EPSILON))/
                         D[si][idx_mass_diffusivities];
                 }
             }
@@ -1491,17 +1491,17 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
             {
                 if (si != sj)
                 {
-                    int idx_ij = 0.0;
+                    int idx_ij = 0;
                     if (sj > si)
                     {
-                        idx_ij = 0.5*(d_num_species - 1)*d_num_species -
-                            0.5*(d_num_species - 1 - si)*(d_num_species - si) +
+                        idx_ij = (d_num_species - 1)*d_num_species/2 -
+                            (d_num_species - 1 - si)*(d_num_species - si)/2 +
                             (sj - (si + 1));
                     }
                     else
                     {
-                        idx_ij = 0.5*(d_num_species - 1)*d_num_species -
-                            0.5*(d_num_species - 1 - sj)*(d_num_species - sj) +
+                        idx_ij = (d_num_species - 1)*d_num_species/2 -
+                            (d_num_species - 1 - sj)*(d_num_species - sj)/2 +
                             (si - (sj + 1));
                     }
                     
@@ -1525,8 +1525,8 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                                     (k + num_ghosts_2_min)*ghostcell_dim_0_min*
                                         ghostcell_dim_1_min;
                                 
-                                D[si][idx_mass_diffusivities] += (X[sj][idx_min] + EPSILON)/
-                                    (D_ij[idx_ij][idx_min] + EPSILON);
+                                D[si][idx_mass_diffusivities] += (X[sj][idx_min] + double(EPSILON))/
+                                    (D_ij[idx_ij][idx_min] + double(EPSILON));
                             }
                         }
                     }
@@ -1553,7 +1553,7 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                             (k + num_ghosts_2_min)*ghostcell_dim_0_min*
                                 ghostcell_dim_1_min;
                         
-                        D[si][idx_mass_diffusivities] = (1.0 - X[si][idx_min] + EPSILON)/
+                        D[si][idx_mass_diffusivities] = (double(1) - X[si][idx_min] + double(EPSILON))/
                             D[si][idx_mass_diffusivities];
                     }
                 }
@@ -1598,14 +1598,14 @@ EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivity(
     TBOX_ASSERT(static_cast<int>(molecular_properties_2.size()) >= 3);
 #endif
     
-    const double A = 1.06036;
-    const double B = -0.1561;
-    const double C = 0.19300;
-    const double D = -0.47635;
-    const double E = 1.03587;
-    const double F = -1.52996;
-    const double G = 1.76474;
-    const double H = -3.89411;
+    const double A = double(1.06036);
+    const double B = double(-0.1561);
+    const double C = double(0.19300);
+    const double D = double(-0.47635);
+    const double E = double(1.03587);
+    const double F = double(-1.52996);
+    const double G = double(1.76474);
+    const double H = double(-3.89411);
     
     const double& epsilon_by_k_1 = *(molecular_properties_1[0]);
     const double& sigma_1 = *(molecular_properties_1[1]);
@@ -1616,8 +1616,8 @@ EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivity(
     const double& M_2 = *(molecular_properties_2[2]);
     
     const double T_epsilon_12 = sqrt(epsilon_by_k_1*epsilon_by_k_2);
-    const double sigma_12 = 0.5*(sigma_1 + sigma_2);
-    const double M_12 = 2.0/(1.0/M_1 + 1.0/M_2);
+    const double sigma_12 = double(1)/double(2)*(sigma_1 + sigma_2);
+    const double M_12 = double(2)/(double(1)/M_1 + double(1)/M_2);
     
     const double& p = *pressure;
     const double& T = *temperature;
@@ -1625,7 +1625,7 @@ EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivity(
     const double T_star_12 = T/T_epsilon_12;
     const double Omega_D_12 = A*pow(T_star_12, B) + C*exp(D*T_star_12) + E*exp(F*T_star_12) + G*exp(H*T_star_12);
     
-    double D_12 = 0.0266*pow(T, 1.5)/(Omega_D_12*p*sqrt(M_12)*sigma_12*sigma_12);
+    double D_12 = double(0.0266)*pow(T, double(3)/double(2))/(Omega_D_12*p*sqrt(M_12)*sigma_12*sigma_12);
     
     return D_12;
 }
