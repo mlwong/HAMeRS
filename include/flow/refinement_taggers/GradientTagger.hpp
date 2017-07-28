@@ -163,8 +163,8 @@ class GradientTagger
         /*
          * boost::shared_ptr to difference operators.
          */
-        boost::shared_ptr<Difference> d_difference_first_order;
-        boost::shared_ptr<Difference> d_difference_second_order;
+        boost::shared_ptr<DifferenceFirstOrder> d_difference_first_order;
+        boost::shared_ptr<DifferenceSecondOrder> d_difference_second_order;
         
         /*
          * boost::shared_ptr to GradientSensorJameson.

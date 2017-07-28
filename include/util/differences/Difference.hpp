@@ -3,8 +3,8 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "SAMRAI/hier/Box.h"
 #include "SAMRAI/hier/IntVector.h"
-#include "SAMRAI/hier/Patch.h"
 #include "SAMRAI/pdat/CellData.h"
 #include "SAMRAI/tbox/Dimension.h"
 
@@ -38,19 +38,11 @@ class Difference
         /*
          * Compute the difference with the given cell data.
          */
-        void
+        virtual void
         computeDifference(
             boost::shared_ptr<pdat::CellData<double> >& difference,
             const boost::shared_ptr<pdat::CellData<double> >& cell_data,
-            const int depth = 0)
-        {
-            const hier::Box empty_box(d_dim);
-            computeDifference(
-                difference,
-                cell_data,
-                empty_box,
-                depth);
-        }
+            const int depth = 0) = 0;
         
         /*
          * Compute the difference with the given cell data.
@@ -65,21 +57,12 @@ class Difference
         /*
          * Compute the difference and the local mean of the given cell data.
          */
-        void
+        virtual void
         computeDifferenceWithVariableLocalMean(
             boost::shared_ptr<pdat::CellData<double> >& difference,
             boost::shared_ptr<pdat::CellData<double> >& variable_local_mean,
             const boost::shared_ptr<pdat::CellData<double> >& cell_data,
-            const int depth = 0)
-        {
-            const hier::Box empty_box(d_dim);
-            computeDifferenceWithVariableLocalMean(
-                difference,
-                variable_local_mean,
-                cell_data,
-                empty_box,
-                depth);
-        }
+            const int depth = 0) = 0;
         
         /*
          * Compute the difference and the local mean of the given cell data.

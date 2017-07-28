@@ -7,5 +7,5 @@ set(utils_source_files
 # source files defined in utils_source_files
 add_library(utils ${utils_source_files})
 
-TARGET_LINK_LIBRARIES(utils differences gradient_sensors
+TARGET_LINK_LIBRARIES(utils derivatives differences gradient_sensors
   wavelet_transform mixing_rules basic_boundary_conditions)

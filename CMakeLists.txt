@@ -78,6 +78,7 @@ link_directories(${HAMeRS_BINARY_DIR}/algs/patch_strategy
                  ${HAMeRS_BINARY_DIR}/extn/visit_data_writer
                  ${HAMeRS_BINARY_DIR}/util
                  ${HAMeRS_BINARY_DIR}/util/basic_boundary_conditions
+                 ${HAMeRS_BINARY_DIR}/util/derivatives
                  ${HAMeRS_BINARY_DIR}/util/differences
                  ${HAMeRS_BINARY_DIR}/util/gradient_sensors
                  ${HAMeRS_BINARY_DIR}/util/mixing_rules
@@ -98,6 +99,7 @@ add_subdirectory(src/extn/patch_hierarchies)
 add_subdirectory(src/extn/visit_data_writer)
 add_subdirectory(src/util)
 add_subdirectory(src/util/basic_boundary_conditions)
+add_subdirectory(src/util/derivatives)
 add_subdirectory(src/util/differences)
 add_subdirectory(src/util/gradient_sensors)
 add_subdirectory(src/util/mixing_rules)

@@ -181,7 +181,7 @@ DifferenceFirstOrder::computeDifferenceWithVariableLocalMean(
             const int idx_cell_data_x_L = i - 1 + num_ghosts_0_cell_data;
             const int idx_cell_data_x_R = i + 1 + num_ghosts_0_cell_data;
             
-            w[idx] = fabs(0.5*(f[idx_cell_data_x_R]  - f[idx_cell_data_x_L]));
+            w[idx] = fabs(double(1)/double(2)*(f[idx_cell_data_x_R] - f[idx_cell_data_x_L]));
         }
         
         if (compute_variable_local_mean)
@@ -197,7 +197,7 @@ DifferenceFirstOrder::computeDifferenceWithVariableLocalMean(
                 const int idx_cell_data_x_L = i - 1 + num_ghosts_0_cell_data;
                 const int idx_cell_data_x_R = i + 1 + num_ghosts_0_cell_data;
                 
-                f_mean[idx] = 0.5*(f[idx_cell_data_x_R] + f[idx_cell_data_x_L]);
+                f_mean[idx] = double(1)/double(2)*(f[idx_cell_data_x_R] + f[idx_cell_data_x_L]);
             }
         }
     }
@@ -243,8 +243,8 @@ DifferenceFirstOrder::computeDifferenceWithVariableLocalMean(
                 const int idx_cell_data_y_T = (i + num_ghosts_0_cell_data) +
                     (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                 
-                double w_x = 0.5*(f[idx_cell_data_x_R] - f[idx_cell_data_x_L]);
-                double w_y = 0.5*(f[idx_cell_data_y_T] - f[idx_cell_data_y_B]);
+                double w_x = double(1)/double(2)*(f[idx_cell_data_x_R] - f[idx_cell_data_x_L]);
+                double w_y = double(1)/double(2)*(f[idx_cell_data_y_T] - f[idx_cell_data_y_B]);
                 
                 w[idx] = sqrt(w_x*w_x + w_y*w_y);
             }
@@ -275,8 +275,8 @@ DifferenceFirstOrder::computeDifferenceWithVariableLocalMean(
                     const int idx_cell_data_y_T = (i + num_ghosts_0_cell_data) +
                         (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                     
-                    double f_mean_x = 0.5*(f[idx_cell_data_x_R] + f[idx_cell_data_x_L]);
-                    double f_mean_y = 0.5*(f[idx_cell_data_y_T] + f[idx_cell_data_y_B]);
+                    double f_mean_x = double(1)/double(2)*(f[idx_cell_data_x_R] + f[idx_cell_data_x_L]);
+                    double f_mean_y = double(1)/double(2)*(f[idx_cell_data_y_T] + f[idx_cell_data_y_B]);
                     
                     f_mean[idx] = sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y);
                 }
@@ -353,9 +353,9 @@ DifferenceFirstOrder::computeDifferenceWithVariableLocalMean(
                         (k + 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
                             ghostcell_dim_1_cell_data;
                     
-                    double w_x = 0.5*(f[idx_cell_data_x_R] - f[idx_cell_data_x_L]);
-                    double w_y = 0.5*(f[idx_cell_data_y_T] - f[idx_cell_data_y_B]);
-                    double w_z = 0.5*(f[idx_cell_data_z_F] - f[idx_cell_data_z_B]);
+                    double w_x = double(1)/double(2)*(f[idx_cell_data_x_R] - f[idx_cell_data_x_L]);
+                    double w_y = double(1)/double(2)*(f[idx_cell_data_y_T] - f[idx_cell_data_y_B]);
+                    double w_z = double(1)/double(2)*(f[idx_cell_data_z_F] - f[idx_cell_data_z_B]);
                     
                     w[idx] = sqrt(w_x*w_x + w_y*w_y + w_z*w_z);
                 }
@@ -409,9 +409,9 @@ DifferenceFirstOrder::computeDifferenceWithVariableLocalMean(
                             (k + 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
                                 ghostcell_dim_1_cell_data;
                         
-                        double f_mean_x = 0.5*(f[idx_cell_data_x_R] + f[idx_cell_data_x_L]);
-                        double f_mean_y = 0.5*(f[idx_cell_data_y_T] + f[idx_cell_data_y_B]);
-                        double f_mean_z = 0.5*(f[idx_cell_data_z_F] + f[idx_cell_data_z_B]);
+                        double f_mean_x = double(1)/double(2)*(f[idx_cell_data_x_R] + f[idx_cell_data_x_L]);
+                        double f_mean_y = double(1)/double(2)*(f[idx_cell_data_y_T] + f[idx_cell_data_y_B]);
+                        double f_mean_z = double(1)/double(2)*(f[idx_cell_data_z_F] + f[idx_cell_data_z_B]);
                         
                         f_mean[idx] = sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y + f_mean_z*f_mean_z);
                     }
