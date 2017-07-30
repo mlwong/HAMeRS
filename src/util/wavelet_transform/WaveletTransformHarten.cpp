@@ -2332,8 +2332,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                         << std::endl);
                 }
             }
-        }
-        
+        }        
         
         /*
          * Compute the three-dimensional wavelet coefficients from the one-dimensional wavelet coefficients.
