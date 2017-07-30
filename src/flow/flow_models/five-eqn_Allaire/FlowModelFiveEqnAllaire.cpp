@@ -7593,385 +7593,41 @@ FlowModelFiveEqnAllaire::getDiffusiveFluxDiffusivities(
             computeGlobalCellDataSpeciesTemperaturesWithPressure();
         }
         
-        // Get the cell data of the variable volume fractions.
-        boost::shared_ptr<pdat::CellData<double> > data_volume_fractions =
-            getGlobalCellDataVolumeFractions();
-        
-        // Get the pointers to the cell data of mass fractions, pressure, species temperatures and
-        // volume fractions.
-        std::vector<double*> Y;
-        Y.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y.push_back(d_data_mass_fractions->getPointer(si));
-        }
-        double* p = d_data_pressure->getPointer(0);
-        std::vector<double*> T;
-        T.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            T.push_back(d_data_species_temperatures->getPointer(si));
-        }
-        std::vector<double*> Z;
-        Z.reserve(d_num_species - 1);
-        for (int si = 0; si < d_num_species - 1; si++)
-        {
-            Z.push_back(data_volume_fractions->getPointer(si));
-        }
-        
         /*
-         * Compute shear viscosity.
+         * Create temporary cell data of shear viscosity and bulk viscosity.
          */
         
         boost::shared_ptr<pdat::CellData<double> > data_shear_viscosity(
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_diffusivities));
         
-        double* mu = data_shear_viscosity->getPointer(0);
-        
-        if (d_dim == tbox::Dimension(1))
-        {
-            for (int i = -d_num_subghosts_diffusivities[0];
-                 i < d_interior_dims[0] + d_num_subghosts_diffusivities[0];
-                 i++)
-            {
-                // Compute the linear indices.
-                const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
-                const int idx_pressure = i + d_num_subghosts_pressure[0];
-                const int idx_species_temperatures = i + d_num_subghosts_species_temperatures[0];
-                const int idx_mass_fractions = i + d_num_subghosts_mass_fractions[0];
-                const int idx = i + d_num_ghosts[0];
-                
-                std::vector<const double*> T_ptr;
-                T_ptr.reserve(d_num_species);
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    T_ptr.push_back(&T[si][idx_species_temperatures]);
-                }
-                
-                std::vector<const double*> Y_ptr;
-                Y_ptr.reserve(d_num_species);
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    Y_ptr.push_back(&Y[si][idx_mass_fractions]);
-                }
-                
-                std::vector<const double*> Z_ptr;
-                Z_ptr.reserve(d_num_species);
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    Z_ptr.push_back(&Z[si][idx]);
-                }
-                
-                mu[idx_diffusivities] = d_equation_of_shear_viscosity_mixing_rules->
-                    getShearViscosity(
-                        &p[idx_pressure],
-                        T_ptr,
-                        Y_ptr,
-                        Z_ptr);
-            }
-        }
-        else if (d_dim == tbox::Dimension(2))
-        {
-            for (int j = -d_num_subghosts_diffusivities[1];
-                 j < d_interior_dims[1] + d_num_subghosts_diffusivities[1];
-                 j++)
-            {
-                for (int i = -d_num_subghosts_diffusivities[0];
-                     i < d_interior_dims[0] + d_num_subghosts_diffusivities[0];
-                     i++)
-                {
-                    // Compute the linear indices.
-                    const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
-                        (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0];
-                    
-                    const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                        (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
-                    
-                    const int idx_species_temperatures = (i + d_num_subghosts_species_temperatures[0]) +
-                        (j + d_num_subghosts_species_temperatures[1])*d_subghostcell_dims_species_temperatures[0];
-                    
-                    const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
-                        (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0];
-                    
-                    const int idx = (i + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
-                    
-                    std::vector<const double*> T_ptr;
-                    T_ptr.reserve(d_num_species);
-                    for (int si = 0; si < d_num_species; si++)
-                    {
-                        T_ptr.push_back(&T[si][idx_species_temperatures]);
-                    }
-                    
-                    std::vector<const double*> Y_ptr;
-                    Y_ptr.reserve(d_num_species);
-                    for (int si = 0; si < d_num_species; si++)
-                    {
-                        Y_ptr.push_back(&Y[si][idx_mass_fractions]);
-                    }
-                    
-                    std::vector<const double*> Z_ptr;
-                    Z_ptr.reserve(d_num_species);
-                    for (int si = 0; si < d_num_species; si++)
-                    {
-                        Z_ptr.push_back(&Z[si][idx]);
-                    }
-                    
-                    mu[idx_diffusivities] = d_equation_of_shear_viscosity_mixing_rules->
-                        getShearViscosity(
-                            &p[idx_pressure],
-                            T_ptr,
-                            Y_ptr,
-                            Z_ptr);
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            for (int k = -d_num_subghosts_diffusivities[2];
-                 k < d_interior_dims[2] + d_num_subghosts_diffusivities[2];
-                 k++)
-            {
-                for (int j = -d_num_subghosts_diffusivities[1];
-                     j < d_interior_dims[1] + d_num_subghosts_diffusivities[1];
-                     j++)
-                {
-                    for (int i = -d_num_subghosts_diffusivities[0];
-                         i < d_interior_dims[0] + d_num_subghosts_diffusivities[0];
-                         i++)
-                    {
-                        const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
-                            (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0] +
-                            (k + d_num_subghosts_diffusivities[2])*d_subghostcell_dims_diffusivities[0]*
-                                d_subghostcell_dims_diffusivities[1];
-                        
-                        const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                            (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
-                            (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
-                                d_subghostcell_dims_pressure[1];
-                        
-                        const int idx_species_temperatures = (i + d_num_subghosts_species_temperatures[0]) +
-                            (j + d_num_subghosts_species_temperatures[1])*d_subghostcell_dims_species_temperatures[0] +
-                            (k + d_num_subghosts_species_temperatures[2])*d_subghostcell_dims_species_temperatures[0]*
-                                d_subghostcell_dims_species_temperatures[1];
-                        
-                        const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
-                            (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0] +
-                            (k + d_num_subghosts_mass_fractions[2])*d_subghostcell_dims_mass_fractions[0]*
-                                d_subghostcell_dims_mass_fractions[1];
-                        
-                        const int idx = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
-                        
-                        std::vector<const double*> T_ptr;
-                        T_ptr.reserve(d_num_species);
-                        for (int si = 0; si < d_num_species; si++)
-                        {
-                            T_ptr.push_back(&T[si][idx_species_temperatures]);
-                        }
-                        
-                        std::vector<const double*> Y_ptr;
-                        Y_ptr.reserve(d_num_species);
-                        for (int si = 0; si < d_num_species; si++)
-                        {
-                            Y_ptr.push_back(&Y[si][idx_mass_fractions]);
-                        }
-                        
-                        std::vector<const double*> Z_ptr;
-                        Z_ptr.reserve(d_num_species);
-                        for (int si = 0; si < d_num_species; si++)
-                        {
-                            Z_ptr.push_back(&Z[si][idx]);
-                        }
-                        
-                        mu[idx_diffusivities] = d_equation_of_shear_viscosity_mixing_rules->
-                            getShearViscosity(
-                                &p[idx_pressure],
-                                T_ptr,
-                                Y_ptr,
-                                Z_ptr);
-                    }
-                }
-            }
-        }
-        
-        /*
-         * Compute bulk viscosity.
-         */
-        
         boost::shared_ptr<pdat::CellData<double> > data_bulk_viscosity(
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_diffusivities));
         
-        double* mu_v = data_bulk_viscosity->getPointer(0);
+        // Get the cell data of the variable volume fractions.
+        boost::shared_ptr<pdat::CellData<double> > data_volume_fractions =
+            getGlobalCellDataVolumeFractions();
         
-        if (d_dim == tbox::Dimension(1))
-        {
-            for (int i = -d_num_subghosts_diffusivities[0];
-                 i < d_interior_dims[0] + d_num_subghosts_diffusivities[0];
-                 i++)
-            {
-                // Compute the linear indices.
-                const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
-                const int idx_pressure = i + d_num_subghosts_pressure[0];
-                const int idx_species_temperatures = i + d_num_subghosts_species_temperatures[0];
-                const int idx_mass_fractions = i + d_num_subghosts_mass_fractions[0];
-                const int idx = i + d_num_ghosts[0];
-                
-                std::vector<const double*> T_ptr;
-                T_ptr.reserve(d_num_species);
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    T_ptr.push_back(&T[si][idx_species_temperatures]);
-                }
-                
-                std::vector<const double*> Y_ptr;
-                Y_ptr.reserve(d_num_species);
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    Y_ptr.push_back(&Y[si][idx_mass_fractions]);
-                }
-                
-                std::vector<const double*> Z_ptr;
-                Z_ptr.reserve(d_num_species);
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    Z_ptr.push_back(&Z[si][idx]);
-                }
-                
-                mu_v[idx_diffusivities] = d_equation_of_bulk_viscosity_mixing_rules->
-                    getBulkViscosity(
-                        &p[idx_pressure],
-                        T_ptr,
-                        Y_ptr,
-                        Z_ptr);
-            }
-        }
-        else if (d_dim == tbox::Dimension(2))
-        {
-            for (int j = -d_num_subghosts_diffusivities[1];
-                 j < d_interior_dims[1] + d_num_subghosts_diffusivities[1];
-                 j++)
-            {
-                for (int i = -d_num_subghosts_diffusivities[0];
-                     i < d_interior_dims[0] + d_num_subghosts_diffusivities[0];
-                     i++)
-                {
-                    // Compute the linear indices.
-                    const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
-                        (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0];
-                    
-                    const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                        (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
-                    
-                    const int idx_species_temperatures = (i + d_num_subghosts_species_temperatures[0]) +
-                        (j + d_num_subghosts_species_temperatures[1])*d_subghostcell_dims_species_temperatures[0];
-                    
-                    const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
-                        (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0];
-                    
-                    const int idx = (i + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
-                    
-                    std::vector<const double*> T_ptr;
-                    T_ptr.reserve(d_num_species);
-                    for (int si = 0; si < d_num_species; si++)
-                    {
-                        T_ptr.push_back(&T[si][idx_species_temperatures]);
-                    }
-                    
-                    std::vector<const double*> Y_ptr;
-                    Y_ptr.reserve(d_num_species);
-                    for (int si = 0; si < d_num_species; si++)
-                    {
-                        Y_ptr.push_back(&Y[si][idx_mass_fractions]);
-                    }
-                    
-                    std::vector<const double*> Z_ptr;
-                    Z_ptr.reserve(d_num_species);
-                    for (int si = 0; si < d_num_species; si++)
-                    {
-                        Z_ptr.push_back(&Z[si][idx]);
-                    }
-                    
-                    mu_v[idx_diffusivities] = d_equation_of_bulk_viscosity_mixing_rules->
-                        getBulkViscosity(
-                            &p[idx_pressure],
-                            T_ptr,
-                            Y_ptr,
-                            Z_ptr);
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            for (int k = -d_num_subghosts_diffusivities[2];
-                 k < d_interior_dims[2] + d_num_subghosts_diffusivities[2];
-                 k++)
-            {
-                for (int j = -d_num_subghosts_diffusivities[1];
-                     j < d_interior_dims[1] + d_num_subghosts_diffusivities[1];
-                     j++)
-                {
-                    for (int i = -d_num_subghosts_diffusivities[0];
-                         i < d_interior_dims[0] + d_num_subghosts_diffusivities[0];
-                         i++)
-                    {
-                        const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
-                            (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0] +
-                            (k + d_num_subghosts_diffusivities[2])*d_subghostcell_dims_diffusivities[0]*
-                                d_subghostcell_dims_diffusivities[1];
-                        
-                        const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                            (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
-                            (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
-                                d_subghostcell_dims_pressure[1];
-                        
-                        const int idx_species_temperatures = (i + d_num_subghosts_species_temperatures[0]) +
-                            (j + d_num_subghosts_species_temperatures[1])*d_subghostcell_dims_species_temperatures[0] +
-                            (k + d_num_subghosts_species_temperatures[2])*d_subghostcell_dims_species_temperatures[0]*
-                                d_subghostcell_dims_species_temperatures[1];
-                        
-                        const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
-                            (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0] +
-                            (k + d_num_subghosts_mass_fractions[2])*d_subghostcell_dims_mass_fractions[0]*
-                                d_subghostcell_dims_mass_fractions[1];
-                        
-                        const int idx = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
-                        
-                        std::vector<const double*> T_ptr;
-                        T_ptr.reserve(d_num_species);
-                        for (int si = 0; si < d_num_species; si++)
-                        {
-                            T_ptr.push_back(&T[si][idx_species_temperatures]);
-                        }
-                        
-                        std::vector<const double*> Y_ptr;
-                        Y_ptr.reserve(d_num_species);
-                        for (int si = 0; si < d_num_species; si++)
-                        {
-                            Y_ptr.push_back(&Y[si][idx_mass_fractions]);
-                        }
-                        
-                        std::vector<const double*> Z_ptr;
-                        Z_ptr.reserve(d_num_species);
-                        for (int si = 0; si < d_num_species; si++)
-                        {
-                            Z_ptr.push_back(&Z[si][idx]);
-                        }
-                        
-                        mu_v[idx_diffusivities] = d_equation_of_bulk_viscosity_mixing_rules->
-                            getBulkViscosity(
-                                &p[idx_pressure],
-                                T_ptr,
-                                Y_ptr,
-                                Z_ptr);
-                    }
-                }
-            }
-        }
+        // Get the pointers to the cell data of shear viscosity and bulk viscosity.
+        double* mu    = data_shear_viscosity->getPointer(0);
+        double* mu_v  = data_bulk_viscosity->getPointer(0);
+        
+        // Compute the shear viscosity field.
+        d_equation_of_shear_viscosity_mixing_rules->computeShearViscosity(
+            data_shear_viscosity,
+            d_data_pressure,
+            d_data_species_temperatures,
+            d_data_mass_fractions,
+            data_volume_fractions,
+            d_subghost_box_diffusivities);
+        
+        // Compute the bulk viscosity field.
+        d_equation_of_bulk_viscosity_mixing_rules->computeBulkViscosity(
+            data_bulk_viscosity,
+            d_data_pressure,
+            d_data_species_temperatures,
+            d_data_mass_fractions,
+            data_volume_fractions,
+            d_subghost_box_diffusivities);
         
         if (d_dim == tbox::Dimension(1))
         {
@@ -13225,29 +12881,40 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxDiffusivityWithDensityMassFract
         boost::shared_ptr<pdat::CellData<double> > data_volume_fractions =
             getGlobalCellDataVolumeFractions();
         
-        // Get the pointers to the cell data of maximum diffusivity, density, mass fractions, pressure,
-        // species temperatures and volume fractions.
+        /*
+         * Create temporary cell data of shear viscosity and bulk viscosity.
+         */
+        
+        boost::shared_ptr<pdat::CellData<double> > data_shear_viscosity(
+            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
+        
+        boost::shared_ptr<pdat::CellData<double> > data_bulk_viscosity(
+            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
+        
+        // Get the pointers to the cell data of maximum diffusivity, density, shear viscosity and
+        // bulk viscosity.
         double* D_max = d_data_max_diffusivity->getPointer(0);
-        double* rho = d_data_density->getPointer(0);
-        std::vector<double*> Y;
-        Y.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y.push_back(d_data_mass_fractions->getPointer(si));
-        }
-        double* p = d_data_pressure->getPointer(0);
-        std::vector<double*> T;
-        T.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            T.push_back(d_data_species_temperatures->getPointer(si));
-        }
-        std::vector<double*> Z;
-        Z.reserve(d_num_species - 1);
-        for (int si = 0; si < d_num_species - 1; si++)
-        {
-            Z.push_back(data_volume_fractions->getPointer(si));
-        }
+        double* rho   = d_data_density->getPointer(0);
+        double* mu    = data_shear_viscosity->getPointer(0);
+        double* mu_v  = data_bulk_viscosity->getPointer(0);
+        
+        // Compute the shear viscosity field.
+        d_equation_of_shear_viscosity_mixing_rules->computeShearViscosity(
+            data_shear_viscosity,
+            d_data_pressure,
+            d_data_species_temperatures,
+            d_data_mass_fractions,
+            data_volume_fractions,
+            d_subghost_box_max_diffusivity);
+        
+        // Compute the bulk viscosity field.
+        d_equation_of_bulk_viscosity_mixing_rules->computeBulkViscosity(
+            data_bulk_viscosity,
+            d_data_pressure,
+            d_data_species_temperatures,
+            d_data_mass_fractions,
+            data_volume_fractions,
+            d_subghost_box_max_diffusivity);
         
         if (d_dim == tbox::Dimension(1))
         {
@@ -13256,49 +12923,11 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxDiffusivityWithDensityMassFract
                  i++)
             {
                 // Compute the linear indices.
-                const int idx = i + d_num_ghosts[0];
                 const int idx_max_diffusivity = i + d_num_subghosts_max_diffusivity[0];
                 const int idx_density = i + d_num_subghosts_density[0];
-                const int idx_mass_fractions = i + d_num_subghosts_mass_fractions[0];
-                const int idx_pressure = i + d_num_subghosts_pressure[0];
-                const int idx_species_temperatures = i + d_num_subghosts_species_temperatures[0];
                 
-                std::vector<const double*> T_ptr;
-                T_ptr.reserve(d_num_species);
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    T_ptr.push_back(&T[si][idx_species_temperatures]);
-                }
-                
-                std::vector<const double*> Y_ptr;
-                Y_ptr.reserve(d_num_species);
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    Y_ptr.push_back(&Y[si][idx_mass_fractions]);
-                }
-                
-                std::vector<const double*> Z_ptr;
-                Z_ptr.reserve(d_num_species);
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    Z_ptr.push_back(&Z[si][idx]);
-                }
-                
-                const double mu = d_equation_of_shear_viscosity_mixing_rules->
-                    getShearViscosity(
-                        &p[idx_pressure],
-                        T_ptr,
-                        Y_ptr,
-                        Z_ptr);
-                
-                const double mu_v = d_equation_of_bulk_viscosity_mixing_rules->
-                    getBulkViscosity(
-                        &p[idx_pressure],
-                        T_ptr,
-                        Y_ptr,
-                        Z_ptr);
-                
-                D_max[idx_max_diffusivity] = fmax(mu/rho[idx_density], mu_v/rho[idx_density]);
+                D_max[idx_max_diffusivity] = fmax(mu[idx_max_diffusivity]/rho[idx_density],
+                    mu_v[idx_max_diffusivity]/rho[idx_density]);
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -13312,60 +12941,14 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxDiffusivityWithDensityMassFract
                      i++)
                 {
                     // Compute the linear indices.
-                    const int idx = (i + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
-                    
                     const int idx_max_diffusivity = (i + d_num_subghosts_max_diffusivity[0]) +
                         (j + d_num_subghosts_max_diffusivity[1])*d_subghostcell_dims_max_diffusivity[0];
                     
                     const int idx_density = (i + d_num_subghosts_density[0]) +
                         (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
                     
-                    const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
-                        (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0];
-                    
-                    const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                        (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
-                    
-                    const int idx_species_temperatures = (i + d_num_subghosts_species_temperatures[0]) +
-                        (j + d_num_subghosts_species_temperatures[1])*d_subghostcell_dims_species_temperatures[0];
-                    
-                    std::vector<const double*> T_ptr;
-                    T_ptr.reserve(d_num_species);
-                    for (int si = 0; si < d_num_species; si++)
-                    {
-                        T_ptr.push_back(&T[si][idx_species_temperatures]);
-                    }
-                    
-                    std::vector<const double*> Y_ptr;
-                    Y_ptr.reserve(d_num_species);
-                    for (int si = 0; si < d_num_species; si++)
-                    {
-                        Y_ptr.push_back(&Y[si][idx_mass_fractions]);
-                    }
-                    
-                    std::vector<const double*> Z_ptr;
-                    Z_ptr.reserve(d_num_species);
-                    for (int si = 0; si < d_num_species; si++)
-                    {
-                        Z_ptr.push_back(&Z[si][idx]);
-                    }
-                    
-                    const double mu = d_equation_of_shear_viscosity_mixing_rules->
-                        getShearViscosity(
-                            &p[idx_pressure],
-                            T_ptr,
-                            Y_ptr,
-                            Z_ptr);
-                    
-                    const double mu_v = d_equation_of_bulk_viscosity_mixing_rules->
-                        getBulkViscosity(
-                            &p[idx_pressure],
-                            T_ptr,
-                            Y_ptr,
-                            Z_ptr);
-                    
-                    D_max[idx_max_diffusivity] = fmax(mu/rho[idx_density], mu_v/rho[idx_density]);
+                    D_max[idx_max_diffusivity] = fmax(mu[idx_max_diffusivity]/rho[idx_density],
+                        mu_v[idx_max_diffusivity]/rho[idx_density]);
                 }
             }
         }
@@ -13384,10 +12967,6 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxDiffusivityWithDensityMassFract
                          i++)
                     {
                         // Compute the linear indices.
-                        const int idx = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
-                        
                         const int idx_max_diffusivity = (i + d_num_subghosts_max_diffusivity[0]) +
                             (j + d_num_subghosts_max_diffusivity[1])*d_subghostcell_dims_max_diffusivity[0] +
                             (k + d_num_subghosts_max_diffusivity[2])*d_subghostcell_dims_max_diffusivity[0]*
@@ -13398,57 +12977,8 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxDiffusivityWithDensityMassFract
                             (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
                                 d_subghostcell_dims_density[1];
                         
-                        const int idx_mass_fractions = (i + d_num_subghosts_mass_fractions[0]) +
-                            (j + d_num_subghosts_mass_fractions[1])*d_subghostcell_dims_mass_fractions[0] +
-                            (k + d_num_subghosts_mass_fractions[2])*d_subghostcell_dims_mass_fractions[0]*
-                                d_subghostcell_dims_mass_fractions[1];
-                        
-                        const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                            (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
-                            (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
-                                d_subghostcell_dims_pressure[1];
-                        
-                        const int idx_species_temperatures = (i + d_num_subghosts_species_temperatures[0]) +
-                            (j + d_num_subghosts_species_temperatures[1])*d_subghostcell_dims_species_temperatures[0] +
-                            (k + d_num_subghosts_species_temperatures[2])*d_subghostcell_dims_species_temperatures[0]*
-                                d_subghostcell_dims_species_temperatures[1];
-                        
-                        std::vector<const double*> T_ptr;
-                        T_ptr.reserve(d_num_species);
-                        for (int si = 0; si < d_num_species; si++)
-                        {
-                            T_ptr.push_back(&T[si][idx_species_temperatures]);
-                        }
-                        
-                        std::vector<const double*> Y_ptr;
-                        Y_ptr.reserve(d_num_species);
-                        for (int si = 0; si < d_num_species; si++)
-                        {
-                            Y_ptr.push_back(&Y[si][idx_mass_fractions]);
-                        }
-                        
-                        std::vector<const double*> Z_ptr;
-                        Z_ptr.reserve(d_num_species);
-                        for (int si = 0; si < d_num_species; si++)
-                        {
-                            Z_ptr.push_back(&Z[si][idx]);
-                        }
-                        
-                        const double mu = d_equation_of_shear_viscosity_mixing_rules->
-                            getShearViscosity(
-                                &p[idx_pressure],
-                                T_ptr,
-                                Y_ptr,
-                                Z_ptr);
-                        
-                        const double mu_v = d_equation_of_bulk_viscosity_mixing_rules->
-                            getBulkViscosity(
-                                &p[idx_pressure],
-                                T_ptr,
-                                Y_ptr,
-                                Z_ptr);
-                        
-                        D_max[idx_max_diffusivity] = fmax(mu/rho[idx_density], mu_v/rho[idx_density]);
+                        D_max[idx_max_diffusivity] = fmax(mu[idx_max_diffusivity]/rho[idx_density],
+                            mu_v[idx_max_diffusivity]/rho[idx_density]);
                     }
                 }
             }

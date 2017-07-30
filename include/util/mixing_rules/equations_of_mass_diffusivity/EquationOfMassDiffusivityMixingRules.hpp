@@ -57,6 +57,25 @@ class EquationOfMassDiffusivityMixingRules
         /*
          * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibria assumptions.
          */
+        void
+        computeMassDiffusivities(
+            boost::shared_ptr<pdat::CellData<double> >& data_mass_diffusivities,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeMassDiffusivities(
+                data_mass_diffusivities,
+                data_pressure,
+                data_temperature,
+                data_mass_fractions,
+                empty_box);
+        }
+        
+        /*
+         * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibria assumptions.
+         */
         virtual void
         computeMassDiffusivities(
             boost::shared_ptr<pdat::CellData<double> >& data_mass_diffusivities,

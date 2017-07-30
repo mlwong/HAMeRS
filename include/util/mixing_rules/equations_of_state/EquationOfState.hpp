@@ -539,6 +539,25 @@ class EquationOfState
         /*
          * Compute the density.
          */
+        void
+        computeDensity(
+            boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const std::vector<const double*>& thermo_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeDensity(
+                data_density,
+                data_pressure,
+                data_temperature,
+                thermo_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the density.
+         */
         virtual void
         computeDensity(
             boost::shared_ptr<pdat::CellData<double> >& data_density,

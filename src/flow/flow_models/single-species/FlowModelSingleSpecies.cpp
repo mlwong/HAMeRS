@@ -5106,9 +5106,23 @@ FlowModelSingleSpecies::getDiffusiveFluxDiffusivities(
             computeGlobalCellDataTemperatureWithPressure();
         }
         
-        // Get the pointers to the cell data of pressure and temperature.
-        double* p = d_data_pressure->getPointer(0);
-        double* T = d_data_temperature->getPointer(0);
+        /*
+         * Create temporary cell data of shear viscosity, bulk viscosity and thermal conductivity.
+         */
+        
+        boost::shared_ptr<pdat::CellData<double> > data_shear_viscosity(
+            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_diffusivities));
+        
+        boost::shared_ptr<pdat::CellData<double> > data_bulk_viscosity(
+            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_diffusivities));
+        
+        boost::shared_ptr<pdat::CellData<double> > data_thermal_conductivity(
+            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_diffusivities));
+        
+        // Get the pointers to the cell data of shear viscosity, bulk viscosity and thermal conductivity.
+        double* mu    = data_shear_viscosity->getPointer(0);
+        double* mu_v  = data_bulk_viscosity->getPointer(0);
+        double* kappa = data_thermal_conductivity->getPointer(0);
         
         // Get the molecular properties of the species for shear viscosity.
         std::vector<const double*> molecular_properties_shear_viscosity_ptr;
@@ -5140,296 +5154,32 @@ FlowModelSingleSpecies::getDiffusiveFluxDiffusivities(
                 &d_molecular_properties_thermal_conductivity[ti]);
         }
         
-        /*
-         * Compute shear viscosity.
-         */
+        // Compute the shear viscosity field.
+        d_equation_of_shear_viscosity_mixing_rules->getEquationOfShearViscosity()->
+            computeShearViscosity(
+                data_shear_viscosity,
+                d_data_pressure,
+                d_data_temperature,
+                molecular_properties_shear_viscosity_ptr,
+                d_subghost_box_diffusivities);
         
-        boost::shared_ptr<pdat::CellData<double> > data_shear_viscosity(
-            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_diffusivities));
+        // Compute the bulk viscosity field.
+        d_equation_of_bulk_viscosity_mixing_rules->getEquationOfBulkViscosity()->
+            computeBulkViscosity(
+                data_bulk_viscosity,
+                d_data_pressure,
+                d_data_temperature,
+                molecular_properties_bulk_viscosity_ptr,
+                d_subghost_box_diffusivities);
         
-        double* mu = data_shear_viscosity->getPointer(0);
-        
-        if (d_dim == tbox::Dimension(1))
-        {
-            for (int i = -d_num_subghosts_diffusivities[0];
-                 i < d_interior_dims[0] + d_num_subghosts_diffusivities[0];
-                 i++)
-            {
-                // Compute the linear indices.
-                const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
-                const int idx_pressure = i + d_num_subghosts_pressure[0];
-                const int idx_temperature = i + d_num_subghosts_temperature[0];
-                
-                mu[idx_diffusivities] = d_equation_of_shear_viscosity_mixing_rules->
-                    getEquationOfShearViscosity()->
-                        getShearViscosity(
-                            &p[idx_pressure],
-                            &T[idx_temperature],
-                            molecular_properties_shear_viscosity_ptr);
-            }
-        }
-        else if (d_dim == tbox::Dimension(2))
-        {
-            for (int j = -d_num_subghosts_diffusivities[1];
-                 j < d_interior_dims[1] + d_num_subghosts_diffusivities[1];
-                 j++)
-            {
-                for (int i = -d_num_subghosts_diffusivities[0];
-                     i < d_interior_dims[0] + d_num_subghosts_diffusivities[0];
-                     i++)
-                {
-                    // Compute the linear indices.
-                    const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
-                        (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0];
-                    
-                    const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                        (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
-                    
-                    const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                        (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0];
-                    
-                    mu[idx_diffusivities] = d_equation_of_shear_viscosity_mixing_rules->
-                        getEquationOfShearViscosity()->
-                            getShearViscosity(
-                                &p[idx_pressure],
-                                &T[idx_temperature],
-                                molecular_properties_shear_viscosity_ptr);
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            for (int k = -d_num_subghosts_diffusivities[2];
-                 k < d_interior_dims[2] + d_num_subghosts_diffusivities[2];
-                 k++)
-            {
-                for (int j = -d_num_subghosts_diffusivities[1];
-                     j < d_interior_dims[1] + d_num_subghosts_diffusivities[1];
-                     j++)
-                {
-                    for (int i = -d_num_subghosts_diffusivities[0];
-                         i < d_interior_dims[0] + d_num_subghosts_diffusivities[0];
-                         i++)
-                    {
-                        const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
-                            (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0] +
-                            (k + d_num_subghosts_diffusivities[2])*d_subghostcell_dims_diffusivities[0]*
-                                d_subghostcell_dims_diffusivities[1];
-                        
-                        const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                            (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
-                            (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
-                                d_subghostcell_dims_pressure[1];
-                        
-                        const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                            (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0] +
-                            (k + d_num_subghosts_temperature[2])*d_subghostcell_dims_temperature[0]*
-                                d_subghostcell_dims_temperature[1];
-                        
-                        mu[idx_diffusivities] = d_equation_of_shear_viscosity_mixing_rules->
-                            getEquationOfShearViscosity()->
-                                getShearViscosity(
-                                    &p[idx_pressure],
-                                    &T[idx_temperature],
-                                    molecular_properties_shear_viscosity_ptr);
-                    }
-                }
-            }
-        }
-        
-        /*
-         * Compute bulk viscosity.
-         */
-        
-        boost::shared_ptr<pdat::CellData<double> > data_bulk_viscosity(
-            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_diffusivities));
-        
-        double* mu_v = data_bulk_viscosity->getPointer(0);
-        
-        if (d_dim == tbox::Dimension(1))
-        {
-            for (int i = -d_num_subghosts_diffusivities[0];
-                 i < d_interior_dims[0] + d_num_subghosts_diffusivities[0];
-                 i++)
-            {
-                // Compute the linear indices.
-                const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
-                const int idx_pressure = i + d_num_subghosts_pressure[0];
-                const int idx_temperature = i + d_num_subghosts_temperature[0];
-                
-                mu_v[idx_diffusivities] = d_equation_of_bulk_viscosity_mixing_rules->
-                    getEquationOfBulkViscosity()->
-                        getBulkViscosity(
-                            &p[idx_pressure],
-                            &T[idx_temperature],
-                            molecular_properties_bulk_viscosity_ptr);
-            }
-        }
-        else if (d_dim == tbox::Dimension(2))
-        {
-            for (int j = -d_num_subghosts_diffusivities[1];
-                 j < d_interior_dims[1] + d_num_subghosts_diffusivities[1];
-                 j++)
-            {
-                for (int i = -d_num_subghosts_diffusivities[0];
-                     i < d_interior_dims[0] + d_num_subghosts_diffusivities[0];
-                     i++)
-                {
-                    // Compute the linear indices.
-                    const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
-                        (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0];
-                    
-                    const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                        (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
-                    
-                    const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                        (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0];
-                    
-                    mu_v[idx_diffusivities] = d_equation_of_bulk_viscosity_mixing_rules->
-                        getEquationOfBulkViscosity()->
-                            getBulkViscosity(
-                                &p[idx_pressure],
-                                &T[idx_temperature],
-                                molecular_properties_bulk_viscosity_ptr);
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            for (int k = -d_num_subghosts_diffusivities[2];
-                 k < d_interior_dims[2] + d_num_subghosts_diffusivities[2];
-                 k++)
-            {
-                for (int j = -d_num_subghosts_diffusivities[1];
-                     j < d_interior_dims[1] + d_num_subghosts_diffusivities[1];
-                     j++)
-                {
-                    for (int i = -d_num_subghosts_diffusivities[0];
-                         i < d_interior_dims[0] + d_num_subghosts_diffusivities[0];
-                         i++)
-                    {
-                        const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
-                            (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0] +
-                            (k + d_num_subghosts_diffusivities[2])*d_subghostcell_dims_diffusivities[0]*
-                                d_subghostcell_dims_diffusivities[1];
-                        
-                        const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                            (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
-                            (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
-                                d_subghostcell_dims_pressure[1];
-                        
-                        const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                            (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0] +
-                            (k + d_num_subghosts_temperature[2])*d_subghostcell_dims_temperature[0]*
-                                d_subghostcell_dims_temperature[1];
-                        
-                        mu_v[idx_diffusivities] = d_equation_of_bulk_viscosity_mixing_rules->
-                            getEquationOfBulkViscosity()->
-                                getBulkViscosity(
-                                    &p[idx_pressure],
-                                    &T[idx_temperature],
-                                    molecular_properties_bulk_viscosity_ptr);
-                    }
-                }
-            }
-        }
-        
-        /*
-         * Compute thermal conductivity.
-         */
-        
-        boost::shared_ptr<pdat::CellData<double> > data_thermal_conductivity(new pdat::CellData<double>(
-            d_interior_box, 1, d_num_subghosts_diffusivities));
-        
-        double* kappa = data_thermal_conductivity->getPointer(0);
-        
-        if (d_dim == tbox::Dimension(1))
-        {
-            for (int i = -d_num_subghosts_diffusivities[0];
-                 i < d_interior_dims[0] + d_num_subghosts_diffusivities[0];
-                 i++)
-            {
-                // Compute the linear indices.
-                const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
-                const int idx_pressure = i + d_num_subghosts_pressure[0];
-                const int idx_temperature = i + d_num_subghosts_temperature[0];
-                
-                kappa[idx_diffusivities] = d_equation_of_thermal_conductivity_mixing_rules->
-                    getEquationOfThermalConductivity()->
-                        getThermalConductivity(
-                            &p[idx_pressure],
-                            &T[idx_temperature],
-                            molecular_properties_thermal_conductivity_ptr);
-            }
-        }
-        else if (d_dim == tbox::Dimension(2))
-        {
-            for (int j = -d_num_subghosts_diffusivities[1];
-                 j < d_interior_dims[1] + d_num_subghosts_diffusivities[1];
-                 j++)
-            {
-                for (int i = -d_num_subghosts_diffusivities[0];
-                     i < d_interior_dims[0] + d_num_subghosts_diffusivities[0];
-                     i++)
-                {
-                    // Compute the linear indices.
-                    const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
-                        (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0];
-                    
-                    const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                        (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
-                    
-                    const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                        (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0];
-                    
-                    kappa[idx_diffusivities] = d_equation_of_thermal_conductivity_mixing_rules->
-                        getEquationOfThermalConductivity()->
-                            getThermalConductivity(
-                                &p[idx_pressure],
-                                &T[idx_temperature],
-                                molecular_properties_thermal_conductivity_ptr);
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            for (int k = -d_num_subghosts_diffusivities[2];
-                 k < d_interior_dims[2] + d_num_subghosts_diffusivities[2];
-                 k++)
-            {
-                for (int j = -d_num_subghosts_diffusivities[1];
-                     j < d_interior_dims[1] + d_num_subghosts_diffusivities[1];
-                     j++)
-                {
-                    for (int i = -d_num_subghosts_diffusivities[0];
-                         i < d_interior_dims[0] + d_num_subghosts_diffusivities[0];
-                         i++)
-                    {
-                        const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
-                            (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0] +
-                            (k + d_num_subghosts_diffusivities[2])*d_subghostcell_dims_diffusivities[0]*
-                                d_subghostcell_dims_diffusivities[1];
-                        
-                        const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                            (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
-                            (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
-                                d_subghostcell_dims_pressure[1];
-                        
-                        const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                            (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0] +
-                            (k + d_num_subghosts_temperature[2])*d_subghostcell_dims_temperature[0]*
-                                d_subghostcell_dims_temperature[1];
-                        
-                        kappa[idx_diffusivities] = d_equation_of_thermal_conductivity_mixing_rules->
-                            getEquationOfThermalConductivity()->
-                                getThermalConductivity(
-                                    &p[idx_pressure],
-                                    &T[idx_temperature],
-                                    molecular_properties_thermal_conductivity_ptr);
-                    }
-                }
-            }
-        }
+        // Compute the thermal conductivity field.
+        d_equation_of_thermal_conductivity_mixing_rules->getEquationOfThermalConductivity()->
+            computeThermalConductivity(
+                data_thermal_conductivity,
+                d_data_pressure,
+                d_data_temperature,
+                molecular_properties_thermal_conductivity_ptr,
+                d_subghost_box_diffusivities);
         
         if (d_dim == tbox::Dimension(1))
         {
@@ -9409,11 +9159,31 @@ FlowModelSingleSpecies::computeGlobalCellDataMaxDiffusivityWithPressureAndTemper
             computeGlobalCellDataTemperatureWithPressure();
         }
         
-        // Get the pointers to the cell data of maximum diffusivity, density, pressure and temperature.
+        /*
+         * Create temporary cell data of isobaric specific heat capacity, shear viscosity, bulk
+         * viscosity and thermal conductivity.
+         */
+        
+        boost::shared_ptr<pdat::CellData<double> > data_isobaric_specific_heat_capacity(
+            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
+        
+        boost::shared_ptr<pdat::CellData<double> > data_shear_viscosity(
+            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
+        
+        boost::shared_ptr<pdat::CellData<double> > data_bulk_viscosity(
+            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
+        
+        boost::shared_ptr<pdat::CellData<double> > data_thermal_conductivity(
+            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
+        
+        // Get the pointers to the cell data of maximum diffusivity, density, isobaric specific heat
+        // capacity, shear viscosity, bulk viscosity and thermal conductivity.
         double* D_max = d_data_max_diffusivity->getPointer(0);
         double* rho   = data_density->getPointer(0);
-        double* p     = d_data_pressure->getPointer(0);
-        double* T     = d_data_temperature->getPointer(0);
+        double* c_p   = data_isobaric_specific_heat_capacity->getPointer(0);
+        double* mu    = data_shear_viscosity->getPointer(0);
+        double* mu_v  = data_bulk_viscosity->getPointer(0);
+        double* kappa = data_thermal_conductivity->getPointer(0);
         
         // Get the thermodynamic properties of the species.
         std::vector<const double*> thermo_properties_ptr;
@@ -9453,6 +9223,42 @@ FlowModelSingleSpecies::computeGlobalCellDataMaxDiffusivityWithPressureAndTemper
                 &d_molecular_properties_thermal_conductivity[ti]);
         }
         
+        // Compute the isobaric specific heat capacity field.
+        d_equation_of_state_mixing_rules->getEquationOfState()->
+            computeIsobaricSpecificHeatCapacity(
+                data_isobaric_specific_heat_capacity,
+                data_density,
+                d_data_pressure,
+                thermo_properties_ptr,
+                d_subghost_box_max_diffusivity);
+        
+        // Compute the shear viscosity field.
+        d_equation_of_shear_viscosity_mixing_rules->getEquationOfShearViscosity()->
+            computeShearViscosity(
+                data_shear_viscosity,
+                d_data_pressure,
+                d_data_temperature,
+                molecular_properties_shear_viscosity_ptr,
+                d_subghost_box_max_diffusivity);
+        
+        // Compute the bulk viscosity field.
+        d_equation_of_bulk_viscosity_mixing_rules->getEquationOfBulkViscosity()->
+            computeBulkViscosity(
+                data_bulk_viscosity,
+                d_data_pressure,
+                d_data_temperature,
+                molecular_properties_bulk_viscosity_ptr,
+                d_subghost_box_max_diffusivity);
+        
+        // Compute the thermal conductivity field.
+        d_equation_of_thermal_conductivity_mixing_rules->getEquationOfThermalConductivity()->
+            computeThermalConductivity(
+                data_thermal_conductivity,
+                d_data_pressure,
+                d_data_temperature,
+                molecular_properties_thermal_conductivity_ptr,
+                d_subghost_box_max_diffusivity);
+        
         if (d_dim == tbox::Dimension(1))
         {
             for (int i = -d_num_subghosts_max_diffusivity[0];
@@ -9462,38 +9268,12 @@ FlowModelSingleSpecies::computeGlobalCellDataMaxDiffusivityWithPressureAndTemper
                 // Compute the linear indices.
                 const int idx = i + d_num_ghosts[0];
                 const int idx_max_diffusivity = i + d_num_subghosts_max_diffusivity[0];
-                const int idx_pressure = i + d_num_subghosts_pressure[0];
-                const int idx_temperature = i + d_num_subghosts_temperature[0];
                 
-                const double c_p = d_equation_of_state_mixing_rules->getEquationOfState()->
-                    getIsobaricSpecificHeatCapacity(
-                        &rho[idx],
-                        &p[idx_pressure],
-                        thermo_properties_ptr);
+                D_max[idx_max_diffusivity] = fmax(mu[idx_max_diffusivity]/rho[idx],
+                    mu_v[idx_max_diffusivity]/rho[idx]);
                 
-                const double mu = d_equation_of_shear_viscosity_mixing_rules->
-                    getEquationOfShearViscosity()->
-                        getShearViscosity(
-                            &p[idx_pressure],
-                            &T[idx_temperature],
-                            molecular_properties_shear_viscosity_ptr);
-                
-                const double mu_v = d_equation_of_bulk_viscosity_mixing_rules->
-                    getEquationOfBulkViscosity()->
-                        getBulkViscosity(
-                            &p[idx_pressure],
-                            &T[idx_temperature],
-                            molecular_properties_bulk_viscosity_ptr);
-                
-                const double kappa = d_equation_of_thermal_conductivity_mixing_rules->
-                        getEquationOfThermalConductivity()->
-                            getThermalConductivity(
-                                &p[idx_pressure],
-                                &T[idx_temperature],
-                                molecular_properties_thermal_conductivity_ptr);
-                
-                D_max[idx_max_diffusivity] = fmax(mu/rho[idx], mu_v/rho[idx]);
-                D_max[idx_max_diffusivity] = fmax(D_max[idx_max_diffusivity], kappa/(rho[idx]*c_p));
+                D_max[idx_max_diffusivity] = fmax(D_max[idx_max_diffusivity],
+                    kappa[idx_max_diffusivity]/(rho[idx]*c_p[idx_max_diffusivity]));
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -9513,41 +9293,11 @@ FlowModelSingleSpecies::computeGlobalCellDataMaxDiffusivityWithPressureAndTemper
                     const int idx_max_diffusivity = (i + d_num_subghosts_max_diffusivity[0]) +
                         (j + d_num_subghosts_max_diffusivity[1])*d_subghostcell_dims_max_diffusivity[0];
                     
-                    const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                        (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
+                    D_max[idx_max_diffusivity] = fmax(mu[idx_max_diffusivity]/rho[idx],
+                        mu_v[idx_max_diffusivity]/rho[idx]);
                     
-                    const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                        (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0];
-                    
-                    const double c_p = d_equation_of_state_mixing_rules->getEquationOfState()->
-                        getIsobaricSpecificHeatCapacity(
-                            &rho[idx],
-                            &p[idx_pressure],
-                            thermo_properties_ptr);
-                    
-                    const double mu = d_equation_of_shear_viscosity_mixing_rules->
-                        getEquationOfShearViscosity()->
-                            getShearViscosity(
-                                &p[idx_pressure],
-                                &T[idx_temperature],
-                                molecular_properties_shear_viscosity_ptr);
-                    
-                    const double mu_v = d_equation_of_bulk_viscosity_mixing_rules->
-                        getEquationOfBulkViscosity()->
-                            getBulkViscosity(
-                                &p[idx_pressure],
-                                &T[idx_temperature],
-                                molecular_properties_bulk_viscosity_ptr);
-                    
-                    const double kappa = d_equation_of_thermal_conductivity_mixing_rules->
-                            getEquationOfThermalConductivity()->
-                                getThermalConductivity(
-                                    &p[idx_pressure],
-                                    &T[idx_temperature],
-                                    molecular_properties_thermal_conductivity_ptr);
-                    
-                    D_max[idx_max_diffusivity] = fmax(mu/rho[idx], mu_v/rho[idx]);
-                    D_max[idx_max_diffusivity] = fmax(D_max[idx_max_diffusivity], kappa/(rho[idx]*c_p));
+                    D_max[idx_max_diffusivity] = fmax(D_max[idx_max_diffusivity],
+                        kappa[idx_max_diffusivity]/(rho[idx]*c_p[idx_max_diffusivity]));
                 }
             }
         }
@@ -9575,45 +9325,11 @@ FlowModelSingleSpecies::computeGlobalCellDataMaxDiffusivityWithPressureAndTemper
                             (k + d_num_subghosts_max_diffusivity[2])*d_subghostcell_dims_max_diffusivity[0]*
                                 d_subghostcell_dims_max_diffusivity[1];
                         
-                        const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                            (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
-                            (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
-                                d_subghostcell_dims_pressure[1];
+                        D_max[idx_max_diffusivity] = fmax(mu[idx_max_diffusivity]/rho[idx],
+                            mu_v[idx_max_diffusivity]/rho[idx]);
                         
-                        const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                            (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0] +
-                            (k + d_num_subghosts_temperature[2])*d_subghostcell_dims_temperature[0]*
-                                d_subghostcell_dims_temperature[1];
-                        
-                        const double c_p = d_equation_of_state_mixing_rules->getEquationOfState()->
-                            getIsobaricSpecificHeatCapacity(
-                                &rho[idx],
-                                &p[idx_pressure],
-                                thermo_properties_ptr);
-                        
-                        const double mu = d_equation_of_shear_viscosity_mixing_rules->
-                            getEquationOfShearViscosity()->
-                                getShearViscosity(
-                                    &p[idx_pressure],
-                                    &T[idx_temperature],
-                                    molecular_properties_shear_viscosity_ptr);
-                        
-                        const double mu_v = d_equation_of_bulk_viscosity_mixing_rules->
-                            getEquationOfBulkViscosity()->
-                                getBulkViscosity(
-                                    &p[idx_pressure],
-                                    &T[idx_temperature],
-                                    molecular_properties_bulk_viscosity_ptr);
-                        
-                        const double kappa = d_equation_of_thermal_conductivity_mixing_rules->
-                                getEquationOfThermalConductivity()->
-                                    getThermalConductivity(
-                                        &p[idx_pressure],
-                                        &T[idx_temperature],
-                                        molecular_properties_thermal_conductivity_ptr);
-                        
-                        D_max[idx_max_diffusivity] = fmax(mu/rho[idx], mu_v/rho[idx]);
-                        D_max[idx_max_diffusivity] = fmax(D_max[idx_max_diffusivity], kappa/(rho[idx]*c_p));
+                        D_max[idx_max_diffusivity] = fmax(D_max[idx_max_diffusivity],
+                            kappa[idx_max_diffusivity]/(rho[idx]*c_p[idx_max_diffusivity]));
                     }
                 }
             }
