@@ -6724,8 +6724,8 @@ FlowModelFourEqnConservative::getDiffusiveFluxDiffusivities(
         boost::shared_ptr<pdat::CellData<double> > data_bulk_viscosity(
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_diffusivities));
         
-        boost::shared_ptr<pdat::CellData<double> > data_thermal_conductivity(new pdat::CellData<double>(
-            d_interior_box, 1, d_num_subghosts_diffusivities));
+        boost::shared_ptr<pdat::CellData<double> > data_thermal_conductivity(
+            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_diffusivities));
         
         // Get the pointers to the cell data of density, mass fractions, mass diffusivities, shear
         // viscosity, bulk viscosity and thermal conductivity.

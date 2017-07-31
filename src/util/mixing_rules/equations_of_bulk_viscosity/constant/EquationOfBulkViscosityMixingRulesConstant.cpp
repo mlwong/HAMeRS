@@ -421,6 +421,21 @@ EquationOfBulkViscosityMixingRulesConstant::computeBulkViscosity(
     double* den = data_den->getPointer(0);
     double* num = data_num->getPointer(0);
     
+    /*
+     * Fill zeros for denominator and numerator.
+     */
+    
+    if (domain.empty())
+    {
+        data_den->fillAll(double(0));
+        data_num->fillAll(double(0));
+    }
+    else
+    {
+        data_den->fillAll(double(0), domain);
+        data_num->fillAll(double(0), domain);
+    }
+    
     if (data_mass_fractions->getDepth() == d_num_species)
     {
         /*
