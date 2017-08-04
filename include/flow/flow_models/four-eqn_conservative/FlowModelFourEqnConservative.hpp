@@ -121,8 +121,7 @@ class FlowModelFourEqnConservative: public FlowModel
          * Compute global cell data of different registered derived variables with the registered data context.
          */
         void
-        computeGlobalDerivedCellData(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+        computeGlobalDerivedCellData(const hier::Box& domain);
         
         /*
          * Get the global cell data of one cell variable in the registered patch.
@@ -371,65 +370,65 @@ class FlowModelFourEqnConservative: public FlowModel
          * Compute the global cell data of density in the registered patch.
          */
         void computeGlobalCellDataDensity(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of mass fractions with density in the registered patch.
          */
         void computeGlobalCellDataMassFractionsWithDensity(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of velocity with density in the registered patch.
          */
         void computeGlobalCellDataVelocityWithDensity(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of internal energy with density and velocity in the registered
          * patch.
          */
         void computeGlobalCellDataInternalEnergyWithDensityAndVelocity(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of pressure with density, mass fractions and internal energy in
          * the registered patch.
          */
         void computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of sound speed with density, mass fractions and pressure in the
          * registered patch.
          */
         void computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of temperature with density, mass fractions and pressure in the
          * registered patch.
          */
         void computeGlobalCellDataTemperatureWithDensityMassFractionsAndPressure(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of dilatation with density and velocity in the registered patch.
          */
         void computeGlobalCellDataDilatationWithDensityAndVelocity(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of vorticity with density and velocity in the registered patch.
          */
         void computeGlobalCellDataVorticityWithDensityAndVelocity(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of enstrophy with vorticity in the registered patch.
          */
         void computeGlobalCellDataEnstrophyWithVorticity(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of convective flux with velocity and pressure in the registered
@@ -437,7 +436,7 @@ class FlowModelFourEqnConservative: public FlowModel
          */
         void computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
             const DIRECTION::TYPE& direction,
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of maximum wave speed with velocity and sound speed in the
@@ -445,14 +444,14 @@ class FlowModelFourEqnConservative: public FlowModel
          */
         void computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
             const DIRECTION::TYPE& direction,
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of maximum diffusivity with density, mass fractions, pressure
          * and temperature in the registered patch.
          */
         void computeGlobalCellDataMaxDiffusivityWithDensityMassFractionsPressureAndTemperature(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * boost::shared_ptr to registered conservative variables.

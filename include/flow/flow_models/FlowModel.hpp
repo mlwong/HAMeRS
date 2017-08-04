@@ -51,16 +51,6 @@ namespace RIEMANN_SOLVER
                 HLLC_HLL };
 }
 
-namespace COMPUTING_OPTION
-{
-    enum TYPE { ALL,
-                INTERIOR,
-                GHOST_X,
-                GHOST_Y,
-                GHOST_Z,
-                GHOST_CORNERS };
-}
-
 class FlowModelStatisticsUtilities;
 
 /*
@@ -262,9 +252,18 @@ class FlowModel:
         /*
          * Compute global cell data of different registered derived variables with the registered data context.
          */
+        void
+        computeGlobalDerivedCellData()
+        {
+            const hier::Box empty_box(d_dim);
+            computeGlobalDerivedCellData(empty_box);
+        }
+        
+        /*
+         * Compute global cell data of different registered derived variables with the registered data context.
+         */
         virtual void
-        computeGlobalDerivedCellData(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL) = 0;
+        computeGlobalDerivedCellData(const hier::Box& domain) = 0;
         
         /*
          * Get the global cell data of one cell variable in the registered patch.

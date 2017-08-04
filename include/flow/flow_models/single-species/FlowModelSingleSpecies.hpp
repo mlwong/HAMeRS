@@ -120,8 +120,7 @@ class FlowModelSingleSpecies: public FlowModel
          * Compute global cell data of different registered derived variables with the registered data context.
          */
         void
-        computeGlobalDerivedCellData(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+        computeGlobalDerivedCellData(const hier::Box& domain);
         
         /*
          * Get the global cell data of one cell variable in the registered patch.
@@ -372,49 +371,49 @@ class FlowModelSingleSpecies: public FlowModel
          * Compute the global cell data of velocity in the registered patch.
          */
         void computeGlobalCellDataVelocity(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of internal energy with velocity in the registered patch.
          */
         void computeGlobalCellDataInternalEnergyWithVelocity(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of pressure with internal energy in the registered patch.
          */
         void computeGlobalCellDataPressureWithInternalEnergy(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of sound speed with pressure in the registered patch.
          */
         void computeGlobalCellDataSoundSpeedWithPressure(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of temperature with pressure in the registered patch.
          */
         void computeGlobalCellDataTemperatureWithPressure(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of dilatation with velocity in the registered patch.
          */
         void computeGlobalCellDataDilatationWithVelocity(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of vorticity with velocity in the registered patch.
          */
         void computeGlobalCellDataVorticityWithVelocity(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of enstrophy with vorticity in the registered patch.
          */
         void computeGlobalCellDataEnstrophyWithVorticity(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of convective flux with velocity and pressure in the registered
@@ -422,7 +421,7 @@ class FlowModelSingleSpecies: public FlowModel
          */
         void computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
             const DIRECTION::TYPE& direction,
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of maximum wave speed with velocity and sound speed in the
@@ -430,14 +429,14 @@ class FlowModelSingleSpecies: public FlowModel
          */
         void computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
             const DIRECTION::TYPE& direction,
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of maximum diffusivity with pressure and temperature in the
          * registered patch.
          */
         void computeGlobalCellDataMaxDiffusivityWithPressureAndTemperature(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * boost::shared_ptr to registered conservative variables.
