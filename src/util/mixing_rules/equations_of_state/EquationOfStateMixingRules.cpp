@@ -113,7 +113,14 @@ EquationOfStateMixingRules::computeMixtureDensity(
      * Fill zeros for rho.
      */
     
-    data_mixture_density->fill(double(0), domain);
+    if (domain.empty())
+    {
+        data_mixture_density->fillAll(double(0));
+    }
+    else
+    {
+        data_mixture_density->fillAll(double(0), domain);
+    }
     
     if (d_dim == tbox::Dimension(1))
     {
