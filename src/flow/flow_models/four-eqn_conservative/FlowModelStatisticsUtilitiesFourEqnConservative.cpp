@@ -6597,10 +6597,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputEnstrophyIntegrated(
                 
                 hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
                 
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-                TBOX_ASSERT(num_ghosts >= hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative);
-#endif
-                
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
@@ -6638,9 +6634,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputEnstrophyIntegrated(
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
                 const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+                TBOX_ASSERT(num_ghosts_velocity >= hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative);
+#endif
                 
                 double Omega_to_add = 0.0;
                 
@@ -6677,13 +6679,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputEnstrophyIntegrated(
                     boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
                         new DerivativeFirstOrder(
                             "first order derivative in x-direction",
-                            d_dim, DIRECTION::X_DIRECTION,
+                            d_dim,
+                            DIRECTION::X_DIRECTION,
                             d_num_ghosts_derivative));
                     
                     boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_y(
                         new DerivativeFirstOrder(
                             "first order derivative in y-direction",
-                            d_dim, DIRECTION::Y_DIRECTION,
+                            d_dim,
+                            DIRECTION::Y_DIRECTION,
                             d_num_ghosts_derivative));
                     
                     // Compute dudy.
@@ -6823,10 +6827,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputEnstrophyIntegrated(
                 
                 hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
                 
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-                TBOX_ASSERT(num_ghosts >= hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative);
-#endif
-                
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
@@ -6864,11 +6864,17 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputEnstrophyIntegrated(
                 const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
                 const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
                 
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                
                 const int num_ghosts_0_density = num_ghosts_density[0];
                 const int num_ghosts_1_density = num_ghosts_density[1];
                 const int num_ghosts_2_density = num_ghosts_density[2];
                 const int ghostcell_dim_0_density = ghostcell_dims_density[0];
                 const int ghostcell_dim_1_density = ghostcell_dims_density[1];
+                
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+                TBOX_ASSERT(num_ghosts_velocity >= hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative);
+#endif
                 
                 double Omega_to_add = 0.0;
                 
@@ -6912,19 +6918,22 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputEnstrophyIntegrated(
                     boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
                         new DerivativeFirstOrder(
                             "first order derivative in x-direction",
-                            d_dim, DIRECTION::X_DIRECTION,
+                            d_dim,
+                            DIRECTION::X_DIRECTION,
                             d_num_ghosts_derivative));
                     
                     boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_y(
                         new DerivativeFirstOrder(
                             "first order derivative in y-direction",
-                            d_dim, DIRECTION::Y_DIRECTION,
+                            d_dim,
+                            DIRECTION::Y_DIRECTION,
                             d_num_ghosts_derivative));
                     
                     boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_z(
                         new DerivativeFirstOrder(
                             "first order derivative in z-direction",
-                            d_dim, DIRECTION::Z_DIRECTION,
+                            d_dim,
+                            DIRECTION::Z_DIRECTION,
                             d_num_ghosts_derivative));
                     
                     // Compute dudy.
@@ -7169,10 +7178,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                 
                 hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
                 
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-                TBOX_ASSERT(num_ghosts >= hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative);
-#endif
-                
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
@@ -7228,6 +7233,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                 const int num_ghosts_0_pressure = num_ghosts_pressure[0];
                 const int num_ghosts_0_temperature = num_ghosts_temperature[0];
                 
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+                TBOX_ASSERT(num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative);
+#endif
+                
                 double Chi_to_add = 0.0;
                 
                 /*
@@ -7258,7 +7267,8 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                     boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
                         new DerivativeFirstOrder(
                             "first order derivative in x-direction",
-                            d_dim, DIRECTION::X_DIRECTION,
+                            d_dim,
+                            DIRECTION::X_DIRECTION,
                             d_num_ghosts_derivative));
                     
                     // Compute dYdx.
@@ -7407,10 +7417,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                 
                 hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
                 
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-                TBOX_ASSERT(num_ghosts >= hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative);
-#endif
-                
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
@@ -7479,6 +7485,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                 const int num_ghosts_1_temperature = num_ghosts_temperature[1];
                 const int ghostcell_dim_0_temperature = ghostcell_dims_temperature[0];
                 
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+                TBOX_ASSERT(num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative);
+#endif
+                
                 double Chi_to_add = 0.0;
                 
                 /*
@@ -7513,13 +7523,15 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                     boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
                         new DerivativeFirstOrder(
                             "first order derivative in x-direction",
-                            d_dim, DIRECTION::X_DIRECTION,
+                            d_dim,
+                            DIRECTION::X_DIRECTION,
                             d_num_ghosts_derivative));
                     
                     boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_y(
                         new DerivativeFirstOrder(
                             "first order derivative in y-direction",
-                            d_dim, DIRECTION::Y_DIRECTION,
+                            d_dim,
+                            DIRECTION::Y_DIRECTION,
                             d_num_ghosts_derivative));
                     
                     // Compute dYdx.
@@ -7688,10 +7700,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                 
                 hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
                 
-#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-                TBOX_ASSERT(num_ghosts >= hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative);
-#endif
-                
                 std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
                 
                 num_subghosts_of_data.insert(
@@ -7766,6 +7774,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                 const int ghostcell_dim_0_temperature = ghostcell_dims_temperature[0];
                 const int ghostcell_dim_1_temperature = ghostcell_dims_temperature[1];
                 
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+                TBOX_ASSERT(num_ghosts_mass_fractions >= hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative);
+#endif
+                
                 double Chi_to_add = 0.0;
                 
                 /*
@@ -7804,19 +7816,22 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
                     boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
                         new DerivativeFirstOrder(
                             "first order derivative in x-direction",
-                            d_dim, DIRECTION::X_DIRECTION,
+                            d_dim,
+                            DIRECTION::X_DIRECTION,
                             d_num_ghosts_derivative));
                     
                     boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_y(
                         new DerivativeFirstOrder(
                             "first order derivative in y-direction",
-                            d_dim, DIRECTION::Y_DIRECTION,
+                            d_dim,
+                            DIRECTION::Y_DIRECTION,
                             d_num_ghosts_derivative));
                     
                     boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_z(
                         new DerivativeFirstOrder(
                             "first order derivative in z-direction",
-                            d_dim, DIRECTION::Z_DIRECTION,
+                            d_dim,
+                            DIRECTION::Z_DIRECTION,
                             d_num_ghosts_derivative));
                     
                     // Compute dYdx.

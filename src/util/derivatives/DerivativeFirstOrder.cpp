@@ -140,7 +140,7 @@ DerivativeFirstOrder::computeDerivative(
             const int num_ghosts_0_data = num_ghosts_data[0];
             const int num_ghosts_0_derivative = num_ghosts_derivative[0];
             
-            if (d_num_derivative_ghosts >= hier::IntVector::getOne(d_dim)*4)
+            if (d_num_derivative_ghosts[0] == 4)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
@@ -165,7 +165,7 @@ DerivativeFirstOrder::computeDerivative(
                                             double(-4)/double(105)*u[idx_x_LLL] + double(1)/double(280)*u[idx_x_LLLL])/dx;
                 }
             }
-            else if (d_num_derivative_ghosts == hier::IntVector::getOne(d_dim)*3)
+            else if (d_num_derivative_ghosts[0] == 3)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
@@ -187,7 +187,7 @@ DerivativeFirstOrder::computeDerivative(
                                             double(3)/double(20)*u[idx_x_LL] + double(-1)/double(60)*u[idx_x_LLL])/dx;
                 }
             }
-            else if (d_num_derivative_ghosts == hier::IntVector::getOne(d_dim)*2)
+            else if (d_num_derivative_ghosts[0] == 2)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
@@ -206,7 +206,7 @@ DerivativeFirstOrder::computeDerivative(
                                             double(-2)/double(3)*u[idx_x_L] + double(1)/double(12)*u[idx_x_LL])/dx;
                 }
             }
-            else if (d_num_derivative_ghosts == hier::IntVector::getOne(d_dim))
+            else if (d_num_derivative_ghosts[0] == 1)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
@@ -242,7 +242,7 @@ DerivativeFirstOrder::computeDerivative(
             const int num_ghosts_1_derivative = num_ghosts_derivative[1];
             const int ghostcell_dim_0_derivative = ghostcell_dims_derivative[0];
             
-            if (d_num_derivative_ghosts >= hier::IntVector::getOne(d_dim)*4)
+            if (d_num_derivative_ghosts[0] == 4)
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
@@ -286,7 +286,7 @@ DerivativeFirstOrder::computeDerivative(
                     }
                 }
             }
-            else if (d_num_derivative_ghosts == hier::IntVector::getOne(d_dim)*3)
+            else if (d_num_derivative_ghosts[0] == 3)
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
@@ -323,7 +323,7 @@ DerivativeFirstOrder::computeDerivative(
                     }
                 }
             }
-            else if (d_num_derivative_ghosts == hier::IntVector::getOne(d_dim)*2)
+            else if (d_num_derivative_ghosts[0] == 2)
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
@@ -353,7 +353,7 @@ DerivativeFirstOrder::computeDerivative(
                     }
                 }
             }
-            else if (d_num_derivative_ghosts == hier::IntVector::getOne(d_dim))
+            else if (d_num_derivative_ghosts[0] == 1)
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
@@ -402,7 +402,7 @@ DerivativeFirstOrder::computeDerivative(
             const int ghostcell_dim_0_derivative = ghostcell_dims_derivative[0];
             const int ghostcell_dim_1_derivative = ghostcell_dims_derivative[1];
             
-            if (d_num_derivative_ghosts >= hier::IntVector::getOne(d_dim)*4)
+            if (d_num_derivative_ghosts[0] == 4)
             {
                 for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
                 {
@@ -467,7 +467,7 @@ DerivativeFirstOrder::computeDerivative(
                     }
                 }
             }
-            else if (d_num_derivative_ghosts == hier::IntVector::getOne(d_dim)*3)
+            else if (d_num_derivative_ghosts[0] == 3)
             {
                 for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
                 {
@@ -521,7 +521,7 @@ DerivativeFirstOrder::computeDerivative(
                     }
                 }
             }
-            else if (d_num_derivative_ghosts == hier::IntVector::getOne(d_dim)*2)
+            else if (d_num_derivative_ghosts[0] == 2)
             {
                 for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
                 {
@@ -564,7 +564,7 @@ DerivativeFirstOrder::computeDerivative(
                     }
                 }
             }
-            else if (d_num_derivative_ghosts == hier::IntVector::getOne(d_dim))
+            else if (d_num_derivative_ghosts[0] == 1)
             {
                 for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
                 {
@@ -624,7 +624,7 @@ DerivativeFirstOrder::computeDerivative(
             const int num_ghosts_1_derivative = num_ghosts_derivative[1];
             const int ghostcell_dim_0_derivative = ghostcell_dims_derivative[0];
             
-            if (d_num_derivative_ghosts >= hier::IntVector::getOne(d_dim)*4)
+            if (d_num_derivative_ghosts[1] == 4)
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
@@ -668,7 +668,7 @@ DerivativeFirstOrder::computeDerivative(
                     }
                 }
             }
-            else if (d_num_derivative_ghosts == hier::IntVector::getOne(d_dim)*3)
+            else if (d_num_derivative_ghosts[1] == 3)
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
@@ -705,7 +705,7 @@ DerivativeFirstOrder::computeDerivative(
                     }
                 }
             }
-            else if (d_num_derivative_ghosts == hier::IntVector::getOne(d_dim)*2)
+            else if (d_num_derivative_ghosts[1] == 2)
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
@@ -735,7 +735,7 @@ DerivativeFirstOrder::computeDerivative(
                     }
                 }
             }
-            else if (d_num_derivative_ghosts == hier::IntVector::getOne(d_dim))
+            else if (d_num_derivative_ghosts[1] == 1)
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
@@ -784,7 +784,7 @@ DerivativeFirstOrder::computeDerivative(
             const int ghostcell_dim_0_derivative = ghostcell_dims_derivative[0];
             const int ghostcell_dim_1_derivative = ghostcell_dims_derivative[1];
             
-            if (d_num_derivative_ghosts >= hier::IntVector::getOne(d_dim)*4)
+            if (d_num_derivative_ghosts[1] == 4)
             {
                 for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
                 {
@@ -849,7 +849,7 @@ DerivativeFirstOrder::computeDerivative(
                     }
                 }
             }
-            else if (d_num_derivative_ghosts == hier::IntVector::getOne(d_dim)*3)
+            else if (d_num_derivative_ghosts[1] == 3)
             {
                 for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
                 {
@@ -903,7 +903,7 @@ DerivativeFirstOrder::computeDerivative(
                     }
                 }
             }
-            else if (d_num_derivative_ghosts == hier::IntVector::getOne(d_dim)*2)
+            else if (d_num_derivative_ghosts[1] == 2)
             {
                 for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
                 {
@@ -946,7 +946,7 @@ DerivativeFirstOrder::computeDerivative(
                     }
                 }
             }
-            else if (d_num_derivative_ghosts == hier::IntVector::getOne(d_dim))
+            else if (d_num_derivative_ghosts[1] == 1)
             {
                 for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
                 {
@@ -1010,7 +1010,7 @@ DerivativeFirstOrder::computeDerivative(
         const int ghostcell_dim_0_derivative = ghostcell_dims_derivative[0];
         const int ghostcell_dim_1_derivative = ghostcell_dims_derivative[1];
         
-        if (d_num_derivative_ghosts >= hier::IntVector::getOne(d_dim)*4)
+        if (d_num_derivative_ghosts[2] == 4)
         {
             for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
@@ -1075,7 +1075,7 @@ DerivativeFirstOrder::computeDerivative(
                 }
             }
         }
-        else if (d_num_derivative_ghosts == hier::IntVector::getOne(d_dim)*3)
+        else if (d_num_derivative_ghosts[2] == 3)
         {
             for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
@@ -1129,7 +1129,7 @@ DerivativeFirstOrder::computeDerivative(
                 }
             }
         }
-        else if (d_num_derivative_ghosts == hier::IntVector::getOne(d_dim)*2)
+        else if (d_num_derivative_ghosts[2] == 2)
         {
             for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
@@ -1172,7 +1172,7 @@ DerivativeFirstOrder::computeDerivative(
                 }
             }
         }
-        else if (d_num_derivative_ghosts == hier::IntVector::getOne(d_dim))
+        else if (d_num_derivative_ghosts[2] == 1)
         {
             for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
