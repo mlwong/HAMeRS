@@ -20,17 +20,19 @@ class DerivativeSecondOrder: public Derivative
         void
         computeDerivative(
             boost::shared_ptr<pdat::CellData<double> >& derivative,
-            const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+            const boost::shared_ptr<pdat::CellData<double> >& data,
             const double dx,
-            const int depth = 0)
+            const int depth_derivative = 0,
+            const int depth_data = 0)
         {
             const hier::Box empty_box(d_dim);
             computeDerivative(
                 derivative,
-                cell_data,
+                data,
                 dx,
                 empty_box,
-                depth);
+                depth_derivative,
+                depth_data);
         }
         
         /*
@@ -39,10 +41,11 @@ class DerivativeSecondOrder: public Derivative
         void
         computeDerivative(
             boost::shared_ptr<pdat::CellData<double> >& derivative,
-            const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+            const boost::shared_ptr<pdat::CellData<double> >& data,
             const double dx,
             const hier::Box& domain,
-            const int depth = 0);
+            const int depth_derivative = 0,
+            const int depth_data = 0);
         
 };
 

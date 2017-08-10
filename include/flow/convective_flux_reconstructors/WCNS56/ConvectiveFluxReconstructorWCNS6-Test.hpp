@@ -2,6 +2,7 @@
 #define CONVECTIVE_FLUX_RECONSTRUCTOR_WCNS6_TEST_HPP
 
 #include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructor.hpp"
+#include "util/derivatives/DerivativeFirstOrder.hpp"
 #include "util/Directions.hpp"
 
 #include "SAMRAI/pdat/SideVariable.h"

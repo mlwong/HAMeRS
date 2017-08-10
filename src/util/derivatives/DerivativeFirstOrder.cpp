@@ -51,19 +51,22 @@ DerivativeFirstOrder::DerivativeFirstOrder(
 void
 DerivativeFirstOrder::computeDerivative(
     boost::shared_ptr<pdat::CellData<double> >& derivative,
-    const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+    const boost::shared_ptr<pdat::CellData<double> >& data,
     const double dx,
     const hier::Box& domain,
-    const int depth)
+    const int depth_derivative,
+    const int depth_data)
 {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(derivative);
-    TBOX_ASSERT(cell_data);
-    TBOX_ASSERT(depth < cell_data->getDepth());
+    TBOX_ASSERT(data);
+    
+    TBOX_ASSERT(depth_derivative < derivative->getDepth());
+    TBOX_ASSERT(depth_data < data->getDepth());
 #endif
     
     // Get the dimensions of box that covers the interior of patch.
-    const hier::Box interior_box = cell_data->getBox();
+    const hier::Box interior_box = data->getBox();
     const hier::IntVector interior_dims = interior_box.numberCells();
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
@@ -71,12 +74,12 @@ DerivativeFirstOrder::computeDerivative(
 #endif
     
     // Get the number of ghost cells of the cell data and derivative data.
-    const hier::IntVector num_ghosts_cell_data = cell_data->getGhostCellWidth();
+    const hier::IntVector num_ghosts_data = data->getGhostCellWidth();
     const hier::IntVector num_ghosts_derivative = derivative->getGhostCellWidth();
     
     // Get the dimensions of box that covers interior of patch plus ghost cells.
-    const hier::Box ghost_box_cell_data = cell_data->getGhostBox();
-    const hier::IntVector ghostcell_dims_cell_data = ghost_box_cell_data.numberCells();
+    const hier::Box ghost_box_data = data->getGhostBox();
+    const hier::IntVector ghostcell_dims_data = ghost_box_data.numberCells();
     
     const hier::Box ghost_box_derivative = derivative->getGhostBox();
     const hier::IntVector ghostcell_dims_derivative = ghost_box_derivative.numberCells();
@@ -91,7 +94,7 @@ DerivativeFirstOrder::computeDerivative(
     if (domain.empty())
     {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        if (num_ghosts_cell_data - num_ghosts_derivative < d_num_derivative_ghosts)
+        if (num_ghosts_data - num_ghosts_derivative < d_num_derivative_ghosts)
         {
             TBOX_ERROR(d_object_name
                 << ": DerivativeFirstOrder::computeDerivative()\n"
@@ -106,10 +109,10 @@ DerivativeFirstOrder::computeDerivative(
     else
     {
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        hier::Box shrinked_ghost_box_cell_data(ghost_box_cell_data);
-        shrinked_ghost_box_cell_data.grow(-d_num_derivative_ghosts);
+        hier::Box shrinked_ghost_box_data(ghost_box_data);
+        shrinked_ghost_box_data.grow(-d_num_derivative_ghosts);
         
-        TBOX_ASSERT(shrinked_ghost_box_cell_data.contains(domain));
+        TBOX_ASSERT(shrinked_ghost_box_data.contains(domain));
         TBOX_ASSERT(ghost_box_derivative.contains(domain));
 #endif
         
@@ -117,13 +120,13 @@ DerivativeFirstOrder::computeDerivative(
         domain_dims = domain.numberCells();
     }
     
-    // Get the pointer to the current depth component of the given cell data.
-    double* u = cell_data->getPointer(depth);
+    // Get the pointer to the given cell data.
+    double* u = data->getPointer(depth_data);
     
     if (d_direction == DIRECTION::X_DIRECTION)
     {
         // Get the pointer to the derivative.
-        double* dudx = derivative->getPointer(0);
+        double* dudx = derivative->getPointer(depth_derivative);
         
         if (d_dim == tbox::Dimension(1))
         {
@@ -134,7 +137,7 @@ DerivativeFirstOrder::computeDerivative(
             const int domain_lo_0 = domain_lo[0];
             const int domain_dim_0 = domain_dims[0];
             
-            const int num_ghosts_0_cell_data = num_ghosts_cell_data[0];
+            const int num_ghosts_0_data = num_ghosts_data[0];
             const int num_ghosts_0_derivative = num_ghosts_derivative[0];
             
             if (d_num_derivative_ghosts >= hier::IntVector::getOne(d_dim)*4)
@@ -147,14 +150,14 @@ DerivativeFirstOrder::computeDerivative(
                     // Compute indices of current and neighboring cells.
                     const int idx_derivative = i + num_ghosts_0_derivative;
                     
-                    const int idx_x_LLLL = i - 4 + num_ghosts_0_cell_data;
-                    const int idx_x_LLL  = i - 3 + num_ghosts_0_cell_data;
-                    const int idx_x_LL   = i - 2 + num_ghosts_0_cell_data;
-                    const int idx_x_L    = i - 1 + num_ghosts_0_cell_data;
-                    const int idx_x_R    = i + 1 + num_ghosts_0_cell_data;
-                    const int idx_x_RR   = i + 2 + num_ghosts_0_cell_data;
-                    const int idx_x_RRR  = i + 3 + num_ghosts_0_cell_data;
-                    const int idx_x_RRRR = i + 4 + num_ghosts_0_cell_data;
+                    const int idx_x_LLLL = i - 4 + num_ghosts_0_data;
+                    const int idx_x_LLL  = i - 3 + num_ghosts_0_data;
+                    const int idx_x_LL   = i - 2 + num_ghosts_0_data;
+                    const int idx_x_L    = i - 1 + num_ghosts_0_data;
+                    const int idx_x_R    = i + 1 + num_ghosts_0_data;
+                    const int idx_x_RR   = i + 2 + num_ghosts_0_data;
+                    const int idx_x_RRR  = i + 3 + num_ghosts_0_data;
+                    const int idx_x_RRRR = i + 4 + num_ghosts_0_data;
                     
                     dudx[idx_derivative] = (double(-1)/double(280)*u[idx_x_RRRR] + double(4)/double(105)*u[idx_x_RRR] +
                                             double(-1)/double(5)*u[idx_x_RR] + double(4)/double(5)*u[idx_x_R] +
@@ -172,12 +175,12 @@ DerivativeFirstOrder::computeDerivative(
                     // Compute indices of current and neighboring cells.
                     const int idx_derivative = i + num_ghosts_0_derivative;
                     
-                    const int idx_x_LLL = i - 3 + num_ghosts_0_cell_data;
-                    const int idx_x_LL  = i - 2 + num_ghosts_0_cell_data;
-                    const int idx_x_L   = i - 1 + num_ghosts_0_cell_data;
-                    const int idx_x_R   = i + 1 + num_ghosts_0_cell_data;
-                    const int idx_x_RR  = i + 2 + num_ghosts_0_cell_data;
-                    const int idx_x_RRR = i + 3 + num_ghosts_0_cell_data;
+                    const int idx_x_LLL = i - 3 + num_ghosts_0_data;
+                    const int idx_x_LL  = i - 2 + num_ghosts_0_data;
+                    const int idx_x_L   = i - 1 + num_ghosts_0_data;
+                    const int idx_x_R   = i + 1 + num_ghosts_0_data;
+                    const int idx_x_RR  = i + 2 + num_ghosts_0_data;
+                    const int idx_x_RRR = i + 3 + num_ghosts_0_data;
                     
                     dudx[idx_derivative] = (double(1)/double(60)*u[idx_x_RRR] + double(-3)/double(20)*u[idx_x_RR] +
                                             double(3)/double(4)*u[idx_x_R] + double(-3)/double(4)*u[idx_x_L] +
@@ -194,10 +197,10 @@ DerivativeFirstOrder::computeDerivative(
                     // Compute indices of current and neighboring cells.
                     const int idx_derivative = i + num_ghosts_0_derivative;
                     
-                    const int idx_x_LL = i - 2 + num_ghosts_0_cell_data;
-                    const int idx_x_L  = i - 1 + num_ghosts_0_cell_data;
-                    const int idx_x_R  = i + 1 + num_ghosts_0_cell_data;
-                    const int idx_x_RR = i + 2 + num_ghosts_0_cell_data;
+                    const int idx_x_LL = i - 2 + num_ghosts_0_data;
+                    const int idx_x_L  = i - 1 + num_ghosts_0_data;
+                    const int idx_x_R  = i + 1 + num_ghosts_0_data;
+                    const int idx_x_RR = i + 2 + num_ghosts_0_data;
                     
                     dudx[idx_derivative] = (double(-1)/double(12)*u[idx_x_RR] + double(2)/double(3)*u[idx_x_R] +
                                             double(-2)/double(3)*u[idx_x_L] + double(1)/double(12)*u[idx_x_LL])/dx;
@@ -213,8 +216,8 @@ DerivativeFirstOrder::computeDerivative(
                     // Compute indices of current and neighboring cells.
                     const int idx_derivative = i + num_ghosts_0_derivative;
                     
-                    const int idx_x_L = i - 1 + num_ghosts_0_cell_data;
-                    const int idx_x_R = i + 1 + num_ghosts_0_cell_data;
+                    const int idx_x_L = i - 1 + num_ghosts_0_data;
+                    const int idx_x_R = i + 1 + num_ghosts_0_data;
                     
                     dudx[idx_derivative] = (double(1)/double(2)*u[idx_x_R] + double(-1)/double(2)*u[idx_x_L])/dx;
                 }
@@ -231,9 +234,9 @@ DerivativeFirstOrder::computeDerivative(
             const int domain_dim_0 = domain_dims[0];
             const int domain_dim_1 = domain_dims[1];
             
-            const int num_ghosts_0_cell_data = num_ghosts_cell_data[0];
-            const int num_ghosts_1_cell_data = num_ghosts_cell_data[1];
-            const int ghostcell_dim_0_cell_data = ghostcell_dims_cell_data[0];
+            const int num_ghosts_0_data = num_ghosts_data[0];
+            const int num_ghosts_1_data = num_ghosts_data[1];
+            const int ghostcell_dim_0_data = ghostcell_dims_data[0];
             
             const int num_ghosts_0_derivative = num_ghosts_derivative[0];
             const int num_ghosts_1_derivative = num_ghosts_derivative[1];
@@ -252,29 +255,29 @@ DerivativeFirstOrder::computeDerivative(
                         const int idx_derivative = (i + num_ghosts_0_derivative) +
                             (j + num_ghosts_1_derivative)*ghostcell_dim_0_derivative;
                         
-                        const int idx_x_LLLL = (i - 4 + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_x_LLLL = (i - 4 + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_x_LLL = (i - 3 + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_x_LLL = (i - 3 + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_x_LL = (i - 2 + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_x_LL = (i - 2 + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_x_L = (i - 1 + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_x_L = (i - 1 + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_x_R = (i + 1 + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_x_R = (i + 1 + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_x_RR = (i + 2 + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_x_RR = (i + 2 + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_x_RRR = (i + 3 + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_x_RRR = (i + 3 + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_x_RRRR = (i + 4 + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_x_RRRR = (i + 4 + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
                         dudx[idx_derivative] = (double(-1)/double(280)*u[idx_x_RRRR] + double(4)/double(105)*u[idx_x_RRR] +
                                                 double(-1)/double(5)*u[idx_x_RR] + double(4)/double(5)*u[idx_x_R] +
@@ -296,23 +299,23 @@ DerivativeFirstOrder::computeDerivative(
                         const int idx_derivative = (i + num_ghosts_0_derivative) +
                             (j + num_ghosts_1_derivative)*ghostcell_dim_0_derivative;
                         
-                        const int idx_x_LLL = (i - 3 + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_x_LLL = (i - 3 + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_x_LL = (i - 2 + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_x_LL = (i - 2 + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_x_L = (i - 1 + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_x_L = (i - 1 + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_x_R = (i + 1 + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_x_R = (i + 1 + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_x_RR = (i + 2 + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_x_RR = (i + 2 + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_x_RRR = (i + 3 + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_x_RRR = (i + 3 + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
                         dudx[idx_derivative] = (double(1)/double(60)*u[idx_x_RRR] + double(-3)/double(20)*u[idx_x_RR] +
                                                 double(3)/double(4)*u[idx_x_R] + double(-3)/double(4)*u[idx_x_L] +
@@ -333,17 +336,17 @@ DerivativeFirstOrder::computeDerivative(
                         const int idx_derivative = (i + num_ghosts_0_derivative) +
                             (j + num_ghosts_1_derivative)*ghostcell_dim_0_derivative;
                         
-                        const int idx_x_LL = (i - 2 + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_x_LL = (i - 2 + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_x_L = (i - 1 + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_x_L = (i - 1 + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_x_R = (i + 1 + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_x_R = (i + 1 + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_x_RR = (i + 2 + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_x_RR = (i + 2 + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
                         dudx[idx_derivative] = (double(-1)/double(12)*u[idx_x_RR] + double(2)/double(3)*u[idx_x_R] +
                                                 double(-2)/double(3)*u[idx_x_L] + double(1)/double(12)*u[idx_x_LL])/dx;
@@ -363,11 +366,11 @@ DerivativeFirstOrder::computeDerivative(
                         const int idx_derivative = (i + num_ghosts_0_derivative) +
                             (j + num_ghosts_1_derivative)*ghostcell_dim_0_derivative;
                         
-                        const int idx_x_L = (i - 1 + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_x_L = (i - 1 + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_x_R = (i + 1 + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_x_R = (i + 1 + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
                         dudx[idx_derivative] = (double(1)/double(2)*u[idx_x_R] + double(-1)/double(2)*u[idx_x_L])/dx;
                     }
@@ -387,11 +390,11 @@ DerivativeFirstOrder::computeDerivative(
             const int domain_dim_1 = domain_dims[1];
             const int domain_dim_2 = domain_dims[2];
             
-            const int num_ghosts_0_cell_data = num_ghosts_cell_data[0];
-            const int num_ghosts_1_cell_data = num_ghosts_cell_data[1];
-            const int num_ghosts_2_cell_data = num_ghosts_cell_data[2];
-            const int ghostcell_dim_0_cell_data = ghostcell_dims_cell_data[0];
-            const int ghostcell_dim_1_cell_data = ghostcell_dims_cell_data[1];
+            const int num_ghosts_0_data = num_ghosts_data[0];
+            const int num_ghosts_1_data = num_ghosts_data[1];
+            const int num_ghosts_2_data = num_ghosts_data[2];
+            const int ghostcell_dim_0_data = ghostcell_dims_data[0];
+            const int ghostcell_dim_1_data = ghostcell_dims_data[1];
             
             const int num_ghosts_0_derivative = num_ghosts_derivative[0];
             const int num_ghosts_1_derivative = num_ghosts_derivative[1];
@@ -416,45 +419,45 @@ DerivativeFirstOrder::computeDerivative(
                                 (k + num_ghosts_2_derivative)*ghostcell_dim_0_derivative*
                                     ghostcell_dim_1_derivative;
                             
-                            const int idx_x_LLLL = (i - 4 + num_ghosts_0_cell_data) +
-                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_x_LLLL = (i - 4 + num_ghosts_0_data) +
+                                (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_x_LLL = (i - 3 + num_ghosts_0_cell_data) +
-                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_x_LLL = (i - 3 + num_ghosts_0_data) +
+                                (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_x_LL = (i - 2 + num_ghosts_0_cell_data) +
-                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_x_LL = (i - 2 + num_ghosts_0_data) +
+                                (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_x_L = (i - 1 + num_ghosts_0_cell_data) +
-                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_x_L = (i - 1 + num_ghosts_0_data) +
+                                (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_x_R = (i + 1 + num_ghosts_0_cell_data) +
-                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_x_R = (i + 1 + num_ghosts_0_data) +
+                                (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_x_RR = (i + 2 + num_ghosts_0_cell_data) +
-                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_x_RR = (i + 2 + num_ghosts_0_data) +
+                                (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_x_RRR = (i + 3 + num_ghosts_0_cell_data) +
-                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_x_RRR = (i + 3 + num_ghosts_0_data) +
+                                (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_x_RRRR = (i + 4 + num_ghosts_0_cell_data) +
-                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_x_RRRR = (i + 4 + num_ghosts_0_data) +
+                                (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
                             dudx[idx_derivative] = (double(-1)/double(280)*u[idx_x_RRRR] + double(4)/double(105)*u[idx_x_RRR] +
                                                     double(-1)/double(5)*u[idx_x_RR] + double(4)/double(5)*u[idx_x_R] +
@@ -481,35 +484,35 @@ DerivativeFirstOrder::computeDerivative(
                                 (k + num_ghosts_2_derivative)*ghostcell_dim_0_derivative*
                                     ghostcell_dim_1_derivative;
                             
-                            const int idx_x_LLL = (i - 3 + num_ghosts_0_cell_data) +
-                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_x_LLL = (i - 3 + num_ghosts_0_data) +
+                                (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_x_LL = (i - 2 + num_ghosts_0_cell_data) +
-                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_x_LL = (i - 2 + num_ghosts_0_data) +
+                                (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_x_L = (i - 1 + num_ghosts_0_cell_data) +
-                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_x_L = (i - 1 + num_ghosts_0_data) +
+                                (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_x_R = (i + 1 + num_ghosts_0_cell_data) +
-                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_x_R = (i + 1 + num_ghosts_0_data) +
+                                (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_x_RR = (i + 2 + num_ghosts_0_cell_data) +
-                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_x_RR = (i + 2 + num_ghosts_0_data) +
+                                (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_x_RRR = (i + 3 + num_ghosts_0_cell_data) +
-                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_x_RRR = (i + 3 + num_ghosts_0_data) +
+                                (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
                             dudx[idx_derivative] = (double(1)/double(60)*u[idx_x_RRR] + double(-3)/double(20)*u[idx_x_RR] +
                                                     double(3)/double(4)*u[idx_x_R] + double(-3)/double(4)*u[idx_x_L] +
@@ -535,25 +538,25 @@ DerivativeFirstOrder::computeDerivative(
                                 (k + num_ghosts_2_derivative)*ghostcell_dim_0_derivative*
                                     ghostcell_dim_1_derivative;
                             
-                            const int idx_x_LL = (i - 2 + num_ghosts_0_cell_data) +
-                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_x_LL = (i - 2 + num_ghosts_0_data) +
+                                (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_x_L = (i - 1 + num_ghosts_0_cell_data) +
-                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_x_L = (i - 1 + num_ghosts_0_data) +
+                                (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_x_R = (i + 1 + num_ghosts_0_cell_data) +
-                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_x_R = (i + 1 + num_ghosts_0_data) +
+                                (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_x_RR = (i + 2 + num_ghosts_0_cell_data) +
-                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_x_RR = (i + 2 + num_ghosts_0_data) +
+                                (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
                             dudx[idx_derivative] = (double(-1)/double(12)*u[idx_x_RR] + double(2)/double(3)*u[idx_x_R] +
                                                     double(-2)/double(3)*u[idx_x_L] + double(1)/double(12)*u[idx_x_LL])/dx;
@@ -578,15 +581,15 @@ DerivativeFirstOrder::computeDerivative(
                                 (k + num_ghosts_2_derivative)*ghostcell_dim_0_derivative*
                                     ghostcell_dim_1_derivative;
                             
-                            const int idx_x_L = (i - 1 + num_ghosts_0_cell_data) +
-                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_x_L = (i - 1 + num_ghosts_0_data) +
+                                (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_x_R = (i + 1 + num_ghosts_0_cell_data) +
-                                (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_x_R = (i + 1 + num_ghosts_0_data) +
+                                (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
                             dudx[idx_derivative] = (double(1)/double(2)*u[idx_x_R] + double(-1)/double(2)*u[idx_x_L])/dx;
                         }
@@ -598,7 +601,7 @@ DerivativeFirstOrder::computeDerivative(
     else if (d_direction == DIRECTION::Y_DIRECTION)
     {
         // Get the pointer to the derivative.
-        double* dudy = derivative->getPointer(0);
+        double* dudy = derivative->getPointer(depth_derivative);
         
         const double& dy = dx;
         
@@ -613,9 +616,9 @@ DerivativeFirstOrder::computeDerivative(
             const int domain_dim_0 = domain_dims[0];
             const int domain_dim_1 = domain_dims[1];
             
-            const int num_ghosts_0_cell_data = num_ghosts_cell_data[0];
-            const int num_ghosts_1_cell_data = num_ghosts_cell_data[1];
-            const int ghostcell_dim_0_cell_data = ghostcell_dims_cell_data[0];
+            const int num_ghosts_0_data = num_ghosts_data[0];
+            const int num_ghosts_1_data = num_ghosts_data[1];
+            const int ghostcell_dim_0_data = ghostcell_dims_data[0];
             
             const int num_ghosts_0_derivative = num_ghosts_derivative[0];
             const int num_ghosts_1_derivative = num_ghosts_derivative[1];
@@ -634,29 +637,29 @@ DerivativeFirstOrder::computeDerivative(
                         const int idx_derivative = (i + num_ghosts_0_derivative) +
                             (j + num_ghosts_1_derivative)*ghostcell_dim_0_derivative;
                         
-                        const int idx_y_BBBB = (i + num_ghosts_0_cell_data) +
-                            (j - 4 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_y_BBBB = (i + num_ghosts_0_data) +
+                            (j - 4 + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_y_BBB = (i + num_ghosts_0_cell_data) +
-                            (j - 3 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_y_BBB = (i + num_ghosts_0_data) +
+                            (j - 3 + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_y_BB = (i + num_ghosts_0_cell_data) +
-                            (j - 2 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_y_BB = (i + num_ghosts_0_data) +
+                            (j - 2 + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_y_B = (i + num_ghosts_0_cell_data) +
-                            (j - 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_y_B = (i + num_ghosts_0_data) +
+                            (j - 1 + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_y_T = (i + num_ghosts_0_cell_data) +
-                            (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_y_T = (i + num_ghosts_0_data) +
+                            (j + 1 + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_y_TT = (i + num_ghosts_0_cell_data) +
-                            (j + 2 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_y_TT = (i + num_ghosts_0_data) +
+                            (j + 2 + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_y_TTT = (i + num_ghosts_0_cell_data) +
-                            (j + 3 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_y_TTT = (i + num_ghosts_0_data) +
+                            (j + 3 + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_y_TTTT = (i + num_ghosts_0_cell_data) +
-                            (j + 4 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_y_TTTT = (i + num_ghosts_0_data) +
+                            (j + 4 + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
                         dudy[idx_derivative] = (double(-1)/double(280)*u[idx_y_TTTT] + double(4)/double(105)*u[idx_y_TTT] +
                                                 double(-1)/double(5)*u[idx_y_TT] + double(4)/double(5)*u[idx_y_T] +
@@ -678,23 +681,23 @@ DerivativeFirstOrder::computeDerivative(
                         const int idx_derivative = (i + num_ghosts_0_derivative) +
                             (j + num_ghosts_1_derivative)*ghostcell_dim_0_derivative;
                         
-                        const int idx_y_BBB = (i + num_ghosts_0_cell_data) +
-                            (j - 3 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_y_BBB = (i + num_ghosts_0_data) +
+                            (j - 3 + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_y_BB = (i + num_ghosts_0_cell_data) +
-                            (j - 2 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_y_BB = (i + num_ghosts_0_data) +
+                            (j - 2 + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_y_B = (i + num_ghosts_0_cell_data) +
-                            (j - 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_y_B = (i + num_ghosts_0_data) +
+                            (j - 1 + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_y_T = (i + num_ghosts_0_cell_data) +
-                            (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_y_T = (i + num_ghosts_0_data) +
+                            (j + 1 + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_y_TT = (i + num_ghosts_0_cell_data) +
-                            (j + 2 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_y_TT = (i + num_ghosts_0_data) +
+                            (j + 2 + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_y_TTT = (i + num_ghosts_0_cell_data) +
-                            (j + 3 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_y_TTT = (i + num_ghosts_0_data) +
+                            (j + 3 + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
                         dudy[idx_derivative] = (double(1)/double(60)*u[idx_y_TTT] + double(-3)/double(20)*u[idx_y_TT] +
                                                 double(3)/double(4)*u[idx_y_T] + double(-3)/double(4)*u[idx_y_B] +
@@ -715,17 +718,17 @@ DerivativeFirstOrder::computeDerivative(
                         const int idx_derivative = (i + num_ghosts_0_derivative) +
                             (j + num_ghosts_1_derivative)*ghostcell_dim_0_derivative;
                         
-                        const int idx_y_BB = (i + num_ghosts_0_cell_data) +
-                            (j - 2 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_y_BB = (i + num_ghosts_0_data) +
+                            (j - 2 + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_y_B = (i + num_ghosts_0_cell_data) +
-                            (j - 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_y_B = (i + num_ghosts_0_data) +
+                            (j - 1 + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_y_T = (i + num_ghosts_0_cell_data) +
-                            (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_y_T = (i + num_ghosts_0_data) +
+                            (j + 1 + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_y_TT = (i + num_ghosts_0_cell_data) +
-                            (j + 2 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_y_TT = (i + num_ghosts_0_data) +
+                            (j + 2 + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
                         dudy[idx_derivative] = (double(-1)/double(12)*u[idx_y_TT] + double(2)/double(3)*u[idx_y_T] +
                                                 double(-2)/double(3)*u[idx_y_B] + double(1)/double(12)*u[idx_y_BB])/dy;
@@ -745,11 +748,11 @@ DerivativeFirstOrder::computeDerivative(
                         const int idx_derivative = (i + num_ghosts_0_derivative) +
                             (j + num_ghosts_1_derivative)*ghostcell_dim_0_derivative;
                         
-                        const int idx_y_B = (i + num_ghosts_0_cell_data) +
-                            (j - 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_y_B = (i + num_ghosts_0_data) +
+                            (j - 1 + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
-                        const int idx_y_T = (i + num_ghosts_0_cell_data) +
-                            (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
+                        const int idx_y_T = (i + num_ghosts_0_data) +
+                            (j + 1 + num_ghosts_1_data)*ghostcell_dim_0_data;
                         
                         dudy[idx_derivative] = (double(1)/double(2)*u[idx_y_T] + double(-1)/double(2)*u[idx_y_B])/dy;
                     }
@@ -769,11 +772,11 @@ DerivativeFirstOrder::computeDerivative(
             const int domain_dim_1 = domain_dims[1];
             const int domain_dim_2 = domain_dims[2];
             
-            const int num_ghosts_0_cell_data = num_ghosts_cell_data[0];
-            const int num_ghosts_1_cell_data = num_ghosts_cell_data[1];
-            const int num_ghosts_2_cell_data = num_ghosts_cell_data[2];
-            const int ghostcell_dim_0_cell_data = ghostcell_dims_cell_data[0];
-            const int ghostcell_dim_1_cell_data = ghostcell_dims_cell_data[1];
+            const int num_ghosts_0_data = num_ghosts_data[0];
+            const int num_ghosts_1_data = num_ghosts_data[1];
+            const int num_ghosts_2_data = num_ghosts_data[2];
+            const int ghostcell_dim_0_data = ghostcell_dims_data[0];
+            const int ghostcell_dim_1_data = ghostcell_dims_data[1];
             
             const int num_ghosts_0_derivative = num_ghosts_derivative[0];
             const int num_ghosts_1_derivative = num_ghosts_derivative[1];
@@ -798,45 +801,45 @@ DerivativeFirstOrder::computeDerivative(
                                 (k + num_ghosts_2_derivative)*ghostcell_dim_0_derivative*
                                     ghostcell_dim_1_derivative;
                             
-                            const int idx_y_BBBB = (i + num_ghosts_0_cell_data) +
-                                (j - 4 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_y_BBBB = (i + num_ghosts_0_data) +
+                                (j - 4 + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_y_BBB = (i + num_ghosts_0_cell_data) +
-                                (j - 3 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_y_BBB = (i + num_ghosts_0_data) +
+                                (j - 3 + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_y_BB = (i + num_ghosts_0_cell_data) +
-                                (j - 2 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_y_BB = (i + num_ghosts_0_data) +
+                                (j - 2 + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_y_B = (i + num_ghosts_0_cell_data) +
-                                (j - 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_y_B = (i + num_ghosts_0_data) +
+                                (j - 1 + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_y_T = (i + num_ghosts_0_cell_data) +
-                                (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_y_T = (i + num_ghosts_0_data) +
+                                (j + 1 + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_y_TT = (i + num_ghosts_0_cell_data) +
-                                (j + 2 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_y_TT = (i + num_ghosts_0_data) +
+                                (j + 2 + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_y_TTT = (i + num_ghosts_0_cell_data) +
-                                (j + 3 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_y_TTT = (i + num_ghosts_0_data) +
+                                (j + 3 + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_y_TTTT = (i + num_ghosts_0_cell_data) +
-                                (j + 4 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_y_TTTT = (i + num_ghosts_0_data) +
+                                (j + 4 + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
                             dudy[idx_derivative] = (double(-1)/double(280)*u[idx_y_TTTT] + double(4)/double(105)*u[idx_y_TTT] +
                                                     double(-1)/double(5)*u[idx_y_TT] + double(4)/double(5)*u[idx_y_T] +
@@ -863,35 +866,35 @@ DerivativeFirstOrder::computeDerivative(
                                 (k + num_ghosts_2_derivative)*ghostcell_dim_0_derivative*
                                     ghostcell_dim_1_derivative;
                             
-                            const int idx_y_BBB = (i + num_ghosts_0_cell_data) +
-                                (j - 3 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_y_BBB = (i + num_ghosts_0_data) +
+                                (j - 3 + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_y_BB = (i + num_ghosts_0_cell_data) +
-                                (j - 2 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_y_BB = (i + num_ghosts_0_data) +
+                                (j - 2 + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_y_B = (i + num_ghosts_0_cell_data) +
-                                (j - 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_y_B = (i + num_ghosts_0_data) +
+                                (j - 1 + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_y_T = (i + num_ghosts_0_cell_data) +
-                                (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_y_T = (i + num_ghosts_0_data) +
+                                (j + 1 + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_y_TT = (i + num_ghosts_0_cell_data) +
-                                (j + 2 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_y_TT = (i + num_ghosts_0_data) +
+                                (j + 2 + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_y_TTT = (i + num_ghosts_0_cell_data) +
-                                (j + 3 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_y_TTT = (i + num_ghosts_0_data) +
+                                (j + 3 + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
                             dudy[idx_derivative] = (double(1)/double(60)*u[idx_y_TTT] + double(-3)/double(20)*u[idx_y_TT] +
                                                     double(3)/double(4)*u[idx_y_T] + double(-3)/double(4)*u[idx_y_B] +
@@ -917,25 +920,25 @@ DerivativeFirstOrder::computeDerivative(
                                 (k + num_ghosts_2_derivative)*ghostcell_dim_0_derivative*
                                     ghostcell_dim_1_derivative;
                             
-                            const int idx_y_BB = (i + num_ghosts_0_cell_data) +
-                                (j - 2 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_y_BB = (i + num_ghosts_0_data) +
+                                (j - 2 + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_y_B = (i + num_ghosts_0_cell_data) +
-                                (j - 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_y_B = (i + num_ghosts_0_data) +
+                                (j - 1 + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_y_T = (i + num_ghosts_0_cell_data) +
-                                (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_y_T = (i + num_ghosts_0_data) +
+                                (j + 1 + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_y_TT = (i + num_ghosts_0_cell_data) +
-                                (j + 2 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_y_TT = (i + num_ghosts_0_data) +
+                                (j + 2 + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
                             dudy[idx_derivative] = (double(-1)/double(12)*u[idx_y_TT] + double(2)/double(3)*u[idx_y_T] +
                                                     double(-2)/double(3)*u[idx_y_B] + double(1)/double(12)*u[idx_y_BB])/dy;
@@ -960,15 +963,15 @@ DerivativeFirstOrder::computeDerivative(
                                 (k + num_ghosts_2_derivative)*ghostcell_dim_0_derivative*
                                     ghostcell_dim_1_derivative;
                             
-                            const int idx_y_B = (i + num_ghosts_0_cell_data) +
-                                (j - 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_y_B = (i + num_ghosts_0_data) +
+                                (j - 1 + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
-                            const int idx_y_T = (i + num_ghosts_0_cell_data) +
-                                (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                                (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                    ghostcell_dim_1_cell_data;
+                            const int idx_y_T = (i + num_ghosts_0_data) +
+                                (j + 1 + num_ghosts_1_data)*ghostcell_dim_0_data +
+                                (k + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                    ghostcell_dim_1_data;
                             
                             dudy[idx_derivative] = (double(1)/double(2)*u[idx_y_T] + double(-1)/double(2)*u[idx_y_B])/dy;
                         }
@@ -980,7 +983,7 @@ DerivativeFirstOrder::computeDerivative(
     else if (d_direction == DIRECTION::Z_DIRECTION)
     {
         // Get the pointer to the derivative.
-        double* dudz = derivative->getPointer(0);
+        double* dudz = derivative->getPointer(depth_derivative);
         
         const double& dz = dx;
         
@@ -995,11 +998,11 @@ DerivativeFirstOrder::computeDerivative(
         const int domain_dim_1 = domain_dims[1];
         const int domain_dim_2 = domain_dims[2];
         
-        const int num_ghosts_0_cell_data = num_ghosts_cell_data[0];
-        const int num_ghosts_1_cell_data = num_ghosts_cell_data[1];
-        const int num_ghosts_2_cell_data = num_ghosts_cell_data[2];
-        const int ghostcell_dim_0_cell_data = ghostcell_dims_cell_data[0];
-        const int ghostcell_dim_1_cell_data = ghostcell_dims_cell_data[1];
+        const int num_ghosts_0_data = num_ghosts_data[0];
+        const int num_ghosts_1_data = num_ghosts_data[1];
+        const int num_ghosts_2_data = num_ghosts_data[2];
+        const int ghostcell_dim_0_data = ghostcell_dims_data[0];
+        const int ghostcell_dim_1_data = ghostcell_dims_data[1];
         
         const int num_ghosts_0_derivative = num_ghosts_derivative[0];
         const int num_ghosts_1_derivative = num_ghosts_derivative[1];
@@ -1024,45 +1027,45 @@ DerivativeFirstOrder::computeDerivative(
                             (k + num_ghosts_2_derivative)*ghostcell_dim_0_derivative*
                                 ghostcell_dim_1_derivative;
                         
-                        const int idx_z_BBBB = (i + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k - 4 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                ghostcell_dim_1_cell_data;
+                        const int idx_z_BBBB = (i + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                            (k - 4 + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                ghostcell_dim_1_data;
                         
-                        const int idx_z_BBB = (i + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k - 3 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                ghostcell_dim_1_cell_data;
+                        const int idx_z_BBB = (i + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                            (k - 3 + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                ghostcell_dim_1_data;
                         
-                        const int idx_z_BB = (i + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k - 2 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                ghostcell_dim_1_cell_data;
+                        const int idx_z_BB = (i + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                            (k - 2 + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                ghostcell_dim_1_data;
                         
-                        const int idx_z_B = (i + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k - 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                ghostcell_dim_1_cell_data;
+                        const int idx_z_B = (i + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                            (k - 1 + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                ghostcell_dim_1_data;
                         
-                        const int idx_z_F = (i + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k + 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                ghostcell_dim_1_cell_data;
+                        const int idx_z_F = (i + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                            (k + 1 + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                ghostcell_dim_1_data;
                         
-                        const int idx_z_FF = (i + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k + 2 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                ghostcell_dim_1_cell_data;
+                        const int idx_z_FF = (i + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                            (k + 2 + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                ghostcell_dim_1_data;
                         
-                        const int idx_z_FFF = (i + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k + 3 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                ghostcell_dim_1_cell_data;
+                        const int idx_z_FFF = (i + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                            (k + 3 + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                ghostcell_dim_1_data;
                         
-                        const int idx_z_FFFF = (i + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k + 4 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                ghostcell_dim_1_cell_data;
+                        const int idx_z_FFFF = (i + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                            (k + 4 + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                ghostcell_dim_1_data;
                         
                         dudz[idx_derivative] = (double(-1)/double(280)*u[idx_z_FFFF] + double(4)/double(105)*u[idx_z_FFF] +
                                                 double(-1)/double(5)*u[idx_z_FF] + double(4)/double(5)*u[idx_z_F] +
@@ -1089,35 +1092,35 @@ DerivativeFirstOrder::computeDerivative(
                             (k + num_ghosts_2_derivative)*ghostcell_dim_0_derivative*
                                 ghostcell_dim_1_derivative;
                         
-                        const int idx_z_BBB = (i + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k - 3 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                ghostcell_dim_1_cell_data;
+                        const int idx_z_BBB = (i + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                            (k - 3 + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                ghostcell_dim_1_data;
                         
-                        const int idx_z_BB = (i + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k - 2 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                ghostcell_dim_1_cell_data;
+                        const int idx_z_BB = (i + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                            (k - 2 + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                ghostcell_dim_1_data;
                         
-                        const int idx_z_B = (i + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k - 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                ghostcell_dim_1_cell_data;
+                        const int idx_z_B = (i + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                            (k - 1 + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                ghostcell_dim_1_data;
                         
-                        const int idx_z_F = (i + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k + 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                ghostcell_dim_1_cell_data;
+                        const int idx_z_F = (i + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                            (k + 1 + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                ghostcell_dim_1_data;
                         
-                        const int idx_z_FF = (i + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k + 2 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                ghostcell_dim_1_cell_data;
+                        const int idx_z_FF = (i + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                            (k + 2 + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                ghostcell_dim_1_data;
                         
-                        const int idx_z_FFF = (i + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k + 3 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                ghostcell_dim_1_cell_data;
+                        const int idx_z_FFF = (i + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                            (k + 3 + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                ghostcell_dim_1_data;
                         
                         dudz[idx_derivative] = (double(1)/double(60)*u[idx_z_FFF] + double(-3)/double(20)*u[idx_z_FF] +
                                                 double(3)/double(4)*u[idx_z_F] + double(-3)/double(4)*u[idx_z_B] +
@@ -1143,25 +1146,25 @@ DerivativeFirstOrder::computeDerivative(
                             (k + num_ghosts_2_derivative)*ghostcell_dim_0_derivative*
                                 ghostcell_dim_1_derivative;
                         
-                        const int idx_z_BB = (i + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k - 2 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                ghostcell_dim_1_cell_data;
+                        const int idx_z_BB = (i + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                            (k - 2 + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                ghostcell_dim_1_data;
                         
-                        const int idx_z_B = (i + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k - 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                ghostcell_dim_1_cell_data;
+                        const int idx_z_B = (i + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                            (k - 1 + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                ghostcell_dim_1_data;
                         
-                        const int idx_z_F = (i + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k + 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                ghostcell_dim_1_cell_data;
+                        const int idx_z_F = (i + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                            (k + 1 + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                ghostcell_dim_1_data;
                         
-                        const int idx_z_FF = (i + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k + 2 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                ghostcell_dim_1_cell_data;
+                        const int idx_z_FF = (i + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                            (k + 2 + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                ghostcell_dim_1_data;
                         
                         dudz[idx_derivative] = (double(-1)/double(12)*u[idx_z_FF] + double(2)/double(3)*u[idx_z_F] +
                                                 double(-2)/double(3)*u[idx_z_B] + double(1)/double(12)*u[idx_z_BB])/dz;
@@ -1186,15 +1189,15 @@ DerivativeFirstOrder::computeDerivative(
                             (k + num_ghosts_2_derivative)*ghostcell_dim_0_derivative*
                                 ghostcell_dim_1_derivative;
                         
-                        const int idx_z_B = (i + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k - 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                ghostcell_dim_1_cell_data;
+                        const int idx_z_B = (i + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                            (k - 1 + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                ghostcell_dim_1_data;
                         
-                        const int idx_z_F = (i + num_ghosts_0_cell_data) +
-                            (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data +
-                            (k + 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
-                                ghostcell_dim_1_cell_data;
+                        const int idx_z_F = (i + num_ghosts_0_data) +
+                            (j + num_ghosts_1_data)*ghostcell_dim_0_data +
+                            (k + 1 + num_ghosts_2_data)*ghostcell_dim_0_data*
+                                ghostcell_dim_1_data;
                         
                         dudz[idx_derivative] = (double(1)/double(2)*u[idx_z_F] + double(-1)/double(2)*u[idx_z_B])/dz;
                     }

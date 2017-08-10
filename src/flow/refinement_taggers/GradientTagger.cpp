@@ -740,8 +740,8 @@ GradientTagger::registerGradientTaggerVariables(
                 {
                     integrator->registerVariable(
                         d_difference_first_order_density,
-                        d_num_gradient_ghosts,
-                        d_num_gradient_ghosts,
+                        hier::IntVector::getOne(d_dim),
+                        hier::IntVector::getOne(d_dim),
                         RungeKuttaLevelIntegrator::TIME_DEP,
                             d_grid_geometry,
                             "NO_COARSEN",
@@ -751,8 +751,8 @@ GradientTagger::registerGradientTaggerVariables(
                     {
                         integrator->registerVariable(
                             d_difference_first_order_local_mean_density,
-                            d_num_gradient_ghosts,
-                            d_num_gradient_ghosts,
+                            hier::IntVector::getOne(d_dim),
+                            hier::IntVector::getOne(d_dim),
                             RungeKuttaLevelIntegrator::TEMPORARY,
                                 d_grid_geometry,
                                 "NO_COARSEN",
@@ -763,8 +763,8 @@ GradientTagger::registerGradientTaggerVariables(
                 {
                     integrator->registerVariable(
                         d_difference_first_order_total_energy,
-                        d_num_gradient_ghosts,
-                        d_num_gradient_ghosts,
+                        hier::IntVector::getOne(d_dim),
+                        hier::IntVector::getOne(d_dim),
                         RungeKuttaLevelIntegrator::TIME_DEP,
                             d_grid_geometry,
                             "NO_COARSEN",
@@ -774,8 +774,8 @@ GradientTagger::registerGradientTaggerVariables(
                     {
                         integrator->registerVariable(
                             d_difference_first_order_local_mean_total_energy,
-                            d_num_gradient_ghosts,
-                            d_num_gradient_ghosts,
+                            hier::IntVector::getOne(d_dim),
+                            hier::IntVector::getOne(d_dim),
                             RungeKuttaLevelIntegrator::TEMPORARY,
                                 d_grid_geometry,
                                 "NO_COARSEN",
@@ -786,8 +786,8 @@ GradientTagger::registerGradientTaggerVariables(
                 {
                     integrator->registerVariable(
                         d_difference_first_order_pressure,
-                        d_num_gradient_ghosts,
-                        d_num_gradient_ghosts,
+                        hier::IntVector::getOne(d_dim),
+                        hier::IntVector::getOne(d_dim),
                         RungeKuttaLevelIntegrator::TIME_DEP,
                             d_grid_geometry,
                             "NO_COARSEN",
@@ -797,8 +797,8 @@ GradientTagger::registerGradientTaggerVariables(
                     {
                         integrator->registerVariable(
                             d_difference_first_order_local_mean_pressure,
-                            d_num_gradient_ghosts,
-                            d_num_gradient_ghosts,
+                            hier::IntVector::getOne(d_dim),
+                            hier::IntVector::getOne(d_dim),
                             RungeKuttaLevelIntegrator::TEMPORARY,
                                 d_grid_geometry,
                                 "NO_COARSEN",
@@ -919,8 +919,8 @@ GradientTagger::registerGradientTaggerVariables(
                 {
                     integrator->registerVariable(
                         d_difference_second_order_density,
-                        d_num_gradient_ghosts,
-                        d_num_gradient_ghosts,
+                        hier::IntVector::getOne(d_dim),
+                        hier::IntVector::getOne(d_dim),
                         RungeKuttaLevelIntegrator::TIME_DEP,
                             d_grid_geometry,
                             "NO_COARSEN",
@@ -930,8 +930,8 @@ GradientTagger::registerGradientTaggerVariables(
                     {
                         integrator->registerVariable(
                             d_difference_second_order_local_mean_density,
-                            d_num_gradient_ghosts,
-                            d_num_gradient_ghosts,
+                            hier::IntVector::getOne(d_dim),
+                            hier::IntVector::getOne(d_dim),
                             RungeKuttaLevelIntegrator::TEMPORARY,
                                 d_grid_geometry,
                                 "NO_COARSEN",
@@ -942,8 +942,8 @@ GradientTagger::registerGradientTaggerVariables(
                 {
                     integrator->registerVariable(
                         d_difference_second_order_total_energy,
-                        d_num_gradient_ghosts,
-                        d_num_gradient_ghosts,
+                        hier::IntVector::getOne(d_dim),
+                        hier::IntVector::getOne(d_dim),
                         RungeKuttaLevelIntegrator::TIME_DEP,
                             d_grid_geometry,
                             "NO_COARSEN",
@@ -953,8 +953,8 @@ GradientTagger::registerGradientTaggerVariables(
                     {
                         integrator->registerVariable(
                             d_difference_second_order_local_mean_total_energy,
-                            d_num_gradient_ghosts,
-                            d_num_gradient_ghosts,
+                            hier::IntVector::getOne(d_dim),
+                            hier::IntVector::getOne(d_dim),
                             RungeKuttaLevelIntegrator::TEMPORARY,
                                 d_grid_geometry,
                                 "NO_COARSEN",
@@ -965,8 +965,8 @@ GradientTagger::registerGradientTaggerVariables(
                 {
                     integrator->registerVariable(
                         d_difference_second_order_pressure,
-                        d_num_gradient_ghosts,
-                        d_num_gradient_ghosts,
+                        hier::IntVector::getOne(d_dim),
+                        hier::IntVector::getOne(d_dim),
                         RungeKuttaLevelIntegrator::TIME_DEP,
                             d_grid_geometry,
                             "NO_COARSEN",
@@ -976,8 +976,8 @@ GradientTagger::registerGradientTaggerVariables(
                     {
                         integrator->registerVariable(
                             d_difference_second_order_local_mean_pressure,
-                            d_num_gradient_ghosts,
-                            d_num_gradient_ghosts,
+                            hier::IntVector::getOne(d_dim),
+                            hier::IntVector::getOne(d_dim),
                             RungeKuttaLevelIntegrator::TEMPORARY,
                                 d_grid_geometry,
                                 "NO_COARSEN",
@@ -1053,8 +1053,8 @@ GradientTagger::registerGradientTaggerVariables(
                 {
                     integrator->registerVariable(
                         d_Jameson_gradient_density,
-                        d_num_gradient_ghosts,
-                        d_num_gradient_ghosts,
+                        hier::IntVector::getOne(d_dim),
+                        hier::IntVector::getOne(d_dim),
                         RungeKuttaLevelIntegrator::TIME_DEP,
                             d_grid_geometry,
                             "NO_COARSEN",
@@ -1064,8 +1064,8 @@ GradientTagger::registerGradientTaggerVariables(
                 {
                     integrator->registerVariable(
                         d_Jameson_gradient_total_energy,
-                        d_num_gradient_ghosts,
-                        d_num_gradient_ghosts,
+                        hier::IntVector::getOne(d_dim),
+                        hier::IntVector::getOne(d_dim),
                         RungeKuttaLevelIntegrator::TIME_DEP,
                             d_grid_geometry,
                             "NO_COARSEN",
@@ -1075,8 +1075,8 @@ GradientTagger::registerGradientTaggerVariables(
                 {
                     integrator->registerVariable(
                         d_Jameson_gradient_pressure,
-                        d_num_gradient_ghosts,
-                        d_num_gradient_ghosts,
+                        hier::IntVector::getOne(d_dim),
+                        hier::IntVector::getOne(d_dim),
                         RungeKuttaLevelIntegrator::TIME_DEP,
                             d_grid_geometry,
                             "NO_COARSEN",
@@ -1741,7 +1741,7 @@ GradientTagger::computeGradientSensorValuesOnPatch(
                         << "\nin input."
                         << std::endl);
                 }
-            } // Looop over variables chosen.
+            } // Loop over variables chosen.
         }
         else if (sensor_key == "DIFFERENCE_SECOND_ORDER")
         {
@@ -1938,7 +1938,7 @@ GradientTagger::computeGradientSensorValuesOnPatch(
                         << "\nin input."
                         << std::endl);
                 }
-            } // Looop over variables chosen.
+            } // Loop over variables chosen.
         }
     } // Loop over multiresolution sensors chosen.
 }
@@ -2113,7 +2113,7 @@ GradientTagger::tagCellsOnPatch(
             int count_global_tol = 0;
             int count_local_tol = 0;
             
-            // Looop over variables chosen.
+            // Loop over variables chosen.
             for (int vi = 0;
                  vi < static_cast<int>(d_difference_first_order_variables.size());
                  vi++)
@@ -2244,14 +2244,14 @@ GradientTagger::tagCellsOnPatch(
                         << "\nin input."
                         << std::endl);
                 }
-            } // Looop over variables chosen.
+            } // Loop over variables chosen.
         }
         else if (sensor_key == "DIFFERENCE_SECOND_ORDER")
         {
             int count_global_tol = 0;
             int count_local_tol = 0;
             
-            // Looop over variables chosen.
+            // Loop over variables chosen.
             for (int vi = 0;
                  vi < static_cast<int>(d_difference_second_order_variables.size());
                  vi++)
@@ -2382,11 +2382,11 @@ GradientTagger::tagCellsOnPatch(
                         << "\nin input."
                         << std::endl);
                 }
-            } // Looop over variables chosen.
+            } // Loop over variables chosen.
         }
         else if (sensor_key == "JAMESON_GRADIENT")
         {
-            // Looop over variables chosen.
+            // Loop over variables chosen.
             for (int vi = 0;
                  vi < static_cast<int>(d_Jameson_gradient_variables.size());
                  vi++)
@@ -2559,7 +2559,7 @@ GradientTagger::tagCellsOnPatch(
                         << "\nin input."
                         << std::endl);
                 }
-            } // Looop over variables chosen.
+            } // Loop over variables chosen.
         }
     } // Loop over gradient sensors chosen.
 }

@@ -75,14 +75,20 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
 #endif
     
     // Allocate temporary patch data.
-    boost::shared_ptr<pdat::SideData<double> > velocity_intercell(
+    boost::shared_ptr<pdat::SideData<double> > velocity_midpoint(
         new pdat::SideData<double>(interior_box, d_dim.getValue(), hier::IntVector::getOne(d_dim)));
     
     boost::shared_ptr<pdat::SideData<double> > convective_flux_midpoint(
         new pdat::SideData<double>(interior_box, d_num_eqn, hier::IntVector::getOne(d_dim)));
     
+    boost::shared_ptr<pdat::CellData<double> > velocity_derivatives(
+        new pdat::CellData<double>(interior_box, d_dim.getValue()*d_dim.getValue(), hier::IntVector::getOne(d_dim)*2));
+    
+    boost::shared_ptr<pdat::CellData<double> > dilatation(
+        new pdat::CellData<double>(interior_box, 1, hier::IntVector::getOne(d_dim)*2));
+    
     boost::shared_ptr<pdat::CellData<double> > vorticity_magnitude(
-        new pdat::CellData<double>(interior_box, 1, d_num_conv_ghosts));
+        new pdat::CellData<double>(interior_box, 1, hier::IntVector::getOne(d_dim)*2));
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -418,7 +424,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
             for (int di = 0; di < d_dim.getValue(); di++)
             {
                 vel_midpoint_ref.push_back(
-                    boost::ref(velocity_intercell->getPointer(0, di)[idx_midpoint_x]));
+                    boost::ref(velocity_midpoint->getPointer(0, di)[idx_midpoint_x]));
             }
             
             for (int ei = 0; ei < d_num_eqn; ei++)
@@ -477,7 +483,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         const std::vector<EQN_FORM::TYPE> eqn_form = d_flow_model->getEquationsForm();
         
-        double* u_midpoint_x = velocity_intercell->getPointer(0, 0);
+        double* u_midpoint_x = velocity_midpoint->getPointer(0, 0);
         
         for (int ei = 0; ei < d_num_eqn; ei ++)
         {
@@ -527,16 +533,11 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
     else if (d_dim == tbox::Dimension(2))
     {
         /*
-         * Get the dimensions and number of ghost cells.
+         * Get the interior dimensions.
          */
         
         const int interior_dim_0 = interior_dims[0];
         const int interior_dim_1 = interior_dims[1];
-        
-        const int num_conv_ghosts_0 = d_num_conv_ghosts[0];
-        const int num_conv_ghosts_1 = d_num_conv_ghosts[1];
-        
-        const int conv_ghostcell_dim_0 = conv_ghostcell_dims[0];
         
         /*
          * Register the patch and derived cell variables in the flow model and compute the corresponding cell data.
@@ -547,8 +548,6 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
         
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("VELOCITY", d_num_conv_ghosts));
-        num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("DILATATION", d_num_conv_ghosts));
-        num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("VORTICITY", d_num_conv_ghosts));
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("CONVECTIVE_FLUX_X", d_num_conv_ghosts));
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("CONVECTIVE_FLUX_Y", d_num_conv_ghosts));
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("PRIMITIVE_VARIABLES", d_num_conv_ghosts));
@@ -569,24 +568,12 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         boost::shared_ptr<pdat::CellData<double> > velocity =
             d_flow_model->getGlobalCellData("VELOCITY");
         
-        boost::shared_ptr<pdat::CellData<double> > dilatation =
-            d_flow_model->getGlobalCellData("DILATATION");
-        
-        boost::shared_ptr<pdat::CellData<double> > vorticity =
-            d_flow_model->getGlobalCellData("VORTICITY");
-        
         std::vector<boost::shared_ptr<pdat::CellData<double> > > convective_flux_node(2);
         convective_flux_node[0] = d_flow_model->getGlobalCellData("CONVECTIVE_FLUX_X");
         convective_flux_node[1] = d_flow_model->getGlobalCellData("CONVECTIVE_FLUX_Y");
         
         hier::IntVector num_subghosts_velocity = velocity->getGhostCellWidth();
         hier::IntVector subghostcell_dims_velocity = velocity->getGhostBox().numberCells();
-        
-        hier::IntVector num_subghosts_dilatation = dilatation->getGhostCellWidth();
-        hier::IntVector subghostcell_dims_dilatation = dilatation->getGhostBox().numberCells();
-        
-        hier::IntVector num_subghosts_vorticity = vorticity->getGhostCellWidth();
-        hier::IntVector subghostcell_dims_vorticity = vorticity->getGhostBox().numberCells();
         
         hier::IntVector num_subghosts_convective_flux_x = convective_flux_node[0]->getGhostCellWidth();
         hier::IntVector subghostcell_dims_convective_flux_x = convective_flux_node[0]->getGhostBox().numberCells();
@@ -597,14 +584,6 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         const int num_subghosts_0_velocity = num_subghosts_velocity[0];
         const int num_subghosts_1_velocity = num_subghosts_velocity[1];
         const int subghostcell_dim_0_velocity = subghostcell_dims_velocity[0];
-        
-        const int num_subghosts_0_dilatation = num_subghosts_dilatation[0];
-        const int num_subghosts_1_dilatation = num_subghosts_dilatation[1];
-        const int subghostcell_dim_0_dilatation = subghostcell_dims_dilatation[0];
-        
-        const int num_subghosts_0_vorticity = num_subghosts_vorticity[0];
-        const int num_subghosts_1_vorticity = num_subghosts_vorticity[1];
-        const int subghostcell_dim_0_vorticity = subghostcell_dims_vorticity[0];
         
         const int num_subghosts_0_convective_flux_x = num_subghosts_convective_flux_x[0];
         const int num_subghosts_1_convective_flux_x = num_subghosts_convective_flux_x[1];
@@ -617,7 +596,6 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         double* u     = velocity->getPointer(0);
         double* v     = velocity->getPointer(1);
         double* theta = dilatation->getPointer(0);
-        double* omega = vorticity->getPointer(0);
         double* Omega = vorticity_magnitude->getPointer(0);
         std::vector<double*> F_node_x;
         std::vector<double*> F_node_y;
@@ -638,22 +616,83 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
             F_midpoint_y.push_back(convective_flux_midpoint->getPointer(1, ei));
         }
         
-        // Compute the magnitude of vorticity.
-        for (int j = -num_conv_ghosts_1 + 1; j < interior_dim_1 + num_conv_ghosts_1 - 1; j++)
+        /*
+         * Compute the derivatives of velocity, dilatation and vorticity magnitude.
+         */
+        
+        boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
+            new DerivativeFirstOrder("first order derivative in x-direction", d_dim, DIRECTION::X_DIRECTION, 1));
+        
+        boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_y(
+            new DerivativeFirstOrder("first order derivative in y-direction", d_dim, DIRECTION::Y_DIRECTION, 1));
+        
+        // Compute dudx.
+        derivative_first_order_x->computeDerivative(
+            velocity_derivatives,
+            velocity,
+            dx[0],
+            0,
+            0);
+        
+        // Compute dudy.
+        derivative_first_order_y->computeDerivative(
+            velocity_derivatives,
+            velocity,
+            dx[1],
+            1,
+            0);
+        
+        // Compute dvdx.
+        derivative_first_order_x->computeDerivative(
+            velocity_derivatives,
+            velocity,
+            dx[0],
+            2,
+            1);
+        
+        // Compute dvdy.
+        derivative_first_order_y->computeDerivative(
+            velocity_derivatives,
+            velocity,
+            dx[1],
+            3,
+            1);
+        
+        // Get the pointers to the cell data of velocity derivatives.
+        double* dudx = velocity_derivatives->getPointer(0);
+        double* dudy = velocity_derivatives->getPointer(1);
+        double* dvdx = velocity_derivatives->getPointer(2);
+        double* dvdy = velocity_derivatives->getPointer(3);
+        
+        // Compute the dilatation.
+        for (int j = -2; j < interior_dim_1 + 2; j++)
         {
 #ifdef HAMERS_ENABLE_SIMD
             #pragma omp simd
 #endif
-            for (int i = -num_conv_ghosts_0 + 1; i < interior_dim_0 + num_conv_ghosts_0 - 1; i++)
+            for (int i = -2; i < interior_dim_0 + 2; i++)
             {
-                // Compute the linear indices.
-                const int idx = (i + num_conv_ghosts_0) +
-                    (j + num_conv_ghosts_1)*conv_ghostcell_dim_0;
+                // Compute the linear index.
+                const int idx = (i + 2) +
+                    (j + 2)*(interior_dim_0 + 4);
                 
-                const int idx_vorticity = (i + num_subghosts_0_vorticity) +
-                    (j + num_subghosts_1_vorticity)*subghostcell_dim_0_vorticity;
+                theta[idx] = dudx[idx] + dvdy[idx];
+            }
+        }
+        
+        // Compute the magnitude of vorticity.
+        for (int j = -2; j < interior_dim_1 + 2; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = -2; i < interior_dim_0 + 2; i++)
+            {
+                // Compute the linear index.
+                const int idx = (i + 2) +
+                    (j + 2)*(interior_dim_0 + 4);
                 
-                Omega[idx] = fabs(omega[idx_vorticity]);
+                Omega[idx] = fabs(dvdx[idx] - dudy[idx]);
             }
         }
         
@@ -992,19 +1031,13 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                     (j + 1)*(interior_dim_0 + 3);
                     
                 // Compute the average dilatation and magnitude of vorticity.
-                const int idx_L = (i - 1 + num_conv_ghosts_0) +
-                    (j + num_conv_ghosts_1)*conv_ghostcell_dim_0;
+                const int idx_L = (i + 1) +
+                    (j + 2)*(interior_dim_0 + 4);
                 
-                const int idx_R = (i + num_conv_ghosts_0) +
-                    (j + num_conv_ghosts_1)*conv_ghostcell_dim_0;
+                const int idx_R = (i + 2) +
+                    (j + 2)*(interior_dim_0 + 4);
                 
-                const int idx_dilatation_L = (i - 1 + num_subghosts_0_dilatation) +
-                    (j + num_subghosts_1_dilatation)*subghostcell_dim_0_dilatation;
-                
-                const int idx_dilatation_R = (i + num_subghosts_0_dilatation) +
-                    (j + num_subghosts_1_dilatation)*subghostcell_dim_0_dilatation;
-                
-                double theta_avg = 0.5*(theta[idx_dilatation_L] + theta[idx_dilatation_R]);
+                double theta_avg = 0.5*(theta[idx_L] + theta[idx_R]);
                 double Omega_avg = 0.5*(Omega[idx_L] + Omega[idx_R]);
                 
                 // Compute the Ducros-like shock sensor.
@@ -1020,7 +1053,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                 for (int di = 0; di < d_dim.getValue(); di++)
                 {
                     vel_midpoint_ref.push_back(
-                        boost::ref(velocity_intercell->getPointer(0, di)[idx_midpoint_x]));
+                        boost::ref(velocity_midpoint->getPointer(0, di)[idx_midpoint_x]));
                 }
                 
                 for (int ei = 0; ei < d_num_eqn; ei++)
@@ -1079,19 +1112,13 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                     (j + 1)*(interior_dim_0 + 2);
                 
                 // Compute the average dilatation and magnitude of vorticity.
-                const int idx_B = (i + num_conv_ghosts_0) +
-                    (j - 1 + num_conv_ghosts_1)*conv_ghostcell_dim_0;
+                const int idx_B = (i + 2) +
+                    (j + 1)*(interior_dim_0 + 4);
                 
-                const int idx_T = (i + num_conv_ghosts_0) +
-                    (j + num_conv_ghosts_1)*conv_ghostcell_dim_0;
+                const int idx_T = (i + 2) +
+                    (j + 2)*(interior_dim_0 + 4);
                 
-                const int idx_dilatation_B = (i + num_subghosts_0_dilatation) +
-                    (j - 1 + num_subghosts_1_dilatation)*subghostcell_dim_0_dilatation;
-                
-                const int idx_dilatation_T = (i + num_subghosts_0_dilatation) +
-                    (j + num_subghosts_1_dilatation)*subghostcell_dim_0_dilatation;
-                
-                double theta_avg = 0.5*(theta[idx_dilatation_B] + theta[idx_dilatation_T]);
+                double theta_avg = 0.5*(theta[idx_B] + theta[idx_T]);
                 double Omega_avg = 0.5*(Omega[idx_B] + Omega[idx_T]);
                 
                 // Compute the Ducros-like shock sensor.
@@ -1107,7 +1134,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                 for (int di = 0; di < d_dim.getValue(); di++)
                 {
                     vel_midpoint_ref.push_back(
-                        boost::ref(velocity_intercell->getPointer(1, di)[idx_midpoint_y]));
+                        boost::ref(velocity_midpoint->getPointer(1, di)[idx_midpoint_y]));
                 }
                 
                 for (int ei = 0; ei < d_num_eqn; ei++)
@@ -1239,8 +1266,8 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         const std::vector<EQN_FORM::TYPE> eqn_form = d_flow_model->getEquationsForm();
         
-        double* u_midpoint_x = velocity_intercell->getPointer(0, 0);
-        double* v_midpoint_y = velocity_intercell->getPointer(1, 1);
+        double* u_midpoint_x = velocity_midpoint->getPointer(0, 0);
+        double* v_midpoint_y = velocity_midpoint->getPointer(1, 1);
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {
@@ -1323,19 +1350,12 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
     else if (d_dim == tbox::Dimension(3))
     {
         /*
-         * Get the dimensions and number of ghost cells.
+         * Get the interior dimensions.
          */
         
         const int interior_dim_0 = interior_dims[0];
         const int interior_dim_1 = interior_dims[1];
         const int interior_dim_2 = interior_dims[2];
-        
-        const int num_conv_ghosts_0 = d_num_conv_ghosts[0];
-        const int num_conv_ghosts_1 = d_num_conv_ghosts[1];
-        const int num_conv_ghosts_2 = d_num_conv_ghosts[2];
-        
-        const int conv_ghostcell_dim_0 = conv_ghostcell_dims[0];
-        const int conv_ghostcell_dim_1 = conv_ghostcell_dims[1];
         
         /*
          * Register the patch and derived cell variables in the flow model and compute the corresponding cell data.
@@ -1346,8 +1366,6 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
         
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("VELOCITY", d_num_conv_ghosts));
-        num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("DILATATION", d_num_conv_ghosts));
-        num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("VORTICITY", d_num_conv_ghosts));
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("CONVECTIVE_FLUX_X", d_num_conv_ghosts));
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("CONVECTIVE_FLUX_Y", d_num_conv_ghosts));
         num_subghosts_of_data.insert(std::pair<std::string, hier::IntVector>("CONVECTIVE_FLUX_Z", d_num_conv_ghosts));
@@ -1369,12 +1387,6 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         boost::shared_ptr<pdat::CellData<double> > velocity =
             d_flow_model->getGlobalCellData("VELOCITY");
         
-        boost::shared_ptr<pdat::CellData<double> > dilatation =
-            d_flow_model->getGlobalCellData("DILATATION");
-        
-        boost::shared_ptr<pdat::CellData<double> > vorticity =
-            d_flow_model->getGlobalCellData("VORTICITY");
-        
         std::vector<boost::shared_ptr<pdat::CellData<double> > > convective_flux_node(3);
         convective_flux_node[0] = d_flow_model->getGlobalCellData("CONVECTIVE_FLUX_X");
         convective_flux_node[1] = d_flow_model->getGlobalCellData("CONVECTIVE_FLUX_Y");
@@ -1382,12 +1394,6 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         hier::IntVector num_subghosts_velocity = velocity->getGhostCellWidth();
         hier::IntVector subghostcell_dims_velocity = velocity->getGhostBox().numberCells();
-        
-        hier::IntVector num_subghosts_dilatation = dilatation->getGhostCellWidth();
-        hier::IntVector subghostcell_dims_dilatation = dilatation->getGhostBox().numberCells();
-        
-        hier::IntVector num_subghosts_vorticity = vorticity->getGhostCellWidth();
-        hier::IntVector subghostcell_dims_vorticity = vorticity->getGhostBox().numberCells();
         
         hier::IntVector num_subghosts_convective_flux_x = convective_flux_node[0]->getGhostCellWidth();
         hier::IntVector subghostcell_dims_convective_flux_x = convective_flux_node[0]->getGhostBox().numberCells();
@@ -1403,18 +1409,6 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         const int num_subghosts_2_velocity = num_subghosts_velocity[2];
         const int subghostcell_dim_0_velocity = subghostcell_dims_velocity[0];
         const int subghostcell_dim_1_velocity = subghostcell_dims_velocity[1];
-        
-        const int num_subghosts_0_dilatation = num_subghosts_dilatation[0];
-        const int num_subghosts_1_dilatation = num_subghosts_dilatation[1];
-        const int num_subghosts_2_dilatation = num_subghosts_dilatation[2];
-        const int subghostcell_dim_0_dilatation = subghostcell_dims_dilatation[0];
-        const int subghostcell_dim_1_dilatation = subghostcell_dims_dilatation[1];
-        
-        const int num_subghosts_0_vorticity = num_subghosts_vorticity[0];
-        const int num_subghosts_1_vorticity = num_subghosts_vorticity[1];
-        const int num_subghosts_2_vorticity = num_subghosts_vorticity[2];
-        const int subghostcell_dim_0_vorticity = subghostcell_dims_vorticity[0];
-        const int subghostcell_dim_1_vorticity = subghostcell_dims_vorticity[1];
         
         const int num_subghosts_0_convective_flux_x = num_subghosts_convective_flux_x[0];
         const int num_subghosts_1_convective_flux_x = num_subghosts_convective_flux_x[1];
@@ -1438,9 +1432,6 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         double* v     = velocity->getPointer(1);
         double* w     = velocity->getPointer(2);
         double* theta = dilatation->getPointer(0);
-        double* omega_x = vorticity->getPointer(0);
-        double* omega_y = vorticity->getPointer(1);
-        double* omega_z = vorticity->getPointer(2);
         double* Omega = vorticity_magnitude->getPointer(0);
         std::vector<double*> F_node_x;
         std::vector<double*> F_node_y;
@@ -1467,30 +1458,144 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
             F_midpoint_z.push_back(convective_flux_midpoint->getPointer(2, ei));
         }
         
-        // Compute the magnitude of vorticity.
-        for (int k = -num_conv_ghosts_2 + 1; k < interior_dim_2 + num_conv_ghosts_2 - 1; k++)
+        /*
+         * Compute the derivatives of velocity, dilatation and vorticity magnitude.
+         */
+        
+        boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
+            new DerivativeFirstOrder("first order derivative in x-direction", d_dim, DIRECTION::X_DIRECTION, 1));
+        
+        boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_y(
+            new DerivativeFirstOrder("first order derivative in y-direction", d_dim, DIRECTION::Y_DIRECTION, 1));
+        
+        boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_z(
+            new DerivativeFirstOrder("first order derivative in z-direction", d_dim, DIRECTION::Z_DIRECTION, 1));
+        
+        // Compute dudx.
+        derivative_first_order_x->computeDerivative(
+            velocity_derivatives,
+            velocity,
+            dx[0],
+            0,
+            0);
+        
+        // Compute dudy.
+        derivative_first_order_y->computeDerivative(
+            velocity_derivatives,
+            velocity,
+            dx[1],
+            1,
+            0);
+        
+        // Compute dudz.
+        derivative_first_order_z->computeDerivative(
+            velocity_derivatives,
+            velocity,
+            dx[2],
+            2,
+            0);
+        
+        // Compute dvdx.
+        derivative_first_order_x->computeDerivative(
+            velocity_derivatives,
+            velocity,
+            dx[0],
+            3,
+            1);
+        
+        // Compute dvdy.
+        derivative_first_order_y->computeDerivative(
+            velocity_derivatives,
+            velocity,
+            dx[1],
+            4,
+            1);
+        
+        // Compute dvdz.
+        derivative_first_order_z->computeDerivative(
+            velocity_derivatives,
+            velocity,
+            dx[2],
+            5,
+            1);
+        
+        // Compute dwdx.
+        derivative_first_order_x->computeDerivative(
+            velocity_derivatives,
+            velocity,
+            dx[0],
+            6,
+            2);
+        
+        // Compute dwdy.
+        derivative_first_order_y->computeDerivative(
+            velocity_derivatives,
+            velocity,
+            dx[1],
+            7,
+            2);
+        
+        // Compute dwdz.
+        derivative_first_order_z->computeDerivative(
+            velocity_derivatives,
+            velocity,
+            dx[2],
+            8,
+            2);
+        
+        // Get the pointers to the cell data of velocity derivatives.
+        double* dudx = velocity_derivatives->getPointer(0);
+        double* dudy = velocity_derivatives->getPointer(1);
+        double* dudz = velocity_derivatives->getPointer(2);
+        double* dvdx = velocity_derivatives->getPointer(3);
+        double* dvdy = velocity_derivatives->getPointer(4);
+        double* dvdz = velocity_derivatives->getPointer(5);
+        double* dwdx = velocity_derivatives->getPointer(6);
+        double* dwdy = velocity_derivatives->getPointer(7);
+        double* dwdz = velocity_derivatives->getPointer(8);
+        
+        // Compute the dilatation.
+        for (int k = -2; k < interior_dim_2 + 2; k++)
         {
-            for (int j = -num_conv_ghosts_1 + 1; j < interior_dim_1 + num_conv_ghosts_1 - 1; j++)
+            for (int j = -2; j < interior_dim_1 + 2; j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
 #endif
-                for (int i = -num_conv_ghosts_0 + 1; i < interior_dim_0 + num_conv_ghosts_0 - 1; i++)
+                for (int i = -2; i < interior_dim_0 + 2; i++)
                 {
-                    // Compute the linear indices
-                    const int idx = (i + num_conv_ghosts_0) +
-                        (j + num_conv_ghosts_1)*conv_ghostcell_dim_0 +
-                        (k + num_conv_ghosts_2)*conv_ghostcell_dim_0*
-                            conv_ghostcell_dim_1;
+                    // Compute the linear index.
+                    const int idx = (i + 2) +
+                        (j + 2)*(interior_dim_0 + 4) +
+                        (k + 2)*(interior_dim_0 + 4)*
+                            (interior_dim_1 + 4);
                     
-                    const int idx_vorticity = (i + num_subghosts_0_vorticity) +
-                        (j + num_subghosts_1_vorticity)*subghostcell_dim_0_vorticity +
-                        (k + num_subghosts_2_vorticity)*subghostcell_dim_0_vorticity*
-                            subghostcell_dim_1_vorticity;
+                    theta[idx] = dudx[idx] + dvdy[idx] + dwdz[idx];
+                }
+            }
+        }
+        
+        // Compute the magnitude of vorticity.
+        for (int k = -2; k < interior_dim_2 + 2; k++)
+        {
+            for (int j = -2; j < interior_dim_1 + 2; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = -2; i < interior_dim_0 + 2; i++)
+                {
+                    // Compute the linear index.
+                    const int idx = (i + 2) +
+                        (j + 2)*(interior_dim_0 + 4) +
+                        (k + 2)*(interior_dim_0 + 4)*
+                            (interior_dim_1 + 4);
                     
-                    Omega[idx] = sqrt(omega_x[idx_vorticity]*omega_x[idx_vorticity] +
-                        omega_y[idx_vorticity]*omega_y[idx_vorticity] +
-                        omega_z[idx_vorticity]*omega_z[idx_vorticity]);
+                    const double omega_x = dwdy[idx] - dvdz[idx];
+                    const double omega_y = dudz[idx] - dwdx[idx];
+                    const double omega_z = dvdx[idx] - dudy[idx];
+                    
+                    Omega[idx] = sqrt(omega_x*omega_x + omega_y*omega_y + omega_z*omega_z);
                 }
             }
         }
@@ -1913,28 +2018,18 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                             (interior_dim_1 + 2);
                     
                     // Compute the average dilatation and magnitude of vorticity.
-                    const int idx_L = (i - 1 + num_conv_ghosts_0) +
-                        (j + num_conv_ghosts_1)*conv_ghostcell_dim_0 +
-                        (k + num_conv_ghosts_2)*conv_ghostcell_dim_0*
-                            conv_ghostcell_dim_1;
+                    const int idx_L = (i + 1) +
+                        (j + 2)*(interior_dim_0 + 4) +
+                        (k + 2)*(interior_dim_0 + 4)*
+                            (interior_dim_1 + 4);
                         
                     
-                    const int idx_R = (i + num_conv_ghosts_0) +
-                        (j + num_conv_ghosts_1)*conv_ghostcell_dim_0 +
-                        (k + num_conv_ghosts_2)*conv_ghostcell_dim_0*
-                            conv_ghostcell_dim_1;
+                    const int idx_R = (i + 2) +
+                        (j + 2)*(interior_dim_0 + 4) +
+                        (k + 2)*(interior_dim_0 + 4)*
+                            (interior_dim_1 + 4);
                     
-                    const int idx_dilatation_L = (i - 1 + num_subghosts_0_dilatation) +
-                        (j + num_subghosts_1_dilatation)*subghostcell_dim_0_dilatation +
-                        (k + num_subghosts_2_dilatation)*subghostcell_dim_0_dilatation*
-                            subghostcell_dim_1_dilatation;
-                    
-                    const int idx_dilatation_R = (i + num_subghosts_0_dilatation) +
-                        (j + num_subghosts_1_dilatation)*subghostcell_dim_0_dilatation +
-                        (k + num_subghosts_2_dilatation)*subghostcell_dim_0_dilatation*
-                            subghostcell_dim_1_dilatation;
-                    
-                    double theta_avg = 0.5*(theta[idx_dilatation_L] + theta[idx_dilatation_R]);
+                    double theta_avg = 0.5*(theta[idx_L] + theta[idx_R]);
                     double Omega_avg = 0.5*(Omega[idx_L] + Omega[idx_R]);
                     
                     // Compute the Ducros-like shock sensor.
@@ -1950,7 +2045,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                     for (int di = 0; di < d_dim.getValue(); di++)
                     {
                         vel_midpoint_ref.push_back(
-                            boost::ref(velocity_intercell->getPointer(0, di)[idx_midpoint_x]));
+                            boost::ref(velocity_midpoint->getPointer(0, di)[idx_midpoint_x]));
                     }
                     
                     for (int ei = 0; ei < d_num_eqn; ei++)
@@ -2014,27 +2109,17 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                             (interior_dim_1 + 3);
                     
                     // Compute the average dilatation and magnitude of vorticity.
-                    const int idx_B = (i + num_conv_ghosts_0) +
-                        (j - 1 + num_conv_ghosts_1)*conv_ghostcell_dim_0 +
-                        (k + num_conv_ghosts_2)*conv_ghostcell_dim_0*
-                            conv_ghostcell_dim_1;
+                    const int idx_B = (i + 2) +
+                        (j + 1)*(interior_dim_0 + 4) +
+                        (k + 2)*(interior_dim_0 + 4)*
+                            (interior_dim_1 + 4);
                     
-                    const int idx_T = (i + num_conv_ghosts_0) +
-                        (j + num_conv_ghosts_1)*conv_ghostcell_dim_0 +
-                        (k + num_conv_ghosts_2)*conv_ghostcell_dim_0*
-                            conv_ghostcell_dim_1;
+                    const int idx_T = (i + 2) +
+                        (j + 2)*(interior_dim_0 + 4) +
+                        (k + 2)*(interior_dim_0 + 4)*
+                            (interior_dim_1 + 4);
                     
-                    const int idx_dilatation_B = (i + num_subghosts_0_dilatation) +
-                        (j - 1 + num_subghosts_1_dilatation)*subghostcell_dim_0_dilatation +
-                        (k + num_subghosts_2_dilatation)*subghostcell_dim_0_dilatation*
-                            subghostcell_dim_1_dilatation;
-                    
-                    const int idx_dilatation_T = (i + num_subghosts_0_dilatation) +
-                        (j + num_subghosts_1_dilatation)*subghostcell_dim_0_dilatation +
-                        (k + num_subghosts_2_dilatation)*subghostcell_dim_0_dilatation*
-                            subghostcell_dim_1_dilatation;
-                    
-                    double theta_avg = 0.5*(theta[idx_dilatation_B] + theta[idx_dilatation_T]);
+                    double theta_avg = 0.5*(theta[idx_B] + theta[idx_T]);
                     double Omega_avg = 0.5*(Omega[idx_B] + Omega[idx_T]);
                     
                     // Compute the Ducros-like shock sensor.
@@ -2050,7 +2135,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                     for (int di = 0; di < d_dim.getValue(); di++)
                     {
                         vel_midpoint_ref.push_back(
-                            boost::ref(velocity_intercell->getPointer(1, di)[idx_midpoint_y]));
+                            boost::ref(velocity_midpoint->getPointer(1, di)[idx_midpoint_y]));
                     }
                     
                     for (int ei = 0; ei < d_num_eqn; ei++)
@@ -2114,27 +2199,17 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                             (interior_dim_1 + 2);
                     
                     // Compute the average dilatation and magnitude of vorticity.
-                    const int idx_B = (i + num_conv_ghosts_0) +
-                        (j + num_conv_ghosts_1)*conv_ghostcell_dim_0 +
-                        (k - 1 + num_conv_ghosts_2)*conv_ghostcell_dim_0*
-                            conv_ghostcell_dim_1;
+                    const int idx_B = (i + 2) +
+                        (j + 2)*(interior_dim_0 + 4) +
+                        (k + 1)*(interior_dim_0 + 4)*
+                            (interior_dim_1 + 4);
                     
-                    const int idx_F = (i + num_conv_ghosts_0) +
-                        (j + num_conv_ghosts_1)*conv_ghostcell_dim_0 +
-                        (k + num_conv_ghosts_2)*conv_ghostcell_dim_0*
-                            conv_ghostcell_dim_1;
+                    const int idx_F = (i + 2) +
+                        (j + 2)*(interior_dim_0 + 4) +
+                        (k + 2)*(interior_dim_0 + 4)*
+                            (interior_dim_1 + 4);
                     
-                    const int idx_dilatation_B = (i + num_subghosts_0_dilatation) +
-                        (j + num_subghosts_1_dilatation)*subghostcell_dim_0_dilatation +
-                        (k - 1 + num_subghosts_2_dilatation)*subghostcell_dim_0_dilatation*
-                            subghostcell_dim_1_dilatation;
-                    
-                    const int idx_dilatation_F = (i + num_subghosts_0_dilatation) +
-                        (j + num_subghosts_1_dilatation)*subghostcell_dim_0_dilatation +
-                        (k + num_subghosts_2_dilatation)*subghostcell_dim_0_dilatation*
-                            subghostcell_dim_1_dilatation;
-                    
-                    double theta_avg = 0.5*(theta[idx_dilatation_B] + theta[idx_dilatation_F]);
+                    double theta_avg = 0.5*(theta[idx_B] + theta[idx_F]);
                     double Omega_avg = 0.5*(Omega[idx_B] + Omega[idx_F]);
                     
                     // Compute the Ducros-like shock sensor.
@@ -2150,7 +2225,7 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
                     for (int di = 0; di < d_dim.getValue(); di++)
                     {
                         vel_midpoint_ref.push_back(
-                            boost::ref(velocity_intercell->getPointer(2, di)[idx_midpoint_z]));
+                            boost::ref(velocity_midpoint->getPointer(2, di)[idx_midpoint_z]));
                     }
                     
                     for (int ei = 0; ei < d_num_eqn; ei++)
@@ -2359,9 +2434,9 @@ ConvectiveFluxReconstructorWCNS56::computeConvectiveFluxAndSourceOnPatch(
         
         const std::vector<EQN_FORM::TYPE> eqn_form = d_flow_model->getEquationsForm();
         
-        double* u_midpoint_x = velocity_intercell->getPointer(0, 0);
-        double* v_midpoint_y = velocity_intercell->getPointer(1, 1);
-        double* w_midpoint_z = velocity_intercell->getPointer(2, 2);
+        double* u_midpoint_x = velocity_midpoint->getPointer(0, 0);
+        double* v_midpoint_y = velocity_midpoint->getPointer(1, 1);
+        double* w_midpoint_z = velocity_midpoint->getPointer(2, 2);
         
         for (int ei = 0; ei < d_num_eqn; ei++)
         {

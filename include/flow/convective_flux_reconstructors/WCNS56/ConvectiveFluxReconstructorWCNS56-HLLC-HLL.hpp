@@ -2,6 +2,7 @@
 #define CONVECTIVE_FLUX_RECONSTRUCTOR_56_HLLC_HLL_HPP
 
 #include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructor.hpp"
+#include "util/derivatives/DerivativeFirstOrder.hpp"
 #include "util/Directions.hpp"
 
 #include "boost/multi_array.hpp"

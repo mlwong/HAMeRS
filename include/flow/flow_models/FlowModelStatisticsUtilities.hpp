@@ -4,6 +4,7 @@
 #include "HAMeRS_config.hpp"
 
 #include "flow/flow_models/FlowModel.hpp"
+#include "util/derivatives/DerivativeFirstOrder.hpp"
 
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 
@@ -24,8 +25,21 @@ class FlowModelStatisticsUtilities
                 d_object_name(object_name),
                 d_dim(dim),
                 d_grid_geometry(grid_geometry),
-                d_num_species(num_species)
+                d_num_species(num_species),
+                d_num_ghosts_derivative(1)
         {
+            /*
+             * Get the number of ghost cells to use in taking derivatives.
+             */ 
+            if (flow_model_db->keyExists("num_ghosts_derivative"))
+            {
+                d_num_ghosts_derivative = flow_model_db->getInteger("num_ghosts_derivative");
+            }
+            else if (flow_model_db->keyExists("d_num_ghosts_derivative"))
+            {
+                d_num_ghosts_derivative = flow_model_db->getInteger("d_num_ghosts_derivative");
+            }
+            
             /*
              * Get the names of statistical quantities to output.
              */
@@ -54,6 +68,8 @@ class FlowModelStatisticsUtilities
         putToRestart(
             const boost::shared_ptr<tbox::Database>& restart_db) const
         {
+            restart_db->putInteger("d_num_ghosts_derivative", d_num_ghosts_derivative);
+            
             if (!d_statistical_quantities.empty())
             {
                 restart_db->putStringVector("d_statistical_quantities", d_statistical_quantities);
@@ -98,6 +114,11 @@ class FlowModelStatisticsUtilities
         const int d_num_species;
         
         /*
+         * Number of ghost cells to use in taking derivatives.
+         */
+        int d_num_ghosts_derivative;
+        
+        /*
          * boost::weak_ptr to FlowModel.
          */
         boost::weak_ptr<FlowModel> d_flow_model;
@@ -106,7 +127,7 @@ class FlowModelStatisticsUtilities
          * Names of statistical quantities to output.
          */
         std::vector<std::string> d_statistical_quantities;
-    
+        
 };
 
 #endif /* FLOW_MODEL_STATISTICS_UTILITIES_HPP */

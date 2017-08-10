@@ -33,9 +33,10 @@ class Derivative
         virtual void
         computeDerivative(
             boost::shared_ptr<pdat::CellData<double> >& derivative,
-            const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+            const boost::shared_ptr<pdat::CellData<double> >& data,
             const double dx,
-            const int depth = 0) = 0;
+            const int depth_derivative = 0,
+            const int depth_data = 0) = 0;
         
         /*
          * Compute the derivative with the given cell data.
@@ -43,10 +44,11 @@ class Derivative
         virtual void
         computeDerivative(
             boost::shared_ptr<pdat::CellData<double> >& derivative,
-            const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+            const boost::shared_ptr<pdat::CellData<double> >& data,
             const double dx,
             const hier::Box& domain,
-            const int depth = 0) = 0;
+            const int depth_derivative = 0,
+            const int depth_data = 0) = 0;
         
     protected:
         /*

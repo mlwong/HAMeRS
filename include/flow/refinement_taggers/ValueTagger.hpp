@@ -6,6 +6,7 @@
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
 #include "extn/visit_data_writer/ExtendedVisItDataWriter.hpp"
 #include "flow/flow_models/FlowModels.hpp"
+#include "util/derivatives/DerivativeFirstOrder.hpp"
 
 // #include "SAMRAI/appu/VisItDataWriter.h"
 #include "SAMRAI/math/HierarchyCellDataOpsReal.h"
@@ -153,6 +154,11 @@ class ValueTagger
          * Flow model.
          */
         const boost::shared_ptr<FlowModel> d_flow_model;
+        
+        /*
+         * Number of ghost cells to use in taking derivatives.
+         */
+        int d_num_ghosts_derivative;
         
         /*
          * Variables, tolerances and settings for the value sensor.

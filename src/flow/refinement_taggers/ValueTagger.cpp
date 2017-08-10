@@ -20,6 +20,7 @@ ValueTagger::ValueTagger(
         d_num_value_ghosts(hier::IntVector::getZero(d_dim)),
         d_num_species(num_species),
         d_flow_model(flow_model),
+        d_num_ghosts_derivative(1),
         d_value_tagger_max_density(0.0),
         d_value_tagger_max_total_energy(0.0),
         d_value_tagger_max_pressure(0.0),
@@ -28,6 +29,15 @@ ValueTagger::ValueTagger(
 {
     if (value_tagger_db != nullptr)
     {
+        if (value_tagger_db->keyExists("num_ghosts_derivative"))
+        {
+            d_num_ghosts_derivative = value_tagger_db->getInteger("num_ghosts_derivative");
+        }
+        else if (value_tagger_db->keyExists("d_num_ghosts_derivative"))
+        {
+            d_num_ghosts_derivative = value_tagger_db->getInteger("d_num_ghosts_derivative");
+        }
+        
         if (value_tagger_db->keyExists("variables"))
         {
             d_variables = value_tagger_db->getStringVector("variables");
@@ -54,7 +64,7 @@ ValueTagger::ValueTagger(
                   (variable_key == "PRESSURE") ||
                   (variable_key == "DILATATION") ||
                   (variable_key == "ENSTROPHY") ||
-                  (variable_key == "MASS_FRACTIONS")))
+                  (variable_key == "MASS_FRACTION") || (variable_key == "MASS_FRACTIONS")))
             {
                 TBOX_ERROR(d_object_name
                     << ":"
@@ -307,6 +317,12 @@ ValueTagger::ValueTagger(
                     << std::endl);
             }
         }
+        
+        if ((std::find(d_variables.begin(), d_variables.end(), "DILATATION") != d_variables.end()) ||
+            (std::find(d_variables.begin(), d_variables.end(), "ENSTROPHY") != d_variables.end()))
+        {
+            d_num_value_ghosts = hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative;
+        }
     }
     else
     {
@@ -367,7 +383,7 @@ ValueTagger::registerValueTaggerVariables(
                 "Value tagger enstrophy",
                 1);
         }
-        else if (variable_key == "MASS_FRACTIONS")
+        else if (variable_key == "MASS_FRACTION" || variable_key == "MASS_FRACTIONS")
         {
             d_value_tagger_variable_mass_fractions.reserve(d_num_species);
             
@@ -408,8 +424,8 @@ ValueTagger::registerValueTaggerVariables(
         {
             integrator->registerVariable(
                 d_value_tagger_variable_density,
-                d_num_value_ghosts,
-                d_num_value_ghosts,
+                hier::IntVector::getZero(d_dim),
+                hier::IntVector::getZero(d_dim),
                 RungeKuttaLevelIntegrator::TEMPORARY,
                     d_grid_geometry,
                     "NO_COARSEN",
@@ -419,8 +435,8 @@ ValueTagger::registerValueTaggerVariables(
         {
             integrator->registerVariable(
                 d_value_tagger_variable_total_energy,
-                d_num_value_ghosts,
-                d_num_value_ghosts,
+                hier::IntVector::getZero(d_dim),
+                hier::IntVector::getZero(d_dim),
                 RungeKuttaLevelIntegrator::TEMPORARY,
                     d_grid_geometry,
                     "NO_COARSEN",
@@ -430,8 +446,8 @@ ValueTagger::registerValueTaggerVariables(
         {
             integrator->registerVariable(
                 d_value_tagger_variable_pressure,
-                d_num_value_ghosts,
-                d_num_value_ghosts,
+                hier::IntVector::getZero(d_dim),
+                hier::IntVector::getZero(d_dim),
                 RungeKuttaLevelIntegrator::TEMPORARY,
                     d_grid_geometry,
                     "NO_COARSEN",
@@ -441,8 +457,8 @@ ValueTagger::registerValueTaggerVariables(
         {
             integrator->registerVariable(
                 d_value_tagger_variable_dilatation,
-                d_num_value_ghosts,
-                d_num_value_ghosts,
+                hier::IntVector::getZero(d_dim),
+                hier::IntVector::getZero(d_dim),
                 RungeKuttaLevelIntegrator::TEMPORARY,
                     d_grid_geometry,
                     "NO_COARSEN",
@@ -452,21 +468,21 @@ ValueTagger::registerValueTaggerVariables(
         {
             integrator->registerVariable(
                 d_value_tagger_variable_enstrophy,
-                d_num_value_ghosts,
-                d_num_value_ghosts,
+                hier::IntVector::getZero(d_dim),
+                hier::IntVector::getZero(d_dim),
                 RungeKuttaLevelIntegrator::TEMPORARY,
                     d_grid_geometry,
                     "NO_COARSEN",
                     "NO_REFINE");
         }
-        else if (variable_key == "MASS_FRACTIONS")
+        else if (variable_key == "MASS_FRACTION" || variable_key == "MASS_FRACTIONS")
         {
             for (int si = 0; si < d_num_species; si++)
             {
                 integrator->registerVariable(
                     d_value_tagger_variable_mass_fractions[si],
-                    d_num_value_ghosts,
-                    d_num_value_ghosts,
+                    hier::IntVector::getZero(d_dim),
+                    hier::IntVector::getZero(d_dim),
                     RungeKuttaLevelIntegrator::TEMPORARY,
                         d_grid_geometry,
                         "NO_COARSEN",
@@ -628,6 +644,8 @@ void
 ValueTagger::putToRestart(
     const boost::shared_ptr<tbox::Database>& restart_db) const
 {
+    restart_db->putInteger("d_num_ghosts_derivative", d_num_ghosts_derivative);
+    
     restart_db->putStringVector("d_variables", d_variables);
     
     restart_db->putBoolVector("d_uses_global_tol_up", d_uses_global_tol_up);
@@ -688,7 +706,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
             
             num_subghosts_of_data.insert(
-                std::pair<std::string, hier::IntVector>("DENSITY", d_num_value_ghosts));
+                std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
             
             d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
             
@@ -729,7 +747,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
             
             num_subghosts_of_data.insert(
-                std::pair<std::string, hier::IntVector>("TOTAL_ENERGY", d_num_value_ghosts));
+                std::pair<std::string, hier::IntVector>("TOTAL_ENERGY", hier::IntVector::getZero(d_dim)));
             
             d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
             
@@ -770,7 +788,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
             
             num_subghosts_of_data.insert(
-                std::pair<std::string, hier::IntVector>("PRESSURE", d_num_value_ghosts));
+                std::pair<std::string, hier::IntVector>("PRESSURE", hier::IntVector::getZero(d_dim)));
             
             d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
             
@@ -803,42 +821,246 @@ ValueTagger::computeValueTaggerValuesOnPatch(
         else if (variable_key == "DILATATION")
         {
             /*
-             * Register the patch and dilatation in the flow model and compute the corresponding cell data.
+             * Register the patch and velocity in the flow model and compute the corresponding cell
+             * data of dilatation.
              */
             
             d_flow_model->registerPatchWithDataContext(patch, data_context);
             
             const hier::IntVector& num_ghosts = d_flow_model->getNumberOfGhostCells();
             
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+            TBOX_ASSERT(num_ghosts >= hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative);
+#endif
+            
             std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
             
             num_subghosts_of_data.insert(
-                std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
-            
-            num_subghosts_of_data.insert(
-                std::pair<std::string, hier::IntVector>("DILATATION", d_num_value_ghosts));
+                std::pair<std::string, hier::IntVector>("VELOCITY", d_num_value_ghosts));
             
             d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
             
             d_flow_model->computeGlobalDerivedCellData();
             
-            /*
-             * Get the pointer to dilatation data inside the flow model.
-             */
+            // Get the cell data.
+            boost::shared_ptr<pdat::CellData<double> > dilatation(
+                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    patch.getPatchData(d_value_tagger_variable_dilatation, data_context)));
             
-            boost::shared_ptr<pdat::CellData<double> > flow_model_data_dilatation =
-                d_flow_model->getGlobalCellData("DILATATION");
+            boost::shared_ptr<pdat::CellData<double> > velocity =
+                d_flow_model->getGlobalCellData("VELOCITY");
             
-            /*
-             * Transfer data from flow model to the class variable.
-             */
+            // Get the dimensions of box that covers the interior of patch.
+            const hier::Box interior_box = patch.getBox();
+            const hier::IntVector interior_dims = interior_box.numberCells();
             
-            transferDataOnPatchToClassVariable(
-                patch,
-                data_context,
-                flow_model_data_dilatation,
-                d_value_tagger_variable_dilatation,
-                0);
+            // Get the numbers of ghost cells and the dimensions of the ghost cell box.
+            const hier::IntVector num_ghosts_dilatation = dilatation->getGhostCellWidth();
+            const hier::IntVector ghostcell_dims_dilatation =
+                dilatation->getGhostBox().numberCells();
+    
+            // Initialize cell data for velocity derivatives.
+            boost::shared_ptr<pdat::CellData<double> > velocity_derivatives(
+                new pdat::CellData<double>(interior_box, d_dim.getValue(), hier::IntVector::getZero(d_dim)));
+            
+            // Get the grid spacing.
+            const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+                BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                    patch.getPatchGeometry()));
+            
+            const double* const dx = patch_geom->getDx();
+            
+            // Get the pointer to the cell data of dilatation.
+            double* theta = dilatation->getPointer(0);
+            
+            if (d_dim == tbox::Dimension(1))
+            {
+                /*
+                 * Get the number of cells in each dimension and number of ghost cells.
+                 */
+                
+                const int interior_dim_0 = interior_dims[0];
+                
+                const int num_ghosts_0_dilatation = num_ghosts_dilatation[0];
+                
+                boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
+                    new DerivativeFirstOrder(
+                        "first order derivative in x-direction",
+                        d_dim, DIRECTION::X_DIRECTION,
+                        d_num_ghosts_derivative));
+                
+                // Compute dudx.
+                derivative_first_order_x->computeDerivative(
+                    velocity_derivatives,
+                    velocity,
+                    dx[0],
+                    0,
+                    0);
+                
+                // Get the pointer to the cell data of velocity derivative.
+                double* dudx = velocity_derivatives->getPointer(0);
+                
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = 0; i < interior_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx = i;
+                    const int idx_dilatation = i + num_ghosts_0_dilatation;
+                    
+                    theta[idx_dilatation] = dudx[idx];
+                }
+            }
+            else if (d_dim == tbox::Dimension(2))
+            {
+                /*
+                 * Get the numbers of cells in each dimension and numbers of ghost cells.
+                 */
+                
+                const int interior_dim_0 = interior_dims[0];
+                const int interior_dim_1 = interior_dims[1];
+                
+                const int num_ghosts_0_dilatation = num_ghosts_dilatation[0];
+                const int num_ghosts_1_dilatation = num_ghosts_dilatation[1];
+                const int ghostcell_dim_0_dilatation = ghostcell_dims_dilatation[0];
+                
+                boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
+                    new DerivativeFirstOrder(
+                        "first order derivative in x-direction",
+                        d_dim, DIRECTION::X_DIRECTION,
+                        d_num_ghosts_derivative));
+                
+                boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_y(
+                    new DerivativeFirstOrder(
+                        "first order derivative in y-direction",
+                        d_dim, DIRECTION::Y_DIRECTION,
+                        d_num_ghosts_derivative));
+                
+                // Compute dudx.
+                derivative_first_order_x->computeDerivative(
+                    velocity_derivatives,
+                    velocity,
+                    dx[0],
+                    0,
+                    0);
+                
+                // Compute dvdy.
+                derivative_first_order_y->computeDerivative(
+                    velocity_derivatives,
+                    velocity,
+                    dx[1],
+                    1,
+                    1);
+                
+                // Get the pointers to the cell data of velocity derivatives.
+                double* dudx = velocity_derivatives->getPointer(0);
+                double* dvdy = velocity_derivatives->getPointer(1);
+                
+                // Compute the dilatation.
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx = i + j*interior_dim_0;
+                        
+                        const int idx_dilatation = (i + num_ghosts_0_dilatation) +
+                            (j + num_ghosts_1_dilatation)*ghostcell_dim_0_dilatation;
+                        
+                        theta[idx_dilatation] = dudx[idx] + dvdy[idx];
+                    }
+                }
+            }
+            else if (d_dim == tbox::Dimension(3))
+            {
+                /*
+                 * Get the numbers of cells in each dimension and numbers of ghost cells.
+                 */
+                
+                const int interior_dim_0 = interior_dims[0];
+                const int interior_dim_1 = interior_dims[1];
+                const int interior_dim_2 = interior_dims[2];
+                
+                const int num_ghosts_0_dilatation = num_ghosts_dilatation[0];
+                const int num_ghosts_1_dilatation = num_ghosts_dilatation[1];
+                const int num_ghosts_2_dilatation = num_ghosts_dilatation[2];
+                const int ghostcell_dim_0_dilatation = ghostcell_dims_dilatation[0];
+                const int ghostcell_dim_1_dilatation = ghostcell_dims_dilatation[1];
+                
+                boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
+                    new DerivativeFirstOrder(
+                        "first order derivative in x-direction",
+                        d_dim, DIRECTION::X_DIRECTION,
+                        d_num_ghosts_derivative));
+                
+                boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_y(
+                    new DerivativeFirstOrder(
+                        "first order derivative in y-direction",
+                        d_dim, DIRECTION::Y_DIRECTION,
+                        d_num_ghosts_derivative));
+                
+                boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_z(
+                    new DerivativeFirstOrder(
+                        "first order derivative in z-direction",
+                        d_dim, DIRECTION::Z_DIRECTION,
+                        d_num_ghosts_derivative));
+                
+                // Compute dudx.
+                derivative_first_order_x->computeDerivative(
+                    velocity_derivatives,
+                    velocity,
+                    dx[0],
+                    0,
+                    0);
+                
+                // Compute dvdy.
+                derivative_first_order_y->computeDerivative(
+                    velocity_derivatives,
+                    velocity,
+                    dx[1],
+                    1,
+                    1);
+                
+                // Compute dwdz.
+                derivative_first_order_z->computeDerivative(
+                    velocity_derivatives,
+                    velocity,
+                    dx[2],
+                    2,
+                    2);
+                
+                // Get the pointers to the cell data of velocity derivatives.
+                double* dudx = velocity_derivatives->getPointer(0);
+                double* dvdy = velocity_derivatives->getPointer(1);
+                double* dwdz = velocity_derivatives->getPointer(2);
+                
+                // Compute the dilatation.
+                for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx = i + j*interior_dim_0 + k*interior_dim_0*interior_dim_1;
+                            
+                            const int idx_dilatation = (i + num_ghosts_0_dilatation) +
+                                (j + num_ghosts_1_dilatation)*ghostcell_dim_0_dilatation +
+                                (k + num_ghosts_2_dilatation)*ghostcell_dim_0_dilatation*
+                                    ghostcell_dim_1_dilatation;
+                            
+                            theta[idx_dilatation] = dudx[idx] + dvdy[idx] + dwdz[idx];
+                        }
+                    }
+                }
+            }
             
             /*
              * Unregister the patch and data of all registered derived cell variables in the flow model.
@@ -849,42 +1071,252 @@ ValueTagger::computeValueTaggerValuesOnPatch(
         else if (variable_key == "ENSTROPHY")
         {
             /*
-             * Register the patch and dilatation in the flow model and compute the corresponding cell data.
+             * Register the patch and velocity in the flow model and compute the corresponding cell
+             * data of enstrophy.
              */
             
             d_flow_model->registerPatchWithDataContext(patch, data_context);
             
             const hier::IntVector& num_ghosts = d_flow_model->getNumberOfGhostCells();
             
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+            TBOX_ASSERT(num_ghosts >= hier::IntVector::getOne(d_dim)*d_num_ghosts_derivative);
+#endif
+            
             std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
             
             num_subghosts_of_data.insert(
-                std::pair<std::string, hier::IntVector>("VELOCITY", num_ghosts));
-            
-            num_subghosts_of_data.insert(
-                std::pair<std::string, hier::IntVector>("ENSTROPHY", d_num_value_ghosts));
+                std::pair<std::string, hier::IntVector>("VELOCITY", d_num_value_ghosts));
             
             d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
             
             d_flow_model->computeGlobalDerivedCellData();
             
-            /*
-             * Get the pointer to enstrophy data inside the flow model.
-             */
+            // Get the cell data.
+            boost::shared_ptr<pdat::CellData<double> > enstrophy(
+                BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
+                    patch.getPatchData(d_value_tagger_variable_enstrophy, data_context)));
             
-            boost::shared_ptr<pdat::CellData<double> > flow_model_data_enstrophy =
-                d_flow_model->getGlobalCellData("ENSTROPHY");
+            boost::shared_ptr<pdat::CellData<double> > velocity =
+                d_flow_model->getGlobalCellData("VELOCITY");
             
-            /*
-             * Transfer data from flow model to the class variable.
-             */
+            // Get the dimensions of box that covers the interior of patch.
+            const hier::Box interior_box = patch.getBox();
+            const hier::IntVector interior_dims = interior_box.numberCells();
             
-            transferDataOnPatchToClassVariable(
-                patch,
-                data_context,
-                flow_model_data_enstrophy,
-                d_value_tagger_variable_enstrophy,
-                0);
+            // Get the numbers of ghost cells and the dimensions of the ghost cell box.
+            const hier::IntVector num_ghosts_enstrophy = enstrophy->getGhostCellWidth();
+            const hier::IntVector ghostcell_dims_enstrophy =
+                enstrophy->getGhostBox().numberCells();
+    
+            // Get the grid spacing.
+            const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+                BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                    patch.getPatchGeometry()));
+            
+            const double* const dx = patch_geom->getDx();
+            
+            // Get the pointer to the cell data of enstrophy.
+            double* Omega = enstrophy->getPointer(0);
+            
+            if (d_dim == tbox::Dimension(1))
+            {
+                TBOX_ERROR(d_object_name
+                    << ": ValueTagger::computeValueTaggerValuesOnPatch()\n"
+                    << "Enstrophy cannot be found for one-dimensional flow."
+                    << std::endl);
+            }
+            else if (d_dim == tbox::Dimension(2))
+            {
+                /*
+                 * Get the numbers of cells in each dimension and numbers of ghost cells.
+                 */
+                
+                const int interior_dim_0 = interior_dims[0];
+                const int interior_dim_1 = interior_dims[1];
+                
+                const int num_ghosts_0_enstrophy = num_ghosts_enstrophy[0];
+                const int num_ghosts_1_enstrophy = num_ghosts_enstrophy[1];
+                const int ghostcell_dim_0_enstrophy = ghostcell_dims_enstrophy[0];
+                
+                // Initialize cell data for velocity derivatives.
+                boost::shared_ptr<pdat::CellData<double> > velocity_derivatives(
+                    new pdat::CellData<double>(interior_box, d_dim.getValue()*d_dim.getValue() - d_dim.getValue(),
+                        hier::IntVector::getZero(d_dim)));
+                
+                boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
+                    new DerivativeFirstOrder(
+                        "first order derivative in x-direction",
+                        d_dim, DIRECTION::X_DIRECTION,
+                        d_num_ghosts_derivative));
+                
+                boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_y(
+                    new DerivativeFirstOrder(
+                        "first order derivative in y-direction",
+                        d_dim, DIRECTION::Y_DIRECTION,
+                        d_num_ghosts_derivative));
+                
+                // Compute dudy.
+                derivative_first_order_y->computeDerivative(
+                    velocity_derivatives,
+                    velocity,
+                    dx[1],
+                    0,
+                    0);
+                
+                // Compute dvdx.
+                derivative_first_order_x->computeDerivative(
+                    velocity_derivatives,
+                    velocity,
+                    dx[0],
+                    1,
+                    1);
+                
+                // Get the pointers to the cell data of velocity derivatives.
+                double* dudy = velocity_derivatives->getPointer(0);
+                double* dvdx = velocity_derivatives->getPointer(1);
+                
+                // Compute the enstrophy.
+                for (int j = 0; j < interior_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = 0; i < interior_dim_0; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx = i + j*interior_dim_0;
+                        
+                        const int idx_enstrophy = (i + num_ghosts_0_enstrophy) +
+                            (j + num_ghosts_1_enstrophy)*ghostcell_dim_0_enstrophy;
+                        
+                        const double omega = dvdx[idx] - dudy[idx];
+                        Omega[idx_enstrophy] = omega*omega;
+                    }
+                }
+            }
+            else if (d_dim == tbox::Dimension(3))
+            {
+                /*
+                 * Get the dimension.
+                 */
+                
+                const int interior_dim_0 = interior_dims[0];
+                const int interior_dim_1 = interior_dims[1];
+                const int interior_dim_2 = interior_dims[2];
+                
+                const int num_ghosts_0_enstrophy = num_ghosts_enstrophy[0];
+                const int num_ghosts_1_enstrophy = num_ghosts_enstrophy[1];
+                const int num_ghosts_2_enstrophy = num_ghosts_enstrophy[2];
+                const int ghostcell_dim_0_enstrophy = ghostcell_dims_enstrophy[0];
+                const int ghostcell_dim_1_enstrophy = ghostcell_dims_enstrophy[1];
+                
+                // Initialize cell data for velocity derivatives.
+                boost::shared_ptr<pdat::CellData<double> > velocity_derivatives(
+                    new pdat::CellData<double>(interior_box, d_dim.getValue()*d_dim.getValue() - d_dim.getValue(),
+                        hier::IntVector::getZero(d_dim)));
+                
+                boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_x(
+                    new DerivativeFirstOrder(
+                        "first order derivative in x-direction",
+                        d_dim, DIRECTION::X_DIRECTION,
+                        d_num_ghosts_derivative));
+                
+                boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_y(
+                    new DerivativeFirstOrder(
+                        "first order derivative in y-direction",
+                        d_dim, DIRECTION::Y_DIRECTION,
+                        d_num_ghosts_derivative));
+                
+                boost::shared_ptr<DerivativeFirstOrder> derivative_first_order_z(
+                    new DerivativeFirstOrder(
+                        "first order derivative in z-direction",
+                        d_dim, DIRECTION::Z_DIRECTION,
+                        d_num_ghosts_derivative));
+                
+                // Compute dudy.
+                derivative_first_order_y->computeDerivative(
+                    velocity_derivatives,
+                    velocity,
+                    dx[1],
+                    0,
+                    0);
+                
+                // Compute dudz.
+                derivative_first_order_z->computeDerivative(
+                    velocity_derivatives,
+                    velocity,
+                    dx[2],
+                    1,
+                    0);
+                
+                // Compute dvdx.
+                derivative_first_order_x->computeDerivative(
+                    velocity_derivatives,
+                    velocity,
+                    dx[0],
+                    2,
+                    1);
+                
+                // Compute dvdz.
+                derivative_first_order_z->computeDerivative(
+                    velocity_derivatives,
+                    velocity,
+                    dx[2],
+                    3,
+                    1);
+                
+                // Compute dwdx.
+                derivative_first_order_x->computeDerivative(
+                    velocity_derivatives,
+                    velocity,
+                    dx[0],
+                    4,
+                    2);
+                
+                // Compute dwdy.
+                derivative_first_order_y->computeDerivative(
+                    velocity_derivatives,
+                    velocity,
+                    dx[1],
+                    5,
+                    2);
+                
+                // Get the pointers to the cell data of velocity derivatives.
+                double* dudy = velocity_derivatives->getPointer(0);
+                double* dudz = velocity_derivatives->getPointer(1);
+                double* dvdx = velocity_derivatives->getPointer(2);
+                double* dvdz = velocity_derivatives->getPointer(3);
+                double* dwdx = velocity_derivatives->getPointer(4);
+                double* dwdy = velocity_derivatives->getPointer(5);
+                
+                // Compute the enstrophy.
+                for (int k = 0; k < interior_dim_2; k++)
+                {
+                    for (int j = 0; j < interior_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = 0; i < interior_dim_0; i++)
+                        {
+                            // Compute the linear index.
+                            const int idx = i + j*interior_dim_0 + k*interior_dim_0*interior_dim_1;
+                            
+                            const int idx_enstrophy = (i + num_ghosts_0_enstrophy) +
+                                (j + num_ghosts_1_enstrophy)*ghostcell_dim_0_enstrophy +
+                                (k + num_ghosts_2_enstrophy)*ghostcell_dim_0_enstrophy*
+                                    ghostcell_dim_1_enstrophy;
+                            
+                            const double omega_x = dwdy[idx] - dvdz[idx];
+                            const double omega_y = dudz[idx] - dwdx[idx];
+                            const double omega_z = dvdx[idx] - dudy[idx];
+                            
+                            Omega[idx_enstrophy] = omega_x*omega_x + omega_y*omega_y + omega_z*omega_z;
+                        }
+                    }
+                }
+            }
             
             /*
              * Unregister the patch and data of all registered derived cell variables in the flow model.
@@ -892,7 +1324,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             
             d_flow_model->unregisterPatch();
         }
-        else if (variable_key == "MASS_FRACTIONS")
+        else if (variable_key == "MASS_FRACTION" || variable_key == "MASS_FRACTIONS")
         {
             /*
              * Register the patch and mass fractions in the flow model and compute the corresponding cell data.
@@ -903,7 +1335,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
             std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
             
             num_subghosts_of_data.insert(
-                std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", d_num_value_ghosts));
+                std::pair<std::string, hier::IntVector>("MASS_FRACTIONS", hier::IntVector::getZero(d_dim)));
             
             d_flow_model->registerDerivedCellVariable(num_subghosts_of_data);
             
@@ -1043,7 +1475,7 @@ ValueTagger::getValueStatistics(
                     MPI_DOUBLE,
                     MPI_MAX);
             }
-            else if (variable_key == "MASS_FRACTIONS")
+            else if (variable_key == "MASS_FRACTION" || variable_key == "MASS_FRACTIONS")
             {
                 for (int si = 0; si < d_num_species; si++)
                 {
@@ -1206,7 +1638,7 @@ ValueTagger::tagCellsOnPatch(
                 local_tol_up,
                 local_tol_lo);
         }
-        else if (variable_key == "MASS_FRACTIONS")
+        else if (variable_key == "MASS_FRACTION" || variable_key == "MASS_FRACTIONS")
         {
             for (int si = 0; si < d_num_species; si++)
             {
