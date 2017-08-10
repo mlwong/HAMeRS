@@ -14555,7 +14555,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxDiffusivityWithDensityMass
 #endif
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
-                    // Compute the linear indices.
+                    // Compute the linear index.
                     const int idx_max_diffusivity = i + num_subghosts_0_max_diffusivity;
                     
                     D_max[idx_max_diffusivity] = fmax(D_max[idx_max_diffusivity],
@@ -14613,7 +14613,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxDiffusivityWithDensityMass
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx_max_diffusivity = (i + num_subghosts_0_max_diffusivity) +
                             (j + num_subghosts_1_max_diffusivity)*subghostcell_dim_0_max_diffusivity;
                         
@@ -14688,7 +14688,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMaxDiffusivityWithDensityMass
 #endif
                         for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
-                            // Compute the linear indices.
+                            // Compute the linear index.
                             const int idx_max_diffusivity = (i + num_subghosts_0_max_diffusivity) +
                                 (j + num_subghosts_1_max_diffusivity)*subghostcell_dim_0_max_diffusivity +
                                 (k + num_subghosts_2_max_diffusivity)*subghostcell_dim_0_max_diffusivity*

@@ -1195,19 +1195,59 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                 }
             }
         }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "Number of components in the data of mass fractions provided is not"
+            << " equal to the total number of species or (total number of species - 1)."
+            << std::endl);
+    }
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        /*
+         * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
+         */
         
-        if (d_dim == tbox::Dimension(1))
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_dim_0 = domain_dims[0];
+        
+        const int num_ghosts_0_min = num_ghosts_min[0];
+        
+        for (int si = 0; si < d_num_species; si++)
         {
-            /*
-             * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
-             */
-            
-            const int domain_lo_0 = domain_lo[0];
-            const int domain_dim_0 = domain_dims[0];
-            
-            const int num_ghosts_0_min = num_ghosts_min[0];
-            
-            for (int si = 0; si < d_num_species; si++)
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {
+                // Compute the linear index.
+                const int idx_min = i + num_ghosts_0_min;
+                
+                X[si][idx_min] = X[si][idx_min]/sum[idx_min];
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        /*
+         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        
+        const int num_ghosts_0_min = num_ghosts_min[0];
+        const int num_ghosts_1_min = num_ghosts_min[1];
+        const int ghostcell_dim_0_min = ghostcell_dims_min[0];
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
 #ifdef HAMERS_ENABLE_SIMD
                 #pragma omp simd
@@ -1215,28 +1255,36 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear index.
-                    const int idx_min = i + num_ghosts_0_min;
+                    const int idx_min = (i + num_ghosts_0_min) +
+                        (j + num_ghosts_1_min)*ghostcell_dim_0_min;
                     
                     X[si][idx_min] = X[si][idx_min]/sum[idx_min];
                 }
             }
         }
-        else if (d_dim == tbox::Dimension(2))
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        /*
+         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_lo_2 = domain_lo[2];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        const int domain_dim_2 = domain_dims[2];
+        
+        const int num_ghosts_0_min = num_ghosts_min[0];
+        const int num_ghosts_1_min = num_ghosts_min[1];
+        const int num_ghosts_2_min = num_ghosts_min[2];
+        const int ghostcell_dim_0_min = ghostcell_dims_min[0];
+        const int ghostcell_dim_1_min = ghostcell_dims_min[1];
+        
+        for (int si = 0; si < d_num_species; si++)
         {
-            /*
-             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
-             */
-            
-            const int domain_lo_0 = domain_lo[0];
-            const int domain_lo_1 = domain_lo[1];
-            const int domain_dim_0 = domain_dims[0];
-            const int domain_dim_1 = domain_dims[1];
-            
-            const int num_ghosts_0_min = num_ghosts_min[0];
-            const int num_ghosts_1_min = num_ghosts_min[1];
-            const int ghostcell_dim_0_min = ghostcell_dims_min[0];
-            
-            for (int si = 0; si < d_num_species; si++)
+            for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
                 for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
@@ -1247,63 +1295,15 @@ EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
                     {
                         // Compute the linear index.
                         const int idx_min = (i + num_ghosts_0_min) +
-                            (j + num_ghosts_1_min)*ghostcell_dim_0_min;
+                            (j + num_ghosts_1_min)*ghostcell_dim_0_min +
+                            (k + num_ghosts_2_min)*ghostcell_dim_0_min*
+                                ghostcell_dim_1_min;
                         
                         X[si][idx_min] = X[si][idx_min]/sum[idx_min];
                     }
                 }
             }
         }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            /*
-             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
-             */
-            
-            const int domain_lo_0 = domain_lo[0];
-            const int domain_lo_1 = domain_lo[1];
-            const int domain_lo_2 = domain_lo[2];
-            const int domain_dim_0 = domain_dims[0];
-            const int domain_dim_1 = domain_dims[1];
-            const int domain_dim_2 = domain_dims[2];
-            
-            const int num_ghosts_0_min = num_ghosts_min[0];
-            const int num_ghosts_1_min = num_ghosts_min[1];
-            const int num_ghosts_2_min = num_ghosts_min[2];
-            const int ghostcell_dim_0_min = ghostcell_dims_min[0];
-            const int ghostcell_dim_1_min = ghostcell_dims_min[1];
-            
-            for (int si = 0; si < d_num_species; si++)
-            {
-                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
-                {
-                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
-                    {
-#ifdef HAMERS_ENABLE_SIMD
-                        #pragma omp simd
-#endif
-                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
-                        {
-                            // Compute the linear index.
-                            const int idx_min = (i + num_ghosts_0_min) +
-                                (j + num_ghosts_1_min)*ghostcell_dim_0_min +
-                                (k + num_ghosts_2_min)*ghostcell_dim_0_min*
-                                    ghostcell_dim_1_min;
-                            
-                            X[si][idx_min] = X[si][idx_min]/sum[idx_min];
-                        }
-                    }
-                }
-            }
-        }
-    }
-    else
-    {
-        TBOX_ERROR(d_object_name
-            << ": "
-            << "Number of components in the data of mass fractions provided is not"
-            << " equal to the total number of species or (total number of species - 1)."
-            << std::endl);
     }
     
     /*
