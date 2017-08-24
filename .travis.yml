@@ -19,4 +19,5 @@ compiler:
 before_install:
   - test -n $CC  && unset CC
   - test -n $CXX && unset CXX
-  - sh pipeline/install-openMPI.sh
+  - sh travis/install-openMPI.sh
+  - sh travis/install-SAMRAI.sh
