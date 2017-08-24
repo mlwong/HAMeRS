@@ -7,12 +7,16 @@ dist: trusty
 os:
   - linux
 
+addons:
+  apt:
+    packages:
+        - libboost-all-dev
+        - libhdf5-serial-dev
+
 compiler:
   - gcc
 
 before_install:
   - test -n $CC  && unset CC
   - test -n $CXX && unset CXX
-  - sudo apt-get -qq update
-  - sudo apt-get install -y libboost-all-dev libhdf5-serial-dev
   - sh pipeline/install-openMPI.sh
