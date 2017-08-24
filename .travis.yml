@@ -1,0 +1,17 @@
+language: c++
+
+sudo: required
+
+dist: trusty
+os:
+  - linux
+
+compiler:
+  - gcc
+
+before_install:
+  - test -n $CC  && unset CC
+  - test -n $CXX && unset CXX
+  - apt-get update && apt-get install -y libboost-all-dev libhdf5-serial-dev
+  - sh pipeline/install-openMPI.sh
+  
