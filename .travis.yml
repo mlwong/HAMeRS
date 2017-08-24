@@ -21,3 +21,8 @@ before_install:
   - test -n $CXX && unset CXX
   - sh travis/install-hdf5.sh
   - sh travis/install-SAMRAI.sh
+
+install:
+  - mkdir build
+  - cd build
+  - cmake ..
