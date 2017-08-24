@@ -16,10 +16,6 @@ addons:
 compiler:
   - gcc
 
-env:
-  - HDF5_ROOT=${HOME}/hdf5
-  - SAMRAI_ROOT=${HOME}/SAMRAI
-
 before_install:
   - test -n $CC  && unset CC
   - test -n $CXX && unset CXX
@@ -30,3 +26,4 @@ install:
   - mkdir build
   - cd build
   - cmake ..
+  - make
