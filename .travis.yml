@@ -31,4 +31,4 @@ install:
   - cmake ..
   - make
 
-script: ./HAMeRS/src/exec/test
+script: ./src/exec/test
