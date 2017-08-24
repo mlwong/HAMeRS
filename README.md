@@ -33,7 +33,7 @@ To restart a simulation, you need to provide restart directory and restore numbe
 src/exec/main <input filename> <restart dir> <restore number>
 ```
 
-To run the code in parallel, you need OpenMPI/MPI. You can try mpirun:
+To run the code in parallel, you need MPI. You can try mpirun:
 
 ```
 mpirun -np <number of processors> src/exec/main <input filename>
