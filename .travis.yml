@@ -10,8 +10,9 @@ os:
 addons:
   apt:
     packages:
-        - libboost-all-dev
-        - libhdf5-serial-dev
+      - gfortran 
+      - libboost-all-dev
+      - libhdf5-serial-dev
 
 compiler:
   - gcc
