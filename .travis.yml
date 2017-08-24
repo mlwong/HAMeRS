@@ -30,3 +30,5 @@ install:
   - cd build
   - cmake ..
   - make
+
+script: ./HAMeRS/src/exec/test
