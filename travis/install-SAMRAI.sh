@@ -11,4 +11,4 @@ cd SAMRAI-v3.11.2
 tar xvf ../SAMRAI-v3.11.2.tar
 mkdir objs
 cd objs
-sh ../SAMRAI/configure --enable-opt --with-CXX=mpicxx --with-CC=mpicc --with-F77=mpif77 --with-boost --with-hdf5=/usr/lib/x86_64-linux-gnu/hdf5/serial
+sh ../SAMRAI/configure --enable-opt --with-CXX=mpicxx --with-CC=mpicc --with-F77=mpif77 --with-boost --with-hdf5

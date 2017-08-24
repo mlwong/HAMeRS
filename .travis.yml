@@ -7,17 +7,14 @@ dist: trusty
 os:
   - linux
 
-addons:
-  apt:
-    packages:
-      - gfortran 
-      - libboost-all-dev
-      - libhdf5-serial-dev
-
 compiler:
   - gcc
 
 before_install:
   - test -n $CC  && unset CC
   - test -n $CXX && unset CXX
+  - sudo apt-get update -qq >/dev/null
+  - sudo apt-get install -qq gfortran  >/dev/null
+  - sudo apt-get install -qq  libboost-all-dev  >/dev/null
+  - sudo apt-get install libhdf5-serial-dev hdf5-tools >/dev/null
   - sh travis/install-SAMRAI.sh
