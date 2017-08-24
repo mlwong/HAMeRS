@@ -12,7 +12,7 @@ addons:
     packages:
       - gfortran 
       - libboost-all-dev
-      - libhdf5-serial-dev
+      - libhdf5-10
 
 compiler:
   - gcc
