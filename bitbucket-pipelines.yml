@@ -5,3 +5,4 @@ pipelines:
           script:
             # Install deps.
             - apt-get update && apt-get install -y libboost-all-dev libhdf5-serial-dev
+            - source pipeline/install-openMPI.sh
