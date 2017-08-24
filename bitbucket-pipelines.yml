@@ -4,4 +4,4 @@ pipelines:
       - step:
           script:
             # Install deps.
-            -  apt-get install libhdf5-serial-dev
+            - apt-get update && apt-get install -y libhdf5-serial-dev
