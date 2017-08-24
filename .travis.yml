@@ -1,8 +1,9 @@
 language: c++
 
-sudo: required
+sudo: enabled
 
 dist: trusty
+
 os:
   - linux
 
