@@ -22,7 +22,6 @@ case "$os" in
         tar -zxf openmpi-1.10.2.tar.gz
         cd openmpi-1.10.2
         sh ./configure --disable-dlopen --prefix=${HOME}/openmpi > /dev/null
-        make -j > /dev/null
         make install > /dev/null
         ;;
 
