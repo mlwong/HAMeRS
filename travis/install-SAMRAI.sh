@@ -11,4 +11,3 @@ cd objs
 sh ../SAMRAI/configure --prefix=${HOME}/SAMRAI --enable-opt --with-CXX=mpicxx --with-CC=mpicc --with-F77=mpif77 --with-boost --with-hdf5=${HOME}/hdf5
 make library > /dev/null
 make install > /dev/null
-export SAMRAI_ROOT=${HOME}/SAMRAI
