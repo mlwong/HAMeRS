@@ -12,7 +12,7 @@ addons:
     packages:
       - gfortran 
       - libboost-all-dev
-      - libhdf5-serial-dev
+      - libhdf5-dev
 
 compiler:
   - gcc
@@ -20,4 +20,5 @@ compiler:
 before_install:
   - test -n $CC  && unset CC
   - test -n $CXX && unset CXX
+  - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/x86_64-linux-gnu/hdf5/serial
   - sh travis/install-SAMRAI.sh
