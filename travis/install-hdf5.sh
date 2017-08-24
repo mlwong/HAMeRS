@@ -6,3 +6,5 @@ cd hdf5_1_8_14
 make
 make install
 export HDF5_ROOT=${HOME}/hdf5
+export HDF5_LIBRARIES=${HOME}/hdf5/lib
+export HDF5_INCLUDE_DIRS=${HOME}/hdf5/include
