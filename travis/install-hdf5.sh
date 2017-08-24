@@ -5,4 +5,3 @@ cd hdf5_1_8_14
 ./configure --prefix=${HOME}/hdf5
 make > /dev/null
 make > /dev/null
-export HDF5_ROOT=${HOME}/hdf5
