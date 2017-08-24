@@ -8,6 +8,6 @@ cd SAMRAI-v3.11.2
 tar xvf ../SAMRAI-v3.11.2.tar > /dev/null 2>&1
 mkdir objs
 cd objs
-sh ../SAMRAI/configure --prefix=$SAMRAI_ROOT --enable-opt --with-CXX=mpicxx --with-CC=mpicc --with-F77=mpif77 --with-boost --with-hdf5=${HOME}/hdf5
+sh ../SAMRAI/configure --prefix=$SAMRAI_ROOT --enable-opt --with-CXX=mpicxx --with-CC=mpicc --with-F77=mpif77 --with-boost --with-hdf5=$HDF5_ROOT
 make library > /dev/null 2>&1
 make install
