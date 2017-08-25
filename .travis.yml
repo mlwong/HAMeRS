@@ -1,0 +1,34 @@
+language: c++
+
+sudo: enabled
+
+dist: trusty
+
+os:
+  - linux
+
+addons:
+  apt:
+    packages:
+      - gfortran 
+      - libboost-all-dev
+
+compiler:
+  - gcc
+
+env:
+  - HDF5_ROOT=${HOME}/hdf5 SAMRAI_ROOT=${HOME}/SAMRAI
+
+before_install:
+  - test -n $CC  && unset CC
+  - test -n $CXX && unset CXX
+  - sh travis/install-hdf5.sh
+  - sh travis/install-SAMRAI.sh
+
+install:
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make
+
+script: ./src/exec/test
