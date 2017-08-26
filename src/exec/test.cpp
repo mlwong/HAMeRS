@@ -384,7 +384,9 @@ int main(int argc, char *argv[])
     }
     
     D.clear();
+    D_ptr.clear();
     Y.clear();
+    Y_const_ptr.clear();
     
     equation_of_mass_diffusivity_mixing_rules_db.reset();
     equation_of_mass_diffusivity_mixing_rules.reset();
