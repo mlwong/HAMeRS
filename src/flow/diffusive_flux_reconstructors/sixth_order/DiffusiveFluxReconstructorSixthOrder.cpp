@@ -220,9 +220,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                     const int idx_node_RRR = i + 2 + num_diff_ghosts_0;
                     
                     F_face_x[idx_face_x] += dt*mu[idx_diffusivity]*(
-                        double(37)/double(60)*(dudx[idx_node_L] + dudx[idx_node_R])
-                        + double(-2)/double(15)*(dudx[idx_node_LL] + dudx[idx_node_RR])
-                        + double(1)/double(60)*(dudx[idx_node_LLL] + dudx[idx_node_RRR]));
+                        double(37)/double(60)*(dudx[idx_node_L] + dudx[idx_node_R]) +
+                        double(-2)/double(15)*(dudx[idx_node_LL] + dudx[idx_node_RR]) +
+                        double(1)/double(60)*(dudx[idx_node_LLL] + dudx[idx_node_RRR]));
                 }
             }
         }
@@ -419,9 +419,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                             (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
                         
                         F_face_x[idx_face_x] += dt*mu[idx_diffusivity]*(
-                            double(37)/double(60)*(dudx[idx_node_L] + dudx[idx_node_R])
-                            + double(-2)/double(15)*(dudx[idx_node_LL] + dudx[idx_node_RR])
-                            + double(1)/double(60)*(dudx[idx_node_LLL] + dudx[idx_node_RRR]));
+                            double(37)/double(60)*(dudx[idx_node_L] + dudx[idx_node_R]) +
+                            double(-2)/double(15)*(dudx[idx_node_LL] + dudx[idx_node_RR]) +
+                            double(1)/double(60)*(dudx[idx_node_LLL] + dudx[idx_node_RRR]));
                     }
                 }
             }
@@ -490,9 +490,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                             (j + num_diff_ghosts_1)*diff_ghostcell_dim_0;
                         
                         F_face_x[idx_face_x] += dt*mu[idx_diffusivity]*(
-                            double(37)/double(60)*(dudy[idx_node_L] + dudy[idx_node_R])
-                            + double(-2)/double(15)*(dudy[idx_node_LL] + dudy[idx_node_RR])
-                            + double(1)/double(60)*(dudy[idx_node_LLL] + dudy[idx_node_RRR]));
+                            double(37)/double(60)*(dudy[idx_node_L] + dudy[idx_node_R]) +
+                            double(-2)/double(15)*(dudy[idx_node_LL] + dudy[idx_node_RR]) +
+                            double(1)/double(60)*(dudy[idx_node_LLL] + dudy[idx_node_RRR]));
                     }
                 }
             }
@@ -646,9 +646,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                             (j + 2 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
                         
                         F_face_y[idx_face_y] += dt*mu[idx_diffusivity]*(
-                            double(37)/double(60)*(dudx[idx_node_B] + dudx[idx_node_T])
-                            + double(-2)/double(15)*(dudx[idx_node_BB] + dudx[idx_node_TT])
-                            + double(1)/double(60)*(dudx[idx_node_BBB] + dudx[idx_node_TTT]));
+                            double(37)/double(60)*(dudx[idx_node_B] + dudx[idx_node_T]) +
+                            double(-2)/double(15)*(dudx[idx_node_BB] + dudx[idx_node_TT]) +
+                            double(1)/double(60)*(dudx[idx_node_BBB] + dudx[idx_node_TTT]));
                     }
                 }
             }
@@ -717,9 +717,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                             (j + 2 + num_diff_ghosts_1)*diff_ghostcell_dim_0;
                         
                         F_face_y[idx_face_y] += dt*mu[idx_diffusivity]*(
-                            double(37)/double(60)*(dudy[idx_node_B] + dudy[idx_node_T])
-                            + double(-2)/double(15)*(dudy[idx_node_BB] + dudy[idx_node_TT])
-                            + double(1)/double(60)*(dudy[idx_node_BBB] + dudy[idx_node_TTT]));
+                            double(37)/double(60)*(dudy[idx_node_B] + dudy[idx_node_T]) +
+                            double(-2)/double(15)*(dudy[idx_node_BB] + dudy[idx_node_TT]) +
+                            double(1)/double(60)*(dudy[idx_node_BBB] + dudy[idx_node_TTT]));
                     }
                 }
             }
@@ -981,9 +981,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                                     diff_ghostcell_dim_1;
                             
                             F_face_x[idx_face_x] += dt*mu[idx_diffusivity]*(
-                                double(37)/double(60)*(dudx[idx_node_L] + dudx[idx_node_R])
-                                + double(-2)/double(15)*(dudx[idx_node_LL] + dudx[idx_node_RR])
-                                + double(1)/double(60)*(dudx[idx_node_LLL] + dudx[idx_node_RRR]));
+                                double(37)/double(60)*(dudx[idx_node_L] + dudx[idx_node_R]) +
+                                double(-2)/double(15)*(dudx[idx_node_LL] + dudx[idx_node_RR]) +
+                                double(1)/double(60)*(dudx[idx_node_LLL] + dudx[idx_node_RRR]));
                         }
                     }
                 }
@@ -1072,9 +1072,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                                     diff_ghostcell_dim_1;
                             
                             F_face_x[idx_face_x] += dt*mu[idx_diffusivity]*(
-                                double(37)/double(60)*(dudy[idx_node_L] + dudy[idx_node_R])
-                                + double(-2)/double(15)*(dudy[idx_node_LL] + dudy[idx_node_RR])
-                                + double(1)/double(60)*(dudy[idx_node_LLL] + dudy[idx_node_RRR]));
+                                double(37)/double(60)*(dudy[idx_node_L] + dudy[idx_node_R]) +
+                                double(-2)/double(15)*(dudy[idx_node_LL] + dudy[idx_node_RR]) +
+                                double(1)/double(60)*(dudy[idx_node_LLL] + dudy[idx_node_RRR]));
                         }
                     }
                 }
@@ -1163,9 +1163,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                                     diff_ghostcell_dim_1;
                             
                             F_face_x[idx_face_x] += dt*mu[idx_diffusivity]*(
-                                double(37)/double(60)*(dudz[idx_node_L] + dudz[idx_node_R])
-                                + double(-2)/double(15)*(dudz[idx_node_LL] + dudz[idx_node_RR])
-                                + double(1)/double(60)*(dudz[idx_node_LLL] + dudz[idx_node_RRR]));
+                                double(37)/double(60)*(dudz[idx_node_L] + dudz[idx_node_R]) +
+                                double(-2)/double(15)*(dudz[idx_node_LL] + dudz[idx_node_RR]) +
+                                double(1)/double(60)*(dudz[idx_node_LLL] + dudz[idx_node_RRR]));
                         }
                     }
                 }
@@ -1371,9 +1371,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                                     diff_ghostcell_dim_1;
                             
                             F_face_y[idx_face_y] += dt*mu[idx_diffusivity]*(
-                                double(37)/double(60)*(dudx[idx_node_B] + dudx[idx_node_T])
-                                + double(-2)/double(15)*(dudx[idx_node_BB] + dudx[idx_node_TT])
-                                + double(1)/double(60)*(dudx[idx_node_BBB] + dudx[idx_node_TTT]));
+                                double(37)/double(60)*(dudx[idx_node_B] + dudx[idx_node_T]) +
+                                double(-2)/double(15)*(dudx[idx_node_BB] + dudx[idx_node_TT]) +
+                                double(1)/double(60)*(dudx[idx_node_BBB] + dudx[idx_node_TTT]));
                         }
                     }
                 }
@@ -1462,9 +1462,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                                     diff_ghostcell_dim_1;
                             
                             F_face_y[idx_face_y] += dt*mu[idx_diffusivity]*(
-                                double(37)/double(60)*(dudy[idx_node_B] + dudy[idx_node_T])
-                                + double(-2)/double(15)*(dudy[idx_node_BB] + dudy[idx_node_TT])
-                                + double(1)/double(60)*(dudy[idx_node_BBB] + dudy[idx_node_TTT]));
+                                double(37)/double(60)*(dudy[idx_node_B] + dudy[idx_node_T]) +
+                                double(-2)/double(15)*(dudy[idx_node_BB] + dudy[idx_node_TT]) +
+                                double(1)/double(60)*(dudy[idx_node_BBB] + dudy[idx_node_TTT]));
                         }
                     }
                 }
@@ -1553,9 +1553,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                                     diff_ghostcell_dim_1;
                             
                             F_face_y[idx_face_y] += dt*mu[idx_diffusivity]*(
-                                double(37)/double(60)*(dudz[idx_node_B] + dudz[idx_node_T])
-                                + double(-2)/double(15)*(dudz[idx_node_BB] + dudz[idx_node_TT])
-                                + double(1)/double(60)*(dudz[idx_node_BBB] + dudz[idx_node_TTT]));
+                                double(37)/double(60)*(dudz[idx_node_B] + dudz[idx_node_T]) +
+                                double(-2)/double(15)*(dudz[idx_node_BB] + dudz[idx_node_TT]) +
+                                double(1)/double(60)*(dudz[idx_node_BBB] + dudz[idx_node_TTT]));
                         }
                     }
                 }
@@ -1761,9 +1761,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                                     diff_ghostcell_dim_1;
                             
                             F_face_z[idx_face_z] += dt*mu[idx_diffusivity]*(
-                                double(37)/double(60)*(dudx[idx_node_B] + dudx[idx_node_F])
-                                + double(-2)/double(15)*(dudx[idx_node_BB] + dudx[idx_node_FF])
-                                + double(1)/double(60)*(dudx[idx_node_BBB] + dudx[idx_node_FFF]));
+                                double(37)/double(60)*(dudx[idx_node_B] + dudx[idx_node_F]) +
+                                double(-2)/double(15)*(dudx[idx_node_BB] + dudx[idx_node_FF]) +
+                                double(1)/double(60)*(dudx[idx_node_BBB] + dudx[idx_node_FFF]));
                         }
                     }
                 }
@@ -1852,9 +1852,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                                     diff_ghostcell_dim_1;
                             
                             F_face_z[idx_face_z] += dt*mu[idx_diffusivity]*(
-                                double(37)/double(60)*(dudy[idx_node_B] + dudy[idx_node_F])
-                                + double(-2)/double(15)*(dudy[idx_node_BB] + dudy[idx_node_FF])
-                                + double(1)/double(60)*(dudy[idx_node_BBB] + dudy[idx_node_FFF]));
+                                double(37)/double(60)*(dudy[idx_node_B] + dudy[idx_node_F]) +
+                                double(-2)/double(15)*(dudy[idx_node_BB] + dudy[idx_node_FF]) +
+                                double(1)/double(60)*(dudy[idx_node_BBB] + dudy[idx_node_FFF]));
                         }
                     }
                 }
@@ -1943,9 +1943,9 @@ DiffusiveFluxReconstructorSixthOrder::computeDiffusiveFluxOnPatch(
                                     diff_ghostcell_dim_1;
                             
                             F_face_z[idx_face_z] += dt*mu[idx_diffusivity]*(
-                                double(37)/double(60)*(dudz[idx_node_B] + dudz[idx_node_F])
-                                + double(-2)/double(15)*(dudz[idx_node_BB] + dudz[idx_node_FF])
-                                + double(1)/double(60)*(dudz[idx_node_BBB] + dudz[idx_node_FFF]));
+                                double(37)/double(60)*(dudz[idx_node_B] + dudz[idx_node_F]) +
+                                double(-2)/double(15)*(dudz[idx_node_BB] + dudz[idx_node_FF]) +
+                                double(1)/double(60)*(dudz[idx_node_BBB] + dudz[idx_node_FFF]));
                         }
                     }
                 }
@@ -2079,9 +2079,9 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInX(
                         const int idx_data_RR  = i + 2 + num_subghosts_0_data;
                         const int idx_data_RRR = i + 3 + num_subghosts_0_data;
                         
-                        dudx[idx] = (double(3)/double(4)*(u[idx_data_R] - u[idx_data_L])
-                                     + double(-3)/double(20)*(u[idx_data_RR] - u[idx_data_LL])
-                                     + double(1)/double(60)*(u[idx_data_RRR] - u[idx_data_LLL]))/
+                        dudx[idx] = (double(3)/double(4)*(u[idx_data_R] - u[idx_data_L]) +
+                                     double(-3)/double(20)*(u[idx_data_RR] - u[idx_data_LL]) +
+                                     double(1)/double(60)*(u[idx_data_RRR] - u[idx_data_LLL]))/
                                         dx_0;
                     }
                     
@@ -2178,9 +2178,9 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInX(
                             const int idx_data_RRR = (i + 3 + num_subghosts_0_data) +
                                 (j + num_subghosts_1_data)*subghostcell_dim_0_data;
                             
-                            dudx[idx] = (double(3)/double(4)*(u[idx_data_R] - u[idx_data_L])
-                                         + double(-3)/double(20)*(u[idx_data_RR] - u[idx_data_LL])
-                                         + double(1)/double(60)*(u[idx_data_RRR] - u[idx_data_LLL]))/
+                            dudx[idx] = (double(3)/double(4)*(u[idx_data_R] - u[idx_data_L]) +
+                                         double(-3)/double(20)*(u[idx_data_RR] - u[idx_data_LL]) +
+                                         double(1)/double(60)*(u[idx_data_RRR] - u[idx_data_LLL]))/
                                             dx_0;
                         }
                     }
@@ -2299,9 +2299,9 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInX(
                                     (k + num_subghosts_2_data)*subghostcell_dim_0_data*
                                         subghostcell_dim_1_data;
                                 
-                                dudx[idx] = (double(3)/double(4)*(u[idx_data_R] - u[idx_data_L])
-                                             + double(-3)/double(20)*(u[idx_data_RR] - u[idx_data_LL])
-                                             + double(1)/double(60)*(u[idx_data_RRR] - u[idx_data_LLL]))/
+                                dudx[idx] = (double(3)/double(4)*(u[idx_data_R] - u[idx_data_L]) +
+                                             double(-3)/double(20)*(u[idx_data_RR] - u[idx_data_LL]) +
+                                             double(1)/double(60)*(u[idx_data_RRR] - u[idx_data_LLL]))/
                                                 dx_0;
                             }
                         }
@@ -2451,9 +2451,9 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInY(
                             const int idx_data_TTT = (i + num_subghosts_0_data) +
                                 (j + 3 + num_subghosts_1_data)*subghostcell_dim_0_data;
                             
-                            dudy[idx] = (double(3)/double(4)*(u[idx_data_T] - u[idx_data_B])
-                                         + double(-3)/double(20)*(u[idx_data_TT] - u[idx_data_BB])
-                                         + double(1)/double(60)*(u[idx_data_TTT] - u[idx_data_BBB]))/
+                            dudy[idx] = (double(3)/double(4)*(u[idx_data_T] - u[idx_data_B]) +
+                                         double(-3)/double(20)*(u[idx_data_TT] - u[idx_data_BB]) +
+                                         double(1)/double(60)*(u[idx_data_TTT] - u[idx_data_BBB]))/
                                             dx_1;
                         }
                     }
@@ -2572,9 +2572,9 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInY(
                                     (k + num_subghosts_2_data)*subghostcell_dim_0_data*
                                         subghostcell_dim_1_data;
                                 
-                                dudy[idx] = (double(3)/double(4)*(u[idx_data_T] - u[idx_data_B])
-                                             + double(-3)/double(20)*(u[idx_data_TT] - u[idx_data_BB])
-                                             + double(1)/double(60)*(u[idx_data_TTT] - u[idx_data_BBB]))/
+                                dudy[idx] = (double(3)/double(4)*(u[idx_data_T] - u[idx_data_B]) +
+                                             double(-3)/double(20)*(u[idx_data_TT] - u[idx_data_BB]) +
+                                             double(1)/double(60)*(u[idx_data_TTT] - u[idx_data_BBB]))/
                                                 dx_1;
                             }
                         }
@@ -2753,9 +2753,9 @@ DiffusiveFluxReconstructorSixthOrder::computeFirstDerivativesInZ(
                                     (k + 3 + num_subghosts_2_data)*subghostcell_dim_0_data*
                                         subghostcell_dim_1_data;
                                 
-                                dudz[idx] = (double(3)/double(4)*(u[idx_data_F] - u[idx_data_B])
-                                             + double(-3)/double(20)*(u[idx_data_FF] - u[idx_data_BB])
-                                             + double(1)/double(60)*(u[idx_data_FFF] - u[idx_data_BBB]))/
+                                dudz[idx] = (double(3)/double(4)*(u[idx_data_F] - u[idx_data_B]) +
+                                             double(-3)/double(20)*(u[idx_data_FF] - u[idx_data_BB]) +
+                                             double(1)/double(60)*(u[idx_data_FFF] - u[idx_data_BBB]))/
                                                 dx_2;
                             }
                         }

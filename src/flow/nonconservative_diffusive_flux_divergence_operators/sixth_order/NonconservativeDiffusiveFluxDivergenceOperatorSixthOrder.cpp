@@ -2410,9 +2410,9 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                         const int idx_data_RR  = i + 2 + num_subghosts_0_data;
                         const int idx_data_RRR = i + 3 + num_subghosts_0_data;
                         
-                        dudx[idx] = (double(3)/double(4)*(u[idx_data_R] - u[idx_data_L])
-                                     + double(-3)/double(20)*(u[idx_data_RR] - u[idx_data_LL])
-                                     + double(1)/double(60)*(u[idx_data_RRR] - u[idx_data_LLL]))/
+                        dudx[idx] = (double(3)/double(4)*(u[idx_data_R] - u[idx_data_L]) +
+                                     double(-3)/double(20)*(u[idx_data_RR] - u[idx_data_LL]) +
+                                     double(1)/double(60)*(u[idx_data_RRR] - u[idx_data_LLL]))/
                                         dx_0;
                     }
                     
@@ -2509,9 +2509,9 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                             const int idx_data_RRR = (i + 3 + num_subghosts_0_data) +
                                 (j + num_subghosts_1_data)*subghostcell_dim_0_data;
                             
-                            dudx[idx] = (double(3)/double(4)*(u[idx_data_R] - u[idx_data_L])
-                                         + double(-3)/double(20)*(u[idx_data_RR] - u[idx_data_LL])
-                                         + double(1)/double(60)*(u[idx_data_RRR] - u[idx_data_LLL]))/
+                            dudx[idx] = (double(3)/double(4)*(u[idx_data_R] - u[idx_data_L]) +
+                                         double(-3)/double(20)*(u[idx_data_RR] - u[idx_data_LL]) +
+                                         double(1)/double(60)*(u[idx_data_RRR] - u[idx_data_LLL]))/
                                             dx_0;
                         }
                     }
@@ -2630,9 +2630,9 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                                     (k + num_subghosts_2_data)*subghostcell_dim_0_data*
                                         subghostcell_dim_1_data;
                                 
-                                dudx[idx] = (double(3)/double(4)*(u[idx_data_R] - u[idx_data_L])
-                                             + double(-3)/double(20)*(u[idx_data_RR] - u[idx_data_LL])
-                                             + double(1)/double(60)*(u[idx_data_RRR] - u[idx_data_LLL]))/
+                                dudx[idx] = (double(3)/double(4)*(u[idx_data_R] - u[idx_data_L]) +
+                                             double(-3)/double(20)*(u[idx_data_RR] - u[idx_data_LL]) +
+                                             double(1)/double(60)*(u[idx_data_RRR] - u[idx_data_LLL]))/
                                                 dx_0;
                             }
                         }
@@ -2782,9 +2782,9 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                             const int idx_data_TTT = (i + num_subghosts_0_data) +
                                 (j + 3 + num_subghosts_1_data)*subghostcell_dim_0_data;
                             
-                            dudy[idx] = (double(3)/double(4)*(u[idx_data_T] - u[idx_data_B])
-                                         + double(-3)/double(20)*(u[idx_data_TT] - u[idx_data_BB])
-                                         + double(1)/double(60)*(u[idx_data_TTT] - u[idx_data_BBB]))/
+                            dudy[idx] = (double(3)/double(4)*(u[idx_data_T] - u[idx_data_B]) +
+                                         double(-3)/double(20)*(u[idx_data_TT] - u[idx_data_BB]) +
+                                         double(1)/double(60)*(u[idx_data_TTT] - u[idx_data_BBB]))/
                                             dx_1;
                         }
                     }
@@ -2903,9 +2903,9 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                                     (k + num_subghosts_2_data)*subghostcell_dim_0_data*
                                         subghostcell_dim_1_data;
                                 
-                                dudy[idx] = (double(3)/double(4)*(u[idx_data_T] - u[idx_data_B])
-                                             + double(-3)/double(20)*(u[idx_data_TT] - u[idx_data_BB])
-                                             + double(1)/double(60)*(u[idx_data_TTT] - u[idx_data_BBB]))/
+                                dudy[idx] = (double(3)/double(4)*(u[idx_data_T] - u[idx_data_B]) +
+                                             double(-3)/double(20)*(u[idx_data_TT] - u[idx_data_BB]) +
+                                             double(1)/double(60)*(u[idx_data_TTT] - u[idx_data_BBB]))/
                                                 dx_1;
                             }
                         }
@@ -3084,9 +3084,9 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                                     (k + 3 + num_subghosts_2_data)*subghostcell_dim_0_data*
                                         subghostcell_dim_1_data;
                                 
-                                dudz[idx] = (double(3)/double(4)*(u[idx_data_F] - u[idx_data_B])
-                                             + double(-3)/double(20)*(u[idx_data_FF] - u[idx_data_BB])
-                                             + double(1)/double(60)*(u[idx_data_FFF] - u[idx_data_BBB]))/
+                                dudz[idx] = (double(3)/double(4)*(u[idx_data_F] - u[idx_data_B]) +
+                                             double(-3)/double(20)*(u[idx_data_FF] - u[idx_data_BB]) +
+                                             double(1)/double(60)*(u[idx_data_FFF] - u[idx_data_BBB]))/
                                                 dx_2;
                             }
                         }
@@ -3206,10 +3206,10 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                         const int idx_data_RR  = i + 2 + num_subghosts_0_data;
                         const int idx_data_RRR = i + 3 + num_subghosts_0_data;
                         
-                        d2udx2[idx] = (double(-49)/double(18)*u[idx_data]
-                                       + double(3)/double(2)*(u[idx_data_L] + u[idx_data_R])
-                                       + double(-3)/double(20)*(u[idx_data_LL] + u[idx_data_RR])
-                                       + double(1)/double(90)*(u[idx_data_LLL] + u[idx_data_RRR]))/
+                        d2udx2[idx] = (double(-49)/double(18)*u[idx_data] +
+                                       double(3)/double(2)*(u[idx_data_L] + u[idx_data_R]) +
+                                       double(-3)/double(20)*(u[idx_data_LL] + u[idx_data_RR]) +
+                                       double(1)/double(90)*(u[idx_data_LLL] + u[idx_data_RRR]))/
                                         dx_sq;
                     }
                     
@@ -3309,10 +3309,10 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                             const int idx_data_RRR = (i + 3 + num_subghosts_0_data) +
                                 (j + num_subghosts_1_data)*subghostcell_dim_0_data;
                             
-                            d2udx2[idx] = (double(-49)/double(18)*u[idx_data]
-                                           + double(3)/double(2)*(u[idx_data_L] + u[idx_data_R])
-                                           + double(-3)/double(20)*(u[idx_data_LL] + u[idx_data_RR])
-                                           + double(1)/double(90)*(u[idx_data_LLL] + u[idx_data_RRR]))/
+                            d2udx2[idx] = (double(-49)/double(18)*u[idx_data] +
+                                           double(3)/double(2)*(u[idx_data_L] + u[idx_data_R]) +
+                                           double(-3)/double(20)*(u[idx_data_LL] + u[idx_data_RR]) +
+                                           double(1)/double(90)*(u[idx_data_LLL] + u[idx_data_RRR]))/
                                             dx_sq;
                         }
                     }
@@ -3436,10 +3436,10 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                                     (k + num_subghosts_2_data)*subghostcell_dim_0_data*
                                         subghostcell_dim_1_data;
                                 
-                                d2udx2[idx] = (double(-49)/double(18)*u[idx_data]
-                                               + double(3)/double(2)*(u[idx_data_L] + u[idx_data_R])
-                                               + double(-3)/double(20)*(u[idx_data_LL] + u[idx_data_RR])
-                                               + double(1)/double(90)*(u[idx_data_LLL] + u[idx_data_RRR]))/
+                                d2udx2[idx] = (double(-49)/double(18)*u[idx_data] +
+                                               double(3)/double(2)*(u[idx_data_L] + u[idx_data_R]) +
+                                               double(-3)/double(20)*(u[idx_data_LL] + u[idx_data_RR]) +
+                                               double(1)/double(90)*(u[idx_data_LLL] + u[idx_data_RRR]))/
                                                 dx_sq;
                             }
                         }
@@ -3592,10 +3592,10 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                             const int idx_data_TTT = (i + num_subghosts_0_data) +
                                 (j + 3 + num_subghosts_1_data)*subghostcell_dim_0_data;
                             
-                            d2udy2[idx] = (double(-49)/double(18)*u[idx_data]
-                                           + double(3)/double(2)*(u[idx_data_B] + u[idx_data_T])
-                                           + double(-3)/double(20)*(u[idx_data_BB] + u[idx_data_TT])
-                                           + double(1)/double(90)*(u[idx_data_BBB] + u[idx_data_TTT]))/
+                            d2udy2[idx] = (double(-49)/double(18)*u[idx_data] +
+                                           double(3)/double(2)*(u[idx_data_B] + u[idx_data_T]) +
+                                           double(-3)/double(20)*(u[idx_data_BB] + u[idx_data_TT]) +
+                                           double(1)/double(90)*(u[idx_data_BBB] + u[idx_data_TTT]))/
                                             dy_sq;
                         }
                     }
@@ -3719,10 +3719,10 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                                     (k + num_subghosts_2_data)*subghostcell_dim_0_data*
                                         subghostcell_dim_1_data;
                                 
-                                d2udy2[idx] = (double(-49)/double(18)*u[idx_data]
-                                               + double(3)/double(2)*(u[idx_data_B] + u[idx_data_T])
-                                               + double(-3)/double(20)*(u[idx_data_BB] + u[idx_data_TT])
-                                               + double(1)/double(90)*(u[idx_data_BBB] + u[idx_data_TTT]))/
+                                d2udy2[idx] = (double(-49)/double(18)*u[idx_data] +
+                                               double(3)/double(2)*(u[idx_data_B] + u[idx_data_T]) +
+                                               double(-3)/double(20)*(u[idx_data_BB] + u[idx_data_TT]) +
+                                               double(1)/double(90)*(u[idx_data_BBB] + u[idx_data_TTT]))/
                                                 dy_sq;
                             }
                         }
@@ -3906,10 +3906,10 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                                     (k + 3 + num_subghosts_2_data)*subghostcell_dim_0_data*
                                         subghostcell_dim_1_data;
                                 
-                                d2udz2[idx] = (double(-49)/double(18)*u[idx_data]
-                                               + double(3)/double(2)*(u[idx_data_B] + u[idx_data_F])
-                                               + double(-3)/double(20)*(u[idx_data_BB] + u[idx_data_FF])
-                                               + double(1)/double(90)*(u[idx_data_BBB] + u[idx_data_FFF]))/
+                                d2udz2[idx] = (double(-49)/double(18)*u[idx_data] +
+                                               double(3)/double(2)*(u[idx_data_B] + u[idx_data_F]) +
+                                               double(-3)/double(20)*(u[idx_data_BB] + u[idx_data_FF]) +
+                                               double(1)/double(90)*(u[idx_data_BBB] + u[idx_data_FFF]))/
                                                 dz_sq;
                             }
                         }
