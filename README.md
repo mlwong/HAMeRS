@@ -41,6 +41,10 @@ To run the code in parallel, you need MPI. You can try mpirun:
 mpirun -np <number of processors> src/exec/main <input filename>
 ```
 
+### How do I change the problem? ###
+
+To change the problem that you want to run for an application, e.g. the Euler application, just simply link the corresponding initial conditions cpp symlink (`EulerInitialConditions.cpp` in `src/apps/Euler`) to the actual problem file using `ln -s <path/to/new/problem/initial/conditions.cpp> EulerInitialConditions.cpp`. There are some initial conditions files from different example problems in the `problems` folder.
+
 ### Who do I talk to? ###
 
 The code is managed by Man-Long Wong (wongml@stanford.edu) of the [Flow Physics and Aeroacoustics Laboratory](https://fpal.stanford.edu/) (FPAL)  at the [Department of Aeronautics and Astronautics](https://aa.stanford.edu/) of [Stanford University](https://www.stanford.edu/).
