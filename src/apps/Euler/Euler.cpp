@@ -146,8 +146,6 @@ Euler::Euler(
         d_flow_model_manager->getFlowModelType(),
         d_num_species));
     
-    d_Euler_initial_conditions->setVariables(d_flow_model->getConservativeVariables());
-    
     /*
      * Initialize d_Euler_boundary_conditions.
      */
@@ -479,9 +477,10 @@ Euler::initializeDataOnPatch(
     
     d_Euler_initial_conditions->initializeDataOnPatch(
         patch,
+        d_flow_model->getConservativeVariables(),
+        getDataContext(),
         data_time,
-        initial_time,
-        getDataContext());
+        initial_time);
     
     if (d_use_nonuniform_workload)
     {
@@ -2171,7 +2170,7 @@ Euler::putToRestart(
 #ifdef HAVE_HDF5
 void
 Euler::registerVisItDataWriter(
-    const boost::shared_ptr<appu::VisItDataWriter>& viz_writer)
+    const boost::shared_ptr<ExtendedVisItDataWriter>& viz_writer)
 {
     TBOX_ASSERT(viz_writer);
     d_visit_writer = viz_writer;

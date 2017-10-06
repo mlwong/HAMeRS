@@ -2,7 +2,7 @@
 add_executable(main main.cpp)
 
 # main should link to the Euler and Navier-Stokes library
-target_link_libraries(main Euler Navier_Stokes gfortran)
+target_link_libraries(main Euler Navier_Stokes visit_data_writer gfortran)
 
 # Compile test from test.cpp
 add_executable(test test.cpp)

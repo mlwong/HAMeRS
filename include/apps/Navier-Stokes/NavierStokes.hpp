@@ -7,6 +7,7 @@
 #include "algs/patch_strategy/RungeKuttaPatchStrategy.hpp"
 #include "apps/Navier-Stokes/NavierStokesBoundaryConditions.hpp"
 #include "apps/Navier-Stokes/NavierStokesInitialConditions.hpp"
+#include "extn/visit_data_writer/ExtendedVisItDataWriter.hpp"
 #include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructorManager.hpp"
 #include "flow/diffusive_flux_reconstructors/DiffusiveFluxReconstructorManager.hpp"
 #include "flow/nonconservative_diffusive_flux_divergence_operators/NonconservativeDiffusiveFluxDivergenceOperatorManager.hpp"
@@ -16,7 +17,7 @@
 #include "flow/refinement_taggers/ValueTagger.hpp"
 
 #include "SAMRAI/appu/VisDerivedDataStrategy.h"
-#include "SAMRAI/appu/VisItDataWriter.h"
+// #include "SAMRAI/appu/VisItDataWriter.h"
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/hier/BoundaryBox.h"
 #include "SAMRAI/hier/Box.h"
@@ -372,7 +373,7 @@ class NavierStokes:
          * with the VisIt visualization tool.
          */
 #ifdef HAVE_HDF5
-        void registerVisItDataWriter(const boost::shared_ptr<appu::VisItDataWriter>& viz_writer);
+        void registerVisItDataWriter(const boost::shared_ptr<ExtendedVisItDataWriter>& viz_writer);
 #endif
         
         /**
@@ -481,7 +482,7 @@ class NavierStokes:
         const std::string d_stat_dump_filename;
         
 #ifdef HAVE_HDF5
-        boost::shared_ptr<appu::VisItDataWriter> d_visit_writer;
+        boost::shared_ptr<ExtendedVisItDataWriter> d_visit_writer;
 #endif
         
         /*
