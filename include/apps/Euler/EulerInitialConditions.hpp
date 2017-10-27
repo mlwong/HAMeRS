@@ -33,50 +33,8 @@ class EulerInitialConditions
                 d_dim(dim),
                 d_grid_geometry(grid_geometry),
                 d_flow_model_type(flow_model_type),
-                d_num_species(num_species),
-                d_variables_set(false)
+                d_num_species(num_species)
         {}
-        
-        /*
-         * Set the cell variables.
-         */
-        void
-        setVariables(
-            const std::vector<boost::shared_ptr<pdat::CellVariable<double> > >& conservative_variables)
-        {
-            switch (d_flow_model_type)
-            {
-                case FLOW_MODEL::SINGLE_SPECIES:
-                {
-                    d_density = conservative_variables[0];
-                    d_momentum = conservative_variables[1];
-                    d_total_energy = conservative_variables[2];
-                    
-                    d_variables_set = true;
-                    
-                    break;
-                }
-                case FLOW_MODEL::FOUR_EQN_CONSERVATIVE:
-                {
-                    d_partial_density = conservative_variables[0];
-                    d_momentum = conservative_variables[1];
-                    d_total_energy = conservative_variables[2];
-                    
-                    d_variables_set = true;
-                    
-                    break;
-                }
-                case FLOW_MODEL::FIVE_EQN_ALLAIRE:
-                {
-                    d_partial_density = conservative_variables[0];
-                    d_momentum = conservative_variables[1];
-                    d_total_energy = conservative_variables[2];
-                    d_volume_fraction = conservative_variables[3];
-                    
-                    break;
-                }
-            }
-        }
         
         /*
          * Set the data on the patch interior to some initial values,
@@ -85,9 +43,10 @@ class EulerInitialConditions
         void
         initializeDataOnPatch(
             hier::Patch& patch,
+            const std::vector<boost::shared_ptr<pdat::CellVariable<double> > >& conservative_variables,
+            const boost::shared_ptr<hier::VariableContext>& data_context,
             const double data_time,
-            const bool initial_time,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+            const bool initial_time);
         
     private:
         /*
@@ -120,20 +79,6 @@ class EulerInitialConditions
          */
         const int d_num_species;
         
-        /*
-         * boost::shared_ptr to solution state.
-         */
-        boost::shared_ptr<pdat::CellVariable<double> > d_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_partial_density;
-        boost::shared_ptr<pdat::CellVariable<double> > d_momentum;
-        boost::shared_ptr<pdat::CellVariable<double> > d_total_energy;
-        boost::shared_ptr<pdat::CellVariable<double> > d_mass_fraction;
-        boost::shared_ptr<pdat::CellVariable<double> > d_volume_fraction;
-        
-        /*
-         * Boolean to determine whether proper variables are initialized.
-         */
-        bool d_variables_set;
 };
 
 #endif /* EULER_INITIAL_CONDITIONS_HPP */

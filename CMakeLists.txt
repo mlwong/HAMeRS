@@ -37,7 +37,9 @@ configure_file(${HAMeRS_SOURCE_DIR}/include/HAMeRS_config.hpp.in ${HAMeRS_SOURCE
 # Set the compilers
 set(CMAKE_CXX_COMPILER mpicxx)
 set(CMAKE_C_COMPILER mpicc)
-set(CMAKE_Fortran_COMPILER gfortran)
+set(CMAKE_Fortran_COMPILER mpif77)
+
+message(STATUS "CMAKE_CXX_COMPILER_ID: " ${CMAKE_CXX_COMPILER_ID})
 
 if (NOT CMAKE_BUILD_TYPE)
     message(STATUS "No build type selected, default to Release")
@@ -47,7 +49,9 @@ endif()
 # Intel compiler suite
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
     if (CMAKE_BUILD_TYPE MATCHES "Release")
-        set(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wall -Wno-deprecated -qopenmp -qoverride-limits -xhost -qopt-report")
+        set(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wall -Wno-deprecated -qopenmp -xhost -qopt-report")
+    elseif (CMAKE_BUILD_TYPE MATCHES "KNL")
+        set(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wall -Wno-deprecated -qopenmp -axMIC-AVX512 -qopt-report")
     elseif (CMAKE_BUILD_TYPE MATCHES "Debug")
         set(CMAKE_CXX_FLAGS "-std=c++11 -g -O0 -Wall -Wno-deprecated")
     endif()
