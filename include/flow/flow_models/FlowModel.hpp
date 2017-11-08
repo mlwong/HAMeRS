@@ -6,7 +6,9 @@
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
 #include "extn/visit_data_writer/ExtendedVisItDataWriter.hpp"
 #include "flow/flow_models/FlowModelBoundaryUtilities.hpp"
+#include "flow/flow_models/FlowModelRiemannSolver.hpp"
 #include "flow/flow_models/FlowModelStatisticsUtilities.hpp"
+#include "flow/flow_models/RiemannSolverTypes.hpp"
 #include "util/Directions.hpp"
 #include "util/mixing_rules/equations_of_state/EquationOfStateMixingRulesManager.hpp"
 
@@ -45,18 +47,13 @@ namespace AVERAGING
                 ROE };
 }
 
-namespace RIEMANN_SOLVER
-{
-    enum TYPE { HLLC,
-                HLLC_HLL };
-}
-
+class FlowModelRiemannSolver;
 class FlowModelStatisticsUtilities;
 
 /*
  * The class should at least be able to register, compute and get the following cell data of the single-species/mixture:
- * DENSITY, MOMENTUM, TOTAL_ENERGY, PRESSURE, VELOCITY, SOUND_SPEED, DILATATION, VORTICITY, ENSTROPHY, PRIMITIVE_VARIABLES
- * CONVECTIVE_FLUX_X, CONVECTIVE_FLUX_Y, CONVECTIVE_FLUX_Z, MAX_WAVE_SPEED_X, MAX_WAVE_SPEED_Y, MAX_WAVE_SPEED_Z
+ * DENSITY, MOMENTUM, TOTAL_ENERGY, PRESSURE, VELOCITY, SOUND_SPEED, PRIMITIVE_VARIABLES, CONVECTIVE_FLUX_X,
+ * CONVECTIVE_FLUX_Y, CONVECTIVE_FLUX_Z, MAX_WAVE_SPEED_X, MAX_WAVE_SPEED_Y, MAX_WAVE_SPEED_Z.
  */
 class FlowModel:
     public appu::VisDerivedDataStrategy,
