@@ -24,7 +24,8 @@ class FlowModelRiemannSolverFiveEqnAllaire: public FlowModelRiemannSolver
         void
         computeConvectiveFluxFromConservativeVariables(
             boost::shared_ptr<pdat::SideData<double> > convective_flux,
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_minus,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_plus,
             const hier::Box& domain,
             const RIEMANN_SOLVER::TYPE& riemann_solver_type);
         
@@ -34,7 +35,8 @@ class FlowModelRiemannSolverFiveEqnAllaire: public FlowModelRiemannSolver
         void
         computeConvectiveFluxFromPrimitiveVariables(
             boost::shared_ptr<pdat::SideData<double> > convective_flux,
-            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& primitive_variables,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_minus,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_plus,
             const hier::Box& domain,
             const RIEMANN_SOLVER::TYPE& riemann_solver_type);
         
