@@ -270,6 +270,21 @@ EquationOfStateIdealGas::computePressure(
  */
 void
 EquationOfStateIdealGas::computePressure(
+    boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::SideData<double> >& data_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
+    const std::vector<const double*>& thermo_properties,
+    int side_normal,
+    const hier::Box& domain) const
+{
+}
+
+
+/*
+ * Compute the pressure.
+ */
+void
+EquationOfStateIdealGas::computePressure(
     boost::shared_ptr<pdat::CellData<double> >& data_pressure,
     const boost::shared_ptr<pdat::CellData<double> >& data_density,
     const boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
@@ -517,6 +532,21 @@ EquationOfStateIdealGas::computePressure(
 
 
 /*
+ * Compute the pressure.
+ */
+void
+EquationOfStateIdealGas::computePressure(
+    boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::SideData<double> >& data_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
+    const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+    int side_normal,
+    const hier::Box& domain) const
+{
+}
+
+
+/*
  * Compute the sound speed.
  */
 double
@@ -756,6 +786,21 @@ EquationOfStateIdealGas::computeSoundSpeed(
             }
         }
     }
+}
+
+
+/*
+ * Compute the sound speed.
+ */
+void
+EquationOfStateIdealGas::computeSoundSpeed(
+    boost::shared_ptr<pdat::SideData<double> >& data_sound_speed,
+    const boost::shared_ptr<pdat::SideData<double> >& data_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    const std::vector<const double*>& thermo_properties,
+    int side_normal,
+    const hier::Box& domain) const
+{
 }
 
 
@@ -1011,6 +1056,21 @@ EquationOfStateIdealGas::computeSoundSpeed(
 
 
 /*
+ * Compute the sound speed.
+ */
+void
+EquationOfStateIdealGas::computeSoundSpeed(
+    boost::shared_ptr<pdat::SideData<double> >& data_sound_speed,
+    const boost::shared_ptr<pdat::SideData<double> >& data_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+    int side_normal,
+    const hier::Box& domain) const
+{
+}
+
+
+/*
  * Compute the specific internal energy.
  */
 double
@@ -1250,6 +1310,21 @@ EquationOfStateIdealGas::computeInternalEnergy(
             }
         }
     }
+}
+
+
+/*
+ * Compute the specific internal energy.
+ */
+void
+EquationOfStateIdealGas::computeInternalEnergy(
+    boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
+    const boost::shared_ptr<pdat::SideData<double> >& data_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    const std::vector<const double*>& thermo_properties,
+    int side_normal,
+    const hier::Box& domain) const
+{
 }
 
 
@@ -1505,6 +1580,21 @@ EquationOfStateIdealGas::computeInternalEnergy(
 
 
 /*
+ * Compute the specific internal energy.
+ */
+void
+EquationOfStateIdealGas::computeInternalEnergy(
+    boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
+    const boost::shared_ptr<pdat::SideData<double> >& data_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+    int side_normal,
+    const hier::Box& domain) const
+{
+}
+
+
+/*
  * Compute the specific enthalpy.
  */
 double
@@ -1744,6 +1834,21 @@ EquationOfStateIdealGas::computeEnthalpy(
             }
         }
     }
+}
+
+
+/*
+ * Compute the specific enthalpy.
+ */
+void
+EquationOfStateIdealGas::computeEnthalpy(
+    boost::shared_ptr<pdat::SideData<double> >& data_enthalpy,
+    const boost::shared_ptr<pdat::SideData<double> >& data_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    const std::vector<const double*>& thermo_properties,
+    int side_normal,
+    const hier::Box& domain) const
+{
 }
 
 
@@ -1999,6 +2104,21 @@ EquationOfStateIdealGas::computeEnthalpy(
 
 
 /*
+ * Compute the specific enthalpy.
+ */
+void
+EquationOfStateIdealGas::computeEnthalpy(
+    boost::shared_ptr<pdat::SideData<double> >& data_enthalpy,
+    const boost::shared_ptr<pdat::SideData<double> >& data_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+    int side_normal,
+    const hier::Box& domain) const
+{
+}
+
+
+/*
  * Compute the temperature.
  */
 double
@@ -2241,6 +2361,21 @@ EquationOfStateIdealGas::computeTemperature(
             }
         }
     }
+}
+
+
+/*
+ * Compute the temperature.
+ */
+void
+EquationOfStateIdealGas::computeTemperature(
+    boost::shared_ptr<pdat::SideData<double> >& data_temperature,
+    const boost::shared_ptr<pdat::SideData<double> >& data_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    const std::vector<const double*>& thermo_properties,
+    int side_normal,
+    const hier::Box& domain) const
+{
 }
 
 
@@ -2497,6 +2632,21 @@ EquationOfStateIdealGas::computeTemperature(
 
 
 /*
+ * Compute the temperature.
+ */
+void
+EquationOfStateIdealGas::computeTemperature(
+    boost::shared_ptr<pdat::SideData<double> >& data_temperature,
+    const boost::shared_ptr<pdat::SideData<double> >& data_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+    int side_normal,
+    const hier::Box& domain) const
+{
+}
+
+
+/*
  * Compute the specific internal energy from temperature.
  */
 double
@@ -2710,6 +2860,21 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
             }
         }
     }
+}
+
+
+/*
+ * Compute the specific internal energy from temperature.
+ */
+void
+EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
+    boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
+    const boost::shared_ptr<pdat::SideData<double> >& data_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_temperature,
+    const std::vector<const double*>& thermo_properties,
+    int side_normal,
+    const hier::Box& domain) const
+{
 }
 
 
@@ -2935,6 +3100,21 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
 
 
 /*
+ * Compute the specific internal energy from temperature.
+ */
+void
+EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
+    boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
+    const boost::shared_ptr<pdat::SideData<double> >& data_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_temperature,
+    const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+    int side_normal,
+    const hier::Box& domain) const
+{
+}
+
+
+/*
  * Compute the isochoric specific heat capacity.
  */
 double
@@ -2988,6 +3168,21 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
         
         data_isochoric_specific_heat_capacity->fillAll(c_v, domain);
     }
+}
+
+
+/*
+ * Compute the isochoric specific heat capacity.
+ */
+void
+EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
+    boost::shared_ptr<pdat::SideData<double> >& data_isochoric_specific_heat_capacity,
+    const boost::shared_ptr<pdat::SideData<double> >& data_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    const std::vector<const double*>& thermo_properties,
+    int side_normal,
+    const hier::Box& domain) const
+{
 }
 
 
@@ -3203,6 +3398,21 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
 
 
 /*
+ * Compute the isochoric specific heat capacity.
+ */
+void
+EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
+    boost::shared_ptr<pdat::SideData<double> >& data_isochoric_specific_heat_capacity,
+    const boost::shared_ptr<pdat::SideData<double> >& data_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+    int side_normal,
+    const hier::Box& domain) const
+{
+}
+
+
+/*
  * Compute the isobaric specific heat capacity.
  */
 double
@@ -3256,6 +3466,21 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
         
         data_isobaric_specific_heat_capacity->fillAll(c_p, domain);
     }
+}
+
+
+/*
+ * Compute the isobaric specific heat capacity.
+ */
+void
+EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
+    boost::shared_ptr<pdat::SideData<double> >& data_isobaric_specific_heat_capacity,
+    const boost::shared_ptr<pdat::SideData<double> >& data_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    const std::vector<const double*>& thermo_properties,
+    int side_normal,
+    const hier::Box& domain) const
+{
 }
 
 
@@ -3471,6 +3696,21 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
 
 
 /*
+ * Compute the isobaric specific heat capacity.
+ */
+void
+EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
+    boost::shared_ptr<pdat::SideData<double> >& data_isobaric_specific_heat_capacity,
+    const boost::shared_ptr<pdat::SideData<double> >& data_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+    int side_normal,
+    const hier::Box& domain) const
+{
+}
+
+
+/*
  * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
  */
 double
@@ -3527,6 +3767,21 @@ EquationOfStateIdealGas::computeIsochoricPartialInternalEnergyPartialPressure(
         
         data_partial_internal_energy_partial_pressure->fillAll(xi, domain);
     }
+}
+
+
+/*
+ * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+ */
+void
+EquationOfStateIdealGas::computeIsochoricPartialInternalEnergyPartialPressure(
+    boost::shared_ptr<pdat::SideData<double> >& data_partial_internal_energy_partial_pressure,
+    const boost::shared_ptr<pdat::SideData<double> >& data_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    const std::vector<const double*>& thermo_properties,
+    int side_normal,
+    const hier::Box& domain) const
+{
 }
 
 
@@ -3745,6 +4000,21 @@ EquationOfStateIdealGas::computeIsochoricPartialInternalEnergyPartialPressure(
 
 
 /*
+ * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+ */
+void
+EquationOfStateIdealGas::computeIsochoricPartialInternalEnergyPartialPressure(
+    boost::shared_ptr<pdat::SideData<double> >& data_partial_internal_energy_partial_pressure,
+    const boost::shared_ptr<pdat::SideData<double> >& data_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+    int side_normal,
+    const hier::Box& domain) const
+{
+}
+
+
+/*
  * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
  */
 double
@@ -3800,6 +4070,21 @@ EquationOfStateIdealGas::computeIsobaricPartialInternalEnergyPartialDensity(
  */
 void
 EquationOfStateIdealGas::computeIsobaricPartialInternalEnergyPartialDensity(
+    boost::shared_ptr<pdat::SideData<double> >& data_partial_internal_energy_partial_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    const std::vector<const double*>& thermo_properties,
+    int side_normal,
+    const hier::Box& domain) const
+{
+}
+
+
+/*
+ * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+ */
+void
+EquationOfStateIdealGas::computeIsobaricPartialInternalEnergyPartialDensity(
     boost::shared_ptr<pdat::CellData<double> >& data_partial_internal_energy_partial_density,
     const boost::shared_ptr<pdat::CellData<double> >& data_density,
     const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
@@ -3826,6 +4111,21 @@ EquationOfStateIdealGas::computeIsobaricPartialInternalEnergyPartialDensity(
         
         data_partial_internal_energy_partial_density->fillAll(double(0), domain);
     }
+}
+
+
+/*
+ * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+ */
+void
+EquationOfStateIdealGas::computeIsobaricPartialInternalEnergyPartialDensity(
+    boost::shared_ptr<pdat::SideData<double> >& data_partial_internal_energy_partial_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+    int side_normal,
+    const hier::Box& domain) const
+{
 }
 
 
@@ -4077,6 +4377,21 @@ EquationOfStateIdealGas::computeDensity(
  */
 void
 EquationOfStateIdealGas::computeDensity(
+    boost::shared_ptr<pdat::SideData<double> >& data_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::SideData<double> >& data_temperature,
+    const std::vector<const double*>& thermo_properties,
+    int side_normal,
+    const hier::Box& domain) const
+{
+}
+
+
+/*
+ * Compute the density.
+ */
+void
+EquationOfStateIdealGas::computeDensity(
     boost::shared_ptr<pdat::CellData<double> >& data_density,
     const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
     const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
@@ -4319,3 +4634,17 @@ EquationOfStateIdealGas::computeDensity(
     }
 }
 
+
+/*
+ * Compute the density.
+ */
+void
+EquationOfStateIdealGas::computeDensity(
+    boost::shared_ptr<pdat::SideData<double> >& data_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::SideData<double> >& data_temperature,
+    const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+    int side_normal,
+    const hier::Box& domain) const
+{
+}
