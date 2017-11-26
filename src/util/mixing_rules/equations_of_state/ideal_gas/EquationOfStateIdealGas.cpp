@@ -224,6 +224,10 @@ EquationOfStateIdealGas::computePressure(
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_pressure->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_density->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_internal_energy->getDirectionVector()[side_normal] > 0);
 #endif
     
     ghostcell_dims_pressure[side_normal]++;
@@ -453,6 +457,11 @@ EquationOfStateIdealGas::computePressure(
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_pressure->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_density->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_internal_energy->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_thermo_properties->getDirectionVector()[side_normal] > 0);
 #endif
     
     ghostcell_dims_pressure[side_normal]++;
@@ -690,6 +699,10 @@ EquationOfStateIdealGas::computeSoundSpeed(
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_sound_speed->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_density->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_pressure->getDirectionVector()[side_normal] > 0);
 #endif
     
     ghostcell_dims_sound_speed[side_normal]++;
@@ -919,6 +932,11 @@ EquationOfStateIdealGas::computeSoundSpeed(
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_sound_speed->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_density->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_pressure->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_thermo_properties->getDirectionVector()[side_normal] > 0);
 #endif
     
     ghostcell_dims_sound_speed[side_normal]++;
@@ -1156,6 +1174,10 @@ EquationOfStateIdealGas::computeInternalEnergy(
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_internal_energy->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_density->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_pressure->getDirectionVector()[side_normal] > 0);
 #endif
     
     ghostcell_dims_internal_energy[side_normal]++;
@@ -1385,6 +1407,11 @@ EquationOfStateIdealGas::computeInternalEnergy(
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_internal_energy->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_density->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_pressure->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_thermo_properties->getDirectionVector()[side_normal] > 0);
 #endif
     
     ghostcell_dims_internal_energy[side_normal]++;
@@ -1622,6 +1649,10 @@ EquationOfStateIdealGas::computeEnthalpy(
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_enthalpy->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_density->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_pressure->getDirectionVector()[side_normal] > 0);
 #endif
     
     ghostcell_dims_enthalpy[side_normal]++;
@@ -1851,6 +1882,11 @@ EquationOfStateIdealGas::computeEnthalpy(
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_enthalpy->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_density->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_pressure->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_thermo_properties->getDirectionVector()[side_normal] > 0);
 #endif
     
     ghostcell_dims_enthalpy[side_normal]++;
@@ -2091,6 +2127,10 @@ EquationOfStateIdealGas::computeTemperature(
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_temperature->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_density->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_pressure->getDirectionVector()[side_normal] > 0);
 #endif
     
     ghostcell_dims_temperature[side_normal]++;
@@ -2324,6 +2364,11 @@ EquationOfStateIdealGas::computeTemperature(
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_temperature->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_density->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_pressure->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_thermo_properties->getDirectionVector()[side_normal] > 0);
 #endif
     
     ghostcell_dims_temperature[side_normal]++;
@@ -2549,6 +2594,9 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_internal_energy->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_temperature->getDirectionVector()[side_normal] > 0);
 #endif
     
     ghostcell_dims_internal_energy[side_normal]++;
@@ -2758,6 +2806,10 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_internal_energy->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_temperature->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_thermo_properties->getDirectionVector()[side_normal] > 0);
 #endif
     
     ghostcell_dims_internal_energy[side_normal]++;
@@ -2945,6 +2997,8 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_isochoric_specific_heat_capacity->getDirectionVector()[side_normal] > 0);
 #endif
     
     ghostcell_dims_isochoric_specific_heat_capacity[side_normal]++;
@@ -2954,7 +3008,7 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
      * Get the pointer to the cell data.
      */
     
-    double* const c_v = data_isochoric_specific_heat_capacity->getPointer(0);
+    double* const c_v = data_isochoric_specific_heat_capacity->getPointer(side_normal, 0);
     
     const double& c_v_src = *(thermo_properties[3]);
     
@@ -3135,6 +3189,9 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_isochoric_specific_heat_capacity->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_thermo_properties->getDirectionVector()[side_normal] > 0);
 #endif
     
     ghostcell_dims_isochoric_specific_heat_capacity[side_normal]++;
@@ -3317,6 +3374,8 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_isobaric_specific_heat_capacity->getDirectionVector()[side_normal] > 0);
 #endif
     
     ghostcell_dims_isobaric_specific_heat_capacity[side_normal]++;
@@ -3326,7 +3385,7 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
      * Get the pointer to the cell data.
      */
     
-    double* const c_p = data_isobaric_specific_heat_capacity->getPointer(0);
+    double* const c_p = data_isobaric_specific_heat_capacity->getPointer(side_normal, 0);
     
     const double& c_p_src = *(thermo_properties[2]);
     
@@ -3507,6 +3566,9 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_isobaric_specific_heat_capacity->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_thermo_properties->getDirectionVector()[side_normal] > 0);
 #endif
     
     ghostcell_dims_isobaric_specific_heat_capacity[side_normal]++;
@@ -3691,6 +3753,8 @@ EquationOfStateIdealGas::computeIsochoricPartialInternalEnergyPartialPressure(
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_partial_internal_energy_partial_pressure->getDirectionVector()[side_normal] > 0);
 #endif
     
     ghostcell_dims_partial_internal_energy_partial_pressure[side_normal]++;
@@ -3700,7 +3764,7 @@ EquationOfStateIdealGas::computeIsochoricPartialInternalEnergyPartialPressure(
      * Get the pointer to the cell data.
      */
     
-    double* const xi = data_partial_internal_energy_partial_pressure->getPointer(0);
+    double* const xi = data_partial_internal_energy_partial_pressure->getPointer(side_normal, 0);
     
     const double& gamma = *(thermo_properties[0]);
     
@@ -3881,6 +3945,9 @@ EquationOfStateIdealGas::computeIsochoricPartialInternalEnergyPartialPressure(
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_partial_internal_energy_partial_pressure->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_thermo_properties->getDirectionVector()[side_normal] > 0);
 #endif
     
     ghostcell_dims_partial_internal_energy_partial_pressure[side_normal]++;
@@ -4055,6 +4122,8 @@ EquationOfStateIdealGas::computeIsobaricPartialInternalEnergyPartialDensity(
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_partial_internal_energy_partial_density->getDirectionVector()[side_normal] > 0);
 #endif
     
     ghostcell_dims_partial_internal_energy_partial_density[side_normal]++;
@@ -4064,7 +4133,7 @@ EquationOfStateIdealGas::computeIsobaricPartialInternalEnergyPartialDensity(
      * Get the pointer to the cell data.
      */
     
-    double* const delta = data_partial_internal_energy_partial_density->getPointer(0);
+    double* const delta = data_partial_internal_energy_partial_density->getPointer(side_normal, 0);
     
     this->computeIsobaricPartialInternalEnergyPartialDensity(
         delta,
@@ -4207,6 +4276,8 @@ EquationOfStateIdealGas::computeIsobaricPartialInternalEnergyPartialDensity(
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_partial_internal_energy_partial_density->getDirectionVector()[side_normal] > 0);
 #endif
     
     ghostcell_dims_partial_internal_energy_partial_density[side_normal]++;
@@ -4216,7 +4287,7 @@ EquationOfStateIdealGas::computeIsobaricPartialInternalEnergyPartialDensity(
      * Get the pointer to the cell data.
      */
     
-    double* const delta = data_partial_internal_energy_partial_density->getPointer(0);
+    double* const delta = data_partial_internal_energy_partial_density->getPointer(side_normal, 0);
     
     this->computeIsobaricPartialInternalEnergyPartialDensity(
         delta,
@@ -4429,6 +4500,10 @@ EquationOfStateIdealGas::computeDensity(
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_density->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_pressure->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_temperature->getDirectionVector()[side_normal] > 0);
 #endif
     
     ghostcell_dims_density[side_normal]++;
@@ -4658,6 +4733,11 @@ EquationOfStateIdealGas::computeDensity(
     
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
     TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_density->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_pressure->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_temperature->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_thermo_properties->getDirectionVector()[side_normal] > 0);
 #endif
     
     ghostcell_dims_density[side_normal]++;
