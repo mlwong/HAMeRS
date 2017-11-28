@@ -929,7 +929,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
             const double c_x_average = double(1)/double(2)*(c_x_L[idx] + c_x_R[idx]);
             
             const double s_x_L = fmin(u_x_average - c_x_average, u_x_L - c_x_L[idx]);
-            const double s_x_R = fmax(u_x_average + c_x_average, u_x_L + c_x_L[idx]);
+            const double s_x_R = fmax(u_x_average + c_x_average, u_x_R + c_x_R[idx]);
             
             const double s_x_minus = fmin(double(0), s_x_L);
             const double s_x_plus  = fmax(double(0), s_x_R);
@@ -939,52 +939,41 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                 (Q_x_L[0][idx]*(s_x_L - u_x_L) - Q_x_R[0][idx]*(s_x_R - u_x_R));
             
             double Chi_x_star_LR;
+            double Q_x_star_LR[3];
+            double F_x_LR[3];
+            
             if (s_x_star > 0)
             {
                 Chi_x_star_LR = (s_x_L - u_x_L)/(s_x_L - s_x_star);
-            }
-            else
-            {
-                Chi_x_star_LR = (s_x_R - u_x_R)/(s_x_R - s_x_star);
-            }
-            
-            double Q_x_star_LR[3];
-            if (s_x_star > 0)
-            {
+                
                 Q_x_star_LR[0] = Chi_x_star_LR*Q_x_L[0][idx];
                 Q_x_star_LR[1] = Chi_x_star_LR*Q_x_L[0][idx]*s_x_star;
                 Q_x_star_LR[2] = Chi_x_star_LR*(Q_x_L[2][idx] + (s_x_star - u_x_L)*(Q_x_L[0][idx]*s_x_star +
                     p_x_L[idx]/(s_x_L - u_x_L)));
+                
+                F_x_LR[0] = Q_x_L[1][idx];
+                F_x_LR[1] = u_x_L*Q_x_L[1][idx] + p_x_L[idx];
+                F_x_LR[2] = u_x_L*(Q_x_L[2][idx] + p_x_L[idx]);
+                
+                for (int ei = 0; ei < num_eqn; ei++)
+                {
+                    F_x[ei][idx_convective_flux] = F_x_LR[ei] + s_x_minus*(Q_x_star_LR[ei] - Q_x_L[ei][idx]);
+                }
             }
             else
             {
+                Chi_x_star_LR = (s_x_R - u_x_R)/(s_x_R - s_x_star);
+                
                 Q_x_star_LR[0] = Chi_x_star_LR*Q_x_R[0][idx];
                 Q_x_star_LR[1] = Chi_x_star_LR*Q_x_R[0][idx]*s_x_star;
                 Q_x_star_LR[2] = Chi_x_star_LR*(Q_x_R[2][idx] + (s_x_star - u_x_R)*(Q_x_R[0][idx]*s_x_star +
                     p_x_R[idx]/(s_x_R - u_x_R)));
-            }
-            
-            double F_x_LR[3];
-            if (s_x_star > 0)
-            {
-                F_x_LR[0] = Q_x_L[1][idx];
-                F_x_LR[1] = u_x_L*Q_x_L[1][idx] + p_x_L[idx];
-                F_x_LR[2] = u_x_L*(Q_x_L[2][idx] + p_x_L[idx]);
-            }
-            else
-            {
+                
                 F_x_LR[0] = Q_x_R[1][idx];
                 F_x_LR[1] = u_x_R*Q_x_R[1][idx] + p_x_R[idx];
                 F_x_LR[2] = u_x_R*(Q_x_R[2][idx] + p_x_R[idx]);
-            }
-            
-            for (int ei = 0; ei < num_eqn; ei++)
-            {
-                if (s_x_star > 0)
-                {
-                    F_x[ei][idx_convective_flux] = F_x_LR[ei] + s_x_minus*(Q_x_star_LR[ei] - Q_x_L[ei][idx]);
-                }
-                else
+                
+                for (int ei = 0; ei < num_eqn; ei++)
                 {
                     F_x[ei][idx_convective_flux] = F_x_LR[ei] + s_x_plus*(Q_x_star_LR[ei] - Q_x_R[ei][idx]);
                 }
