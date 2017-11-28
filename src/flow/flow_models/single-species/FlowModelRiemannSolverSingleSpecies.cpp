@@ -674,6 +674,83 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
 }
 
 
+static inline __attribute__((always_inline)) void
+computeLocalConvectiveFluxInXDirectionFromConservativeVariablesHLLC1D(
+    double** F_x,
+    double** Q_x_L,
+    double** Q_x_R,
+    double* p_x_L,
+    double* p_x_R,
+    double* c_x_L,
+    double* c_x_R,
+    double u_x_L,
+    double u_x_R,
+    double s_x_minus,
+    double s_x_plus,
+    double s_x_star,
+    double Chi_x_star_LR,
+    int idx_flux,
+    int idx,
+    int num_eqn)
+{
+    u_x_L = Q_x_L[1][idx]/Q_x_L[0][idx];
+    u_x_R = Q_x_R[1][idx]/Q_x_R[0][idx];
+    
+    const double u_x_average = double(1)/double(2)*(u_x_L + u_x_R);
+    const double c_x_average = double(1)/double(2)*(c_x_L[idx] + c_x_R[idx]);
+    
+    const double s_x_L = fmin(u_x_average - c_x_average, u_x_L - c_x_L[idx]);
+    const double s_x_R = fmax(u_x_average + c_x_average, u_x_R + c_x_R[idx]);
+    
+    s_x_minus = fmin(double(0), s_x_L);
+    s_x_plus  = fmax(double(0), s_x_R);
+    
+    s_x_star = (p_x_R[idx] - p_x_L[idx] +
+        Q_x_L[1][idx]*(s_x_L - u_x_L) - Q_x_R[1][idx]*(s_x_R - u_x_R))/
+        (Q_x_L[0][idx]*(s_x_L - u_x_L) - Q_x_R[0][idx]*(s_x_R - u_x_R));
+    
+    double Q_x_star_LR[3];
+    double F_x_LR[3];
+    
+    if (s_x_star > 0)
+    {
+        Chi_x_star_LR = (s_x_L - u_x_L)/(s_x_L - s_x_star);
+        
+        Q_x_star_LR[0] = Chi_x_star_LR*Q_x_L[0][idx];
+        Q_x_star_LR[1] = Chi_x_star_LR*Q_x_L[0][idx]*s_x_star;
+        Q_x_star_LR[2] = Chi_x_star_LR*(Q_x_L[2][idx] + (s_x_star - u_x_L)*(Q_x_L[0][idx]*s_x_star +
+            p_x_L[idx]/(s_x_L - u_x_L)));
+        
+        F_x_LR[0] = Q_x_L[1][idx];
+        F_x_LR[1] = u_x_L*Q_x_L[1][idx] + p_x_L[idx];
+        F_x_LR[2] = u_x_L*(Q_x_L[2][idx] + p_x_L[idx]);
+        
+        for (int ei = 0; ei < num_eqn; ei++)
+        {
+            F_x[ei][idx_flux] = F_x_LR[ei] + s_x_minus*(Q_x_star_LR[ei] - Q_x_L[ei][idx]);
+        }
+    }
+    else
+    {
+        Chi_x_star_LR = (s_x_R - u_x_R)/(s_x_R - s_x_star);
+        
+        Q_x_star_LR[0] = Chi_x_star_LR*Q_x_R[0][idx];
+        Q_x_star_LR[1] = Chi_x_star_LR*Q_x_R[0][idx]*s_x_star;
+        Q_x_star_LR[2] = Chi_x_star_LR*(Q_x_R[2][idx] + (s_x_star - u_x_R)*(Q_x_R[0][idx]*s_x_star +
+            p_x_R[idx]/(s_x_R - u_x_R)));
+        
+        F_x_LR[0] = Q_x_R[1][idx];
+        F_x_LR[1] = u_x_R*Q_x_R[1][idx] + p_x_R[idx];
+        F_x_LR[2] = u_x_R*(Q_x_R[2][idx] + p_x_R[idx]);
+        
+        for (int ei = 0; ei < num_eqn; ei++)
+        {
+            F_x[ei][idx_flux] = F_x_LR[ei] + s_x_plus*(Q_x_star_LR[ei] - Q_x_R[ei][idx]);
+        }
+    }
+}
+
+
 /*
  * Compute the convective flux and velocity in the x-direction from conservative variables with
  * HLLC Riemann solver.
@@ -913,70 +990,97 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
                 0,
                 domain);
         
-#ifdef HAMERS_ENABLE_SIMD
-        #pragma omp simd
-#endif
-        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
+        double u_x_L = double(0);
+        double u_x_R = double(0);
+        
+        double s_x_minus = double(0);
+        double s_x_plus  = double(0);
+        double s_x_star  = double(0);
+        
+        double Chi_x_star_LR = double(0);
+        
+        if (compute_velocity)
         {
-            // Compute the linear indices.
-            const int idx_convective_flux = i + num_ghosts_0_convective_flux;
-            const int idx = i + num_ghosts_0_conservative_variables;
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(velocity);
+#endif
             
-            const double u_x_L = Q_x_L[1][idx]/Q_x_L[0][idx];
-            const double u_x_R = Q_x_R[1][idx]/Q_x_R[0][idx];
+            /*
+             * Get the number of ghost cells of velocity and the pointer to velocity.
+             */
             
-            const double u_x_average = double(1)/double(2)*(u_x_L + u_x_R);
-            const double c_x_average = double(1)/double(2)*(c_x_L[idx] + c_x_R[idx]);
+            const hier::IntVector num_ghosts_velocity = velocity->getGhostCellWidth();
             
-            const double s_x_L = fmin(u_x_average - c_x_average, u_x_L - c_x_L[idx]);
-            const double s_x_R = fmax(u_x_average + c_x_average, u_x_R + c_x_R[idx]);
+            const int num_ghosts_0_velocity = num_ghosts_velocity[0];
             
-            const double s_x_minus = fmin(double(0), s_x_L);
-            const double s_x_plus  = fmax(double(0), s_x_R);
+            double* u = velocity->getPointer(0, 0);
             
-            const double s_x_star = (p_x_R[idx] - p_x_L[idx] +
-                Q_x_L[1][idx]*(s_x_L - u_x_L) - Q_x_R[1][idx]*(s_x_R - u_x_R))/
-                (Q_x_L[0][idx]*(s_x_L - u_x_L) - Q_x_R[0][idx]*(s_x_R - u_x_R));
-            
-            double Chi_x_star_LR;
-            double Q_x_star_LR[3];
-            double F_x_LR[3];
-            
-            if (s_x_star > 0)
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
-                Chi_x_star_LR = (s_x_L - u_x_L)/(s_x_L - s_x_star);
+                // Compute the linear indices.
+                const int idx_flux = i + num_ghosts_0_convective_flux;
+                const int idx_velocity = i + num_ghosts_0_velocity;
+                const int idx = i + num_ghosts_0_conservative_variables;
                 
-                Q_x_star_LR[0] = Chi_x_star_LR*Q_x_L[0][idx];
-                Q_x_star_LR[1] = Chi_x_star_LR*Q_x_L[0][idx]*s_x_star;
-                Q_x_star_LR[2] = Chi_x_star_LR*(Q_x_L[2][idx] + (s_x_star - u_x_L)*(Q_x_L[0][idx]*s_x_star +
-                    p_x_L[idx]/(s_x_L - u_x_L)));
+                computeLocalConvectiveFluxInXDirectionFromConservativeVariablesHLLC1D(
+                    F_x.data(),
+                    Q_x_L.data(),
+                    Q_x_R.data(),
+                    p_x_L,
+                    p_x_R,
+                    c_x_L,
+                    c_x_R,
+                    u_x_L,
+                    u_x_R,
+                    s_x_minus,
+                    s_x_plus,
+                    s_x_star,
+                    Chi_x_star_LR,
+                    idx_flux,
+                    idx,
+                    num_eqn);
                 
-                F_x_LR[0] = Q_x_L[1][idx];
-                F_x_LR[1] = u_x_L*Q_x_L[1][idx] + p_x_L[idx];
-                F_x_LR[2] = u_x_L*(Q_x_L[2][idx] + p_x_L[idx]);
-                
-                for (int ei = 0; ei < num_eqn; ei++)
+                if (s_x_star > 0)
                 {
-                    F_x[ei][idx_convective_flux] = F_x_LR[ei] + s_x_minus*(Q_x_star_LR[ei] - Q_x_L[ei][idx]);
+                    u[idx_velocity] = u_x_L + s_x_minus*(Chi_x_star_LR - double(1));
+                }
+                else
+                {
+                    u[idx_velocity] = u_x_R + s_x_plus*(Chi_x_star_LR - double(1));
                 }
             }
-            else
+        }
+        else
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
             {
-                Chi_x_star_LR = (s_x_R - u_x_R)/(s_x_R - s_x_star);
+                // Compute the linear indices.
+                const int idx_flux = i + num_ghosts_0_convective_flux;
+                const int idx = i + num_ghosts_0_conservative_variables;
                 
-                Q_x_star_LR[0] = Chi_x_star_LR*Q_x_R[0][idx];
-                Q_x_star_LR[1] = Chi_x_star_LR*Q_x_R[0][idx]*s_x_star;
-                Q_x_star_LR[2] = Chi_x_star_LR*(Q_x_R[2][idx] + (s_x_star - u_x_R)*(Q_x_R[0][idx]*s_x_star +
-                    p_x_R[idx]/(s_x_R - u_x_R)));
-                
-                F_x_LR[0] = Q_x_R[1][idx];
-                F_x_LR[1] = u_x_R*Q_x_R[1][idx] + p_x_R[idx];
-                F_x_LR[2] = u_x_R*(Q_x_R[2][idx] + p_x_R[idx]);
-                
-                for (int ei = 0; ei < num_eqn; ei++)
-                {
-                    F_x[ei][idx_convective_flux] = F_x_LR[ei] + s_x_plus*(Q_x_star_LR[ei] - Q_x_R[ei][idx]);
-                }
+                computeLocalConvectiveFluxInXDirectionFromConservativeVariablesHLLC1D(
+                    F_x.data(),
+                    Q_x_L.data(),
+                    Q_x_R.data(),
+                    p_x_L,
+                    p_x_R,
+                    c_x_L,
+                    c_x_R,
+                    u_x_L,
+                    u_x_R,
+                    s_x_minus,
+                    s_x_plus,
+                    s_x_star,
+                    Chi_x_star_LR,
+                    idx_flux,
+                    idx,
+                    num_eqn);
             }
         }
     }
