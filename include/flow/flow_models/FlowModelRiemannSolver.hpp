@@ -6,6 +6,8 @@
 #include "flow/flow_models/FlowModel.hpp"
 #include "flow/flow_models/RiemannSolverTypes.hpp"
 
+#include "util/Directions.hpp"
+
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 #include "SAMRAI/pdat/SideData.h"
 
@@ -39,13 +41,56 @@ class FlowModelRiemannSolver
         /*
          * Compute the convective flux from conservative variables.
          */
+        void
+        computeConvectiveFluxFromConservativeVariables(
+            boost::shared_ptr<pdat::SideData<double> > convective_flux,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_minus,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_plus,
+            const DIRECTION::TYPE& direction,
+            const RIEMANN_SOLVER::TYPE& riemann_solver_type) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeConvectiveFluxFromConservativeVariables(
+                convective_flux,
+                conservative_variables_minus,
+                conservative_variables_plus,
+                direction,
+                riemann_solver_type,
+                empty_box);
+        }
+        
+        /*
+         * Compute the convective flux from conservative variables.
+         */
         virtual void
         computeConvectiveFluxFromConservativeVariables(
             boost::shared_ptr<pdat::SideData<double> > convective_flux,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_minus,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_plus,
-            const hier::Box& domain,
-            const RIEMANN_SOLVER::TYPE& riemann_solver_type) = 0;
+            const DIRECTION::TYPE& direction,
+            const RIEMANN_SOLVER::TYPE& riemann_solver_type,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the convective flux from primitive variables.
+         */
+        void
+        computeConvectiveFluxFromPrimitiveVariables(
+            boost::shared_ptr<pdat::SideData<double> > convective_flux,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_minus,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_plus,
+            const DIRECTION::TYPE& direction,
+            const RIEMANN_SOLVER::TYPE& riemann_solver_type) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeConvectiveFluxFromPrimitiveVariables(
+                convective_flux,
+                primitive_variables_minus,
+                primitive_variables_plus,
+                direction,
+                riemann_solver_type,
+                empty_box);
+        }
         
         /*
          * Compute the convective flux from primitive variables.
@@ -55,9 +100,82 @@ class FlowModelRiemannSolver
             boost::shared_ptr<pdat::SideData<double> > convective_flux,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_minus,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_plus,
-            const hier::Box& domain,
-            const RIEMANN_SOLVER::TYPE& riemann_solver_type) = 0;
-    
+            const DIRECTION::TYPE& direction,
+            const RIEMANN_SOLVER::TYPE& riemann_solver_type,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the convective flux and velocity from conservative variables.
+         */
+        void
+        computeConvectiveFluxAndVelocityFromConservativeVariables(
+            boost::shared_ptr<pdat::SideData<double> > convective_flux,
+            boost::shared_ptr<pdat::SideData<double> > velocity,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_minus,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_plus,
+            const DIRECTION::TYPE& direction,
+            const RIEMANN_SOLVER::TYPE& riemann_solver_type) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeConvectiveFluxAndVelocityFromConservativeVariables(
+                convective_flux,
+                velocity,
+                conservative_variables_minus,
+                conservative_variables_plus,
+                direction,
+                riemann_solver_type,
+                empty_box);
+        }
+        
+        /*
+         * Compute the convective flux and velocity from conservative variables.
+         */
+        virtual void
+        computeConvectiveFluxAndVelocityFromConservativeVariables(
+            boost::shared_ptr<pdat::SideData<double> > convective_flux,
+            boost::shared_ptr<pdat::SideData<double> > velocity,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_minus,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_plus,
+            const DIRECTION::TYPE& direction,
+            const RIEMANN_SOLVER::TYPE& riemann_solver_type,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the convective flux and velocity from primitive variables.
+         */
+        void
+        computeConvectiveFluxAndVelocityFromPrimitiveVariables(
+            boost::shared_ptr<pdat::SideData<double> > convective_flux,
+            boost::shared_ptr<pdat::SideData<double> > velocity,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_minus,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_plus,
+            const DIRECTION::TYPE& direction,
+            const RIEMANN_SOLVER::TYPE& riemann_solver_type) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeConvectiveFluxAndVelocityFromPrimitiveVariables(
+                convective_flux,
+                velocity,
+                primitive_variables_minus,
+                primitive_variables_plus,
+                direction,
+                riemann_solver_type,
+                empty_box);
+        }
+        
+        /*
+         * Compute the convective flux and velocity from primitive variables.
+         */
+        virtual void
+        computeConvectiveFluxAndVelocityFromPrimitiveVariables(
+            boost::shared_ptr<pdat::SideData<double> > convective_flux,
+            boost::shared_ptr<pdat::SideData<double> > velocity,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_minus,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_plus,
+            const DIRECTION::TYPE& direction,
+            const RIEMANN_SOLVER::TYPE& riemann_solver_type,
+            const hier::Box& domain) const = 0;
+        
     protected:
         /*
          * The object name is used for error/warning reporting.
