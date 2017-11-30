@@ -74,19 +74,6 @@ class FlowModelRiemannSolverSingleSpecies: public FlowModelRiemannSolver
          * HLLC Riemann solver.
          */
         void
-        computeConvectiveFluxAndVelocityInXDirectionFromConservativeVariablesHLLC_old(
-            boost::shared_ptr<pdat::SideData<double> > convective_flux,
-            boost::shared_ptr<pdat::SideData<double> > velocity,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_L,
-            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_R,
-            const hier::Box& domain,
-            bool compute_velocity) const;
-        
-        /*
-         * Compute the convective flux and velocity in the x-direction from conservative variables with
-         * HLLC Riemann solver.
-         */
-        void
         computeConvectiveFluxAndVelocityInXDirectionFromConservativeVariablesHLLC(
             boost::shared_ptr<pdat::SideData<double> > convective_flux,
             boost::shared_ptr<pdat::SideData<double> > velocity,
@@ -153,6 +140,84 @@ class FlowModelRiemannSolverSingleSpecies: public FlowModelRiemannSolver
          */
         void
         computeConvectiveFluxAndVelocityInZDirectionFromPrimitiveVariablesHLLC(
+            boost::shared_ptr<pdat::SideData<double> > convective_flux,
+            boost::shared_ptr<pdat::SideData<double> > velocity,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_B,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_F,
+            const hier::Box& domain,
+            bool compute_velocity) const;
+        
+        /*
+         * Compute the convective flux and velocity in the x-direction from conservative variables with
+         * HLLC Riemann solver.
+         */
+        void
+        computeConvectiveFluxAndVelocityInXDirectionFromConservativeVariablesHLLC_HLL(
+            boost::shared_ptr<pdat::SideData<double> > convective_flux,
+            boost::shared_ptr<pdat::SideData<double> > velocity,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_L,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_R,
+            const hier::Box& domain,
+            bool compute_velocity) const;
+        
+        /*
+         * Compute the convective flux and velocity in the y-direction from conservative variables with
+         * HLLC Riemann solver.
+         */
+        void
+        computeConvectiveFluxAndVelocityInYDirectionFromConservativeVariablesHLLC_HLL(
+            boost::shared_ptr<pdat::SideData<double> > convective_flux,
+            boost::shared_ptr<pdat::SideData<double> > velocity,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_B,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_T,
+            const hier::Box& domain,
+            bool compute_velocity) const;
+        
+        /*
+         * Compute the convective flux and velocity in the z-direction from conservative variables with
+         * HLLC Riemann solver.
+         */
+        void
+        computeConvectiveFluxAndVelocityInZDirectionFromConservativeVariablesHLLC_HLL(
+            boost::shared_ptr<pdat::SideData<double> > convective_flux,
+            boost::shared_ptr<pdat::SideData<double> > velocity,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_B,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& conservative_variables_F,
+            const hier::Box& domain,
+            bool compute_velocity) const;
+        
+        /*
+         * Compute the convective flux and velocity in the x-direction from primitive variables with
+         * HLLC Riemann solver.
+         */
+        void
+        computeConvectiveFluxAndVelocityInXDirectionFromPrimitiveVariablesHLLC_HLL(
+            boost::shared_ptr<pdat::SideData<double> > convective_flux,
+            boost::shared_ptr<pdat::SideData<double> > velocity,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_L,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_R,
+            const hier::Box& domain,
+            bool compute_velocity) const;
+        
+        /*
+         * Compute the convective flux and velocity in the y-direction from primitive variables with
+         * HLLC Riemann solver.
+         */
+        void
+        computeConvectiveFluxAndVelocityInYDirectionFromPrimitiveVariablesHLLC_HLL(
+            boost::shared_ptr<pdat::SideData<double> > convective_flux,
+            boost::shared_ptr<pdat::SideData<double> > velocity,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_B,
+            const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_T,
+            const hier::Box& domain,
+            bool compute_velocity) const;
+        
+        /*
+         * Compute the convective flux and velocity in the z-direction from primitive variables with
+         * HLLC Riemann solver.
+         */
+        void
+        computeConvectiveFluxAndVelocityInZDirectionFromPrimitiveVariablesHLLC_HLL(
             boost::shared_ptr<pdat::SideData<double> > convective_flux,
             boost::shared_ptr<pdat::SideData<double> > velocity,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables_B,
