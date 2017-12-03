@@ -17,11 +17,9 @@ include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIRS})
 
 # Find the hdf5 package
-set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 find_package(HDF5 1.8.4 REQUIRED)
 include_directories(${HDF5_INCLUDE_DIR})
 link_directories(${HDF5_LIBRARY_DIRS})
-set(CMAKE_FIND_LIBRARY_SUFFIXES ".so;.a")
 
 # Find the zlib package
 if (WITH_ZLIB)
