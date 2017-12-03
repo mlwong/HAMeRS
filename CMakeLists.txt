@@ -17,19 +17,17 @@ include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIRS})
 
 # Find the hdf5 package
-set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 find_package(HDF5 1.8.4 REQUIRED)
 include_directories(${HDF5_INCLUDE_DIR})
 link_directories(${HDF5_LIBRARY_DIRS})
-set(CMAKE_FIND_LIBRARY_SUFFIXES ".so;.a")
 
 # Find the zlib package
 if (WITH_ZLIB)
     set(ZLIB_LIBRARIES $ENV{ZLIB_ROOT})
-    set(ZLIB_LIBRARY_PATH "${ZLIB_ROOT}/lib")
+    set(ZLIB_LIBRARY_DIRS "${ZLIB_ROOT}/lib")
     set(ZLIB_INCLUDE_DIRS "${ZLIB_ROOT}/include")
     include_directories(${ZLIB_INCLUDE_DIRS})
-    link_directories(${ZLIB_LIBRARIES})
+    link_directories(${ZLIB_LIBRARY_DIRS})
 endif()
 
 # Find the SAMRAI package

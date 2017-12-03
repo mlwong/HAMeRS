@@ -13,7 +13,7 @@ add_library(visit_data_writer ${visit_data_writer_source_files})
 TARGET_LINK_LIBRARIES(visit_data_writer
   SAMRAI_appu SAMRAI_geom SAMRAI_solv SAMRAI_algs SAMRAI_mesh
   SAMRAI_math SAMRAI_pdat SAMRAI_xfer SAMRAI_hier SAMRAI_tbox
-  hdf5 gfortran)
+  ${HDF5_C_LIBRARIES} gfortran)
 
 if (WITH_ZLIB)
     TARGET_LINK_LIBRARIES(visit_data_writer z)

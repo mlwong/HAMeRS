@@ -12,7 +12,7 @@ add_library(diffusive_flux_reconstructors ${diffusive_flux_reconstructors_source
 TARGET_LINK_LIBRARIES(diffusive_flux_reconstructors flow_models
   SAMRAI_appu SAMRAI_geom SAMRAI_solv SAMRAI_algs SAMRAI_mesh
   SAMRAI_math SAMRAI_pdat SAMRAI_xfer SAMRAI_hier SAMRAI_tbox
-  hdf5 gfortran)
+  ${HDF5_C_LIBRARIES} gfortran)
 
 if (WITH_ZLIB)
     TARGET_LINK_LIBRARIES(diffusive_flux_reconstructors z)
