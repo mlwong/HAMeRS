@@ -14,9 +14,10 @@ Git is used for the version control of the code. To install Git on Debian-based 
 sudo apt-get install git-all
 ```
 
-To compile the code, in general all you need is to use [CMake](https://cmake.org/). For example:
+To compile the code, in general all you need is to use [CMake](https://cmake.org/). For example, after cloning the repository with `git clone`:
 
 ```
+cd HAMeRS
 mkdir build
 cd build
 cmake ..
