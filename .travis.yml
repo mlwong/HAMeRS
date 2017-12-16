@@ -18,6 +18,7 @@ compiler:
 
 env:
   - HDF5_ROOT=${HOME}/hdf5 SAMRAI_ROOT=${HOME}/SAMRAI
+  - F77=gfortran
 
 before_install:
   - test -n $CC  && unset CC
