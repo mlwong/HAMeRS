@@ -102,7 +102,7 @@ EquationOfStateMixingRules::computeMixtureDensity(
     
     double* rho = data_mixture_density->getPointer(0);
     
-    std::vector<double*> Z_rho;
+    std::vector<const double*> Z_rho;
     Z_rho.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
@@ -122,6 +122,147 @@ EquationOfStateMixingRules::computeMixtureDensity(
         data_mixture_density->fillAll(double(0), domain);
     }
     
+    computeMixtureDensity(
+        rho,
+        Z_rho,
+        num_ghosts_mixture_density,
+        num_ghosts_partial_densities,
+        ghostcell_dims_mixture_density,
+        ghostcell_dims_partial_densities,
+        domain_lo,
+        domain_dims);
+}
+
+
+/*
+ * Helper function to compute the density of mixture given the partial densities.
+ */
+void
+EquationOfStateMixingRules::computeMixtureDensity(
+    boost::shared_ptr<pdat::SideData<double> >& data_mixture_density,
+    const boost::shared_ptr<pdat::SideData<double> >& data_partial_densities,
+    int side_normal,
+    const hier::Box& domain) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_mixture_density);
+    TBOX_ASSERT(data_partial_densities);
+#endif
+    
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = data_mixture_density->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_partial_densities->getBox().numberCells() == interior_dims);
+#endif
+    
+    /*
+     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
+     */
+    
+    const hier::IntVector num_ghosts_mixture_density = data_mixture_density->getGhostCellWidth();
+    hier::IntVector ghostcell_dims_mixture_density =
+        data_mixture_density->getGhostBox().numberCells();
+    
+    const hier::IntVector num_ghosts_partial_densities = data_partial_densities->getGhostCellWidth();
+    hier::IntVector ghostcell_dims_partial_densities =
+        data_partial_densities->getGhostBox().numberCells();
+    
+    /*
+     * Get the local lower indices and number of cells in each direction of the domain.
+     */
+    
+    hier::IntVector domain_lo(d_dim);
+    hier::IntVector domain_dims(d_dim);
+    
+    if (domain.empty())
+    {
+        hier::IntVector num_ghosts_min(d_dim);
+        
+        num_ghosts_min = num_ghosts_mixture_density;
+        num_ghosts_min = hier::IntVector::min(num_ghosts_partial_densities, num_ghosts_min);
+        
+        hier::Box ghost_box = interior_box;
+        ghost_box.grow(num_ghosts_min);
+        
+        domain_lo = -num_ghosts_min;
+        domain_dims = ghost_box.numberCells();
+    }
+    else
+    {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_mixture_density->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_partial_densities->getGhostBox().contains(domain));
+#endif
+        
+        domain_lo = domain.lower() - interior_box.lower();
+        domain_dims = domain.numberCells();
+    }
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(side_normal < d_dim.getValue());
+    
+    TBOX_ASSERT(data_mixture_density->getDirectionVector()[side_normal] > 0);
+    TBOX_ASSERT(data_partial_densities->getDirectionVector()[side_normal] > 0);
+#endif
+    
+    ghostcell_dims_mixture_density[side_normal]++;
+    ghostcell_dims_partial_densities[side_normal]++;
+    domain_dims[side_normal]++;
+    
+    /*
+     * Get the pointers to the cell data.
+     */
+    
+    double* rho = data_mixture_density->getPointer(side_normal, 0);
+    
+    std::vector<const double*> Z_rho;
+    Z_rho.reserve(d_num_species);
+    for (int si = 0; si < d_num_species; si++)
+    {
+        Z_rho.push_back(data_partial_densities->getPointer(side_normal, si));
+    }
+    
+    /*
+     * Fill zeros for rho.
+     */
+    
+    if (domain.empty())
+    {
+        data_mixture_density->fillAll(double(0));
+    }
+    else
+    {
+        data_mixture_density->fillAll(double(0), domain);
+    }
+    
+    computeMixtureDensity(
+        rho,
+        Z_rho,
+        num_ghosts_mixture_density,
+        num_ghosts_partial_densities,
+        ghostcell_dims_mixture_density,
+        ghostcell_dims_partial_densities,
+        domain_lo,
+        domain_dims);
+}
+
+
+/*
+ * Compute the density of mixture given the partial densities.
+ */
+void
+EquationOfStateMixingRules::computeMixtureDensity(
+    double* const rho,
+    const std::vector<const double*>& Z_rho,
+    const hier::IntVector& num_ghosts_mixture_density,
+    const hier::IntVector& num_ghosts_partial_densities,
+    const hier::IntVector& ghostcell_dims_mixture_density,
+    const hier::IntVector& ghostcell_dims_partial_densities,
+    const hier::IntVector& domain_lo,
+    const hier::IntVector& domain_dims) const
+{
     if (d_dim == tbox::Dimension(1))
     {
         /*

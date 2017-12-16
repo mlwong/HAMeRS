@@ -21,6 +21,8 @@ set(flow_models_source_files
     ./five-eqn_Allaire/FlowModelBoundaryUtilitiesFiveEqnAllaire.cpp
     ./five-eqn_Allaire/FlowModelRiemannSolverFiveEqnAllaire.cpp
     ./five-eqn_Allaire/FlowModelStatisticsUtilitiesFiveEqnAllaire.cpp
+    ./five-eqn_Allaire/Riemann_solvers/FlowModelRiemannSolverFiveEqnAllaireHLLC.cpp
+    ./five-eqn_Allaire/Riemann_solvers/FlowModelRiemannSolverFiveEqnAllaireHLLC-HLL.cpp
     ./five-eqn_Allaire/Riemann_solvers/RiemannSolverFiveEqnAllaireHLLC.cpp
     ./five-eqn_Allaire/Riemann_solvers/RiemannSolverFiveEqnAllaireHLLC_HLL.cpp
 )

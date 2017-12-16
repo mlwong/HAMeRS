@@ -131,7 +131,7 @@ EquationOfStateIdealGas::computePressure(
     
     const double& gamma = *(thermo_properties[0]);
     
-    this->computePressure(
+    computePressure(
         p,
         rho,
         epsilon,
@@ -245,7 +245,7 @@ EquationOfStateIdealGas::computePressure(
     
     const double& gamma = *(thermo_properties[0]);
     
-    this->computePressure(
+    computePressure(
         p,
         rho,
         epsilon,
@@ -355,7 +355,7 @@ EquationOfStateIdealGas::computePressure(
     const double* const epsilon = data_internal_energy->getPointer(0);
     const double* const gamma = data_thermo_properties->getPointer(0);
     
-    this->computePressure(
+    computePressure(
         p,
         rho,
         epsilon,
@@ -479,7 +479,7 @@ EquationOfStateIdealGas::computePressure(
     const double* const epsilon = data_internal_energy->getPointer(side_normal, 0);
     const double* const gamma = data_thermo_properties->getPointer(side_normal, 0);
     
-    this->computePressure(
+    computePressure(
         p,
         rho,
         epsilon,
@@ -606,7 +606,7 @@ EquationOfStateIdealGas::computeSoundSpeed(
     
     const double& gamma = *(thermo_properties[0]);
     
-    this->computeSoundSpeed(
+    computeSoundSpeed(
         c,
         rho,
         p,
@@ -720,7 +720,7 @@ EquationOfStateIdealGas::computeSoundSpeed(
     
     const double& gamma = *(thermo_properties[0]);
     
-    this->computeSoundSpeed(
+    computeSoundSpeed(
         c,
         rho,
         p,
@@ -830,7 +830,7 @@ EquationOfStateIdealGas::computeSoundSpeed(
     const double* const p = data_pressure->getPointer(0);
     const double* const gamma = data_thermo_properties->getPointer(0);
     
-    this->computeSoundSpeed(
+    computeSoundSpeed(
         c,
         rho,
         p,
@@ -954,7 +954,7 @@ EquationOfStateIdealGas::computeSoundSpeed(
     const double* const p = data_pressure->getPointer(side_normal, 0);
     const double* const gamma = data_thermo_properties->getPointer(side_normal, 0);
     
-    this->computeSoundSpeed(
+    computeSoundSpeed(
         c,
         rho,
         p,
@@ -1081,7 +1081,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
     
     const double& gamma = *(thermo_properties[0]);
     
-    this->computeInternalEnergy(
+    computeInternalEnergy(
         epsilon,
         rho,
         p,
@@ -1195,7 +1195,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
     
     const double& gamma = *(thermo_properties[0]);
     
-    this->computeInternalEnergy(
+    computeInternalEnergy(
         epsilon,
         rho,
         p,
@@ -1305,7 +1305,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
     const double* const p = data_pressure->getPointer(0);
     const double* const gamma = data_thermo_properties->getPointer(0);
     
-    this->computeInternalEnergy(
+    computeInternalEnergy(
         epsilon,
         rho,
         p,
@@ -1429,7 +1429,7 @@ EquationOfStateIdealGas::computeInternalEnergy(
     const double* const p = data_pressure->getPointer(side_normal, 0);
     const double* const gamma = data_thermo_properties->getPointer(side_normal, 0);
     
-    this->computeInternalEnergy(
+    computeInternalEnergy(
         epsilon,
         rho,
         p,
@@ -1556,7 +1556,7 @@ EquationOfStateIdealGas::computeEnthalpy(
     
     const double& gamma = *(thermo_properties[0]);
     
-    this->computeEnthalpy(
+    computeEnthalpy(
         h,
         rho,
         p,
@@ -1670,7 +1670,7 @@ EquationOfStateIdealGas::computeEnthalpy(
     
     const double& gamma = *(thermo_properties[0]);
     
-    this->computeEnthalpy(
+    computeEnthalpy(
         h,
         rho,
         p,
@@ -1780,7 +1780,7 @@ EquationOfStateIdealGas::computeEnthalpy(
     const double* const p = data_pressure->getPointer(0);
     const double* const gamma = data_thermo_properties->getPointer(0);
     
-    this->computeEnthalpy(
+    computeEnthalpy(
         h,
         rho,
         p,
@@ -1904,7 +1904,7 @@ EquationOfStateIdealGas::computeEnthalpy(
     const double* const p = data_pressure->getPointer(side_normal, 0);
     const double* const gamma = data_thermo_properties->getPointer(side_normal, 0);
     
-    this->computeEnthalpy(
+    computeEnthalpy(
         h,
         rho,
         p,
@@ -2033,7 +2033,7 @@ EquationOfStateIdealGas::computeTemperature(
     const double& gamma = *(thermo_properties[0]);
     const double& c_v = *(thermo_properties[3]);
     
-    this->computeTemperature(
+    computeTemperature(
         T,
         rho,
         p,
@@ -2149,7 +2149,7 @@ EquationOfStateIdealGas::computeTemperature(
     const double& gamma = *(thermo_properties[0]);
     const double& c_v = *(thermo_properties[3]);
     
-    this->computeTemperature(
+    computeTemperature(
         T,
         rho,
         p,
@@ -2261,7 +2261,7 @@ EquationOfStateIdealGas::computeTemperature(
     const double* const gamma = data_thermo_properties->getPointer(0);
     const double* const c_v = data_thermo_properties->getPointer(3);
     
-    this->computeTemperature(
+    computeTemperature(
         T,
         rho,
         p,
@@ -2387,7 +2387,7 @@ EquationOfStateIdealGas::computeTemperature(
     const double* const gamma = data_thermo_properties->getPointer(side_normal, 0);
     const double* const c_v = data_thermo_properties->getPointer(side_normal, 3);
     
-    this->computeTemperature(
+    computeTemperature(
         T,
         rho,
         p,
@@ -2509,7 +2509,7 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
     
     const double& c_v = *(thermo_properties[3]);
     
-    this->computeInternalEnergyFromTemperature(
+    computeInternalEnergyFromTemperature(
         epsilon,
         T,
         c_v,
@@ -2612,7 +2612,7 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
     
     const double& c_v = *(thermo_properties[3]);
     
-    this->computeInternalEnergyFromTemperature(
+    computeInternalEnergyFromTemperature(
         epsilon,
         T,
         c_v,
@@ -2712,7 +2712,7 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
     const double* const T = data_temperature->getPointer(0);
     const double* const c_v = data_thermo_properties->getPointer(3);
     
-    this->computeInternalEnergyFromTemperature(
+    computeInternalEnergyFromTemperature(
         epsilon,
         T,
         c_v,
@@ -2825,7 +2825,7 @@ EquationOfStateIdealGas::computeInternalEnergyFromTemperature(
     const double* const T = data_temperature->getPointer(side_normal, 0);
     const double* const c_v = data_thermo_properties->getPointer(side_normal, 3);
     
-    this->computeInternalEnergyFromTemperature(
+    computeInternalEnergyFromTemperature(
         epsilon,
         T,
         c_v,
@@ -2926,7 +2926,7 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
     
     const double& c_v_src = *(thermo_properties[3]);
     
-    this->computeIsochoricSpecificHeatCapacity(
+    computeIsochoricSpecificHeatCapacity(
         c_v,
         c_v_src,
         num_ghosts_isochoric_specific_heat_capacity,
@@ -3012,7 +3012,7 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
     
     const double& c_v_src = *(thermo_properties[3]);
     
-    this->computeIsochoricSpecificHeatCapacity(
+    computeIsochoricSpecificHeatCapacity(
         c_v,
         c_v_src,
         num_ghosts_isochoric_specific_heat_capacity,
@@ -3102,7 +3102,7 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
     double* const c_v = data_isochoric_specific_heat_capacity->getPointer(0);
     const double* const c_v_src = data_thermo_properties->getPointer(3);
     
-    this->computeIsochoricSpecificHeatCapacity(
+    computeIsochoricSpecificHeatCapacity(
         c_v,
         c_v_src,
         num_ghosts_isochoric_specific_heat_capacity,
@@ -3205,7 +3205,7 @@ EquationOfStateIdealGas::computeIsochoricSpecificHeatCapacity(
     double* const c_v = data_isochoric_specific_heat_capacity->getPointer(side_normal, 0);
     const double* const c_v_src = data_thermo_properties->getPointer(side_normal, 3);
     
-    this->computeIsochoricSpecificHeatCapacity(
+    computeIsochoricSpecificHeatCapacity(
         c_v,
         c_v_src,
         num_ghosts_isochoric_specific_heat_capacity,
@@ -3303,7 +3303,7 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
     
     const double& c_p_src = *(thermo_properties[2]);
     
-    this->computeIsobaricSpecificHeatCapacity(
+    computeIsobaricSpecificHeatCapacity(
         c_p,
         c_p_src,
         num_ghosts_isobaric_specific_heat_capacity,
@@ -3389,7 +3389,7 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
     
     const double& c_p_src = *(thermo_properties[2]);
     
-    this->computeIsobaricSpecificHeatCapacity(
+    computeIsobaricSpecificHeatCapacity(
         c_p,
         c_p_src,
         num_ghosts_isobaric_specific_heat_capacity,
@@ -3479,7 +3479,7 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
     double* const c_p = data_isobaric_specific_heat_capacity->getPointer(0);
     const double* const c_p_src = data_thermo_properties->getPointer(2);
     
-    this->computeIsobaricSpecificHeatCapacity(
+    computeIsobaricSpecificHeatCapacity(
         c_p,
         c_p_src,
         num_ghosts_isobaric_specific_heat_capacity,
@@ -3582,7 +3582,7 @@ EquationOfStateIdealGas::computeIsobaricSpecificHeatCapacity(
     double* const c_p = data_isobaric_specific_heat_capacity->getPointer(side_normal, 0);
     const double* const c_p_src = data_thermo_properties->getPointer(side_normal, 2);
     
-    this->computeIsobaricSpecificHeatCapacity(
+    computeIsobaricSpecificHeatCapacity(
         c_p,
         c_p_src,
         num_ghosts_isobaric_specific_heat_capacity,
@@ -3682,7 +3682,7 @@ EquationOfStateIdealGas::computeIsochoricPartialInternalEnergyPartialPressure(
     
     const double& gamma = *(thermo_properties[0]);
     
-    this->computeIsochoricPartialInternalEnergyPartialPressure(
+    computeIsochoricPartialInternalEnergyPartialPressure(
         xi,
         gamma,
         num_ghosts_partial_internal_energy_partial_pressure,
@@ -3768,7 +3768,7 @@ EquationOfStateIdealGas::computeIsochoricPartialInternalEnergyPartialPressure(
     
     const double& gamma = *(thermo_properties[0]);
     
-    this->computeIsochoricPartialInternalEnergyPartialPressure(
+    computeIsochoricPartialInternalEnergyPartialPressure(
         xi,
         gamma,
         num_ghosts_partial_internal_energy_partial_pressure,
@@ -3858,7 +3858,7 @@ EquationOfStateIdealGas::computeIsochoricPartialInternalEnergyPartialPressure(
     double* const xi = data_partial_internal_energy_partial_pressure->getPointer(0);
     const double* const gamma = data_thermo_properties->getPointer(0);
     
-    this->computeIsochoricPartialInternalEnergyPartialPressure(
+    computeIsochoricPartialInternalEnergyPartialPressure(
         xi,
         gamma,
         num_ghosts_partial_internal_energy_partial_pressure,
@@ -3961,7 +3961,7 @@ EquationOfStateIdealGas::computeIsochoricPartialInternalEnergyPartialPressure(
     double* const xi = data_partial_internal_energy_partial_pressure->getPointer(side_normal, 0);
     const double* const gamma = data_thermo_properties->getPointer(side_normal, 0);
     
-    this->computeIsochoricPartialInternalEnergyPartialPressure(
+    computeIsochoricPartialInternalEnergyPartialPressure(
         xi,
         gamma,
         num_ghosts_partial_internal_energy_partial_pressure,
@@ -4053,7 +4053,7 @@ EquationOfStateIdealGas::computeIsobaricPartialInternalEnergyPartialDensity(
     
     double* const delta = data_partial_internal_energy_partial_density->getPointer(0);
     
-    this->computeIsobaricPartialInternalEnergyPartialDensity(
+    computeIsobaricPartialInternalEnergyPartialDensity(
         delta,
         num_ghosts_partial_internal_energy_partial_density,
         ghostcell_dims_partial_internal_energy_partial_density,
@@ -4135,7 +4135,7 @@ EquationOfStateIdealGas::computeIsobaricPartialInternalEnergyPartialDensity(
     
     double* const delta = data_partial_internal_energy_partial_density->getPointer(side_normal, 0);
     
-    this->computeIsobaricPartialInternalEnergyPartialDensity(
+    computeIsobaricPartialInternalEnergyPartialDensity(
         delta,
         num_ghosts_partial_internal_energy_partial_density,
         ghostcell_dims_partial_internal_energy_partial_density,
@@ -4207,7 +4207,7 @@ EquationOfStateIdealGas::computeIsobaricPartialInternalEnergyPartialDensity(
     
     double* const delta = data_partial_internal_energy_partial_density->getPointer(0);
     
-    this->computeIsobaricPartialInternalEnergyPartialDensity(
+    computeIsobaricPartialInternalEnergyPartialDensity(
         delta,
         num_ghosts_partial_internal_energy_partial_density,
         ghostcell_dims_partial_internal_energy_partial_density,
@@ -4289,7 +4289,7 @@ EquationOfStateIdealGas::computeIsobaricPartialInternalEnergyPartialDensity(
     
     double* const delta = data_partial_internal_energy_partial_density->getPointer(side_normal, 0);
     
-    this->computeIsobaricPartialInternalEnergyPartialDensity(
+    computeIsobaricPartialInternalEnergyPartialDensity(
         delta,
         num_ghosts_partial_internal_energy_partial_density,
         ghostcell_dims_partial_internal_energy_partial_density,
@@ -4407,7 +4407,7 @@ EquationOfStateIdealGas::computeDensity(
     
     const double& R = *(thermo_properties[1]);
     
-    this->computeDensity(
+    computeDensity(
         rho,
         p,
         T,
@@ -4521,7 +4521,7 @@ EquationOfStateIdealGas::computeDensity(
     
     const double& R = *(thermo_properties[1]);
     
-    this->computeDensity(
+    computeDensity(
         rho,
         p,
         T,
@@ -4631,7 +4631,7 @@ EquationOfStateIdealGas::computeDensity(
     const double* const T = data_temperature->getPointer(0);
     const double* const R = data_thermo_properties->getPointer(1);
     
-    this->computeDensity(
+    computeDensity(
         rho,
         p,
         T,
@@ -4755,7 +4755,7 @@ EquationOfStateIdealGas::computeDensity(
     const double* const T = data_temperature->getPointer(side_normal, 0);
     const double* const R = data_thermo_properties->getPointer(side_normal, 1);
     
-    this->computeDensity(
+    computeDensity(
         rho,
         p,
         T,

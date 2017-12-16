@@ -60,6 +60,18 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const hier::Box& domain) const;
         
         /*
+         * Compute the pressure of the mixture with isothermal and isobaric equilibria assumptions.
+         */
+        void
+        computePressure(
+            boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            int side_normal,
+            const hier::Box& domain) const;
+        
+        /*
          * Compute the pressure of the mixture with isobaric equilibrium assumption.
          */
         double
@@ -82,6 +94,19 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const hier::Box& domain) const;
         
         /*
+         * Compute the pressure of the mixture with isobaric equilibrium assumption.
+         */
+        void
+        computePressure(
+            boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            const boost::shared_ptr<pdat::SideData<double> >& data_volume_fractions,
+            int side_normal,
+            const hier::Box& domain) const;
+        
+        /*
          * Compute the sound speed of the mixture with isothermal and isobaric equilibria assumptions.
          */
         double
@@ -99,6 +124,18 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the sound speed of the mixture with isothermal and isobaric equilibria assumptions.
+         */
+        void
+        computeSoundSpeed(
+            boost::shared_ptr<pdat::SideData<double> >& data_sound_speed,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            int side_normal,
             const hier::Box& domain) const;
         
         /*
@@ -124,6 +161,19 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const hier::Box& domain) const;
         
         /*
+         * Compute the sound speed of the mixture with isobaric equilibrium assumption.
+         */
+        void
+        computeSoundSpeed(
+            boost::shared_ptr<pdat::SideData<double> >& data_sound_speed,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            const boost::shared_ptr<pdat::SideData<double> >& data_volume_fractions,
+            int side_normal,
+            const hier::Box& domain) const;
+        
+        /*
          * Compute the specific internal energy of the mixture with isothermal and isobaric equilibria assumptions.
          */
         double
@@ -141,6 +191,18 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the specific internal energy of the mixture with isothermal and isobaric equilibria assumptions.
+         */
+        void
+        computeInternalEnergy(
+            boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            int side_normal,
             const hier::Box& domain) const;
         
         /*
@@ -163,6 +225,19 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
             const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the specific internal energy of the mixture with isobaric equilibrium assumption.
+         */
+        void
+        computeInternalEnergy(
+            boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            const boost::shared_ptr<pdat::SideData<double> >& data_volume_fractions,
+            int side_normal,
             const hier::Box& domain) const;
         
         /*
@@ -183,6 +258,18 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the temperature of the mixture with isothermal and isobaric equilibria assumptions.
+         */
+        void
+        computeTemperature(
+            boost::shared_ptr<pdat::SideData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            int side_normal,
             const hier::Box& domain) const;
         
         /*
@@ -208,6 +295,19 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const hier::Box& domain) const;
         
         /*
+         * Compute the specific internal energy of the mixture from temperature with isothermal
+         * and isobaric equilibria assumptions.
+         */
+        void
+        computeInternalEnergyFromTemperature(
+            boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            int side_normal,
+            const hier::Box& domain) const;
+        
+        /*
          * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric
          * equilibria assumptions.
          */
@@ -227,6 +327,19 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const boost::shared_ptr<pdat::CellData<double> >& data_density,
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric
+         * equilibria assumptions.
+         */
+        void
+        computeIsochoricSpecificHeatCapacity(
+            boost::shared_ptr<pdat::SideData<double> >& data_isochoric_specific_heat_capacity,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            int side_normal,
             const hier::Box& domain) const;
         
         /*
@@ -252,6 +365,19 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const hier::Box& domain) const;
         
         /*
+         * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric
+         * equilibria assumptions.
+         */
+        void
+        computeIsobaricSpecificHeatCapacity(
+            boost::shared_ptr<pdat::SideData<double> >& data_isobaric_specific_heat_capacity,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            int side_normal,
+            const hier::Box& domain) const;
+        
+        /*
          * Compute the density of mixture with isothermal and isobaric equilibria assumptions.
          */
         double
@@ -269,6 +395,18 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
             const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
             const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the density of mixture with isothermal and isobaric equilibria assumptions.
+         */
+        void
+        computeMixtureDensity(
+            boost::shared_ptr<pdat::SideData<double> >& data_mixture_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            int side_normal,
             const hier::Box& domain) const;
         
         /*
@@ -314,6 +452,16 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const hier::Box& domain) const;
         
         /*
+         * Get the thermodynamic properties of the mixture.
+         */
+        void
+        computeMixtureThermodynamicProperties(
+            boost::shared_ptr<pdat::SideData<double> >& data_mixture_thermo_properties,
+            const boost::shared_ptr<pdat::SideData<double> >& data_species_fraction,
+            int side_normal,
+            const hier::Box& domain) const;
+        
+        /*
          * Compute the thermodynamic properties of the mixture with mass fractions.
          */
         void
@@ -328,6 +476,16 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
         computeMixtureThermodynamicPropertiesWithMassFraction(
             boost::shared_ptr<pdat::CellData<double> >& data_mixture_thermo_properties,
             const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the thermodynamic properties of the mixture with mass fractions.
+         */
+        void
+        computeMixtureThermodynamicPropertiesWithMassFraction(
+            boost::shared_ptr<pdat::SideData<double> >& data_mixture_thermo_properties,
+            const boost::shared_ptr<pdat::SideData<double> >& data_mass_fractions,
+            int side_normal,
             const hier::Box& domain) const;
         
         /*
@@ -346,6 +504,142 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             boost::shared_ptr<pdat::CellData<double> >& data_mixture_thermo_properties,
             const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
             const hier::Box& domain) const;
+        
+        /*
+         * Compute the thermodynamic properties of the mixture with volume fractions.
+         */
+        void
+        computeMixtureThermodynamicPropertiesWithVolumeFraction(
+            boost::shared_ptr<pdat::SideData<double> >& data_mixture_thermo_properties,
+            const boost::shared_ptr<pdat::SideData<double> >& data_volume_fractions,
+            int side_normal,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric
+         * equilibria assumptions.
+         */
+        void
+        computeIsochoricSpecificHeatCapacity(
+            double* const c_v,
+            const std::vector<const double*> Y,
+            const hier::IntVector& num_ghosts_isochoric_specific_heat_capacity,
+            const hier::IntVector& num_ghosts_mass_fractions,
+            const hier::IntVector& ghostcell_dims_isochoric_specific_heat_capacity,
+            const hier::IntVector& ghostcell_dims_mass_fractions,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims) const;
+        
+        /*
+         * Compute the isochoric specific heat capacity of mixture with isothermal and isobaric
+         * equilibria assumptions.
+         */
+        void
+        computeIsochoricSpecificHeatCapacity(
+            double* const c_v,
+            double* const Y_last,
+            const std::vector<const double*> Y,
+            const hier::IntVector& num_ghosts_isochoric_specific_heat_capacity,
+            const hier::IntVector& num_ghosts_mass_fractions,
+            const hier::IntVector& ghostcell_dims_isochoric_specific_heat_capacity,
+            const hier::IntVector& ghostcell_dims_mass_fractions,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims) const;
+        
+        /*
+         * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric equilibria
+         * assumptions.
+         */
+        void
+        computeIsobaricSpecificHeatCapacity(
+            double* const c_p,
+            const std::vector<const double*> Y,
+            const hier::IntVector& num_ghosts_isobaric_specific_heat_capacity,
+            const hier::IntVector& num_ghosts_mass_fractions,
+            const hier::IntVector& ghostcell_dims_isobaric_specific_heat_capacity,
+            const hier::IntVector& ghostcell_dims_mass_fractions,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims) const;
+        
+        /*
+         * Compute the isobaric specific heat capacity of mixture with isothermal and isobaric equilibria
+         * assumptions.
+         */
+        void
+        computeIsobaricSpecificHeatCapacity(
+            double* const c_p,
+            double* const Y_last,
+            const std::vector<const double*> Y,
+            const hier::IntVector& num_ghosts_isobaric_specific_heat_capacity,
+            const hier::IntVector& num_ghosts_mass_fractions,
+            const hier::IntVector& ghostcell_dims_isobaric_specific_heat_capacity,
+            const hier::IntVector& ghostcell_dims_mass_fractions,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims) const;
+        
+        /*
+         * Compute the thermodynamic properties of the mixture with mass fractions.
+         */
+        void
+        computeMixtureThermodynamicPropertiesWithMassFraction(
+            double* const gamma,
+            double* const R,
+            double* const c_p,
+            double* const c_v,
+            const std::vector<const double*> Y,
+            const hier::IntVector& num_ghosts_mixture_thermo_properties,
+            const hier::IntVector& num_ghosts_mass_fractions,
+            const hier::IntVector& ghostcell_dims_mixture_thermo_properties,
+            const hier::IntVector& ghostcell_dims_mass_fractions,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims) const;
+        
+        /*
+         * Compute the thermodynamic properties of the mixture with mass fractions.
+         */
+        void
+        computeMixtureThermodynamicPropertiesWithMassFraction(
+            double* const gamma,
+            double* const R,
+            double* const c_p,
+            double* const c_v,
+            double* const Y_last,
+            const std::vector<const double*> Y,
+            const hier::IntVector& num_ghosts_mixture_thermo_properties,
+            const hier::IntVector& num_ghosts_mass_fractions,
+            const hier::IntVector& ghostcell_dims_mixture_thermo_properties,
+            const hier::IntVector& ghostcell_dims_mass_fractions,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims) const;
+        
+        /*
+         * Compute the thermodynamic properties of the mixture with volume fractions.
+         */
+        void
+        getMixtureThermodynamicPropertiesWithVolumeFraction(
+            double* const gamma,
+            const std::vector<const double*> Z,
+            const hier::IntVector& num_ghosts_mixture_thermo_properties,
+            const hier::IntVector& num_ghosts_volume_fractions,
+            const hier::IntVector& ghostcell_dims_mixture_thermo_properties,
+            const hier::IntVector& ghostcell_dims_volume_fractions,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims) const;
+        
+        /*
+         * Compute the thermodynamic properties of the mixture with volume fractions.
+         */
+        void
+        getMixtureThermodynamicPropertiesWithVolumeFraction(
+            double* const gamma,
+            double* const Z_last,
+            const std::vector<const double*> Z,
+            const hier::IntVector& num_ghosts_mixture_thermo_properties,
+            const hier::IntVector& num_ghosts_volume_fractions,
+            const hier::IntVector& ghostcell_dims_mixture_thermo_properties,
+            const hier::IntVector& ghostcell_dims_volume_fractions,
+            const hier::IntVector& domain_lo,
+            const hier::IntVector& domain_dims) const;
         
         /*
          * Ratio of specific heats of different species.
