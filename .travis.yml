@@ -24,6 +24,9 @@ before_install:
   - test -n $CXX && unset CXX
   - sh travis/install-hdf5.sh
   - sh travis/install-SAMRAI.sh
+  - export CC=mpicc
+  - export CXX=mpicxx
+  - export F77=mpif77
 
 install:
   - mkdir build
