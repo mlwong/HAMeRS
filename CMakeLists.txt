@@ -4,28 +4,38 @@ project(HAMeRS C CXX Fortran)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 
+
 find_package(MPI)
 
 if (MPI_FOUND)
   include_directories(${MPI_INCLUDE_PATH})
-endif(MPI_FOUND)
+endif()
 
 # Find the boost package
 find_package(Boost 1.45 REQUIRED)
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
-LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
+include_directories(${Boost_INCLUDE_DIR})
+link_directories(${Boost_LIBRARY_DIRS})
 
 # Find the hdf5 package
 find_package(HDF5 1.8.4 REQUIRED)
-INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIR})
-LINK_DIRECTORIES(${HDF5_LIBRARY_DIRS})
+include_directories(${HDF5_INCLUDE_DIR})
+link_directories(${HDF5_LIBRARY_DIRS})
+
+# Find the zlib package
+if (WITH_ZLIB)
+    set(ZLIB_LIBRARIES $ENV{ZLIB_ROOT})
+    set(ZLIB_LIBRARY_DIRS "${ZLIB_ROOT}/lib")
+    set(ZLIB_INCLUDE_DIRS "${ZLIB_ROOT}/include")
+    include_directories(${ZLIB_INCLUDE_DIRS})
+    link_directories(${ZLIB_LIBRARY_DIRS})
+endif()
 
 # Find the SAMRAI package
 find_package(SAMRAI REQUIRED)
-INCLUDE_DIRECTORIES(${SAMRAI_INCLUDE_DIR})
-LINK_DIRECTORIES(${SAMRAI_LIBRARY_DIRS})
+include_directories(${SAMRAI_INCLUDE_DIR})
+link_directories(${SAMRAI_LIBRARY_DIRS})
 
-MESSAGE(STATUS "SAMRAI_INCLUDE_DIR: " ${SAMRAI_INCLUDE_DIR})
+message(STATUS "SAMRAI_INCLUDE_DIR: " ${SAMRAI_INCLUDE_DIR})
 
 # Set the preprocessor variables
 option(HAMERS_ENABLE_SIMD "HAMERS_ENABLE_SIMD" OFF)
@@ -35,9 +45,13 @@ option(HAMERS_DEBUG_CHECK_DEV_ASSERTIONS "HAMERS_DEBUG_CHECK_DEV_ASSERTIONS" ON)
 configure_file(${HAMeRS_SOURCE_DIR}/include/HAMeRS_config.hpp.in ${HAMeRS_SOURCE_DIR}/include/HAMeRS_config.hpp)
 
 # Set the compilers
-set(CMAKE_CXX_COMPILER mpicxx)
-set(CMAKE_C_COMPILER mpicc)
-set(CMAKE_Fortran_COMPILER gfortran)
+set(CMAKE_C_COMPILER $ENV{CC})
+set(CMAKE_CXX_COMPILER $ENV{CXX})
+set(CMAKE_Fortran_COMPILER $ENV{F77})
+
+message(STATUS "CMAKE_C_COMPILER_ID: " ${CMAKE_C_COMPILER_ID})
+message(STATUS "CMAKE_CXX_COMPILER_ID: " ${CMAKE_CXX_COMPILER_ID})
+message(STATUS "CMAKE_Fortran_COMPILER_ID: " ${CMAKE_Fortran_COMPILER_ID})
 
 if (NOT CMAKE_BUILD_TYPE)
     message(STATUS "No build type selected, default to Release")
@@ -48,6 +62,8 @@ endif()
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
     if (CMAKE_BUILD_TYPE MATCHES "Release")
         set(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wall -Wno-deprecated -qopenmp -qoverride-limits -xhost -qopt-report")
+    elseif (CMAKE_BUILD_TYPE MATCHES "KNL")
+        set(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wall -Wno-deprecated -qopenmp -axMIC-AVX512 -qopt-report")
     elseif (CMAKE_BUILD_TYPE MATCHES "Debug")
         set(CMAKE_CXX_FLAGS "-std=c++11 -g -O0 -Wall -Wno-deprecated")
     endif()
@@ -59,6 +75,15 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     elseif (CMAKE_BUILD_TYPE MATCHES "Debug")
         set(CMAKE_CXX_FLAGS "-std=c++11 -g -O0 -Wall -Wno-deprecated")
     endif()
+
+# Clang compilers
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    if (CMAKE_BUILD_TYPE MATCHES "Release")
+        set(CMAKE_CXX_FLAGS "-std=c++11 -O3 -Wall -Wno-deprecated -fopenmp")
+    elseif (CMAKE_BUILD_TYPE MATCHES "Debug")
+        set(CMAKE_CXX_FLAGS "-std=c++11 -g -O0 -Wall -Wno-deprecated")
+    endif()
+
 endif()
 
 # Directories to look for include files

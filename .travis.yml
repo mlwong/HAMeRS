@@ -22,6 +22,9 @@ env:
 before_install:
   - test -n $CC  && unset CC
   - test -n $CXX && unset CXX
+  - export CC=mpicc
+  - export CXX=mpicxx
+  - export F77=mpif77
   - sh travis/install-hdf5.sh
   - sh travis/install-SAMRAI.sh
 
