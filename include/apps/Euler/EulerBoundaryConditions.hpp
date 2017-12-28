@@ -4,6 +4,7 @@
 #include "HAMeRS_config.hpp"
 
 #include "flow/flow_models/FlowModels.hpp"
+#include "apps/Euler/EulerSpecialBoundaryConditions.hpp"
 #include "util/basic_boundary_conditions/BasicBoundaryConditions.hpp"
 #include "util/basic_boundary_conditions/BoundaryUtilityStrategy.hpp"
 #include "util/basic_boundary_conditions/CartesianBoundaryDefines.hpp"
@@ -25,6 +26,7 @@ class EulerBoundaryConditions:
             const tbox::Dimension& dim,
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
+            const FLOW_MODEL::TYPE& flow_model_type,
             const boost::shared_ptr<FlowModel>& flow_model,
             const boost::shared_ptr<tbox::Database>& boundary_conditions_db,
             const bool& is_from_restart);
@@ -119,6 +121,11 @@ class EulerBoundaryConditions:
         const int d_num_species;
         
         /*
+         * Flow model type.
+         */
+        const FLOW_MODEL::TYPE d_flow_model_type;
+        
+        /*
          * Flow model.
          */
         const boost::shared_ptr<FlowModel> d_flow_model;
@@ -156,6 +163,11 @@ class EulerBoundaryConditions:
         std::vector<std::vector<double> > d_bdry_node_conservative_var;
         std::vector<std::vector<double> > d_bdry_edge_conservative_var;
         std::vector<std::vector<double> > d_bdry_face_conservative_var;
+        
+        /*
+         * boost::shared_ptr to the special boundary conditions.
+         */
+        boost::shared_ptr<EulerSpecialBoundaryConditions> d_Euler_special_boundary_conditions;
         
 };
 

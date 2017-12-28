@@ -196,6 +196,7 @@ NavierStokes::NavierStokes(
         d_dim,
         d_grid_geometry,
         d_num_species,
+        d_flow_model_manager->getFlowModelType(),
         d_flow_model,
         d_Navier_Stokes_boundary_conditions_db,
         d_Navier_Stokes_boundary_conditions_db_is_from_restart));
