@@ -6,12 +6,14 @@
 void
 NavierStokesInitialConditions::initializeDataOnPatch(
     hier::Patch& patch,
-    const std::vector<boost::shared_ptr<pdat::CellVariable<double> > >& conservative_variables,
-    const boost::shared_ptr<hier::VariableContext>& data_context,
+    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables,
     const double data_time,
     const bool initial_time)
 {
+    NULL_USE(patch);
+    NULL_USE(conservative_variables);
     NULL_USE(data_time);
+    NULL_USE(initial_time);
     
     TBOX_ERROR(d_object_name
         << ": "

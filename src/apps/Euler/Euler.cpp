@@ -156,6 +156,7 @@ Euler::Euler(
         d_dim,
         d_grid_geometry,
         d_num_species,
+        d_flow_model_manager->getFlowModelType(),
         d_flow_model,
         d_Euler_boundary_conditions_db,
         d_Euler_boundary_conditions_db_is_from_restart));
@@ -475,12 +476,18 @@ Euler::initializeDataOnPatch(
 {   
     t_init->start();
     
+    d_flow_model->registerPatchWithDataContext(patch, getDataContext());
+    
+    std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_var_data =
+        d_flow_model->getGlobalCellDataConservativeVariables();
+    
     d_Euler_initial_conditions->initializeDataOnPatch(
         patch,
-        d_flow_model->getConservativeVariables(),
-        getDataContext(),
+        conservative_var_data,
         data_time,
         initial_time);
+    
+    d_flow_model->unregisterPatch();
     
     if (d_use_nonuniform_workload)
     {

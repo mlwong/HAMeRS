@@ -4,6 +4,7 @@ set(Navier_Stokes_source_files
     NavierStokes.cpp
     NavierStokesBoundaryConditions.cpp
     NavierStokesInitialConditions.cpp
+    NavierStokesSpecialBoundaryConditions.cpp
 )
 
 # Create a library called Navier_Stokes which includes the source files defined
