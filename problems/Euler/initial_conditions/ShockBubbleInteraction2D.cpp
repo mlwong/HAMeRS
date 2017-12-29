@@ -6,18 +6,17 @@
 void
 EulerInitialConditions::initializeDataOnPatch(
     hier::Patch& patch,
-    const std::vector<boost::shared_ptr<pdat::CellVariable<double> > >& conservative_variables,
-    const boost::shared_ptr<hier::VariableContext>& data_context,
+    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables,
     const double data_time,
     const bool initial_time)
 {
     NULL_USE(data_time);
     
-    if (d_project_name != "2D Richtmyer-Meshkov instability")
+    if (d_project_name != "2D shock-bubble interaction")
     {
         TBOX_ERROR(d_object_name
             << ": "
-            << "Can only initialize data for 'project_name' = '2D Richtmyer-Meshkov instability'!\n"
+            << "Can only initialize data for 'project_name' = '2D shock-bubble interaction'!\n"
             << "'project_name' = '"
             << d_project_name
             << "' is given."
@@ -66,36 +65,13 @@ EulerInitialConditions::initializeDataOnPatch(
         const hier::IntVector patch_dims = patch_box.numberCells();
         
         /*
-         * Initialize data for a 2D Richtmyer-Meshkov instability problem.
+         * Initialize data for a 2D shock-bubble interaction.
          */
         
-        boost::shared_ptr<pdat::CellVariable<double> > var_partial_density = conservative_variables[0];
-        boost::shared_ptr<pdat::CellVariable<double> > var_momentum        = conservative_variables[1];
-        boost::shared_ptr<pdat::CellVariable<double> > var_total_energy    = conservative_variables[2];
-        boost::shared_ptr<pdat::CellVariable<double> > var_volume_fraction = conservative_variables[3];
-        
-        boost::shared_ptr<pdat::CellData<double> > partial_density(
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(var_partial_density, data_context)));
-        
-        boost::shared_ptr<pdat::CellData<double> > momentum(
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(var_momentum, data_context)));
-        
-        boost::shared_ptr<pdat::CellData<double> > total_energy(
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(var_total_energy, data_context)));
-        
-        boost::shared_ptr<pdat::CellData<double> > volume_fraction(
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(var_volume_fraction, data_context)));
-        
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        TBOX_ASSERT(partial_density);
-        TBOX_ASSERT(momentum);
-        TBOX_ASSERT(total_energy);
-        TBOX_ASSERT(volume_fraction);
-#endif
+        boost::shared_ptr<pdat::CellData<double> > partial_density = conservative_variables[0];
+        boost::shared_ptr<pdat::CellData<double> > momentum        = conservative_variables[1];
+        boost::shared_ptr<pdat::CellData<double> > total_energy    = conservative_variables[2];
+        boost::shared_ptr<pdat::CellData<double> > volume_fraction = conservative_variables[3];
         
         double* Z_rho_1   = partial_density->getPointer(0);
         double* Z_rho_2   = partial_density->getPointer(1);
@@ -105,36 +81,35 @@ EulerInitialConditions::initializeDataOnPatch(
         double* Z_1       = volume_fraction->getPointer(0);
         double* Z_2       = volume_fraction->getPointer(1);
         
-        // Define and compute the characteristic lengths of the problem.
+        // Define of the characteristic lengths of the problem.
         const double D = double(1);
-        const double epsilon_i = double(6)*sqrt(dx[0]*dx[1]);
+        const double C_epsilon = double(3);
+        const double epsilon_i = C_epsilon*sqrt(dx[0]*dx[1]);
         
-        // species 0: SF6
+        // species 0: He
         // species 1: air
-        const double gamma_0 = double(1.093);
+        const double gamma_0 = double(1.648);
         const double gamma_1 = double(1.4);
         
-        NULL_USE(gamma_0);
-        
-        // SF6, pre-shock condition.
-        const double rho_SF6 = double(5.04);
-        const double u_SF6   = double(1.24);
-        const double v_SF6   = double(0);
-        const double p_SF6   = double(1)/double(1.4);
-        const double Z_SF6   = double(1);
+        // He, pre-shock condition.
+        const double rho_He = double(0.1819);
+        const double u_He   = double(0);
+        const double v_He   = double(0);
+        const double p_He   = double(1)/double(1.4);
+        const double Z_He   = double(1);
         
         // air, pre-shock condition.
         const double rho_pre = double(1);
-        const double u_pre   = double(1.24);
+        const double u_pre   = double(0);
         const double v_pre   = double(0);
         const double p_pre   = double(1)/double(1.4);
         const double Z_pre   = double(0);
         
         // air, post-shock condition.
-        const double rho_post = double(1.4112);
-        const double u_post   = double(0.8787);
+        const double rho_post = double(1.3764);
+        const double u_post   = double(-0.3336);
         const double v_post   = double(0);
-        const double p_post   = double(1.6272)/double(1.4);
+        const double p_post   = double(1.5698)/double(1.4);
         const double Z_post   = double(0);
         
         for (int j = 0; j < patch_dims[1]; j++)
@@ -149,7 +124,7 @@ EulerInitialConditions::initializeDataOnPatch(
                 x[0] = patch_xlo[0] + (double(i) + double(1)/double(2))*dx[0];
                 x[1] = patch_xlo[1] + (double(j) + double(1)/double(2))*dx[1];
                 
-                if (x[0] > double(7)/double(10)*D)
+                if (x[0] > double(9)/double(2)*D)
                 {
                     Z_rho_1[idx_cell] = double(0);
                     Z_rho_2[idx_cell] = rho_post;
@@ -163,18 +138,18 @@ EulerInitialConditions::initializeDataOnPatch(
                 else
                 {
                     // Compute the distance from the initial material interface.
-                    const double dR = x[0] - (double(2)/double(5) - double(1)/double(10)*
-                        sin(2*M_PI*(x[1]/D + double(1)/double(4))))*D;
+                    const double dR = sqrt(pow(x[0] - double(7)/double(2), 2) + x[1]*x[1]) -
+                        double(1)/double(2)*D;
                     
                     const double f_sm = double(1)/double(2)*(double(1) + erf(dR/epsilon_i));
                     
                     // Smooth the primitive quantity.
-                    const double Z_rho_1_i = rho_SF6*(double(1) - f_sm);
+                    const double Z_rho_1_i = rho_He*(double(1) - f_sm);
                     const double Z_rho_2_i = rho_pre*f_sm;
-                    const double u_i       = u_SF6*(double(1) - f_sm) + u_pre*f_sm;
-                    const double v_i       = v_SF6*(double(1) - f_sm) + v_pre*f_sm;
-                    const double p_i       = p_SF6*(double(1) - f_sm) + p_pre*f_sm;
-                    const double Z_1_i     = Z_SF6*(double(1) - f_sm) + Z_pre*f_sm;
+                    const double u_i       = u_He*(double(1) - f_sm) + u_pre*f_sm;
+                    const double v_i       = v_He*(double(1) - f_sm) + v_pre*f_sm;
+                    const double p_i       = p_He*(double(1) - f_sm) + p_pre*f_sm;
+                    const double Z_1_i     = Z_He*(double(1) - f_sm) + Z_pre*f_sm;
                     
                     const double rho_i = Z_rho_1_i + Z_rho_2_i;
                     const double Z_2_i = double(1) - Z_1_i;

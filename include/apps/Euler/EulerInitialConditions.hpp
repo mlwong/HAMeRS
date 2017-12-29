@@ -9,7 +9,7 @@
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 #include "SAMRAI/hier/IntVector.h"
 #include "SAMRAI/hier/Patch.h"
-#include "SAMRAI/pdat/CellVariable.h"
+#include "SAMRAI/pdat/CellData.h"
 #include "SAMRAI/tbox/Dimension.h"
 
 #include "boost/shared_ptr.hpp"
@@ -37,14 +37,13 @@ class EulerInitialConditions
         {}
         
         /*
-         * Set the data on the patch interior to some initial values,
-         * depending on the flow problems and flow models.
+         * Set the data on the patch interior to some initial values, depending on the flow problems
+         * and flow models.
          */
         void
         initializeDataOnPatch(
             hier::Patch& patch,
-            const std::vector<boost::shared_ptr<pdat::CellVariable<double> > >& conservative_variables,
-            const boost::shared_ptr<hier::VariableContext>& data_context,
+            const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables,
             const double data_time,
             const bool initial_time);
         

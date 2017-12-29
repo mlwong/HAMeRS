@@ -6,8 +6,7 @@
 void
 EulerInitialConditions::initializeDataOnPatch(
     hier::Patch& patch,
-    const std::vector<boost::shared_ptr<pdat::CellVariable<double> > >& conservative_variables,
-    const boost::shared_ptr<hier::VariableContext>& data_context,
+    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables,
     const double data_time,
     const bool initial_time)
 {
@@ -64,27 +63,9 @@ EulerInitialConditions::initializeDataOnPatch(
          * Initialize data for a 2D density wave advection problem.
          */
         
-        boost::shared_ptr<pdat::CellVariable<double> > var_density      = conservative_variables[0];
-        boost::shared_ptr<pdat::CellVariable<double> > var_momentum     = conservative_variables[1];
-        boost::shared_ptr<pdat::CellVariable<double> > var_total_energy = conservative_variables[2];
-        
-        boost::shared_ptr<pdat::CellData<double> > density(
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(var_density, data_context)));
-        
-        boost::shared_ptr<pdat::CellData<double> > momentum(
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(var_momentum, data_context)));
-        
-        boost::shared_ptr<pdat::CellData<double> > total_energy(
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(var_total_energy, data_context)));
-        
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        TBOX_ASSERT(density);
-        TBOX_ASSERT(momentum);
-        TBOX_ASSERT(total_energy);
-#endif
+        boost::shared_ptr<pdat::CellData<double> > density      = conservative_variables[0];
+        boost::shared_ptr<pdat::CellData<double> > momentum     = conservative_variables[1];
+        boost::shared_ptr<pdat::CellData<double> > total_energy = conservative_variables[2];
         
         double* rho   = density->getPointer(0);
         double* rho_u = momentum->getPointer(0);

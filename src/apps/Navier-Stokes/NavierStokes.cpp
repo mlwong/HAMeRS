@@ -572,12 +572,18 @@ NavierStokes::initializeDataOnPatch(
 {   
     t_init->start();
     
+    d_flow_model->registerPatchWithDataContext(patch, getDataContext());
+    
+    std::vector<boost::shared_ptr<pdat::CellData<double> > > conservative_var_data =
+        d_flow_model->getGlobalCellDataConservativeVariables();
+    
     d_Navier_Stokes_initial_conditions->initializeDataOnPatch(
         patch,
-        d_flow_model->getConservativeVariables(),
-        getDataContext(),
+        conservative_var_data,
         data_time,
         initial_time);
+    
+    d_flow_model->unregisterPatch();
     
     if (d_use_nonuniform_workload)
     {
