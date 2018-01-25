@@ -1646,13 +1646,6 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
     }
     
     /*
-     * Get the equation of state mixing rules and the thermodynamic properties of the species.
-     */
-    
-    const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules =
-        d_flow_model_tmp->getEquationOfStateMixingRules();
-    
-    /*
      * Get the pointers to the side data of convective flux and conservative variables.
      */
     
@@ -2077,11 +2070,11 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
         
         const int num_ghosts_0_convective_flux = num_ghosts_convective_flux[0];
         const int num_ghosts_1_convective_flux = num_ghosts_convective_flux[1];
-        const int ghostcell_dim_0_convective_flux = ghostcell_dims_convective_flux[0];
+        const int ghostcell_dim_0_convective_flux = ghostcell_dims_convective_flux[0] + 1;
         
         const int num_ghosts_0_conservative_variables = num_ghosts_conservative_variables[0];
         const int num_ghosts_1_conservative_variables = num_ghosts_conservative_variables[1];
-        const int ghostcell_dim_0_conservative_variables = ghostcell_dims_conservative_variables[0];
+        const int ghostcell_dim_0_conservative_variables = ghostcell_dims_conservative_variables[0] + 1;
         
         /*
          * Compute the density field.
@@ -2329,7 +2322,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
             
             const int num_ghosts_0_velocity = num_ghosts_velocity[0];
             const int num_ghosts_1_velocity = num_ghosts_velocity[1];
-            const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+            const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0] + 1;
             
             double* u = velocity->getPointer(0, 0);
             
@@ -2438,13 +2431,13 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
         const int num_ghosts_0_convective_flux = num_ghosts_convective_flux[0];
         const int num_ghosts_1_convective_flux = num_ghosts_convective_flux[1];
         const int num_ghosts_2_convective_flux = num_ghosts_convective_flux[2];
-        const int ghostcell_dim_0_convective_flux = ghostcell_dims_convective_flux[0];
+        const int ghostcell_dim_0_convective_flux = ghostcell_dims_convective_flux[0] + 1;
         const int ghostcell_dim_1_convective_flux = ghostcell_dims_convective_flux[1];
         
         const int num_ghosts_0_conservative_variables = num_ghosts_conservative_variables[0];
         const int num_ghosts_1_conservative_variables = num_ghosts_conservative_variables[1];
         const int num_ghosts_2_conservative_variables = num_ghosts_conservative_variables[2];
-        const int ghostcell_dim_0_conservative_variables = ghostcell_dims_conservative_variables[0];
+        const int ghostcell_dim_0_conservative_variables = ghostcell_dims_conservative_variables[0] + 1;
         const int ghostcell_dim_1_conservative_variables = ghostcell_dims_conservative_variables[1];
         
         /*
@@ -2460,7 +2453,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
 #endif
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
-                    // Compute the linear indices.
+                    // Compute the linear index.
                     const int idx = (i + num_ghosts_0_conservative_variables) +
                         (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                         (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -2482,7 +2475,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_conservative_variables) +
                             (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                             (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -2503,7 +2496,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
 #endif
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
-                    // Compute the linear indices.
+                    // Compute the linear index.
                     const int idx = (i + num_ghosts_0_conservative_variables) +
                         (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                         (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -2525,7 +2518,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_conservative_variables) +
                             (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                             (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -2550,7 +2543,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
 #endif
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
-                    // Compute the linear indices.
+                    // Compute the linear index.
                     const int idx = (i + num_ghosts_0_conservative_variables) +
                         (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                         (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -2574,7 +2567,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
 #endif
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
-                    // Compute the linear indices.
+                    // Compute the linear index.
                     const int idx = (i + num_ghosts_0_conservative_variables) +
                         (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                         (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -2604,7 +2597,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_conservative_variables) +
                             (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                             (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -2627,7 +2620,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_conservative_variables) +
                             (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                             (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -2643,7 +2636,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
          * Compute the volume fraction fields.
          */
         
-        for (int si = 0; si < d_num_species; si++)
+        for (int si = 0; si < d_num_species - 1; si++)
         {
             for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
@@ -2654,7 +2647,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_conservative_variables) +
                             (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                             (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -2666,7 +2659,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
             }
         }
         
-        for (int si = 0; si < d_num_species; si++)
+        for (int si = 0; si < d_num_species - 1; si++)
         {
             for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
@@ -2677,7 +2670,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_conservative_variables) +
                             (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                             (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -2688,10 +2681,6 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
                 }
             }
         }
-        
-        /*
-         * Compute the volume fraction fields.
-         */
         
         d_flow_model_tmp->getEquationOfStateMixingRules()->
             computePressure(
@@ -2750,7 +2739,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
             const int num_ghosts_0_velocity = num_ghosts_velocity[0];
             const int num_ghosts_1_velocity = num_ghosts_velocity[1];
             const int num_ghosts_2_velocity = num_ghosts_velocity[2];
-            const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+            const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0] + 1;
             const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
             
             double* u = velocity->getPointer(0, 0);
@@ -2923,13 +2912,6 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
         domain_lo = domain.lower() - interior_box.lower();
         domain_dims = domain.numberCells();
     }
-    
-    /*
-     * Get the equation of state mixing rules and the thermodynamic properties of the species.
-     */
-    
-    const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules =
-        d_flow_model_tmp->getEquationOfStateMixingRules();
     
     /*
      * Get the pointers to the side data of convective flux and conservative variables.
@@ -3435,13 +3417,13 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
         const int num_ghosts_1_convective_flux = num_ghosts_convective_flux[1];
         const int num_ghosts_2_convective_flux = num_ghosts_convective_flux[2];
         const int ghostcell_dim_0_convective_flux = ghostcell_dims_convective_flux[0];
-        const int ghostcell_dim_1_convective_flux = ghostcell_dims_convective_flux[1];
+        const int ghostcell_dim_1_convective_flux = ghostcell_dims_convective_flux[1] + 1;
         
         const int num_ghosts_0_conservative_variables = num_ghosts_conservative_variables[0];
         const int num_ghosts_1_conservative_variables = num_ghosts_conservative_variables[1];
         const int num_ghosts_2_conservative_variables = num_ghosts_conservative_variables[2];
         const int ghostcell_dim_0_conservative_variables = ghostcell_dims_conservative_variables[0];
-        const int ghostcell_dim_1_conservative_variables = ghostcell_dims_conservative_variables[1];
+        const int ghostcell_dim_1_conservative_variables = ghostcell_dims_conservative_variables[1] + 1;
         
         /*
          * Compute the density field.
@@ -3456,7 +3438,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
 #endif
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
-                    // Compute the linear indices.
+                    // Compute the linear index.
                     const int idx = (i + num_ghosts_0_conservative_variables) +
                         (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                         (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -3478,7 +3460,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_conservative_variables) +
                             (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                             (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -3499,7 +3481,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
 #endif
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
-                    // Compute the linear indices.
+                    // Compute the linear index.
                     const int idx = (i + num_ghosts_0_conservative_variables) +
                         (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                         (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -3521,7 +3503,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_conservative_variables) +
                             (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                             (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -3546,16 +3528,17 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
 #endif
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
-                    // Compute the linear indices.
+                    // Compute the linear index.
                     const int idx = (i + num_ghosts_0_conservative_variables) +
                         (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                         (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
                             ghostcell_dim_1_conservative_variables;
                     
-                    epsilon_y_B[idx] = (Q_y_B[d_num_species + 2][idx] -
+                    epsilon_y_B[idx] = (Q_y_B[d_num_species + 3][idx] -
                         double(1)/double(2)*(Q_y_B[d_num_species][idx]*Q_y_B[d_num_species][idx] +
-                            Q_y_B[d_num_species + 1][idx]*Q_y_B[d_num_species + 1][idx])/
-                                rho_y_B[idx])/rho_y_B[idx];
+                            Q_y_B[d_num_species + 1][idx]*Q_y_B[d_num_species + 1][idx] +
+                                Q_y_B[d_num_species + 2][idx]*Q_y_B[d_num_species + 2][idx])/
+                                    rho_y_B[idx])/rho_y_B[idx];
                 }
             }
         }
@@ -3569,16 +3552,17 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
 #endif
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
-                    // Compute the linear indices.
+                    // Compute the linear index.
                     const int idx = (i + num_ghosts_0_conservative_variables) +
                         (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                         (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
                             ghostcell_dim_1_conservative_variables;
                     
-                    epsilon_y_T[idx] = (Q_y_T[d_num_species + 2][idx] -
+                    epsilon_y_T[idx] = (Q_y_T[d_num_species + 3][idx] -
                         double(1)/double(2)*(Q_y_T[d_num_species][idx]*Q_y_T[d_num_species][idx] +
-                            Q_y_T[d_num_species + 1][idx]*Q_y_T[d_num_species + 1][idx])/
-                                rho_y_T[idx])/rho_y_T[idx];
+                            Q_y_T[d_num_species + 1][idx]*Q_y_T[d_num_species + 1][idx] +
+                                Q_y_T[d_num_species + 2][idx]*Q_y_T[d_num_species + 2][idx])/
+                                    rho_y_T[idx])/rho_y_T[idx];
                 }
             }
         }
@@ -3598,7 +3582,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_conservative_variables) +
                             (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                             (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -3621,7 +3605,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_conservative_variables) +
                             (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                             (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -3637,7 +3621,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
          * Compute the volume fraction fields.
          */
         
-        for (int si = 0; si < d_num_species; si++)
+        for (int si = 0; si < d_num_species - 1; si++)
         {
             for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
@@ -3648,7 +3632,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_conservative_variables) +
                             (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                             (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -3660,7 +3644,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
             }
         }
         
-        for (int si = 0; si < d_num_species; si++)
+        for (int si = 0; si < d_num_species - 1; si++)
         {
             for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
@@ -3671,7 +3655,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_conservative_variables) +
                             (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                             (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -3741,7 +3725,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
             const int num_ghosts_1_velocity = num_ghosts_velocity[1];
             const int num_ghosts_2_velocity = num_ghosts_velocity[2];
             const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
-            const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+            const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1] + 1;
             
             double* v = velocity->getPointer(1, 1);
             
@@ -3913,13 +3897,6 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
         domain_lo = domain.lower() - interior_box.lower();
         domain_dims = domain.numberCells();
     }
-    
-    /*
-     * Get the equation of state mixing rules and the thermodynamic properties of the species.
-     */
-    
-    const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules =
-        d_flow_model_tmp->getEquationOfStateMixingRules();
     
     /*
      * Get the pointers to the side data of convective flux and conservative variables.
@@ -4096,7 +4073,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
 #endif
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
-                    // Compute the linear indices.
+                    // Compute the linear index.
                     const int idx = (i + num_ghosts_0_conservative_variables) +
                         (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                         (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -4118,7 +4095,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_conservative_variables) +
                             (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                             (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -4139,7 +4116,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
 #endif
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
-                    // Compute the linear indices.
+                    // Compute the linear index.
                     const int idx = (i + num_ghosts_0_conservative_variables) +
                         (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                         (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -4161,7 +4138,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_conservative_variables) +
                             (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                             (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -4186,16 +4163,17 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
 #endif
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
-                    // Compute the linear indices.
+                    // Compute the linear index.
                     const int idx = (i + num_ghosts_0_conservative_variables) +
                         (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                         (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
                             ghostcell_dim_1_conservative_variables;
                     
-                    epsilon_z_B[idx] = (Q_z_B[d_num_species + 2][idx] -
+                    epsilon_z_B[idx] = (Q_z_B[d_num_species + 3][idx] -
                         double(1)/double(2)*(Q_z_B[d_num_species][idx]*Q_z_B[d_num_species][idx] +
-                            Q_z_B[d_num_species + 1][idx]*Q_z_B[d_num_species + 1][idx])/
-                                rho_z_B[idx])/rho_z_B[idx];
+                            Q_z_B[d_num_species + 1][idx]*Q_z_B[d_num_species + 1][idx] +
+                                Q_z_B[d_num_species + 2][idx]*Q_z_B[d_num_species + 2][idx])/
+                                    rho_z_B[idx])/rho_z_B[idx];
                 }
             }
         }
@@ -4209,16 +4187,17 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
 #endif
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
-                    // Compute the linear indices.
+                    // Compute the linear index.
                     const int idx = (i + num_ghosts_0_conservative_variables) +
                         (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                         (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
                             ghostcell_dim_1_conservative_variables;
                     
-                    epsilon_z_F[idx] = (Q_z_F[d_num_species + 2][idx] -
+                    epsilon_z_F[idx] = (Q_z_F[d_num_species + 3][idx] -
                         double(1)/double(2)*(Q_z_F[d_num_species][idx]*Q_z_F[d_num_species][idx] +
-                            Q_z_F[d_num_species + 1][idx]*Q_z_F[d_num_species + 1][idx])/
-                                rho_z_F[idx])/rho_z_F[idx];
+                            Q_z_F[d_num_species + 1][idx]*Q_z_F[d_num_species + 1][idx] +
+                                Q_z_F[d_num_species + 2][idx]*Q_z_F[d_num_species + 2][idx])/
+                                    rho_z_F[idx])/rho_z_F[idx];
                 }
             }
         }
@@ -4238,7 +4217,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_conservative_variables) +
                             (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                             (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -4261,7 +4240,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_conservative_variables) +
                             (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                             (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -4277,7 +4256,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
          * Compute the volume fraction fields.
          */
         
-        for (int si = 0; si < d_num_species; si++)
+        for (int si = 0; si < d_num_species - 1; si++)
         {
             for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2 + 1; k++)
             {
@@ -4288,7 +4267,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_conservative_variables) +
                             (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                             (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -4300,7 +4279,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
             }
         }
         
-        for (int si = 0; si < d_num_species; si++)
+        for (int si = 0; si < d_num_species - 1; si++)
         {
             for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2 + 1; k++)
             {
@@ -4311,7 +4290,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_conservative_variables) +
                             (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                             (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -4553,13 +4532,6 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
         domain_lo = domain.lower() - interior_box.lower();
         domain_dims = domain.numberCells();
     }
-    
-    /*
-     * Get the equation of state mixing rules and the thermodynamic properties of the species.
-     */
-    
-    const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules =
-        d_flow_model_tmp->getEquationOfStateMixingRules();
     
     /*
      * Get the pointers to the side data of convective flux and primitive variables.
@@ -4938,11 +4910,11 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
         
         const int num_ghosts_0_convective_flux = num_ghosts_convective_flux[0];
         const int num_ghosts_1_convective_flux = num_ghosts_convective_flux[1];
-        const int ghostcell_dim_0_convective_flux = ghostcell_dims_convective_flux[0];
+        const int ghostcell_dim_0_convective_flux = ghostcell_dims_convective_flux[0] + 1;
         
         const int num_ghosts_0_primitive_variables = num_ghosts_primitive_variables[0];
         const int num_ghosts_1_primitive_variables = num_ghosts_primitive_variables[1];
-        const int ghostcell_dim_0_primitive_variables = ghostcell_dims_primitive_variables[0];
+        const int ghostcell_dim_0_primitive_variables = ghostcell_dims_primitive_variables[0] + 1;
         
         /*
          * Compute the density field.
@@ -5150,7 +5122,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
             
             const int num_ghosts_0_velocity = num_ghosts_velocity[0];
             const int num_ghosts_1_velocity = num_ghosts_velocity[1];
-            const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+            const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0] + 1;
             
             double* u = velocity->getPointer(0, 0);
             
@@ -5255,13 +5227,13 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
         const int num_ghosts_0_convective_flux = num_ghosts_convective_flux[0];
         const int num_ghosts_1_convective_flux = num_ghosts_convective_flux[1];
         const int num_ghosts_2_convective_flux = num_ghosts_convective_flux[2];
-        const int ghostcell_dim_0_convective_flux = ghostcell_dims_convective_flux[0];
+        const int ghostcell_dim_0_convective_flux = ghostcell_dims_convective_flux[0] + 1;
         const int ghostcell_dim_1_convective_flux = ghostcell_dims_convective_flux[1];
         
         const int num_ghosts_0_primitive_variables = num_ghosts_primitive_variables[0];
         const int num_ghosts_1_primitive_variables = num_ghosts_primitive_variables[1];
         const int num_ghosts_2_primitive_variables = num_ghosts_primitive_variables[2];
-        const int ghostcell_dim_0_primitive_variables = ghostcell_dims_primitive_variables[0];
+        const int ghostcell_dim_0_primitive_variables = ghostcell_dims_primitive_variables[0] + 1;
         const int ghostcell_dim_1_primitive_variables = ghostcell_dims_primitive_variables[1];
         
         /*
@@ -5277,7 +5249,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
 #endif
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
-                    // Compute the linear indices.
+                    // Compute the linear index.
                     const int idx = (i + num_ghosts_0_primitive_variables) +
                         (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
                         (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
@@ -5299,7 +5271,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_primitive_variables) +
                             (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
                             (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
@@ -5320,7 +5292,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
 #endif
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                 {
-                    // Compute the linear indices.
+                    // Compute the linear index.
                     const int idx = (i + num_ghosts_0_primitive_variables) +
                         (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
                         (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
@@ -5342,7 +5314,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_primitive_variables) +
                             (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
                             (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
@@ -5369,7 +5341,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_primitive_variables) +
                             (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
                             (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
@@ -5392,7 +5364,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_primitive_variables) +
                             (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
                             (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
@@ -5408,7 +5380,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
          * Compute the volume fraction fields.
          */
         
-        for (int si = 0; si < d_num_species; si++)
+        for (int si = 0; si < d_num_species - 1; si++)
         {
             for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
@@ -5419,7 +5391,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_primitive_variables) +
                             (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
                             (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
@@ -5431,7 +5403,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
             }
         }
         
-        for (int si = 0; si < d_num_species; si++)
+        for (int si = 0; si < d_num_species - 1; si++)
         {
             for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
@@ -5442,7 +5414,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_primitive_variables) +
                             (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
                             (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
@@ -5511,7 +5483,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInXDirecti
             const int num_ghosts_0_velocity = num_ghosts_velocity[0];
             const int num_ghosts_1_velocity = num_ghosts_velocity[1];
             const int num_ghosts_2_velocity = num_ghosts_velocity[2];
-            const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+            const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0] + 1;
             const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
             
             double* u = velocity->getPointer(0, 0);
@@ -5680,13 +5652,6 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
         domain_lo = domain.lower() - interior_box.lower();
         domain_dims = domain.numberCells();
     }
-    
-    /*
-     * Get the equation of state mixing rules and the thermodynamic properties of the species.
-     */
-    
-    const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules =
-        d_flow_model_tmp->getEquationOfStateMixingRules();
     
     /*
      * Get the pointers to the side data of convective flux and primitive variables.
@@ -6049,7 +6014,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
                     const int idx = (i + num_ghosts_0_primitive_variables) +
                         (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables;
                     
-                    computeLocalConvectiveFluxInYDirectionFromPrimitiveVariablesHLLC3D(
+                    computeLocalConvectiveFluxInYDirectionFromPrimitiveVariablesHLLC2D(
                         F_y.data(),
                         V_y_B.data(),
                         V_y_T.data(),
@@ -6095,7 +6060,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
                     const int idx = (i + num_ghosts_0_primitive_variables) +
                         (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables;
                     
-                    computeLocalConvectiveFluxInYDirectionFromPrimitiveVariablesHLLC3D(
+                    computeLocalConvectiveFluxInYDirectionFromPrimitiveVariablesHLLC2D(
                         F_y.data(),
                         V_y_B.data(),
                         V_y_T.data(),
@@ -6134,13 +6099,13 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
         const int num_ghosts_1_convective_flux = num_ghosts_convective_flux[1];
         const int num_ghosts_2_convective_flux = num_ghosts_convective_flux[2];
         const int ghostcell_dim_0_convective_flux = ghostcell_dims_convective_flux[0];
-        const int ghostcell_dim_1_convective_flux = ghostcell_dims_convective_flux[1];
+        const int ghostcell_dim_1_convective_flux = ghostcell_dims_convective_flux[1] + 1;
         
         const int num_ghosts_0_primitive_variables = num_ghosts_primitive_variables[0];
         const int num_ghosts_1_primitive_variables = num_ghosts_primitive_variables[1];
         const int num_ghosts_2_primitive_variables = num_ghosts_primitive_variables[2];
         const int ghostcell_dim_0_primitive_variables = ghostcell_dims_primitive_variables[0];
-        const int ghostcell_dim_1_primitive_variables = ghostcell_dims_primitive_variables[1];
+        const int ghostcell_dim_1_primitive_variables = ghostcell_dims_primitive_variables[1] + 1;
         
         /*
          * Compute the density field.
@@ -6155,7 +6120,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
 #endif
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
-                    // Compute the linear indices.
+                    // Compute the linear index.
                     const int idx = (i + num_ghosts_0_primitive_variables) +
                         (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
                         (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
@@ -6177,7 +6142,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_primitive_variables) +
                             (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
                             (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
@@ -6198,7 +6163,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
 #endif
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
-                    // Compute the linear indices.
+                    // Compute the linear index.
                     const int idx = (i + num_ghosts_0_primitive_variables) +
                         (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
                         (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
@@ -6220,7 +6185,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_primitive_variables) +
                             (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
                             (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
@@ -6247,7 +6212,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_primitive_variables) +
                             (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
                             (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
@@ -6270,7 +6235,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_primitive_variables) +
                             (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
                             (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
@@ -6286,7 +6251,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
          * Compute the volume fraction fields.
          */
         
-        for (int si = 0; si < d_num_species; si++)
+        for (int si = 0; si < d_num_species - 1; si++)
         {
             for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
@@ -6297,7 +6262,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_primitive_variables) +
                             (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
                             (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
@@ -6309,7 +6274,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
             }
         }
         
-        for (int si = 0; si < d_num_species; si++)
+        for (int si = 0; si < d_num_species - 1; si++)
         {
             for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
@@ -6320,7 +6285,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_primitive_variables) +
                             (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
                             (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
@@ -6390,7 +6355,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInYDirecti
             const int num_ghosts_1_velocity = num_ghosts_velocity[1];
             const int num_ghosts_2_velocity = num_ghosts_velocity[2];
             const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
-            const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+            const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1] + 1;
             
             double* v = velocity->getPointer(1, 1);
             
@@ -6560,13 +6525,6 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
     }
     
     /*
-     * Get the equation of state mixing rules and the thermodynamic properties of the species.
-     */
-    
-    const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules =
-        d_flow_model_tmp->getEquationOfStateMixingRules();
-    
-    /*
      * Get the pointers to the side data of convective flux and primitive variables.
      */
     
@@ -6727,7 +6685,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
 #endif
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
-                    // Compute the linear indices.
+                    // Compute the linear index.
                     const int idx = (i + num_ghosts_0_primitive_variables) +
                         (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
                         (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
@@ -6749,7 +6707,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_primitive_variables) +
                             (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
                             (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
@@ -6770,7 +6728,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
 #endif
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
-                    // Compute the linear indices.
+                    // Compute the linear index.
                     const int idx = (i + num_ghosts_0_primitive_variables) +
                         (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
                         (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
@@ -6792,7 +6750,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_primitive_variables) +
                             (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
                             (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
@@ -6819,7 +6777,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_primitive_variables) +
                             (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
                             (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
@@ -6842,7 +6800,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_primitive_variables) +
                             (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
                             (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
@@ -6858,7 +6816,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
          * Compute the volume fraction fields.
          */
         
-        for (int si = 0; si < d_num_species; si++)
+        for (int si = 0; si < d_num_species - 1; si++)
         {
             for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2 + 1; k++)
             {
@@ -6869,7 +6827,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_primitive_variables) +
                             (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
                             (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
@@ -6881,7 +6839,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
             }
         }
         
-        for (int si = 0; si < d_num_species; si++)
+        for (int si = 0; si < d_num_species - 1; si++)
         {
             for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2 + 1; k++)
             {
@@ -6892,7 +6850,7 @@ FlowModelRiemannSolverFiveEqnAllaire::computeConvectiveFluxAndVelocityInZDirecti
 #endif
                     for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
-                        // Compute the linear indices.
+                        // Compute the linear index.
                         const int idx = (i + num_ghosts_0_primitive_variables) +
                             (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
                             (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*

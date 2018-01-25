@@ -1,6 +1,7 @@
 #include "flow/flow_models/four-eqn_conservative/FlowModelFourEqnConservative.hpp"
 
 #include "flow/flow_models/four-eqn_conservative/FlowModelBoundaryUtilitiesFourEqnConservative.hpp"
+#include "flow/flow_models/four-eqn_conservative/FlowModelRiemannSolverFourEqnConservative.hpp"
 #include "flow/flow_models/four-eqn_conservative/FlowModelStatisticsUtilitiesFourEqnConservative.hpp"
 
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelFourEqnConservative::s_variable_partial_densities;
@@ -366,6 +367,15 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
     }
     
     /*
+     * Initialize Riemann solver object.
+     */
+    d_flow_model_riemann_solver.reset(new FlowModelRiemannSolverFourEqnConservative(
+        "d_flow_model_riemann_solver",
+        d_dim,
+        d_grid_geometry,
+        d_num_species));
+    
+    /*
      * Initialize statistics utilities object.
      */
     d_flow_model_statistics_utilities.reset(new FlowModelStatisticsUtilitiesFourEqnConservative(
@@ -395,6 +405,9 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
             d_num_species,
             d_equation_of_state_mixing_rules));
     
+    /*
+     * Initialize boundary utilities object.
+     */
     d_flow_model_boundary_utilities.reset(
         new FlowModelBoundaryUtilitiesFourEqnConservative(
             "d_flow_model_boundary_utilities",

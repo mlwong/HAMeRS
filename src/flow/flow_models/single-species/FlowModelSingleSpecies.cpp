@@ -1,6 +1,7 @@
 #include "flow/flow_models/single-species/FlowModelSingleSpecies.hpp"
 
 #include "flow/flow_models/single-species/FlowModelBoundaryUtilitiesSingleSpecies.hpp"
+#include "flow/flow_models/single-species/FlowModelRiemannSolverSingleSpecies.hpp"
 #include "flow/flow_models/single-species/FlowModelStatisticsUtilitiesSingleSpecies.hpp"
 
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelSingleSpecies::s_variable_density;
@@ -361,6 +362,15 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
     }
     
     /*
+     * Initialize Riemann solver object.
+     */
+    d_flow_model_riemann_solver.reset(new FlowModelRiemannSolverSingleSpecies(
+        "d_flow_model_riemann_solver",
+        d_dim,
+        d_grid_geometry,
+        d_num_species));
+    
+    /*
      * Initialize statistics utilities object.
      */
     d_flow_model_statistics_utilities.reset(new FlowModelStatisticsUtilitiesSingleSpecies(
@@ -389,6 +399,9 @@ FlowModelSingleSpecies::FlowModelSingleSpecies(
             d_num_species,
             d_equation_of_state_mixing_rules));
     
+    /*
+     * Initialize boundary utilities object.
+     */
     d_flow_model_boundary_utilities.reset(
         new FlowModelBoundaryUtilitiesSingleSpecies(
             "d_flow_model_boundary_utilities",

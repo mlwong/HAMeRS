@@ -1,6 +1,7 @@
 #include "flow/flow_models/five-eqn_Allaire/FlowModelFiveEqnAllaire.hpp"
 
 #include "flow/flow_models/five-eqn_Allaire/FlowModelBoundaryUtilitiesFiveEqnAllaire.hpp"
+#include "flow/flow_models/five-eqn_Allaire/FlowModelRiemannSolverFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelStatisticsUtilitiesFiveEqnAllaire.hpp"
 
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelFiveEqnAllaire::s_variable_partial_densities;
@@ -270,6 +271,15 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
     }
     
     /*
+     * Initialize Riemann solver object.
+     */
+    d_flow_model_riemann_solver.reset(new FlowModelRiemannSolverFiveEqnAllaire(
+        "d_flow_model_riemann_solver",
+        d_dim,
+        d_grid_geometry,
+        d_num_species));
+    
+    /*
      * Initialize statistics utilities object.
      */
     d_flow_model_statistics_utilities.reset(new FlowModelStatisticsUtilitiesFiveEqnAllaire(
@@ -298,6 +308,9 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
             d_num_species,
             d_equation_of_state_mixing_rules));
     
+    /*
+     * Initialize boundary utilities object.
+     */
     d_flow_model_boundary_utilities.reset(
         new FlowModelBoundaryUtilitiesFiveEqnAllaire(
             "d_flow_model_boundary_utilities",

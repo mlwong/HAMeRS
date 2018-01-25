@@ -132,6 +132,15 @@ class FlowModel:
         }
         
         /*
+         * Return the boost::shared_ptr to the Riemann solver object.
+         */
+        const boost::shared_ptr<FlowModelRiemannSolver>&
+        getFlowModelRiemannSolver() const
+        {
+            return d_flow_model_riemann_solver;
+        }
+        
+        /*
          * Return the boost::shared_ptr to the boundary utilities object.
          */
         const boost::shared_ptr<FlowModelBoundaryUtilities>&
@@ -461,6 +470,12 @@ class FlowModel:
         }
         
         /*
+         * Setup the Riemann solver object.
+         */
+        void
+        setupRiemannSolver();
+        
+        /*
          * Setup the statistics utilties object.
          */
         void
@@ -608,6 +623,11 @@ class FlowModel:
          * boost::shared_ptr to the plotting context.
          */
         boost::shared_ptr<hier::VariableContext> d_plot_context;
+        
+        /*
+         * boost::shared_ptr to the Riemann solver object for the flow model.
+         */
+        boost::shared_ptr<FlowModelRiemannSolver> d_flow_model_riemann_solver;
         
         /*
          * boost::shared_ptr to the boundary utilities object for the flow model.

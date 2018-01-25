@@ -15,6 +15,8 @@ set(flow_models_source_files
     ./four-eqn_conservative/FlowModelBoundaryUtilitiesFourEqnConservative.cpp
     ./four-eqn_conservative/FlowModelRiemannSolverFourEqnConservative.cpp
     ./four-eqn_conservative/FlowModelStatisticsUtilitiesFourEqnConservative.cpp
+    ./four-eqn_conservative/Riemann_solvers/FlowModelRiemannSolverFourEqnConservativeHLLC.cpp
+    ./four-eqn_conservative/Riemann_solvers/FlowModelRiemannSolverFourEqnConservativeHLLC-HLL.cpp
     ./four-eqn_conservative/Riemann_solvers/RiemannSolverFourEqnConservativeHLLC.cpp
     ./four-eqn_conservative/Riemann_solvers/RiemannSolverFourEqnConservativeHLLC_HLL.cpp
     ./five-eqn_Allaire/FlowModelFiveEqnAllaire.cpp

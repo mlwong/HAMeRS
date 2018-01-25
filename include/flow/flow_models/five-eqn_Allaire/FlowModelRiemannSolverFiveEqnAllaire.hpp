@@ -12,10 +12,10 @@ class FlowModelRiemannSolverFiveEqnAllaire: public FlowModelRiemannSolver
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species):
                 FlowModelRiemannSolver(
-                    d_object_name,
-                    d_dim,
-                    d_grid_geometry,
-                    d_num_species)
+                    object_name,
+                    dim,
+                    grid_geometry,
+                    num_species)
         {}
         
         /*
@@ -149,7 +149,7 @@ class FlowModelRiemannSolverFiveEqnAllaire: public FlowModelRiemannSolver
         
         /*
          * Compute the convective flux and velocity in the x-direction from conservative variables with
-         * HLLC Riemann solver.
+         * HLLC-HLL Riemann solver.
          */
         void
         computeConvectiveFluxAndVelocityInXDirectionFromConservativeVariablesHLLC_HLL(
@@ -162,7 +162,7 @@ class FlowModelRiemannSolverFiveEqnAllaire: public FlowModelRiemannSolver
         
         /*
          * Compute the convective flux and velocity in the y-direction from conservative variables with
-         * HLLC Riemann solver.
+         * HLLC-HLL Riemann solver.
          */
         void
         computeConvectiveFluxAndVelocityInYDirectionFromConservativeVariablesHLLC_HLL(
@@ -175,7 +175,7 @@ class FlowModelRiemannSolverFiveEqnAllaire: public FlowModelRiemannSolver
         
         /*
          * Compute the convective flux and velocity in the z-direction from conservative variables with
-         * HLLC Riemann solver.
+         * HLLC-HLL Riemann solver.
          */
         void
         computeConvectiveFluxAndVelocityInZDirectionFromConservativeVariablesHLLC_HLL(
@@ -188,7 +188,7 @@ class FlowModelRiemannSolverFiveEqnAllaire: public FlowModelRiemannSolver
         
         /*
          * Compute the convective flux and velocity in the x-direction from primitive variables with
-         * HLLC Riemann solver.
+         * HLLC-HLL Riemann solver.
          */
         void
         computeConvectiveFluxAndVelocityInXDirectionFromPrimitiveVariablesHLLC_HLL(
@@ -201,7 +201,7 @@ class FlowModelRiemannSolverFiveEqnAllaire: public FlowModelRiemannSolver
         
         /*
          * Compute the convective flux and velocity in the y-direction from primitive variables with
-         * HLLC Riemann solver.
+         * HLLC-HLL Riemann solver.
          */
         void
         computeConvectiveFluxAndVelocityInYDirectionFromPrimitiveVariablesHLLC_HLL(
@@ -214,7 +214,7 @@ class FlowModelRiemannSolverFiveEqnAllaire: public FlowModelRiemannSolver
         
         /*
          * Compute the convective flux and velocity in the z-direction from primitive variables with
-         * HLLC Riemann solver.
+         * HLLC-HLL Riemann solver.
          */
         void
         computeConvectiveFluxAndVelocityInZDirectionFromPrimitiveVariablesHLLC_HLL(

@@ -12,6 +12,14 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxFromConservativeVariab
     const RIEMANN_SOLVER::TYPE& riemann_solver_type,
     const hier::Box& domain) const
 {
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
     const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
     
@@ -133,7 +141,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxFromConservativeVariab
                 }
                 case DIRECTION::Y_DIRECTION:
                 {
-                    computeConvectiveFluxAndVelocityInXDirectionFromConservativeVariablesHLLC_HLL(
+                    computeConvectiveFluxAndVelocityInYDirectionFromConservativeVariablesHLLC_HLL(
                         convective_flux,
                         velocity,
                         conservative_variables_minus,
@@ -145,7 +153,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxFromConservativeVariab
                 }
                 case DIRECTION::Z_DIRECTION:
                 {
-                    computeConvectiveFluxAndVelocityInXDirectionFromConservativeVariablesHLLC_HLL(
+                    computeConvectiveFluxAndVelocityInZDirectionFromConservativeVariablesHLLC_HLL(
                         convective_flux,
                         velocity,
                         conservative_variables_minus,
@@ -191,6 +199,14 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxFromPrimitiveVariables
     const RIEMANN_SOLVER::TYPE& riemann_solver_type,
     const hier::Box& domain) const
 {
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
     const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
     
@@ -312,7 +328,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxFromPrimitiveVariables
                 }
                 case DIRECTION::Y_DIRECTION:
                 {
-                    computeConvectiveFluxAndVelocityInXDirectionFromPrimitiveVariablesHLLC_HLL(
+                    computeConvectiveFluxAndVelocityInYDirectionFromPrimitiveVariablesHLLC_HLL(
                         convective_flux,
                         velocity,
                         primitive_variables_minus,
@@ -324,7 +340,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxFromPrimitiveVariables
                 }
                 case DIRECTION::Z_DIRECTION:
                 {
-                    computeConvectiveFluxAndVelocityInXDirectionFromPrimitiveVariablesHLLC_HLL(
+                    computeConvectiveFluxAndVelocityInZDirectionFromPrimitiveVariablesHLLC_HLL(
                         convective_flux,
                         velocity,
                         primitive_variables_minus,
@@ -371,6 +387,14 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityFromConserv
     const RIEMANN_SOLVER::TYPE& riemann_solver_type,
     const hier::Box& domain) const
 {
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
     const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
     
@@ -495,7 +519,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityFromConserv
                 }
                 case DIRECTION::Y_DIRECTION:
                 {
-                    computeConvectiveFluxAndVelocityInXDirectionFromConservativeVariablesHLLC_HLL(
+                    computeConvectiveFluxAndVelocityInYDirectionFromConservativeVariablesHLLC_HLL(
                         convective_flux,
                         velocity,
                         conservative_variables_minus,
@@ -507,7 +531,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityFromConserv
                 }
                 case DIRECTION::Z_DIRECTION:
                 {
-                    computeConvectiveFluxAndVelocityInXDirectionFromConservativeVariablesHLLC_HLL(
+                    computeConvectiveFluxAndVelocityInZDirectionFromConservativeVariablesHLLC_HLL(
                         convective_flux,
                         velocity,
                         conservative_variables_minus,
@@ -554,6 +578,14 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityFromPrimiti
     const RIEMANN_SOLVER::TYPE& riemann_solver_type,
     const hier::Box& domain) const
 {
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
     boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
     const int num_eqn = d_flow_model_tmp->getNumberOfEquations();
     
@@ -678,7 +710,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityFromPrimiti
                 }
                 case DIRECTION::Y_DIRECTION:
                 {
-                    computeConvectiveFluxAndVelocityInXDirectionFromPrimitiveVariablesHLLC_HLL(
+                    computeConvectiveFluxAndVelocityInYDirectionFromPrimitiveVariablesHLLC_HLL(
                         convective_flux,
                         velocity,
                         primitive_variables_minus,
@@ -690,7 +722,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityFromPrimiti
                 }
                 case DIRECTION::Z_DIRECTION:
                 {
-                    computeConvectiveFluxAndVelocityInXDirectionFromPrimitiveVariablesHLLC_HLL(
+                    computeConvectiveFluxAndVelocityInZDirectionFromPrimitiveVariablesHLLC_HLL(
                         convective_flux,
                         velocity,
                         primitive_variables_minus,

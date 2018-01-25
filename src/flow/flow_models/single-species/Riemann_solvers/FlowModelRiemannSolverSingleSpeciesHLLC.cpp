@@ -1409,11 +1409,11 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
         
         const int num_ghosts_0_convective_flux = num_ghosts_convective_flux[0];
         const int num_ghosts_1_convective_flux = num_ghosts_convective_flux[1];
-        const int ghostcell_dim_0_convective_flux = ghostcell_dims_convective_flux[0];
+        const int ghostcell_dim_0_convective_flux = ghostcell_dims_convective_flux[0] + 1;
         
         const int num_ghosts_0_conservative_variables = num_ghosts_conservative_variables[0];
         const int num_ghosts_1_conservative_variables = num_ghosts_conservative_variables[1];
-        const int ghostcell_dim_0_conservative_variables = ghostcell_dims_conservative_variables[0];
+        const int ghostcell_dim_0_conservative_variables = ghostcell_dims_conservative_variables[0] + 1;
         
         /*
          * Compute the internal energy field.
@@ -1505,7 +1505,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
             
             const int num_ghosts_0_velocity = num_ghosts_velocity[0];
             const int num_ghosts_1_velocity = num_ghosts_velocity[1];
-            const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+            const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0] + 1;
             
             double* u = velocity->getPointer(0, 0);
             
@@ -1606,13 +1606,13 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
         const int num_ghosts_0_convective_flux = num_ghosts_convective_flux[0];
         const int num_ghosts_1_convective_flux = num_ghosts_convective_flux[1];
         const int num_ghosts_2_convective_flux = num_ghosts_convective_flux[2];
-        const int ghostcell_dim_0_convective_flux = ghostcell_dims_convective_flux[0];
+        const int ghostcell_dim_0_convective_flux = ghostcell_dims_convective_flux[0] + 1;
         const int ghostcell_dim_1_convective_flux = ghostcell_dims_convective_flux[1];
         
         const int num_ghosts_0_conservative_variables = num_ghosts_conservative_variables[0];
         const int num_ghosts_1_conservative_variables = num_ghosts_conservative_variables[1];
         const int num_ghosts_2_conservative_variables = num_ghosts_conservative_variables[2];
-        const int ghostcell_dim_0_conservative_variables = ghostcell_dims_conservative_variables[0];
+        const int ghostcell_dim_0_conservative_variables = ghostcell_dims_conservative_variables[0] + 1;
         const int ghostcell_dim_1_conservative_variables = ghostcell_dims_conservative_variables[1];
         
         /*
@@ -1716,7 +1716,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
             const int num_ghosts_0_velocity = num_ghosts_velocity[0];
             const int num_ghosts_1_velocity = num_ghosts_velocity[1];
             const int num_ghosts_2_velocity = num_ghosts_velocity[2];
-            const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+            const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0] + 1;
             const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
             
             double* u = velocity->getPointer(0, 0);
@@ -2203,13 +2203,13 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
         const int num_ghosts_1_convective_flux = num_ghosts_convective_flux[1];
         const int num_ghosts_2_convective_flux = num_ghosts_convective_flux[2];
         const int ghostcell_dim_0_convective_flux = ghostcell_dims_convective_flux[0];
-        const int ghostcell_dim_1_convective_flux = ghostcell_dims_convective_flux[1];
+        const int ghostcell_dim_1_convective_flux = ghostcell_dims_convective_flux[1] + 1;
         
         const int num_ghosts_0_conservative_variables = num_ghosts_conservative_variables[0];
         const int num_ghosts_1_conservative_variables = num_ghosts_conservative_variables[1];
         const int num_ghosts_2_conservative_variables = num_ghosts_conservative_variables[2];
         const int ghostcell_dim_0_conservative_variables = ghostcell_dims_conservative_variables[0];
-        const int ghostcell_dim_1_conservative_variables = ghostcell_dims_conservative_variables[1];
+        const int ghostcell_dim_1_conservative_variables = ghostcell_dims_conservative_variables[1] + 1;
         
         /*
          * Compute the internal energy field.
@@ -2224,7 +2224,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
 #endif
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
-                    // Compute the linear indices.
+                    // Compute the linear index.
                     const int idx = (i + num_ghosts_0_conservative_variables) +
                         (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                         (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -2246,7 +2246,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
 #endif
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
-                    // Compute the linear indices.
+                    // Compute the linear index.
                     const int idx = (i + num_ghosts_0_conservative_variables) +
                         (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                         (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -2313,7 +2313,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
             const int num_ghosts_1_velocity = num_ghosts_velocity[1];
             const int num_ghosts_2_velocity = num_ghosts_velocity[2];
             const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
-            const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+            const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1] + 1;
             
             double* v = velocity->getPointer(1, 1);
             
@@ -2634,7 +2634,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
 #endif
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
-                    // Compute the linear indices.
+                    // Compute the linear index.
                     const int idx = (i + num_ghosts_0_conservative_variables) +
                         (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                         (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -2656,7 +2656,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInZDirectio
 #endif
                 for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
-                    // Compute the linear indices.
+                    // Compute the linear index.
                     const int idx = (i + num_ghosts_0_conservative_variables) +
                         (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
                         (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
@@ -3116,11 +3116,11 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
         
         const int num_ghosts_0_convective_flux = num_ghosts_convective_flux[0];
         const int num_ghosts_1_convective_flux = num_ghosts_convective_flux[1];
-        const int ghostcell_dim_0_convective_flux = ghostcell_dims_convective_flux[0];
+        const int ghostcell_dim_0_convective_flux = ghostcell_dims_convective_flux[0] + 1;
         
         const int num_ghosts_0_primitive_variables = num_ghosts_primitive_variables[0];
         const int num_ghosts_1_primitive_variables = num_ghosts_primitive_variables[1];
-        const int ghostcell_dim_0_primitive_variables = ghostcell_dims_primitive_variables[0];
+        const int ghostcell_dim_0_primitive_variables = ghostcell_dims_primitive_variables[0] + 1;
         
         d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeSoundSpeed(
@@ -3174,7 +3174,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
             
             const int num_ghosts_0_velocity = num_ghosts_velocity[0];
             const int num_ghosts_1_velocity = num_ghosts_velocity[1];
-            const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+            const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0] + 1;
             
             double* u = velocity->getPointer(0, 0);
             
@@ -3271,13 +3271,13 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
         const int num_ghosts_0_convective_flux = num_ghosts_convective_flux[0];
         const int num_ghosts_1_convective_flux = num_ghosts_convective_flux[1];
         const int num_ghosts_2_convective_flux = num_ghosts_convective_flux[2];
-        const int ghostcell_dim_0_convective_flux = ghostcell_dims_convective_flux[0];
+        const int ghostcell_dim_0_convective_flux = ghostcell_dims_convective_flux[0] + 1;
         const int ghostcell_dim_1_convective_flux = ghostcell_dims_convective_flux[1];
         
         const int num_ghosts_0_primitive_variables = num_ghosts_primitive_variables[0];
         const int num_ghosts_1_primitive_variables = num_ghosts_primitive_variables[1];
         const int num_ghosts_2_primitive_variables = num_ghosts_primitive_variables[2];
-        const int ghostcell_dim_0_primitive_variables = ghostcell_dims_primitive_variables[0];
+        const int ghostcell_dim_0_primitive_variables = ghostcell_dims_primitive_variables[0] + 1;
         const int ghostcell_dim_1_primitive_variables = ghostcell_dims_primitive_variables[1];
         
         d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
@@ -3333,7 +3333,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInXDirectio
             const int num_ghosts_0_velocity = num_ghosts_velocity[0];
             const int num_ghosts_1_velocity = num_ghosts_velocity[1];
             const int num_ghosts_2_velocity = num_ghosts_velocity[2];
-            const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+            const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0] + 1;
             const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
             
             double* u = velocity->getPointer(0, 0);
@@ -3760,13 +3760,13 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
         const int num_ghosts_1_convective_flux = num_ghosts_convective_flux[1];
         const int num_ghosts_2_convective_flux = num_ghosts_convective_flux[2];
         const int ghostcell_dim_0_convective_flux = ghostcell_dims_convective_flux[0];
-        const int ghostcell_dim_1_convective_flux = ghostcell_dims_convective_flux[1];
+        const int ghostcell_dim_1_convective_flux = ghostcell_dims_convective_flux[1] + 1;
         
         const int num_ghosts_0_primitive_variables = num_ghosts_primitive_variables[0];
         const int num_ghosts_1_primitive_variables = num_ghosts_primitive_variables[1];
         const int num_ghosts_2_primitive_variables = num_ghosts_primitive_variables[2];
         const int ghostcell_dim_0_primitive_variables = ghostcell_dims_primitive_variables[0];
-        const int ghostcell_dim_1_primitive_variables = ghostcell_dims_primitive_variables[1];
+        const int ghostcell_dim_1_primitive_variables = ghostcell_dims_primitive_variables[1] + 1;
         
         d_flow_model_tmp->getEquationOfStateMixingRules()->getEquationOfState()->
             computeSoundSpeed(
@@ -3822,7 +3822,7 @@ FlowModelRiemannSolverSingleSpecies::computeConvectiveFluxAndVelocityInYDirectio
             const int num_ghosts_1_velocity = num_ghosts_velocity[1];
             const int num_ghosts_2_velocity = num_ghosts_velocity[2];
             const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
-            const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+            const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1] + 1;
             
             double* v = velocity->getPointer(1, 1);
             
