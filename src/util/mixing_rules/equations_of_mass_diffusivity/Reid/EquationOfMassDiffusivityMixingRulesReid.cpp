@@ -1,8 +1,9 @@
 #include "util/mixing_rules/equations_of_mass_diffusivity/Reid/EquationOfMassDiffusivityMixingRulesReid.hpp"
 
+#include <cfloat>
 #include <cmath>
 
-#define EPSILON 1e-40
+#define EPSILON DBL_EPSILON
 
 EquationOfMassDiffusivityMixingRulesReid::EquationOfMassDiffusivityMixingRulesReid(
     const std::string& object_name,
