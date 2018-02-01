@@ -1,10 +1,10 @@
-#include "apps/Euler/EulerInitialConditions.hpp"
+#include "apps/Navier-Stokes/NavierStokesInitialConditions.hpp"
 
 /*
  * Set the data on the patch interior to some initial values.
  */
 void
-EulerInitialConditions::initializeDataOnPatch(
+NavierStokesInitialConditions::initializeDataOnPatch(
     hier::Patch& patch,
     const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables,
     const double data_time,
