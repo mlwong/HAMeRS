@@ -4,6 +4,7 @@ set(Navier_Stokes_source_files
     NavierStokes.cpp
     NavierStokesBoundaryConditions.cpp
     NavierStokesInitialConditions.cpp
+    NavierStokesSpecialBoundaryConditions.cpp
 )
 
 # Create a library called Navier_Stokes which includes the source files defined
@@ -16,4 +17,8 @@ TARGET_LINK_LIBRARIES(Navier_Stokes
     flow_models Runge_Kutta_patch_strategy Runge_Kutta_level_integrator
     SAMRAI_appu SAMRAI_geom SAMRAI_solv SAMRAI_algs SAMRAI_mesh
     SAMRAI_math SAMRAI_pdat SAMRAI_xfer SAMRAI_hier SAMRAI_tbox
-    hdf5 gfortran)
+    ${HDF5_C_LIBRARIES} gfortran)
+
+if (WITH_ZLIB)
+    TARGET_LINK_LIBRARIES(Navier_Stokes z)
+endif()

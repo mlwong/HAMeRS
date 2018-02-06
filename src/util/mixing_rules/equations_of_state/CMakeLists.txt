@@ -14,4 +14,8 @@ add_library(equations_of_state ${equations_of_state_source_files})
 TARGET_LINK_LIBRARIES(equations_of_state
   SAMRAI_appu SAMRAI_geom SAMRAI_solv SAMRAI_algs SAMRAI_mesh
   SAMRAI_math SAMRAI_pdat SAMRAI_xfer SAMRAI_hier SAMRAI_tbox
-  hdf5 gfortran)
+  ${HDF5_C_LIBRARIES} gfortran)
+
+if (WITH_ZLIB)
+    TARGET_LINK_LIBRARIES(equations_of_state z)
+endif()

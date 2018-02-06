@@ -14,9 +14,10 @@ Git is used for the version control of the code. To install Git on Debian-based 
 sudo apt-get install git-all
 ```
 
-To compile the code, in general all you need is to use [CMake](https://cmake.org/). For example:
+To compile the code, in general all you need is to use [CMake](https://cmake.org/). For example, after cloning the repository with `git clone`:
 
 ```
+cd HAMeRS
 mkdir build
 cd build
 cmake ..
@@ -64,7 +65,7 @@ HAMeRS has already been successfully tested with HDF5-1.8, Boost-1.60 and SAMRAI
 
 ### How do I change the problem? ###
 
-To change the problem that you want to run for an application, e.g. the Euler application, just simply link the corresponding initial conditions cpp symlink (`EulerInitialConditions.cpp` in `src/apps/Euler`) to the actual problem file using `ln -s <path/to/new/problem/initial/conditions.cpp> EulerInitialConditions.cpp`. There are some initial conditions files from different example problems in the `problems` folder.
+To change the problem that you want to run for an application, e.g. the Euler application, just simply link the corresponding initial conditions cpp symlink (`EulerInitialConditions.cpp` in `src/apps/Euler`) to the actual problem file using `ln -sf <absolute path to .cpp file containing problem's initial conditions> EulerInitialConditions.cpp`. If the problem has special boundary conditions, the user can supply the boundary conditions with `ln -sf <absolute path to .cpp file containing problem's user-coded boundary conditions> EulerSpecialBoundaryConditions.cpp`. There are some initial conditions and boundary conditions files from different example problems in the `problems` folder.
 
 ### Who do I talk to? ###
 

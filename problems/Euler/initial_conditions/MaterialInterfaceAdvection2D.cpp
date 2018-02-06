@@ -6,8 +6,7 @@
 void
 EulerInitialConditions::initializeDataOnPatch(
     hier::Patch& patch,
-    const std::vector<boost::shared_ptr<pdat::CellVariable<double> > >& conservative_variables,
-    const boost::shared_ptr<hier::VariableContext>& data_context,
+    const std::vector<boost::shared_ptr<pdat::CellData<double> > >& conservative_variables,
     const double data_time,
     const bool initial_time)
 {
@@ -72,33 +71,10 @@ EulerInitialConditions::initializeDataOnPatch(
          * Initialize data for a 2D material interface advection problem.
          */
         
-        boost::shared_ptr<pdat::CellVariable<double> > var_partial_density = conservative_variables[0];
-        boost::shared_ptr<pdat::CellVariable<double> > var_momentum        = conservative_variables[1];
-        boost::shared_ptr<pdat::CellVariable<double> > var_total_energy    = conservative_variables[2];
-        boost::shared_ptr<pdat::CellVariable<double> > var_volume_fraction = conservative_variables[3];
-        
-        boost::shared_ptr<pdat::CellData<double> > partial_density(
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(var_partial_density, data_context)));
-        
-        boost::shared_ptr<pdat::CellData<double> > momentum(
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(var_momentum, data_context)));
-        
-        boost::shared_ptr<pdat::CellData<double> > total_energy(
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(var_total_energy, data_context)));
-        
-        boost::shared_ptr<pdat::CellData<double> > volume_fraction(
-            BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(var_volume_fraction, data_context)));
-        
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        TBOX_ASSERT(partial_density);
-        TBOX_ASSERT(momentum);
-        TBOX_ASSERT(total_energy);
-        TBOX_ASSERT(volume_fraction);
-#endif
+        boost::shared_ptr<pdat::CellData<double> > partial_density = conservative_variables[0];
+        boost::shared_ptr<pdat::CellData<double> > momentum        = conservative_variables[1];
+        boost::shared_ptr<pdat::CellData<double> > total_energy    = conservative_variables[2];
+        boost::shared_ptr<pdat::CellData<double> > volume_fraction = conservative_variables[3];
         
         double* Z_rho_1   = partial_density->getPointer(0);
         double* Z_rho_2   = partial_density->getPointer(1);

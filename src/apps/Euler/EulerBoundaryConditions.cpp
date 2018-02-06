@@ -14,6 +14,7 @@ EulerBoundaryConditions::EulerBoundaryConditions(
     const tbox::Dimension& dim,
     const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
     const int& num_species,
+    const FLOW_MODEL::TYPE& flow_model_type,
     const boost::shared_ptr<FlowModel>& flow_model,
     const boost::shared_ptr<tbox::Database>& boundary_conditions_db,
     const bool& boundary_conditions_db_is_from_restart):
@@ -22,6 +23,7 @@ EulerBoundaryConditions::EulerBoundaryConditions(
         d_dim(dim),
         d_grid_geometry(grid_geometry),
         d_num_species(num_species),
+        d_flow_model_type(flow_model_type),
         d_flow_model(flow_model)
 {
     /*
@@ -278,6 +280,14 @@ EulerBoundaryConditions::EulerBoundaryConditions(
             }
         }
     }
+    
+    d_Euler_special_boundary_conditions.reset(new EulerSpecialBoundaryConditions(
+        "d_Euler_special_boundary_conditions",
+        d_project_name,
+        d_dim,
+        d_grid_geometry,
+        d_flow_model_type,
+        d_num_species));
 }
 
 
@@ -900,157 +910,12 @@ EulerBoundaryConditions::setPhysicalBoundaryConditions(
             }
         }
     }
-
-    /*
-     * Set the boundary conditions for specific problems.
-     */
-    if (d_project_name == "2D double-Mach reflection")
-    {
-        TBOX_ASSERT(d_dim == tbox::Dimension(2));
-        
-        // Get the number of ghost cells of gradient.
-        hier::IntVector num_ghosts = conservative_var_data[0]->getGhostCellWidth();
-        
-        // Get the dimensions of box that covers the interior of patch.
-        const hier::Box interior_box = patch.getBox();
-        const hier::IntVector interior_dims = interior_box.numberCells();
-        
-        // Get the dimensions of box that covers interior of patch plus
-        // ghost cells.
-        const hier::Box ghost_box = conservative_var_data[0]->getGhostBox();
-        const hier::IntVector ghostcell_dims = ghost_box.numberCells();
-        
-        const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-            BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-                patch.getPatchGeometry()));
-        
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        TBOX_ASSERT(patch_geom);
-#endif
-        
-        if (patch_geom->getTouchesRegularBoundary(1, 0) ||
-            patch_geom->getTouchesRegularBoundary(1, 1))
-        {
-            const double* const dx = patch_geom->getDx();
-            const double* const patch_xlo = patch_geom->getXLower();
-            
-            boost::shared_ptr<pdat::CellData<double> > density = conservative_var_data[0];
-            boost::shared_ptr<pdat::CellData<double> > momentum = conservative_var_data[1];
-            boost::shared_ptr<pdat::CellData<double> > total_energy = conservative_var_data[2];
-            
-            double* rho   = density->getPointer(0);
-            double* rho_u = momentum->getPointer(0);
-            double* rho_v = momentum->getPointer(1);
-            double* E     = total_energy->getPointer(0);
-            
-            const double x_0 = 1.0/6.0;
-            
-            const double gamma = 1.4;
-            
-            const double rho_post_shock = 8.0;
-            const double u_post_shock = 8.25*cos(M_PI/6.0);
-            const double v_post_shock = -8.25*sin(M_PI/6.0);
-            const double p_post_shock = 116.5;
-            
-            const double rho_pre_shock = 1.4;
-            const double u_pre_shock = 0.0;
-            const double v_pre_shock = 0.0;
-            const double p_pre_shock = 1.0;
-            
-            const double rho_u_post_shock = rho_post_shock*u_post_shock;
-            const double rho_v_post_shock = rho_post_shock*v_post_shock;
-            
-            const double rho_u_pre_shock = rho_pre_shock*u_pre_shock;
-            const double rho_v_pre_shock = rho_pre_shock*v_pre_shock;
-            
-            const double E_pre_shock = p_pre_shock/(gamma - 1.0) +
-                0.5*rho_pre_shock*(u_pre_shock*u_pre_shock + v_pre_shock*v_pre_shock);
-            
-            const double E_post_shock = p_post_shock/(gamma - 1.0) +
-                0.5*rho_post_shock*(u_post_shock*u_post_shock + v_post_shock*v_post_shock);
-            
-            /*
-             * Update the bottom boundary conditions.
-             */
-            
-            if (patch_geom->getTouchesRegularBoundary(1, 0))
-            {
-                for (int i = 0; i < interior_dims[0]; i++)
-                {
-                    for (int j = -ghost_width_to_fill[1];
-                         j < 0;
-                         j++)
-                    {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0];
-                        
-                        // Compute the coordinates.
-                        double x[2];
-                        x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
-                        x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
-                        
-                        if (x[0] < x_0)
-                        {
-                            rho[idx_cell] = rho_post_shock;
-                            rho_u[idx_cell] = rho_u_post_shock;
-                            rho_v[idx_cell] = rho_v_post_shock;
-                            E[idx_cell] = E_post_shock;
-                        }
-                        else
-                        {
-                            const int idx_mirror_cell = (i + num_ghosts[0]) +
-                                (-j + num_ghosts[1] - 1)*ghostcell_dims[0];
-                            
-                            rho[idx_cell] = rho[idx_mirror_cell];
-                            rho_u[idx_cell] = rho_u[idx_mirror_cell];
-                            rho_v[idx_cell] = -rho_v[idx_mirror_cell];
-                            E[idx_cell] = E[idx_mirror_cell];
-                        }
-                    }
-                }
-            }
-            
-            /*
-             * Update the top boundary conditions.
-             */
-            
-            if (patch_geom->getTouchesRegularBoundary(1, 1))
-            {
-                const double x_s = x_0 + (1.0 + 20.0*fill_time)/sqrt(3.0);
-                
-                for (int i = 0; i < interior_dims[0]; i++)
-                {
-                    for (int j = interior_dims[1];
-                         j < interior_dims[1] + ghost_width_to_fill[1];
-                         j++)
-                    {
-                        const int idx_cell = (i + num_ghosts[0]) +
-                            (j + num_ghosts[1])*ghostcell_dims[0];
-                        
-                        // Compute the coordinates.
-                        double x[2];
-                        x[0] = patch_xlo[0] + (i + 0.5)*dx[0];
-                        x[1] = patch_xlo[1] + (j + 0.5)*dx[1];
-                        
-                        if (x[0] >= x_s)
-                        {
-                            rho[idx_cell] = rho_pre_shock;
-                            rho_u[idx_cell] = rho_u_pre_shock;
-                            rho_v[idx_cell] = rho_v_pre_shock;
-                            E[idx_cell] = E_pre_shock;
-                        }
-                        else
-                        {
-                            rho[idx_cell] = rho_post_shock;
-                            rho_u[idx_cell] = rho_u_post_shock;
-                            rho_v[idx_cell] = rho_v_post_shock;
-                            E[idx_cell] = E_post_shock;
-                        }
-                    }
-                }
-            }
-        }
-    }
+    
+    d_Euler_special_boundary_conditions->setSpecialBoundaryConditions(
+        patch,
+        conservative_var_data,
+        fill_time,
+        ghost_width_to_fill);
     
     d_flow_model->unregisterPatch();
 }

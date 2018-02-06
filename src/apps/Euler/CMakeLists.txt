@@ -4,6 +4,7 @@ set(Euler_source_files
     Euler.cpp
     EulerBoundaryConditions.cpp
     EulerInitialConditions.cpp
+    EulerSpecialBoundaryConditions.cpp
 )
 
 # Create a library called Euler which includes the source files defined
@@ -15,4 +16,8 @@ TARGET_LINK_LIBRARIES(Euler
     Runge_Kutta_patch_strategy Runge_Kutta_level_integrator
     SAMRAI_appu SAMRAI_geom SAMRAI_solv SAMRAI_algs SAMRAI_mesh
     SAMRAI_math SAMRAI_pdat SAMRAI_xfer SAMRAI_hier SAMRAI_tbox
-    hdf5 gfortran)
+    ${HDF5_C_LIBRARIES} gfortran)
+
+if (WITH_ZLIB)
+    TARGET_LINK_LIBRARIES(Euler z)
+endif()
