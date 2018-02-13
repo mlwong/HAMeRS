@@ -11727,9 +11727,9 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
         }
         
         mpi.Reduce(
-            &TKE_avg_local,
-            &TKE_avg_global,
-            1,
+            TKE_avg_local,
+            TKE_avg_global,
+            finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
             0);
@@ -12371,9 +12371,9 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         }
         
         mpi.Reduce(
-            &rho_u_pp_u_pp_avg_local,
-            &rho_u_pp_u_pp_avg_global,
-            1,
+            rho_u_pp_u_pp_avg_local,
+            rho_u_pp_u_pp_avg_global,
+            finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
             0);
@@ -12993,9 +12993,9 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         }
         
         mpi.Reduce(
-            &rho_v_pp_v_pp_avg_local,
-            &rho_v_pp_v_pp_avg_global,
-            1,
+            rho_v_pp_v_pp_avg_local,
+            rho_v_pp_v_pp_avg_global,
+            finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
             0);
@@ -13615,9 +13615,9 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         }
         
         mpi.Reduce(
-            &rho_w_pp_w_pp_avg_local,
-            &rho_w_pp_w_pp_avg_global,
-            1,
+            rho_w_pp_w_pp_avg_local,
+            rho_w_pp_w_pp_avg_global,
+            finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
             0);
@@ -14236,9 +14236,9 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         }
         
         mpi.Reduce(
-            &rho_p_u_p_avg_local,
-            &rho_p_u_p_avg_global,
-            1,
+            rho_p_u_p_avg_local,
+            rho_p_u_p_avg_global,
+            finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
             0);
@@ -14814,9 +14814,9 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
         }
         
         mpi.Reduce(
-            &rho_p_v_p_avg_local,
-            &rho_p_v_p_avg_global,
-            1,
+            rho_p_v_p_avg_local,
+            rho_p_v_p_avg_global,
+            finest_level_dim_0,
             MPI_DOUBLE,
             MPI_SUM,
             0);
