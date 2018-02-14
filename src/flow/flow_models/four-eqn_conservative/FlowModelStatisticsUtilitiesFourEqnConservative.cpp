@@ -7273,7 +7273,7 @@ outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
                                     double u_prime = u[idx_velocity] -
                                         rho_u_avg_global[idx_fine]/rho_avg_global[idx_fine];
                                     
-                                    TKE_x_to_add += rho[idx_density]*u_prime*u_prime*weight;
+                                    TKE_x_to_add += 0.5*rho[idx_density]*u_prime*u_prime*weight;
                                 }
                             }
                         }
@@ -7820,7 +7820,7 @@ outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
                                     double v_prime = v[idx_velocity] -
                                         rho_v_avg_global[idx_fine]/rho_avg_global[idx_fine];
                                     
-                                    TKE_y_to_add += rho[idx_density]*v_prime*v_prime*weight;
+                                    TKE_y_to_add += 0.5*rho[idx_density]*v_prime*v_prime*weight;
                                 }
                             }
                         }
@@ -8367,7 +8367,7 @@ outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
                                     double w_prime = w[idx_velocity] -
                                         rho_w_avg_global[idx_fine]/rho_avg_global[idx_fine];
                                     
-                                    TKE_z_to_add += rho[idx_density]*w_prime*w_prime*weight;
+                                    TKE_z_to_add += 0.5*rho[idx_density]*w_prime*w_prime*weight;
                                 }
                             }
                         }
