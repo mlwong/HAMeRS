@@ -12265,6 +12265,12 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
         double* TKE_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* TKE_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            TKE_avg_local[i] = 0.0;
+            TKE_avg_global[i] = 0.0;
+        }
+        
         for (int li = 0; li < num_levels; li++)
         {
             /*
@@ -12884,6 +12890,12 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         double* TKE_x_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* TKE_x_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            TKE_x_avg_local[i] = 0.0;
+            TKE_x_avg_global[i] = 0.0;
+        }
+        
         for (int li = 0; li < num_levels; li++)
         {
             /*
@@ -13491,6 +13503,12 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         double* TKE_y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* TKE_y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            TKE_y_avg_local[i] = 0.0;
+            TKE_y_avg_global[i] = 0.0;
+        }
+        
         for (int li = 0; li < num_levels; li++)
         {
             /*
@@ -14097,6 +14115,12 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         
         double* TKE_z_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
         double* TKE_z_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            TKE_z_avg_local[i] = 0.0;
+            TKE_z_avg_global[i] = 0.0;
+        }
         
         for (int li = 0; li < num_levels; li++)
         {
