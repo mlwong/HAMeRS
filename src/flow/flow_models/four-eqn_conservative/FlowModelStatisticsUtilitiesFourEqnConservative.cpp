@@ -115,6 +115,18 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             {
                 f_out << "\t" << "RE_HOMO_YZ_IN_ML_X   ";
             }
+            else if (statistical_quantity_key == "TKE_X_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "TKE_X_HOMO_YZ_IN_ML_X";
+            }
+            else if (statistical_quantity_key == "TKE_Y_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "TKE_Y_HOMO_YZ_IN_ML_X";
+            }
+            else if (statistical_quantity_key == "TKE_Z_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "TKE_Z_HOMO_YZ_IN_ML_X";
+            }
             else if (statistical_quantity_key == "R11_HOMO_YZ_IN_ML_X")
             {
                 f_out << "\t" << "R11_HOMO_YZ_IN_ML_X  ";
@@ -126,6 +138,18 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             else if (statistical_quantity_key == "R33_HOMO_YZ_IN_ML_X")
             {
                 f_out << "\t" << "R33_HOMO_YZ_IN_ML_X  ";
+            }
+            else if (statistical_quantity_key == "R12_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "R12_HOMO_YZ_IN_ML_X  ";
+            }
+            else if (statistical_quantity_key == "R13_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "R13_HOMO_YZ_IN_ML_X  ";
+            }
+            else if (statistical_quantity_key == "R23_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "R23_HOMO_YZ_IN_ML_X  ";
             }
             else if (statistical_quantity_key == "a1_HOMO_YZ_IN_ML_X")
             {
@@ -355,6 +379,34 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 patch_hierarchy,
                 data_context);
         }
+        else if (statistical_quantity_key == "TKE_HOMO_YZ_IN_ML_X")
+        {
+            outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "TKE_X_HOMO_YZ_IN_ML_X")
+        {
+            outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "TKE_Y_HOMO_YZ_IN_ML_X")
+        {
+            outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "TKE_Z_HOMO_YZ_IN_ML_X")
+        {
+            outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
         else if (statistical_quantity_key == "R11_HOMO_YZ_IN_ML_X")
         {
             outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
@@ -372,6 +424,27 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "R33_HOMO_YZ_IN_ML_X")
         {
             outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "R12_HOMO_YZ_IN_ML_X")
+        {
+            outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "R13_HOMO_YZ_IN_ML_X")
+        {
+            outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "R23_HOMO_YZ_IN_ML_X")
+        {
+            outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
                 stat_dump_filename,
                 patch_hierarchy,
                 data_context);
@@ -6767,7 +6840,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
 
 
 /*
- * Output TKE in x-direction integrated with assumed homogeneity in xz-plane to a file.
+ * Output TKE in x-direction integrated with assumed homogeneity in yz-plane to a file.
  */
 void
 FlowModelStatisticsUtilitiesFourEqnConservative::
@@ -7314,7 +7387,7 @@ outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
 
 
 /*
- * Output TKE in y-direction integrated with assumed homogeneity in xz-plane to a file.
+ * Output TKE in y-direction integrated with assumed homogeneity in yz-plane to a file.
  */
 void
 FlowModelStatisticsUtilitiesFourEqnConservative::
@@ -7861,7 +7934,7 @@ outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
 
 
 /*
- * Output TKE in z-direction integrated with assumed homogeneity in xz-plane to a file.
+ * Output TKE in z-direction integrated with assumed homogeneity in yz-plane to a file.
  */
 void
 FlowModelStatisticsUtilitiesFourEqnConservative::
@@ -11794,7 +11867,2473 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
 
 
 /*
- * Output mean Reynolds normal stress componentin x-direction inside mixing layer with
+ * Output mean TKE inside mixing layer with assumed homogeneity in yz-plane to a file.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
+    const std::string& stat_dump_filename,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context)
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    /*
+     * Get the refinement ratio from the finest level to the coarest level.
+     */
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
+    hier::IntVector ratioFinestLevelToCoarestLevel =
+        patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
+    for (int li = num_levels - 2; li > 0 ; li--)
+    {
+        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+    }
+    
+    /*
+     * Get the flattened hierarchy where only the finest existing grid is visible at any given
+     * location in the problem space.
+     */
+    
+    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
+            *patch_hierarchy,
+            0,
+            num_levels - 1));
+    
+    /*
+     * Get the number of cells of physical domain refined to the finest level.
+     */
+    
+    const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
+    const hier::Box& physical_domain_box = physical_domain.front();
+    const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    
+    /*
+     * Get the indices of the physical domain.
+     */
+    
+    const double* x_lo = d_grid_geometry->getXLower();
+    const double* x_hi = d_grid_geometry->getXUpper();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no 'TKE_HOMO_YZ_IN_ML_X' for one-dimensional problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no 'TKE_HOMO_YZ_IN_ML_X' for two-dimensional problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const int finest_level_dim_0 = finest_level_dims[0];
+        
+        /*
+         * Get the size of the physical domain.
+         */
+        
+        const double L_y = x_hi[1] - x_lo[1];
+        const double L_z = x_hi[2] - x_lo[2];
+        
+        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_u_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_v_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_v_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_w_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_w_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            Y_avg_local[i] = 0.0;
+            Y_avg_global[i] = 0.0;
+            rho_avg_local[i] = 0.0;
+            rho_avg_global[i] = 0.0;
+            rho_u_avg_local[i] = 0.0;
+            rho_u_avg_global[i] = 0.0;
+            rho_v_avg_local[i] = 0.0;
+            rho_v_avg_global[i] = 0.0;
+            rho_w_avg_local[i] = 0.0;
+            rho_w_avg_global[i] = 0.0;
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratioToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            
+            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                // Get the dimensions of box that covers the interior of patch.
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * the corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                
+                d_flow_model_tmp->computeGlobalDerivedCellData();
+                
+                /*
+                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 */
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_density =
+                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                
+                std::vector<double*> Y;
+                Y.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                double* rho = data_density->getPointer(0);
+                double* u = data_velocity->getPointer(0);
+                double* v = data_velocity->getPointer(1);
+                double* w = data_velocity->getPointer(2);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
+                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_1_density = num_ghosts_density[1];
+                const int num_ghosts_2_density = num_ghosts_density[2];
+                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                const int ghostcell_dim_1_density = ghostcell_dims_density[1];
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int num_ghosts_2_velocity = num_ghosts_velocity[2];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+                
+                const double weight = dx[1]*dx[2]/(L_y*L_z);
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    const int relative_idx_lo_2 = relative_index_lo[2];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear indices and the data to add.
+                                 */
+                                
+                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                        ghostcell_dim_1_mass_fraction;
+                                
+                                const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                                        ghostcell_dim_1_density;
+                                
+                                const int idx_velocity = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                        ghostcell_dim_1_velocity;
+                                
+                                const double weight_local = weight/((double) n_overlapped);
+                                
+                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double rho_to_add = rho[idx_density]*weight_local;
+                                const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
+                                const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
+                                const double rho_w_to_add = rho[idx_density]*w[idx_velocity]*weight_local;
+                                
+                                for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                                {
+                                    const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                    
+                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    rho_avg_local[idx_fine] += rho_to_add;
+                                    rho_u_avg_local[idx_fine] += rho_u_to_add;
+                                    rho_v_avg_local[idx_fine] += rho_v_to_add;
+                                    rho_w_avg_local[idx_fine] += rho_w_to_add;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        mpi.Allreduce(
+            Y_avg_local,
+            Y_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Allreduce(
+            rho_avg_local,
+            rho_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Allreduce(
+            rho_u_avg_local,
+            rho_u_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Allreduce(
+            rho_v_avg_local,
+            rho_v_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Allreduce(
+            rho_w_avg_local,
+            rho_w_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        double* TKE_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* TKE_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratioToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            
+            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                // Get the dimensions of box that covers the interior of patch.
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch, density and velocity in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                
+                d_flow_model_tmp->computeGlobalDerivedCellData();
+                
+                /*
+                 * Get the pointers to velocity data inside the flow model.
+                 */
+                
+                boost::shared_ptr<pdat::CellData<double> > data_density =
+                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                
+                double* rho = data_density->getPointer(0);
+                double* u = data_velocity->getPointer(0);
+                double* v = data_velocity->getPointer(1);
+                double* w = data_velocity->getPointer(2);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_1_density = num_ghosts_density[1];
+                const int num_ghosts_2_density = num_ghosts_density[2];
+                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                const int ghostcell_dim_1_density = ghostcell_dims_density[1];
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int num_ghosts_2_velocity = num_ghosts_velocity[2];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+                
+                const double weight = dx[1]*dx[2]/(L_y*L_z);
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    const int relative_idx_lo_2 = relative_index_lo[2];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear indices and the data to add.
+                                 */
+                                
+                                const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                                        ghostcell_dim_1_density;
+                                
+                                const int idx_velocity = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                        ghostcell_dim_1_velocity;
+                                
+                                const double weight_local = weight/((double) n_overlapped);
+                                
+                                for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                                {
+                                    const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                    
+                                    double u_prime = u[idx_velocity] -
+                                        rho_u_avg_global[idx_fine]/rho_avg_global[idx_fine];
+                                    
+                                    double v_prime = v[idx_velocity] -
+                                        rho_v_avg_global[idx_fine]/rho_avg_global[idx_fine];
+                                    
+                                    double w_prime = w[idx_velocity] -
+                                        rho_w_avg_global[idx_fine]/rho_avg_global[idx_fine];
+                                    
+                                    TKE_avg_local[idx_fine] += 0.5*rho[idx_density]*
+                                        (u_prime*u_prime + v_prime*v_prime + w_prime*w_prime)*weight_local;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        mpi.Reduce(
+            TKE_avg_local,
+            TKE_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM,
+            0);
+        
+        /*
+         * Compute and output the mean of TKE inside mixing layer (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            double TKE_sum = 0.0;
+            int count = 0;
+            
+            for (int i = 0; i < finest_level_dim_0; i++)
+            {
+                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                {
+                    TKE_sum += TKE_avg_global[i];
+                    count++;
+                }
+            }
+            
+            const double TKE_mean = TKE_sum/count;
+            
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << TKE_mean;
+        }
+        
+        std::free(Y_avg_local);
+        std::free(Y_avg_global);
+        std::free(rho_avg_local);
+        std::free(rho_avg_global);
+        std::free(rho_u_avg_local);
+        std::free(rho_u_avg_global);
+        std::free(rho_v_avg_local);
+        std::free(rho_v_avg_global);
+        std::free(rho_w_avg_local);
+        std::free(rho_w_avg_global);
+        std::free(TKE_avg_local);
+        std::free(TKE_avg_global);
+    }
+}
+
+
+/*
+ * Output mean TKE in x-direction inside mixing layer with assumed homogeneity in yz-plane
+ * to a file.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::
+outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+    const std::string& stat_dump_filename,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context)
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    /*
+     * Get the refinement ratio from the finest level to the coarest level.
+     */
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
+    hier::IntVector ratioFinestLevelToCoarestLevel =
+        patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
+    for (int li = num_levels - 2; li > 0 ; li--)
+    {
+        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+    }
+    
+    /*
+     * Get the flattened hierarchy where only the finest existing grid is visible at any given
+     * location in the problem space.
+     */
+    
+    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
+            *patch_hierarchy,
+            0,
+            num_levels - 1));
+    
+    /*
+     * Get the number of cells of physical domain refined to the finest level.
+     */
+    
+    const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
+    const hier::Box& physical_domain_box = physical_domain.front();
+    const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    
+    /*
+     * Get the indices of the physical domain.
+     */
+    
+    const double* x_lo = d_grid_geometry->getXLower();
+    const double* x_hi = d_grid_geometry->getXUpper();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no 'TKE_X_HOMO_YZ_IN_ML_X' for one-dimensional problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no 'TKE_X_HOMO_YZ_IN_ML_X' for two-dimensional problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const int finest_level_dim_0 = finest_level_dims[0];
+        
+        /*
+         * Get the size of the physical domain.
+         */
+        
+        const double L_y = x_hi[1] - x_lo[1];
+        const double L_z = x_hi[2] - x_lo[2];
+        
+        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_u_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            Y_avg_local[i] = 0.0;
+            Y_avg_global[i] = 0.0;
+            rho_avg_local[i] = 0.0;
+            rho_avg_global[i] = 0.0;
+            rho_u_avg_local[i] = 0.0;
+            rho_u_avg_global[i] = 0.0;
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratioToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            
+            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                // Get the dimensions of box that covers the interior of patch.
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * the corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                
+                d_flow_model_tmp->computeGlobalDerivedCellData();
+                
+                /*
+                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 */
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_density =
+                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                
+                std::vector<double*> Y;
+                Y.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                double* rho = data_density->getPointer(0);
+                double* u = data_velocity->getPointer(0);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
+                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_1_density = num_ghosts_density[1];
+                const int num_ghosts_2_density = num_ghosts_density[2];
+                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                const int ghostcell_dim_1_density = ghostcell_dims_density[1];
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int num_ghosts_2_velocity = num_ghosts_velocity[2];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+                
+                const double weight = dx[1]*dx[2]/(L_y*L_z);
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    const int relative_idx_lo_2 = relative_index_lo[2];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear indices and the data to add.
+                                 */
+                                
+                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                        ghostcell_dim_1_mass_fraction;
+                                
+                                const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                                        ghostcell_dim_1_density;
+                                
+                                const int idx_velocity = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                        ghostcell_dim_1_velocity;
+                                
+                                const double weight_local = weight/((double) n_overlapped);
+                                
+                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double rho_to_add = rho[idx_density]*weight_local;
+                                const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
+                                
+                                for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                                {
+                                    const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                    
+                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    rho_avg_local[idx_fine] += rho_to_add;
+                                    rho_u_avg_local[idx_fine] += rho_u_to_add;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        mpi.Allreduce(
+            Y_avg_local,
+            Y_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Allreduce(
+            rho_avg_local,
+            rho_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Allreduce(
+            rho_u_avg_local,
+            rho_u_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        double* TKE_x_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* TKE_x_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratioToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            
+            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                // Get the dimensions of box that covers the interior of patch.
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch, density and velocity in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                
+                d_flow_model_tmp->computeGlobalDerivedCellData();
+                
+                /*
+                 * Get the pointers to velocity data inside the flow model.
+                 */
+                
+                boost::shared_ptr<pdat::CellData<double> > data_density =
+                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                
+                double* rho = data_density->getPointer(0);
+                double* u = data_velocity->getPointer(0);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_1_density = num_ghosts_density[1];
+                const int num_ghosts_2_density = num_ghosts_density[2];
+                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                const int ghostcell_dim_1_density = ghostcell_dims_density[1];
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int num_ghosts_2_velocity = num_ghosts_velocity[2];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+                
+                const double weight = dx[1]*dx[2]/(L_y*L_z);
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    const int relative_idx_lo_2 = relative_index_lo[2];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear indices and the data to add.
+                                 */
+                                
+                                const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                                        ghostcell_dim_1_density;
+                                
+                                const int idx_velocity = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                        ghostcell_dim_1_velocity;
+                                
+                                const double weight_local = weight/((double) n_overlapped);
+                                
+                                for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                                {
+                                    const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                    
+                                    double u_prime = u[idx_velocity] -
+                                        rho_u_avg_global[idx_fine]/rho_avg_global[idx_fine];
+                                    
+                                    TKE_x_avg_local[idx_fine] +=
+                                        0.5*rho[idx_density]*u_prime*u_prime*weight_local;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        mpi.Reduce(
+            TKE_x_avg_local,
+            TKE_x_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM,
+            0);
+        
+        /*
+         * Compute and output the mean of TKE in x-direction inside mixing layer (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            double TKE_x_sum = 0.0;
+            int count = 0;
+            
+            for (int i = 0; i < finest_level_dim_0; i++)
+            {
+                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                {
+                    TKE_x_sum += TKE_x_avg_global[i];
+                    count++;
+                }
+            }
+            
+            const double TKE_x_mean = TKE_x_sum/count;
+            
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << TKE_x_mean;
+        }
+        
+        std::free(Y_avg_local);
+        std::free(Y_avg_global);
+        std::free(rho_avg_local);
+        std::free(rho_avg_global);
+        std::free(rho_u_avg_local);
+        std::free(rho_u_avg_global);
+        std::free(TKE_x_avg_local);
+        std::free(TKE_x_avg_global);
+    }
+}
+
+
+/*
+ * Output mean TKE in y-direction inside mixing layer with assumed homogeneity in yz-plane
+ * to a file.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::
+outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+    const std::string& stat_dump_filename,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context)
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    /*
+     * Get the refinement ratio from the finest level to the coarest level.
+     */
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
+    hier::IntVector ratioFinestLevelToCoarestLevel =
+        patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
+    for (int li = num_levels - 2; li > 0 ; li--)
+    {
+        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+    }
+    
+    /*
+     * Get the flattened hierarchy where only the finest existing grid is visible at any given
+     * location in the problem space.
+     */
+    
+    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
+            *patch_hierarchy,
+            0,
+            num_levels - 1));
+    
+    /*
+     * Get the number of cells of physical domain refined to the finest level.
+     */
+    
+    const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
+    const hier::Box& physical_domain_box = physical_domain.front();
+    const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    
+    /*
+     * Get the indices of the physical domain.
+     */
+    
+    const double* x_lo = d_grid_geometry->getXLower();
+    const double* x_hi = d_grid_geometry->getXUpper();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no 'TKE_Y_HOMO_YZ_IN_ML_X' for one-dimensional problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no 'TKE_Y_HOMO_YZ_IN_ML_X' for two-dimensional problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const int finest_level_dim_0 = finest_level_dims[0];
+        
+        /*
+         * Get the size of the physical domain.
+         */
+        
+        const double L_y = x_hi[1] - x_lo[1];
+        const double L_z = x_hi[2] - x_lo[2];
+        
+        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_v_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_v_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            Y_avg_local[i] = 0.0;
+            Y_avg_global[i] = 0.0;
+            rho_avg_local[i] = 0.0;
+            rho_avg_global[i] = 0.0;
+            rho_v_avg_local[i] = 0.0;
+            rho_v_avg_global[i] = 0.0;
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratioToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            
+            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                // Get the dimensions of box that covers the interior of patch.
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * the corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                
+                d_flow_model_tmp->computeGlobalDerivedCellData();
+                
+                /*
+                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 */
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_density =
+                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                
+                std::vector<double*> Y;
+                Y.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                double* rho = data_density->getPointer(0);
+                double* v = data_velocity->getPointer(1);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
+                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_1_density = num_ghosts_density[1];
+                const int num_ghosts_2_density = num_ghosts_density[2];
+                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                const int ghostcell_dim_1_density = ghostcell_dims_density[1];
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int num_ghosts_2_velocity = num_ghosts_velocity[2];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+                
+                const double weight = dx[1]*dx[2]/(L_y*L_z);
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    const int relative_idx_lo_2 = relative_index_lo[2];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear indices and the data to add.
+                                 */
+                                
+                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                        ghostcell_dim_1_mass_fraction;
+                                
+                                const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                                        ghostcell_dim_1_density;
+                                
+                                const int idx_velocity = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                        ghostcell_dim_1_velocity;
+                                
+                                const double weight_local = weight/((double) n_overlapped);
+                                
+                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double rho_to_add = rho[idx_density]*weight_local;
+                                const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
+                                
+                                for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                                {
+                                    const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                    
+                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    rho_avg_local[idx_fine] += rho_to_add;
+                                    rho_v_avg_local[idx_fine] += rho_v_to_add;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        mpi.Allreduce(
+            Y_avg_local,
+            Y_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Allreduce(
+            rho_avg_local,
+            rho_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Allreduce(
+            rho_v_avg_local,
+            rho_v_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        double* TKE_y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* TKE_y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratioToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            
+            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                // Get the dimensions of box that covers the interior of patch.
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch, density and velocity in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                
+                d_flow_model_tmp->computeGlobalDerivedCellData();
+                
+                /*
+                 * Get the pointers to velocity data inside the flow model.
+                 */
+                
+                boost::shared_ptr<pdat::CellData<double> > data_density =
+                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                
+                double* rho = data_density->getPointer(0);
+                double* v = data_velocity->getPointer(1);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_1_density = num_ghosts_density[1];
+                const int num_ghosts_2_density = num_ghosts_density[2];
+                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                const int ghostcell_dim_1_density = ghostcell_dims_density[1];
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int num_ghosts_2_velocity = num_ghosts_velocity[2];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+                
+                const double weight = dx[1]*dx[2]/(L_y*L_z);
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    const int relative_idx_lo_2 = relative_index_lo[2];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear indices and the data to add.
+                                 */
+                                
+                                const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                                        ghostcell_dim_1_density;
+                                
+                                const int idx_velocity = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                        ghostcell_dim_1_velocity;
+                                
+                                const double weight_local = weight/((double) n_overlapped);
+                                
+                                for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                                {
+                                    const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                    
+                                    double v_prime = v[idx_velocity] -
+                                        rho_v_avg_global[idx_fine]/rho_avg_global[idx_fine];
+                                    
+                                    TKE_y_avg_local[idx_fine] +=
+                                        0.5*rho[idx_density]*v_prime*v_prime*weight_local;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        mpi.Reduce(
+            TKE_y_avg_local,
+            TKE_y_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM,
+            0);
+        
+        /*
+         * Compute and output the mean of TKE in y-direction inside mixing layer (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            double TKE_y_sum = 0.0;
+            int count = 0;
+            
+            for (int i = 0; i < finest_level_dim_0; i++)
+            {
+                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                {
+                    TKE_y_sum += TKE_y_avg_global[i];
+                    count++;
+                }
+            }
+            
+            const double TKE_y_mean = TKE_y_sum/count;
+            
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << TKE_y_mean;
+        }
+        
+        std::free(Y_avg_local);
+        std::free(Y_avg_global);
+        std::free(rho_avg_local);
+        std::free(rho_avg_global);
+        std::free(rho_v_avg_local);
+        std::free(rho_v_avg_global);
+        std::free(TKE_y_avg_local);
+        std::free(TKE_y_avg_global);
+    }
+}
+
+
+/*
+ * Output mean TKE in z-direction inside mixing layer with assumed homogeneity in yz-plane
+ * to a file.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::
+outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+    const std::string& stat_dump_filename,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context)
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    /*
+     * Get the refinement ratio from the finest level to the coarest level.
+     */
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
+    hier::IntVector ratioFinestLevelToCoarestLevel =
+        patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
+    for (int li = num_levels - 2; li > 0 ; li--)
+    {
+        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+    }
+    
+    /*
+     * Get the flattened hierarchy where only the finest existing grid is visible at any given
+     * location in the problem space.
+     */
+    
+    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
+            *patch_hierarchy,
+            0,
+            num_levels - 1));
+    
+    /*
+     * Get the number of cells of physical domain refined to the finest level.
+     */
+    
+    const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
+    const hier::Box& physical_domain_box = physical_domain.front();
+    const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    
+    /*
+     * Get the indices of the physical domain.
+     */
+    
+    const double* x_lo = d_grid_geometry->getXLower();
+    const double* x_hi = d_grid_geometry->getXUpper();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no 'TKE_Z_HOMO_YZ_IN_ML_X' for one-dimensional problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no 'TKE_Z_HOMO_YZ_IN_ML_X' for two-dimensional problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const int finest_level_dim_0 = finest_level_dims[0];
+        
+        /*
+         * Get the size of the physical domain.
+         */
+        
+        const double L_y = x_hi[1] - x_lo[1];
+        const double L_z = x_hi[2] - x_lo[2];
+        
+        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_w_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_w_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            Y_avg_local[i] = 0.0;
+            Y_avg_global[i] = 0.0;
+            rho_avg_local[i] = 0.0;
+            rho_avg_global[i] = 0.0;
+            rho_w_avg_local[i] = 0.0;
+            rho_w_avg_global[i] = 0.0;
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratioToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            
+            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                // Get the dimensions of box that covers the interior of patch.
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * the corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                
+                d_flow_model_tmp->computeGlobalDerivedCellData();
+                
+                /*
+                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 */
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_density =
+                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                
+                std::vector<double*> Y;
+                Y.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                double* rho = data_density->getPointer(0);
+                double* w = data_velocity->getPointer(2);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
+                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_1_density = num_ghosts_density[1];
+                const int num_ghosts_2_density = num_ghosts_density[2];
+                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                const int ghostcell_dim_1_density = ghostcell_dims_density[1];
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int num_ghosts_2_velocity = num_ghosts_velocity[2];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+                
+                const double weight = dx[1]*dx[2]/(L_y*L_z);
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    const int relative_idx_lo_2 = relative_index_lo[2];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear indices and the data to add.
+                                 */
+                                
+                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                        ghostcell_dim_1_mass_fraction;
+                                
+                                const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                                        ghostcell_dim_1_density;
+                                
+                                const int idx_velocity = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                        ghostcell_dim_1_velocity;
+                                
+                                const double weight_local = weight/((double) n_overlapped);
+                                
+                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double rho_to_add = rho[idx_density]*weight_local;
+                                const double rho_w_to_add = rho[idx_density]*w[idx_velocity]*weight_local;
+                                
+                                for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                                {
+                                    const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                    
+                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    rho_avg_local[idx_fine] += rho_to_add;
+                                    rho_w_avg_local[idx_fine] += rho_w_to_add;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        mpi.Allreduce(
+            Y_avg_local,
+            Y_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Allreduce(
+            rho_avg_local,
+            rho_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Allreduce(
+            rho_w_avg_local,
+            rho_w_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        double* TKE_z_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* TKE_z_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratioToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            
+            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                // Get the dimensions of box that covers the interior of patch.
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch, density and velocity in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                
+                d_flow_model_tmp->computeGlobalDerivedCellData();
+                
+                /*
+                 * Get the pointers to velocity data inside the flow model.
+                 */
+                
+                boost::shared_ptr<pdat::CellData<double> > data_density =
+                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                
+                double* rho = data_density->getPointer(0);
+                double* w = data_velocity->getPointer(2);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_1_density = num_ghosts_density[1];
+                const int num_ghosts_2_density = num_ghosts_density[2];
+                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                const int ghostcell_dim_1_density = ghostcell_dims_density[1];
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int num_ghosts_2_velocity = num_ghosts_velocity[2];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+                
+                const double weight = dx[1]*dx[2]/(L_y*L_z);
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    const int relative_idx_lo_2 = relative_index_lo[2];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear indices and the data to add.
+                                 */
+                                
+                                const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                                        ghostcell_dim_1_density;
+                                
+                                const int idx_velocity = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                        ghostcell_dim_1_velocity;
+                                
+                                const double weight_local = weight/((double) n_overlapped);
+                                
+                                for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                                {
+                                    const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                    
+                                    double w_prime = w[idx_velocity] -
+                                        rho_w_avg_global[idx_fine]/rho_avg_global[idx_fine];
+                                    
+                                    TKE_z_avg_local[idx_fine] +=
+                                        0.5*rho[idx_density]*w_prime*w_prime*weight_local;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        mpi.Reduce(
+            TKE_z_avg_local,
+            TKE_z_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM,
+            0);
+        
+        /*
+         * Compute and output the mean of TKE in z-direction inside mixing layer (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            double TKE_z_sum = 0.0;
+            int count = 0;
+            
+            for (int i = 0; i < finest_level_dim_0; i++)
+            {
+                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                {
+                    TKE_z_sum += TKE_z_avg_global[i];
+                    count++;
+                }
+            }
+            
+            const double TKE_z_mean = TKE_z_sum/count;
+            
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << TKE_z_mean;
+        }
+        
+        std::free(Y_avg_local);
+        std::free(Y_avg_global);
+        std::free(rho_avg_local);
+        std::free(rho_avg_global);
+        std::free(rho_w_avg_local);
+        std::free(rho_w_avg_global);
+        std::free(TKE_z_avg_local);
+        std::free(TKE_z_avg_global);
+    }
+}
+
+
+/*
+ * Output mean Reynolds normal stress component in x-direction inside mixing layer with
  * assumed homogeneity in yz-plane to a file.
  */
 void
@@ -12416,7 +14955,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
 
 
 /*
- * Output mean Reynolds normal stress componentin y-direction inside mixing layer with
+ * Output mean Reynolds normal stress component in y-direction inside mixing layer with
  * assumed homogeneity in yz-plane to a file.
  */
 void
@@ -13038,7 +15577,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
 
 
 /*
- * Output mean Reynolds normal stress componentin z-direction inside mixing layer with
+ * Output mean Reynolds normal stress component in z-direction inside mixing layer with
  * assumed homogeneity in yz-plane to a file.
  */
 void
@@ -13655,6 +16194,1932 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         std::free(rho_w_avg_global);
         std::free(rho_w_pp_w_pp_avg_local);
         std::free(rho_w_pp_w_pp_avg_global);
+    }
+}
+
+
+/*
+ * Output mean Reynolds shear stress component in x- and y-directions inside mixing layer
+ * with assumed homogeneity in yz-plane to a file.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::
+outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
+    const std::string& stat_dump_filename,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context)
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'R12_HOMO_YZ_IN_ML_X' can be computed with two species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    /*
+     * Get the refinement ratio from the finest level to the coarest level.
+     */
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
+    hier::IntVector ratioFinestLevelToCoarestLevel =
+        patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
+    for (int li = num_levels - 2; li > 0 ; li--)
+    {
+        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+    }
+    
+    /*
+     * Get the flattened hierarchy where only the finest existing grid is visible at any given
+     * location in the problem space.
+     */
+    
+    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
+            *patch_hierarchy,
+            0,
+            num_levels - 1));
+    
+    /*
+     * Get the number of cells of physical domain refined to the finest level.
+     */
+    
+    const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
+    const hier::Box& physical_domain_box = physical_domain.front();
+    const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    
+    /*
+     * Get the indices of the physical domain.
+     */
+    
+    const double* x_lo = d_grid_geometry->getXLower();
+    const double* x_hi = d_grid_geometry->getXUpper();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no 'R12_HOMO_YZ_IN_ML_X' for one-dimensional problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no 'R12_HOMO_YZ_IN_ML_X' for two-dimensional problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const int finest_level_dim_0 = finest_level_dims[0];
+        
+        /*
+         * Get the size of the physical domain.
+         */
+        
+        const double L_y = x_hi[1] - x_lo[1];
+        const double L_z = x_hi[2] - x_lo[2];
+        
+        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_u_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_v_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_v_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            Y_avg_local[i] = 0.0;
+            Y_avg_global[i] = 0.0;
+            rho_avg_local[i] = 0.0;
+            rho_avg_global[i] = 0.0;
+            rho_u_avg_local[i] = 0.0;
+            rho_u_avg_global[i] = 0.0;
+            rho_v_avg_local[i] = 0.0;
+            rho_v_avg_global[i] = 0.0;
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratioToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            
+            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                // Get the dimensions of box that covers the interior of patch.
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * the corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                
+                d_flow_model_tmp->computeGlobalDerivedCellData();
+                
+                /*
+                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 */
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_density =
+                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                
+                std::vector<double*> Y;
+                Y.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                double* rho = data_density->getPointer(0);
+                double* u = data_velocity->getPointer(0);
+                double* v = data_velocity->getPointer(1);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
+                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_1_density = num_ghosts_density[1];
+                const int num_ghosts_2_density = num_ghosts_density[2];
+                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                const int ghostcell_dim_1_density = ghostcell_dims_density[1];
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int num_ghosts_2_velocity = num_ghosts_velocity[2];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+                
+                const double weight = dx[1]*dx[2]/(L_y*L_z);
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    const int relative_idx_lo_2 = relative_index_lo[2];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear indices and the data to add.
+                                 */
+                                
+                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                        ghostcell_dim_1_mass_fraction;
+                                
+                                const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                                        ghostcell_dim_1_density;
+                                
+                                const int idx_velocity = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                        ghostcell_dim_1_velocity;
+                                
+                                const double weight_local = weight/((double) n_overlapped);
+                                
+                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double rho_to_add = rho[idx_density]*weight_local;
+                                const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
+                                const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
+                                
+                                for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                                {
+                                    const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                    
+                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    rho_avg_local[idx_fine] += rho_to_add;
+                                    rho_u_avg_local[idx_fine] += rho_u_to_add;
+                                    rho_v_avg_local[idx_fine] += rho_v_to_add;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        mpi.Allreduce(
+            Y_avg_local,
+            Y_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Allreduce(
+            rho_avg_local,
+            rho_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Allreduce(
+            rho_u_avg_local,
+            rho_u_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Allreduce(
+            rho_v_avg_local,
+            rho_v_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        double* rho_u_pp_v_pp_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_u_pp_v_pp_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            rho_u_pp_v_pp_avg_local[i] = 0.0;
+            rho_u_pp_v_pp_avg_global[i] = 0.0;
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratioToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            
+            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                // Get the dimensions of box that covers the interior of patch.
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch, density and velocity in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                
+                d_flow_model_tmp->computeGlobalDerivedCellData();
+                
+                /*
+                 * Get the pointers to density and velocity data inside the flow model.
+                 */
+                
+                boost::shared_ptr<pdat::CellData<double> > data_density =
+                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                
+                double* rho = data_density->getPointer(0);
+                double* u = data_velocity->getPointer(0);
+                double* v = data_velocity->getPointer(1);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_1_density = num_ghosts_density[1];
+                const int num_ghosts_2_density = num_ghosts_density[2];
+                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                const int ghostcell_dim_1_density = ghostcell_dims_density[1];
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int num_ghosts_2_velocity = num_ghosts_velocity[2];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+                
+                const double weight = dx[1]*dx[2]/(L_y*L_z);
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    const int relative_idx_lo_2 = relative_index_lo[2];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear indices and the data to add.
+                                 */
+                                
+                                const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                                        ghostcell_dim_1_density;
+                                
+                                const int idx_velocity = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                        ghostcell_dim_1_velocity;
+                                
+                                const double weight_local = weight/((double) n_overlapped);
+                                
+                                for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                                {
+                                    const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                    
+                                    const double u_pp = u[idx_velocity] - rho_u_avg_global[idx_fine]/
+                                        rho_avg_global[idx_fine];
+                                    
+                                    const double v_pp = v[idx_velocity] - rho_v_avg_global[idx_fine]/
+                                        rho_avg_global[idx_fine];
+                                    
+                                    rho_u_pp_v_pp_avg_local[idx_fine] +=
+                                        rho[idx_density]*u_pp*v_pp*weight_local;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        mpi.Reduce(
+            rho_u_pp_v_pp_avg_local,
+            rho_u_pp_v_pp_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM,
+            0);
+        
+        /*
+         * Compute and output the mean of Reynolds shear stress component in x- and y-directions
+         * inside mixing layer (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            double R12_sum = 0.0;
+            int count = 0;
+            
+            for (int i = 0; i < finest_level_dim_0; i++)
+            {
+                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                {
+                    R12_sum += rho_u_pp_v_pp_avg_global[i]/rho_avg_global[i];
+                    count++;
+                }
+            }
+            
+            const double R12_mean = R12_sum/count;
+            
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << R12_mean;
+        }
+        
+        std::free(Y_avg_local);
+        std::free(Y_avg_global);
+        std::free(rho_avg_local);
+        std::free(rho_avg_global);
+        std::free(rho_u_avg_local);
+        std::free(rho_u_avg_global);
+        std::free(rho_v_avg_local);
+        std::free(rho_v_avg_global);
+        std::free(rho_u_pp_v_pp_avg_local);
+        std::free(rho_u_pp_v_pp_avg_global);
+    }
+}
+
+
+/*
+ * Output mean Reynolds shear stress component in x- and z-directions inside mixing layer
+ * with assumed homogeneity in yz-plane to a file.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::
+outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
+    const std::string& stat_dump_filename,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context)
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'R13_HOMO_YZ_IN_ML_X' can be computed with two species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    /*
+     * Get the refinement ratio from the finest level to the coarest level.
+     */
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
+    hier::IntVector ratioFinestLevelToCoarestLevel =
+        patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
+    for (int li = num_levels - 2; li > 0 ; li--)
+    {
+        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+    }
+    
+    /*
+     * Get the flattened hierarchy where only the finest existing grid is visible at any given
+     * location in the problem space.
+     */
+    
+    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
+            *patch_hierarchy,
+            0,
+            num_levels - 1));
+    
+    /*
+     * Get the number of cells of physical domain refined to the finest level.
+     */
+    
+    const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
+    const hier::Box& physical_domain_box = physical_domain.front();
+    const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    
+    /*
+     * Get the indices of the physical domain.
+     */
+    
+    const double* x_lo = d_grid_geometry->getXLower();
+    const double* x_hi = d_grid_geometry->getXUpper();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no 'R13_HOMO_YZ_IN_ML_X' for one-dimensional problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no 'R13_HOMO_YZ_IN_ML_X' for two-dimensional problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const int finest_level_dim_0 = finest_level_dims[0];
+        
+        /*
+         * Get the size of the physical domain.
+         */
+        
+        const double L_y = x_hi[1] - x_lo[1];
+        const double L_z = x_hi[2] - x_lo[2];
+        
+        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_u_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_u_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_w_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_w_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            Y_avg_local[i] = 0.0;
+            Y_avg_global[i] = 0.0;
+            rho_avg_local[i] = 0.0;
+            rho_avg_global[i] = 0.0;
+            rho_u_avg_local[i] = 0.0;
+            rho_u_avg_global[i] = 0.0;
+            rho_w_avg_local[i] = 0.0;
+            rho_w_avg_global[i] = 0.0;
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratioToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            
+            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                // Get the dimensions of box that covers the interior of patch.
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * the corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                
+                d_flow_model_tmp->computeGlobalDerivedCellData();
+                
+                /*
+                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 */
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_density =
+                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                
+                std::vector<double*> Y;
+                Y.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                double* rho = data_density->getPointer(0);
+                double* u = data_velocity->getPointer(0);
+                double* w = data_velocity->getPointer(2);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
+                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_1_density = num_ghosts_density[1];
+                const int num_ghosts_2_density = num_ghosts_density[2];
+                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                const int ghostcell_dim_1_density = ghostcell_dims_density[1];
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int num_ghosts_2_velocity = num_ghosts_velocity[2];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+                
+                const double weight = dx[1]*dx[2]/(L_y*L_z);
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    const int relative_idx_lo_2 = relative_index_lo[2];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear indices and the data to add.
+                                 */
+                                
+                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                        ghostcell_dim_1_mass_fraction;
+                                
+                                const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                                        ghostcell_dim_1_density;
+                                
+                                const int idx_velocity = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                        ghostcell_dim_1_velocity;
+                                
+                                const double weight_local = weight/((double) n_overlapped);
+                                
+                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double rho_to_add = rho[idx_density]*weight_local;
+                                const double rho_u_to_add = rho[idx_density]*u[idx_velocity]*weight_local;
+                                const double rho_w_to_add = rho[idx_density]*w[idx_velocity]*weight_local;
+                                
+                                for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                                {
+                                    const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                    
+                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    rho_avg_local[idx_fine] += rho_to_add;
+                                    rho_u_avg_local[idx_fine] += rho_u_to_add;
+                                    rho_w_avg_local[idx_fine] += rho_w_to_add;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        mpi.Allreduce(
+            Y_avg_local,
+            Y_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Allreduce(
+            rho_avg_local,
+            rho_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Allreduce(
+            rho_u_avg_local,
+            rho_u_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Allreduce(
+            rho_w_avg_local,
+            rho_w_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        double* rho_u_pp_w_pp_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_u_pp_w_pp_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            rho_u_pp_w_pp_avg_local[i] = 0.0;
+            rho_u_pp_w_pp_avg_global[i] = 0.0;
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratioToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            
+            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                // Get the dimensions of box that covers the interior of patch.
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch, density and velocity in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                
+                d_flow_model_tmp->computeGlobalDerivedCellData();
+                
+                /*
+                 * Get the pointers to density and velocity data inside the flow model.
+                 */
+                
+                boost::shared_ptr<pdat::CellData<double> > data_density =
+                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                
+                double* rho = data_density->getPointer(0);
+                double* u = data_velocity->getPointer(0);
+                double* w = data_velocity->getPointer(2);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_1_density = num_ghosts_density[1];
+                const int num_ghosts_2_density = num_ghosts_density[2];
+                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                const int ghostcell_dim_1_density = ghostcell_dims_density[1];
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int num_ghosts_2_velocity = num_ghosts_velocity[2];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+                
+                const double weight = dx[1]*dx[2]/(L_y*L_z);
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    const int relative_idx_lo_2 = relative_index_lo[2];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear indices and the data to add.
+                                 */
+                                
+                                const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                                        ghostcell_dim_1_density;
+                                
+                                const int idx_velocity = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                        ghostcell_dim_1_velocity;
+                                
+                                const double weight_local = weight/((double) n_overlapped);
+                                
+                                for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                                {
+                                    const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                    
+                                    const double u_pp = u[idx_velocity] - rho_u_avg_global[idx_fine]/
+                                        rho_avg_global[idx_fine];
+                                    
+                                    const double w_pp = w[idx_velocity] - rho_w_avg_global[idx_fine]/
+                                        rho_avg_global[idx_fine];
+                                    
+                                    rho_u_pp_w_pp_avg_local[idx_fine] +=
+                                        rho[idx_density]*u_pp*w_pp*weight_local;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        mpi.Reduce(
+            rho_u_pp_w_pp_avg_local,
+            rho_u_pp_w_pp_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM,
+            0);
+        
+        /*
+         * Compute and output the mean of Reynolds shear stress component in x- and z-directions
+         * inside mixing layer (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            double R13_sum = 0.0;
+            int count = 0;
+            
+            for (int i = 0; i < finest_level_dim_0; i++)
+            {
+                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                {
+                    R13_sum += rho_u_pp_w_pp_avg_global[i]/rho_avg_global[i];
+                    count++;
+                }
+            }
+            
+            const double R13_mean = R13_sum/count;
+            
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << R13_mean;
+        }
+        
+        std::free(Y_avg_local);
+        std::free(Y_avg_global);
+        std::free(rho_avg_local);
+        std::free(rho_avg_global);
+        std::free(rho_u_avg_local);
+        std::free(rho_u_avg_global);
+        std::free(rho_w_avg_local);
+        std::free(rho_w_avg_global);
+        std::free(rho_u_pp_w_pp_avg_local);
+        std::free(rho_u_pp_w_pp_avg_global);
+    }
+}
+
+
+/*
+ * Output mean Reynolds shear stress component in y- and z-directions inside mixing layer
+ * with assumed homogeneity in yz-plane to a file.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::
+outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
+    const std::string& stat_dump_filename,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context)
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_num_species != 2)
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "'R23_HOMO_YZ_IN_ML_X' can be computed with two species only."
+            << std::endl);
+    }
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    boost::shared_ptr<FlowModel> d_flow_model_tmp = d_flow_model.lock();
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    /*
+     * Get the refinement ratio from the finest level to the coarest level.
+     */
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
+    hier::IntVector ratioFinestLevelToCoarestLevel =
+        patch_hierarchy->getRatioToCoarserLevel(num_levels - 1);
+    for (int li = num_levels - 2; li > 0 ; li--)
+    {
+        ratioFinestLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(li);
+    }
+    
+    /*
+     * Get the flattened hierarchy where only the finest existing grid is visible at any given
+     * location in the problem space.
+     */
+    
+    boost::shared_ptr<ExtendedFlattenedHierarchy> flattened_hierarchy(
+        new ExtendedFlattenedHierarchy(
+            *patch_hierarchy,
+            0,
+            num_levels - 1));
+    
+    /*
+     * Get the number of cells of physical domain refined to the finest level.
+     */
+    
+    const hier::BoxContainer& physical_domain = d_grid_geometry->getPhysicalDomain();
+    const hier::Box& physical_domain_box = physical_domain.front();
+    const hier::IntVector& physical_domain_dims = physical_domain_box.numberCells();
+    const hier::IntVector finest_level_dims = physical_domain_dims*ratioFinestLevelToCoarestLevel;
+    
+    /*
+     * Get the indices of the physical domain.
+     */
+    
+    const double* x_lo = d_grid_geometry->getXLower();
+    const double* x_hi = d_grid_geometry->getXUpper();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no 'R23_HOMO_YZ_IN_ML_X' for one-dimensional problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "There is no 'R23_HOMO_YZ_IN_ML_X' for two-dimensional problem."
+            << std::endl);
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        const int finest_level_dim_0 = finest_level_dims[0];
+        
+        /*
+         * Get the size of the physical domain.
+         */
+        
+        const double L_y = x_hi[1] - x_lo[1];
+        const double L_z = x_hi[2] - x_lo[2];
+        
+        double* Y_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* Y_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_v_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_v_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_w_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_w_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            Y_avg_local[i] = 0.0;
+            Y_avg_global[i] = 0.0;
+            rho_avg_local[i] = 0.0;
+            rho_avg_global[i] = 0.0;
+            rho_v_avg_local[i] = 0.0;
+            rho_v_avg_global[i] = 0.0;
+            rho_w_avg_local[i] = 0.0;
+            rho_w_avg_global[i] = 0.0;
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratioToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            
+            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                // Get the dimensions of box that covers the interior of patch.
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch, mass fraction, density and velocity in the flow model and compute
+                 * the corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("MASS_FRACTION", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                
+                d_flow_model_tmp->computeGlobalDerivedCellData();
+                
+                /*
+                 * Get the pointers to mass fraction, density and velocity data inside the flow model.
+                 */
+                
+                boost::shared_ptr<pdat::CellData<double> > data_mass_fraction =
+                    d_flow_model_tmp->getGlobalCellData("MASS_FRACTION");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_density =
+                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                
+                std::vector<double*> Y;
+                Y.reserve(d_num_species);
+                for (int si = 0; si < d_num_species; si++)
+                {
+                    Y.push_back(data_mass_fraction->getPointer(si));
+                }
+                double* rho = data_density->getPointer(0);
+                double* v = data_velocity->getPointer(1);
+                double* w = data_velocity->getPointer(2);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_mass_fraction = data_mass_fraction->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_mass_fraction = data_mass_fraction->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_mass_fraction = num_ghosts_mass_fraction[0];
+                const int num_ghosts_1_mass_fraction = num_ghosts_mass_fraction[1];
+                const int num_ghosts_2_mass_fraction = num_ghosts_mass_fraction[2];
+                const int ghostcell_dim_0_mass_fraction = ghostcell_dims_mass_fraction[0];
+                const int ghostcell_dim_1_mass_fraction = ghostcell_dims_mass_fraction[1];
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_1_density = num_ghosts_density[1];
+                const int num_ghosts_2_density = num_ghosts_density[2];
+                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                const int ghostcell_dim_1_density = ghostcell_dims_density[1];
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int num_ghosts_2_velocity = num_ghosts_velocity[2];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+                
+                const double weight = dx[1]*dx[2]/(L_y*L_z);
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    const int relative_idx_lo_2 = relative_index_lo[2];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear indices and the data to add.
+                                 */
+                                
+                                const int idx_mass_fraction = (relative_idx_lo_0 + i + num_ghosts_0_mass_fraction) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_mass_fraction)*ghostcell_dim_0_mass_fraction +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_mass_fraction)*ghostcell_dim_0_mass_fraction*
+                                        ghostcell_dim_1_mass_fraction;
+                                
+                                const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                                        ghostcell_dim_1_density;
+                                
+                                const int idx_velocity = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                        ghostcell_dim_1_velocity;
+                                
+                                const double weight_local = weight/((double) n_overlapped);
+                                
+                                const double Y_to_add = Y[0][idx_mass_fraction]*weight_local;
+                                const double rho_to_add = rho[idx_density]*weight_local;
+                                const double rho_v_to_add = rho[idx_density]*v[idx_velocity]*weight_local;
+                                const double rho_w_to_add = rho[idx_density]*w[idx_velocity]*weight_local;
+                                
+                                for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                                {
+                                    const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                    
+                                    Y_avg_local[idx_fine] += Y_to_add;
+                                    rho_avg_local[idx_fine] += rho_to_add;
+                                    rho_v_avg_local[idx_fine] += rho_v_to_add;
+                                    rho_w_avg_local[idx_fine] += rho_w_to_add;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        mpi.Allreduce(
+            Y_avg_local,
+            Y_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Allreduce(
+            rho_avg_local,
+            rho_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Allreduce(
+            rho_v_avg_local,
+            rho_v_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        mpi.Allreduce(
+            rho_w_avg_local,
+            rho_w_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM);
+        
+        double* rho_v_pp_w_pp_avg_local = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        double* rho_v_pp_w_pp_avg_global = (double*)std::malloc(finest_level_dim_0*sizeof(double));
+        
+        for (int i = 0; i < finest_level_dim_0; i++)
+        {
+            rho_v_pp_w_pp_avg_local[i] = 0.0;
+            rho_v_pp_w_pp_avg_global[i] = 0.0;
+        }
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            /*
+             * Get the refinement ratio from current level to the finest level.
+             */
+            
+            hier::IntVector ratioToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            hier::IntVector ratioToFinestLevel = ratioFinestLevelToCoarestLevel/ratioToCoarestLevel;
+            
+            const int ratioToFinestLevel_0 = ratioToFinestLevel[0];
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                // Get the dimensions of box that covers the interior of patch.
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::Index& patch_index_lo = patch_box.lower();
+                
+                const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
+                    BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
+                        patch->getPatchGeometry()));
+                
+                const double* const dx = patch_geom->getDx();
+                
+                /*
+                 * Register the patch, density and velocity in the flow model and compute the
+                 * corresponding cell data.
+                 */
+                
+                d_flow_model_tmp->registerPatchWithDataContext(*patch, data_context);
+                
+                hier::IntVector num_ghosts = d_flow_model_tmp->getNumberOfGhostCells();
+                
+                std::unordered_map<std::string, hier::IntVector> num_subghosts_of_data;
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("DENSITY", hier::IntVector::getZero(d_dim)));
+                
+                num_subghosts_of_data.insert(
+                    std::pair<std::string, hier::IntVector>("VELOCITY", hier::IntVector::getZero(d_dim)));
+                
+                d_flow_model_tmp->registerDerivedCellVariable(num_subghosts_of_data);
+                
+                d_flow_model_tmp->computeGlobalDerivedCellData();
+                
+                /*
+                 * Get the pointers to density and velocity data inside the flow model.
+                 */
+                
+                boost::shared_ptr<pdat::CellData<double> > data_density =
+                    d_flow_model_tmp->getGlobalCellData("DENSITY");
+                
+                boost::shared_ptr<pdat::CellData<double> > data_velocity =
+                    d_flow_model_tmp->getGlobalCellData("VELOCITY");
+                
+                double* rho = data_density->getPointer(0);
+                double* v = data_velocity->getPointer(1);
+                double* w = data_velocity->getPointer(2);
+                
+                const hier::BoxContainer& patch_visible_boxes =
+                    flattened_hierarchy->getVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::BoxContainer& patch_overlapped_visible_boxes =
+                    flattened_hierarchy->getOverlappedVisibleBoxes(
+                        patch_box,
+                        li);
+                
+                const hier::IntVector num_ghosts_density = data_density->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_density = data_density->getGhostBox().numberCells();
+                
+                const hier::IntVector num_ghosts_velocity = data_velocity->getGhostCellWidth();
+                const hier::IntVector ghostcell_dims_velocity = data_velocity->getGhostBox().numberCells();
+                
+                const int num_ghosts_0_density = num_ghosts_density[0];
+                const int num_ghosts_1_density = num_ghosts_density[1];
+                const int num_ghosts_2_density = num_ghosts_density[2];
+                const int ghostcell_dim_0_density = ghostcell_dims_density[0];
+                const int ghostcell_dim_1_density = ghostcell_dims_density[1];
+                
+                const int num_ghosts_0_velocity = num_ghosts_velocity[0];
+                const int num_ghosts_1_velocity = num_ghosts_velocity[1];
+                const int num_ghosts_2_velocity = num_ghosts_velocity[2];
+                const int ghostcell_dim_0_velocity = ghostcell_dims_velocity[0];
+                const int ghostcell_dim_1_velocity = ghostcell_dims_velocity[1];
+                
+                const double weight = dx[1]*dx[2]/(L_y*L_z);
+                
+                for (hier::BoxContainer::BoxContainerConstIterator ib(patch_visible_boxes.begin());
+                     ib != patch_visible_boxes.end();
+                     ib++)
+                {
+                    const hier::Box& patch_visible_box = *ib;
+                    
+                    const hier::IntVector interior_dims = patch_visible_box.numberCells();
+                    
+                    const int interior_dim_0 = interior_dims[0];
+                    const int interior_dim_1 = interior_dims[1];
+                    const int interior_dim_2 = interior_dims[2];
+                    
+                    const hier::Index& index_lo = patch_visible_box.lower();
+                    const hier::Index relative_index_lo = index_lo - patch_index_lo;
+                    
+                    const int idx_lo_0 = index_lo[0];
+                    const int idx_lo_1 = index_lo[1];
+                    const int idx_lo_2 = index_lo[2];
+                    const int relative_idx_lo_0 = relative_index_lo[0];
+                    const int relative_idx_lo_1 = relative_index_lo[1];
+                    const int relative_idx_lo_2 = relative_index_lo[2];
+                    
+                    for (int k = 0; k < interior_dim_2; k++)
+                    {
+                        for (int j = 0; j < interior_dim_1; j++)
+                        {
+                            for (int i = 0; i < interior_dim_0; i++)
+                            {
+                                /*
+                                 * Compute the index of the data point and count how many times the data is repeated.
+                                 */
+                                
+                                const hier::Index idx_pt(idx_lo_0 + i, idx_lo_1 + j, idx_lo_2 + k);
+                                
+                                int n_overlapped = 1;
+                                
+                                for (hier::BoxContainer::BoxContainerConstIterator iob(
+                                        patch_overlapped_visible_boxes.begin());
+                                     iob != patch_overlapped_visible_boxes.end();
+                                     iob++)
+                                {
+                                    const hier::Box& patch_overlapped_visible_box = *iob;
+                                    
+                                    if (patch_overlapped_visible_box.contains(idx_pt))
+                                    {
+                                        n_overlapped++;
+                                    }
+                                }
+                                
+                                /*
+                                 * Compute the linear indices and the data to add.
+                                 */
+                                
+                                const int idx_density = (relative_idx_lo_0 + i + num_ghosts_0_density) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_density)*ghostcell_dim_0_density +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_density)*ghostcell_dim_0_density*
+                                        ghostcell_dim_1_density;
+                                
+                                const int idx_velocity = (relative_idx_lo_0 + i + num_ghosts_0_velocity) +
+                                    (relative_idx_lo_1 + j + num_ghosts_1_velocity)*ghostcell_dim_0_velocity +
+                                    (relative_idx_lo_2 + k + num_ghosts_2_velocity)*ghostcell_dim_0_velocity*
+                                        ghostcell_dim_1_velocity;
+                                
+                                const double weight_local = weight/((double) n_overlapped);
+                                
+                                for (int ii = 0; ii < ratioToFinestLevel_0; ii++)
+                                {
+                                    const int idx_fine = (idx_lo_0 + i)*ratioToFinestLevel_0 + ii;
+                                    
+                                    const double v_pp = v[idx_velocity] - rho_v_avg_global[idx_fine]/
+                                        rho_avg_global[idx_fine];
+                                    
+                                    const double w_pp = w[idx_velocity] - rho_w_avg_global[idx_fine]/
+                                        rho_avg_global[idx_fine];
+                                    
+                                    rho_v_pp_w_pp_avg_local[idx_fine] +=
+                                        rho[idx_density]*v_pp*w_pp*weight_local;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                /*
+                 * Unregister the patch and data of all registered derived cell variables in the flow model.
+                 */
+                
+                d_flow_model_tmp->unregisterPatch();
+            }
+        }
+        
+        mpi.Reduce(
+            rho_v_pp_w_pp_avg_local,
+            rho_v_pp_w_pp_avg_global,
+            finest_level_dim_0,
+            MPI_DOUBLE,
+            MPI_SUM,
+            0);
+        
+        /*
+         * Compute and output the mean of Reynolds shear stress component in y- and z-directions
+         * inside mixing layer (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            double R23_sum = 0.0;
+            int count = 0;
+            
+            for (int i = 0; i < finest_level_dim_0; i++)
+            {
+                if (4.0*Y_avg_global[i]*(1.0 - Y_avg_global[i]) > 0.9)
+                {
+                    R23_sum += rho_v_pp_w_pp_avg_global[i]/rho_avg_global[i];
+                    count++;
+                }
+            }
+            
+            const double R23_mean = R23_sum/count;
+            
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << R23_mean;
+        }
+        
+        std::free(Y_avg_local);
+        std::free(Y_avg_global);
+        std::free(rho_avg_local);
+        std::free(rho_avg_global);
+        std::free(rho_v_avg_local);
+        std::free(rho_v_avg_global);
+        std::free(rho_w_avg_local);
+        std::free(rho_w_avg_global);
+        std::free(rho_v_pp_w_pp_avg_local);
+        std::free(rho_v_pp_w_pp_avg_global);
     }
 }
 
