@@ -1,5 +1,7 @@
 #include "flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS6-CU-M2-HLLC-HLL.hpp"
 
+#include <cfloat>
+
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 
 

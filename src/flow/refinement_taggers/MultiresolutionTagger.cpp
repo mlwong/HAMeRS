@@ -5,7 +5,7 @@
 
 // #define HAMERS_PLOTTING_MULTIRESOLUTION_TAGGER
 
-#define EPSILON 1e-40
+#define EPSILON DBL_EPSILON
 
 MultiresolutionTagger::MultiresolutionTagger(
     const std::string& object_name,

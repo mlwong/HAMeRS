@@ -1,6 +1,8 @@
 #include "flow/flow_models/single-species/Riemann_solvers/RiemannSolverSingleSpeciesHLLC_HLL.hpp"
 
-#define EPSILON 1e-40
+#include <cfloat>
+
+#define EPSILON DBL_EPSILON
 
 /*
  * Compute the flux at the intercell face from conservative variables.
