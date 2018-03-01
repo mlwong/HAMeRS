@@ -1619,19 +1619,6 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
                 const int idx = i + num_ghosts_0_conservative_variables;
                 
                 Y_x_L[si][idx] = Q_x_L[si][idx]/rho_x_L[idx];
-            }
-        }
-        
-        for (int si = 0; si < d_num_species; si++)
-        {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
-            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
-            {
-                // Compute the linear index.
-                const int idx = i + num_ghosts_0_conservative_variables;
-                
                 Y_x_R[si][idx] = Q_x_R[si][idx]/rho_x_R[idx];
             }
         }
@@ -1910,23 +1897,6 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
                         (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables;
                     
                     Y_x_L[si][idx] = Q_x_L[si][idx]/rho_x_L[idx];
-                }
-            }
-        }
-        
-        for (int si = 0; si < d_num_species; si++)
-        {
-            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
-            {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
-                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
-                {
-                    // Compute the linear index.
-                    const int idx = (i + num_ghosts_0_conservative_variables) +
-                        (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables;
-                    
                     Y_x_R[si][idx] = Q_x_R[si][idx]/rho_x_R[idx];
                 }
             }
@@ -2266,28 +2236,6 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
                                 ghostcell_dim_1_conservative_variables;
                         
                         Y_x_L[si][idx] = Q_x_L[si][idx]/rho_x_L[idx];
-                    }
-                }
-            }
-        }
-        
-        for (int si = 0; si < d_num_species; si++)
-        {
-            for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
-            {
-                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
-                {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
-                    {
-                        // Compute the linear index.
-                        const int idx = (i + num_ghosts_0_conservative_variables) +
-                            (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
-                            (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
-                                ghostcell_dim_1_conservative_variables;
-                        
                         Y_x_R[si][idx] = Q_x_R[si][idx]/rho_x_R[idx];
                     }
                 }
@@ -2779,23 +2727,6 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
                         (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables;
                     
                     Y_y_B[si][idx] = Q_y_B[si][idx]/rho_y_B[idx];
-                }
-            }
-        }
-        
-        for (int si = 0; si < d_num_species; si++)
-        {
-            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
-            {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
-                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
-                {
-                    // Compute the linear index.
-                    const int idx = (i + num_ghosts_0_conservative_variables) +
-                        (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables;
-                    
                     Y_y_T[si][idx] = Q_y_T[si][idx]/rho_y_T[idx];
                 }
             }
@@ -3135,28 +3066,6 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
                                 ghostcell_dim_1_conservative_variables;
                         
                         Y_y_B[si][idx] = Q_y_B[si][idx]/rho_y_B[idx];
-                    }
-                }
-            }
-        }
-        
-        for (int si = 0; si < d_num_species; si++)
-        {
-            for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
-            {
-                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
-                {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
-                    {
-                        // Compute the linear index.
-                        const int idx = (i + num_ghosts_0_conservative_variables) +
-                            (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
-                            (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
-                                ghostcell_dim_1_conservative_variables;
-                        
                         Y_y_T[si][idx] = Q_y_T[si][idx]/rho_y_T[idx];
                     }
                 }
@@ -3698,28 +3607,6 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
                                 ghostcell_dim_1_conservative_variables;
                         
                         Y_z_B[si][idx] = Q_z_B[si][idx]/rho_z_B[idx];
-                    }
-                }
-            }
-        }
-        
-        for (int si = 0; si < d_num_species; si++)
-        {
-            for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2 + 1; k++)
-            {
-                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
-                {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
-                    {
-                        // Compute the linear index.
-                        const int idx = (i + num_ghosts_0_conservative_variables) +
-                            (j + num_ghosts_1_conservative_variables)*ghostcell_dim_0_conservative_variables +
-                            (k + num_ghosts_2_conservative_variables)*ghostcell_dim_0_conservative_variables*
-                                ghostcell_dim_1_conservative_variables;
-                        
                         Y_z_F[si][idx] = Q_z_F[si][idx]/rho_z_F[idx];
                     }
                 }
@@ -4123,19 +4010,6 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
                 const int idx = i + num_ghosts_0_primitive_variables;
                 
                 Y_x_L[si][idx] = V_x_L[si][idx]/rho_x_L[idx];
-            }
-        }
-        
-        for (int si = 0; si < d_num_species; si++)
-        {
-#ifdef HAMERS_ENABLE_SIMD
-            #pragma omp simd
-#endif
-            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
-            {
-                // Compute the linear index.
-                const int idx = i + num_ghosts_0_primitive_variables;
-                
                 Y_x_R[si][idx] = V_x_R[si][idx]/rho_x_R[idx];
             }
         }
@@ -4370,23 +4244,6 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
                         (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables;
                     
                     Y_x_L[si][idx] = V_x_L[si][idx]/rho_x_L[idx];
-                }
-            }
-        }
-        
-        for (int si = 0; si < d_num_species; si++)
-        {
-            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
-            {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
-                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
-                {
-                    // Compute the linear index.
-                    const int idx = (i + num_ghosts_0_primitive_variables) +
-                        (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables;
-                    
                     Y_x_R[si][idx] = V_x_R[si][idx]/rho_x_R[idx];
                 }
             }
@@ -4670,28 +4527,6 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInXDi
                                 ghostcell_dim_1_primitive_variables;
                         
                         Y_x_L[si][idx] = V_x_L[si][idx]/rho_x_L[idx];
-                    }
-                }
-            }
-        }
-        
-        for (int si = 0; si < d_num_species; si++)
-        {
-            for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
-            {
-                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
-                {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0 + 1; i++)
-                    {
-                        // Compute the linear index.
-                        const int idx = (i + num_ghosts_0_primitive_variables) +
-                            (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
-                            (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
-                                ghostcell_dim_1_primitive_variables;
-                        
                         Y_x_R[si][idx] = V_x_R[si][idx]/rho_x_R[idx];
                     }
                 }
@@ -5125,23 +4960,6 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
                         (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables;
                     
                     Y_y_B[si][idx] = V_y_B[si][idx]/rho_y_B[idx];
-                }
-            }
-        }
-        
-        for (int si = 0; si < d_num_species; si++)
-        {
-            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
-            {
-#ifdef HAMERS_ENABLE_SIMD
-                #pragma omp simd
-#endif
-                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
-                {
-                    // Compute the linear index.
-                    const int idx = (i + num_ghosts_0_primitive_variables) +
-                        (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables;
-                    
                     Y_y_T[si][idx] = V_y_T[si][idx]/rho_y_T[idx];
                 }
             }
@@ -5425,28 +5243,6 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInYDi
                                 ghostcell_dim_1_primitive_variables;
                         
                         Y_y_B[si][idx] = V_y_B[si][idx]/rho_y_B[idx];
-                    }
-                }
-            }
-        }
-        
-        for (int si = 0; si < d_num_species; si++)
-        {
-            for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
-            {
-                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1 + 1; j++)
-                {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
-                    {
-                        // Compute the linear index.
-                        const int idx = (i + num_ghosts_0_primitive_variables) +
-                            (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
-                            (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
-                                ghostcell_dim_1_primitive_variables;
-                        
                         Y_y_T[si][idx] = V_y_T[si][idx]/rho_y_T[idx];
                     }
                 }
@@ -5918,28 +5714,6 @@ FlowModelRiemannSolverFourEqnConservative::computeConvectiveFluxAndVelocityInZDi
                                 ghostcell_dim_1_primitive_variables;
                         
                         Y_z_B[si][idx] = V_z_B[si][idx]/rho_z_B[idx];
-                    }
-                }
-            }
-        }
-        
-        for (int si = 0; si < d_num_species; si++)
-        {
-            for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2 + 1; k++)
-            {
-                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
-                {
-#ifdef HAMERS_ENABLE_SIMD
-                    #pragma omp simd
-#endif
-                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
-                    {
-                        // Compute the linear index.
-                        const int idx = (i + num_ghosts_0_primitive_variables) +
-                            (j + num_ghosts_1_primitive_variables)*ghostcell_dim_0_primitive_variables +
-                            (k + num_ghosts_2_primitive_variables)*ghostcell_dim_0_primitive_variables*
-                                ghostcell_dim_1_primitive_variables;
-                        
                         Y_z_F[si][idx] = V_z_F[si][idx]/rho_z_F[idx];
                     }
                 }
