@@ -1,6 +1,8 @@
 #include "flow/flow_models/five-eqn_Allaire/Riemann_solvers/RiemannSolverFiveEqnAllaireHLLC_HLL.hpp"
 
-#define EPSILON 1e-40
+#include <cfloat>
+
+#define EPSILON DBL_EPSILON
 
 /*
  * Compute the flux and velocity at the intercell face from conservative variables.

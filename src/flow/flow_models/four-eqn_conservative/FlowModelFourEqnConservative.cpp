@@ -384,7 +384,11 @@ FlowModelFourEqnConservative::FlowModelFourEqnConservative(
         d_grid_geometry,
         d_num_species,
         flow_model_db,
-        d_equation_of_mass_diffusivity_mixing_rules));
+        d_equation_of_state_mixing_rules,
+        d_equation_of_mass_diffusivity_mixing_rules,
+        d_equation_of_shear_viscosity_mixing_rules,
+        d_equation_of_bulk_viscosity_mixing_rules,
+        d_equation_of_thermal_conductivity_mixing_rules));
     
     /*
      * Initialize the Riemann solvers.
