@@ -4,8 +4,6 @@
 #include "HAMeRS_config.hpp"
 
 #include "flow/flow_models/FlowModel.hpp"
-#include "flow/flow_models/RiemannSolverTypes.hpp"
-
 #include "util/Directions.hpp"
 
 #include "SAMRAI/geom/CartesianGridGeometry.h"
@@ -13,6 +11,12 @@
 
 #include "boost/weak_ptr.hpp"
 #include <string>
+
+namespace RIEMANN_SOLVER
+{
+    enum TYPE { HLLC,
+                HLLC_HLL };
+}
 
 class FlowModel;
 

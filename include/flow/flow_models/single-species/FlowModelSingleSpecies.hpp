@@ -2,8 +2,6 @@
 #define FLOW_MODEL_SINGLE_SPECIES_HPP
 
 #include "flow/flow_models/FlowModel.hpp"
-#include "flow/flow_models/single-species/Riemann_solvers/RiemannSolverSingleSpeciesHLLC.hpp"
-#include "flow/flow_models/single-species/Riemann_solvers/RiemannSolverSingleSpeciesHLLC_HLL.hpp"
 #include "util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosityMixingRulesManager.hpp"
 #include "util/mixing_rules/equations_of_bulk_viscosity/EquationOfBulkViscosityMixingRulesManager.hpp"
 #include "util/mixing_rules/equations_of_thermal_conductivity/EquationOfThermalConductivityMixingRulesManager.hpp"
@@ -225,38 +223,6 @@ class FlowModelSingleSpecies: public FlowModel
             std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables);
-        
-        /*
-         * Compute the local intercell quantities with conservative variables on each side of the face
-         * from Riemann solver at face.
-         * flux_face: Convective flux at face.
-         * velocity_face: Velocity at face.
-         * The FlowModelSingleSpecies class modifies nothing for velocity_face.
-         */
-        void
-        computeLocalFaceFluxAndVelocityFromRiemannSolverWithConservativeVariables(
-            std::vector<boost::reference_wrapper<double> >& flux_face,
-            std::vector<boost::reference_wrapper<double> >& velocity_face,
-            const std::vector<boost::reference_wrapper<double> >& conservative_variables_minus,
-            const std::vector<boost::reference_wrapper<double> >& conservative_variables_plus,
-            const DIRECTION::TYPE& direction,
-            const RIEMANN_SOLVER::TYPE& Riemann_solver);
-        
-        /*
-         * Compute the local intercell quantities with primitive variables on each side of the face
-         * from Riemann solver at face.
-         * flux_face: Convective flux at face.
-         * velocity_face: Velocity at face.
-         * The FlowModelSingleSpecies class modifies nothing for velocity_face.
-         */
-        void
-        computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
-            std::vector<boost::reference_wrapper<double> >& flux_face,
-            std::vector<boost::reference_wrapper<double> >& velocity_face,
-            const std::vector<boost::reference_wrapper<double> >& primitive_variables_minus,
-            const std::vector<boost::reference_wrapper<double> >& primitive_variables_plus,
-            const DIRECTION::TYPE& direction,
-            const RIEMANN_SOLVER::TYPE& Riemann_solver);
         
         /*
          * Check whether the given side conservative variables are within the bounds.
@@ -494,12 +460,6 @@ class FlowModelSingleSpecies: public FlowModel
         boost::shared_ptr<pdat::CellData<double> > d_data_max_wave_speed_z;
         boost::shared_ptr<pdat::CellData<double> > d_data_max_diffusivity;
         boost::shared_ptr<pdat::CellData<double> > d_data_diffusivities;
-        
-        /*
-         * boost::shared_ptr to Riemann solvers.
-         */
-        boost::shared_ptr<RiemannSolverSingleSpeciesHLLC>     d_Riemann_solver_HLLC;
-        boost::shared_ptr<RiemannSolverSingleSpeciesHLLC_HLL> d_Riemann_solver_HLLC_HLL;
         
         /*
          * A string variable to describe the equation of shear viscosity used.

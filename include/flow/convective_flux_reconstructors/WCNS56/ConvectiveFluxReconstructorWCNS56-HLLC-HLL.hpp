@@ -58,6 +58,17 @@ class ConvectiveFluxReconstructorWCNS56: public ConvectiveFluxReconstructor
             std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_plus,
             const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables) = 0;
         
+        /*
+         * Forms of equations.
+         */
+        std::vector<EQN_FORM::TYPE> d_eqn_form;
+        bool d_has_advective_eqn_form;
+        
+        /*
+         * boost::shared_ptr to the Riemann solver object.
+         */
+        boost::shared_ptr<FlowModelRiemannSolver> d_riemann_solver;
+        
 };
 
 #endif /* CONVECTIVE_FLUX_RECONSTRUCTOR_56_HLLC_HLL_HPP */

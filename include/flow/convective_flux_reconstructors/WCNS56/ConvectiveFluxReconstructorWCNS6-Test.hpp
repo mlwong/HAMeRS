@@ -68,6 +68,9 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
         double d_constant_C;
         double d_constant_alpha_tau;
         
+        /*
+         * Forms of equations.
+         */
         std::vector<EQN_FORM::TYPE> d_eqn_form;
         bool d_has_advective_eqn_form;
         

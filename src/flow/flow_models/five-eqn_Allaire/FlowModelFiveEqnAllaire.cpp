@@ -290,25 +290,6 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
         flow_model_db));
     
     /*
-     * Initialize the Riemann solvers.
-     */
-    d_Riemann_solver_HLLC = boost::shared_ptr<RiemannSolverFiveEqnAllaireHLLC> (
-        new RiemannSolverFiveEqnAllaireHLLC(
-            d_object_name,
-            d_dim,
-            d_num_eqn,
-            d_num_species,
-            d_equation_of_state_mixing_rules));
-    
-    d_Riemann_solver_HLLC_HLL = boost::shared_ptr<RiemannSolverFiveEqnAllaireHLLC_HLL> (
-        new RiemannSolverFiveEqnAllaireHLLC_HLL(
-            d_object_name,
-            d_dim,
-            d_num_eqn,
-            d_num_species,
-            d_equation_of_state_mixing_rules));
-    
-    /*
      * Initialize boundary utilities object.
      */
     d_flow_model_boundary_utilities.reset(
@@ -4053,108 +4034,6 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
                             double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*W[d_num_eqn - 1][idx_face];
                 }
             }
-        }
-    }
-}
-
-
-/*
- * Compute the local intercell quantities with conservative variables on each side of the face
- * from Riemann solver at face.
- * flux_face: Convective flux at face.
- * velocity_face: Velocity at face.
- */
-void
-FlowModelFiveEqnAllaire::computeLocalFaceFluxAndVelocityFromRiemannSolverWithConservativeVariables(
-    std::vector<boost::reference_wrapper<double> >& flux_face,
-    std::vector<boost::reference_wrapper<double> >& velocity_face,
-    const std::vector<boost::reference_wrapper<double> >& conservative_variables_minus,
-    const std::vector<boost::reference_wrapper<double> >& conservative_variables_plus,
-    const DIRECTION::TYPE& direction,
-    const RIEMANN_SOLVER::TYPE& Riemann_solver)
-{
-    switch (Riemann_solver)
-    {
-        case RIEMANN_SOLVER::HLLC:
-        {
-            d_Riemann_solver_HLLC->computeIntercellFluxAndVelocityFromConservativeVariables(
-                flux_face,
-                velocity_face,
-                conservative_variables_minus,
-                conservative_variables_plus,
-                direction);
-            
-            break;
-        }
-        case RIEMANN_SOLVER::HLLC_HLL:
-        {
-            d_Riemann_solver_HLLC_HLL->computeIntercellFluxAndVelocityFromConservativeVariables(
-                flux_face,
-                velocity_face,
-                conservative_variables_minus,
-                conservative_variables_plus,
-                direction);
-            
-            break;
-        }
-        default:
-        {
-            TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::"
-            << "computeLocalFaceFluxAndVelocityFromRiemannSolverWithConservativeVariables()\n"
-            << "Unknown Riemann solver required."
-            << std::endl);
-        }
-    }
-}
-
-
-/*
- * Compute the local intercell quantities with primitive variables on each side of the face
- * from Riemann solver at face.
- * flux_face: Convective flux at face.
- * velocity_face: Velocity at face.
- */
-void
-FlowModelFiveEqnAllaire::computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
-    std::vector<boost::reference_wrapper<double> >& flux_face,
-    std::vector<boost::reference_wrapper<double> >& velocity_face,
-    const std::vector<boost::reference_wrapper<double> >& primitive_variables_minus,
-    const std::vector<boost::reference_wrapper<double> >& primitive_variables_plus,
-    const DIRECTION::TYPE& direction,
-    const RIEMANN_SOLVER::TYPE& Riemann_solver)
-{
-    switch (Riemann_solver)
-    {
-        case RIEMANN_SOLVER::HLLC:
-        {
-            d_Riemann_solver_HLLC->computeIntercellFluxAndVelocityFromPrimitiveVariables(
-                flux_face,
-                velocity_face,
-                primitive_variables_minus,
-                primitive_variables_plus,
-                direction);
-            
-            break;
-        }
-        case RIEMANN_SOLVER::HLLC_HLL:
-        {
-            d_Riemann_solver_HLLC_HLL->computeIntercellFluxAndVelocityFromPrimitiveVariables(
-                flux_face,
-                velocity_face,
-                primitive_variables_minus,
-                primitive_variables_plus,
-                direction);
-            
-            break;
-        }
-        default:
-        {
-            TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::"
-            << "computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables()\n"
-            << "Unknown Riemann solver required."
-            << std::endl);
         }
     }
 }

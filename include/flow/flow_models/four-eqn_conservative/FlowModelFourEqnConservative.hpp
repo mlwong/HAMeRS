@@ -2,8 +2,6 @@
 #define FLOW_MODEL_FOUR_EQN_CONSERVATIVE_HPP
 
 #include "flow/flow_models/FlowModel.hpp"
-#include "flow/flow_models/four-eqn_conservative/Riemann_solvers/RiemannSolverFourEqnConservativeHLLC.hpp"
-#include "flow/flow_models/four-eqn_conservative/Riemann_solvers/RiemannSolverFourEqnConservativeHLLC_HLL.hpp"
 #include "util/mixing_rules/equations_of_mass_diffusivity/EquationOfMassDiffusivityMixingRulesManager.hpp"
 #include "util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosityMixingRulesManager.hpp"
 #include "util/mixing_rules/equations_of_bulk_viscosity/EquationOfBulkViscosityMixingRulesManager.hpp"
@@ -226,36 +224,6 @@ class FlowModelFourEqnConservative: public FlowModel
             std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables);
-        
-        /*
-         * Compute the local intercell quantities with conservative variables on each side of the face
-         * from Riemann solver at face.
-         * flux_face: Convective flux at face.
-         * velocity_face: Velocity at face.
-         */
-        void
-        computeLocalFaceFluxAndVelocityFromRiemannSolverWithConservativeVariables(
-            std::vector<boost::reference_wrapper<double> >& flux_face,
-            std::vector<boost::reference_wrapper<double> >& velocity_face,
-            const std::vector<boost::reference_wrapper<double> >& conservative_variables_minus,
-            const std::vector<boost::reference_wrapper<double> >& conservative_variables_plus,
-            const DIRECTION::TYPE& direction,
-            const RIEMANN_SOLVER::TYPE& Riemann_solver);
-        
-        /*
-         * Compute the local intercell quantities with primitive variables on each side of the face
-         * from Riemann solver at face.
-         * flux_face: Convective flux at face.
-         * velocity_face: Velocity at face.
-         */
-        void
-        computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
-            std::vector<boost::reference_wrapper<double> >& flux_face,
-            std::vector<boost::reference_wrapper<double> >& velocity_face,
-            const std::vector<boost::reference_wrapper<double> >& primitive_variables_minus,
-            const std::vector<boost::reference_wrapper<double> >& primitive_variables_plus,
-            const DIRECTION::TYPE& direction,
-            const RIEMANN_SOLVER::TYPE& Riemann_solver);
         
         /*
          * Check whether the given side conservative variables are within the bounds.
@@ -517,12 +485,6 @@ class FlowModelFourEqnConservative: public FlowModel
         boost::shared_ptr<pdat::CellData<double> > d_data_max_wave_speed_z;
         boost::shared_ptr<pdat::CellData<double> > d_data_max_diffusivity;
         boost::shared_ptr<pdat::CellData<double> > d_data_diffusivities;
-        
-        /*
-         * boost::shared_ptr to Riemann solvers.
-         */
-        boost::shared_ptr<RiemannSolverFourEqnConservativeHLLC>     d_Riemann_solver_HLLC;
-        boost::shared_ptr<RiemannSolverFourEqnConservativeHLLC_HLL> d_Riemann_solver_HLLC_HLL;
         
         /*
          * Upper and lower bounds on variables.
