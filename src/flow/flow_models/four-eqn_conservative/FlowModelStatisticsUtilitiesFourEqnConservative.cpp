@@ -111,9 +111,29 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             {
                 f_out << "\t" << "SCAL_DISS_RAT_INT    ";
             }
+            else if (statistical_quantity_key == "RE_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "RE_HOMO_Y_IN_ML_X    ";
+            }
             else if (statistical_quantity_key == "RE_HOMO_YZ_IN_ML_X")
             {
                 f_out << "\t" << "RE_HOMO_YZ_IN_ML_X   ";
+            }
+            else if (statistical_quantity_key == "TKE_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "TKE_HOMO_Y_IN_ML_X   ";
+            }
+            else if (statistical_quantity_key == "TKE_X_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "TKE_X_HOMO_Y_IN_ML_X ";
+            }
+            else if (statistical_quantity_key == "TKE_Y_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "TKE_Y_HOMO_Y_IN_ML_X ";
+            }
+            else if (statistical_quantity_key == "TKE_Z_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "TKE_Z_HOMO_Y_IN_ML_X ";
             }
             else if (statistical_quantity_key == "TKE_HOMO_YZ_IN_ML_X")
             {
@@ -131,6 +151,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             {
                 f_out << "\t" << "TKE_Z_HOMO_YZ_IN_ML_X";
             }
+            else if (statistical_quantity_key == "R11_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "R11_HOMO_Y_IN_ML_X   ";
+            }
+            else if (statistical_quantity_key == "R22_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "R22_HOMO_Y_IN_ML_X   ";
+            }
             else if (statistical_quantity_key == "R11_HOMO_YZ_IN_ML_X")
             {
                 f_out << "\t" << "R11_HOMO_YZ_IN_ML_X  ";
@@ -142,6 +170,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             else if (statistical_quantity_key == "R33_HOMO_YZ_IN_ML_X")
             {
                 f_out << "\t" << "R33_HOMO_YZ_IN_ML_X  ";
+            }
+            else if (statistical_quantity_key == "R12_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "R12_HOMO_Y_IN_ML_X   ";
             }
             else if (statistical_quantity_key == "R12_HOMO_YZ_IN_ML_X")
             {
@@ -155,6 +187,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             {
                 f_out << "\t" << "R23_HOMO_YZ_IN_ML_X  ";
             }
+            else if (statistical_quantity_key == "b11_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "b11_HOMO_Y_IN_ML_X   ";
+            }
+            else if (statistical_quantity_key == "b22_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "b22_HOMO_Y_IN_ML_X   ";
+            }
             else if (statistical_quantity_key == "b11_HOMO_YZ_IN_ML_X")
             {
                 f_out << "\t" << "b11_HOMO_YZ_IN_ML_X  ";
@@ -166,6 +206,10 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             else if (statistical_quantity_key == "b33_HOMO_YZ_IN_ML_X")
             {
                 f_out << "\t" << "b33_HOMO_YZ_IN_ML_X  ";
+            }
+            else if (statistical_quantity_key == "b12_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "b12_HOMO_YZ_IN_ML_X  ";
             }
             else if (statistical_quantity_key == "b12_HOMO_YZ_IN_ML_X")
             {
@@ -179,9 +223,17 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             {
                 f_out << "\t" << "b23_HOMO_YZ_IN_ML_X  ";
             }
+            else if (statistical_quantity_key == "a1_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "a1_HOMO_Y_IN_ML_X    ";
+            }
             else if (statistical_quantity_key == "a1_HOMO_YZ_IN_ML_X")
             {
                 f_out << "\t" << "a1_HOMO_YZ_IN_ML_X   ";
+            }
+            else if (statistical_quantity_key == "b_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "b_HOMO_Y_IN_ML_X     ";
             }
             else if (statistical_quantity_key == "b_HOMO_YZ_IN_ML_X")
             {
@@ -400,9 +452,37 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 patch_hierarchy,
                 data_context);
         }
+        else if (statistical_quantity_key == "RE_HOMO_Y_IN_ML_X")
+        {
+            outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
         else if (statistical_quantity_key == "RE_HOMO_YZ_IN_ML_X")
         {
             outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "TKE_HOMO_Y_IN_ML_X")
+        {
+            outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "TKE_X_HOMO_Y_IN_ML_X")
+        {
+            outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "TKE_Y_HOMO_Y_IN_ML_X")
+        {
+            outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
                 stat_dump_filename,
                 patch_hierarchy,
                 data_context);
@@ -435,6 +515,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 patch_hierarchy,
                 data_context);
         }
+        else if (statistical_quantity_key == "R11_HOMO_Y_IN_ML_X")
+        {
+            outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "R22_HOMO_Y_IN_ML_X")
+        {
+            outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
         else if (statistical_quantity_key == "R11_HOMO_YZ_IN_ML_X")
         {
             outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
@@ -452,6 +546,13 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "R33_HOMO_YZ_IN_ML_X")
         {
             outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "R12_HOMO_Y_IN_ML_X")
+        {
+            outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirection(
                 stat_dump_filename,
                 patch_hierarchy,
                 data_context);
@@ -477,6 +578,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 patch_hierarchy,
                 data_context);
         }
+        else if (statistical_quantity_key == "b11_HOMO_Y_IN_ML_X")
+        {
+            outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "b22_HOMO_Y_IN_ML_X")
+        {
+            outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
         else if (statistical_quantity_key == "b11_HOMO_YZ_IN_ML_X")
         {
             outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
@@ -494,6 +609,13 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "b33_HOMO_YZ_IN_ML_X")
         {
             outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "b12_HOMO_Y_IN_ML_X")
+        {
+            outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirection(
                 stat_dump_filename,
                 patch_hierarchy,
                 data_context);
@@ -519,9 +641,23 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 patch_hierarchy,
                 data_context);
         }
+        else if (statistical_quantity_key == "a1_HOMO_Y_IN_ML_X")
+        {
+            outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
         else if (statistical_quantity_key == "a1_HOMO_YZ_IN_ML_X")
         {
             outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "b_HOMO_Y_IN_ML_X")
+        {
+            outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirection(
                 stat_dump_filename,
                 patch_hierarchy,
                 data_context);
