@@ -1,7 +1,5 @@
 #include "util/wavelet_transform/WaveletTransformHarten.hpp"
 
-#include "SAMRAI/geom/CartesianPatchGeometry.h"
-
 #include <algorithm>
 #include <cfloat>
 
@@ -214,7 +212,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
     for (int li = 0; li < d_num_level; li++)
     {
         w.push_back(wavelet_coeffs[li]->getPointer(0));
-        wavelet_coeffs[li]->fillAll(0.0);
+        wavelet_coeffs[li]->fillAll(double(0));
     }
     
     // Get the pointer to the local means at different levels if it is required to compute them.
@@ -260,7 +258,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
         for (int li = 0; li < d_num_level; li++)
         {
             f_x.push_back(scaling_coeffs_x[li]->getPointer(0));
-            scaling_coeffs_x[li]->fillAll(0.0);
+            scaling_coeffs_x[li]->fillAll(double(0));
         }
         
         /*
@@ -301,10 +299,11 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     const int idx_cell_data_x_L = i - 1 + num_ghosts_0_cell_data;
                     const int idx_cell_data_x_R = i + 1 + num_ghosts_0_cell_data;
                     
-                    f_x[0][idx] = 0.5*(f[idx_cell_data_x_L] + f[idx_cell_data_x_R]);
+                    f_x[0][idx] = double(1)/double(2)*(f[idx_cell_data_x_L] + f[idx_cell_data_x_R]);
                     
-                    w[0][idx] = fabs(-0.5*(f[idx_cell_data_x_L] - 2.0*f[idx_cell_data] +
-                        f[idx_cell_data_x_R]));
+                    w[0][idx] = double(-1)/double(2)*(f[idx_cell_data_x_L] - double(2)*f[idx_cell_data] +
+                                                      f[idx_cell_data_x_R]);
+                    w[0][idx] = fabs(w[0][idx]);
                 }
                 
                 if (compute_variable_local_means)
@@ -321,8 +320,8 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                         const int idx_cell_data_x_L = i - 1 + num_ghosts_0_cell_data;
                         const int idx_cell_data_x_R = i + 1 + num_ghosts_0_cell_data;
                         
-                        f_mean[0][idx] = 0.5*(f[idx_cell_data_x_L] + 2.0*f[idx_cell_data] +
-                            f[idx_cell_data_x_R]);
+                        f_mean[0][idx] = double(1)/double(2)*(f[idx_cell_data_x_L] + double(2)*f[idx_cell_data] +
+                                                              f[idx_cell_data_x_R]);
                     }
                 }
                 
@@ -362,11 +361,14 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                     const int idx_cell_data_x_R  = i + 1 + num_ghosts_0_cell_data;
                     const int idx_cell_data_x_RR = i + 2 + num_ghosts_0_cell_data;
                     
-                    f_x[0][idx] = 1.0/6.0*(-f[idx_cell_data_x_LL] + 4.0*f[idx_cell_data_x_L] +
-                        4.0*f[idx_cell_data_x_R] - f[idx_cell_data_x_RR]);
+                    f_x[0][idx] = double(1)/double(6)*(-f[idx_cell_data_x_LL] + double(4)*f[idx_cell_data_x_L] +
+                                                       double(4)*f[idx_cell_data_x_R] - f[idx_cell_data_x_RR]);
                     
-                    w[0][idx] = fabs(1.0/6.0*(f[idx_cell_data_x_LL] - 4.0*f[idx_cell_data_x_L] +
-                        6.0*f[idx_cell_data] - 4.0*f[idx_cell_data_x_R] + f[idx_cell_data_x_RR]));
+                    w[0][idx] = double(1)/double(6)*(f[idx_cell_data_x_LL] - double(4)*f[idx_cell_data_x_L] +
+                                                     double(6)*f[idx_cell_data] - double(4)*f[idx_cell_data_x_R] +
+                                                     f[idx_cell_data_x_RR]);
+                    
+                    w[0][idx] = fabs(w[0][idx]);
                 }
                 
                 if (compute_variable_local_means)
@@ -385,8 +387,9 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                         const int idx_cell_data_x_R  = i + 1 + num_ghosts_0_cell_data;
                         const int idx_cell_data_x_RR = i + 2 + num_ghosts_0_cell_data;
                         
-                        f_mean[0][idx] = 1.0/6.0*(f[idx_cell_data_x_LL] + 4.0*f[idx_cell_data_x_L] +
-                            6.0*f[idx_cell_data] + 4.0*f[idx_cell_data_x_R] + f[idx_cell_data_x_RR]);
+                        f_mean[0][idx] = double(1)/double(6)*(f[idx_cell_data_x_LL] + double(4)*f[idx_cell_data_x_L] +
+                                                              double(6)*f[idx_cell_data] + double(4)*f[idx_cell_data_x_R] +
+                                                              f[idx_cell_data_x_RR]);
                     }
                 }
                 
@@ -433,10 +436,12 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                         const int idx_x_L = i - offset + num_ghosts_0_wavelet_coeffs;
                         const int idx_x_R = i + offset + num_ghosts_0_wavelet_coeffs;
                         
-                        f_x[li][idx] = 0.5*(f_x[li-1][idx_x_L] + f_x[li-1][idx_x_R]);
+                        f_x[li][idx] = double(1)/double(2)*(f_x[li-1][idx_x_L] + f_x[li-1][idx_x_R]);
                         
-                        w[li][idx]   = fabs(-0.5*(f_x[li-1][idx_x_L] - 2.0*f_x[li-1][idx] +
-                            f_x[li-1][idx_x_R]));
+                        w[li][idx]   = double(-1)/double(2)*(f_x[li-1][idx_x_L] - double(2)*f_x[li-1][idx] +
+                                                             f_x[li-1][idx_x_R]);
+                        
+                        w[li][idx] = fabs(w[li][idx]);
                     }
                     
                     if (compute_variable_local_means)
@@ -451,8 +456,8 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                             const int idx_x_L = i - offset + num_ghosts_0_wavelet_coeffs;
                             const int idx_x_R = i + offset + num_ghosts_0_wavelet_coeffs;
                             
-                            f_mean[li][idx] = 0.5*(f_x[li-1][idx_x_L] + 2.0*f_x[li-1][idx] +
-                                f_x[li-1][idx_x_R]);
+                            f_mean[li][idx] = double(1)/double(2)*(f_x[li-1][idx_x_L] + double(2)*f_x[li-1][idx] +
+                                                                   f_x[li-1][idx_x_R]);
                         }
                     }
                     
@@ -480,11 +485,14 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                         const int idx_x_R  = i + offset + num_ghosts_0_wavelet_coeffs;
                         const int idx_x_RR = i + 2*offset + num_ghosts_0_wavelet_coeffs;
                         
-                        f_x[li][idx] = 1.0/6.0*(-f_x[li-1][idx_x_LL] + 4.0*f_x[li-1][idx_x_L] +
-                            4.0*f_x[li-1][idx_x_R] - f_x[li-1][idx_x_RR]);
+                        f_x[li][idx] = double(1)/double(6)*(-f_x[li-1][idx_x_LL] + double(4)*f_x[li-1][idx_x_L] +
+                                                            double(4)*f_x[li-1][idx_x_R] - f_x[li-1][idx_x_RR]);
                         
-                        w[li][idx] = fabs(1.0/6.0*(f_x[li-1][idx_x_LL] - 4.0*f_x[li-1][idx_x_L] +
-                            6.0*f_x[li-1][idx] - 4.0*f_x[li-1][idx_x_R] + f_x[li-1][idx_x_RR]));
+                        w[li][idx] = double(1)/double(6)*(f_x[li-1][idx_x_LL] - double(4)*f_x[li-1][idx_x_L] +
+                                                          double(6)*f_x[li-1][idx] - double(4)*f_x[li-1][idx_x_R] +
+                                                          f_x[li-1][idx_x_RR]);
+                        
+                        w[li][idx] = fabs(w[li][idx]);
                     }
                     
                     if (compute_variable_local_means)
@@ -501,8 +509,9 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                             const int idx_x_R  = i + offset + num_ghosts_0_wavelet_coeffs;
                             const int idx_x_RR = i + 2*offset + num_ghosts_0_wavelet_coeffs;
                             
-                            f_mean[li][idx] = 1.0/6.0*(f_x[li-1][idx_x_LL] + 4.0*f_x[li-1][idx_x_L] +
-                                6.0*f_x[li-1][idx] + 4.0*f_x[li-1][idx_x_R] + f_x[li-1][idx_x_RR]);
+                            f_mean[li][idx] = double(1)/double(6)*(f_x[li-1][idx_x_LL] + double(4)*f_x[li-1][idx_x_L] +
+                                                                   double(6)*f_x[li-1][idx] + double(4)*f_x[li-1][idx_x_R] +
+                                                                   f_x[li-1][idx_x_RR]);
                         }
                     }
                     
@@ -562,10 +571,10 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
             f_x.push_back(scaling_coeffs_x[li]->getPointer(0));
             f_y.push_back(scaling_coeffs_y[li]->getPointer(0));
             
-            wavelet_coeffs_x[li]->fillAll(0.0);
-            wavelet_coeffs_y[li]->fillAll(0.0);
-            scaling_coeffs_x[li]->fillAll(0.0);
-            scaling_coeffs_y[li]->fillAll(0.0);
+            wavelet_coeffs_x[li]->fillAll(double(0));
+            wavelet_coeffs_y[li]->fillAll(double(0));
+            scaling_coeffs_x[li]->fillAll(double(0));
+            scaling_coeffs_y[li]->fillAll(double(0));
         }
         
         /*
@@ -616,10 +625,10 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                         const int idx_cell_data_x_R = (i + 1 + num_ghosts_0_cell_data) +
                             (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                         
-                        f_x[0][idx] = 0.5*(f[idx_cell_data_x_L] + f[idx_cell_data_x_R]);
+                        f_x[0][idx] = double(1)/double(2)*(f[idx_cell_data_x_L] + f[idx_cell_data_x_R]);
                         
-                        w_x[0][idx] = -0.5*(f[idx_cell_data_x_L] - 2.0*f[idx_cell_data] +
-                            f[idx_cell_data_x_R]);
+                        w_x[0][idx] = double(-1)/double(2)*(f[idx_cell_data_x_L] - double(2)*f[idx_cell_data] +
+                                                            f[idx_cell_data_x_R]);
                     }
                 }
                 
@@ -663,9 +672,10 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                         const int idx_cell_data_y_T = (i + num_ghosts_0_cell_data) +
                             (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                         
-                        f_y[0][idx] = 0.5*(f[idx_cell_data_y_B] + f[idx_cell_data_y_T]);
-                        w_y[0][idx] = -0.5*(f[idx_cell_data_y_B] - 2.0*f[idx_cell_data] +
-                            f[idx_cell_data_y_T]);
+                        f_y[0][idx] = double(1)/double(2)*(f[idx_cell_data_y_B] + f[idx_cell_data_y_T]);
+                        
+                        w_y[0][idx] = double(-1)/double(2)*(f[idx_cell_data_y_B] - double(2)*f[idx_cell_data] +
+                                                            f[idx_cell_data_y_T]);
                     }
                 }
                 
@@ -697,13 +707,13 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                             const int idx_cell_data_y_T = (i + num_ghosts_0_cell_data) +
                                 (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                             
-                            double f_mean_x = f[idx_cell_data_x_L] + 2.0*f[idx_cell_data] +
+                            double f_mean_x = f[idx_cell_data_x_L] + double(2)*f[idx_cell_data] +
                                               f[idx_cell_data_x_R];
                             
-                            double f_mean_y = f[idx_cell_data_y_B] + 2.0*f[idx_cell_data] +
+                            double f_mean_y = f[idx_cell_data_y_B] + double(2)*f[idx_cell_data] +
                                               f[idx_cell_data_y_T];
                             
-                            f_mean[0][idx] = 0.5*sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y);
+                            f_mean[0][idx] = double(1)/double(2)*sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y);
                         }
                     }
                 }
@@ -758,11 +768,12 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                         const int idx_cell_data_x_RR = (i + 2 + num_ghosts_0_cell_data) +
                             (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                         
-                        f_x[0][idx] = 1.0/6.0*(-f[idx_cell_data_x_LL] + 4.0*f[idx_cell_data_x_L] +
-                            4.0*f[idx_cell_data_x_R] - f[idx_cell_data_x_RR]);
+                        f_x[0][idx] = double(1)/double(6)*(-f[idx_cell_data_x_LL] + double(4)*f[idx_cell_data_x_L] +
+                                                           double(4)*f[idx_cell_data_x_R] - f[idx_cell_data_x_RR]);
                         
-                        w_x[0][idx] = 1.0/6.0*(f[idx_cell_data_x_LL] - 4.0*f[idx_cell_data_x_L] +
-                            6.0*f[idx_cell_data] - 4.0*f[idx_cell_data_x_R] + f[idx_cell_data_x_RR]);
+                        w_x[0][idx] = double(1)/double(6)*(f[idx_cell_data_x_LL] - double(4)*f[idx_cell_data_x_L] +
+                                                           double(6)*f[idx_cell_data] - double(4)*f[idx_cell_data_x_R] +
+                                                           f[idx_cell_data_x_RR]);
                     }
                 }
                 
@@ -812,11 +823,12 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                         const int idx_cell_data_y_TT = (i + num_ghosts_0_cell_data) +
                             (j + 2 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                         
-                        f_y[0][idx] = 1.0/6.0*(-f[idx_cell_data_y_BB] + 4.0*f[idx_cell_data_y_B] +
-                            4.0*f[idx_cell_data_y_T] - f[idx_cell_data_y_TT]);
+                        f_y[0][idx] = double(1)/double(6)*(-f[idx_cell_data_y_BB] + double(4)*f[idx_cell_data_y_B] +
+                                                           double(4)*f[idx_cell_data_y_T] - f[idx_cell_data_y_TT]);
                         
-                        w_y[0][idx] = 1.0/6.0*(f[idx_cell_data_y_BB] - 4.0*f[idx_cell_data_y_B] +
-                            6.0*f[idx_cell_data] - 4.0*f[idx_cell_data_y_T] + f[idx_cell_data_y_TT]);
+                        w_y[0][idx] = double(1)/double(6)*(f[idx_cell_data_y_BB] - double(4)*f[idx_cell_data_y_B] +
+                                                           double(6)*f[idx_cell_data] - double(4)*f[idx_cell_data_y_T] +
+                                                           f[idx_cell_data_y_TT]);
                     }
                 }
                 
@@ -860,13 +872,13 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                             const int idx_cell_data_y_TT = (i + num_ghosts_0_cell_data) +
                                 (j + 2 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                             
-                            double f_mean_x = f[idx_cell_data_x_LL] + 4.0*f[idx_cell_data_x_L] +
-                                6.0*f[idx_cell_data] + 4.0*f[idx_cell_data_x_R] + f[idx_cell_data_x_RR];
+                            double f_mean_x = f[idx_cell_data_x_LL] + double(4)*f[idx_cell_data_x_L] +
+                                double(6)*f[idx_cell_data] + double(4)*f[idx_cell_data_x_R] + f[idx_cell_data_x_RR];
                             
-                            double f_mean_y = f[idx_cell_data_y_BB] + 4.0*f[idx_cell_data_y_B] +
-                                6.0*f[idx_cell_data] + 4.0*f[idx_cell_data_y_T] + f[idx_cell_data_y_TT];
+                            double f_mean_y = f[idx_cell_data_y_BB] + double(4)*f[idx_cell_data_y_B] +
+                                double(6)*f[idx_cell_data] + double(4)*f[idx_cell_data_y_T] + f[idx_cell_data_y_TT];
                             
-                            f_mean[0][idx] = 1.0/6.0*sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y);
+                            f_mean[0][idx] = double(1)/double(6)*sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y);
                         }
                     }
                 }
@@ -923,10 +935,10 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                             const int idx_x_R = (i + offset + num_ghosts_0_wavelet_coeffs) +
                                 (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
-                            f_x[li][idx] = 0.5*(f_x[li-1][idx_x_L] + f_x[li-1][idx_x_R]);
+                            f_x[li][idx] = double(1)/double(2)*(f_x[li-1][idx_x_L] + f_x[li-1][idx_x_R]);
                             
-                            w_x[li][idx] = -0.5*(f_x[li-1][idx_x_L] - 2.0*f_x[li-1][idx] +
-                                f_x[li-1][idx_x_R]);
+                            w_x[li][idx] = double(-1)/double(2)*(f_x[li-1][idx_x_L] - double(2)*f_x[li-1][idx] +
+                                                                 f_x[li-1][idx_x_R]);
                         }
                     }
                     
@@ -957,10 +969,10 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                             const int idx_y_T = (i + num_ghosts_0_wavelet_coeffs) +
                                 (j + offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
-                            f_y[li][idx] = 0.5*(f_y[li-1][idx_y_B] + f_y[li-1][idx_y_T]);
+                            f_y[li][idx] = double(1)/double(2)*(f_y[li-1][idx_y_B] + f_y[li-1][idx_y_T]);
                             
-                            w_y[li][idx] = -0.5*(f_y[li-1][idx_y_B] - 2.0*f_y[li-1][idx] +
-                                f_y[li-1][idx_y_T]);
+                            w_y[li][idx] = double(-1)/double(2)*(f_y[li-1][idx_y_B] - double(2)*f_y[li-1][idx] +
+                                                                 f_y[li-1][idx_y_T]);
                         }
                     }
                     
@@ -989,13 +1001,13 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                                 const int idx_y_T = (i + num_ghosts_0_wavelet_coeffs) +
                                     (j + offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                                 
-                                double f_mean_x = f_x[li-1][idx_x_L] + 2.0*f_x[li-1][idx] +
+                                double f_mean_x = f_x[li-1][idx_x_L] + double(2)*f_x[li-1][idx] +
                                     f_x[li-1][idx_x_R];
                                 
-                                double f_mean_y = f_y[li-1][idx_y_B] + 2.0*f_y[li-1][idx] +
+                                double f_mean_y = f_y[li-1][idx_y_B] + double(2)*f_y[li-1][idx] +
                                     f_y[li-1][idx_y_T];
                                 
-                                f_mean[li][idx] = 0.5*sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y);
+                                f_mean[li][idx] = double(1)/double(2)*sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y);
                             }
                         }
                     }
@@ -1037,11 +1049,12 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                             const int idx_x_RR = (i + 2*offset + num_ghosts_0_wavelet_coeffs) +
                                 (j + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
-                            f_x[li][idx] = 1.0/6.0*(-f_x[li-1][idx_x_LL] + 4.0*f_x[li-1][idx_x_L] +
-                                4.0*f_x[li-1][idx_x_R] - f_x[li-1][idx_x_RR]);
+                            f_x[li][idx] = double(1)/double(6)*(-f_x[li-1][idx_x_LL] + double(4)*f_x[li-1][idx_x_L] +
+                                                                double(4)*f_x[li-1][idx_x_R] - f_x[li-1][idx_x_RR]);
                             
-                            w_x[li][idx] = 1.0/6.0*(f_x[li-1][idx_x_LL] - 4.0*f_x[li-1][idx_x_L] +
-                                6.0*f_x[li-1][idx] - 4.0*f_x[li-1][idx_x_R] + f_x[li-1][idx_x_RR]);
+                            w_x[li][idx] = double(1)/double(6)*(f_x[li-1][idx_x_LL] - double(4)*f_x[li-1][idx_x_L] +
+                                                                double(6)*f_x[li-1][idx] - double(4)*f_x[li-1][idx_x_R] +
+                                                                f_x[li-1][idx_x_RR]);
                         }
                     }
                     
@@ -1078,11 +1091,12 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                             const int idx_y_TT = (i + num_ghosts_0_wavelet_coeffs) +
                                 (j + 2*offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                             
-                            f_y[li][idx] = 1.0/6.0*(-f_y[li-1][idx_y_BB] + 4.0*f_y[li-1][idx_y_B] +
-                                4.0*f_y[li-1][idx_y_T] - f_y[li-1][idx_y_TT]);
+                            f_y[li][idx] = double(1)/double(6)*(-f_y[li-1][idx_y_BB] + double(4)*f_y[li-1][idx_y_B] +
+                                                                double(4)*f_y[li-1][idx_y_T] - f_y[li-1][idx_y_TT]);
                             
-                            w_y[li][idx] = 1.0/6.0*(f_y[li-1][idx_y_BB] - 4.0*f_y[li-1][idx_y_B] +
-                                6.0*f_y[li-1][idx] - 4.0*f_y[li-1][idx_y_T] + f_y[li-1][idx_y_TT]);
+                            w_y[li][idx] = double(1)/double(6)*(f_y[li-1][idx_y_BB] - double(4)*f_y[li-1][idx_y_B] +
+                                                                double(6)*f_y[li-1][idx] - double(4)*f_y[li-1][idx_y_T] +
+                                                                f_y[li-1][idx_y_TT]);
                         }
                     }
                     
@@ -1123,13 +1137,13 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                                 const int idx_y_TT = (i + num_ghosts_0_wavelet_coeffs) +
                                     (j + 2*offset + num_ghosts_1_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs;
                                 
-                                double f_mean_x = f_x[li-1][idx_x_LL] + 4.0*f_x[li-1][idx_x_L] +
-                                    6.0*f_x[li-1][idx] + 4.0*f_x[li-1][idx_x_R] + f_x[li-1][idx_x_RR];
+                                double f_mean_x = f_x[li-1][idx_x_LL] + double(4)*f_x[li-1][idx_x_L] +
+                                    double(6)*f_x[li-1][idx] + double(4)*f_x[li-1][idx_x_R] + f_x[li-1][idx_x_RR];
                                 
-                                double f_mean_y = f_y[li-1][idx_y_BB] + 4.0*f_y[li-1][idx_y_B] +
-                                    6.0*f_y[li-1][idx] + 4.0*f_y[li-1][idx_y_T] + f_y[li-1][idx_y_TT];
+                                double f_mean_y = f_y[li-1][idx_y_BB] + double(4)*f_y[li-1][idx_y_B] +
+                                    double(6)*f_y[li-1][idx] + double(4)*f_y[li-1][idx_y_T] + f_y[li-1][idx_y_TT];
                                 
-                                f_mean[li][idx] = 1.0/6.0*sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y);
+                                f_mean[li][idx] = double(1)/double(6)*sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y);
                             }
                         }
                     }
@@ -1234,12 +1248,12 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
             f_y.push_back(scaling_coeffs_y[li]->getPointer(0));
             f_z.push_back(scaling_coeffs_z[li]->getPointer(0));
             
-            wavelet_coeffs_x[li]->fillAll(0.0);
-            wavelet_coeffs_y[li]->fillAll(0.0);
-            wavelet_coeffs_z[li]->fillAll(0.0);
-            scaling_coeffs_x[li]->fillAll(0.0);
-            scaling_coeffs_y[li]->fillAll(0.0);
-            scaling_coeffs_z[li]->fillAll(0.0);
+            wavelet_coeffs_x[li]->fillAll(double(0));
+            wavelet_coeffs_y[li]->fillAll(double(0));
+            wavelet_coeffs_z[li]->fillAll(double(0));
+            scaling_coeffs_x[li]->fillAll(double(0));
+            scaling_coeffs_y[li]->fillAll(double(0));
+            scaling_coeffs_z[li]->fillAll(double(0));
         }
         
         /*
@@ -1301,10 +1315,10 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                                 (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
                                     ghostcell_dim_1_cell_data;
                             
-                            f_x[0][idx] = 0.5*(f[idx_cell_data_x_L] + f[idx_cell_data_x_R]);
+                            f_x[0][idx] = double(1)/double(2)*(f[idx_cell_data_x_L] + f[idx_cell_data_x_R]);
                             
-                            w_x[0][idx] = -0.5*(f[idx_cell_data_x_L] - 2.0*f[idx_cell_data] +
-                                f[idx_cell_data_x_R]);
+                            w_x[0][idx] = double(-1)/double(2)*(f[idx_cell_data_x_L] - double(2)*f[idx_cell_data] +
+                                                                f[idx_cell_data_x_R]);
                         }
                     }
                 }
@@ -1361,10 +1375,10 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                                 (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
                                     ghostcell_dim_1_cell_data;
                             
-                            f_y[0][idx] = 0.5*(f[idx_cell_data_y_B] + f[idx_cell_data_y_T]);
+                            f_y[0][idx] = double(1)/double(2)*(f[idx_cell_data_y_B] + f[idx_cell_data_y_T]);
                             
-                            w_y[0][idx] = -0.5*(f[idx_cell_data_y_B] - 2.0*f[idx_cell_data] +
-                                f[idx_cell_data_y_T]);
+                            w_y[0][idx] = double(-1)/double(2)*(f[idx_cell_data_y_B] - double(2)*f[idx_cell_data] +
+                                                                f[idx_cell_data_y_T]);
                         }
                     }
                 }
@@ -1421,10 +1435,10 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                                 (k + 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
                                     ghostcell_dim_1_cell_data;
                             
-                            f_z[0][idx] = 0.5*(f[idx_cell_data_z_B] + f[idx_cell_data_z_F]);
+                            f_z[0][idx] = double(1)/double(2)*(f[idx_cell_data_z_B] + f[idx_cell_data_z_F]);
                             
-                            w_z[0][idx] = -0.5*(f[idx_cell_data_z_B] - 2.0*f[idx_cell_data] +
-                                f[idx_cell_data_z_F]);
+                            w_z[0][idx] = double(-1)/double(2)*(f[idx_cell_data_z_B] - double(2)*f[idx_cell_data] +
+                                                                f[idx_cell_data_z_F]);
                         }
                     }
                 }
@@ -1481,17 +1495,17 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                                     (k + 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
                                         ghostcell_dim_1_cell_data;
                                 
-                                double f_mean_x = f[idx_cell_data_x_L] + 2.0*f[idx_cell_data] +
+                                double f_mean_x = f[idx_cell_data_x_L] + double(2)*f[idx_cell_data] +
                                     f[idx_cell_data_x_R];
                                 
-                                double f_mean_y = f[idx_cell_data_y_B] + 2.0*f[idx_cell_data] +
+                                double f_mean_y = f[idx_cell_data_y_B] + double(2)*f[idx_cell_data] +
                                     f[idx_cell_data_y_T];
                                 
-                                double f_mean_z = f[idx_cell_data_z_B] + 2.0*f[idx_cell_data] +
+                                double f_mean_z = f[idx_cell_data_z_B] + double(2)*f[idx_cell_data] +
                                     f[idx_cell_data_z_F];
                                 
-                                f_mean[0][idx] = 0.5*sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y +
-                                    f_mean_z*f_mean_z);
+                                f_mean[0][idx] = double(1)/double(2)*sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y +
+                                                                          f_mean_z*f_mean_z);
                             }
                         }
                     }
@@ -1563,11 +1577,12 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                                 (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
                                     ghostcell_dim_1_cell_data;
                             
-                            f_x[0][idx] = 1.0/6.0*(-f[idx_cell_data_x_LL] + 4.0*f[idx_cell_data_x_L] +
-                                4.0*f[idx_cell_data_x_R] - f[idx_cell_data_x_RR]);
+                            f_x[0][idx] = double(1)/double(6)*(-f[idx_cell_data_x_LL] + double(4)*f[idx_cell_data_x_L] +
+                                                               double(4)*f[idx_cell_data_x_R] - f[idx_cell_data_x_RR]);
                             
-                            w_x[0][idx] = 1.0/6.0*(f[idx_cell_data_x_LL] - 4.0*f[idx_cell_data_x_L] +
-                                6.0*f[idx_cell_data] - 4.0*f[idx_cell_data_x_R] + f[idx_cell_data_x_RR]);
+                            w_x[0][idx] = double(1)/double(6)*(f[idx_cell_data_x_LL] - double(4)*f[idx_cell_data_x_L] +
+                                                               double(6)*f[idx_cell_data] - double(4)*f[idx_cell_data_x_R] +
+                                                               f[idx_cell_data_x_RR]);
                         }
                     }
                 }
@@ -1634,11 +1649,12 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                                 (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
                                     ghostcell_dim_1_cell_data;
                             
-                            f_y[0][idx] = 1.0/6.0*(-f[idx_cell_data_y_BB] + 4.0*f[idx_cell_data_y_B] +
-                                4.0*f[idx_cell_data_y_T] - f[idx_cell_data_y_TT]);
+                            f_y[0][idx] = double(1)/double(6)*(-f[idx_cell_data_y_BB] + double(4)*f[idx_cell_data_y_B] +
+                                                               double(4)*f[idx_cell_data_y_T] - f[idx_cell_data_y_TT]);
                             
-                            w_y[0][idx] = 1.0/6.0*(f[idx_cell_data_y_BB] - 4.0*f[idx_cell_data_y_B] +
-                                6.0*f[idx_cell_data] - 4.0*f[idx_cell_data_y_T] + f[idx_cell_data_y_TT]);
+                            w_y[0][idx] = double(1)/double(6)*(f[idx_cell_data_y_BB] - double(4)*f[idx_cell_data_y_B] +
+                                                               double(6)*f[idx_cell_data] - double(4)*f[idx_cell_data_y_T] +
+                                                               f[idx_cell_data_y_TT]);
                         }
                     }
                 }
@@ -1705,11 +1721,12 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                                 (k + 2 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
                                     ghostcell_dim_1_cell_data;
                             
-                            f_z[0][idx] = 1.0/6.0*(-f[idx_cell_data_z_BB] + 4.0*f[idx_cell_data_z_B] +
-                                4.0*f[idx_cell_data_z_F] - f[idx_cell_data_z_FF]);
+                            f_z[0][idx] = double(1)/double(6)*(-f[idx_cell_data_z_BB] + double(4)*f[idx_cell_data_z_B] +
+                                                               double(4)*f[idx_cell_data_z_F] - f[idx_cell_data_z_FF]);
                             
-                            w_z[0][idx] = 1.0/6.0*(f[idx_cell_data_z_BB] - 4.0*f[idx_cell_data_z_B] +
-                                6.0*f[idx_cell_data] - 4.0*f[idx_cell_data_z_F] + f[idx_cell_data_z_FF]);
+                            w_z[0][idx] = double(1)/double(6)*(f[idx_cell_data_z_BB] - double(4)*f[idx_cell_data_z_B] +
+                                                               double(6)*f[idx_cell_data] - double(4)*f[idx_cell_data_z_F] +
+                                                               f[idx_cell_data_z_FF]);
                         }
                     }
                 }
@@ -1796,17 +1813,17 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                                     (k + 2 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
                                         ghostcell_dim_1_cell_data;
                                 
-                                double f_mean_x = f[idx_cell_data_x_LL] + 4.0*f[idx_cell_data_x_L] +
-                                    6.0*f[idx_cell_data] + 4.0*f[idx_cell_data_x_R] + f[idx_cell_data_x_RR];
+                                double f_mean_x = f[idx_cell_data_x_LL] + double(4)*f[idx_cell_data_x_L] +
+                                    double(6)*f[idx_cell_data] + double(4)*f[idx_cell_data_x_R] + f[idx_cell_data_x_RR];
                                 
-                                double f_mean_y = f[idx_cell_data_y_BB] + 4.0*f[idx_cell_data_y_B] +
-                                    6.0*f[idx_cell_data] + 4.0*f[idx_cell_data_y_T] + f[idx_cell_data_y_TT];
+                                double f_mean_y = f[idx_cell_data_y_BB] + double(4)*f[idx_cell_data_y_B] +
+                                    double(6)*f[idx_cell_data] + double(4)*f[idx_cell_data_y_T] + f[idx_cell_data_y_TT];
                                 
-                                double f_mean_z = f[idx_cell_data_z_BB] + 4.0*f[idx_cell_data_z_B] +
-                                    6.0*f[idx_cell_data] + 4.0*f[idx_cell_data_z_F] + f[idx_cell_data_z_FF];
+                                double f_mean_z = f[idx_cell_data_z_BB] + double(4)*f[idx_cell_data_z_B] +
+                                    double(6)*f[idx_cell_data] + double(4)*f[idx_cell_data_z_F] + f[idx_cell_data_z_FF];
                                 
-                                f_mean[0][idx] = 1.0/6.0*sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y +
-                                    f_mean_z*f_mean_z);
+                                f_mean[0][idx] = double(1)/double(6)*sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y +
+                                                                          f_mean_z*f_mean_z);
                             }
                         }
                     }
@@ -1874,10 +1891,10 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                                     (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
                                         ghostcell_dim_1_wavelet_coeffs;
                                 
-                                f_x[li][idx] = 0.5*(f_x[li-1][idx_x_L] + f_x[li-1][idx_x_R]);
+                                f_x[li][idx] = double(1)/double(2)*(f_x[li-1][idx_x_L] + f_x[li-1][idx_x_R]);
                                 
-                                w_x[li][idx] = -0.5*(f_x[li-1][idx_x_L] - 2.0*f_x[li-1][idx] +
-                                    f_x[li-1][idx_x_R]);
+                                w_x[li][idx] = double(-1)/double(2)*(f_x[li-1][idx_x_L] - double(2)*f_x[li-1][idx] +
+                                                                     f_x[li-1][idx_x_R]);
                             }
                         }
                     }
@@ -1919,10 +1936,10 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                                     (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
                                         ghostcell_dim_1_wavelet_coeffs;
                                 
-                                f_y[li][idx] = 0.5*(f_y[li-1][idx_y_B] + f_y[li-1][idx_y_T]);
+                                f_y[li][idx] = double(1)/double(2)*(f_y[li-1][idx_y_B] + f_y[li-1][idx_y_T]);
                                 
-                                w_y[li][idx] = -0.5*(f_y[li-1][idx_y_B] - 2.0*f_y[li-1][idx] +
-                                    f_y[li-1][idx_y_T]);
+                                w_y[li][idx] = double(-1)/double(2)*(f_y[li-1][idx_y_B] - double(2)*f_y[li-1][idx] +
+                                                                     f_y[li-1][idx_y_T]);
                             }
                         }
                     }
@@ -1964,10 +1981,10 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                                     (k + offset + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
                                         ghostcell_dim_1_wavelet_coeffs;
                                 
-                                f_z[li][idx] = 0.5*(f_z[li-1][idx_z_B] + f_z[li-1][idx_z_F]);
+                                f_z[li][idx] = double(1)/double(2)*(f_z[li-1][idx_z_B] + f_z[li-1][idx_z_F]);
                                 
-                                w_z[li][idx] = -0.5*(f_z[li-1][idx_z_B] - 2.0*f_z[li-1][idx] +
-                                    f_z[li-1][idx_z_F]);
+                                w_z[li][idx] = double(-1)/double(2)*(f_z[li-1][idx_z_B] - double(2)*f_z[li-1][idx] +
+                                                                     f_z[li-1][idx_z_F]);
                             }
                         }
                     }
@@ -2019,17 +2036,17 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                                         (k + offset + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
                                             ghostcell_dim_1_wavelet_coeffs;
                                     
-                                    double f_mean_x = f_x[li-1][idx_x_L] + 2.0*f_x[li-1][idx] +
+                                    double f_mean_x = f_x[li-1][idx_x_L] + double(2)*f_x[li-1][idx] +
                                         f_x[li-1][idx_x_R];
                                     
-                                    double f_mean_y = f_y[li-1][idx_y_B] + 2.0*f_y[li-1][idx] +
+                                    double f_mean_y = f_y[li-1][idx_y_B] + double(2)*f_y[li-1][idx] +
                                         f_y[li-1][idx_y_T];
                                     
-                                    double f_mean_z = f_z[li-1][idx_z_B] + 2.0*f_z[li-1][idx] +
+                                    double f_mean_z = f_z[li-1][idx_z_B] + double(2)*f_z[li-1][idx] +
                                         f_z[li-1][idx_z_F];
                                     
-                                    f_mean[li][idx] = 0.5*sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y +
-                                        f_mean_z*f_mean_z);
+                                    f_mean[li][idx] = double(1)/double(2)*sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y +
+                                                                               f_mean_z*f_mean_z);
                                 }
                             }
                         }
@@ -2086,11 +2103,12 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                                     (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
                                         ghostcell_dim_1_wavelet_coeffs;
                                 
-                                f_x[li][idx] = 1.0/6.0*(-f_x[li-1][idx_x_LL] + 4.0*f_x[li-1][idx_x_L] +
-                                    4.0*f_x[li-1][idx_x_R] - f_x[li-1][idx_x_RR]);
+                                f_x[li][idx] = double(1)/double(6)*(-f_x[li-1][idx_x_LL] + double(4)*f_x[li-1][idx_x_L] +
+                                                                    double(4)*f_x[li-1][idx_x_R] - f_x[li-1][idx_x_RR]);
                                 
-                                w_x[li][idx] = 1.0/6.0*(f_x[li-1][idx_x_LL] - 4.0*f_x[li-1][idx_x_L] +
-                                    6.0*f_x[li-1][idx] - 4.0*f_x[li-1][idx_x_R] + f_x[li-1][idx_x_RR]);
+                                w_x[li][idx] = double(1)/double(6)*(f_x[li-1][idx_x_LL] - double(4)*f_x[li-1][idx_x_L] +
+                                                                    double(6)*f_x[li-1][idx] - double(4)*f_x[li-1][idx_x_R] +
+                                                                    f_x[li-1][idx_x_RR]);
                             }
                         }
                     }
@@ -2142,11 +2160,12 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                                     (k + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
                                         ghostcell_dim_1_wavelet_coeffs;
                                 
-                                f_y[li][idx] = 1.0/6.0*(-f_y[li-1][idx_y_BB] + 4.0*f_y[li-1][idx_y_B] +
-                                    4.0*f_y[li-1][idx_y_T] - f_y[li-1][idx_y_TT]);
+                                f_y[li][idx] = double(1)/double(6)*(-f_y[li-1][idx_y_BB] + double(4)*f_y[li-1][idx_y_B] +
+                                                                    double(4)*f_y[li-1][idx_y_T] - f_y[li-1][idx_y_TT]);
                                 
-                                w_y[li][idx] = 1.0/6.0*(f_y[li-1][idx_y_BB] - 4.0*f_y[li-1][idx_y_B] +
-                                    6.0*f_y[li-1][idx] - 4.0*f_y[li-1][idx_y_T] + f_y[li-1][idx_y_TT]);
+                                w_y[li][idx] = double(1)/double(6)*(f_y[li-1][idx_y_BB] - double(4)*f_y[li-1][idx_y_B] +
+                                                                    double(6)*f_y[li-1][idx] - double(4)*f_y[li-1][idx_y_T] +
+                                                                    f_y[li-1][idx_y_TT]);
                             }
                         }
                     }
@@ -2198,11 +2217,12 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                                     (k + 2*offset + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
                                         ghostcell_dim_1_wavelet_coeffs;
                                 
-                                f_z[li][idx] = 1.0/6.0*(-f_z[li-1][idx_z_BB] + 4.0*f_z[li-1][idx_z_B] +
-                                    4.0*f_z[li-1][idx_z_F] - f_z[li-1][idx_z_FF]);
+                                f_z[li][idx] = double(1)/double(6)*(-f_z[li-1][idx_z_BB] + double(4)*f_z[li-1][idx_z_B] +
+                                                                    double(4)*f_z[li-1][idx_z_F] - f_z[li-1][idx_z_FF]);
                                 
-                                w_z[li][idx] = 1.0/6.0*(f_z[li-1][idx_z_BB] - 4.0*f_z[li-1][idx_z_B] +
-                                    6.0*f_z[li-1][idx] - 4.0*f_z[li-1][idx_z_F] + f_z[li-1][idx_z_FF]);
+                                w_z[li][idx] = double(1)/double(6)*(f_z[li-1][idx_z_BB] - double(4)*f_z[li-1][idx_z_B] +
+                                                                    double(6)*f_z[li-1][idx] - double(4)*f_z[li-1][idx_z_F] +
+                                                                    f_z[li-1][idx_z_FF]);
                             }
                         }
                     }
@@ -2284,17 +2304,17 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                                         (k + 2*offset + num_ghosts_2_wavelet_coeffs)*ghostcell_dim_0_wavelet_coeffs*
                                             ghostcell_dim_1_wavelet_coeffs;
                                     
-                                    double f_mean_x = f_x[li-1][idx_x_LL] + 4.0*f_x[li-1][idx_x_L] +
-                                        6.0*f_x[li-1][idx] + 4.0*f_x[li-1][idx_x_R] + f_x[li-1][idx_x_RR];
+                                    double f_mean_x = f_x[li-1][idx_x_LL] + double(4)*f_x[li-1][idx_x_L] +
+                                        double(6)*f_x[li-1][idx] + double(4)*f_x[li-1][idx_x_R] + f_x[li-1][idx_x_RR];
                                     
-                                    double f_mean_y = f_y[li-1][idx_y_BB] + 4.0*f_y[li-1][idx_y_B] +
-                                        6.0*f_y[li-1][idx] + 4.0*f_y[li-1][idx_y_T] + f_y[li-1][idx_y_TT];
+                                    double f_mean_y = f_y[li-1][idx_y_BB] + double(4)*f_y[li-1][idx_y_B] +
+                                        double(6)*f_y[li-1][idx] + double(4)*f_y[li-1][idx_y_T] + f_y[li-1][idx_y_TT];
                                     
-                                    double f_mean_z = f_z[li-1][idx_z_BB] + 4.0*f_z[li-1][idx_z_B] +
-                                        6.0*f_z[li-1][idx] + 4.0*f_z[li-1][idx_z_F] + f_z[li-1][idx_z_FF];
+                                    double f_mean_z = f_z[li-1][idx_z_BB] + double(4)*f_z[li-1][idx_z_B] +
+                                        double(6)*f_z[li-1][idx] + double(4)*f_z[li-1][idx_z_F] + f_z[li-1][idx_z_FF];
                                     
-                                    f_mean[li][idx] = 1.0/6.0*sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y +
-                                        f_mean_z*f_mean_z);
+                                    f_mean[li][idx] = double(1)/double(6)*sqrt(f_mean_x*f_mean_x + f_mean_y*f_mean_y +
+                                                                               f_mean_z*f_mean_z);
                                 }
                             }
                         }
@@ -2312,8 +2332,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                         << std::endl);
                 }
             }
-        }
-        
+        }        
         
         /*
          * Compute the three-dimensional wavelet coefficients from the one-dimensional wavelet coefficients.
@@ -2346,7 +2365,7 @@ WaveletTransformHarten::computeWaveletCoefficientsWithVariableLocalMeans(
                                 ghostcell_dim_1_wavelet_coeffs;
                         
                         w[li][idx] = sqrt(w_x[li][idx]*w_x[li][idx] + w_y[li][idx]*w_y[li][idx] +
-                            w_z[li][idx]*w_z[li][idx]);
+                                          w_z[li][idx]*w_z[li][idx]);
                     }
                 }
             }

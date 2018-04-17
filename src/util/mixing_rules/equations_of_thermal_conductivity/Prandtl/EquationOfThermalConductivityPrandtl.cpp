@@ -31,11 +31,8 @@ EquationOfThermalConductivityPrandtl::getThermalConductivity(
     const double* const temperature,
     const std::vector<const double*>& molecular_properties) const
 {
-    NULL_USE(pressure);
-    NULL_USE(temperature);
-    
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(molecular_properties.size()) >= 3);
+    TBOX_ASSERT(static_cast<int>(molecular_properties.size()) >= 4);
 #endif
     
     const double& c_p = *(molecular_properties[0]);
@@ -64,4 +61,503 @@ EquationOfThermalConductivityPrandtl::getThermalConductivity(
             mu_molecular_properties_const_ptr);
     
     return c_p*mu/Pr;
+}
+
+
+/*
+ * Compute the thermal conductivity.
+ */
+void
+EquationOfThermalConductivityPrandtl::computeThermalConductivity(
+    boost::shared_ptr<pdat::CellData<double> >& data_thermal_conductivity,
+    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+    const std::vector<const double*>& molecular_properties,
+    const hier::Box& domain) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_thermal_conductivity);
+    TBOX_ASSERT(data_pressure);
+    TBOX_ASSERT(data_temperature);
+    
+    TBOX_ASSERT(static_cast<int>(molecular_properties.size()) >= 4);
+#endif
+    
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = data_thermal_conductivity->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_temperature->getBox().numberCells() == interior_dims);
+#endif
+    
+    /*
+     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
+     */
+    
+    const hier::IntVector num_ghosts_thermal_conductivity = data_thermal_conductivity->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_thermal_conductivity =
+        data_thermal_conductivity->getGhostBox().numberCells();
+    
+    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+    const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+    
+    /*
+     * Get the minimum number of ghost cells and the dimensions of the ghost cell box for shear
+     * viscosity.
+     */
+    
+    hier::IntVector num_ghosts_min(d_dim);
+    
+    num_ghosts_min = num_ghosts_thermal_conductivity;
+    num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
+    num_ghosts_min = hier::IntVector::min(num_ghosts_temperature, num_ghosts_min);
+    
+    const hier::IntVector ghostcell_dims_min = interior_dims + num_ghosts_min*2;
+    
+    /*
+     * Get the local lower indices and number of cells in each direction of the domain.
+     */
+    
+    hier::IntVector domain_lo(d_dim);
+    hier::IntVector domain_dims(d_dim);
+    
+    if (domain.empty())
+    {
+        hier::Box ghost_box = interior_box;
+        ghost_box.grow(num_ghosts_min);
+        
+        domain_lo = -num_ghosts_min;
+        domain_dims = ghost_box.numberCells();
+    }
+    else
+    {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_thermal_conductivity->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_pressure->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_temperature->getGhostBox().contains(domain));
+#endif
+        
+        domain_lo = domain.lower() - interior_box.lower();
+        domain_dims = domain.numberCells();
+    }
+    
+    /*
+     * Delcare data containers for shear viscosity.
+     */
+    
+    boost::shared_ptr<pdat::CellData<double> > data_shear_viscosity(
+        new pdat::CellData<double>(interior_box, 1, num_ghosts_min));
+    
+    /*
+     * Compute the shear viscosity.
+     */
+    
+    std::vector<double> mu_molecular_properties;
+    std::vector<const double*> mu_molecular_properties_const_ptr;
+    
+    mu_molecular_properties.reserve(static_cast<int>(molecular_properties.size()) - 3);
+    mu_molecular_properties_const_ptr.reserve(static_cast<int>(molecular_properties.size()) - 3);
+    
+    for (int mi = 3; mi < static_cast<int>(molecular_properties.size()); mi++)
+    {
+        mu_molecular_properties.push_back(*molecular_properties[mi]);
+    }
+    
+    for (int mi = 0; mi < (static_cast<int>(molecular_properties.size()) - 3); mi++)
+    {
+        mu_molecular_properties_const_ptr.push_back(&mu_molecular_properties[mi]);
+    }
+    
+    d_equation_of_shear_viscosity->computeShearViscosity(
+        data_shear_viscosity,
+        data_pressure,
+        data_temperature,
+        mu_molecular_properties_const_ptr,
+        domain);
+    
+    /*
+     * Get the pointers to the cell data.
+     */
+    
+    double* kappa = data_thermal_conductivity->getPointer(0);
+    double* mu = data_shear_viscosity->getPointer(0);
+    
+    const double& c_p = *(molecular_properties[0]);
+    const double& Pr = *(molecular_properties[1]);
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        /*
+         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_dim_0 = domain_dims[0];
+        
+        const int num_ghosts_0_thermal_conductivity = num_ghosts_thermal_conductivity[0];
+        const int num_ghosts_0_min = num_ghosts_min[0];
+        
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+        {
+            // Compute the linear indices.
+            const int idx_thermal_conductivity = i + num_ghosts_0_thermal_conductivity;
+            const int idx_min = i + num_ghosts_0_min;
+            
+            kappa[idx_thermal_conductivity] = c_p*mu[idx_min]/Pr;
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        /*
+         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        
+        const int num_ghosts_0_thermal_conductivity = num_ghosts_thermal_conductivity[0];
+        const int num_ghosts_1_thermal_conductivity = num_ghosts_thermal_conductivity[1];
+        const int ghostcell_dim_0_thermal_conductivity = ghostcell_dims_thermal_conductivity[0];
+        
+        const int num_ghosts_0_min = num_ghosts_min[0];
+        const int num_ghosts_1_min = num_ghosts_min[1];
+        const int ghostcell_dim_0_min = ghostcell_dims_min[0];
+        
+        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx_thermal_conductivity = (i + num_ghosts_0_thermal_conductivity) +
+                    (j + num_ghosts_1_thermal_conductivity)*ghostcell_dim_0_thermal_conductivity;
+                
+                const int idx_min = (i + num_ghosts_0_min) +
+                    (j + num_ghosts_1_min)*ghostcell_dim_0_min;
+                
+                kappa[idx_thermal_conductivity] = c_p*mu[idx_min]/Pr;
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        /*
+         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_lo_2 = domain_lo[2];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        const int domain_dim_2 = domain_dims[2];
+        
+        const int num_ghosts_0_thermal_conductivity = num_ghosts_thermal_conductivity[0];
+        const int num_ghosts_1_thermal_conductivity = num_ghosts_thermal_conductivity[1];
+        const int num_ghosts_2_thermal_conductivity = num_ghosts_thermal_conductivity[2];
+        const int ghostcell_dim_0_thermal_conductivity = ghostcell_dims_thermal_conductivity[0];
+        const int ghostcell_dim_1_thermal_conductivity = ghostcell_dims_thermal_conductivity[1];
+        
+        const int num_ghosts_0_min = num_ghosts_min[0];
+        const int num_ghosts_1_min = num_ghosts_min[1];
+        const int num_ghosts_2_min = num_ghosts_min[2];
+        const int ghostcell_dim_0_min = ghostcell_dims_min[0];
+        const int ghostcell_dim_1_min = ghostcell_dims_min[1];
+        
+        for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_thermal_conductivity = (i + num_ghosts_0_thermal_conductivity) +
+                        (j + num_ghosts_1_thermal_conductivity)*ghostcell_dim_0_thermal_conductivity +
+                        (k + num_ghosts_2_thermal_conductivity)*ghostcell_dim_0_thermal_conductivity*
+                            ghostcell_dim_1_thermal_conductivity;
+                    
+                    const int idx_min = (i + num_ghosts_0_min) +
+                        (j + num_ghosts_1_min)*ghostcell_dim_0_min +
+                        (k + num_ghosts_2_min)*ghostcell_dim_0_min*
+                            ghostcell_dim_1_min;
+                    
+                    kappa[idx_thermal_conductivity] = c_p*mu[idx_min]/Pr;
+                }
+            }
+        }
+    }
+}
+
+
+/*
+ * Compute the thermal conductivity.
+ */
+void
+EquationOfThermalConductivityPrandtl::computeThermalConductivity(
+    boost::shared_ptr<pdat::CellData<double> >& data_thermal_conductivity,
+    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+    const boost::shared_ptr<pdat::CellData<double> >& data_molecular_properties,
+    const hier::Box& domain) const
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_thermal_conductivity);
+    TBOX_ASSERT(data_pressure);
+    TBOX_ASSERT(data_temperature);
+    TBOX_ASSERT(data_molecular_properties);
+    
+    TBOX_ASSERT(data_molecular_properties->getDepth() >= 4);
+#endif
+    
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = data_thermal_conductivity->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_temperature->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_molecular_properties->getBox().numberCells() == interior_dims);
+#endif
+    
+    /*
+     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
+     */
+    
+    const hier::IntVector num_ghosts_thermal_conductivity = data_thermal_conductivity->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_thermal_conductivity =
+        data_thermal_conductivity->getGhostBox().numberCells();
+    
+    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+    const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+    
+    const hier::IntVector num_ghosts_molecular_properties = data_molecular_properties->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_molecular_properties =
+        data_molecular_properties->getGhostBox().numberCells();
+    
+    /*
+     * Get the minimum number of ghost cells and the dimensions of the ghost cell box for shear
+     * viscosity.
+     */
+    
+    hier::IntVector num_ghosts_min(d_dim);
+    
+    num_ghosts_min = num_ghosts_thermal_conductivity;
+    num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
+    num_ghosts_min = hier::IntVector::min(num_ghosts_temperature, num_ghosts_min);
+    num_ghosts_min = hier::IntVector::min(num_ghosts_molecular_properties, num_ghosts_min);
+    
+    const hier::IntVector ghostcell_dims_min = interior_dims + num_ghosts_min*2;
+    
+    /*
+     * Get the local lower indices and number of cells in each direction of the domain.
+     */
+    
+    hier::IntVector domain_lo(d_dim);
+    hier::IntVector domain_dims(d_dim);
+    
+    if (domain.empty())
+    {
+        hier::Box ghost_box = interior_box;
+        ghost_box.grow(num_ghosts_min);
+        
+        domain_lo = -num_ghosts_min;
+        domain_dims = ghost_box.numberCells();
+    }
+    else
+    {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_thermal_conductivity->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_pressure->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_temperature->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_molecular_properties->getGhostBox().contains(domain));
+#endif
+        
+        domain_lo = domain.lower() - interior_box.lower();
+        domain_dims = domain.numberCells();
+    }
+    
+    /*
+     * Delcare data containers for shear viscosity and the molecular properties to compute shear
+     * viscosity.
+     */
+    
+    boost::shared_ptr<pdat::CellData<double> > data_shear_viscosity(
+        new pdat::CellData<double>(interior_box, 1, num_ghosts_min));
+    
+    boost::shared_ptr<pdat::CellData<double> > data_molecular_properties_shear_viscosity(
+        new pdat::CellData<double>(interior_box, data_molecular_properties->getDepth() - 3,
+            num_ghosts_molecular_properties));
+    
+    /*
+     * Compute the shear viscosity.
+     */
+    
+    for (int mi = 0; mi < data_molecular_properties->getDepth() - 3; mi++)
+    {
+        data_molecular_properties_shear_viscosity->copyDepth(mi, *data_molecular_properties, mi + 3);
+    }
+    
+    d_equation_of_shear_viscosity->computeShearViscosity(
+        data_shear_viscosity,
+        data_pressure,
+        data_temperature,
+        data_molecular_properties_shear_viscosity,
+        domain);
+    
+    /*
+     * Get the pointers to the cell data.
+     */
+    
+    double* kappa = data_thermal_conductivity->getPointer(0);
+    double* mu = data_shear_viscosity->getPointer(0);
+    
+    double* c_p = data_molecular_properties->getPointer(0);
+    double* Pr = data_molecular_properties->getPointer(1);
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        /*
+         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_dim_0 = domain_dims[0];
+        
+        const int num_ghosts_0_thermal_conductivity = num_ghosts_thermal_conductivity[0];
+        const int num_ghosts_0_molecular_properties = num_ghosts_molecular_properties[0];
+        const int num_ghosts_0_min = num_ghosts_min[0];
+        
+#ifdef HAMERS_ENABLE_SIMD
+        #pragma omp simd
+#endif
+        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+        {
+            // Compute the linear indices.
+            const int idx_thermal_conductivity = i + num_ghosts_0_thermal_conductivity;
+            const int idx_molecular_properties = i + num_ghosts_0_molecular_properties;
+            const int idx_min = i + num_ghosts_0_min;
+            
+            kappa[idx_thermal_conductivity] = c_p[idx_molecular_properties]*mu[idx_min]/
+                Pr[idx_molecular_properties];
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        /*
+         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        
+        const int num_ghosts_0_thermal_conductivity = num_ghosts_thermal_conductivity[0];
+        const int num_ghosts_1_thermal_conductivity = num_ghosts_thermal_conductivity[1];
+        const int ghostcell_dim_0_thermal_conductivity = ghostcell_dims_thermal_conductivity[0];
+        
+        const int num_ghosts_0_molecular_properties = num_ghosts_molecular_properties[0];
+        const int num_ghosts_1_molecular_properties = num_ghosts_molecular_properties[1];
+        const int ghostcell_dim_0_molecular_properties = ghostcell_dims_molecular_properties[0];
+        
+        const int num_ghosts_0_min = num_ghosts_min[0];
+        const int num_ghosts_1_min = num_ghosts_min[1];
+        const int ghostcell_dim_0_min = ghostcell_dims_min[0];
+        
+        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx_thermal_conductivity = (i + num_ghosts_0_thermal_conductivity) +
+                    (j + num_ghosts_1_thermal_conductivity)*ghostcell_dim_0_thermal_conductivity;
+                
+                const int idx_molecular_properties = (i + num_ghosts_0_molecular_properties) +
+                    (j + num_ghosts_1_molecular_properties)*ghostcell_dim_0_molecular_properties;
+                
+                const int idx_min = (i + num_ghosts_0_min) +
+                    (j + num_ghosts_1_min)*ghostcell_dim_0_min;
+                
+                kappa[idx_thermal_conductivity] = c_p[idx_molecular_properties]*mu[idx_min]/
+                    Pr[idx_molecular_properties];
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        /*
+         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_lo_2 = domain_lo[2];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        const int domain_dim_2 = domain_dims[2];
+        
+        const int num_ghosts_0_thermal_conductivity = num_ghosts_thermal_conductivity[0];
+        const int num_ghosts_1_thermal_conductivity = num_ghosts_thermal_conductivity[1];
+        const int num_ghosts_2_thermal_conductivity = num_ghosts_thermal_conductivity[2];
+        const int ghostcell_dim_0_thermal_conductivity = ghostcell_dims_thermal_conductivity[0];
+        const int ghostcell_dim_1_thermal_conductivity = ghostcell_dims_thermal_conductivity[1];
+        
+        const int num_ghosts_0_molecular_properties = num_ghosts_molecular_properties[0];
+        const int num_ghosts_1_molecular_properties = num_ghosts_molecular_properties[1];
+        const int num_ghosts_2_molecular_properties = num_ghosts_molecular_properties[2];
+        const int ghostcell_dim_0_molecular_properties = ghostcell_dims_molecular_properties[0];
+        const int ghostcell_dim_1_molecular_properties = ghostcell_dims_molecular_properties[1];
+        
+        const int num_ghosts_0_min = num_ghosts_min[0];
+        const int num_ghosts_1_min = num_ghosts_min[1];
+        const int num_ghosts_2_min = num_ghosts_min[2];
+        const int ghostcell_dim_0_min = ghostcell_dims_min[0];
+        const int ghostcell_dim_1_min = ghostcell_dims_min[1];
+        
+        for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_thermal_conductivity = (i + num_ghosts_0_thermal_conductivity) +
+                        (j + num_ghosts_1_thermal_conductivity)*ghostcell_dim_0_thermal_conductivity +
+                        (k + num_ghosts_2_thermal_conductivity)*ghostcell_dim_0_thermal_conductivity*
+                            ghostcell_dim_1_thermal_conductivity;
+                    
+                    const int idx_molecular_properties = (i + num_ghosts_0_molecular_properties) +
+                        (j + num_ghosts_1_molecular_properties)*ghostcell_dim_0_molecular_properties +
+                        (k + num_ghosts_2_molecular_properties)*ghostcell_dim_0_molecular_properties*
+                            ghostcell_dim_1_molecular_properties;
+                    
+                    const int idx_min = (i + num_ghosts_0_min) +
+                        (j + num_ghosts_1_min)*ghostcell_dim_0_min +
+                        (k + num_ghosts_2_min)*ghostcell_dim_0_min*
+                            ghostcell_dim_1_min;
+                    
+                    kappa[idx_thermal_conductivity] = c_p[idx_molecular_properties]*mu[idx_min]/
+                        Pr[idx_molecular_properties];
+                }
+            }
+        }
+    }
 }

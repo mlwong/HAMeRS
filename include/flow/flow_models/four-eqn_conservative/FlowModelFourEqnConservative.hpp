@@ -2,8 +2,6 @@
 #define FLOW_MODEL_FOUR_EQN_CONSERVATIVE_HPP
 
 #include "flow/flow_models/FlowModel.hpp"
-#include "flow/flow_models/four-eqn_conservative/Riemann_solvers/RiemannSolverFourEqnConservativeHLLC.hpp"
-#include "flow/flow_models/four-eqn_conservative/Riemann_solvers/RiemannSolverFourEqnConservativeHLLC_HLL.hpp"
 #include "util/mixing_rules/equations_of_mass_diffusivity/EquationOfMassDiffusivityMixingRulesManager.hpp"
 #include "util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosityMixingRulesManager.hpp"
 #include "util/mixing_rules/equations_of_bulk_viscosity/EquationOfBulkViscosityMixingRulesManager.hpp"
@@ -121,8 +119,7 @@ class FlowModelFourEqnConservative: public FlowModel
          * Compute global cell data of different registered derived variables with the registered data context.
          */
         void
-        computeGlobalDerivedCellData(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+        computeGlobalDerivedCellData(const hier::Box& domain);
         
         /*
          * Get the global cell data of one cell variable in the registered patch.
@@ -229,36 +226,6 @@ class FlowModelFourEqnConservative: public FlowModel
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables);
         
         /*
-         * Compute the local intercell quantities with conservative variables on each side of the face
-         * from Riemann solver at face.
-         * flux_face: Convective flux at face.
-         * velocity_face: Velocity at face.
-         */
-        void
-        computeLocalFaceFluxAndVelocityFromRiemannSolverWithConservativeVariables(
-            std::vector<boost::reference_wrapper<double> >& flux_face,
-            std::vector<boost::reference_wrapper<double> >& velocity_face,
-            const std::vector<boost::reference_wrapper<double> >& conservative_variables_minus,
-            const std::vector<boost::reference_wrapper<double> >& conservative_variables_plus,
-            const DIRECTION::TYPE& direction,
-            const RIEMANN_SOLVER::TYPE& Riemann_solver);
-        
-        /*
-         * Compute the local intercell quantities with primitive variables on each side of the face
-         * from Riemann solver at face.
-         * flux_face: Convective flux at face.
-         * velocity_face: Velocity at face.
-         */
-        void
-        computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
-            std::vector<boost::reference_wrapper<double> >& flux_face,
-            std::vector<boost::reference_wrapper<double> >& velocity_face,
-            const std::vector<boost::reference_wrapper<double> >& primitive_variables_minus,
-            const std::vector<boost::reference_wrapper<double> >& primitive_variables_plus,
-            const DIRECTION::TYPE& direction,
-            const RIEMANN_SOLVER::TYPE& Riemann_solver);
-        
-        /*
          * Check whether the given side conservative variables are within the bounds.
          */
         void
@@ -350,10 +317,10 @@ class FlowModelFourEqnConservative: public FlowModel
         setGhostBoxesAndDimensionsDerivedCellVariables();
         
         /*
-         * Get the global cell data of partial density in the registered patch.
+         * Get the global cell data of partial densities in the registered patch.
          */
         boost::shared_ptr<pdat::CellData<double> >
-        getGlobalCellDataPartialDensity();
+        getGlobalCellDataPartialDensities();
         
         /*
          * Get the global cell data of momentum in the registered patch.
@@ -371,65 +338,47 @@ class FlowModelFourEqnConservative: public FlowModel
          * Compute the global cell data of density in the registered patch.
          */
         void computeGlobalCellDataDensity(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
-         * Compute the global cell data of mass fraction with density in the registered patch.
+         * Compute the global cell data of mass fractions with density in the registered patch.
          */
-        void computeGlobalCellDataMassFractionWithDensity(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+        void computeGlobalCellDataMassFractionsWithDensity(
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of velocity with density in the registered patch.
          */
         void computeGlobalCellDataVelocityWithDensity(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of internal energy with density and velocity in the registered
          * patch.
          */
         void computeGlobalCellDataInternalEnergyWithDensityAndVelocity(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
-         * Compute the global cell data of pressure with density, mass fraction and internal energy in
+         * Compute the global cell data of pressure with density, mass fractions and internal energy in
          * the registered patch.
          */
-        void computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+        void computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy(
+            const hier::Box& domain);
         
         /*
-         * Compute the global cell data of sound speed with density, mass fraction and pressure in the
+         * Compute the global cell data of sound speed with density, mass fractions and pressure in the
          * registered patch.
          */
-        void computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+        void computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure(
+            const hier::Box& domain);
         
         /*
-         * Compute the global cell data of temperature with density, mass fraction and pressure in the
+         * Compute the global cell data of temperature with density, mass fractions and pressure in the
          * registered patch.
          */
-        void computeGlobalCellDataTemperatureWithDensityMassFractionAndPressure(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
-        
-        /*
-         * Compute the global cell data of dilatation with density and velocity in the registered patch.
-         */
-        void computeGlobalCellDataDilatationWithDensityAndVelocity(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
-        
-        /*
-         * Compute the global cell data of vorticity with density and velocity in the registered patch.
-         */
-        void computeGlobalCellDataVorticityWithDensityAndVelocity(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
-        
-        /*
-         * Compute the global cell data of enstrophy with vorticity in the registered patch.
-         */
-        void computeGlobalCellDataEnstrophyWithVorticity(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+        void computeGlobalCellDataTemperatureWithDensityMassFractionsAndPressure(
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of convective flux with velocity and pressure in the registered
@@ -437,7 +386,7 @@ class FlowModelFourEqnConservative: public FlowModel
          */
         void computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
             const DIRECTION::TYPE& direction,
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of maximum wave speed with velocity and sound speed in the
@@ -445,19 +394,19 @@ class FlowModelFourEqnConservative: public FlowModel
          */
         void computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
             const DIRECTION::TYPE& direction,
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
-         * Compute the global cell data of maximum diffusivity with density, mass fraction, pressure
+         * Compute the global cell data of maximum diffusivity with density, mass fractions, pressure
          * and temperature in the registered patch.
          */
-        void computeGlobalCellDataMaxDiffusivityWithDensityMassFractionPressureAndTemperature(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+        void computeGlobalCellDataMaxDiffusivityWithDensityMassFractionsPressureAndTemperature(
+            const hier::Box& domain);
         
         /*
          * boost::shared_ptr to registered conservative variables.
          */
-        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_partial_density;
+        static boost::shared_ptr<pdat::CellVariable<double> > s_variable_partial_densities;
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_momentum;
         static boost::shared_ptr<pdat::CellVariable<double> > s_variable_total_energy;
         
@@ -465,15 +414,12 @@ class FlowModelFourEqnConservative: public FlowModel
          * Number of sub-ghost cells of derived cell data.
          */
         hier::IntVector d_num_subghosts_density;
-        hier::IntVector d_num_subghosts_mass_fraction;
+        hier::IntVector d_num_subghosts_mass_fractions;
         hier::IntVector d_num_subghosts_velocity;
         hier::IntVector d_num_subghosts_internal_energy;
         hier::IntVector d_num_subghosts_pressure;
         hier::IntVector d_num_subghosts_sound_speed;
         hier::IntVector d_num_subghosts_temperature;
-        hier::IntVector d_num_subghosts_dilatation;
-        hier::IntVector d_num_subghosts_vorticity;
-        hier::IntVector d_num_subghosts_enstrophy;
         hier::IntVector d_num_subghosts_convective_flux_x;
         hier::IntVector d_num_subghosts_convective_flux_y;
         hier::IntVector d_num_subghosts_convective_flux_z;
@@ -487,15 +433,12 @@ class FlowModelFourEqnConservative: public FlowModel
          * Boxes with sub-ghost cells of derived cell data.
          */
         hier::Box d_subghost_box_density;
-        hier::Box d_subghost_box_mass_fraction;
+        hier::Box d_subghost_box_mass_fractions;
         hier::Box d_subghost_box_velocity;
         hier::Box d_subghost_box_internal_energy;
         hier::Box d_subghost_box_pressure;
         hier::Box d_subghost_box_sound_speed;
         hier::Box d_subghost_box_temperature;
-        hier::Box d_subghost_box_dilatation;
-        hier::Box d_subghost_box_vorticity;
-        hier::Box d_subghost_box_enstrophy;
         hier::Box d_subghost_box_convective_flux_x;
         hier::Box d_subghost_box_convective_flux_y;
         hier::Box d_subghost_box_convective_flux_z;
@@ -509,15 +452,12 @@ class FlowModelFourEqnConservative: public FlowModel
          * Dimensions of boxes with sub-ghost cells of derived cell data.
          */
         hier::IntVector d_subghostcell_dims_density;
-        hier::IntVector d_subghostcell_dims_mass_fraction;
+        hier::IntVector d_subghostcell_dims_mass_fractions;
         hier::IntVector d_subghostcell_dims_velocity;
         hier::IntVector d_subghostcell_dims_internal_energy;
         hier::IntVector d_subghostcell_dims_pressure;
         hier::IntVector d_subghostcell_dims_sound_speed;
         hier::IntVector d_subghostcell_dims_temperature;
-        hier::IntVector d_subghostcell_dims_dilatation;
-        hier::IntVector d_subghostcell_dims_vorticity;
-        hier::IntVector d_subghostcell_dims_enstrophy;
         hier::IntVector d_subghostcell_dims_convective_flux_x;
         hier::IntVector d_subghostcell_dims_convective_flux_y;
         hier::IntVector d_subghostcell_dims_convective_flux_z;
@@ -531,15 +471,12 @@ class FlowModelFourEqnConservative: public FlowModel
          * boost::shared_ptr to derived cell data.
          */
         boost::shared_ptr<pdat::CellData<double> > d_data_density;
-        boost::shared_ptr<pdat::CellData<double> > d_data_mass_fraction;
+        boost::shared_ptr<pdat::CellData<double> > d_data_mass_fractions;
         boost::shared_ptr<pdat::CellData<double> > d_data_velocity;
         boost::shared_ptr<pdat::CellData<double> > d_data_internal_energy;
         boost::shared_ptr<pdat::CellData<double> > d_data_pressure;
         boost::shared_ptr<pdat::CellData<double> > d_data_sound_speed;
         boost::shared_ptr<pdat::CellData<double> > d_data_temperature;
-        boost::shared_ptr<pdat::CellData<double> > d_data_dilatation;
-        boost::shared_ptr<pdat::CellData<double> > d_data_vorticity;
-        boost::shared_ptr<pdat::CellData<double> > d_data_enstrophy;
         boost::shared_ptr<pdat::CellData<double> > d_data_convective_flux_x;
         boost::shared_ptr<pdat::CellData<double> > d_data_convective_flux_y;
         boost::shared_ptr<pdat::CellData<double> > d_data_convective_flux_z;
@@ -548,12 +485,6 @@ class FlowModelFourEqnConservative: public FlowModel
         boost::shared_ptr<pdat::CellData<double> > d_data_max_wave_speed_z;
         boost::shared_ptr<pdat::CellData<double> > d_data_max_diffusivity;
         boost::shared_ptr<pdat::CellData<double> > d_data_diffusivities;
-        
-        /*
-         * boost::shared_ptr to Riemann solvers.
-         */
-        boost::shared_ptr<RiemannSolverFourEqnConservativeHLLC>     d_Riemann_solver_HLLC;
-        boost::shared_ptr<RiemannSolverFourEqnConservativeHLLC_HLL> d_Riemann_solver_HLLC_HLL;
         
         /*
          * Upper and lower bounds on variables.

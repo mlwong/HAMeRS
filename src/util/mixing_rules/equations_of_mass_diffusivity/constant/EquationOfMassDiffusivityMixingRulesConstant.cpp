@@ -112,25 +112,24 @@ EquationOfMassDiffusivityMixingRulesConstant::putToRestart(
 
 
 /*
- * Compute the mass diffusivities of the mixture with isothermal and isobaric assumptions.
+ * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibria assumptions.
  */
 void
 EquationOfMassDiffusivityMixingRulesConstant::getMassDiffusivities(
     std::vector<double*>& mass_diffusivities,
     const double* const pressure,
     const double* const temperature,
-    const std::vector<const double*>& mass_fraction) const
+    const std::vector<const double*>& mass_fractions) const
 {
     NULL_USE(pressure);
     NULL_USE(temperature);
-    NULL_USE(mass_fraction);
+    NULL_USE(mass_fractions);
     
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(mass_diffusivities.size()) == d_num_species);
     TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
                 (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
-    TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
-                (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
+    
+    TBOX_ASSERT(static_cast<int>(mass_diffusivities.size()) == d_num_species);
 #endif
     
     for (int si = 0; si < d_num_species; si++)
@@ -141,12 +140,54 @@ EquationOfMassDiffusivityMixingRulesConstant::getMassDiffusivities(
 
 
 /*
+ * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibria assumptions.
+ */
+void
+EquationOfMassDiffusivityMixingRulesConstant::computeMassDiffusivities(
+    boost::shared_ptr<pdat::CellData<double> >& data_mass_diffusivities,
+    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+    const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+    const hier::Box& domain) const
+{
+    NULL_USE(data_pressure);
+    NULL_USE(data_temperature);
+    NULL_USE(data_mass_fractions);
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
+                (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
+    
+    TBOX_ASSERT(data_mass_diffusivities->getDepth() == d_num_species);
+#endif
+    
+    if (domain.empty())
+    {
+        for (int si = 0; si < d_num_species; si++)
+        {
+            data_mass_diffusivities->fill(d_species_D[si], si);
+        }
+    }
+    else
+    {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+        TBOX_ASSERT(data_mass_diffusivities->getGhostBox().contains(domain));
+#endif
+        for (int si = 0; si < d_num_species; si++)
+        {
+            data_mass_diffusivities->fill(d_species_D[si], domain, si);
+        }
+    }
+}
+
+
+/*
  * Get the molecular properties of a species.
  */
 void
 EquationOfMassDiffusivityMixingRulesConstant::getSpeciesMolecularProperties(
     std::vector<double*>& species_molecular_properties,
-    const int& species_index) const
+    const int species_index) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(species_molecular_properties.size()) >= 1);

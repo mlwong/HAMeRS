@@ -2,6 +2,7 @@
 #define CONVECTIVE_FLUX_RECONSTRUCTOR_WCNS6_TEST_HPP
 
 #include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructor.hpp"
+#include "util/derivatives/DerivativeFirstOrder.hpp"
 #include "util/Directions.hpp"
 
 #include "SAMRAI/pdat/SideVariable.h"
@@ -66,6 +67,17 @@ class ConvectiveFluxReconstructorWCNS6_Test: public ConvectiveFluxReconstructor
         int    d_constant_q;
         double d_constant_C;
         double d_constant_alpha_tau;
+        
+        /*
+         * Forms of equations.
+         */
+        std::vector<EQN_FORM::TYPE> d_eqn_form;
+        bool d_has_advective_eqn_form;
+        
+        /*
+         * boost::shared_ptr to the Riemann solver object.
+         */
+        boost::shared_ptr<FlowModelRiemannSolver> d_riemann_solver;
         
         /*
          * Timers interspersed throughout the class.

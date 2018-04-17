@@ -6,6 +6,7 @@
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
 #include "extn/visit_data_writer/ExtendedVisItDataWriter.hpp"
 #include "flow/flow_models/FlowModels.hpp"
+#include "util/derivatives/DerivativeFirstOrder.hpp"
 
 // #include "SAMRAI/appu/VisItDataWriter.h"
 #include "SAMRAI/math/HierarchyCellDataOpsReal.h"
@@ -155,6 +156,11 @@ class ValueTagger
         const boost::shared_ptr<FlowModel> d_flow_model;
         
         /*
+         * Number of ghost cells to use in taking derivatives.
+         */
+        int d_num_ghosts_derivative;
+        
+        /*
          * Variables, tolerances and settings for the value sensor.
          */
         std::vector<std::string> d_variables;
@@ -175,7 +181,7 @@ class ValueTagger
         boost::shared_ptr<pdat::CellVariable<double> > d_value_tagger_variable_pressure;
         boost::shared_ptr<pdat::CellVariable<double> > d_value_tagger_variable_dilatation;
         boost::shared_ptr<pdat::CellVariable<double> > d_value_tagger_variable_enstrophy;
-        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_value_tagger_variable_mass_fraction;
+        std::vector<boost::shared_ptr<pdat::CellVariable<double> > > d_value_tagger_variable_mass_fractions;
         
         /*
          * Statistics of data values.
@@ -185,7 +191,7 @@ class ValueTagger
         double d_value_tagger_max_pressure;
         double d_value_tagger_max_dilatation;
         double d_value_tagger_max_enstrophy;
-        std::vector<double> d_value_tagger_max_mass_fraction;
+        std::vector<double> d_value_tagger_max_mass_fractions;
         
 };
 

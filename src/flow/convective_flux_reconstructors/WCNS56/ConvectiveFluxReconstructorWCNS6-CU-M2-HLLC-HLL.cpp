@@ -31,32 +31,35 @@ static inline __attribute__((always_inline)) void computeLocalBeta(
     double** U_array,
     int idx_side)
 {
-    *beta_0 = 1.0/3.0*(U_array[0][idx_side]*(4.0*U_array[0][idx_side] - 19.0*U_array[1][idx_side] +
-         11.0*U_array[2][idx_side]) + U_array[1][idx_side]*(25.0*U_array[1][idx_side] -
-         31.0*U_array[2][idx_side]) + 10.0*U_array[2][idx_side]*U_array[2][idx_side]);
+    *beta_0 = double(1)/double(3)*(U_array[0][idx_side]*(double(4)*U_array[0][idx_side] -
+         double(19)*U_array[1][idx_side] + double(11)*U_array[2][idx_side]) +
+         U_array[1][idx_side]*(double(25)*U_array[1][idx_side] - double(31)*U_array[2][idx_side]) +
+         double(10)*U_array[2][idx_side]*U_array[2][idx_side]);
     
-    *beta_1 = 1.0/3.0*(U_array[1][idx_side]*(4.0*U_array[1][idx_side] - 13.0*U_array[2][idx_side] +
-         5.0*U_array[3][idx_side]) + 13.0*U_array[2][idx_side]*(U_array[2][idx_side] -
-         U_array[3][idx_side]) + 4.0*U_array[3][idx_side]*U_array[3][idx_side]);
+    *beta_1 = double(1)/double(3)*(U_array[1][idx_side]*(double(4)*U_array[1][idx_side] -
+         double(13)*U_array[2][idx_side] + double(5)*U_array[3][idx_side]) +
+         double(13)*U_array[2][idx_side]*(U_array[2][idx_side] - U_array[3][idx_side]) +
+         double(4)*U_array[3][idx_side]*U_array[3][idx_side]);
     
-    *beta_2 = 1.0/3.0*(U_array[2][idx_side]*(10.0*U_array[2][idx_side] - 31.0*U_array[3][idx_side] +
-         11.0*U_array[4][idx_side]) + U_array[3][idx_side]*(25.0*U_array[3][idx_side] -
-         19.0*U_array[4][idx_side]) + 4.0*U_array[4][idx_side]*U_array[4][idx_side]);
+    *beta_2 = double(1)/double(3)*(U_array[2][idx_side]*(double(10)*U_array[2][idx_side] -
+         double(31)*U_array[3][idx_side] + double(11)*U_array[4][idx_side]) +
+         U_array[3][idx_side]*(double(25)*U_array[3][idx_side] - double(19)*U_array[4][idx_side]) +
+         double(4)*U_array[4][idx_side]*U_array[4][idx_side]);
     
-    *beta_3 = 1.0/232243200.0*(U_array[0][idx_side]*(525910327.0*U_array[0][idx_side] -
-         4562164630.0*U_array[1][idx_side] + 7799501420.0*U_array[2][idx_side] -
-         6610694540.0*U_array[3][idx_side] + 2794296070.0*U_array[4][idx_side] -
-         472758974.0*U_array[5][idx_side]) + 5.0*U_array[1][idx_side]*
-        (2146987907.0*U_array[1][idx_side] - 7722406988.0*U_array[2][idx_side] +
-         6763559276.0*U_array[3][idx_side] - 2926461814.0*U_array[4][idx_side] +
-         503766638.0*U_array[5][idx_side]) + 20.0*U_array[2][idx_side]*
-        (1833221603.0*U_array[2][idx_side] - 3358664662.0*U_array[3][idx_side] +
-         1495974539.0*U_array[4][idx_side] - 263126407.0*U_array[5][idx_side]) +
-        20.0*U_array[3][idx_side]*(1607794163.0*U_array[3][idx_side] -
-         1486026707.0*U_array[4][idx_side] + 268747951.0*U_array[5][idx_side]) +
-        5.0*U_array[4][idx_side]*(1432381427.0*U_array[4][idx_side] -
-         536951582.0*U_array[5][idx_side]) +
-        263126407.0*U_array[5][idx_side]*U_array[5][idx_side]);
+    *beta_3 = double(1)/double(232243200)*(U_array[0][idx_side]*(double(525910327)*U_array[0][idx_side] -
+         double(4562164630)*U_array[1][idx_side] + double(7799501420)*U_array[2][idx_side] -
+         double(6610694540)*U_array[3][idx_side] + double(2794296070)*U_array[4][idx_side] -
+         double(472758974)*U_array[5][idx_side]) + double(5)*U_array[1][idx_side]*
+        (double(2146987907)*U_array[1][idx_side] - double(7722406988)*U_array[2][idx_side] +
+         double(6763559276)*U_array[3][idx_side] - double(2926461814)*U_array[4][idx_side] +
+         double(503766638)*U_array[5][idx_side]) + double(20)*U_array[2][idx_side]*
+        (double(1833221603)*U_array[2][idx_side] - double(3358664662)*U_array[3][idx_side] +
+         double(1495974539)*U_array[4][idx_side] - double(263126407)*U_array[5][idx_side]) +
+        double(20)*U_array[3][idx_side]*(double(1607794163)*U_array[3][idx_side] -
+         double(1486026707)*U_array[4][idx_side] + double(268747951)*U_array[5][idx_side]) +
+        double(5)*U_array[4][idx_side]*(double(1432381427)*U_array[4][idx_side] -
+         double(536951582)*U_array[5][idx_side]) +
+        double(263126407)*U_array[5][idx_side]*U_array[5][idx_side]);
 }
 
 
@@ -71,32 +74,35 @@ static inline __attribute__((always_inline)) void computeLocalBetaTilde(
     double** U_array,
     int idx_side)
 {
-    *beta_tilde_0 = 1.0/3.0*(U_array[5][idx_side]*(4.0*U_array[5][idx_side] - 19.0*U_array[4][idx_side] +
-         11.0*U_array[3][idx_side]) + U_array[4][idx_side]*(25.0*U_array[4][idx_side] -
-         31.0*U_array[3][idx_side]) + 10.0*U_array[3][idx_side]*U_array[3][idx_side]);
+    *beta_tilde_0 = double(1)/double(3)*(U_array[5][idx_side]*(double(4)*U_array[5][idx_side] -
+         double(19)*U_array[4][idx_side] + double(11)*U_array[3][idx_side]) +
+         U_array[4][idx_side]*(double(25)*U_array[4][idx_side] - double(31)*U_array[3][idx_side]) +
+         double(10)*U_array[3][idx_side]*U_array[3][idx_side]);
     
-    *beta_tilde_1 = 1.0/3.0*(U_array[4][idx_side]*(4.0*U_array[4][idx_side] - 13.0*U_array[3][idx_side] +
-         5.0*U_array[2][idx_side]) + 13.0*U_array[3][idx_side]*(U_array[3][idx_side] -
-         U_array[2][idx_side]) + 4.0*U_array[2][idx_side]*U_array[2][idx_side]);
+    *beta_tilde_1 = double(1)/double(3)*(U_array[4][idx_side]*(double(4)*U_array[4][idx_side] -
+         double(13)*U_array[3][idx_side] + double(5)*U_array[2][idx_side]) +
+         double(13)*U_array[3][idx_side]*(U_array[3][idx_side] - U_array[2][idx_side]) +
+         double(4)*U_array[2][idx_side]*U_array[2][idx_side]);
     
-    *beta_tilde_2 = 1.0/3.0*(U_array[3][idx_side]*(10.0*U_array[3][idx_side] - 31.0*U_array[2][idx_side] +
-         11.0*U_array[1][idx_side]) + U_array[2][idx_side]*(25.0*U_array[2][idx_side] -
-         19.0*U_array[1][idx_side]) + 4.0*U_array[1][idx_side]*U_array[1][idx_side]);
+    *beta_tilde_2 = double(1)/double(3)*(U_array[3][idx_side]*(double(10)*U_array[3][idx_side] -
+         double(31)*U_array[2][idx_side] + double(11)*U_array[1][idx_side]) +
+         U_array[2][idx_side]*(double(25)*U_array[2][idx_side] - double(19)*U_array[1][idx_side]) +
+         double(4)*U_array[1][idx_side]*U_array[1][idx_side]);
     
-    *beta_tilde_3 = 1.0/232243200.0*(U_array[5][idx_side]*(525910327.0*U_array[5][idx_side] -
-         4562164630.0*U_array[4][idx_side] + 7799501420.0*U_array[3][idx_side] -
-         6610694540.0*U_array[2][idx_side] + 2794296070.0*U_array[1][idx_side] -
-         472758974.0*U_array[0][idx_side]) + 5.0*U_array[4][idx_side]*
-        (2146987907.0*U_array[4][idx_side] - 7722406988.0*U_array[3][idx_side] +
-         6763559276.0*U_array[2][idx_side] - 2926461814.0*U_array[1][idx_side] +
-         503766638.0*U_array[0][idx_side]) + 20.0*U_array[3][idx_side]*
-        (1833221603.0*U_array[3][idx_side] - 3358664662.0*U_array[2][idx_side] +
-         1495974539.0*U_array[1][idx_side] - 263126407.0*U_array[0][idx_side]) +
-        20.0*U_array[2][idx_side]*(1607794163.0*U_array[2][idx_side] -
-         1486026707.0*U_array[1][idx_side] + 268747951.0*U_array[0][idx_side]) +
-        5.0*U_array[1][idx_side]*(1432381427.0*U_array[1][idx_side] -
-         536951582.0*U_array[0][idx_side]) +
-        263126407.0*U_array[0][idx_side]*U_array[0][idx_side]);
+    *beta_tilde_3 = double(1)/double(232243200)*(U_array[5][idx_side]*(double(525910327)*U_array[5][idx_side] -
+         double(4562164630)*U_array[4][idx_side] + double(7799501420)*U_array[3][idx_side] -
+         double(6610694540)*U_array[2][idx_side] + double(2794296070)*U_array[1][idx_side] -
+         double(472758974)*U_array[0][idx_side]) + double(5)*U_array[4][idx_side]*
+        (double(2146987907)*U_array[4][idx_side] - double(7722406988)*U_array[3][idx_side] +
+         double(6763559276)*U_array[2][idx_side] - double(2926461814)*U_array[1][idx_side] +
+         double(503766638)*U_array[0][idx_side]) + double(20)*U_array[3][idx_side]*
+        (double(1833221603)*U_array[3][idx_side] - double(3358664662)*U_array[2][idx_side] +
+         double(1495974539)*U_array[1][idx_side] - double(263126407)*U_array[0][idx_side]) +
+        double(20)*U_array[2][idx_side]*(double(1607794163)*U_array[2][idx_side] -
+         double(1486026707)*U_array[1][idx_side] + double(268747951)*U_array[0][idx_side]) +
+        double(5)*U_array[1][idx_side]*(double(1432381427)*U_array[1][idx_side] -
+         double(536951582)*U_array[0][idx_side]) +
+        double(263126407)*U_array[0][idx_side]*U_array[0][idx_side]);
 }
 
 
@@ -127,16 +133,16 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationM
     
     double omega_0, omega_1, omega_2, omega_3;
     
-    double beta_avg = 1.0/8*(beta_0 + beta_2 + 6*beta_1);
+    double beta_avg = double(1)/double(8)*(beta_0 + beta_2 + 6*beta_1);
     double tau_6 = fabs(beta_3 - beta_avg);
     
-    omega_0 = 1.0/32.0*ipow(C + tau_6/(beta_0 + epsilon*dx*dx)*
+    omega_0 = double(1)/double(32)*ipow(C + tau_6/(beta_0 + epsilon*dx*dx)*
         (beta_avg + Chi*dx*dx)/(beta_0 + Chi*dx*dx), q);
-    omega_1 = 15.0/32.0*ipow(C + tau_6/(beta_1 + epsilon*dx*dx)*
+    omega_1 = double(15)/double(32)*ipow(C + tau_6/(beta_1 + epsilon*dx*dx)*
         (beta_avg + Chi*dx*dx)/(beta_1 + Chi*dx*dx), q);
-    omega_2 = 15.0/32.0*ipow(C + tau_6/(beta_2 + epsilon*dx*dx)*
+    omega_2 = double(15)/double(32)*ipow(C + tau_6/(beta_2 + epsilon*dx*dx)*
         (beta_avg + Chi*dx*dx)/(beta_2 + Chi*dx*dx), q);
-    omega_3 = 1.0/32.0*ipow(C + tau_6/(beta_3 + epsilon*dx*dx)*
+    omega_3 = double(1)/double(32)*ipow(C + tau_6/(beta_3 + epsilon*dx*dx)*
         (beta_avg + Chi*dx*dx)/(beta_3 + Chi*dx*dx), q);
     
     double omega_sum = omega_0 + omega_1 + omega_2 + omega_3;
@@ -150,12 +156,14 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationM
      * Compute U_minus.
      */
     
-    U_minus[idx_side] = 3.0/8.0*omega_0*U_array[0][idx_side] +
-        (-10.0/8.0*omega_0 - 1.0/8.0*omega_1)*U_array[1][idx_side] +
-        (15.0/8.0*omega_0 + 6.0/8.0*omega_1 + 3.0/8.0*omega_2)*U_array[2][idx_side] +
-        (3.0/8.0*omega_1 + 6.0/8.0*omega_2 + 15.0/8.0*omega_3)*U_array[3][idx_side] +
-        (-1.0/8.0*omega_2 - 10.0/8.0*omega_3)*U_array[4][idx_side] +
-        3.0/8.0*omega_3*U_array[5][idx_side];
+    U_minus[idx_side] = double(3)/double(8)*omega_0*U_array[0][idx_side] +
+        (-double(10)/double(8)*omega_0 - double(1)/double(8)*omega_1)*U_array[1][idx_side] +
+        (double(15)/double(8)*omega_0 + double(6)/double(8)*omega_1 + double(3)/double(8)*omega_2)*
+            U_array[2][idx_side] +
+        (double(3)/double(8)*omega_1 + double(6)/double(8)*omega_2 + double(15)/double(8)*omega_3)*
+            U_array[3][idx_side] +
+        (-double(1)/double(8)*omega_2 - double(10)/double(8)*omega_3)*U_array[4][idx_side] +
+        double(3)/double(8)*omega_3*U_array[5][idx_side];
 }
 
 
@@ -186,16 +194,16 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationP
     
     double omega_tilde_0, omega_tilde_1, omega_tilde_2, omega_tilde_3;
     
-    double beta_avg_tilde = 1.0/8*(beta_tilde_0 + beta_tilde_2 + 6*beta_tilde_1);
+    double beta_avg_tilde = double(1)/double(8)*(beta_tilde_0 + beta_tilde_2 + 6*beta_tilde_1);
     double tau_6_tilde = fabs(beta_tilde_3 - beta_avg_tilde);
     
-    omega_tilde_0 = 1.0/32.0*ipow(C + tau_6_tilde/(beta_tilde_0 + epsilon*dx*dx)*
+    omega_tilde_0 = double(1)/double(32)*ipow(C + tau_6_tilde/(beta_tilde_0 + epsilon*dx*dx)*
         (beta_avg_tilde + Chi*dx*dx)/(beta_tilde_0 + Chi*dx*dx), q);
-    omega_tilde_1 = 15.0/32.0*ipow(C + tau_6_tilde/(beta_tilde_1 + epsilon*dx*dx)*
+    omega_tilde_1 = double(15)/double(32)*ipow(C + tau_6_tilde/(beta_tilde_1 + epsilon*dx*dx)*
         (beta_avg_tilde + Chi*dx*dx)/(beta_tilde_1 + Chi*dx*dx), q);
-    omega_tilde_2 = 15.0/32.0*ipow(C + tau_6_tilde/(beta_tilde_2 + epsilon*dx*dx)*
+    omega_tilde_2 = double(15)/double(32)*ipow(C + tau_6_tilde/(beta_tilde_2 + epsilon*dx*dx)*
         (beta_avg_tilde + Chi*dx*dx)/(beta_tilde_2 + Chi*dx*dx), q);
-    omega_tilde_3 = 1.0/32.0*ipow(C + tau_6_tilde/(beta_tilde_3 + epsilon*dx*dx)*
+    omega_tilde_3 = double(1)/double(32)*ipow(C + tau_6_tilde/(beta_tilde_3 + epsilon*dx*dx)*
         (beta_avg_tilde + Chi*dx*dx)/(beta_tilde_3 + Chi*dx*dx), q);
     
     double omega_tilde_sum = omega_tilde_0 + omega_tilde_1 + omega_tilde_2 + omega_tilde_3;
@@ -209,12 +217,14 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationP
      * Compute U_plus.
      */
     
-    U_plus[idx_side] = 3.0/8.0*omega_tilde_0*U_array[5][idx_side] +
-        (-10.0/8.0*omega_tilde_0 - 1.0/8.0*omega_tilde_1)*U_array[4][idx_side] +
-        (15.0/8.0*omega_tilde_0 + 6.0/8.0*omega_tilde_1 + 3.0/8.0*omega_tilde_2)*U_array[3][idx_side] +
-        (3.0/8.0*omega_tilde_1 + 6.0/8.0*omega_tilde_2 + 15.0/8.0*omega_tilde_3)*U_array[2][idx_side] +
-        (-1.0/8.0*omega_tilde_2 - 10.0/8.0*omega_tilde_3)*U_array[1][idx_side] +
-        3.0/8.0*omega_tilde_3*U_array[0][idx_side];
+    U_plus[idx_side] = double(3)/double(8)*omega_tilde_0*U_array[5][idx_side] +
+        (-double(10)/double(8)*omega_tilde_0 - double(1)/double(8)*omega_tilde_1)*U_array[4][idx_side] +
+        (double(15)/double(8)*omega_tilde_0 + double(6)/double(8)*omega_tilde_1 + double(3)/double(8)*omega_tilde_2)*
+            U_array[3][idx_side] +
+        (double(3)/double(8)*omega_tilde_1 + double(6)/double(8)*omega_tilde_2 + double(15)/double(8)*omega_tilde_3)*
+            U_array[2][idx_side] +
+        (-double(1)/double(8)*omega_tilde_2 - double(10)/double(8)*omega_tilde_3)*U_array[1][idx_side] +
+        double(3)/double(8)*omega_tilde_3*U_array[0][idx_side];
 }
 
 
@@ -245,17 +255,17 @@ ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL::ConvectiveFluxReconstructorWCNS
         getIntegerWithDefault("d_constant_q", d_constant_q);
     
     d_constant_C = convective_flux_reconstructor_db->
-        getDoubleWithDefault("constant_C", 1000.0);
+        getDoubleWithDefault("constant_C", double(1000));
     d_constant_C = convective_flux_reconstructor_db->
         getDoubleWithDefault("d_constant_C", d_constant_C);
     
     d_constant_Chi = convective_flux_reconstructor_db->
-        getDoubleWithDefault("constant_Chi", 1.0e8);
+        getDoubleWithDefault("constant_Chi", double(1.0e8));
     d_constant_Chi = convective_flux_reconstructor_db->
         getDoubleWithDefault("d_constant_Chi", d_constant_Chi);
     
     d_constant_epsilon = convective_flux_reconstructor_db->
-        getDoubleWithDefault("constant_epsilon", 1.0e-8);
+        getDoubleWithDefault("constant_epsilon", double(1.0e-8));
     d_constant_epsilon = convective_flux_reconstructor_db->
         getDoubleWithDefault("d_constant_epsilon", d_constant_epsilon);
 }

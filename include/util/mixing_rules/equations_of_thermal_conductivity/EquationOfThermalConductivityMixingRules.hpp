@@ -31,11 +31,8 @@ class EquationOfThermalConductivityMixingRules
         /*
          * Return the boost::shared_ptr to the equation of thermal conductivity.
          */
-        const boost::shared_ptr<EquationOfThermalConductivity>&
-        getEquationOfThermalConductivity() const
-        {
-            return d_equation_of_thermal_conductivity;
-        }
+        virtual const boost::shared_ptr<EquationOfThermalConductivity>&
+        getEquationOfThermalConductivity(const int species_index = 0) const = 0;
         
         /*
          * Print all characteristics of the equation of thermal conductivity mixing rules class.
@@ -52,19 +49,49 @@ class EquationOfThermalConductivityMixingRules
             const boost::shared_ptr<tbox::Database>& restart_db) const = 0;
         
         /*
-         * Compute the thermal conductivity of the mixture with isothermal and isobaric assumptions.
+         * Compute the thermal conductivity of the mixture with isothermal and isobaric equilibria assumptions.
          */
         virtual double
         getThermalConductivity(
             const double* const pressure,
             const double* const temperature,
-            const std::vector<const double*>& mass_fraction) const = 0;
+            const std::vector<const double*>& mass_fractions) const = 0;
+        
+        /*
+         * Compute the thermal conductivity of the mixture with isothermal and isobaric equilibria assumptions.
+         */
+        void
+        computeThermalConductivity(
+            boost::shared_ptr<pdat::CellData<double> >& data_thermal_conductivity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeThermalConductivity(
+                data_thermal_conductivity,
+                data_pressure,
+                data_temperature,
+                data_mass_fractions,
+                empty_box);
+        }
+        
+        /*
+         * Compute the thermal conductivity of the mixture with isothermal and isobaric equilibria assumptions.
+         */
+        virtual void
+        computeThermalConductivity(
+            boost::shared_ptr<pdat::CellData<double> >& data_thermal_conductivity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            const hier::Box& domain) const = 0;
         
         /*
          * Get the number of molecular properties of a species.
          */
         virtual int
-        getNumberOfSpeciesMolecularProperties() const = 0;
+        getNumberOfSpeciesMolecularProperties(const int species_index = 0) const = 0;
         
         /*
          * Get the molecular properties of a species.
@@ -72,7 +99,7 @@ class EquationOfThermalConductivityMixingRules
         virtual void
         getSpeciesMolecularProperties(
             std::vector<double*>& species_molecular_properties,
-            const int& species_index) const = 0;
+            const int species_index = 0) const = 0;
         
     protected:
         /*
@@ -99,11 +126,6 @@ class EquationOfThermalConductivityMixingRules
          * boost::shared_ptr to the database of equation of thermal conductivity mixing rules.
          */
         const boost::shared_ptr<tbox::Database> d_equation_of_thermal_conductivity_mixing_rules_db;
-        
-        /*
-         * boost::shared_ptr to EquationOfThermalConductivity.
-         */
-        boost::shared_ptr<EquationOfThermalConductivity> d_equation_of_thermal_conductivity;
         
 };
     

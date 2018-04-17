@@ -2,8 +2,6 @@
 #define FLOW_MODEL_SINGLE_SPECIES_HPP
 
 #include "flow/flow_models/FlowModel.hpp"
-#include "flow/flow_models/single-species/Riemann_solvers/RiemannSolverSingleSpeciesHLLC.hpp"
-#include "flow/flow_models/single-species/Riemann_solvers/RiemannSolverSingleSpeciesHLLC_HLL.hpp"
 #include "util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosityMixingRulesManager.hpp"
 #include "util/mixing_rules/equations_of_bulk_viscosity/EquationOfBulkViscosityMixingRulesManager.hpp"
 #include "util/mixing_rules/equations_of_thermal_conductivity/EquationOfThermalConductivityMixingRulesManager.hpp"
@@ -120,8 +118,7 @@ class FlowModelSingleSpecies: public FlowModel
          * Compute global cell data of different registered derived variables with the registered data context.
          */
         void
-        computeGlobalDerivedCellData(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+        computeGlobalDerivedCellData(const hier::Box& domain);
         
         /*
          * Get the global cell data of one cell variable in the registered patch.
@@ -226,38 +223,6 @@ class FlowModelSingleSpecies: public FlowModel
             std::vector<boost::shared_ptr<pdat::SideData<double> > >& primitive_variables,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& characteristic_variables,
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables);
-        
-        /*
-         * Compute the local intercell quantities with conservative variables on each side of the face
-         * from Riemann solver at face.
-         * flux_face: Convective flux at face.
-         * velocity_face: Velocity at face.
-         * The FlowModelSingleSpecies class modifies nothing for velocity_face.
-         */
-        void
-        computeLocalFaceFluxAndVelocityFromRiemannSolverWithConservativeVariables(
-            std::vector<boost::reference_wrapper<double> >& flux_face,
-            std::vector<boost::reference_wrapper<double> >& velocity_face,
-            const std::vector<boost::reference_wrapper<double> >& conservative_variables_minus,
-            const std::vector<boost::reference_wrapper<double> >& conservative_variables_plus,
-            const DIRECTION::TYPE& direction,
-            const RIEMANN_SOLVER::TYPE& Riemann_solver);
-        
-        /*
-         * Compute the local intercell quantities with primitive variables on each side of the face
-         * from Riemann solver at face.
-         * flux_face: Convective flux at face.
-         * velocity_face: Velocity at face.
-         * The FlowModelSingleSpecies class modifies nothing for velocity_face.
-         */
-        void
-        computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
-            std::vector<boost::reference_wrapper<double> >& flux_face,
-            std::vector<boost::reference_wrapper<double> >& velocity_face,
-            const std::vector<boost::reference_wrapper<double> >& primitive_variables_minus,
-            const std::vector<boost::reference_wrapper<double> >& primitive_variables_plus,
-            const DIRECTION::TYPE& direction,
-            const RIEMANN_SOLVER::TYPE& Riemann_solver);
         
         /*
          * Check whether the given side conservative variables are within the bounds.
@@ -372,49 +337,31 @@ class FlowModelSingleSpecies: public FlowModel
          * Compute the global cell data of velocity in the registered patch.
          */
         void computeGlobalCellDataVelocity(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of internal energy with velocity in the registered patch.
          */
         void computeGlobalCellDataInternalEnergyWithVelocity(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of pressure with internal energy in the registered patch.
          */
         void computeGlobalCellDataPressureWithInternalEnergy(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of sound speed with pressure in the registered patch.
          */
         void computeGlobalCellDataSoundSpeedWithPressure(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of temperature with pressure in the registered patch.
          */
         void computeGlobalCellDataTemperatureWithPressure(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
-        
-        /*
-         * Compute the global cell data of dilatation with velocity in the registered patch.
-         */
-        void computeGlobalCellDataDilatationWithVelocity(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
-        
-        /*
-         * Compute the global cell data of vorticity with velocity in the registered patch.
-         */
-        void computeGlobalCellDataVorticityWithVelocity(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
-        
-        /*
-         * Compute the global cell data of enstrophy with vorticity in the registered patch.
-         */
-        void computeGlobalCellDataEnstrophyWithVorticity(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of convective flux with velocity and pressure in the registered
@@ -422,7 +369,7 @@ class FlowModelSingleSpecies: public FlowModel
          */
         void computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
             const DIRECTION::TYPE& direction,
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of maximum wave speed with velocity and sound speed in the
@@ -430,14 +377,14 @@ class FlowModelSingleSpecies: public FlowModel
          */
         void computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
             const DIRECTION::TYPE& direction,
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * Compute the global cell data of maximum diffusivity with pressure and temperature in the
          * registered patch.
          */
         void computeGlobalCellDataMaxDiffusivityWithPressureAndTemperature(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL);
+            const hier::Box& domain);
         
         /*
          * boost::shared_ptr to registered conservative variables.
@@ -454,9 +401,6 @@ class FlowModelSingleSpecies: public FlowModel
         hier::IntVector d_num_subghosts_pressure;
         hier::IntVector d_num_subghosts_sound_speed;
         hier::IntVector d_num_subghosts_temperature;
-        hier::IntVector d_num_subghosts_dilatation;
-        hier::IntVector d_num_subghosts_vorticity;
-        hier::IntVector d_num_subghosts_enstrophy;
         hier::IntVector d_num_subghosts_convective_flux_x;
         hier::IntVector d_num_subghosts_convective_flux_y;
         hier::IntVector d_num_subghosts_convective_flux_z;
@@ -474,9 +418,6 @@ class FlowModelSingleSpecies: public FlowModel
         hier::Box d_subghost_box_pressure;
         hier::Box d_subghost_box_sound_speed;
         hier::Box d_subghost_box_temperature;
-        hier::Box d_subghost_box_dilatation;
-        hier::Box d_subghost_box_vorticity;
-        hier::Box d_subghost_box_enstrophy;
         hier::Box d_subghost_box_convective_flux_x;
         hier::Box d_subghost_box_convective_flux_y;
         hier::Box d_subghost_box_convective_flux_z;
@@ -494,9 +435,6 @@ class FlowModelSingleSpecies: public FlowModel
         hier::IntVector d_subghostcell_dims_pressure;
         hier::IntVector d_subghostcell_dims_sound_speed;
         hier::IntVector d_subghostcell_dims_temperature;
-        hier::IntVector d_subghostcell_dims_dilatation;
-        hier::IntVector d_subghostcell_dims_vorticity;
-        hier::IntVector d_subghostcell_dims_enstrophy;
         hier::IntVector d_subghostcell_dims_convective_flux_x;
         hier::IntVector d_subghostcell_dims_convective_flux_y;
         hier::IntVector d_subghostcell_dims_convective_flux_z;
@@ -514,9 +452,6 @@ class FlowModelSingleSpecies: public FlowModel
         boost::shared_ptr<pdat::CellData<double> > d_data_pressure;
         boost::shared_ptr<pdat::CellData<double> > d_data_sound_speed;
         boost::shared_ptr<pdat::CellData<double> > d_data_temperature;
-        boost::shared_ptr<pdat::CellData<double> > d_data_dilatation;
-        boost::shared_ptr<pdat::CellData<double> > d_data_vorticity;
-        boost::shared_ptr<pdat::CellData<double> > d_data_enstrophy;
         boost::shared_ptr<pdat::CellData<double> > d_data_convective_flux_x;
         boost::shared_ptr<pdat::CellData<double> > d_data_convective_flux_y;
         boost::shared_ptr<pdat::CellData<double> > d_data_convective_flux_z;
@@ -525,95 +460,6 @@ class FlowModelSingleSpecies: public FlowModel
         boost::shared_ptr<pdat::CellData<double> > d_data_max_wave_speed_z;
         boost::shared_ptr<pdat::CellData<double> > d_data_max_diffusivity;
         boost::shared_ptr<pdat::CellData<double> > d_data_diffusivities;
-        
-        /*
-         * Booleans to determine whether derived cell data is computed.
-         */
-        bool d_interior_computed_velocity;
-        bool d_interior_computed_internal_energy;
-        bool d_interior_computed_pressure;
-        bool d_interior_computed_sound_speed;
-        bool d_interior_computed_temperature;
-        bool d_interior_computed_dilatation;
-        bool d_interior_computed_vorticity;
-        bool d_interior_computed_enstrophy;
-        bool d_interior_computed_convective_flux_x;
-        bool d_interior_computed_convective_flux_y;
-        bool d_interior_computed_convective_flux_z;
-        bool d_interior_computed_max_wave_speed_x;
-        bool d_interior_computed_max_wave_speed_y;
-        bool d_interior_computed_max_wave_speed_z;
-        bool d_interior_computed_max_diffusivity;
-        
-        bool d_ghost_x_computed_velocity;
-        bool d_ghost_x_computed_internal_energy;
-        bool d_ghost_x_computed_pressure;
-        bool d_ghost_x_computed_sound_speed;
-        bool d_ghost_x_computed_temperature;
-        bool d_ghost_x_computed_dilatation;
-        bool d_ghost_x_computed_vorticity;
-        bool d_ghost_x_computed_enstrophy;
-        bool d_ghost_x_computed_convective_flux_x;
-        bool d_ghost_x_computed_convective_flux_y;
-        bool d_ghost_x_computed_convective_flux_z;
-        bool d_ghost_x_computed_max_wave_speed_x;
-        bool d_ghost_x_computed_max_wave_speed_y;
-        bool d_ghost_x_computed_max_wave_speed_z;
-        bool d_ghost_x_computed_max_diffusivity;
-        
-        bool d_ghost_y_computed_velocity;
-        bool d_ghost_y_computed_internal_energy;
-        bool d_ghost_y_computed_pressure;
-        bool d_ghost_y_computed_sound_speed;
-        bool d_ghost_y_computed_temperature;
-        bool d_ghost_y_computed_dilatation;
-        bool d_ghost_y_computed_vorticity;
-        bool d_ghost_y_computed_enstrophy;
-        bool d_ghost_y_computed_convective_flux_x;
-        bool d_ghost_y_computed_convective_flux_y;
-        bool d_ghost_y_computed_convective_flux_z;
-        bool d_ghost_y_computed_max_wave_speed_x;
-        bool d_ghost_y_computed_max_wave_speed_y;
-        bool d_ghost_y_computed_max_wave_speed_z;
-        bool d_ghost_y_computed_max_diffusivity;
-        
-        bool d_ghost_z_computed_velocity;
-        bool d_ghost_z_computed_internal_energy;
-        bool d_ghost_z_computed_pressure;
-        bool d_ghost_z_computed_sound_speed;
-        bool d_ghost_z_computed_temperature;
-        bool d_ghost_z_computed_dilatation;
-        bool d_ghost_z_computed_vorticity;
-        bool d_ghost_z_computed_enstrophy;
-        bool d_ghost_z_computed_convective_flux_x;
-        bool d_ghost_z_computed_convective_flux_y;
-        bool d_ghost_z_computed_convective_flux_z;
-        bool d_ghost_z_computed_max_wave_speed_x;
-        bool d_ghost_z_computed_max_wave_speed_y;
-        bool d_ghost_z_computed_max_wave_speed_z;
-        bool d_ghost_z_computed_max_diffusivity;
-        
-        bool d_ghost_corners_computed_velocity;
-        bool d_ghost_corners_computed_internal_energy;
-        bool d_ghost_corners_computed_pressure;
-        bool d_ghost_corners_computed_sound_speed;
-        bool d_ghost_corners_computed_temperature;
-        bool d_ghost_corners_computed_dilatation;
-        bool d_ghost_corners_computed_vorticity;
-        bool d_ghost_corners_computed_enstrophy;
-        bool d_ghost_corners_computed_convective_flux_x;
-        bool d_ghost_corners_computed_convective_flux_y;
-        bool d_ghost_corners_computed_convective_flux_z;
-        bool d_ghost_corners_computed_max_wave_speed_x;
-        bool d_ghost_corners_computed_max_wave_speed_y;
-        bool d_ghost_corners_computed_max_wave_speed_z;
-        bool d_ghost_corners_computed_max_diffusivity;
-        
-        /*
-         * boost::shared_ptr to Riemann solvers.
-         */
-        boost::shared_ptr<RiemannSolverSingleSpeciesHLLC>     d_Riemann_solver_HLLC;
-        boost::shared_ptr<RiemannSolverSingleSpeciesHLLC_HLL> d_Riemann_solver_HLLC_HLL;
         
         /*
          * A string variable to describe the equation of shear viscosity used.

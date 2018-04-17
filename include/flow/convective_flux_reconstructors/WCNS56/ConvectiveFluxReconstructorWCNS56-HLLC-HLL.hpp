@@ -2,6 +2,7 @@
 #define CONVECTIVE_FLUX_RECONSTRUCTOR_56_HLLC_HLL_HPP
 
 #include "flow/convective_flux_reconstructors/ConvectiveFluxReconstructor.hpp"
+#include "util/derivatives/DerivativeFirstOrder.hpp"
 #include "util/Directions.hpp"
 
 #include "boost/multi_array.hpp"
@@ -56,6 +57,17 @@ class ConvectiveFluxReconstructorWCNS56: public ConvectiveFluxReconstructor
             std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_minus,
             std::vector<boost::shared_ptr<pdat::SideData<double> > >& variables_plus,
             const std::vector<std::vector<boost::shared_ptr<pdat::SideData<double> > > >& variables) = 0;
+        
+        /*
+         * Forms of equations.
+         */
+        std::vector<EQN_FORM::TYPE> d_eqn_form;
+        bool d_has_advective_eqn_form;
+        
+        /*
+         * boost::shared_ptr to the Riemann solver object.
+         */
+        boost::shared_ptr<FlowModelRiemannSolver> d_riemann_solver;
         
 };
 

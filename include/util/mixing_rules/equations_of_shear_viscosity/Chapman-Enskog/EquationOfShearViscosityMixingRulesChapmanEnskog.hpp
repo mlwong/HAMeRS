@@ -16,6 +16,16 @@ class EquationOfShearViscosityMixingRulesChapmanEnskog: public EquationOfShearVi
             const boost::shared_ptr<tbox::Database>& equation_of_shear_viscosity_mixing_rules_db);
         
         /*
+         * Return the boost::shared_ptr to the equation of shear viscosity.
+         */
+        const boost::shared_ptr<EquationOfShearViscosity>&
+        getEquationOfShearViscosity(const int species_index = 0) const
+        {
+            NULL_USE(species_index);
+            return d_equation_of_shear_viscosity;
+        }
+        
+        /*
          * Print all characteristics of the equation of shear viscosity mixing rules class.
          */
         void
@@ -30,29 +40,56 @@ class EquationOfShearViscosityMixingRulesChapmanEnskog: public EquationOfShearVi
             const boost::shared_ptr<tbox::Database>& restart_db) const;
         
         /*
-         * Compute the shear viscosity of the mixture with isothermal and isobaric assumptions.
+         * Compute the shear viscosity of the mixture with isothermal and isobaric equilibria assumptions.
          */
         double
         getShearViscosity(
             const double* const pressure,
             const double* const temperature,
-            const std::vector<const double*>& mass_fraction) const;
+            const std::vector<const double*>& mass_fractions) const;
         
         /*
-         * Compute the shear viscosity of the mixture with isobaric assumption.
+         * Compute the shear viscosity of the mixture with isothermal and isobaric equilibria assumptions.
+         */
+        void
+        computeShearViscosity(
+            boost::shared_ptr<pdat::CellData<double> >& data_shear_viscosity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the shear viscosity of the mixture with isobaric equilibrium assumption.
          */
         double
         getShearViscosity(
             const double* const pressure,
-            const std::vector<const double*>& temperature,
-            const std::vector<const double*>& mass_fraction,
-            const std::vector<const double*>& volume_fraction) const;
+            const std::vector<const double*>& species_temperature,
+            const std::vector<const double*>& mass_fractions,
+            const std::vector<const double*>& volume_fractions) const;
+        
+        /*
+         * Compute the shear viscosity of the mixture with isobaric equilibrium assumption.
+         */
+        void
+        computeShearViscosity(
+            boost::shared_ptr<pdat::CellData<double> >& data_shear_viscosity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_species_temperatures,
+            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            const boost::shared_ptr<pdat::CellData<double> >& data_volume_fractions,
+            const hier::Box& domain) const;
         
         /*
          * Get the number of molecular properties of a species.
          */
         int
-        getNumberOfSpeciesMolecularProperties() const { return 3; }
+        getNumberOfSpeciesMolecularProperties(const int species_index = 0) const
+        {
+            NULL_USE(species_index);
+            return 3;
+        }
         
         /*
          * Get the molecular properties of a species.
@@ -60,7 +97,7 @@ class EquationOfShearViscosityMixingRulesChapmanEnskog: public EquationOfShearVi
         void
         getSpeciesMolecularProperties(
             std::vector<double*>& species_molecular_properties,
-            const int& species_index) const;
+            const int species_index = 0) const;
         
     private:
         /*
@@ -77,6 +114,11 @@ class EquationOfShearViscosityMixingRulesChapmanEnskog: public EquationOfShearVi
          * Molecular weight of different species.
          */
         std::vector<double> d_species_M;
+        
+        /*
+         * boost::shared_ptr to EquationOfShearViscosity.
+         */
+        boost::shared_ptr<EquationOfShearViscosity> d_equation_of_shear_viscosity;
         
 };
     
