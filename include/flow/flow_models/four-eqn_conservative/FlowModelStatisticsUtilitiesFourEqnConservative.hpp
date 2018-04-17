@@ -494,8 +494,8 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
-         * Output mean density specific volume covariance in x-direction inside mixing layer file with
-         * assumed homogeneity in y-direction to a file.
+         * Output mean density specific volume covariance inside mixing layer with assumed homogeneity
+         * in y-direction to a file.
          */
         void
         outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirection(
@@ -504,11 +504,49 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
-         * Output mean density specific volume covariance in x-direction inside mixing layer file with
-         * assumed homogeneity in yz-plane to a file.
+         * Output mean density specific volume covariance inside mixing layer with assumed homogeneity
+         * in yz-plane to a file.
          */
         void
         outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean density inside mixing layer with assumed homogeneity in y-direction to a file.
+         */
+        void
+        outputDensityMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean density inside mixing layer with assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputDensityMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean deviation from Boussinesq approximation inside mixing layer with assumed
+         * homogeneity in y-direction to a file.
+         */
+        void
+        outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean deviation from Boussinesq approximation inside mixing layer with assumed
+         * homogeneity in yz-plane to a file.
+         */
+        void
+        outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
