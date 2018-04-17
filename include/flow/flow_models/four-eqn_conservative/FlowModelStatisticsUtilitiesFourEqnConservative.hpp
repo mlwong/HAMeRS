@@ -206,11 +206,50 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
+         * Output mean Reynolds number inside mixing layer with assumed homogeneity in y-direction to
+         * a file.
+         */
+        void
+        outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
          * Output mean Reynolds number inside mixing layer with assumed homogeneity in yz-plane to
          * a file.
          */
         void
         outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean TKE inside mixing layer with assumed homogeneity in y-direction to a file.
+         */
+        void
+        outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean TKE in x-direction inside mixing layer with assumed homogeneity in y-direction
+         * to a file.
+         */
+        void
+        outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean TKE in y-direction inside mixing layer with assumed homogeneity in y-direction
+         * to a file.
+         */
+        void
+        outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
@@ -256,6 +295,26 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
         
         /*
          * Output mean Reynolds normal stress component in x-direction inside mixing layer with
+         * assumed homogeneity in y-direction to a file.
+         */
+        void
+        outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds normal stress component in y-direction inside mixing layer with
+         * assumed homogeneity in y-direction to a file.
+         */
+        void
+        outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds normal stress component in x-direction inside mixing layer with
          * assumed homogeneity in yz-plane to a file.
          */
         void
@@ -280,6 +339,16 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
          */
         void
         outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds shear stress component in x- and y-directions inside mixing layer
+         * with assumed homogeneity in y-direction to a file.
+         */
+        void
+        outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirection(
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
@@ -315,6 +384,106 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
+         * Output mean Reynolds normal stress anisotropy component in x-direction inside mixing layer with
+         * assumed homogeneity in y-direction to a file.
+         */
+        void
+        outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds normal stress anisotropy component in y-direction inside mixing layer with
+         * assumed homogeneity in y-direction to a file.
+         */
+        void
+        outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds normal stress anisotropy component in x-direction inside mixing layer with
+         * assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds normal stress anisotropy component in y-direction inside mixing layer with
+         * assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds normal stress anisotropy component in z-direction inside mixing layer with
+         * assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds shear stress anisotropy component in x- and y-directions inside mixing layer
+         * with assumed homogeneity in y-direction to a file.
+         */
+        void
+        outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds shear stress anisotropy component in x- and y-directions inside mixing layer
+         * with assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds shear stress anisotropy component in x- and z-directions inside mixing layer
+         * with assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds shear stress anisotropy component in y- and z-directions inside mixing layer
+         * with assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean turbulent mass flux in x-direction inside mixing layer with assumed homogeneity
+         * in y-direction to a file.
+         */
+        void
+        outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
          * Output mean turbulent mass flux in x-direction inside mixing layer with assumed homogeneity
          * in yz-plane to a file.
          */
@@ -325,11 +494,59 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
-         * Output mean density specific volume covariance in x-direction inside mixing layer file with
-         * assumed homogeneity in yz-plane to a file.
+         * Output mean density specific volume covariance inside mixing layer with assumed homogeneity
+         * in y-direction to a file.
+         */
+        void
+        outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean density specific volume covariance inside mixing layer with assumed homogeneity
+         * in yz-plane to a file.
          */
         void
         outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean density inside mixing layer with assumed homogeneity in y-direction to a file.
+         */
+        void
+        outputDensityMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean density inside mixing layer with assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputDensityMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean deviation from Boussinesq approximation inside mixing layer with assumed
+         * homogeneity in y-direction to a file.
+         */
+        void
+        outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean deviation from Boussinesq approximation inside mixing layer with assumed
+         * homogeneity in yz-plane to a file.
+         */
+        void
+        outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
             const std::string& stat_dump_filename,
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
