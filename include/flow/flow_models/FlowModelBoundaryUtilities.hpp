@@ -52,6 +52,8 @@ class FlowModelBoundaryUtilities
                 d_equation_of_state_mixing_rules(equation_of_state_mixing_rules)
         {}
         
+        virtual ~FlowModelBoundaryUtilities() {}
+        
         /*
          * Virtual function to read 1d boundary data from input database.
          * Node locations that have boundary conditions identified are removed from the container.

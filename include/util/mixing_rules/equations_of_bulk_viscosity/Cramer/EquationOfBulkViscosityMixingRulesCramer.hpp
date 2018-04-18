@@ -14,6 +14,8 @@ class EquationOfBulkViscosityMixingRulesCramer: public EquationOfBulkViscosityMi
             const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
             const boost::shared_ptr<tbox::Database>& equation_of_bulk_viscosity_mixing_rules_db);
         
+        ~EquationOfBulkViscosityMixingRulesCramer() {}
+        
         /*
          * Return the boost::shared_ptr to the equation of bulk viscosity.
          */

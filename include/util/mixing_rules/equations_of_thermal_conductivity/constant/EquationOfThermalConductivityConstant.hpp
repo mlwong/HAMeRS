@@ -14,6 +14,8 @@ class EquationOfThermalConductivityConstant: public EquationOfThermalConductivit
                     dim)
         {}
         
+        ~EquationOfThermalConductivityConstant() {}
+        
         /*
          * Print all characteristics of the equation of thermal conductivity class.
          */

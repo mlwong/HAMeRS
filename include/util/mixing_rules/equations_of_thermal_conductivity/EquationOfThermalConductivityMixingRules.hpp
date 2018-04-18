@@ -28,6 +28,8 @@ class EquationOfThermalConductivityMixingRules
                 d_equation_of_thermal_conductivity_mixing_rules_db(equation_of_thermal_conductivity_mixing_rules_db)
         {}
         
+        virtual ~EquationOfThermalConductivityMixingRules() {}
+        
         /*
          * Return the boost::shared_ptr to the equation of thermal conductivity.
          */

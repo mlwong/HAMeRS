@@ -13,6 +13,8 @@ class EquationOfMassDiffusivityMixingRulesConstant: public EquationOfMassDiffusi
             const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
             const boost::shared_ptr<tbox::Database>& equation_of_mass_diffusivity_mixing_rules_db);
         
+        ~EquationOfMassDiffusivityMixingRulesConstant() {}
+        
         /*
          * Print all characteristics of the equation of mass diffusivity mixing rules class.
          */

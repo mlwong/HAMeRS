@@ -28,6 +28,8 @@ class EquationOfStateMixingRules
                 d_equation_of_state_mixing_rules_db(equation_of_state_mixing_rules_db)
         {}
         
+        virtual ~EquationOfStateMixingRules() {}
+        
         /*
          * Return the boost::shared_ptr to the equation of state.
          */

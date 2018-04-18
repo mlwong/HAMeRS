@@ -35,6 +35,8 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
                 d_equation_of_thermal_conductivity_mixing_rules(equation_of_thermal_conductivity_mixing_rules)
         {}
         
+        ~FlowModelStatisticsUtilitiesFourEqnConservative() {}
+        
         /*
          * Output names of statistical quantities to output to a file.
          */

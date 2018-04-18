@@ -34,6 +34,8 @@ class FlowModelRiemannSolver
                 d_num_species(num_species)
         {}
         
+        virtual ~FlowModelRiemannSolver() {}
+        
         /*
          * Set the weak pointer to the flow model from the parent FlowModel class.
          */

@@ -16,6 +16,8 @@ class EquationOfShearViscosityChapmanEnskog: public EquationOfShearViscosity
                     dim)
         {}
         
+        ~EquationOfShearViscosityChapmanEnskog() {}
+        
         /*
          * Print all characteristics of the equation of shear viscosity class.
          */

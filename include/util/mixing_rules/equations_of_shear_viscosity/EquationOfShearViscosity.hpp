@@ -21,6 +21,8 @@ class EquationOfShearViscosity
                 d_dim(dim)
         {}
         
+        virtual ~EquationOfShearViscosity() {}
+        
         /*
          * Print all characteristics of the equation of shear viscosity class.
          */

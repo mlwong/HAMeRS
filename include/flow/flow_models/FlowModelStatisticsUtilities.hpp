@@ -40,6 +40,8 @@ class FlowModelStatisticsUtilities
             }
         }
         
+        virtual ~FlowModelStatisticsUtilities() {}
+        
         /*
          * Set the weak pointer to the flow model from the parent FlowModel class.
          */

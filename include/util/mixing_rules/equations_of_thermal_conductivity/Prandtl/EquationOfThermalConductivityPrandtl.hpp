@@ -18,6 +18,8 @@ class EquationOfThermalConductivityPrandtl: public EquationOfThermalConductivity
                 d_equation_of_shear_viscosity(equation_of_shear_viscosity)
         {}
         
+        ~EquationOfThermalConductivityPrandtl() {}
+        
         /*
          * Print all characteristics of the equation of thermal conductivity class.
          */

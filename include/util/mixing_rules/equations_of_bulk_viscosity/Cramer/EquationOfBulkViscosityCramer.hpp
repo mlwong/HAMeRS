@@ -14,6 +14,8 @@ class EquationOfBulkViscosityCramer: public EquationOfBulkViscosity
                     dim)
         {}
         
+        ~EquationOfBulkViscosityCramer() {}
+        
         /*
          * Print all characteristics of the equation of thermal conductivity class.
          */

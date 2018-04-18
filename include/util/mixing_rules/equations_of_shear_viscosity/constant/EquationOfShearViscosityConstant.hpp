@@ -14,6 +14,8 @@ class EquationOfShearViscosityConstant: public EquationOfShearViscosity
                     dim)
         {}
         
+        ~EquationOfShearViscosityConstant() {}
+        
         /*
          * Print all characteristics of the equation of shear viscosity class.
          */

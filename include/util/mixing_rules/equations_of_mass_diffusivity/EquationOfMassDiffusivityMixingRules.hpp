@@ -30,6 +30,8 @@ class EquationOfMassDiffusivityMixingRules
                 d_equation_of_mass_diffusivity_mixing_rules_db(equation_of_mass_diffusivity_mixing_rules_db)
         {}
         
+        virtual ~EquationOfMassDiffusivityMixingRules() {}
+        
         /*
          * Print all characteristics of the equation of mass diffusivity mixing rules class.
          */

@@ -22,6 +22,8 @@ class EquationOfState
                 d_dim(dim)
         {}
         
+        virtual ~EquationOfState() {}
+        
         /*
          * Print all characteristics of the equation of state class.
          */

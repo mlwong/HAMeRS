@@ -15,6 +15,8 @@ class EquationOfStateMixingRulesIdealGas: public EquationOfStateMixingRules
             const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
             const boost::shared_ptr<tbox::Database>& equation_of_state_mixing_rules_db);
         
+        ~EquationOfStateMixingRulesIdealGas() {}
+        
         /*
          * Print all characteristics of the equation of state mixing rules class.
          */

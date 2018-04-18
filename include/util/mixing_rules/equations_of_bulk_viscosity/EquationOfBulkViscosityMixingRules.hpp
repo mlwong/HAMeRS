@@ -28,6 +28,8 @@ class EquationOfBulkViscosityMixingRules
                 d_equation_of_bulk_viscosity_mixing_rules_db(equation_of_bulk_viscosity_mixing_rules_db)
         {}
         
+        virtual ~EquationOfBulkViscosityMixingRules() {}
+        
         /*
          * Return the boost::shared_ptr to the equation of bulk viscosity.
          */

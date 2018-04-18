@@ -31,6 +31,8 @@ class FlowModelStatisticsUtilitiesSingleSpecies: public FlowModelStatisticsUtili
             d_equation_of_thermal_conductivity_mixing_rules(equation_of_thermal_conductivity_mixing_rules)
         {}
         
+        ~FlowModelStatisticsUtilitiesSingleSpecies() {}
+        
         /*
          * Output names of statistical quantities to output to a file.
          */

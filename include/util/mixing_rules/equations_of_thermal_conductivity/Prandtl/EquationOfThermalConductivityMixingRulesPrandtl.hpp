@@ -16,6 +16,8 @@ class EquationOfThermalConductivityMixingRulesPrandtl: public EquationOfThermalC
             const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
             const boost::shared_ptr<tbox::Database>& equation_of_thermal_conductivity_mixing_rules_db);
         
+        ~EquationOfThermalConductivityMixingRulesPrandtl() {}
+        
         /*
          * Return the boost::shared_ptr to the equation of thermal conductivity.
          */

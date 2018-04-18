@@ -15,6 +15,8 @@ class EquationOfShearViscosityMixingRulesConstant: public EquationOfShearViscosi
             const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
             const boost::shared_ptr<tbox::Database>& equation_of_shear_viscosity_mixing_rules_db);
         
+        ~EquationOfShearViscosityMixingRulesConstant() {}
+        
         /*
          * Return the boost::shared_ptr to the equation of shear viscosity.
          */

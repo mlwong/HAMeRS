@@ -21,6 +21,8 @@ class EquationOfBulkViscosity
                 d_dim(dim)
         {}
         
+        virtual ~EquationOfBulkViscosity() {}
+        
         /*
          * Print all characteristics of the equation of bulk viscosity class.
          */

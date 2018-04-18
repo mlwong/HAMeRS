@@ -18,6 +18,8 @@ class FlowModelRiemannSolverSingleSpecies: public FlowModelRiemannSolver
                     num_species)
         {}
         
+        ~FlowModelRiemannSolverSingleSpecies() {}
+        
         /*
          * Compute the convective flux from conservative variables.
          */

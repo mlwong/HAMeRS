@@ -21,6 +21,8 @@ class EquationOfThermalConductivity
                 d_dim(dim)
         {}
         
+        virtual ~EquationOfThermalConductivity() {}
+        
         /*
          * Print all characteristics of the equation of thermal conductivity class.
          */

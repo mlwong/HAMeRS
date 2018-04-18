@@ -28,6 +28,8 @@ class FlowModelStatisticsUtilitiesFiveEqnAllaire: public FlowModelStatisticsUtil
                 d_equation_of_bulk_viscosity_mixing_rules(equation_of_bulk_viscosity_mixing_rules)
         {}
         
+        ~FlowModelStatisticsUtilitiesFiveEqnAllaire() {}
+        
         /*
          * Output names of statistical quantities to output to a file.
          */

@@ -14,6 +14,8 @@ class EquationOfBulkViscosityConstant: public EquationOfBulkViscosity
                     dim)
         {}
         
+        ~EquationOfBulkViscosityConstant() {}
+        
         /*
          * Print all characteristics of the equation of thermal conductivity class.
          */

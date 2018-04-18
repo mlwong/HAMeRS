@@ -18,6 +18,8 @@ class FlowModelRiemannSolverFiveEqnAllaire: public FlowModelRiemannSolver
                     num_species)
         {}
         
+        ~FlowModelRiemannSolverFiveEqnAllaire() {}
+        
         /*
          * Compute the convective flux from conservative variables.
          */

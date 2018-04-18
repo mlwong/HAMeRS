@@ -28,6 +28,8 @@ class EquationOfShearViscosityMixingRules
                 d_equation_of_shear_viscosity_mixing_rules_db(equation_of_shear_viscosity_mixing_rules_db)
         {}
         
+        virtual ~EquationOfShearViscosityMixingRules() {}
+        
         /*
          * Return the boost::shared_ptr to the equation of shear viscosity.
          */

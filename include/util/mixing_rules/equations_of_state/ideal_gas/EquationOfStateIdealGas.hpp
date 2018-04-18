@@ -16,6 +16,8 @@ class EquationOfStateIdealGas: public EquationOfState
                     dim)
         {}
         
+        ~EquationOfStateIdealGas() {}
+        
         /*
          * Print all characteristics of the equation of state class.
          */

@@ -18,6 +18,8 @@ class FlowModelRiemannSolverFourEqnConservative: public FlowModelRiemannSolver
                     num_species)
         {}
         
+        ~FlowModelRiemannSolverFourEqnConservative() {}
+        
         /*
          * Compute the convective flux from conservative variables.
          */
