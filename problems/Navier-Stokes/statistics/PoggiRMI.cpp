@@ -4,869 +4,754 @@
 
 #include <fstream>
 
-/*
- * Output names of statistical quantities to output to a file.
- */
-void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesNames(
-    const std::string& stat_dump_filename)
+class RMIStatisticsUtilities
 {
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(!stat_dump_filename.empty());
-#endif
-    
-    if (d_flow_model.expired())
-    {
-        TBOX_ERROR(d_object_name
-            << ": "
-            << "The object is not setup yet!"
-            << std::endl);
-    }
-    
-    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
-    if (mpi.getRank() == 0)
-    {
-        std::ofstream f_out;
-        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+    public:
+        RMIStatisticsUtilities(
+            const std::string& object_name,
+            const tbox::Dimension& dim,
+            const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
+            const int& num_species,
+            const boost::weak_ptr<FlowModel> flow_model,
+            const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules,
+            const boost::shared_ptr<EquationOfMassDiffusivityMixingRules> equation_of_mass_diffusivity_mixing_rules,
+            const boost::shared_ptr<EquationOfShearViscosityMixingRules> equation_of_shear_viscosity_mixing_rules,
+            const boost::shared_ptr<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules,
+            const boost::shared_ptr<EquationOfThermalConductivityMixingRules> equation_of_thermal_conductivity_mixing_rules):
+                d_object_name(object_name),
+                d_dim(dim),
+                d_grid_geometry(grid_geometry),
+                d_num_species(num_species),
+                d_flow_model(flow_model),
+                d_equation_of_state_mixing_rules(equation_of_state_mixing_rules),
+                d_equation_of_mass_diffusivity_mixing_rules(equation_of_mass_diffusivity_mixing_rules),
+                d_equation_of_shear_viscosity_mixing_rules(equation_of_shear_viscosity_mixing_rules),
+                d_equation_of_bulk_viscosity_mixing_rules(equation_of_bulk_viscosity_mixing_rules),
+                d_equation_of_thermal_conductivity_mixing_rules(equation_of_thermal_conductivity_mixing_rules),
+                d_num_ghosts_derivative(3)
+        {}
         
-        if (!f_out.is_open())
-        {
-            TBOX_ERROR(d_object_name
-                << ": "
-                << "Failed to open file to output statistics!"
-                << std::endl);
-        }
+        /*
+         * Output mixing width in x-direction to a file.
+         */
+        void
+        outputMixingWidthInXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
         
-        // Loop over statistical quantities.
-        for (int qi = 0; qi < static_cast<int>(d_statistical_quantities.size()); qi++)
-        {
-            // Get the key of the current variable.
-            std::string statistical_quantity_key = d_statistical_quantities[qi];
-            
-            if (statistical_quantity_key == "MIXING_WIDTH_X")
-            {
-                f_out << "\t" << "MIXING_WIDTH_X       ";
-            }
-            else if (statistical_quantity_key == "MIXING_WIDTH_Y")
-            {
-                f_out << "\t" << "MIXING_WIDTH_Y       ";
-            }
-            else if (statistical_quantity_key == "MIXING_WIDTH_Z")
-            {
-                f_out << "\t" << "MIXING_WIDTH_Z       ";
-            }
-            else if (statistical_quantity_key == "MIXEDNESS_X")
-            {
-                f_out << "\t" << "MIXEDNESS_X          ";
-            }
-            else if (statistical_quantity_key == "MIXEDNESS_Y")
-            {
-                f_out << "\t" << "MIXEDNESS_Y          ";
-            }
-            else if (statistical_quantity_key == "MIXEDNESS_Z")
-            {
-                f_out << "\t" << "MIXEDNESS_Z          ";
-            }
-            else if (statistical_quantity_key == "TKE_INT_HOMO_X")
-            {
-                f_out << "\t" << "TKE_INT_HOMO_X       ";
-            }
-            else if (statistical_quantity_key == "TKE_INT_HOMO_Y")
-            {
-                f_out << "\t" << "TKE_INT_HOMO_Y       ";
-            }
-            else if (statistical_quantity_key == "TKE_INT_HOMO_Z")
-            {
-                f_out << "\t" << "TKE_INT_HOMO_Z       ";
-            }
-            else if (statistical_quantity_key == "TKE_INT_HOMO_XY")
-            {
-                f_out << "\t" << "TKE_INT_HOMO_XY      ";
-            }
-            else if (statistical_quantity_key == "TKE_INT_HOMO_YZ")
-            {
-                f_out << "\t" << "TKE_INT_HOMO_YZ      ";
-            }
-            else if (statistical_quantity_key == "TKE_INT_HOMO_XZ")
-            {
-                f_out << "\t" << "TKE_INT_HOMO_XZ      ";
-            }
-            else if (statistical_quantity_key == "TKE_X_INT_HOMO_YZ")
-            {
-                f_out << "\t" << "TKE_X_INT_HOME_YZ    ";
-            }
-            else if (statistical_quantity_key == "TKE_Y_INT_HOMO_YZ")
-            {
-                f_out << "\t" << "TKE_Y_INT_HOME_YZ    ";
-            }
-            else if (statistical_quantity_key == "TKE_Z_INT_HOMO_YZ")
-            {
-                f_out << "\t" << "TKE_Z_INT_HOME_YZ    ";
-            }
-            else if (statistical_quantity_key == "ENSTROPHY_INT")
-            {
-                f_out << "\t" << "ENSTROPHY_INT        ";
-            }
-            else if (statistical_quantity_key == "SCAL_DISS_RAT_INT")
-            {
-                f_out << "\t" << "SCAL_DISS_RAT_INT    ";
-            }
-            else if (statistical_quantity_key == "RE_HOMO_Y_IN_ML_X")
-            {
-                f_out << "\t" << "RE_HOMO_Y_IN_ML_X    ";
-            }
-            else if (statistical_quantity_key == "RE_HOMO_YZ_IN_ML_X")
-            {
-                f_out << "\t" << "RE_HOMO_YZ_IN_ML_X   ";
-            }
-            else if (statistical_quantity_key == "TKE_HOMO_Y_IN_ML_X")
-            {
-                f_out << "\t" << "TKE_HOMO_Y_IN_ML_X   ";
-            }
-            else if (statistical_quantity_key == "TKE_X_HOMO_Y_IN_ML_X")
-            {
-                f_out << "\t" << "TKE_X_HOMO_Y_IN_ML_X ";
-            }
-            else if (statistical_quantity_key == "TKE_Y_HOMO_Y_IN_ML_X")
-            {
-                f_out << "\t" << "TKE_Y_HOMO_Y_IN_ML_X ";
-            }
-            else if (statistical_quantity_key == "TKE_Z_HOMO_Y_IN_ML_X")
-            {
-                f_out << "\t" << "TKE_Z_HOMO_Y_IN_ML_X ";
-            }
-            else if (statistical_quantity_key == "TKE_HOMO_YZ_IN_ML_X")
-            {
-                f_out << "\t" << "TKE_HOMO_YZ_IN_ML_X  ";
-            }
-            else if (statistical_quantity_key == "TKE_X_HOMO_YZ_IN_ML_X")
-            {
-                f_out << "\t" << "TKE_X_HOMO_YZ_IN_ML_X";
-            }
-            else if (statistical_quantity_key == "TKE_Y_HOMO_YZ_IN_ML_X")
-            {
-                f_out << "\t" << "TKE_Y_HOMO_YZ_IN_ML_X";
-            }
-            else if (statistical_quantity_key == "TKE_Z_HOMO_YZ_IN_ML_X")
-            {
-                f_out << "\t" << "TKE_Z_HOMO_YZ_IN_ML_X";
-            }
-            else if (statistical_quantity_key == "R11_HOMO_Y_IN_ML_X")
-            {
-                f_out << "\t" << "R11_HOMO_Y_IN_ML_X   ";
-            }
-            else if (statistical_quantity_key == "R22_HOMO_Y_IN_ML_X")
-            {
-                f_out << "\t" << "R22_HOMO_Y_IN_ML_X   ";
-            }
-            else if (statistical_quantity_key == "R11_HOMO_YZ_IN_ML_X")
-            {
-                f_out << "\t" << "R11_HOMO_YZ_IN_ML_X  ";
-            }
-            else if (statistical_quantity_key == "R22_HOMO_YZ_IN_ML_X")
-            {
-                f_out << "\t" << "R22_HOMO_YZ_IN_ML_X  ";
-            }
-            else if (statistical_quantity_key == "R33_HOMO_YZ_IN_ML_X")
-            {
-                f_out << "\t" << "R33_HOMO_YZ_IN_ML_X  ";
-            }
-            else if (statistical_quantity_key == "R12_HOMO_Y_IN_ML_X")
-            {
-                f_out << "\t" << "R12_HOMO_Y_IN_ML_X   ";
-            }
-            else if (statistical_quantity_key == "R12_HOMO_YZ_IN_ML_X")
-            {
-                f_out << "\t" << "R12_HOMO_YZ_IN_ML_X  ";
-            }
-            else if (statistical_quantity_key == "R13_HOMO_YZ_IN_ML_X")
-            {
-                f_out << "\t" << "R13_HOMO_YZ_IN_ML_X  ";
-            }
-            else if (statistical_quantity_key == "R23_HOMO_YZ_IN_ML_X")
-            {
-                f_out << "\t" << "R23_HOMO_YZ_IN_ML_X  ";
-            }
-            else if (statistical_quantity_key == "b11_HOMO_Y_IN_ML_X")
-            {
-                f_out << "\t" << "b11_HOMO_Y_IN_ML_X   ";
-            }
-            else if (statistical_quantity_key == "b22_HOMO_Y_IN_ML_X")
-            {
-                f_out << "\t" << "b22_HOMO_Y_IN_ML_X   ";
-            }
-            else if (statistical_quantity_key == "b11_HOMO_YZ_IN_ML_X")
-            {
-                f_out << "\t" << "b11_HOMO_YZ_IN_ML_X  ";
-            }
-            else if (statistical_quantity_key == "b22_HOMO_YZ_IN_ML_X")
-            {
-                f_out << "\t" << "b22_HOMO_YZ_IN_ML_X  ";
-            }
-            else if (statistical_quantity_key == "b33_HOMO_YZ_IN_ML_X")
-            {
-                f_out << "\t" << "b33_HOMO_YZ_IN_ML_X  ";
-            }
-            else if (statistical_quantity_key == "b12_HOMO_Y_IN_ML_X")
-            {
-                f_out << "\t" << "b12_HOMO_YZ_IN_ML_X  ";
-            }
-            else if (statistical_quantity_key == "b12_HOMO_YZ_IN_ML_X")
-            {
-                f_out << "\t" << "b12_HOMO_YZ_IN_ML_X  ";
-            }
-            else if (statistical_quantity_key == "b13_HOMO_YZ_IN_ML_X")
-            {
-                f_out << "\t" << "b13_HOMO_YZ_IN_ML_X  ";
-            }
-            else if (statistical_quantity_key == "b23_HOMO_YZ_IN_ML_X")
-            {
-                f_out << "\t" << "b23_HOMO_YZ_IN_ML_X  ";
-            }
-            else if (statistical_quantity_key == "a1_HOMO_Y_IN_ML_X")
-            {
-                f_out << "\t" << "a1_HOMO_Y_IN_ML_X    ";
-            }
-            else if (statistical_quantity_key == "a1_HOMO_YZ_IN_ML_X")
-            {
-                f_out << "\t" << "a1_HOMO_YZ_IN_ML_X   ";
-            }
-            else if (statistical_quantity_key == "b_HOMO_Y_IN_ML_X")
-            {
-                f_out << "\t" << "b_HOMO_Y_IN_ML_X     ";
-            }
-            else if (statistical_quantity_key == "b_HOMO_YZ_IN_ML_X")
-            {
-                f_out << "\t" << "b_HOMO_YZ_IN_ML_X    ";
-            }
-            else if (statistical_quantity_key == "DEN_MEAN_Y_IN_ML_X")
-            {
-                f_out << "\t" << "DEN_MEAN_Y_IN_ML_X   ";
-            }
-            else if (statistical_quantity_key == "DEN_MEAN_YZ_IN_ML_X")
-            {
-                f_out << "\t" << "DEN_MEAN_YZ_IN_ML_X  ";
-            }
-            else if (statistical_quantity_key == "BOUSS_HOMO_Y_IN_ML_X")
-            {
-                f_out << "\t" << "BOUSS_HOMO_Y_IN_ML_X ";
-            }
-            else if (statistical_quantity_key == "BOUSS_HOMO_YZ_IN_ML_X")
-            {
-                f_out << "\t" << "BOUSS_HOMO_YZ_IN_ML_X";
-            }
-            else if (statistical_quantity_key == "MASS_DIFF_IN_ML_X")
-            {
-                f_out << "\t" << "MASS_DIFF_IN_ML_X    ";
-            }
-            else if (statistical_quantity_key == "DYN_SHEAR_VIS_IN_ML_X")
-            {
-                f_out << "\t" << "DYN_SHEAR_VIS_IN_ML_X";
-            }
-            else if (statistical_quantity_key == "KIN_SHEAR_VIS_IN_ML_X")
-            {
-                f_out << "\t" << "KIN_SHEAR_VIS_IN_ML_X";
-            }
-            else if (statistical_quantity_key == "DYN_BULK_VIS_IN_ML_X")
-            {
-                f_out << "\t" << "DYN_BULK_VIS_IN_ML_X ";
-            }
-            else if (statistical_quantity_key == "KIN_BULK_VIS_IN_ML_X")
-            {
-                f_out << "\t" << "KIN_BULK_VIS_IN_ML_X ";
-            }
-            else if (statistical_quantity_key == "THERMAL_COND_IN_ML_X")
-            {
-                f_out << "\t" << "THERMAL_COND_IN_ML_X ";
-            }
-            else if (statistical_quantity_key == "THERMAL_DIFF_IN_ML_X")
-            {
-                f_out << "\t" << "THERMAL_DIFF_IN_ML_X ";
-            }
-            else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X1")
-            {
-                f_out << "\t" << "MIXING_LAYER_WIDTH_X1";
-            }
-            else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X2")
-            {
-                f_out << "\t" << "MIXING_LAYER_WIDTH_X2";
-            }
-            else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X3")
-            {
-                f_out << "\t" << "MIXING_LAYER_WIDTH_X3";
-            }
-            else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X4")
-            {
-                f_out << "\t" << "MIXING_LAYER_WIDTH_X4";
-            }
-            else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X5")
-            {
-                f_out << "\t" << "MIXING_LAYER_WIDTH_X5";
-            }
-            else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X6")
-            {
-                f_out << "\t" << "MIXING_LAYER_WIDTH_X6";
-            }
-            else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X7")
-            {
-                f_out << "\t" << "MIXING_LAYER_WIDTH_X7";
-            }
-            else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X8")
-            {
-                f_out << "\t" << "MIXING_LAYER_WIDTH_X8";
-            }
-            else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X9")
-            {
-                f_out << "\t" << "MIXING_LAYER_WIDTH_X9";
-            }
-            else if (statistical_quantity_key == "NUM_INTEF_THICK")
-            {
-                f_out << "\t" << "NUM_INTEF_THICK      ";
-            }
-        }
+        /*
+         * Output mixing width in y-direction to a file.
+         */
+        void
+        outputMixingWidthInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
         
-        f_out.close();
-    }
-}
-
-
-/*
- * Output statisitcal quantities to a file.
- */
-void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
-    const std::string& stat_dump_filename,
-    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-    const boost::shared_ptr<hier::VariableContext>& data_context)
-{
-#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-    TBOX_ASSERT(!stat_dump_filename.empty());
-#endif
-    
-    // Loop over statistical quantities.
-    for (int qi = 0; qi < static_cast<int>(d_statistical_quantities.size()); qi++)
-    {
-        // Get the key of the current variable.
-        std::string statistical_quantity_key = d_statistical_quantities[qi];
+        /*
+         * Output mixing width in z-direction to a file.
+         */
+        void
+        outputMixingWidthInZDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
         
-        if (statistical_quantity_key == "MIXING_WIDTH_X")
-        {
-            outputMixingWidthInXDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "MIXING_WIDTH_Y")
-        {
-            outputMixingWidthInYDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "MIXING_WIDTH_Z")
-        {
-            outputMixingWidthInZDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "MIXEDNESS_X")
-        {
-            outputMixednessInXDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "MIXEDNESS_Y")
-        {
-            outputMixednessInYDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "MIXEDNESS_Z")
-        {
-            outputMixednessInZDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "TKE_INT_HOMO_X")
-        {
-            outputTKEIntegratedWithHomogeneityInXDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "TKE_INT_HOMO_Y")
-        {
-            outputTKEIntegratedWithHomogeneityInYDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "TKE_INT_HOMO_Z")
-        {
-            outputTKEIntegratedWithHomogeneityInZDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "TKE_INT_HOMO_XY")
-        {
-            outputTKEIntegratedWithHomogeneityInXYPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "TKE_INT_HOMO_YZ")
-        {
-            outputTKEIntegratedWithHomogeneityInYZPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "TKE_INT_HOMO_XZ")
-        {
-            outputTKEIntegratedWithHomogeneityInXZPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "TKE_X_INT_HOMO_YZ")
-        {
-            outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "TKE_Y_INT_HOMO_YZ")
-        {
-            outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "TKE_Z_INT_HOMO_YZ")
-        {
-            outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "ENSTROPHY_INT")
-        {
-            outputEnstrophyIntegrated(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "SCAL_DISS_RAT_INT")
-        {
-            outputScalarDissipationRateIntegrated(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "RE_HOMO_Y_IN_ML_X")
-        {
-            outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "RE_HOMO_YZ_IN_ML_X")
-        {
-            outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "TKE_HOMO_Y_IN_ML_X")
-        {
-            outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "TKE_X_HOMO_Y_IN_ML_X")
-        {
-            outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "TKE_Y_HOMO_Y_IN_ML_X")
-        {
-            outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "TKE_HOMO_YZ_IN_ML_X")
-        {
-            outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "TKE_X_HOMO_YZ_IN_ML_X")
-        {
-            outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "TKE_Y_HOMO_YZ_IN_ML_X")
-        {
-            outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "TKE_Z_HOMO_YZ_IN_ML_X")
-        {
-            outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "R11_HOMO_Y_IN_ML_X")
-        {
-            outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "R22_HOMO_Y_IN_ML_X")
-        {
-            outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "R11_HOMO_YZ_IN_ML_X")
-        {
-            outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "R22_HOMO_YZ_IN_ML_X")
-        {
-            outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "R33_HOMO_YZ_IN_ML_X")
-        {
-            outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "R12_HOMO_Y_IN_ML_X")
-        {
-            outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "R12_HOMO_YZ_IN_ML_X")
-        {
-            outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "R13_HOMO_YZ_IN_ML_X")
-        {
-            outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "R23_HOMO_YZ_IN_ML_X")
-        {
-            outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "b11_HOMO_Y_IN_ML_X")
-        {
-            outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "b22_HOMO_Y_IN_ML_X")
-        {
-            outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "b11_HOMO_YZ_IN_ML_X")
-        {
-            outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "b22_HOMO_YZ_IN_ML_X")
-        {
-            outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "b33_HOMO_YZ_IN_ML_X")
-        {
-            outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "b12_HOMO_Y_IN_ML_X")
-        {
-            outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "b12_HOMO_YZ_IN_ML_X")
-        {
-            outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "b13_HOMO_YZ_IN_ML_X")
-        {
-            outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "b23_HOMO_YZ_IN_ML_X")
-        {
-            outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "a1_HOMO_Y_IN_ML_X")
-        {
-            outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "a1_HOMO_YZ_IN_ML_X")
-        {
-            outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "b_HOMO_Y_IN_ML_X")
-        {
-            outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "b_HOMO_YZ_IN_ML_X")
-        {
-            outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "DEN_MEAN_Y_IN_ML_X")
-        {
-            outputDensityMeanInMixingLayerWithHomogeneityInYDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "DEN_MEAN_YZ_IN_ML_X")
-        {
-            outputDensityMeanInMixingLayerWithHomogeneityInYZPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "BOUSS_HOMO_Y_IN_ML_X")
-        {
-            outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "BOUSS_HOMO_YZ_IN_ML_X")
-        {
-            outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "MASS_DIFF_IN_ML_X")
-        {
-            outputMassDiffusivityMeanInMixingLayerInXDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "DYN_SHEAR_VIS_IN_ML_X")
-        {
-            outputDynamicShearViscosityMeanInMixingLayerInXDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "KIN_SHEAR_VIS_IN_ML_X")
-        {
-            outputKinematicShearViscosityMeanInMixingLayerInXDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "DYN_BULK_VIS_IN_ML_X")
-        {
-            outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "KIN_BULK_VIS_IN_ML_X")
-        {
-            outputKinematicBulkViscosityMeanInMixingLayerInXDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "THERMAL_COND_IN_ML_X")
-        {
-            outputThermalConductivityMeanInMixingLayerInXDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "THERMAL_DIFF_IN_ML_X")
-        {
-            outputThermalDiffusivityMeanInMixingLayerInXDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X1")
-        {
-            outputMixingLayerWidth1InXDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X2")
-        {
-            outputMixingLayerWidth2InXDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X3")
-        {
-            outputMixingLayerWidth3InXDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X4")
-        {
-            outputMixingLayerWidth4InXDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X5")
-        {
-            outputMixingLayerWidth5InXDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X6")
-        {
-            outputMixingLayerWidth6InXDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X7")
-        {
-            outputMixingLayerWidth7InXDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X8")
-        {
-            outputMixingLayerWidth8InXDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X9")
-        {
-            outputMixingLayerWidth9InXDirection(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else if (statistical_quantity_key == "NUM_INTEF_THICK")
-        {
-            outputNumericalInterfaceThickness(
-                stat_dump_filename,
-                patch_hierarchy,
-                data_context);
-        }
-        else
-        {
-            TBOX_ERROR(d_object_name
-                << ": "
-                << "Unknown statistical quantity key = '"
-                << statistical_quantity_key
-                << " found."
-                << std::endl);
-        }
-    }
-    
-    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
-    if (mpi.getRank() == 0)
-    {
-        std::ofstream f_out;
-        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        /*
+         * Output mixedness in x-direction to a file.
+         */
+        void
+        outputMixednessInXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
         
-        if (!f_out.is_open())
-        {
-            TBOX_ERROR(d_object_name
-                << ": "
-                << "Failed to open file to output statistics!"
-                << std::endl);
-        }
+        /*
+         * Output mixedness in y-direction to a file.
+         */
+        void
+        outputMixednessInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
         
-        f_out.close();
-    }
-}
+        /*
+         * Output mixedness in z-direction to a file.
+         */
+        void
+        outputMixednessInZDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output TKE integrated with assumed homogeneity in x-direction to a file.
+         */
+        void
+        outputTKEIntegratedWithHomogeneityInXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output TKE integrated with assumed homogeneity in y-direction to a file.
+         */
+        void
+        outputTKEIntegratedWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output TKE integrated with assumed homogeneity in z-direction to a file.
+         */
+        void
+        outputTKEIntegratedWithHomogeneityInZDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output TKE integrated with assumed homogeneity in xy-plane to a file.
+         */
+        void
+        outputTKEIntegratedWithHomogeneityInXYPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output TKE integrated with assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputTKEIntegratedWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output TKE integrated with assumed homogeneity in xz-plane to a file.
+         */
+        void
+        outputTKEIntegratedWithHomogeneityInXZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output TKE in x-direction integrated with assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output TKE in y-direction integrated with assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output TKE in z-direction integrated with assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output enstrophy integrated to a file.
+         */
+        void
+        outputEnstrophyIntegrated(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output scalar dissipation rate of first species integrated to a file.
+         */
+        void
+        outputScalarDissipationRateIntegrated(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds number inside mixing layer with assumed homogeneity in y-direction to
+         * a file.
+         */
+        void
+        outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds number inside mixing layer with assumed homogeneity in yz-plane to
+         * a file.
+         */
+        void
+        outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean TKE inside mixing layer with assumed homogeneity in y-direction to a file.
+         */
+        void
+        outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean TKE in x-direction inside mixing layer with assumed homogeneity in y-direction
+         * to a file.
+         */
+        void
+        outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean TKE in y-direction inside mixing layer with assumed homogeneity in y-direction
+         * to a file.
+         */
+        void
+        outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean TKE inside mixing layer with assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean TKE in x-direction inside mixing layer with assumed homogeneity in yz-plane
+         * to a file.
+         */
+        void
+        outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean TKE in y-direction inside mixing layer with assumed homogeneity in yz-plane
+         * to a file.
+         */
+        void
+        outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean TKE in z-direction inside mixing layer with assumed homogeneity in yz-plane
+         * to a file.
+         */
+        void
+        outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds normal stress component in x-direction inside mixing layer with
+         * assumed homogeneity in y-direction to a file.
+         */
+        void
+        outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds normal stress component in y-direction inside mixing layer with
+         * assumed homogeneity in y-direction to a file.
+         */
+        void
+        outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds normal stress component in x-direction inside mixing layer with
+         * assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds normal stress component in y-direction inside mixing layer with
+         * assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds normal stress component in z-direction inside mixing layer with
+         * assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds shear stress component in x- and y-directions inside mixing layer
+         * with assumed homogeneity in y-direction to a file.
+         */
+        void
+        outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds shear stress component in x- and y-directions inside mixing layer
+         * with assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds shear stress component in x- and z-directions inside mixing layer
+         * with assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds shear stress component in y- and z-directions inside mixing layer
+         * with assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds normal stress anisotropy component in x-direction inside mixing layer with
+         * assumed homogeneity in y-direction to a file.
+         */
+        void
+        outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds normal stress anisotropy component in y-direction inside mixing layer with
+         * assumed homogeneity in y-direction to a file.
+         */
+        void
+        outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds normal stress anisotropy component in x-direction inside mixing layer with
+         * assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds normal stress anisotropy component in y-direction inside mixing layer with
+         * assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds normal stress anisotropy component in z-direction inside mixing layer with
+         * assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds shear stress anisotropy component in x- and y-directions inside mixing layer
+         * with assumed homogeneity in y-direction to a file.
+         */
+        void
+        outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds shear stress anisotropy component in x- and y-directions inside mixing layer
+         * with assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds shear stress anisotropy component in x- and z-directions inside mixing layer
+         * with assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean Reynolds shear stress anisotropy component in y- and z-directions inside mixing layer
+         * with assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean turbulent mass flux in x-direction inside mixing layer with assumed homogeneity
+         * in y-direction to a file.
+         */
+        void
+        outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean turbulent mass flux in x-direction inside mixing layer with assumed homogeneity
+         * in yz-plane to a file.
+         */
+        void
+        outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean density specific volume covariance inside mixing layer with assumed homogeneity
+         * in y-direction to a file.
+         */
+        void
+        outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean density specific volume covariance inside mixing layer with assumed homogeneity
+         * in yz-plane to a file.
+         */
+        void
+        outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean density inside mixing layer with assumed homogeneity in y-direction to a file.
+         */
+        void
+        outputDensityMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean density inside mixing layer with assumed homogeneity in yz-plane to a file.
+         */
+        void
+        outputDensityMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean deviation from Boussinesq approximation inside mixing layer with assumed
+         * homogeneity in y-direction to a file.
+         */
+        void
+        outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean deviation from Boussinesq approximation inside mixing layer with assumed
+         * homogeneity in yz-plane to a file.
+         */
+        void
+        outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean mass diffusivity inside mixing layer in x-direction to a file.
+         */
+        void
+        outputMassDiffusivityMeanInMixingLayerInXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean dynamic shear viscosity inside mixing layer in x-direction to a file.
+         */
+        void
+        outputDynamicShearViscosityMeanInMixingLayerInXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean kinematic shear viscosity inside mixing layer in x-direction to a file.
+         */
+        void
+        outputKinematicShearViscosityMeanInMixingLayerInXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean dynamic bulk viscosity inside mixing layer in x-direction to a file.
+         */
+        void
+        outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean kinematic bulk viscosity inside mixing layer in x-direction to a file.
+         */
+        void
+        outputKinematicBulkViscosityMeanInMixingLayerInXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean thermal conductivity inside mixing layer in x-direction to a file.
+         */
+        void
+        outputThermalConductivityMeanInMixingLayerInXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mean thermal diffusivity inside mixing layer in x-direction to a file.
+         */
+        void
+        outputThermalDiffusivityMeanInMixingLayerInXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mixing layer width 1 in x-direction to a file.
+         */
+        void
+        outputMixingLayerWidth1InXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mixing layer width 2 in x-direction to a file.
+         */
+        void
+        outputMixingLayerWidth2InXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mixing layer width 3 in x-direction to a file.
+         */
+        void
+        outputMixingLayerWidth3InXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mixing layer width 4 in x-direction to a file.
+         */
+        void
+        outputMixingLayerWidth4InXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mixing layer width 5 in x-direction to a file.
+         */
+        void
+        outputMixingLayerWidth5InXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mixing layer width 6 in x-direction to a file.
+         */
+        void
+        outputMixingLayerWidth6InXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mixing layer width 7 in x-direction to a file.
+         */
+        void
+        outputMixingLayerWidth7InXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mixing layer width 8 in x-direction to a file.
+         */
+        void
+        outputMixingLayerWidth8InXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output mixing layer width 9 in x-direction to a file.
+         */
+        void
+        outputMixingLayerWidth9InXDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output numerical interface thickness to a file.
+         */
+        void
+        outputNumericalInterfaceThickness(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+    private:
+        /*
+         * The object name is used for error/warning reporting.
+         */
+        const std::string d_object_name;
+        
+        /*
+         * Problem dimension.
+         */
+        const tbox::Dimension d_dim;
+        
+        /*
+         * boost::shared_ptr to the grid geometry.
+         */
+        const boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
+        
+        /*
+         * Number of species.
+         */
+        const int d_num_species;
+        
+        /*
+         * boost::weak_ptr to FlowModel.
+         */
+        const boost::weak_ptr<FlowModel> d_flow_model;
+        
+        /*
+         * boost::shared_ptr to EquationOfStateMixingRules.
+         */
+        const boost::shared_ptr<EquationOfStateMixingRules>
+            d_equation_of_state_mixing_rules;
+        
+        /*
+         * boost::shared_ptr to EquationOfMassDiffusivityMixingRules.
+         */
+        const boost::shared_ptr<EquationOfMassDiffusivityMixingRules>
+            d_equation_of_mass_diffusivity_mixing_rules;
+        
+        /*
+         * boost::shared_ptr to EquationOfShearViscosityMixingRules.
+         */
+        const boost::shared_ptr<EquationOfShearViscosityMixingRules>
+            d_equation_of_shear_viscosity_mixing_rules;
+        
+        /*
+         * boost::shared_ptr to EquationOfBulkViscosityMixingRules.
+         */
+        const boost::shared_ptr<EquationOfBulkViscosityMixingRules>
+            d_equation_of_bulk_viscosity_mixing_rules;
+        
+        /*
+         * boost::shared_ptr to EquationOfThermalConductivityMixingRules.
+         */
+        const boost::shared_ptr<EquationOfThermalConductivityMixingRules>
+            d_equation_of_thermal_conductivity_mixing_rules;
+        
+        /*
+         * Number of ghost cells to use in taking derivatives.
+         */
+        const int d_num_ghosts_derivative;
+        
+};
 
 
 /*
  * Output mixing width in x-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
+RMIStatisticsUtilities::outputMixingWidthInXDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -1602,7 +1487,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInXDirection(
  * Output mixing width in y-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
+RMIStatisticsUtilities::outputMixingWidthInYDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -2146,7 +2031,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInYDirection(
  * Output mixing width in z-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInZDirection(
+RMIStatisticsUtilities::outputMixingWidthInZDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -2479,7 +2364,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingWidthInZDirection(
  * Output mixedness in x-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
+RMIStatisticsUtilities::outputMixednessInXDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -3279,7 +3164,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInXDirection(
  * Output mixedness in y-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
+RMIStatisticsUtilities::outputMixednessInYDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -3869,7 +3754,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInYDirection(
  * Output mixedness in z-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInZDirection(
+RMIStatisticsUtilities::outputMixednessInZDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -4225,7 +4110,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixednessInZDirection(
  * Output TKE integrated with assumed homogeneity in x-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogeneityInXDirection(
+RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -4762,7 +4647,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
  * Output TKE integrated with assumed homogeneity in y-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogeneityInYDirection(
+RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -5299,7 +5184,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
  * Output TKE integrated with assumed homogeneity in z-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogeneityInZDirection(
+RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInZDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -5332,7 +5217,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
  * Output TKE integrated with assumed homogeneity in xy-plane to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogeneityInXYPlane(
+RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXYPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -5919,7 +5804,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
  * Output TKE integrated with assumed homogeneity in yz-plane to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogeneityInYZPlane(
+RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -6506,7 +6391,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
  * Output TKE integrated with assumed homogeneity in xz-plane to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogeneityInXZPlane(
+RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXZPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -7093,7 +6978,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEIntegratedWithHomogene
  * Output TKE in x-direction integrated with assumed homogeneity in yz-plane to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -7637,7 +7522,7 @@ outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
  * Output TKE in y-direction integrated with assumed homogeneity in yz-plane to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -8184,7 +8069,7 @@ outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
  * Output TKE in z-direction integrated with assumed homogeneity in yz-plane to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -8731,7 +8616,7 @@ outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
  * Output enstrophy integrated to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputEnstrophyIntegrated(
+RMIStatisticsUtilities::outputEnstrophyIntegrated(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -9315,7 +9200,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputEnstrophyIntegrated(
  * Output scalar dissipation rate of first species integrated to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateIntegrated(
+RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -10217,7 +10102,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputScalarDissipationRateInte
  * a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -10888,7 +10773,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
  * Output mean Reynolds number inside mixing layer with assumed homogeneity in yz-plane to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -11617,7 +11502,7 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
  * Output mean TKE inside mixing layer with assumed homogeneity in y-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
+RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -12224,7 +12109,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
  * to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -12812,7 +12697,7 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
  * to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -13399,7 +13284,7 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
  * Output mean TKE inside mixing layer with assumed homogeneity in yz-plane to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
+RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -14059,7 +13944,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputTKEMeanInMixingLayerWithH
  * to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -14680,7 +14565,7 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
  * to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -15301,7 +15186,7 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
  * to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -15922,7 +15807,7 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
  * assumed homogeneity in y-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -16511,7 +16396,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
  * assumed homogeneity in y-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -17100,7 +16985,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
  * assumed homogeneity in yz-plane to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -17722,7 +17607,7 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
  * assumed homogeneity in yz-plane to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -18344,7 +18229,7 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
  * assumed homogeneity in yz-plane to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -18966,7 +18851,7 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
  * with assumed homogeneity in y-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -19575,7 +19460,7 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
  * with assumed homogeneity in yz-plane to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -20217,7 +20102,7 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
  * with assumed homogeneity in yz-plane to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -20859,7 +20744,7 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
  * with assumed homogeneity in yz-plane to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -21501,7 +21386,7 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
  * assumed homogeneity in y-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -22130,7 +22015,7 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
  * assumed homogeneity in y-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -22759,7 +22644,7 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
  * assumed homogeneity in yz-plane to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -23459,7 +23344,7 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
  * assumed homogeneity in yz-plane to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -24159,7 +24044,7 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
  * assumed homogeneity in yz-plane to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -24859,7 +24744,7 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
  * with assumed homogeneity in y-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -25509,7 +25394,7 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
  * with assumed homogeneity in yz-plane to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -26230,7 +26115,7 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
  * with assumed homogeneity in yz-plane to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -26951,7 +26836,7 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
  * with assumed homogeneity in yz-plane to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -27672,7 +27557,7 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
  * in y-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -28259,7 +28144,7 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
  * yz-plane to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -28879,7 +28764,7 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
  * in y-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -29432,7 +29317,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
  * in yz-plane to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -30009,7 +29894,7 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
  * Output mean density inside mixing layer with assumed homogeneity in y-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputDensityMeanInMixingLayerWithHomogeneityInYDirection(
+RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -30364,7 +30249,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDensityMeanInMixingLayerW
  * Output mean density inside mixing layer with assumed homogeneity in yz-plane to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputDensityMeanInMixingLayerWithHomogeneityInYZPlane(
+RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -30735,7 +30620,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDensityMeanInMixingLayerW
  * homogeneity in y-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -31307,7 +31192,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
  * homogeneity in yz-plane to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::
+RMIStatisticsUtilities::
 outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
@@ -31903,7 +31788,7 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
  * Output mean mass diffusivity inside mixing layer in x-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixingLayerInXDirection(
+RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -32871,7 +32756,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMassDiffusivityMeanInMixi
  * Output mean dynamic shear viscosity inside mixing layer in x-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMeanInMixingLayerInXDirection(
+RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -33806,7 +33691,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicShearViscosityMean
  * Output mean kinematic shear viscosity inside mixing layer in x-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMeanInMixingLayerInXDirection(
+RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -34798,7 +34683,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicShearViscosityMe
  * Output mean dynamic bulk viscosity inside mixing layer in x-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
+RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -35733,7 +35618,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputDynamicBulkViscosityMeanI
  * Output mean kinematic bulk viscosity inside mixing layer in x-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMeanInMixingLayerInXDirection(
+RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -36725,7 +36610,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputKinematicBulkViscosityMea
  * Output mean thermal conductivity inside mixing layer in x-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanInMixingLayerInXDirection(
+RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -37660,7 +37545,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalConductivityMeanIn
  * Output mean thermal diffusivity inside mixing layer in x-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInMixingLayerInXDirection(
+RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -38670,7 +38555,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputThermalDiffusivityMeanInM
  * Output mixing layer width 1 in x-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingLayerWidth1InXDirection(
+RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -39451,7 +39336,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingLayerWidth1InXDirec
  * Output mixing layer width 2 in x-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingLayerWidth2InXDirection(
+RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -40232,7 +40117,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingLayerWidth2InXDirec
  * Output mixing layer width 3 in x-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingLayerWidth3InXDirection(
+RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -41013,7 +40898,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingLayerWidth3InXDirec
  * Output mixing layer width 4 in x-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingLayerWidth4InXDirection(
+RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -41794,7 +41679,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingLayerWidth4InXDirec
  * Output mixing layer width 5 in x-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingLayerWidth5InXDirection(
+RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -42533,7 +42418,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingLayerWidth5InXDirec
  * Output mixing layer width 6 in x-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingLayerWidth6InXDirection(
+RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -43272,7 +43157,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingLayerWidth6InXDirec
  * Output mixing layer width 7 in x-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingLayerWidth7InXDirection(
+RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -44011,7 +43896,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingLayerWidth7InXDirec
  * Output mixing layer width 8 in x-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingLayerWidth8InXDirection(
+RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -44750,7 +44635,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingLayerWidth8InXDirec
  * Output mixing layer width 9 in x-direction to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingLayerWidth9InXDirection(
+RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -45489,7 +45374,7 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputMixingLayerWidth9InXDirec
  * Output numerical interface thickness to a file.
  */
 void
-FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickness(
+RMIStatisticsUtilities::outputNumericalInterfaceThickness(
     const std::string& stat_dump_filename,
     const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
     const boost::shared_ptr<hier::VariableContext>& data_context)
@@ -46806,5 +46691,876 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputNumericalInterfaceThickne
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
                   << "\t" << 1.0/(dx_finest*grad_mag_max_global);
         }
+    }
+}
+
+
+/*
+ * Output names of statistical quantities to output to a file.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesNames(
+    const std::string& stat_dump_filename)
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    if (d_flow_model.expired())
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "The object is not setup yet!"
+            << std::endl);
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        // Loop over statistical quantities.
+        for (int qi = 0; qi < static_cast<int>(d_statistical_quantities.size()); qi++)
+        {
+            // Get the key of the current variable.
+            std::string statistical_quantity_key = d_statistical_quantities[qi];
+            
+            if (statistical_quantity_key == "MIXING_WIDTH_X")
+            {
+                f_out << "\t" << "MIXING_WIDTH_X       ";
+            }
+            else if (statistical_quantity_key == "MIXING_WIDTH_Y")
+            {
+                f_out << "\t" << "MIXING_WIDTH_Y       ";
+            }
+            else if (statistical_quantity_key == "MIXING_WIDTH_Z")
+            {
+                f_out << "\t" << "MIXING_WIDTH_Z       ";
+            }
+            else if (statistical_quantity_key == "MIXEDNESS_X")
+            {
+                f_out << "\t" << "MIXEDNESS_X          ";
+            }
+            else if (statistical_quantity_key == "MIXEDNESS_Y")
+            {
+                f_out << "\t" << "MIXEDNESS_Y          ";
+            }
+            else if (statistical_quantity_key == "MIXEDNESS_Z")
+            {
+                f_out << "\t" << "MIXEDNESS_Z          ";
+            }
+            else if (statistical_quantity_key == "TKE_INT_HOMO_X")
+            {
+                f_out << "\t" << "TKE_INT_HOMO_X       ";
+            }
+            else if (statistical_quantity_key == "TKE_INT_HOMO_Y")
+            {
+                f_out << "\t" << "TKE_INT_HOMO_Y       ";
+            }
+            else if (statistical_quantity_key == "TKE_INT_HOMO_Z")
+            {
+                f_out << "\t" << "TKE_INT_HOMO_Z       ";
+            }
+            else if (statistical_quantity_key == "TKE_INT_HOMO_XY")
+            {
+                f_out << "\t" << "TKE_INT_HOMO_XY      ";
+            }
+            else if (statistical_quantity_key == "TKE_INT_HOMO_YZ")
+            {
+                f_out << "\t" << "TKE_INT_HOMO_YZ      ";
+            }
+            else if (statistical_quantity_key == "TKE_INT_HOMO_XZ")
+            {
+                f_out << "\t" << "TKE_INT_HOMO_XZ      ";
+            }
+            else if (statistical_quantity_key == "TKE_X_INT_HOMO_YZ")
+            {
+                f_out << "\t" << "TKE_X_INT_HOME_YZ    ";
+            }
+            else if (statistical_quantity_key == "TKE_Y_INT_HOMO_YZ")
+            {
+                f_out << "\t" << "TKE_Y_INT_HOME_YZ    ";
+            }
+            else if (statistical_quantity_key == "TKE_Z_INT_HOMO_YZ")
+            {
+                f_out << "\t" << "TKE_Z_INT_HOME_YZ    ";
+            }
+            else if (statistical_quantity_key == "ENSTROPHY_INT")
+            {
+                f_out << "\t" << "ENSTROPHY_INT        ";
+            }
+            else if (statistical_quantity_key == "SCAL_DISS_RAT_INT")
+            {
+                f_out << "\t" << "SCAL_DISS_RAT_INT    ";
+            }
+            else if (statistical_quantity_key == "RE_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "RE_HOMO_Y_IN_ML_X    ";
+            }
+            else if (statistical_quantity_key == "RE_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "RE_HOMO_YZ_IN_ML_X   ";
+            }
+            else if (statistical_quantity_key == "TKE_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "TKE_HOMO_Y_IN_ML_X   ";
+            }
+            else if (statistical_quantity_key == "TKE_X_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "TKE_X_HOMO_Y_IN_ML_X ";
+            }
+            else if (statistical_quantity_key == "TKE_Y_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "TKE_Y_HOMO_Y_IN_ML_X ";
+            }
+            else if (statistical_quantity_key == "TKE_Z_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "TKE_Z_HOMO_Y_IN_ML_X ";
+            }
+            else if (statistical_quantity_key == "TKE_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "TKE_HOMO_YZ_IN_ML_X  ";
+            }
+            else if (statistical_quantity_key == "TKE_X_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "TKE_X_HOMO_YZ_IN_ML_X";
+            }
+            else if (statistical_quantity_key == "TKE_Y_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "TKE_Y_HOMO_YZ_IN_ML_X";
+            }
+            else if (statistical_quantity_key == "TKE_Z_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "TKE_Z_HOMO_YZ_IN_ML_X";
+            }
+            else if (statistical_quantity_key == "R11_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "R11_HOMO_Y_IN_ML_X   ";
+            }
+            else if (statistical_quantity_key == "R22_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "R22_HOMO_Y_IN_ML_X   ";
+            }
+            else if (statistical_quantity_key == "R11_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "R11_HOMO_YZ_IN_ML_X  ";
+            }
+            else if (statistical_quantity_key == "R22_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "R22_HOMO_YZ_IN_ML_X  ";
+            }
+            else if (statistical_quantity_key == "R33_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "R33_HOMO_YZ_IN_ML_X  ";
+            }
+            else if (statistical_quantity_key == "R12_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "R12_HOMO_Y_IN_ML_X   ";
+            }
+            else if (statistical_quantity_key == "R12_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "R12_HOMO_YZ_IN_ML_X  ";
+            }
+            else if (statistical_quantity_key == "R13_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "R13_HOMO_YZ_IN_ML_X  ";
+            }
+            else if (statistical_quantity_key == "R23_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "R23_HOMO_YZ_IN_ML_X  ";
+            }
+            else if (statistical_quantity_key == "b11_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "b11_HOMO_Y_IN_ML_X   ";
+            }
+            else if (statistical_quantity_key == "b22_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "b22_HOMO_Y_IN_ML_X   ";
+            }
+            else if (statistical_quantity_key == "b11_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "b11_HOMO_YZ_IN_ML_X  ";
+            }
+            else if (statistical_quantity_key == "b22_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "b22_HOMO_YZ_IN_ML_X  ";
+            }
+            else if (statistical_quantity_key == "b33_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "b33_HOMO_YZ_IN_ML_X  ";
+            }
+            else if (statistical_quantity_key == "b12_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "b12_HOMO_YZ_IN_ML_X  ";
+            }
+            else if (statistical_quantity_key == "b12_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "b12_HOMO_YZ_IN_ML_X  ";
+            }
+            else if (statistical_quantity_key == "b13_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "b13_HOMO_YZ_IN_ML_X  ";
+            }
+            else if (statistical_quantity_key == "b23_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "b23_HOMO_YZ_IN_ML_X  ";
+            }
+            else if (statistical_quantity_key == "a1_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "a1_HOMO_Y_IN_ML_X    ";
+            }
+            else if (statistical_quantity_key == "a1_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "a1_HOMO_YZ_IN_ML_X   ";
+            }
+            else if (statistical_quantity_key == "b_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "b_HOMO_Y_IN_ML_X     ";
+            }
+            else if (statistical_quantity_key == "b_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "b_HOMO_YZ_IN_ML_X    ";
+            }
+            else if (statistical_quantity_key == "DEN_MEAN_Y_IN_ML_X")
+            {
+                f_out << "\t" << "DEN_MEAN_Y_IN_ML_X   ";
+            }
+            else if (statistical_quantity_key == "DEN_MEAN_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "DEN_MEAN_YZ_IN_ML_X  ";
+            }
+            else if (statistical_quantity_key == "BOUSS_HOMO_Y_IN_ML_X")
+            {
+                f_out << "\t" << "BOUSS_HOMO_Y_IN_ML_X ";
+            }
+            else if (statistical_quantity_key == "BOUSS_HOMO_YZ_IN_ML_X")
+            {
+                f_out << "\t" << "BOUSS_HOMO_YZ_IN_ML_X";
+            }
+            else if (statistical_quantity_key == "MASS_DIFF_IN_ML_X")
+            {
+                f_out << "\t" << "MASS_DIFF_IN_ML_X    ";
+            }
+            else if (statistical_quantity_key == "DYN_SHEAR_VIS_IN_ML_X")
+            {
+                f_out << "\t" << "DYN_SHEAR_VIS_IN_ML_X";
+            }
+            else if (statistical_quantity_key == "KIN_SHEAR_VIS_IN_ML_X")
+            {
+                f_out << "\t" << "KIN_SHEAR_VIS_IN_ML_X";
+            }
+            else if (statistical_quantity_key == "DYN_BULK_VIS_IN_ML_X")
+            {
+                f_out << "\t" << "DYN_BULK_VIS_IN_ML_X ";
+            }
+            else if (statistical_quantity_key == "KIN_BULK_VIS_IN_ML_X")
+            {
+                f_out << "\t" << "KIN_BULK_VIS_IN_ML_X ";
+            }
+            else if (statistical_quantity_key == "THERMAL_COND_IN_ML_X")
+            {
+                f_out << "\t" << "THERMAL_COND_IN_ML_X ";
+            }
+            else if (statistical_quantity_key == "THERMAL_DIFF_IN_ML_X")
+            {
+                f_out << "\t" << "THERMAL_DIFF_IN_ML_X ";
+            }
+            else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X1")
+            {
+                f_out << "\t" << "MIXING_LAYER_WIDTH_X1";
+            }
+            else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X2")
+            {
+                f_out << "\t" << "MIXING_LAYER_WIDTH_X2";
+            }
+            else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X3")
+            {
+                f_out << "\t" << "MIXING_LAYER_WIDTH_X3";
+            }
+            else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X4")
+            {
+                f_out << "\t" << "MIXING_LAYER_WIDTH_X4";
+            }
+            else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X5")
+            {
+                f_out << "\t" << "MIXING_LAYER_WIDTH_X5";
+            }
+            else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X6")
+            {
+                f_out << "\t" << "MIXING_LAYER_WIDTH_X6";
+            }
+            else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X7")
+            {
+                f_out << "\t" << "MIXING_LAYER_WIDTH_X7";
+            }
+            else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X8")
+            {
+                f_out << "\t" << "MIXING_LAYER_WIDTH_X8";
+            }
+            else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X9")
+            {
+                f_out << "\t" << "MIXING_LAYER_WIDTH_X9";
+            }
+            else if (statistical_quantity_key == "NUM_INTEF_THICK")
+            {
+                f_out << "\t" << "NUM_INTEF_THICK      ";
+            }
+        }
+        
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output statisitcal quantities to a file.
+ */
+void
+FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
+    const std::string& stat_dump_filename,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context)
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    boost::shared_ptr<RMIStatisticsUtilities> rmi_statistics_utilities(
+        new RMIStatisticsUtilities(
+            "RMI statistics utilities",
+            d_dim,
+            d_grid_geometry,
+            d_num_species,
+            d_flow_model,
+            d_equation_of_state_mixing_rules,
+            d_equation_of_mass_diffusivity_mixing_rules,
+            d_equation_of_shear_viscosity_mixing_rules,
+            d_equation_of_bulk_viscosity_mixing_rules,
+            d_equation_of_thermal_conductivity_mixing_rules));
+    
+    // Loop over statistical quantities.
+    for (int qi = 0; qi < static_cast<int>(d_statistical_quantities.size()); qi++)
+    {
+        // Get the key of the current variable.
+        std::string statistical_quantity_key = d_statistical_quantities[qi];
+        
+        if (statistical_quantity_key == "MIXING_WIDTH_X")
+        {
+            rmi_statistics_utilities->outputMixingWidthInXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "MIXING_WIDTH_Y")
+        {
+            rmi_statistics_utilities->outputMixingWidthInYDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "MIXING_WIDTH_Z")
+        {
+            rmi_statistics_utilities->outputMixingWidthInZDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "MIXEDNESS_X")
+        {
+            rmi_statistics_utilities->outputMixednessInXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "MIXEDNESS_Y")
+        {
+            rmi_statistics_utilities->outputMixednessInYDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "MIXEDNESS_Z")
+        {
+            rmi_statistics_utilities->outputMixednessInZDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "TKE_INT_HOMO_X")
+        {
+            rmi_statistics_utilities->outputTKEIntegratedWithHomogeneityInXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "TKE_INT_HOMO_Y")
+        {
+            rmi_statistics_utilities->outputTKEIntegratedWithHomogeneityInYDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "TKE_INT_HOMO_Z")
+        {
+            rmi_statistics_utilities->outputTKEIntegratedWithHomogeneityInZDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "TKE_INT_HOMO_XY")
+        {
+            rmi_statistics_utilities->outputTKEIntegratedWithHomogeneityInXYPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "TKE_INT_HOMO_YZ")
+        {
+            rmi_statistics_utilities->outputTKEIntegratedWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "TKE_INT_HOMO_XZ")
+        {
+            rmi_statistics_utilities->outputTKEIntegratedWithHomogeneityInXZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "TKE_X_INT_HOMO_YZ")
+        {
+            rmi_statistics_utilities->outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "TKE_Y_INT_HOMO_YZ")
+        {
+            rmi_statistics_utilities->outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "TKE_Z_INT_HOMO_YZ")
+        {
+            rmi_statistics_utilities->outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "ENSTROPHY_INT")
+        {
+            rmi_statistics_utilities->outputEnstrophyIntegrated(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "SCAL_DISS_RAT_INT")
+        {
+            rmi_statistics_utilities->outputScalarDissipationRateIntegrated(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "RE_HOMO_Y_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "RE_HOMO_YZ_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "TKE_HOMO_Y_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "TKE_X_HOMO_Y_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "TKE_Y_HOMO_Y_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "TKE_HOMO_YZ_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "TKE_X_HOMO_YZ_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "TKE_Y_HOMO_YZ_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "TKE_Z_HOMO_YZ_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "R11_HOMO_Y_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "R22_HOMO_Y_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "R11_HOMO_YZ_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "R22_HOMO_YZ_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "R33_HOMO_YZ_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "R12_HOMO_Y_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "R12_HOMO_YZ_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "R13_HOMO_YZ_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "R23_HOMO_YZ_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "b11_HOMO_Y_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "b22_HOMO_Y_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "b11_HOMO_YZ_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "b22_HOMO_YZ_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "b33_HOMO_YZ_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "b12_HOMO_Y_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "b12_HOMO_YZ_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "b13_HOMO_YZ_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "b23_HOMO_YZ_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "a1_HOMO_Y_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "a1_HOMO_YZ_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "b_HOMO_Y_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "b_HOMO_YZ_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "DEN_MEAN_Y_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputDensityMeanInMixingLayerWithHomogeneityInYDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "DEN_MEAN_YZ_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputDensityMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "BOUSS_HOMO_Y_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "BOUSS_HOMO_YZ_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "MASS_DIFF_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputMassDiffusivityMeanInMixingLayerInXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "DYN_SHEAR_VIS_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputDynamicShearViscosityMeanInMixingLayerInXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "KIN_SHEAR_VIS_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputKinematicShearViscosityMeanInMixingLayerInXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "DYN_BULK_VIS_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "KIN_BULK_VIS_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputKinematicBulkViscosityMeanInMixingLayerInXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "THERMAL_COND_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputThermalConductivityMeanInMixingLayerInXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "THERMAL_DIFF_IN_ML_X")
+        {
+            rmi_statistics_utilities->outputThermalDiffusivityMeanInMixingLayerInXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X1")
+        {
+            rmi_statistics_utilities->outputMixingLayerWidth1InXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X2")
+        {
+            rmi_statistics_utilities->outputMixingLayerWidth2InXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X3")
+        {
+            rmi_statistics_utilities->outputMixingLayerWidth3InXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X4")
+        {
+            rmi_statistics_utilities->outputMixingLayerWidth4InXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X5")
+        {
+            rmi_statistics_utilities->outputMixingLayerWidth5InXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X6")
+        {
+            rmi_statistics_utilities->outputMixingLayerWidth6InXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X7")
+        {
+            rmi_statistics_utilities->outputMixingLayerWidth7InXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X8")
+        {
+            rmi_statistics_utilities->outputMixingLayerWidth8InXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "MIXING_LAYER_WIDTH_X9")
+        {
+            rmi_statistics_utilities->outputMixingLayerWidth9InXDirection(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "NUM_INTEF_THICK")
+        {
+            rmi_statistics_utilities->outputNumericalInterfaceThickness(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Unknown statistical quantity key = '"
+                << statistical_quantity_key
+                << " found."
+                << std::endl);
+        }
+    }
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    if (mpi.getRank() == 0)
+    {
+        std::ofstream f_out;
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+        
+        f_out.close();
     }
 }
