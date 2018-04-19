@@ -72,4 +72,4 @@ To change the problem that you want to run for an application, e.g. the Euler ap
 The code is managed by Man-Long Wong (wongml@stanford.edu) of the [Flow Physics and Aeroacoustics Laboratory](https://fpal.stanford.edu/) (FPAL)  at the [Department of Aeronautics and Astronautics](https://aa.stanford.edu/) of [Stanford University](https://www.stanford.edu/).
 
 ### Copyright ###
-HAMeRS is licensed under a  GNU Lesser General Public License.
+HAMeRS is licensed under a GNU Lesser General Public License v3.0.
