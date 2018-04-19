@@ -27,7 +27,6 @@ class DiffusiveFluxReconstructor
             const tbox::Dimension& dim,
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_eqn,
-            const int& num_species,
             const boost::shared_ptr<FlowModel>& flow_model,
             const boost::shared_ptr<tbox::Database>& diffusive_flux_reconstructor_db):
                 d_object_name(object_name),
@@ -35,7 +34,6 @@ class DiffusiveFluxReconstructor
                 d_grid_geometry(grid_geometry),
                 d_num_diff_ghosts(hier::IntVector::getZero(d_dim)),
                 d_num_eqn(num_eqn),
-                d_num_species(num_species),
                 d_flow_model(flow_model),
                 d_diffusive_flux_reconstructor_db(diffusive_flux_reconstructor_db)
         {}
@@ -103,11 +101,6 @@ class DiffusiveFluxReconstructor
          * Number of equations.
          */
         const int d_num_eqn;
-        
-        /*
-         * Number of species.
-         */
-        const int d_num_species;
         
         /*
          * Flow model.

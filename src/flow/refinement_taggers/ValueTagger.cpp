@@ -11,14 +11,12 @@ ValueTagger::ValueTagger(
     const std::string& object_name,
     const tbox::Dimension& dim,
     const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
-    const int& num_species,
     const boost::shared_ptr<FlowModel>& flow_model,
     const boost::shared_ptr<tbox::Database>& value_tagger_db):
         d_object_name(object_name),
         d_dim(dim),
         d_grid_geometry(grid_geometry),
         d_num_value_ghosts(hier::IntVector::getZero(d_dim)),
-        d_num_species(num_species),
         d_flow_model(flow_model),
         d_num_ghosts_derivative(1),
         d_value_tagger_max_density(0.0),
@@ -385,9 +383,11 @@ ValueTagger::registerValueTaggerVariables(
         }
         else if (variable_key == "MASS_FRACTION" || variable_key == "MASS_FRACTIONS")
         {
-            d_value_tagger_variable_mass_fractions.reserve(d_num_species);
+            const int num_species = d_flow_model->getNumberOfSpecies();
             
-            for (int si = 0; si < d_num_species; si++)
+            d_value_tagger_variable_mass_fractions.reserve(num_species);
+            
+            for (int si = 0; si < num_species; si++)
             {
                 d_value_tagger_variable_mass_fractions.push_back(
                     boost::make_shared<pdat::CellVariable<double> >(
@@ -396,9 +396,9 @@ ValueTagger::registerValueTaggerVariables(
                         1));
             }
             
-            d_value_tagger_max_mass_fractions.reserve(d_num_species);
+            d_value_tagger_max_mass_fractions.reserve(num_species);
             
-            for (int si = 0; si < d_num_species; si++)
+            for (int si = 0; si < num_species; si++)
             {
                 d_value_tagger_max_mass_fractions.push_back(0.0);
             }
@@ -477,7 +477,7 @@ ValueTagger::registerValueTaggerVariables(
         }
         else if (variable_key == "MASS_FRACTION" || variable_key == "MASS_FRACTIONS")
         {
-            for (int si = 0; si < d_num_species; si++)
+            for (int si = 0; si < d_flow_model->getNumberOfSpecies(); si++)
             {
                 integrator->registerVariable(
                     d_value_tagger_variable_mass_fractions[si],
@@ -1352,7 +1352,7 @@ ValueTagger::computeValueTaggerValuesOnPatch(
              * Transfer data from flow model to the class variable.
              */
             
-            for (int si = 0; si < d_num_species; si++)
+            for (int si = 0; si < d_flow_model->getNumberOfSpecies(); si++)
             {
                 transferDataOnPatchToClassVariable(
                     patch,
@@ -1477,7 +1477,7 @@ ValueTagger::getValueStatistics(
             }
             else if (variable_key == "MASS_FRACTION" || variable_key == "MASS_FRACTIONS")
             {
-                for (int si = 0; si < d_num_species; si++)
+                for (int si = 0; si < d_flow_model->getNumberOfSpecies(); si++)
                 {
                     const int Y_id = variable_db->mapVariableAndContextToIndex(
                         d_value_tagger_variable_mass_fractions[si],
@@ -1640,7 +1640,7 @@ ValueTagger::tagCellsOnPatch(
         }
         else if (variable_key == "MASS_FRACTION" || variable_key == "MASS_FRACTIONS")
         {
-            for (int si = 0; si < d_num_species; si++)
+            for (int si = 0; si < d_flow_model->getNumberOfSpecies(); si++)
             {
                 tagCellsOnPatchWithValue(
                     patch,

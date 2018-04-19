@@ -9,7 +9,6 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::NonconservativeDiffusi
     const tbox::Dimension& dim,
     const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
     const int& num_eqn,
-    const int& num_species,
     const boost::shared_ptr<FlowModel>& flow_model,
     const boost::shared_ptr<tbox::Database>& nonconservative_diffusive_flux_divergence_operator_db):
         NonconservativeDiffusiveFluxDivergenceOperator(
@@ -17,7 +16,6 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::NonconservativeDiffusi
             dim,
             grid_geometry,
             num_eqn,
-            num_species,
             flow_model,
             nonconservative_diffusive_flux_divergence_operator_db)
 {

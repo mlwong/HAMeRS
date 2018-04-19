@@ -87,6 +87,14 @@ class FlowModel:
         virtual ~FlowModel() {}
         
         /*
+         * Get the total number of species.
+         */
+        int getNumberOfSpecies() const
+        {
+            return d_num_species;
+        }
+        
+        /*
          * Get the total number of equations.
          */
         int getNumberOfEquations() const

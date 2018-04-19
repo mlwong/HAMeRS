@@ -29,7 +29,6 @@ class GradientTagger
             const std::string& object_name,
             const tbox::Dimension& dim,
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
-            const int& num_species,
             const boost::shared_ptr<FlowModel>& flow_model,
             const boost::shared_ptr<tbox::Database>& gradient_tagger_db);
         
@@ -144,11 +143,6 @@ class GradientTagger
          * Number of ghost cells needed by the the gradient tagger.
          */
         hier::IntVector d_num_gradient_ghosts;
-        
-        /*
-         * Number of species.
-         */
-        const int d_num_species;
         
         /*
          * Flow model.

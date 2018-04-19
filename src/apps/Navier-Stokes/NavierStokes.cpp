@@ -126,7 +126,6 @@ NavierStokes::NavierStokes(
         d_dim,
         d_grid_geometry,
         d_flow_model->getNumberOfEquations(),
-        d_num_species,
         d_flow_model,
         d_convective_flux_reconstructor_db,
         d_convective_flux_reconstructor_str));
@@ -144,7 +143,6 @@ NavierStokes::NavierStokes(
             d_dim,
             d_grid_geometry,
             d_flow_model->getNumberOfEquations(),
-            d_num_species,
             d_flow_model,
             d_diffusive_flux_reconstructor_db,
             d_diffusive_flux_reconstructor_str));
@@ -164,7 +162,6 @@ NavierStokes::NavierStokes(
                 d_dim,
                 d_grid_geometry,
                 d_flow_model->getNumberOfEquations(),
-                d_num_species,
                 d_flow_model,
                 d_nonconservative_diffusive_flux_divergence_operator_db,
                 d_nonconservative_diffusive_flux_divergence_operator_str));
@@ -184,7 +181,7 @@ NavierStokes::NavierStokes(
         d_dim,
         d_grid_geometry,
         d_flow_model_manager->getFlowModelType(),
-        d_num_species));
+        d_flow_model));
     
     /*
      * Initialize d_Navier_Stokes_boundary_conditions.
@@ -195,7 +192,6 @@ NavierStokes::NavierStokes(
         d_project_name,
         d_dim,
         d_grid_geometry,
-        d_num_species,
         d_flow_model_manager->getFlowModelType(),
         d_flow_model,
         d_Navier_Stokes_boundary_conditions_db,
@@ -211,7 +207,6 @@ NavierStokes::NavierStokes(
             "d_value_tagger",
             d_dim,
             d_grid_geometry,
-            d_num_species,
             d_flow_model,
             d_value_tagger_db));
     }
@@ -226,7 +221,6 @@ NavierStokes::NavierStokes(
             "d_gradient_tagger",
             d_dim,
             d_grid_geometry,
-            d_num_species,
             d_flow_model,
             d_gradient_tagger_db));
     }
@@ -241,7 +235,6 @@ NavierStokes::NavierStokes(
             "d_multiresolution_tagger",
             d_dim,
             d_grid_geometry,
-            d_num_species,
             d_flow_model,
             d_multiresolution_tagger_db));
     }

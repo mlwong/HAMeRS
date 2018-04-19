@@ -27,7 +27,6 @@ class MultiresolutionTagger
             const std::string& object_name,
             const tbox::Dimension& dim,
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
-            const int& num_species,
             const boost::shared_ptr<FlowModel>& flow_model,
             const boost::shared_ptr<tbox::Database>& multiresolution_tagger_db);
         
@@ -150,11 +149,6 @@ class MultiresolutionTagger
          * Number of ghost cells needed by the the multiresolution tagger.
          */
         hier::IntVector d_num_multiresolution_ghosts;
-        
-        /*
-         * Number of species.
-         */
-        const int d_num_species;
         
         /*
          * Flow model.

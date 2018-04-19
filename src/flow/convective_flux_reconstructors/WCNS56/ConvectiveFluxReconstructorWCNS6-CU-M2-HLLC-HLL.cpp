@@ -233,7 +233,6 @@ ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL::ConvectiveFluxReconstructorWCNS
     const tbox::Dimension& dim,
     const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
     const int& num_eqn,
-    const int& num_species,
     const boost::shared_ptr<FlowModel>& flow_model,
     const boost::shared_ptr<tbox::Database>& convective_flux_reconstructor_db):
         ConvectiveFluxReconstructorWCNS56(
@@ -241,7 +240,6 @@ ConvectiveFluxReconstructorWCNS6_CU_M2_HLLC_HLL::ConvectiveFluxReconstructorWCNS
             dim,
             grid_geometry,
             num_eqn,
-            num_species,
             flow_model,
             convective_flux_reconstructor_db)
 {

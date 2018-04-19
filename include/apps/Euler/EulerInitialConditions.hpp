@@ -27,13 +27,13 @@ class EulerInitialConditions
             const tbox::Dimension& dim,
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
             const FLOW_MODEL::TYPE& flow_model_type,
-            const int& num_species):
+            const boost::shared_ptr<FlowModel>& flow_model):
                 d_object_name(object_name),
                 d_project_name(project_name),
                 d_dim(dim),
                 d_grid_geometry(grid_geometry),
                 d_flow_model_type(flow_model_type),
-                d_num_species(num_species)
+                d_flow_model(flow_model)
         {}
         
         /*
@@ -74,9 +74,9 @@ class EulerInitialConditions
         const FLOW_MODEL::TYPE d_flow_model_type;
         
         /*
-         * Number of species.
+         * Flow model.
          */
-        const int d_num_species;
+        const boost::shared_ptr<FlowModel> d_flow_model;
         
 };
 
