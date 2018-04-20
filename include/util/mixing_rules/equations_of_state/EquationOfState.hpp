@@ -1,7 +1,11 @@
 #ifndef EQUATION_OF_STATE_HPP
 #define EQUATION_OF_STATE_HPP
 
+#include "HAMeRS_config.hpp"
+
 #include "SAMRAI/tbox/Dimension.h"
+#include "SAMRAI/pdat/CellData.h"
+#include "SAMRAI/pdat/SideData.h"
 
 #include <string>
 #include <vector>
@@ -17,6 +21,8 @@ class EquationOfState
                 d_object_name(object_name),
                 d_dim(dim)
         {}
+        
+        virtual ~EquationOfState() {}
         
         /*
          * Print all characteristics of the equation of state class.
@@ -34,6 +40,132 @@ class EquationOfState
             const std::vector<const double*>& thermo_properties) const = 0;
         
         /*
+         * Compute the pressure.
+         */
+        void
+        computePressure(
+            boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
+            const std::vector<const double*>& thermo_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computePressure(
+                data_pressure,
+                data_density,
+                data_internal_energy,
+                thermo_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the pressure.
+         */
+        virtual void
+        computePressure(
+            boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
+            const std::vector<const double*>& thermo_properties,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the pressure.
+         */
+        void
+        computePressure(
+            boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
+            const std::vector<const double*>& thermo_properties,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computePressure(
+                data_pressure,
+                data_density,
+                data_internal_energy,
+                thermo_properties,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the pressure.
+         */
+        virtual void
+        computePressure(
+            boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
+            const std::vector<const double*>& thermo_properties,
+            int side_normal,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the pressure.
+         */
+        void
+        computePressure(
+            boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computePressure(
+                data_pressure,
+                data_density,
+                data_internal_energy,
+                data_thermo_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the pressure.
+         */
+        virtual void
+        computePressure(
+            boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the pressure.
+         */
+        void
+        computePressure(
+            boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computePressure(
+                data_pressure,
+                data_density,
+                data_internal_energy,
+                data_thermo_properties,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the pressure.
+         */
+        virtual void
+        computePressure(
+            boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+            int side_normal,
+            const hier::Box& domain) const = 0;
+        
+        /*
          * Compute the sound speed.
          */
         virtual double
@@ -41,6 +173,132 @@ class EquationOfState
             const double* const density,
             const double* const pressure,
             const std::vector<const double*>& thermo_properties) const = 0;
+        
+        /*
+         * Compute the sound speed.
+         */
+        void
+        computeSoundSpeed(
+            boost::shared_ptr<pdat::CellData<double> >& data_sound_speed,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeSoundSpeed(
+                data_sound_speed,
+                data_density,
+                data_pressure,
+                thermo_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the sound speed.
+         */
+        virtual void
+        computeSoundSpeed(
+            boost::shared_ptr<pdat::CellData<double> >& data_sound_speed,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the sound speed.
+         */
+        void
+        computeSoundSpeed(
+            boost::shared_ptr<pdat::SideData<double> >& data_sound_speed,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeSoundSpeed(
+                data_sound_speed,
+                data_density,
+                data_pressure,
+                thermo_properties,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the sound speed.
+         */
+        virtual void
+        computeSoundSpeed(
+            boost::shared_ptr<pdat::SideData<double> >& data_sound_speed,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            int side_normal,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the sound speed.
+         */
+        void
+        computeSoundSpeed(
+            boost::shared_ptr<pdat::CellData<double> >& data_sound_speed,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeSoundSpeed(
+                data_sound_speed,
+                data_density,
+                data_pressure,
+                data_thermo_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the sound speed.
+         */
+        virtual void
+        computeSoundSpeed(
+            boost::shared_ptr<pdat::CellData<double> >& data_sound_speed,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the sound speed.
+         */
+        void
+        computeSoundSpeed(
+            boost::shared_ptr<pdat::SideData<double> >& data_sound_speed,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeSoundSpeed(
+                data_sound_speed,
+                data_density,
+                data_pressure,
+                data_thermo_properties,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the sound speed.
+         */
+        virtual void
+        computeSoundSpeed(
+            boost::shared_ptr<pdat::SideData<double> >& data_sound_speed,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+            int side_normal,
+            const hier::Box& domain) const = 0;
         
         /*
          * Compute the specific internal energy.
@@ -52,6 +310,132 @@ class EquationOfState
             const std::vector<const double*>& thermo_properties) const = 0;
         
         /*
+         * Compute the specific internal energy.
+         */
+        void
+        computeInternalEnergy(
+            boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeInternalEnergy(
+                data_internal_energy,
+                data_density,
+                data_pressure,
+                thermo_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the specific internal energy.
+         */
+        virtual void
+        computeInternalEnergy(
+            boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the specific internal energy.
+         */
+        void
+        computeInternalEnergy(
+            boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeInternalEnergy(
+                data_internal_energy,
+                data_density,
+                data_pressure,
+                thermo_properties,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the specific internal energy.
+         */
+        virtual void
+        computeInternalEnergy(
+            boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            int side_normal,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the specific internal energy.
+         */
+        void
+        computeInternalEnergy(
+            boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeInternalEnergy(
+                data_internal_energy,
+                data_density,
+                data_pressure,
+                data_thermo_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the specific internal energy.
+         */
+        virtual void
+        computeInternalEnergy(
+            boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the specific internal energy.
+         */
+        void
+        computeInternalEnergy(
+            boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeInternalEnergy(
+                data_internal_energy,
+                data_density,
+                data_pressure,
+                data_thermo_properties,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the specific internal energy.
+         */
+        virtual void
+        computeInternalEnergy(
+            boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+            int side_normal,
+            const hier::Box& domain) const = 0;
+        
+        /*
          * Compute the specific enthalpy.
          */
         virtual double
@@ -59,6 +443,132 @@ class EquationOfState
             const double* const density,
             const double* const pressure,
             const std::vector<const double*>& thermo_properties) const = 0;
+        
+        /*
+         * Compute the specific enthalpy.
+         */
+        void
+        computeEnthalpy(
+            boost::shared_ptr<pdat::CellData<double> >& data_enthalpy,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeEnthalpy(
+                data_enthalpy,
+                data_density,
+                data_pressure,
+                thermo_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the specific enthalpy.
+         */
+        virtual void
+        computeEnthalpy(
+            boost::shared_ptr<pdat::CellData<double> >& data_enthalpy,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the specific enthalpy.
+         */
+        void
+        computeEnthalpy(
+            boost::shared_ptr<pdat::SideData<double> >& data_enthalpy,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeEnthalpy(
+                data_enthalpy,
+                data_density,
+                data_pressure,
+                thermo_properties,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the specific enthalpy.
+         */
+        virtual void
+        computeEnthalpy(
+            boost::shared_ptr<pdat::SideData<double> >& data_enthalpy,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            int side_normal,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the specific enthalpy.
+         */
+        void
+        computeEnthalpy(
+            boost::shared_ptr<pdat::CellData<double> >& data_enthalpy,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeEnthalpy(
+                data_enthalpy,
+                data_density,
+                data_pressure,
+                data_thermo_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the specific enthalpy.
+         */
+        virtual void
+        computeEnthalpy(
+            boost::shared_ptr<pdat::CellData<double> >& data_enthalpy,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the specific enthalpy.
+         */
+        void
+        computeEnthalpy(
+            boost::shared_ptr<pdat::SideData<double> >& data_enthalpy,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeEnthalpy(
+                data_enthalpy,
+                data_density,
+                data_pressure,
+                data_thermo_properties,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the specific enthalpy.
+         */
+        virtual void
+        computeEnthalpy(
+            boost::shared_ptr<pdat::SideData<double> >& data_enthalpy,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+            int side_normal,
+            const hier::Box& domain) const = 0;
         
         /*
          * Compute the temperature.
@@ -70,6 +580,132 @@ class EquationOfState
             const std::vector<const double*>& thermo_properties) const = 0;
         
         /*
+         * Compute the temperature.
+         */
+        void
+        computeTemperature(
+            boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeTemperature(
+                data_temperature,
+                data_density,
+                data_pressure,
+                thermo_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the temperature.
+         */
+        virtual void
+        computeTemperature(
+            boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the temperature.
+         */
+        void
+        computeTemperature(
+            boost::shared_ptr<pdat::SideData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeTemperature(
+                data_temperature,
+                data_density,
+                data_pressure,
+                thermo_properties,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the temperature.
+         */
+        virtual void
+        computeTemperature(
+            boost::shared_ptr<pdat::SideData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            int side_normal,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the temperature.
+         */
+        void
+        computeTemperature(
+            boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeTemperature(
+                data_temperature,
+                data_density,
+                data_pressure,
+                data_thermo_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the temperature.
+         */
+        virtual void
+        computeTemperature(
+            boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the temperature.
+         */
+        void
+        computeTemperature(
+            boost::shared_ptr<pdat::SideData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeTemperature(
+                data_temperature,
+                data_density,
+                data_pressure,
+                data_thermo_properties,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the temperature.
+         */
+        virtual void
+        computeTemperature(
+            boost::shared_ptr<pdat::SideData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+            int side_normal,
+            const hier::Box& domain) const = 0;
+        
+        /*
          * Compute the specific internal energy from temperature.
          */
         virtual double
@@ -77,6 +713,132 @@ class EquationOfState
             const double* const density,
             const double* const temperature,
             const std::vector<const double*>& thermo_properties) const = 0;
+        
+        /*
+         * Compute the specific internal energy from temperature.
+         */
+        void
+        computeInternalEnergyFromTemperature(
+            boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const std::vector<const double*>& thermo_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeInternalEnergyFromTemperature(
+                data_internal_energy,
+                data_density,
+                data_temperature,
+                thermo_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the specific internal energy from temperature.
+         */
+        virtual void
+        computeInternalEnergyFromTemperature(
+            boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const std::vector<const double*>& thermo_properties,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the specific internal energy from temperature.
+         */
+        void
+        computeInternalEnergyFromTemperature(
+            boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_temperature,
+            const std::vector<const double*>& thermo_properties,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeInternalEnergyFromTemperature(
+                data_internal_energy,
+                data_density,
+                data_temperature,
+                thermo_properties,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the specific internal energy from temperature.
+         */
+        virtual void
+        computeInternalEnergyFromTemperature(
+            boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_temperature,
+            const std::vector<const double*>& thermo_properties,
+            int side_normal,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the specific internal energy from temperature.
+         */
+        void
+        computeInternalEnergyFromTemperature(
+            boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeInternalEnergyFromTemperature(
+                data_internal_energy,
+                data_density,
+                data_temperature,
+                data_thermo_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the specific internal energy from temperature.
+         */
+        virtual void
+        computeInternalEnergyFromTemperature(
+            boost::shared_ptr<pdat::CellData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the specific internal energy from temperature.
+         */
+        void
+        computeInternalEnergyFromTemperature(
+            boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeInternalEnergyFromTemperature(
+                data_internal_energy,
+                data_density,
+                data_temperature,
+                data_thermo_properties,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the specific internal energy from temperature.
+         */
+        virtual void
+        computeInternalEnergyFromTemperature(
+            boost::shared_ptr<pdat::SideData<double> >& data_internal_energy,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+            int side_normal,
+            const hier::Box& domain) const = 0;
         
         /*
          * Compute the isochoric specific heat capacity.
@@ -88,6 +850,132 @@ class EquationOfState
             const std::vector<const double*>& thermo_properties) const = 0;
         
         /*
+         * Compute the isochoric specific heat capacity.
+         */
+        void
+        computeIsochoricSpecificHeatCapacity(
+            boost::shared_ptr<pdat::CellData<double> >& data_isochoric_specific_heat_capacity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeIsochoricSpecificHeatCapacity(
+                data_isochoric_specific_heat_capacity,
+                data_density,
+                data_pressure,
+                thermo_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the isochoric specific heat capacity.
+         */
+        virtual void
+        computeIsochoricSpecificHeatCapacity(
+            boost::shared_ptr<pdat::CellData<double> >& data_isochoric_specific_heat_capacity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the isochoric specific heat capacity.
+         */
+        void
+        computeIsochoricSpecificHeatCapacity(
+            boost::shared_ptr<pdat::SideData<double> >& data_isochoric_specific_heat_capacity,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeIsochoricSpecificHeatCapacity(
+                data_isochoric_specific_heat_capacity,
+                data_density,
+                data_pressure,
+                thermo_properties,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the isochoric specific heat capacity.
+         */
+        virtual void
+        computeIsochoricSpecificHeatCapacity(
+            boost::shared_ptr<pdat::SideData<double> >& data_isochoric_specific_heat_capacity,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            int side_normal,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the isochoric specific heat capacity.
+         */
+        void
+        computeIsochoricSpecificHeatCapacity(
+            boost::shared_ptr<pdat::CellData<double> >& data_isochoric_specific_heat_capacity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeIsochoricSpecificHeatCapacity(
+                data_isochoric_specific_heat_capacity,
+                data_density,
+                data_pressure,
+                data_thermo_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the isochoric specific heat capacity.
+         */
+        virtual void
+        computeIsochoricSpecificHeatCapacity(
+            boost::shared_ptr<pdat::CellData<double> >& data_isochoric_specific_heat_capacity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the isochoric specific heat capacity.
+         */
+        void
+        computeIsochoricSpecificHeatCapacity(
+            boost::shared_ptr<pdat::SideData<double> >& data_isochoric_specific_heat_capacity,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeIsochoricSpecificHeatCapacity(
+                data_isochoric_specific_heat_capacity,
+                data_density,
+                data_pressure,
+                data_thermo_properties,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the isochoric specific heat capacity.
+         */
+        virtual void
+        computeIsochoricSpecificHeatCapacity(
+            boost::shared_ptr<pdat::SideData<double> >& data_isochoric_specific_heat_capacity,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+            int side_normal,
+            const hier::Box& domain) const = 0;
+        
+        /*
          * Compute the isobaric specific heat capacity.
          */
         virtual double
@@ -95,6 +983,132 @@ class EquationOfState
             const double* const density,
             const double* const pressure,
             const std::vector<const double*>& thermo_properties) const = 0;
+        
+        /*
+         * Compute the isobaric specific heat capacity.
+         */
+        void
+        computeIsobaricSpecificHeatCapacity(
+            boost::shared_ptr<pdat::CellData<double> >& data_isobaric_specific_heat_capacity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeIsobaricSpecificHeatCapacity(
+                data_isobaric_specific_heat_capacity,
+                data_density,
+                data_pressure,
+                thermo_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the isobaric specific heat capacity.
+         */
+        virtual void
+        computeIsobaricSpecificHeatCapacity(
+            boost::shared_ptr<pdat::CellData<double> >& data_isobaric_specific_heat_capacity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the isobaric specific heat capacity.
+         */
+        void
+        computeIsobaricSpecificHeatCapacity(
+            boost::shared_ptr<pdat::SideData<double> >& data_isobaric_specific_heat_capacity,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeIsobaricSpecificHeatCapacity(
+                data_isobaric_specific_heat_capacity,
+                data_density,
+                data_pressure,
+                thermo_properties,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the isobaric specific heat capacity.
+         */
+        virtual void
+        computeIsobaricSpecificHeatCapacity(
+            boost::shared_ptr<pdat::SideData<double> >& data_isobaric_specific_heat_capacity,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            int side_normal,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the isobaric specific heat capacity.
+         */
+        void
+        computeIsobaricSpecificHeatCapacity(
+            boost::shared_ptr<pdat::CellData<double> >& data_isobaric_specific_heat_capacity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeIsobaricSpecificHeatCapacity(
+                data_isobaric_specific_heat_capacity,
+                data_density,
+                data_pressure,
+                data_thermo_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the isobaric specific heat capacity.
+         */
+        virtual void
+        computeIsobaricSpecificHeatCapacity(
+            boost::shared_ptr<pdat::CellData<double> >& data_isobaric_specific_heat_capacity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the isobaric specific heat capacity.
+         */
+        void
+        computeIsobaricSpecificHeatCapacity(
+            boost::shared_ptr<pdat::SideData<double> >& data_isobaric_specific_heat_capacity,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeIsobaricSpecificHeatCapacity(
+                data_isobaric_specific_heat_capacity,
+                data_density,
+                data_pressure,
+                data_thermo_properties,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the isobaric specific heat capacity.
+         */
+        virtual void
+        computeIsobaricSpecificHeatCapacity(
+            boost::shared_ptr<pdat::SideData<double> >& data_isobaric_specific_heat_capacity,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+            int side_normal,
+            const hier::Box& domain) const = 0;
         
         /*
          * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
@@ -106,6 +1120,132 @@ class EquationOfState
             const std::vector<const double*>& thermo_properties) const = 0;
         
         /*
+         * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+         */
+        void
+        computeIsochoricPartialInternalEnergyPartialPressure(
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_internal_energy_partial_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeIsochoricPartialInternalEnergyPartialPressure(
+                data_partial_internal_energy_partial_pressure,
+                data_density,
+                data_pressure,
+                thermo_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+         */
+        virtual void
+        computeIsochoricPartialInternalEnergyPartialPressure(
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_internal_energy_partial_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+         */
+        void
+        computeIsochoricPartialInternalEnergyPartialPressure(
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_internal_energy_partial_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeIsochoricPartialInternalEnergyPartialPressure(
+                data_partial_internal_energy_partial_pressure,
+                data_density,
+                data_pressure,
+                thermo_properties,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+         */
+        virtual void
+        computeIsochoricPartialInternalEnergyPartialPressure(
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_internal_energy_partial_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            int side_normal,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+         */
+        void
+        computeIsochoricPartialInternalEnergyPartialPressure(
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_internal_energy_partial_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeIsochoricPartialInternalEnergyPartialPressure(
+                data_partial_internal_energy_partial_pressure,
+                data_density,
+                data_pressure,
+                data_thermo_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+         */
+        virtual void
+        computeIsochoricPartialInternalEnergyPartialPressure(
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_internal_energy_partial_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+         */
+        void
+        computeIsochoricPartialInternalEnergyPartialPressure(
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_internal_energy_partial_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeIsochoricPartialInternalEnergyPartialPressure(
+                data_partial_internal_energy_partial_pressure,
+                data_density,
+                data_pressure,
+                data_thermo_properties,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the partial derivative of internal energy w.r.t. pressure under constant density.
+         */
+        virtual void
+        computeIsochoricPartialInternalEnergyPartialPressure(
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_internal_energy_partial_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+            int side_normal,
+            const hier::Box& domain) const = 0;
+        
+        /*
          * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
          */
         virtual double
@@ -115,6 +1255,132 @@ class EquationOfState
             const std::vector<const double*>& thermo_properties) const = 0;
         
         /*
+         * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+         */
+        void
+        computeIsobaricPartialInternalEnergyPartialDensity(
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_internal_energy_partial_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeIsobaricPartialInternalEnergyPartialDensity(
+                data_partial_internal_energy_partial_density,
+                data_density,
+                data_pressure,
+                thermo_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+         */
+        virtual void
+        computeIsobaricPartialInternalEnergyPartialDensity(
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_internal_energy_partial_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+         */
+        void
+        computeIsobaricPartialInternalEnergyPartialDensity(
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_internal_energy_partial_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeIsobaricPartialInternalEnergyPartialDensity(
+                data_partial_internal_energy_partial_density,
+                data_density,
+                data_pressure,
+                thermo_properties,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+         */
+        virtual void
+        computeIsobaricPartialInternalEnergyPartialDensity(
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_internal_energy_partial_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const std::vector<const double*>& thermo_properties,
+            int side_normal,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+         */
+        void
+        computeIsobaricPartialInternalEnergyPartialDensity(
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_internal_energy_partial_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeIsobaricPartialInternalEnergyPartialDensity(
+                data_partial_internal_energy_partial_density,
+                data_density,
+                data_pressure,
+                data_thermo_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+         */
+        virtual void
+        computeIsobaricPartialInternalEnergyPartialDensity(
+            boost::shared_ptr<pdat::CellData<double> >& data_partial_internal_energy_partial_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+         */
+        void
+        computeIsobaricPartialInternalEnergyPartialDensity(
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_internal_energy_partial_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeIsobaricPartialInternalEnergyPartialDensity(
+                data_partial_internal_energy_partial_density,
+                data_density,
+                data_pressure,
+                data_thermo_properties,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the partial derivative of internal energy w.r.t. density under constant pressure.
+         */
+        virtual void
+        computeIsobaricPartialInternalEnergyPartialDensity(
+            boost::shared_ptr<pdat::SideData<double> >& data_partial_internal_energy_partial_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+            int side_normal,
+            const hier::Box& domain) const = 0;
+        
+        /*
          * Compute the density.
          */
         virtual double
@@ -122,6 +1388,132 @@ class EquationOfState
             const double* const pressure,
             const double* const temperature,
             const std::vector<const double*>& thermo_properties) const = 0;
+        
+        /*
+         * Compute the density.
+         */
+        void
+        computeDensity(
+            boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const std::vector<const double*>& thermo_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeDensity(
+                data_density,
+                data_pressure,
+                data_temperature,
+                thermo_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the density.
+         */
+        virtual void
+        computeDensity(
+            boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const std::vector<const double*>& thermo_properties,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the density.
+         */
+        void
+        computeDensity(
+            boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_temperature,
+            const std::vector<const double*>& thermo_properties,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeDensity(
+                data_density,
+                data_pressure,
+                data_temperature,
+                thermo_properties,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the density.
+         */
+        virtual void
+        computeDensity(
+            boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_temperature,
+            const std::vector<const double*>& thermo_properties,
+            int side_normal,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the density.
+         */
+        void
+        computeDensity(
+            boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeDensity(
+                data_density,
+                data_pressure,
+                data_temperature,
+                data_thermo_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the density.
+         */
+        virtual void
+        computeDensity(
+            boost::shared_ptr<pdat::CellData<double> >& data_density,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::CellData<double> >& data_thermo_properties,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the density.
+         */
+        void
+        computeDensity(
+            boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+            int side_normal) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeDensity(
+                data_density,
+                data_pressure,
+                data_temperature,
+                data_thermo_properties,
+                side_normal,
+                empty_box);
+        }
+        
+        /*
+         * Compute the density.
+         */
+        virtual void
+        computeDensity(
+            boost::shared_ptr<pdat::SideData<double> >& data_density,
+            const boost::shared_ptr<pdat::SideData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::SideData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::SideData<double> >& data_thermo_properties,
+            int side_normal,
+            const hier::Box& domain) const = 0;
         
     protected:
         /*

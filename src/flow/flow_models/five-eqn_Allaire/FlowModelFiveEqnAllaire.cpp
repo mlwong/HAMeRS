@@ -1,12 +1,13 @@
 #include "flow/flow_models/five-eqn_Allaire/FlowModelFiveEqnAllaire.hpp"
 
 #include "flow/flow_models/five-eqn_Allaire/FlowModelBoundaryUtilitiesFiveEqnAllaire.hpp"
+#include "flow/flow_models/five-eqn_Allaire/FlowModelRiemannSolverFiveEqnAllaire.hpp"
 #include "flow/flow_models/five-eqn_Allaire/FlowModelStatisticsUtilitiesFiveEqnAllaire.hpp"
 
-boost::shared_ptr<pdat::CellVariable<double> > FlowModelFiveEqnAllaire::s_variable_partial_density;
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelFiveEqnAllaire::s_variable_partial_densities;
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelFiveEqnAllaire::s_variable_momentum;
 boost::shared_ptr<pdat::CellVariable<double> > FlowModelFiveEqnAllaire::s_variable_total_energy;
-boost::shared_ptr<pdat::CellVariable<double> > FlowModelFiveEqnAllaire::s_variable_volume_fraction;
+boost::shared_ptr<pdat::CellVariable<double> > FlowModelFiveEqnAllaire::s_variable_volume_fractions;
 
 FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
     const std::string& object_name,
@@ -22,15 +23,12 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
             dim.getValue() + 2*num_species,
             flow_model_db),
         d_num_subghosts_density(-hier::IntVector::getOne(d_dim)),
-        d_num_subghosts_mass_fraction(-hier::IntVector::getOne(d_dim)),
+        d_num_subghosts_mass_fractions(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_velocity(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_internal_energy(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_pressure(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_sound_speed(-hier::IntVector::getOne(d_dim)),
-        d_num_subghosts_temperature(-hier::IntVector::getOne(d_dim)),
-        d_num_subghosts_dilatation(-hier::IntVector::getOne(d_dim)),
-        d_num_subghosts_vorticity(-hier::IntVector::getOne(d_dim)),
-        d_num_subghosts_enstrophy(-hier::IntVector::getOne(d_dim)),
+        d_num_subghosts_species_temperatures(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_convective_flux_x(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_convective_flux_y(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_convective_flux_z(-hier::IntVector::getOne(d_dim)),
@@ -40,15 +38,12 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
         d_num_subghosts_max_diffusivity(-hier::IntVector::getOne(d_dim)),
         d_num_subghosts_diffusivities(-hier::IntVector::getOne(d_dim)),
         d_subghost_box_density(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_mass_fraction(hier::Box::getEmptyBox(dim)),
+        d_subghost_box_mass_fractions(hier::Box::getEmptyBox(dim)),
         d_subghost_box_velocity(hier::Box::getEmptyBox(dim)),
         d_subghost_box_internal_energy(hier::Box::getEmptyBox(dim)),
         d_subghost_box_pressure(hier::Box::getEmptyBox(dim)),
         d_subghost_box_sound_speed(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_temperature(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_dilatation(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_vorticity(hier::Box::getEmptyBox(dim)),
-        d_subghost_box_enstrophy(hier::Box::getEmptyBox(dim)),
+        d_subghost_box_species_temperatures(hier::Box::getEmptyBox(dim)),
         d_subghost_box_convective_flux_x(hier::Box::getEmptyBox(dim)),
         d_subghost_box_convective_flux_y(hier::Box::getEmptyBox(dim)),
         d_subghost_box_convective_flux_z(hier::Box::getEmptyBox(dim)),
@@ -58,15 +53,12 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
         d_subghost_box_max_diffusivity(hier::Box::getEmptyBox(dim)),
         d_subghost_box_diffusivities(hier::Box::getEmptyBox(dim)),
         d_subghostcell_dims_density(hier::IntVector::getZero(d_dim)),
-        d_subghostcell_dims_mass_fraction(hier::IntVector::getZero(d_dim)),
+        d_subghostcell_dims_mass_fractions(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_velocity(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_internal_energy(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_pressure(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_sound_speed(hier::IntVector::getZero(d_dim)),
-        d_subghostcell_dims_temperature(hier::IntVector::getZero(d_dim)),
-        d_subghostcell_dims_dilatation(hier::IntVector::getZero(d_dim)),
-        d_subghostcell_dims_vorticity(hier::IntVector::getZero(d_dim)),
-        d_subghostcell_dims_enstrophy(hier::IntVector::getZero(d_dim)),
+        d_subghostcell_dims_species_temperatures(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_convective_flux_x(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_convective_flux_y(hier::IntVector::getZero(d_dim)),
         d_subghostcell_dims_convective_flux_z(hier::IntVector::getZero(d_dim)),
@@ -78,7 +70,7 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
 {
     d_eqn_form.reserve(d_num_eqn);
     
-    // Set the equations form for partial density.
+    // Set the equations form for partial densities.
     for (int si = 0; si < d_num_species; si++)
     {
         d_eqn_form.push_back(EQN_FORM::CONSERVATIVE);
@@ -93,24 +85,24 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
     // Set the equation form for total energy.
     d_eqn_form.push_back(EQN_FORM::CONSERVATIVE);
     
-    // Set the equation forms for volume fraction
+    // Set the equation forms for volume fractions.
     for (int si = 0; si < d_num_species - 1; si++)
     {
         d_eqn_form.push_back(EQN_FORM::ADVECTIVE);
     }
     
     // Set the bounds for the variables.
-    d_Y_bound_lo = -0.001;
-    d_Y_bound_up = 1.001;
-    d_Z_bound_lo = -1000.0;
-    d_Z_bound_up = 1000.0;
+    d_Y_bound_lo = double(-0.001);
+    d_Y_bound_up = double(1.001);
+    d_Z_bound_lo = double(-1000.0);
+    d_Z_bound_up = double(1000.0);
     
     /*
      * Initialize the conservative variables.
      */
     
-    s_variable_partial_density = boost::shared_ptr<pdat::CellVariable<double> > (
-        new pdat::CellVariable<double>(d_dim, "partial density", d_num_species));
+    s_variable_partial_densities = boost::shared_ptr<pdat::CellVariable<double> > (
+        new pdat::CellVariable<double>(d_dim, "partial densities", d_num_species));
     
     s_variable_momentum = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "momentum", d_dim.getValue()));
@@ -118,8 +110,8 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
     s_variable_total_energy = boost::shared_ptr<pdat::CellVariable<double> > (
         new pdat::CellVariable<double>(d_dim, "total energy", 1));
     
-    s_variable_volume_fraction = boost::shared_ptr<pdat::CellVariable<double> > (
-        new pdat::CellVariable<double>(d_dim, "volume fraction", d_num_species));
+    s_variable_volume_fractions = boost::shared_ptr<pdat::CellVariable<double> > (
+        new pdat::CellVariable<double>(d_dim, "volume fractions", d_num_species));
     
     /*
      * Initialize d_equation_of_state_mixing_rules_manager and get the equation of state mixing rules object.
@@ -279,6 +271,15 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
     }
     
     /*
+     * Initialize Riemann solver object.
+     */
+    d_flow_model_riemann_solver.reset(new FlowModelRiemannSolverFiveEqnAllaire(
+        "d_flow_model_riemann_solver",
+        d_dim,
+        d_grid_geometry,
+        d_num_species));
+    
+    /*
      * Initialize statistics utilities object.
      */
     d_flow_model_statistics_utilities.reset(new FlowModelStatisticsUtilitiesFiveEqnAllaire(
@@ -286,27 +287,14 @@ FlowModelFiveEqnAllaire::FlowModelFiveEqnAllaire(
         d_dim,
         d_grid_geometry,
         d_num_species,
-        flow_model_db));
+        flow_model_db,
+        d_equation_of_state_mixing_rules,
+        d_equation_of_shear_viscosity_mixing_rules,
+        d_equation_of_bulk_viscosity_mixing_rules));
     
     /*
-     * Initialize the Riemann solvers.
+     * Initialize boundary utilities object.
      */
-    d_Riemann_solver_HLLC = boost::shared_ptr<RiemannSolverFiveEqnAllaireHLLC> (
-        new RiemannSolverFiveEqnAllaireHLLC(
-            d_object_name,
-            d_dim,
-            d_num_eqn,
-            d_num_species,
-            d_equation_of_state_mixing_rules));
-    
-    d_Riemann_solver_HLLC_HLL = boost::shared_ptr<RiemannSolverFiveEqnAllaireHLLC_HLL> (
-        new RiemannSolverFiveEqnAllaireHLLC_HLL(
-            d_object_name,
-            d_dim,
-            d_num_eqn,
-            d_num_species,
-            d_equation_of_state_mixing_rules));
-    
     d_flow_model_boundary_utilities.reset(
         new FlowModelBoundaryUtilitiesFiveEqnAllaire(
             "d_flow_model_boundary_utilities",
@@ -399,7 +387,7 @@ FlowModelFiveEqnAllaire::registerConservativeVariables(
     const hier::IntVector& num_ghosts_intermediate)
 {
     integrator->registerVariable(
-        s_variable_partial_density,
+        s_variable_partial_densities,
         num_ghosts,
         num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::TIME_DEP,
@@ -426,7 +414,7 @@ FlowModelFiveEqnAllaire::registerConservativeVariables(
         "CONSERVATIVE_LINEAR_REFINE");
     
     integrator->registerVariable(
-        s_variable_volume_fraction,
+        s_variable_volume_fractions,
         num_ghosts,
         num_ghosts_intermediate,
         RungeKuttaLevelIntegrator::TIME_DEP,
@@ -447,17 +435,17 @@ FlowModelFiveEqnAllaire::getNamesOfConservativeVariables(bool have_underscores)
     
     if (have_underscores)
     {
-        names.push_back("partial_density");
+        names.push_back("partial_densities");
         names.push_back("momentum");
         names.push_back("total_energy");
-        names.push_back("volume_fraction");
+        names.push_back("volume_fractions");
     }
     else
     {
-        names.push_back("partial density");
+        names.push_back("partial densities");
         names.push_back("momentum");
         names.push_back("total energy");
-        names.push_back("volume fraction");
+        names.push_back("volume fractions");
     }
     
     return names;
@@ -475,14 +463,14 @@ FlowModelFiveEqnAllaire::getNamesOfPrimitiveVariables(bool have_underscores)
     
     if (have_underscores)
     {
-        names.push_back("partial_density");
+        names.push_back("partial_densities");
         names.push_back("velocity");
         names.push_back("pressure");
-        names.push_back("volume_fraction");
+        names.push_back("volume_fractions");
     }
     else
     {
-        names.push_back("partial density");
+        names.push_back("partial densities");
         names.push_back("velocity");
         names.push_back("pressure");
         names.push_back("volume fraction");
@@ -537,10 +525,10 @@ FlowModelFiveEqnAllaire::getConservativeVariables()
     std::vector<boost::shared_ptr<pdat::CellVariable<double> > > conservative_variables;
     conservative_variables.reserve(4);
     
-    conservative_variables.push_back(s_variable_partial_density);
+    conservative_variables.push_back(s_variable_partial_densities);
     conservative_variables.push_back(s_variable_momentum);
     conservative_variables.push_back(s_variable_total_energy);
-    conservative_variables.push_back(s_variable_volume_fraction);
+    conservative_variables.push_back(s_variable_volume_fractions);
     
     return conservative_variables;
 }
@@ -571,11 +559,11 @@ FlowModelFiveEqnAllaire::registerPatchWithDataContext(
      * Set the number of ghost cells of conservative variables.
      */
     
-    boost::shared_ptr<pdat::CellData<double> > data_partial_density(
+    boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(s_variable_partial_density, getDataContext())));
+            d_patch->getPatchData(s_variable_partial_densities, getDataContext())));
     
-    d_num_ghosts = data_partial_density->getGhostCellWidth();
+    d_num_ghosts = data_partial_densities->getGhostCellWidth();
     
     /*
      * Set the interior and ghost boxes with their dimensions for the conservative cell variables.
@@ -642,12 +630,12 @@ FlowModelFiveEqnAllaire::registerDerivedCellVariable(
             "DENSITY");
     }
     
-    if (num_subghosts_of_data.find("MASS_FRACTION") != num_subghosts_of_data.end())
+    if (num_subghosts_of_data.find("MASS_FRACTIONS") != num_subghosts_of_data.end())
     {
         setNumberOfSubGhosts(
-            num_subghosts_of_data.find("MASS_FRACTION")->second,
-            "MASS_FRACTION",
-            "MASS_FRACTION");
+            num_subghosts_of_data.find("MASS_FRACTIONS")->second,
+            "MASS_FRACTIONS",
+            "MASS_FRACTIONS");
     }
     
     if (num_subghosts_of_data.find("VELOCITY") != num_subghosts_of_data.end())
@@ -873,7 +861,7 @@ FlowModelFiveEqnAllaire::registerDiffusiveFlux(
     
     setNumberOfSubGhosts(
         num_subghosts,
-        "MASS_FRACTION",
+        "MASS_FRACTIONS",
         "DIFFUSIVE_FLUX");
     
     setNumberOfSubGhosts(
@@ -888,17 +876,17 @@ FlowModelFiveEqnAllaire::registerDiffusiveFlux(
     
     setNumberOfSubGhosts(
         num_subghosts,
-        "TEMPERATURE",
+        "SPECIES_TEMPERATURE",
         "DIFFUSIVE_FLUX");
     
     d_num_subghosts_diffusivities = 
-        hier::IntVector::min(d_num_subghosts_mass_fraction, d_num_subghosts_velocity);
+        hier::IntVector::min(d_num_subghosts_mass_fractions, d_num_subghosts_velocity);
     
     d_num_subghosts_diffusivities = 
         hier::IntVector::min(d_num_subghosts_diffusivities, d_num_subghosts_pressure);
     
     d_num_subghosts_diffusivities = 
-        hier::IntVector::min(d_num_subghosts_diffusivities, d_num_subghosts_temperature);
+        hier::IntVector::min(d_num_subghosts_diffusivities, d_num_subghosts_species_temperatures);
 }
 
 
@@ -919,79 +907,67 @@ void FlowModelFiveEqnAllaire::unregisterPatch()
     
     d_patch = nullptr;
     
-    d_num_ghosts                      = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_density           = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_mass_fraction     = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_velocity          = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_internal_energy   = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_pressure          = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_sound_speed       = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_temperature       = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_dilatation        = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_vorticity         = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_enstrophy         = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_convective_flux_x = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_convective_flux_y = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_convective_flux_z = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_max_wave_speed_x  = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_max_wave_speed_y  = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_max_wave_speed_z  = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_max_diffusivity   = -hier::IntVector::getOne(d_dim);
-    d_num_subghosts_diffusivities     = -hier::IntVector::getOne(d_dim);
+    d_num_ghosts                         = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_density              = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_mass_fractions       = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_velocity             = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_internal_energy      = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_pressure             = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_sound_speed          = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_species_temperatures = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_convective_flux_x    = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_convective_flux_y    = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_convective_flux_z    = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_max_wave_speed_x     = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_max_wave_speed_y     = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_max_wave_speed_z     = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_max_diffusivity      = -hier::IntVector::getOne(d_dim);
+    d_num_subghosts_diffusivities        = -hier::IntVector::getOne(d_dim);
     
-    d_interior_box                   = hier::Box::getEmptyBox(d_dim);
-    d_ghost_box                      = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_density           = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_mass_fraction     = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_velocity          = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_internal_energy   = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_pressure          = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_sound_speed       = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_temperature       = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_dilatation        = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_vorticity         = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_enstrophy         = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_convective_flux_x = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_convective_flux_y = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_convective_flux_z = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_max_wave_speed_x  = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_max_wave_speed_y  = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_max_wave_speed_z  = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_max_diffusivity   = hier::Box::getEmptyBox(d_dim);
-    d_subghost_box_diffusivities     = hier::Box::getEmptyBox(d_dim);
+    d_interior_box                      = hier::Box::getEmptyBox(d_dim);
+    d_ghost_box                         = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_density              = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_mass_fractions       = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_velocity             = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_internal_energy      = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_pressure             = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_sound_speed          = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_species_temperatures = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_convective_flux_x    = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_convective_flux_y    = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_convective_flux_z    = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_max_wave_speed_x     = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_max_wave_speed_y     = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_max_wave_speed_z     = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_max_diffusivity      = hier::Box::getEmptyBox(d_dim);
+    d_subghost_box_diffusivities        = hier::Box::getEmptyBox(d_dim);
     
     
-    d_interior_dims                       = hier::IntVector::getZero(d_dim);
-    d_ghostcell_dims                      = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_density           = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_mass_fraction     = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_velocity          = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_internal_energy   = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_pressure          = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_sound_speed       = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_temperature       = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_dilatation        = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_vorticity         = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_enstrophy         = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_convective_flux_x = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_convective_flux_y = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_convective_flux_z = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_max_wave_speed_x  = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_max_wave_speed_y  = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_max_wave_speed_z  = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_max_diffusivity   = hier::IntVector::getZero(d_dim);
-    d_subghostcell_dims_diffusivities     = hier::IntVector::getZero(d_dim);
+    d_interior_dims                          = hier::IntVector::getZero(d_dim);
+    d_ghostcell_dims                         = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_density              = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_mass_fractions       = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_velocity             = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_internal_energy      = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_pressure             = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_sound_speed          = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_species_temperatures = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_convective_flux_x    = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_convective_flux_y    = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_convective_flux_z    = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_max_wave_speed_x     = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_max_wave_speed_y     = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_max_wave_speed_z     = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_max_diffusivity      = hier::IntVector::getZero(d_dim);
+    d_subghostcell_dims_diffusivities        = hier::IntVector::getZero(d_dim);
     
     d_data_density.reset();
-    d_data_mass_fraction.reset();
+    d_data_mass_fractions.reset();
     d_data_velocity.reset();
     d_data_internal_energy.reset();
     d_data_pressure.reset();
     d_data_sound_speed.reset();
-    d_data_temperature.reset();
-    d_data_dilatation.reset();
-    d_data_vorticity.reset();
-    d_data_enstrophy.reset();
+    d_data_species_temperatures.reset();
     d_data_convective_flux_x.reset();
     d_data_convective_flux_y.reset();
     d_data_convective_flux_z.reset();
@@ -1011,8 +987,7 @@ void FlowModelFiveEqnAllaire::unregisterPatch()
  * Compute global cell data of different registered derived variables with the registered data context.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalDerivedCellData(
-    const COMPUTING_OPTION::TYPE& computing_option)
+FlowModelFiveEqnAllaire::computeGlobalDerivedCellData(const hier::Box& domain)
 {
     // Check whether a patch is already registered.
     if (!d_patch)
@@ -1037,17 +1012,17 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData(
         if (!d_data_density)
         {
             computeGlobalCellDataDensity(
-                computing_option);
+                domain);
         }
     }
     
     // Compute the mass fraction cell data.
-    if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
+    if (d_num_subghosts_mass_fractions > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_data_mass_fraction)
+        if (!d_data_mass_fractions)
         {
-            computeGlobalCellDataMassFractionWithDensity(
-                computing_option);
+            computeGlobalCellDataMassFractionsWithDensity(
+                domain);
         }
     }
     
@@ -1057,7 +1032,7 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData(
         if (!d_data_velocity)
         {
             computeGlobalCellDataVelocityWithDensity(
-                computing_option);
+                domain);
         }
     }
     
@@ -1067,7 +1042,7 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData(
         if (!d_data_internal_energy)
         {
             computeGlobalCellDataInternalEnergyWithDensityAndVelocity(
-                computing_option);
+                domain);
         }
     }
     
@@ -1076,8 +1051,8 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData(
     {
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy(
-                computing_option);
+            computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy(
+                domain);
         }
     }
     
@@ -1086,48 +1061,18 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData(
     {
         if (!d_data_sound_speed)
         {
-            computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure(
-                computing_option);
+            computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure(
+                domain);
         }
     }
     
-    // Compute the temperature cell data.
-    if (d_num_subghosts_temperature > -hier::IntVector::getOne(d_dim))
+    // Compute the species temperatures cell data.
+    if (d_num_subghosts_species_temperatures > -hier::IntVector::getOne(d_dim))
     {
-        if (!d_data_temperature)
+        if (!d_data_species_temperatures)
         {
-            computeGlobalCellDataTemperatureWithPressure(
-                computing_option);
-        }
-    }
-    
-    // Compute the dilatation cell data.
-    if (d_num_subghosts_dilatation > -hier::IntVector::getOne(d_dim))
-    {
-        if (!d_data_dilatation)
-        {
-            computeGlobalCellDataDilatationWithDensityAndVelocity(
-                computing_option);
-        }
-    }
-    
-    // Compute the vorticity cell data.
-    if (d_num_subghosts_vorticity > -hier::IntVector::getOne(d_dim))
-    {
-        if (!d_data_vorticity)
-        {
-            computeGlobalCellDataVorticityWithDensityAndVelocity(
-                computing_option);
-        }
-    }
-    
-    // Compute the enstrophy cell data.
-    if (d_num_subghosts_enstrophy > -hier::IntVector::getOne(d_dim))
-    {
-        if (!d_data_enstrophy)
-        {
-            computeGlobalCellDataEnstrophyWithVorticity(
-                computing_option);
+            computeGlobalCellDataSpeciesTemperaturesWithPressure(
+                domain);
         }
     }
     
@@ -1138,7 +1083,7 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData(
         {
             computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
                 DIRECTION::X_DIRECTION,
-                computing_option);
+                domain);
         }
     }
     
@@ -1149,7 +1094,7 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData(
         {
             computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
                 DIRECTION::Y_DIRECTION,
-                computing_option);
+                domain);
         }
     }
     
@@ -1160,7 +1105,7 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData(
         {
             computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
                 DIRECTION::Z_DIRECTION,
-                computing_option);
+                domain);
         }
     }
     
@@ -1171,7 +1116,7 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData(
         {
             computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
                 DIRECTION::X_DIRECTION,
-                computing_option);
+                domain);
         }
     }
     
@@ -1182,7 +1127,7 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData(
         {
             computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
                 DIRECTION::Y_DIRECTION,
-                computing_option);
+                domain);
         }
     }
     
@@ -1193,7 +1138,7 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData(
         {
             computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
                 DIRECTION::Z_DIRECTION,
-                computing_option);
+                domain);
         }
     }
     
@@ -1202,8 +1147,8 @@ FlowModelFiveEqnAllaire::computeGlobalDerivedCellData(
     {
         if (!d_data_max_diffusivity)
         {
-            computeGlobalCellDataMaxDiffusivityWithDensityMassFractionPressureAndTemperature(
-                computing_option);
+            computeGlobalCellDataMaxDiffusivityWithDensityMassFractionsPressureAndTemperature(
+                domain);
         }
     }
     
@@ -1231,7 +1176,7 @@ FlowModelFiveEqnAllaire::getGlobalCellData(
     
     if (variable_key == "PARTIAL_DENSITY")
     {
-        cell_data = getGlobalCellDataPartialDensity();
+        cell_data = getGlobalCellDataPartialDensities();
     }
     else if (variable_key == "MOMENTUM")
     {
@@ -1241,9 +1186,9 @@ FlowModelFiveEqnAllaire::getGlobalCellData(
     {
         cell_data = getGlobalCellDataTotalEnergy();
     }
-    else if (variable_key == "VOLUME_FRACTION")
+    else if (variable_key == "VOLUME_FRACTIONS")
     {
-        cell_data = getGlobalCellDataVolumeFraction();
+        cell_data = getGlobalCellDataVolumeFractions();
     }
     else if (variable_key == "DENSITY")
     {
@@ -1256,16 +1201,16 @@ FlowModelFiveEqnAllaire::getGlobalCellData(
         }
         cell_data = d_data_density;
     }
-    else if (variable_key == "MASS_FRACTION")
+    else if (variable_key == "MASS_FRACTIONS")
     {
-        if (!d_data_mass_fraction)
+        if (!d_data_mass_fractions)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFiveEqnAllaire::getGlobalCellData()\n"
                 << "Cell data of 'MASS_FRACTION' is not registered/computed yet."
                 << std::endl);
         }
-        cell_data = d_data_mass_fraction;
+        cell_data = d_data_mass_fractions;
     }
     else if (variable_key == "VELOCITY")
     {
@@ -1311,49 +1256,16 @@ FlowModelFiveEqnAllaire::getGlobalCellData(
         }
         cell_data = d_data_sound_speed;
     }
-    else if (variable_key == "TEMPERATURE")
+    else if (variable_key == "SPECIES_TEMPERATURE")
     {
-        if (!d_data_temperature)
+        if (!d_data_species_temperatures)
         {
             TBOX_ERROR(d_object_name
                 << ": FlowModelFiveEqnAllaire::getGlobalCellData()\n"
-                << "Cell data of 'TEMPERATURE' is not registered/computed yet."
+                << "Cell data of 'SPECIES_TEMPERATURE' is not registered/computed yet."
                 << std::endl);
         }
-        cell_data = d_data_temperature;
-    }
-    else if (variable_key == "DILATATION")
-    {
-        if (!d_data_dilatation)
-        {
-            TBOX_ERROR(d_object_name
-                << ": FlowModelFiveEqnAllaire::getGlobalCellData()\n"
-                << "Cell data of 'DILATATION' is not registered/computed yet."
-                << std::endl);
-        }
-        cell_data = d_data_dilatation;
-    }
-    else if (variable_key == "VORTICITY")
-    {
-        if (!d_data_vorticity)
-        {
-            TBOX_ERROR(d_object_name
-                << ": FlowModelFiveEqnAllaire::getGlobalCellData()\n"
-                << "Cell data of 'VORTICITY' is not registered/computed yet."
-                << std::endl);
-        }
-        cell_data = d_data_vorticity;
-    }
-    else if (variable_key == "ENSTROPHY")
-    {
-        if (!d_data_enstrophy)
-        {
-            TBOX_ERROR(d_object_name
-                << ": FlowModelFiveEqnAllaire::getGlobalCellData()\n"
-                << "Cell data of 'ENSTROPHY' is not registered/computed yet."
-                << std::endl);
-        }
-        cell_data = d_data_enstrophy;
+        cell_data = d_data_species_temperatures;
     }
     else if (variable_key == "CONVECTIVE_FLUX_X")
     {
@@ -1479,15 +1391,15 @@ FlowModelFiveEqnAllaire::fillZeroGlobalCellDataConservativeVariables()
             << std::endl);
     }
     
-    boost::shared_ptr<pdat::CellData<double> > data_partial_density = getGlobalCellDataPartialDensity();
+    boost::shared_ptr<pdat::CellData<double> > data_partial_densities = getGlobalCellDataPartialDensities();
     boost::shared_ptr<pdat::CellData<double> > data_momentum = getGlobalCellDataMomentum();
     boost::shared_ptr<pdat::CellData<double> > data_total_energy = getGlobalCellDataTotalEnergy();
-    boost::shared_ptr<pdat::CellData<double> > data_volume_fraction = getGlobalCellDataVolumeFraction();
+    boost::shared_ptr<pdat::CellData<double> > data_volume_fractions = getGlobalCellDataVolumeFractions();
     
-    data_partial_density->fillAll(0.0, d_interior_box);
-    data_momentum->fillAll(0.0, d_interior_box);
-    data_total_energy->fillAll(0.0, d_interior_box);
-    data_volume_fraction->fillAll(0.0, d_interior_box);
+    data_partial_densities->fillAll(double(0), d_interior_box);
+    data_momentum->fillAll(double(0), d_interior_box);
+    data_total_energy->fillAll(double(0), d_interior_box);
+    data_volume_fractions->fillAll(double(0), d_interior_box);
 }
 
 
@@ -1506,13 +1418,13 @@ FlowModelFiveEqnAllaire::updateGlobalCellDataConservativeVariables()
             << std::endl);
     }
     
-    boost::shared_ptr<pdat::CellData<double> > data_volume_fraction = getGlobalCellDataVolumeFraction();
+    boost::shared_ptr<pdat::CellData<double> > data_volume_fractions = getGlobalCellDataVolumeFractions();
     
     std::vector<double*> Z;
     Z.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
-        Z.push_back(data_volume_fraction->getPointer(si));
+        Z.push_back(data_volume_fractions->getPointer(si));
     }
     
     if (d_dim == tbox::Dimension(1))
@@ -1522,7 +1434,7 @@ FlowModelFiveEqnAllaire::updateGlobalCellDataConservativeVariables()
             // Compute the linear index.
             int idx = i + d_num_ghosts[0];
             
-            Z[d_num_species - 1][idx] = 1.0;
+            Z[d_num_species - 1][idx] = double(1);
             
             for (int si = 0; si < d_num_species - 1; si++)
             {
@@ -1540,7 +1452,7 @@ FlowModelFiveEqnAllaire::updateGlobalCellDataConservativeVariables()
                 int idx  = (i + d_num_ghosts[0]) +
                     (j + d_num_ghosts[1])*d_ghostcell_dims[0];
                 
-                Z[d_num_species - 1][idx] = 1.0;
+                Z[d_num_species - 1][idx] = double(1);
                 
                 for (int si = 0; si < d_num_species - 1; si++)
                 {
@@ -1562,7 +1474,7 @@ FlowModelFiveEqnAllaire::updateGlobalCellDataConservativeVariables()
                         (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
                         (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
                     
-                    Z[d_num_species - 1][idx] = 1.0;
+                    Z[d_num_species - 1][idx] = double(1);
                     
                     for (int si = 0; si < d_num_species - 1; si++)
                     {
@@ -1593,10 +1505,10 @@ FlowModelFiveEqnAllaire::getGlobalCellDataConservativeVariables()
     std::vector<boost::shared_ptr<pdat::CellData<double> > > global_cell_data;
     global_cell_data.reserve(4);
     
-    global_cell_data.push_back(getGlobalCellDataPartialDensity());
+    global_cell_data.push_back(getGlobalCellDataPartialDensities());
     global_cell_data.push_back(getGlobalCellDataMomentum());
     global_cell_data.push_back(getGlobalCellDataTotalEnergy());
-    global_cell_data.push_back(getGlobalCellDataVolumeFraction());
+    global_cell_data.push_back(getGlobalCellDataVolumeFractions());
     
     return global_cell_data;
 }
@@ -1620,7 +1532,7 @@ FlowModelFiveEqnAllaire::getGlobalCellDataPrimitiveVariables()
     std::vector<boost::shared_ptr<pdat::CellData<double> > > global_cell_data;
     global_cell_data.reserve(4);
     
-    global_cell_data.push_back(getGlobalCellDataPartialDensity());
+    global_cell_data.push_back(getGlobalCellDataPartialDensities());
     if (!d_data_velocity)
     {
         TBOX_ERROR(d_object_name
@@ -1637,7 +1549,7 @@ FlowModelFiveEqnAllaire::getGlobalCellDataPrimitiveVariables()
             << std::endl);
     }
     global_cell_data.push_back(d_data_pressure);
-    global_cell_data.push_back(getGlobalCellDataVolumeFraction());
+    global_cell_data.push_back(getGlobalCellDataVolumeFractions());
     
     return global_cell_data;
 }
@@ -1698,6 +1610,9 @@ void
 FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVariables(
     std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables)
 {
+    // Create empty box.
+    const hier::Box empty_box(d_dim);
+    
     /*
      * Get the number of ghost cells and ghost cell dimension of projection variables.
      */
@@ -1767,25 +1682,25 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
             << std::endl);
     }
     
-    // Get the cell data of the variable partial density.
-    boost::shared_ptr<pdat::CellData<double> > data_partial_density =
-        getGlobalCellDataPartialDensity();
+    // Get the cell data of the variable partial densities.
+    boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+        getGlobalCellDataPartialDensities();
     
-    // Get the pointers to the cell data of partial density, total density and sound speed.
+    // Get the pointers to the cell data of partial densities, total density and sound speed.
     std::vector<double*> Z_rho;
     Z_rho.reserve(d_num_species);
     for (int si = 0; si < d_num_species; si++)
     {
-        Z_rho.push_back(data_partial_density->getPointer(si));
+        Z_rho.push_back(data_partial_densities->getPointer(si));
     }
     if (!d_data_density)
     {
-        computeGlobalCellDataDensity();
+        computeGlobalCellDataDensity(empty_box);
     }
     double* rho = d_data_density->getPointer(0);
     if (!d_data_sound_speed)
     {
-        computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
+        computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure(empty_box);
     }
     double* c = d_data_sound_speed->getPointer(0);
     
@@ -1836,7 +1751,7 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
                         const int idx_L = i - 1 + num_ghosts_0;
                         const int idx_R = i + num_ghosts_0;
                         
-                        Z_rho_average[si][idx_face_x] = (0.5*(Z_rho[si][idx_L] + Z_rho[si][idx_R]));
+                        Z_rho_average[si][idx_face_x] = double(1)/double(2)*(Z_rho[si][idx_L] + Z_rho[si][idx_R]);
                     }
                 }
                 
@@ -1854,8 +1769,8 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
                     const int idx_sound_speed_L = i - 1 + num_subghosts_0_sound_speed;
                     const int idx_sound_speed_R = i + num_subghosts_0_sound_speed;
                     
-                    rho_average[idx_face_x] = 0.5*(rho[idx_density_L] + rho[idx_density_R]);
-                    c_average[idx_face_x] = 0.5*(c[idx_sound_speed_L] + c[idx_sound_speed_R]);
+                    rho_average[idx_face_x] = double(1)/double(2)*(rho[idx_density_L] + rho[idx_density_R]);
+                    c_average[idx_face_x] = double(1)/double(2)*(c[idx_sound_speed_L] + c[idx_sound_speed_R]);
                 }
                 
                 break;
@@ -1937,7 +1852,7 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
                             const int idx_R = (i + num_ghosts_0) +
                                 (j + num_ghosts_1)*ghostcell_dim_0;
                             
-                            Z_rho_average[si][idx_face_x] = (0.5*(Z_rho[si][idx_L] + Z_rho[si][idx_R]));
+                            Z_rho_average[si][idx_face_x] = double(1)/double(2)*(Z_rho[si][idx_L] + Z_rho[si][idx_R]);
                         }
                     }
                 }
@@ -1967,8 +1882,8 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
                         const int idx_sound_speed_R = (i + num_subghosts_0_sound_speed) +
                             (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed;
                         
-                        rho_average[idx_face_x] = 0.5*(rho[idx_density_L] + rho[idx_density_R]);
-                        c_average[idx_face_x] = 0.5*(c[idx_sound_speed_L] + c[idx_sound_speed_R]);
+                        rho_average[idx_face_x] = double(1)/double(2)*(rho[idx_density_L] + rho[idx_density_R]);
+                        c_average[idx_face_x] = double(1)/double(2)*(c[idx_sound_speed_L] + c[idx_sound_speed_R]);
                     }
                 }
                 
@@ -2004,7 +1919,7 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
                             const int idx_T = (i + num_ghosts_0) +
                                 (j + num_ghosts_1)*ghostcell_dim_0;
                             
-                            Z_rho_average[si][idx_face_y] = (0.5*(Z_rho[si][idx_B] + Z_rho[si][idx_T]));
+                            Z_rho_average[si][idx_face_y] = double(1)/double(2)*(Z_rho[si][idx_B] + Z_rho[si][idx_T]);
                         }
                     }
                 }
@@ -2034,8 +1949,8 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
                         const int idx_sound_speed_T = (i + num_subghosts_0_sound_speed) +
                             (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed;
                         
-                        rho_average[idx_face_y] = 0.5*(rho[idx_density_B] + rho[idx_density_T]);
-                        c_average[idx_face_y] = 0.5*(c[idx_sound_speed_B] + c[idx_sound_speed_T]);
+                        rho_average[idx_face_y] = double(1)/double(2)*(rho[idx_density_B] + rho[idx_density_T]);
+                        c_average[idx_face_y] = double(1)/double(2)*(c[idx_sound_speed_B] + c[idx_sound_speed_T]);
                     }
                 }
                 
@@ -2135,7 +2050,7 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
                                     (k + num_ghosts_2)*ghostcell_dim_0*
                                         ghostcell_dim_1;
                                 
-                                Z_rho_average[si][idx_face_x] = (0.5*(Z_rho[si][idx_L] + Z_rho[si][idx_R]));
+                                Z_rho_average[si][idx_face_x] = double(1)/double(2)*(Z_rho[si][idx_L] + Z_rho[si][idx_R]);
                             }
                         }
                     }
@@ -2178,8 +2093,8 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
                                 (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
                                     subghostcell_dim_1_sound_speed;
                             
-                            rho_average[idx_face_x] = 0.5*(rho[idx_density_L] + rho[idx_density_R]);
-                            c_average[idx_face_x] = 0.5*(c[idx_sound_speed_L] + c[idx_sound_speed_R]);
+                            rho_average[idx_face_x] = double(1)/double(2)*(rho[idx_density_L] + rho[idx_density_R]);
+                            c_average[idx_face_x] = double(1)/double(2)*(c[idx_sound_speed_L] + c[idx_sound_speed_R]);
                         }
                     }
                 }
@@ -2224,7 +2139,7 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
                                     (k + num_ghosts_2)*ghostcell_dim_0*
                                         ghostcell_dim_1;
                                 
-                                Z_rho_average[si][idx_face_y] = (0.5*(Z_rho[si][idx_B] + Z_rho[si][idx_T]));
+                                Z_rho_average[si][idx_face_y] = double(1)/double(2)*(Z_rho[si][idx_B] + Z_rho[si][idx_T]);
                             }
                         }
                     }
@@ -2267,8 +2182,8 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
                                 (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
                                     subghostcell_dim_1_sound_speed;
                             
-                            rho_average[idx_face_y] = 0.5*(rho[idx_density_B] + rho[idx_density_T]);
-                            c_average[idx_face_y] = 0.5*(c[idx_sound_speed_B] + c[idx_sound_speed_T]);
+                            rho_average[idx_face_y] = double(1)/double(2)*(rho[idx_density_B] + rho[idx_density_T]);
+                            c_average[idx_face_y] = double(1)/double(2)*(c[idx_sound_speed_B] + c[idx_sound_speed_T]);
                         }
                     }
                 }
@@ -2313,7 +2228,7 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
                                     (k + num_ghosts_2)*ghostcell_dim_0*
                                         ghostcell_dim_1;
                                 
-                                Z_rho_average[si][idx_face_z] = (0.5*(Z_rho[si][idx_B] + Z_rho[si][idx_F]));
+                                Z_rho_average[si][idx_face_z] = double(1)/double(2)*(Z_rho[si][idx_B] + Z_rho[si][idx_F]);
                             }
                         }
                     }
@@ -2356,8 +2271,8 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataProjectionVariablesForPrimitiveVar
                                 (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
                                     subghostcell_dim_1_sound_speed;
                             
-                            rho_average[idx_face_z] = 0.5*(rho[idx_density_B] + rho[idx_density_F]);
-                            c_average[idx_face_z] = 0.5*(c[idx_sound_speed_B] + c[idx_sound_speed_F]);
+                            rho_average[idx_face_z] = double(1)/double(2)*(rho[idx_density_B] + rho[idx_density_F]);
+                            c_average[idx_face_z] = double(1)/double(2)*(c[idx_sound_speed_B] + c[idx_sound_speed_F]);
                         }
                     }
                 }
@@ -2700,10 +2615,10 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataCharacteristicVariablesFromPrimiti
             const int idx_p = i + idx_offset_p + num_ghosts_0_p;
             
             W[0][idx_face] = V[d_num_species][idx_vel] -
-                1.0/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 1][idx_p];
+                double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 1][idx_p];
             
             W[2*d_num_species][idx_face] = V[d_num_species][idx_vel] +
-                1.0/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 1][idx_p];
+                double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 1][idx_p];
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -2823,12 +2738,12 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataCharacteristicVariablesFromPrimiti
                     (j + num_ghosts_1_p)*ghostcell_dim_0_p;
                 
                 W[0][idx_face] = V[d_num_species][idx_vel] -
-                    1.0/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 2][idx_p];
+                    double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 2][idx_p];
                 
                 W[d_num_species + 1][idx_face] = V[d_num_species + 1][idx_vel];
                 
                 W[2*d_num_species + 1][idx_face] = V[d_num_species][idx_vel] +
-                    1.0/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 2][idx_p];
+                    double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 2][idx_p];
             }
         }
         
@@ -2919,12 +2834,12 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataCharacteristicVariablesFromPrimiti
                     (j + idx_offset_p + num_ghosts_1_p)*ghostcell_dim_0_p;
                 
                 W[0][idx_face] = V[d_num_species + 1][idx_vel] -
-                    1.0/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 2][idx_p];
+                    double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 2][idx_p];
                 
                 W[d_num_species + 1][idx_face] = V[d_num_species][idx_vel];
                 
                 W[2*d_num_species + 1][idx_face] = V[d_num_species + 1][idx_vel] +
-                    1.0/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 2][idx_p];
+                    double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 2][idx_p];
             }
         }
     }
@@ -3080,14 +2995,14 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataCharacteristicVariablesFromPrimiti
                             ghostcell_dim_1_p;
                     
                     W[0][idx_face] = V[d_num_species][idx_vel] -
-                        1.0/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
+                        double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
                     
                     W[d_num_species + 1][idx_face] = V[d_num_species + 1][idx_vel];
                     
                     W[d_num_species + 2][idx_face] = V[d_num_species + 2][idx_vel];
                     
                     W[2*d_num_species + 2][idx_face] = V[d_num_species][idx_vel] +
-                        1.0/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
+                        double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
                 }
             }
         }
@@ -3203,14 +3118,14 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataCharacteristicVariablesFromPrimiti
                             ghostcell_dim_1_p;
                     
                     W[0][idx_face] = V[d_num_species + 1][idx_vel] -
-                        1.0/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
+                        double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
                     
                     W[d_num_species + 1][idx_face] = V[d_num_species][idx_vel];
                     
                     W[d_num_species + 2][idx_face] = V[d_num_species + 2][idx_vel];
                     
                     W[2*d_num_species + 2][idx_face] = V[d_num_species + 1][idx_vel] +
-                        1.0/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
+                        double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
                 }
             }
         }
@@ -3326,14 +3241,14 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataCharacteristicVariablesFromPrimiti
                             ghostcell_dim_1_p;
                     
                     W[0][idx_face] = V[d_num_species + 2][idx_vel] -
-                        1.0/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
+                        double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
                     
                     W[d_num_species + 1][idx_face] = V[d_num_species][idx_vel];
                     
                     W[d_num_species + 2][idx_face] = V[d_num_species + 1][idx_vel];
                     
                     W[2*d_num_species + 2][idx_face] = V[d_num_species + 2][idx_vel] +
-                        1.0/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
+                        double(1)/(rho_average[idx_face]*c_average[idx_face])*V[d_num_species + 3][idx_p];
                 }
             }
         }
@@ -3571,9 +3486,10 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
                 // Compute the linear index.
                 const int idx_face = i + num_ghosts_0_characteristic_var;
                 
-                V[si][idx_face] = -0.5*Z_rho_average[si][idx_face]/c_average[idx_face]*W[0][idx_face] +
-                    W[si + 1][idx_face] + 0.5*Z_rho_average[si][idx_face]/c_average[idx_face]*
-                        W[d_num_eqn - 1][idx_face];
+                V[si][idx_face] = -double(1)/double(2)*Z_rho_average[si][idx_face]/
+                    c_average[idx_face]*W[0][idx_face] + W[si + 1][idx_face] +
+                        double(1)/double(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
+                            W[d_num_eqn - 1][idx_face];
             }
         }
         
@@ -3603,10 +3519,11 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
             // Compute the linear index.
             const int idx_face = i + num_ghosts_0_characteristic_var;
             
-            V[d_num_species][idx_face] = 0.5*W[0][idx_face] + 0.5*W[d_num_eqn - 1][idx_face];
+            V[d_num_species][idx_face] = double(1)/double(2)*W[0][idx_face] +
+                double(1)/double(2)*W[d_num_eqn - 1][idx_face];
             
-            V[d_num_species + 1][idx_face] = -0.5*rho_average[idx_face]*c_average[idx_face]*
-                W[0][idx_face] + 0.5*rho_average[idx_face]*c_average[idx_face]*
+            V[d_num_species + 1][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
+                W[0][idx_face] + double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
                     W[d_num_eqn - 1][idx_face];
         }
     }
@@ -3655,9 +3572,10 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
                     const int idx_face = (i + num_ghosts_0_characteristic_var) +
                         (j + num_ghosts_1_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1);
                     
-                    V[si][idx_face] = -0.5*Z_rho_average[si][idx_face]/c_average[idx_face]*W[0][idx_face] +
-                        W[si + 1][idx_face] + 0.5*Z_rho_average[si][idx_face]/c_average[idx_face]*
-                            W[d_num_eqn - 1][idx_face];
+                    V[si][idx_face] = -double(1)/double(2)*Z_rho_average[si][idx_face]/
+                        c_average[idx_face]*W[0][idx_face] + W[si + 1][idx_face] +
+                            double(1)/double(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
+                                W[d_num_eqn - 1][idx_face];
                 }
             }
         }
@@ -3695,12 +3613,13 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
                 const int idx_face = (i + num_ghosts_0_characteristic_var) +
                     (j + num_ghosts_1_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1);
                 
-                V[d_num_species][idx_face] = 0.5*W[0][idx_face] + 0.5*W[d_num_eqn - 1][idx_face];
+                V[d_num_species][idx_face] = double(1)/double(2)*W[0][idx_face] +
+                    double(1)/double(2)*W[d_num_eqn - 1][idx_face];
                 
                 V[d_num_species + 1][idx_face] = W[d_num_species + 1][idx_face];
                 
-                V[d_num_species + 2][idx_face] = -0.5*rho_average[idx_face]*c_average[idx_face]*
-                    W[0][idx_face] + 0.5*rho_average[idx_face]*c_average[idx_face]*
+                V[d_num_species + 2][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
+                    W[0][idx_face] + double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
                         W[d_num_eqn - 1][idx_face];
             }
         }
@@ -3741,9 +3660,10 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
                     const int idx_face = (i + num_ghosts_0_characteristic_var) +
                         (j + num_ghosts_1_characteristic_var)*ghostcell_dim_0_characteristic_var;
                     
-                    V[si][idx_face] = -0.5*Z_rho_average[si][idx_face]/c_average[idx_face]*W[0][idx_face] +
-                        W[si + 1][idx_face] + 0.5*Z_rho_average[si][idx_face]/c_average[idx_face]*
-                            W[d_num_eqn - 1][idx_face];
+                    V[si][idx_face] = -double(1)/double(2)*Z_rho_average[si][idx_face]/
+                        c_average[idx_face]*W[0][idx_face] + W[si + 1][idx_face] +
+                            double(1)/double(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
+                                W[d_num_eqn - 1][idx_face];
                 }
             }
         }
@@ -3783,10 +3703,11 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
                 
                 V[d_num_species][idx_face] = W[d_num_species + 1][idx_face];
                 
-                V[d_num_species + 1][idx_face] = 0.5*W[0][idx_face] + 0.5*W[d_num_eqn - 1][idx_face];
+                V[d_num_species + 1][idx_face] = double(1)/double(2)*W[0][idx_face] +
+                    double(1)/double(2)*W[d_num_eqn - 1][idx_face];
                 
-                V[d_num_species + 2][idx_face] = -0.5*rho_average[idx_face]*c_average[idx_face]*
-                    W[0][idx_face] + 0.5*rho_average[idx_face]*c_average[idx_face]*
+                V[d_num_species + 2][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
+                    W[0][idx_face] + double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
                         W[d_num_eqn - 1][idx_face];
             }
         }
@@ -3843,9 +3764,10 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
                             (k + num_ghosts_2_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1)*
                                 ghostcell_dim_1_characteristic_var;
                         
-                        V[si][idx_face] = -0.5*Z_rho_average[si][idx_face]/c_average[idx_face]*W[0][idx_face] +
-                            W[si + 1][idx_face] + 0.5*Z_rho_average[si][idx_face]/c_average[idx_face]*
-                                W[d_num_eqn - 1][idx_face];
+                        V[si][idx_face] = -double(1)/double(2)*Z_rho_average[si][idx_face]/
+                            c_average[idx_face]*W[0][idx_face] + W[si + 1][idx_face] +
+                                double(1)/double(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
+                                    W[d_num_eqn - 1][idx_face];
                     }
                 }
             }
@@ -3893,14 +3815,15 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
                         (k + num_ghosts_2_characteristic_var)*(ghostcell_dim_0_characteristic_var + 1)*
                             ghostcell_dim_1_characteristic_var;
                     
-                    V[d_num_species][idx_face] = 0.5*W[0][idx_face] + 0.5*W[d_num_eqn - 1][idx_face];
+                    V[d_num_species][idx_face] = double(1)/double(2)*W[0][idx_face] +
+                        double(1)/double(2)*W[d_num_eqn - 1][idx_face];
                     
                     V[d_num_species + 1][idx_face] = W[d_num_species + 1][idx_face];
                     
                     V[d_num_species + 2][idx_face] = W[d_num_species + 2][idx_face];
                     
-                    V[d_num_species + 3][idx_face] = -0.5*rho_average[idx_face]*c_average[idx_face]*
-                        W[0][idx_face] + 0.5*rho_average[idx_face]*c_average[idx_face]*
+                    V[d_num_species + 3][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
+                        W[0][idx_face] + double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
                             W[d_num_eqn - 1][idx_face];
                 }
             }
@@ -3946,9 +3869,10 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
                             (k + num_ghosts_2_characteristic_var)*ghostcell_dim_0_characteristic_var*
                                 (ghostcell_dim_1_characteristic_var + 1);
                         
-                        V[si][idx_face] = -0.5*Z_rho_average[si][idx_face]/c_average[idx_face]*W[0][idx_face] +
-                            W[si + 1][idx_face] + 0.5*Z_rho_average[si][idx_face]/c_average[idx_face]*
-                                W[d_num_eqn - 1][idx_face];
+                        V[si][idx_face] = -double(1)/double(2)*Z_rho_average[si][idx_face]/
+                            c_average[idx_face]*W[0][idx_face] + W[si + 1][idx_face] +
+                                double(1)/double(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
+                                    W[d_num_eqn - 1][idx_face];
                     }
                 }
             }
@@ -3998,12 +3922,13 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
                     
                     V[d_num_species][idx_face] = W[d_num_species + 1][idx_face];
                     
-                    V[d_num_species + 1][idx_face] = 0.5*W[0][idx_face] + 0.5*W[d_num_eqn - 1][idx_face];
+                    V[d_num_species + 1][idx_face] = double(1)/double(2)*W[0][idx_face] +
+                        double(1)/double(2)*W[d_num_eqn - 1][idx_face];
                     
                     V[d_num_species + 2][idx_face] = W[d_num_species + 2][idx_face];
                     
-                    V[d_num_species + 3][idx_face] = -0.5*rho_average[idx_face]*c_average[idx_face]*
-                        W[0][idx_face] + 0.5*rho_average[idx_face]*c_average[idx_face]*
+                    V[d_num_species + 3][idx_face] = -double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
+                        W[0][idx_face] + double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*
                             W[d_num_eqn - 1][idx_face];
                 }
             }
@@ -4049,9 +3974,10 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
                             (k + num_ghosts_2_characteristic_var)*ghostcell_dim_0_characteristic_var*
                                 ghostcell_dim_1_characteristic_var;
                         
-                        V[si][idx_face] = -0.5*Z_rho_average[si][idx_face]/c_average[idx_face]*W[0][idx_face] +
-                            W[si + 1][idx_face] + 0.5*Z_rho_average[si][idx_face]/c_average[idx_face]*
-                                W[d_num_eqn - 1][idx_face];
+                        V[si][idx_face] = -double(1)/double(2)*Z_rho_average[si][idx_face]/
+                            c_average[idx_face]*W[0][idx_face] + W[si + 1][idx_face] +
+                                double(1)/double(2)*Z_rho_average[si][idx_face]/c_average[idx_face]*
+                                    W[d_num_eqn - 1][idx_face];
                     }
                 }
             }
@@ -4103,114 +4029,14 @@ FlowModelFiveEqnAllaire::computeGlobalSideDataPrimitiveVariablesFromCharacterist
                     
                     V[d_num_species + 1][idx_face] = W[d_num_species + 2][idx_face];
                     
-                    V[d_num_species + 2][idx_face] = 0.5*W[0][idx_face] + 0.5*W[d_num_eqn - 1][idx_face];
+                    V[d_num_species + 2][idx_face] = double(1)/double(2)*W[0][idx_face] +
+                        double(1)/double(2)*W[d_num_eqn - 1][idx_face];
                     
-                    V[d_num_species + 3][idx_face] = -0.5*rho_average[idx_face]*c_average[idx_face]*W[0][idx_face] +
-                        0.5*rho_average[idx_face]*c_average[idx_face]*W[d_num_eqn - 1][idx_face];
+                    V[d_num_species + 3][idx_face] = -double(1)/double(2)*rho_average[idx_face]*
+                        c_average[idx_face]*W[0][idx_face] +
+                            double(1)/double(2)*rho_average[idx_face]*c_average[idx_face]*W[d_num_eqn - 1][idx_face];
                 }
             }
-        }
-    }
-}
-
-
-/*
- * Compute the local intercell quantities with conservative variables on each side of the face
- * from Riemann solver at face.
- * flux_face: Convective flux at face.
- * velocity_face: Velocity at face.
- */
-void
-FlowModelFiveEqnAllaire::computeLocalFaceFluxAndVelocityFromRiemannSolverWithConservativeVariables(
-    std::vector<boost::reference_wrapper<double> >& flux_face,
-    std::vector<boost::reference_wrapper<double> >& velocity_face,
-    const std::vector<boost::reference_wrapper<double> >& conservative_variables_minus,
-    const std::vector<boost::reference_wrapper<double> >& conservative_variables_plus,
-    const DIRECTION::TYPE& direction,
-    const RIEMANN_SOLVER::TYPE& Riemann_solver)
-{
-    switch (Riemann_solver)
-    {
-        case RIEMANN_SOLVER::HLLC:
-        {
-            d_Riemann_solver_HLLC->computeIntercellFluxAndVelocityFromConservativeVariables(
-                flux_face,
-                velocity_face,
-                conservative_variables_minus,
-                conservative_variables_plus,
-                direction);
-            
-            break;
-        }
-        case RIEMANN_SOLVER::HLLC_HLL:
-        {
-            d_Riemann_solver_HLLC_HLL->computeIntercellFluxAndVelocityFromConservativeVariables(
-                flux_face,
-                velocity_face,
-                conservative_variables_minus,
-                conservative_variables_plus,
-                direction);
-            
-            break;
-        }
-        default:
-        {
-            TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::"
-            << "computeLocalFaceFluxAndVelocityFromRiemannSolverWithConservativeVariables()\n"
-            << "Unknown Riemann solver required."
-            << std::endl);
-        }
-    }
-}
-
-
-/*
- * Compute the local intercell quantities with primitive variables on each side of the face
- * from Riemann solver at face.
- * flux_face: Convective flux at face.
- * velocity_face: Velocity at face.
- */
-void
-FlowModelFiveEqnAllaire::computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
-    std::vector<boost::reference_wrapper<double> >& flux_face,
-    std::vector<boost::reference_wrapper<double> >& velocity_face,
-    const std::vector<boost::reference_wrapper<double> >& primitive_variables_minus,
-    const std::vector<boost::reference_wrapper<double> >& primitive_variables_plus,
-    const DIRECTION::TYPE& direction,
-    const RIEMANN_SOLVER::TYPE& Riemann_solver)
-{
-    switch (Riemann_solver)
-    {
-        case RIEMANN_SOLVER::HLLC:
-        {
-            d_Riemann_solver_HLLC->computeIntercellFluxAndVelocityFromPrimitiveVariables(
-                flux_face,
-                velocity_face,
-                primitive_variables_minus,
-                primitive_variables_plus,
-                direction);
-            
-            break;
-        }
-        case RIEMANN_SOLVER::HLLC_HLL:
-        {
-            d_Riemann_solver_HLLC_HLL->computeIntercellFluxAndVelocityFromPrimitiveVariables(
-                flux_face,
-                velocity_face,
-                primitive_variables_minus,
-                primitive_variables_plus,
-                direction);
-            
-            break;
-        }
-        default:
-        {
-            TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::"
-            << "computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables()\n"
-            << "Unknown Riemann solver required."
-            << std::endl);
         }
     }
 }
@@ -4306,16 +4132,16 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
     bounded_flag->fillAll(1);
     
     // Create the side data for last volume fraction.
-    boost::shared_ptr<pdat::SideData<double> > data_last_volume_fraction(
+    boost::shared_ptr<pdat::SideData<double> > data_last_volume_fractions(
         new pdat::SideData<double>(d_interior_box, 1, num_ghosts_conservative_var));
     
-    data_last_volume_fraction->fillAll(1.0);
+    data_last_volume_fractions->fillAll(double(1));
     
     // Create the side data of density.
     boost::shared_ptr<pdat::SideData<double> > data_density(
         new pdat::SideData<double>(d_interior_box, 1, num_ghosts_conservative_var));
     
-    data_density->fillAll(0.0);
+    data_density->fillAll(double(0));
     
     /*
      * Declare containers to store pointers to different data.
@@ -4347,7 +4173,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
             Q[ei] = conservative_variables[ei]->getPointer(0);
         }
         
-        Z_last = data_last_volume_fraction->getPointer(0);
+        Z_last = data_last_volume_fractions->getPointer(0);
         
         rho = data_density->getPointer(0);
         
@@ -4453,7 +4279,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
             // Compute the linear index.
             const int idx_face = i + num_ghosts_0_conservative_var;
             
-            if (rho[idx_face] > 0.0)
+            if (rho[idx_face] > double(0))
             {
                 are_bounded[idx_face] &= 1;
             }
@@ -4462,7 +4288,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
                 are_bounded[idx_face] &= 0;
             }
             
-            if (Q[d_num_species + d_dim.getValue()][idx_face] > 0.0)
+            if (Q[d_num_species + d_dim.getValue()][idx_face] > double(0))
             {
                 are_bounded[idx_face] &= 1;
             }
@@ -4492,7 +4318,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
             Q[ei] = conservative_variables[ei]->getPointer(0);
         }
         
-        Z_last = data_last_volume_fraction->getPointer(0);
+        Z_last = data_last_volume_fractions->getPointer(0);
         
         rho = data_density->getPointer(0);
         
@@ -4617,7 +4443,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
                 const int idx_face = (i + num_ghosts_0_conservative_var) +
                     (j + num_ghosts_1_conservative_var)*(ghostcell_dim_0_conservative_var + 1);
                 
-                if (rho[idx_face] > 0.0)
+                if (rho[idx_face] > double(0))
                 {
                     are_bounded[idx_face] &= 1;
                 }
@@ -4626,7 +4452,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
                     are_bounded[idx_face] &= 0;
                 }
                 
-                if (Q[d_num_species + d_dim.getValue()][idx_face] > 0.0)
+                if (Q[d_num_species + d_dim.getValue()][idx_face] > double(0))
                 {
                     are_bounded[idx_face] &= 1;
                 }
@@ -4648,7 +4474,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
             Q[ei] = conservative_variables[ei]->getPointer(1);
         }
         
-        Z_last = data_last_volume_fraction->getPointer(1);
+        Z_last = data_last_volume_fractions->getPointer(1);
         
         rho = data_density->getPointer(1);
         
@@ -4773,7 +4599,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
                 const int idx_face = (i + num_ghosts_0_conservative_var) +
                     (j + num_ghosts_1_conservative_var)*ghostcell_dim_0_conservative_var;
                 
-                if (rho[idx_face] > 0.0)
+                if (rho[idx_face] > double(0))
                 {
                     are_bounded[idx_face] &= 1;
                 }
@@ -4782,7 +4608,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
                     are_bounded[idx_face] &= 0;
                 }
                 
-                if (Q[d_num_species + d_dim.getValue()][idx_face] > 0.0)
+                if (Q[d_num_species + d_dim.getValue()][idx_face] > double(0))
                 {
                     are_bounded[idx_face] &= 1;
                 }
@@ -4816,7 +4642,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
             Q[ei] = conservative_variables[ei]->getPointer(0);
         }
         
-        Z_last = data_last_volume_fraction->getPointer(0);
+        Z_last = data_last_volume_fractions->getPointer(0);
         
         rho = data_density->getPointer(0);
         
@@ -4965,7 +4791,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
                         (k + num_ghosts_2_conservative_var)*(ghostcell_dim_0_conservative_var + 1)*
                             ghostcell_dim_1_conservative_var;
                     
-                    if (rho[idx_face] > 0.0)
+                    if (rho[idx_face] > double(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -4974,7 +4800,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
                         are_bounded[idx_face] &= 0;
                     }
                     
-                    if (Q[d_num_species + d_dim.getValue()][idx_face] > 0.0)
+                    if (Q[d_num_species + d_dim.getValue()][idx_face] > double(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -4997,7 +4823,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
             Q[ei] = conservative_variables[ei]->getPointer(1);
         }
         
-        Z_last = data_last_volume_fraction->getPointer(1);
+        Z_last = data_last_volume_fractions->getPointer(1);
         
         rho = data_density->getPointer(1);
         
@@ -5146,7 +4972,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
                         (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
                             (ghostcell_dim_1_conservative_var + 1);
                     
-                    if (rho[idx_face] > 0.0)
+                    if (rho[idx_face] > double(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -5155,7 +4981,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
                         are_bounded[idx_face] &= 0;
                     }
                     
-                    if (Q[d_num_species + d_dim.getValue()][idx_face] > 0.0)
+                    if (Q[d_num_species + d_dim.getValue()][idx_face] > double(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -5178,7 +5004,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
             Q[ei] = conservative_variables[ei]->getPointer(2);
         }
         
-        Z_last = data_last_volume_fraction->getPointer(2);
+        Z_last = data_last_volume_fractions->getPointer(2);
         
         rho = data_density->getPointer(2);
         
@@ -5327,7 +5153,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
                         (k + num_ghosts_2_conservative_var)*ghostcell_dim_0_conservative_var*
                             ghostcell_dim_1_conservative_var;
                     
-                    if (rho[idx_face] > 0.0)
+                    if (rho[idx_face] > double(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -5336,7 +5162,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataConservativeVariablesBounded(
                         are_bounded[idx_face] &= 0;
                     }
                     
-                    if (Q[d_num_species + d_dim.getValue()][idx_face] > 0.0)
+                    if (Q[d_num_species + d_dim.getValue()][idx_face] > double(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -5441,16 +5267,16 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
     bounded_flag->fillAll(1);
     
     // Create the side data for last volume fraction.
-    boost::shared_ptr<pdat::SideData<double> > data_last_volume_fraction(
+    boost::shared_ptr<pdat::SideData<double> > data_last_volume_fractions(
         new pdat::SideData<double>(d_interior_box, 1, num_ghosts_primitive_var));
     
-    data_last_volume_fraction->fillAll(1.0);
+    data_last_volume_fractions->fillAll(double(1));
     
     // Create the side data of density.
     boost::shared_ptr<pdat::SideData<double> > data_density(
         new pdat::SideData<double>(d_interior_box, 1, num_ghosts_primitive_var));
     
-    data_density->fillAll(0.0);
+    data_density->fillAll(double(0));
     
     /*
      * Declare containers to store pointers to different data.
@@ -5482,7 +5308,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
         
-        Z_last = data_last_volume_fraction->getPointer(0);
+        Z_last = data_last_volume_fractions->getPointer(0);
         
         rho = data_density->getPointer(0);
         
@@ -5588,7 +5414,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
             // Compute the linear index.
             const int idx_face = i + num_ghosts_0_primitive_var;
             
-            if (rho[idx_face] > 0.0)
+            if (rho[idx_face] > double(0))
             {
                 are_bounded[idx_face] &= 1;
             }
@@ -5597,7 +5423,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
                 are_bounded[idx_face] &= 0;
             }
             
-            if (V[d_num_species + d_dim.getValue()][idx_face] > 0.0)
+            if (V[d_num_species + d_dim.getValue()][idx_face] > double(0))
             {
                 are_bounded[idx_face] &= 1;
             }
@@ -5627,7 +5453,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
         
-        Z_last = data_last_volume_fraction->getPointer(0);
+        Z_last = data_last_volume_fractions->getPointer(0);
         
         rho = data_density->getPointer(0);
         
@@ -5752,7 +5578,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
                 const int idx_face = (i + num_ghosts_0_primitive_var) +
                     (j + num_ghosts_1_primitive_var)*(ghostcell_dim_0_primitive_var + 1);
                 
-                if (rho[idx_face] > 0.0)
+                if (rho[idx_face] > double(0))
                 {
                     are_bounded[idx_face] &= 1;
                 }
@@ -5761,7 +5587,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
                     are_bounded[idx_face] &= 0;
                 }
                 
-                if (V[d_num_species + d_dim.getValue()][idx_face] > 0.0)
+                if (V[d_num_species + d_dim.getValue()][idx_face] > double(0))
                 {
                     are_bounded[idx_face] &= 1;
                 }
@@ -5783,7 +5609,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
             V[ei] = primitive_variables[ei]->getPointer(1);
         }
         
-        Z_last = data_last_volume_fraction->getPointer(1);
+        Z_last = data_last_volume_fractions->getPointer(1);
         
         rho = data_density->getPointer(1);
         
@@ -5908,7 +5734,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
                 const int idx_face = (i + num_ghosts_0_primitive_var) +
                     (j + num_ghosts_1_primitive_var)*ghostcell_dim_0_primitive_var;
                 
-                if (rho[idx_face] > 0.0)
+                if (rho[idx_face] > double(0))
                 {
                     are_bounded[idx_face] &= 1;
                 }
@@ -5917,7 +5743,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
                     are_bounded[idx_face] &= 0;
                 }
                 
-                if (V[d_num_species + d_dim.getValue()][idx_face] > 0.0)
+                if (V[d_num_species + d_dim.getValue()][idx_face] > double(0))
                 {
                     are_bounded[idx_face] &= 1;
                 }
@@ -5951,7 +5777,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
             V[ei] = primitive_variables[ei]->getPointer(0);
         }
         
-        Z_last = data_last_volume_fraction->getPointer(0);
+        Z_last = data_last_volume_fractions->getPointer(0);
         
         rho = data_density->getPointer(0);
         
@@ -6100,7 +5926,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
                         (k + num_ghosts_2_primitive_var)*(ghostcell_dim_0_primitive_var + 1)*
                             ghostcell_dim_1_primitive_var;
                     
-                    if (rho[idx_face] > 0.0)
+                    if (rho[idx_face] > double(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -6109,7 +5935,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
                         are_bounded[idx_face] &= 0;
                     }
                     
-                    if (V[d_num_species + d_dim.getValue()][idx_face] > 0.0)
+                    if (V[d_num_species + d_dim.getValue()][idx_face] > double(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -6132,7 +5958,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
             V[ei] = primitive_variables[ei]->getPointer(1);
         }
         
-        Z_last = data_last_volume_fraction->getPointer(1);
+        Z_last = data_last_volume_fractions->getPointer(1);
         
         rho = data_density->getPointer(1);
         
@@ -6281,7 +6107,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
                         (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
                             (ghostcell_dim_1_primitive_var + 1);
                     
-                    if (rho[idx_face] > 0.0)
+                    if (rho[idx_face] > double(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -6290,7 +6116,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
                         are_bounded[idx_face] &= 0;
                     }
                     
-                    if (V[d_num_species + d_dim.getValue()][idx_face] > 0.0)
+                    if (V[d_num_species + d_dim.getValue()][idx_face] > double(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -6313,7 +6139,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
             V[ei] = primitive_variables[ei]->getPointer(2);
         }
         
-        Z_last = data_last_volume_fraction->getPointer(2);
+        Z_last = data_last_volume_fractions->getPointer(2);
         
         rho = data_density->getPointer(2);
         
@@ -6462,7 +6288,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
                         (k + num_ghosts_2_primitive_var)*ghostcell_dim_0_primitive_var*
                             ghostcell_dim_1_primitive_var;
                     
-                    if (rho[idx_face] > 0.0)
+                    if (rho[idx_face] > double(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -6471,7 +6297,7 @@ FlowModelFiveEqnAllaire::checkGlobalSideDataPrimitiveVariablesBounded(
                         are_bounded[idx_face] &= 0;
                     }
                     
-                    if (V[d_num_species + d_dim.getValue()][idx_face] > 0.0)
+                    if (V[d_num_species + d_dim.getValue()][idx_face] > double(0))
                     {
                         are_bounded[idx_face] &= 1;
                     }
@@ -6519,22 +6345,22 @@ FlowModelFiveEqnAllaire::convertLocalCellDataPointersConservativeVariablesToPrim
     /*
      * Compute the internal energy.
      */
-    double epsilon = 0.0;
+    double epsilon = double(0);
     if (d_dim == tbox::Dimension(1))
     {
         epsilon = ((*Q[d_num_species + d_dim.getValue()]) -
-            0.5*((*Q[d_num_species])*(*Q[d_num_species]))/rho)/rho;
+            double(1)/double(2)*((*Q[d_num_species])*(*Q[d_num_species]))/rho)/rho;
     }
     else if (d_dim == tbox::Dimension(2))
     {
         epsilon = ((*Q[d_num_species + d_dim.getValue()]) -
-            0.5*((*Q[d_num_species])*(*Q[d_num_species]) +
+            double(1)/double(2)*((*Q[d_num_species])*(*Q[d_num_species]) +
             (*Q[d_num_species + 1])*(*Q[d_num_species + 1]))/rho)/rho;
     }
     else if (d_dim == tbox::Dimension(3))
     {
         epsilon = ((*Q[d_num_species + d_dim.getValue()]) -
-            0.5*((*Q[d_num_species])*(*Q[d_num_species]) +
+            double(1)/double(2)*((*Q[d_num_species])*(*Q[d_num_species]) +
             (*Q[d_num_species + 1])*(*Q[d_num_species + 1]) +
             (*Q[d_num_species + 2])*(*Q[d_num_species + 2]))/rho)/rho;
     }
@@ -6666,7 +6492,7 @@ FlowModelFiveEqnAllaire::convertLocalCellDataPointersPrimitiveVariablesToConserv
         Y_ptr,
         Z_ptr);
     
-    const double E = epsilon + 0.5*rho*((*Q[d_num_species])*(*Q[d_num_species]) +
+    const double E = epsilon + double(1)/double(2)*rho*((*Q[d_num_species])*(*Q[d_num_species]) +
         (*Q[d_num_species + 1])*(*Q[d_num_species + 1]) +
         (*Q[d_num_species + 2])*(*Q[d_num_species + 2]));
     
@@ -6708,12 +6534,15 @@ FlowModelFiveEqnAllaire::getDiffusiveFluxVariablesForDerivative(
     const DIRECTION::TYPE& flux_direction,
     const DIRECTION::TYPE& derivative_direction)
 {
+    // Create empty box.
+    const hier::Box empty_box(d_dim);
+    
     derivative_var_data.resize(d_num_eqn);
     derivative_var_component_idx.resize(d_num_eqn);
     
     if (!d_data_velocity)
     {
-        computeGlobalCellDataVelocityWithDensity();
+        computeGlobalCellDataVelocityWithDensity(empty_box);
     }
     
     if (d_dim == tbox::Dimension(1))
@@ -7558,6 +7387,9 @@ FlowModelFiveEqnAllaire::getDiffusiveFluxDiffusivities(
     const DIRECTION::TYPE& flux_direction,
     const DIRECTION::TYPE& derivative_direction)
 {
+    // Create empty box.
+    const hier::Box empty_box(d_dim);
+    
     if (!d_equation_of_shear_viscosity_mixing_rules ||
         !d_equation_of_bulk_viscosity_mixing_rules)
     {
@@ -7573,405 +7405,61 @@ FlowModelFiveEqnAllaire::getDiffusiveFluxDiffusivities(
     
     if (!d_data_diffusivities)
     {
-        if (!d_data_mass_fraction)
+        if (!d_data_mass_fractions)
         {
-            computeGlobalCellDataMassFractionWithDensity();
+            computeGlobalCellDataMassFractionsWithDensity(empty_box);
         }
         
         if (!d_data_velocity)
         {
-            computeGlobalCellDataVelocityWithDensity();
+            computeGlobalCellDataVelocityWithDensity(empty_box);
         }
         
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+            computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy(empty_box);
         }
         
-        if (!d_data_temperature)
+        if (!d_data_species_temperatures)
         {
-            computeGlobalCellDataTemperatureWithPressure();
-        }
-        
-        // Get the cell data of the variable volume fraction.
-        boost::shared_ptr<pdat::CellData<double> > data_volume_fraction =
-            getGlobalCellDataVolumeFraction();
-        
-        // Get the pointers to the cell data of mass fraction, pressure, temperature and
-        // volume fraction.
-        std::vector<double*> Y;
-        Y.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y.push_back(d_data_mass_fraction->getPointer(si));
-        }
-        double* p = d_data_pressure->getPointer(0);
-        std::vector<double*> T;
-        T.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            T.push_back(d_data_temperature->getPointer(si));
-        }
-        std::vector<double*> Z;
-        Z.reserve(d_num_species - 1);
-        for (int si = 0; si < d_num_species - 1; si++)
-        {
-            Z.push_back(data_volume_fraction->getPointer(si));
+            computeGlobalCellDataSpeciesTemperaturesWithPressure(empty_box);
         }
         
         /*
-         * Compute shear viscosity.
+         * Create temporary cell data of shear viscosity and bulk viscosity.
          */
         
         boost::shared_ptr<pdat::CellData<double> > data_shear_viscosity(
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_diffusivities));
         
-        double* mu = data_shear_viscosity->getPointer(0);
-        
-        if (d_dim == tbox::Dimension(1))
-        {
-            for (int i = -d_num_subghosts_diffusivities[0];
-                 i < d_interior_dims[0] + d_num_subghosts_diffusivities[0];
-                 i++)
-            {
-                // Compute the linear indices.
-                const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
-                const int idx_pressure = i + d_num_subghosts_pressure[0];
-                const int idx_temperature = i + d_num_subghosts_temperature[0];
-                const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
-                const int idx = i + d_num_ghosts[0];
-                
-                std::vector<const double*> T_ptr;
-                T_ptr.reserve(d_num_species);
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    T_ptr.push_back(&T[si][idx_temperature]);
-                }
-                
-                std::vector<const double*> Y_ptr;
-                Y_ptr.reserve(d_num_species);
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    Y_ptr.push_back(&Y[si][idx_mass_fraction]);
-                }
-                
-                std::vector<const double*> Z_ptr;
-                Z_ptr.reserve(d_num_species);
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    Z_ptr.push_back(&Z[si][idx]);
-                }
-                
-                mu[idx_diffusivities] = d_equation_of_shear_viscosity_mixing_rules->
-                    getShearViscosity(
-                        &p[idx_pressure],
-                        T_ptr,
-                        Y_ptr,
-                        Z_ptr);
-            }
-        }
-        else if (d_dim == tbox::Dimension(2))
-        {
-            for (int j = -d_num_subghosts_diffusivities[1];
-                 j < d_interior_dims[1] + d_num_subghosts_diffusivities[1];
-                 j++)
-            {
-                for (int i = -d_num_subghosts_diffusivities[0];
-                     i < d_interior_dims[0] + d_num_subghosts_diffusivities[0];
-                     i++)
-                {
-                    // Compute the linear indices.
-                    const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
-                        (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0];
-                    
-                    const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                        (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
-                    
-                    const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                        (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0];
-                    
-                    const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                        (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
-                    
-                    const int idx = (i + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
-                    
-                    std::vector<const double*> T_ptr;
-                    T_ptr.reserve(d_num_species);
-                    for (int si = 0; si < d_num_species; si++)
-                    {
-                        T_ptr.push_back(&T[si][idx_temperature]);
-                    }
-                    
-                    std::vector<const double*> Y_ptr;
-                    Y_ptr.reserve(d_num_species);
-                    for (int si = 0; si < d_num_species; si++)
-                    {
-                        Y_ptr.push_back(&Y[si][idx_mass_fraction]);
-                    }
-                    
-                    std::vector<const double*> Z_ptr;
-                    Z_ptr.reserve(d_num_species);
-                    for (int si = 0; si < d_num_species; si++)
-                    {
-                        Z_ptr.push_back(&Z[si][idx]);
-                    }
-                    
-                    mu[idx_diffusivities] = d_equation_of_shear_viscosity_mixing_rules->
-                        getShearViscosity(
-                            &p[idx_pressure],
-                            T_ptr,
-                            Y_ptr,
-                            Z_ptr);
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            for (int k = -d_num_subghosts_diffusivities[2];
-                 k < d_interior_dims[2] + d_num_subghosts_diffusivities[2];
-                 k++)
-            {
-                for (int j = -d_num_subghosts_diffusivities[1];
-                     j < d_interior_dims[1] + d_num_subghosts_diffusivities[1];
-                     j++)
-                {
-                    for (int i = -d_num_subghosts_diffusivities[0];
-                         i < d_interior_dims[0] + d_num_subghosts_diffusivities[0];
-                         i++)
-                    {
-                        const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
-                            (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0] +
-                            (k + d_num_subghosts_diffusivities[2])*d_subghostcell_dims_diffusivities[0]*
-                                d_subghostcell_dims_diffusivities[1];
-                        
-                        const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                            (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
-                            (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
-                                d_subghostcell_dims_pressure[1];
-                        
-                        const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                            (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0] +
-                            (k + d_num_subghosts_temperature[2])*d_subghostcell_dims_temperature[0]*
-                                d_subghostcell_dims_temperature[1];
-                        
-                        const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                            (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
-                            (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*
-                                d_subghostcell_dims_mass_fraction[1];
-                        
-                        const int idx = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
-                        
-                        std::vector<const double*> T_ptr;
-                        T_ptr.reserve(d_num_species);
-                        for (int si = 0; si < d_num_species; si++)
-                        {
-                            T_ptr.push_back(&T[si][idx_temperature]);
-                        }
-                        
-                        std::vector<const double*> Y_ptr;
-                        Y_ptr.reserve(d_num_species);
-                        for (int si = 0; si < d_num_species; si++)
-                        {
-                            Y_ptr.push_back(&Y[si][idx_mass_fraction]);
-                        }
-                        
-                        std::vector<const double*> Z_ptr;
-                        Z_ptr.reserve(d_num_species);
-                        for (int si = 0; si < d_num_species; si++)
-                        {
-                            Z_ptr.push_back(&Z[si][idx]);
-                        }
-                        
-                        mu[idx_diffusivities] = d_equation_of_shear_viscosity_mixing_rules->
-                            getShearViscosity(
-                                &p[idx_pressure],
-                                T_ptr,
-                                Y_ptr,
-                                Z_ptr);
-                    }
-                }
-            }
-        }
-        
-        /*
-         * Compute bulk viscosity.
-         */
-        
         boost::shared_ptr<pdat::CellData<double> > data_bulk_viscosity(
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_diffusivities));
         
-        double* mu_v = data_bulk_viscosity->getPointer(0);
+        // Get the cell data of the variable volume fractions.
+        boost::shared_ptr<pdat::CellData<double> > data_volume_fractions =
+            getGlobalCellDataVolumeFractions();
         
-        if (d_dim == tbox::Dimension(1))
-        {
-            for (int i = -d_num_subghosts_diffusivities[0];
-                 i < d_interior_dims[0] + d_num_subghosts_diffusivities[0];
-                 i++)
-            {
-                // Compute the linear indices.
-                const int idx_diffusivities = i + d_num_subghosts_diffusivities[0];
-                const int idx_pressure = i + d_num_subghosts_pressure[0];
-                const int idx_temperature = i + d_num_subghosts_temperature[0];
-                const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
-                const int idx = i + d_num_ghosts[0];
-                
-                std::vector<const double*> T_ptr;
-                T_ptr.reserve(d_num_species);
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    T_ptr.push_back(&T[si][idx_temperature]);
-                }
-                
-                std::vector<const double*> Y_ptr;
-                Y_ptr.reserve(d_num_species);
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    Y_ptr.push_back(&Y[si][idx_mass_fraction]);
-                }
-                
-                std::vector<const double*> Z_ptr;
-                Z_ptr.reserve(d_num_species);
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    Z_ptr.push_back(&Z[si][idx]);
-                }
-                
-                mu_v[idx_diffusivities] = d_equation_of_bulk_viscosity_mixing_rules->
-                    getBulkViscosity(
-                        &p[idx_pressure],
-                        T_ptr,
-                        Y_ptr,
-                        Z_ptr);
-            }
-        }
-        else if (d_dim == tbox::Dimension(2))
-        {
-            for (int j = -d_num_subghosts_diffusivities[1];
-                 j < d_interior_dims[1] + d_num_subghosts_diffusivities[1];
-                 j++)
-            {
-                for (int i = -d_num_subghosts_diffusivities[0];
-                     i < d_interior_dims[0] + d_num_subghosts_diffusivities[0];
-                     i++)
-                {
-                    // Compute the linear indices.
-                    const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
-                        (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0];
-                    
-                    const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                        (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
-                    
-                    const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                        (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0];
-                    
-                    const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                        (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
-                    
-                    const int idx = (i + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
-                    
-                    std::vector<const double*> T_ptr;
-                    T_ptr.reserve(d_num_species);
-                    for (int si = 0; si < d_num_species; si++)
-                    {
-                        T_ptr.push_back(&T[si][idx_temperature]);
-                    }
-                    
-                    std::vector<const double*> Y_ptr;
-                    Y_ptr.reserve(d_num_species);
-                    for (int si = 0; si < d_num_species; si++)
-                    {
-                        Y_ptr.push_back(&Y[si][idx_mass_fraction]);
-                    }
-                    
-                    std::vector<const double*> Z_ptr;
-                    Z_ptr.reserve(d_num_species);
-                    for (int si = 0; si < d_num_species; si++)
-                    {
-                        Z_ptr.push_back(&Z[si][idx]);
-                    }
-                    
-                    mu_v[idx_diffusivities] = d_equation_of_bulk_viscosity_mixing_rules->
-                        getBulkViscosity(
-                            &p[idx_pressure],
-                            T_ptr,
-                            Y_ptr,
-                            Z_ptr);
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            for (int k = -d_num_subghosts_diffusivities[2];
-                 k < d_interior_dims[2] + d_num_subghosts_diffusivities[2];
-                 k++)
-            {
-                for (int j = -d_num_subghosts_diffusivities[1];
-                     j < d_interior_dims[1] + d_num_subghosts_diffusivities[1];
-                     j++)
-                {
-                    for (int i = -d_num_subghosts_diffusivities[0];
-                         i < d_interior_dims[0] + d_num_subghosts_diffusivities[0];
-                         i++)
-                    {
-                        const int idx_diffusivities = (i + d_num_subghosts_diffusivities[0]) +
-                            (j + d_num_subghosts_diffusivities[1])*d_subghostcell_dims_diffusivities[0] +
-                            (k + d_num_subghosts_diffusivities[2])*d_subghostcell_dims_diffusivities[0]*
-                                d_subghostcell_dims_diffusivities[1];
-                        
-                        const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                            (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
-                            (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
-                                d_subghostcell_dims_pressure[1];
-                        
-                        const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                            (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0] +
-                            (k + d_num_subghosts_temperature[2])*d_subghostcell_dims_temperature[0]*
-                                d_subghostcell_dims_temperature[1];
-                        
-                        const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                            (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
-                            (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*
-                                d_subghostcell_dims_mass_fraction[1];
-                        
-                        const int idx = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
-                        
-                        std::vector<const double*> T_ptr;
-                        T_ptr.reserve(d_num_species);
-                        for (int si = 0; si < d_num_species; si++)
-                        {
-                            T_ptr.push_back(&T[si][idx_temperature]);
-                        }
-                        
-                        std::vector<const double*> Y_ptr;
-                        Y_ptr.reserve(d_num_species);
-                        for (int si = 0; si < d_num_species; si++)
-                        {
-                            Y_ptr.push_back(&Y[si][idx_mass_fraction]);
-                        }
-                        
-                        std::vector<const double*> Z_ptr;
-                        Z_ptr.reserve(d_num_species);
-                        for (int si = 0; si < d_num_species; si++)
-                        {
-                            Z_ptr.push_back(&Z[si][idx]);
-                        }
-                        
-                        mu_v[idx_diffusivities] = d_equation_of_bulk_viscosity_mixing_rules->
-                            getBulkViscosity(
-                                &p[idx_pressure],
-                                T_ptr,
-                                Y_ptr,
-                                Z_ptr);
-                    }
-                }
-            }
-        }
+        // Get the pointers to the cell data of shear viscosity and bulk viscosity.
+        double* mu    = data_shear_viscosity->getPointer(0);
+        double* mu_v  = data_bulk_viscosity->getPointer(0);
+        
+        // Compute the shear viscosity field.
+        d_equation_of_shear_viscosity_mixing_rules->computeShearViscosity(
+            data_shear_viscosity,
+            d_data_pressure,
+            d_data_species_temperatures,
+            d_data_mass_fractions,
+            data_volume_fractions,
+            d_subghost_box_diffusivities);
+        
+        // Compute the bulk viscosity field.
+        d_equation_of_bulk_viscosity_mixing_rules->computeBulkViscosity(
+            data_bulk_viscosity,
+            d_data_pressure,
+            d_data_species_temperatures,
+            d_data_mass_fractions,
+            data_volume_fractions,
+            d_subghost_box_diffusivities);
         
         if (d_dim == tbox::Dimension(1))
         {
@@ -8003,9 +7491,9 @@ FlowModelFiveEqnAllaire::getDiffusiveFluxDiffusivities(
                 const int idx_velocity = i + d_num_subghosts_velocity[0];
                 
                 D_ptr[0][idx_diffusivities] =
-                    -(4.0/3.0*mu[idx_diffusivities] + mu_v[idx_diffusivities]);
+                    -(double(4)/double(3)*mu[idx_diffusivities] + mu_v[idx_diffusivities]);
                 D_ptr[1][idx_diffusivities] =
-                    -u[idx_velocity]*(4.0/3.0*mu[idx_diffusivities] + mu_v[idx_diffusivities]);
+                    -u[idx_velocity]*(double(4)/double(3)*mu[idx_diffusivities] + mu_v[idx_diffusivities]);
             }
         }
         else if (d_dim == tbox::Dimension(2))
@@ -8046,19 +7534,19 @@ FlowModelFiveEqnAllaire::getDiffusiveFluxDiffusivities(
                         (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
                     
                     D_ptr[0][idx_diffusivities] =
-                        -(4.0/3.0*mu[idx_diffusivities] + mu_v[idx_diffusivities]);
+                        -(double(4)/double(3)*mu[idx_diffusivities] + mu_v[idx_diffusivities]);
                     D_ptr[1][idx_diffusivities] =
-                        2.0/3.0*mu[idx_diffusivities] - mu_v[idx_diffusivities];
+                        double(2)/double(3)*mu[idx_diffusivities] - mu_v[idx_diffusivities];
                     D_ptr[2][idx_diffusivities] =
                         -mu[idx_diffusivities];
                     D_ptr[3][idx_diffusivities] =
-                        -u[idx_velocity]*(4.0/3.0*mu[idx_diffusivities] + mu_v[idx_diffusivities]);
+                        -u[idx_velocity]*(double(4)/double(3)*mu[idx_diffusivities] + mu_v[idx_diffusivities]);
                     D_ptr[4][idx_diffusivities] =
-                        -v[idx_velocity]*(4.0/3.0*mu[idx_diffusivities] + mu_v[idx_diffusivities]);
+                        -v[idx_velocity]*(double(4)/double(3)*mu[idx_diffusivities] + mu_v[idx_diffusivities]);
                     D_ptr[5][idx_diffusivities] =
-                        u[idx_velocity]*(2.0/3.0*mu[idx_diffusivities] - mu_v[idx_diffusivities]);
+                        u[idx_velocity]*(double(2)/double(3)*mu[idx_diffusivities] - mu_v[idx_diffusivities]);
                     D_ptr[6][idx_diffusivities] =
-                        v[idx_velocity]*(2.0/3.0*mu[idx_diffusivities] - mu_v[idx_diffusivities]);
+                        v[idx_velocity]*(double(2)/double(3)*mu[idx_diffusivities] - mu_v[idx_diffusivities]);
                     D_ptr[7][idx_diffusivities] =
                         -u[idx_velocity]*mu[idx_diffusivities];
                     D_ptr[8][idx_diffusivities] =
@@ -8112,23 +7600,23 @@ FlowModelFiveEqnAllaire::getDiffusiveFluxDiffusivities(
                                 d_subghostcell_dims_velocity[1];
                         
                         D_ptr[0][idx_diffusivities] =
-                            -(4.0/3.0*mu[idx_diffusivities] + mu_v[idx_diffusivities]);
+                            -(double(4)/double(3)*mu[idx_diffusivities] + mu_v[idx_diffusivities]);
                         D_ptr[1][idx_diffusivities] =
-                            2.0/3.0*mu[idx_diffusivities] - mu_v[idx_diffusivities];
+                            double(2)/double(3)*mu[idx_diffusivities] - mu_v[idx_diffusivities];
                         D_ptr[2][idx_diffusivities] =
                             -mu[idx_diffusivities];
                         D_ptr[3][idx_diffusivities] =
-                            -u[idx_velocity]*(4.0/3.0*mu[idx_diffusivities] + mu_v[idx_diffusivities]);
+                            -u[idx_velocity]*(double(4)/double(3)*mu[idx_diffusivities] + mu_v[idx_diffusivities]);
                         D_ptr[4][idx_diffusivities] =
-                            -v[idx_velocity]*(4.0/3.0*mu[idx_diffusivities] + mu_v[idx_diffusivities]);
+                            -v[idx_velocity]*(double(4)/double(3)*mu[idx_diffusivities] + mu_v[idx_diffusivities]);
                         D_ptr[5][idx_diffusivities] =
-                            -w[idx_velocity]*(4.0/3.0*mu[idx_diffusivities] + mu_v[idx_diffusivities]);
+                            -w[idx_velocity]*(double(4)/double(3)*mu[idx_diffusivities] + mu_v[idx_diffusivities]);
                         D_ptr[6][idx_diffusivities] =
-                            u[idx_velocity]*(2.0/3.0*mu[idx_diffusivities] - mu_v[idx_diffusivities]);
+                            u[idx_velocity]*(double(2)/double(3)*mu[idx_diffusivities] - mu_v[idx_diffusivities]);
                         D_ptr[7][idx_diffusivities] =
-                            v[idx_velocity]*(2.0/3.0*mu[idx_diffusivities] - mu_v[idx_diffusivities]);
+                            v[idx_velocity]*(double(2)/double(3)*mu[idx_diffusivities] - mu_v[idx_diffusivities]);
                         D_ptr[8][idx_diffusivities] =
-                            w[idx_velocity]*(2.0/3.0*mu[idx_diffusivities] - mu_v[idx_diffusivities]);
+                            w[idx_velocity]*(double(2)/double(3)*mu[idx_diffusivities] - mu_v[idx_diffusivities]);
                         D_ptr[9][idx_diffusivities] =
                             -u[idx_velocity]*mu[idx_diffusivities];
                         D_ptr[10][idx_diffusivities] =
@@ -9011,17 +8499,17 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
     
     if (variable_name == "density")
     {
-        boost::shared_ptr<pdat::CellData<double> > data_partial_density(
+        boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(s_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        TBOX_ASSERT(data_partial_density);
-        TBOX_ASSERT(data_partial_density->getGhostBox().isSpatiallyEqual(patch.getBox()));
+        TBOX_ASSERT(data_partial_densities);
+        TBOX_ASSERT(data_partial_densities->getGhostBox().isSpatiallyEqual(patch.getBox()));
 #endif
         
         // Get the dimensions of box that covers the data.
-        const hier::Box data_box = data_partial_density->getGhostBox();
+        const hier::Box data_box = data_partial_densities->getGhostBox();
         const hier::IntVector data_dims = data_box.numberCells();
         
         // Get the pointers to the conservative variables.
@@ -9029,7 +8517,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
         Z_rho.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            Z_rho.push_back(data_partial_density->getPointer(si));
+            Z_rho.push_back(data_partial_densities->getPointer(si));
         }
         
         size_t offset_data = data_box.offset(region.lower());
@@ -9110,9 +8598,9 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
     }
     else if (variable_name == "pressure")
     {
-        boost::shared_ptr<pdat::CellData<double> > data_partial_density(
+        boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(s_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_momentum(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -9122,23 +8610,23 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(s_variable_total_energy, d_plot_context)));
         
-        boost::shared_ptr<pdat::CellData<double> > data_volume_fraction(
+        boost::shared_ptr<pdat::CellData<double> > data_volume_fractions(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(s_variable_volume_fraction, d_plot_context)));
+                patch.getPatchData(s_variable_volume_fractions, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        TBOX_ASSERT(data_partial_density);
+        TBOX_ASSERT(data_partial_densities);
         TBOX_ASSERT(data_momentum);
         TBOX_ASSERT(data_total_energy);
-        TBOX_ASSERT(data_volume_fraction);
-        TBOX_ASSERT(data_partial_density->getGhostBox().isSpatiallyEqual(patch.getBox()));
+        TBOX_ASSERT(data_volume_fractions);
+        TBOX_ASSERT(data_partial_densities->getGhostBox().isSpatiallyEqual(patch.getBox()));
         TBOX_ASSERT(data_momentum->getGhostBox().isSpatiallyEqual(patch.getBox()));
         TBOX_ASSERT(data_total_energy->getGhostBox().isSpatiallyEqual(patch.getBox()));
-        TBOX_ASSERT(data_volume_fraction->getGhostBox().isSpatiallyEqual(patch.getBox()));
+        TBOX_ASSERT(data_volume_fractions->getGhostBox().isSpatiallyEqual(patch.getBox()));
 #endif
         
         // Get the dimensions of box that covers the data.
-        const hier::Box data_box = data_partial_density->getGhostBox();
+        const hier::Box data_box = data_partial_densities->getGhostBox();
         const hier::IntVector data_dims = data_box.numberCells();
         
         // Get the pointers to the conservative variables.
@@ -9146,7 +8634,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
         Z_rho.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            Z_rho.push_back(data_partial_density->getPointer(si));
+            Z_rho.push_back(data_partial_densities->getPointer(si));
         }
         const double* const rho_u = data_momentum->getPointer(0);
         const double* const rho_v = d_dim > tbox::Dimension(1) ? data_momentum->getPointer(1) : NULL;
@@ -9156,7 +8644,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
         Z.reserve(d_num_species - 1);
         for (int si = 0; si < d_num_species - 1; si++)
         {
-            Z.push_back(data_volume_fraction->getPointer(si));
+            Z.push_back(data_volume_fractions->getPointer(si));
         }
         
         size_t offset_data = data_box.offset(region.lower());
@@ -9181,22 +8669,22 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                 /*
                  * Compute the internal energy.
                  */
-                double epsilon = 0.0;
+                double epsilon = double(0);
                 if (d_dim == tbox::Dimension(1))
                 {
                     epsilon = (E[idx_data] -
-                        0.5*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
+                        double(1)/double(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
                 }
                 else if (d_dim == tbox::Dimension(2))
                 {
                     epsilon = (E[idx_data] -
-                        0.5*(rho_u[idx_data]*rho_u[idx_data] +
+                        double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
                         rho_v[idx_data]*rho_v[idx_data])/rho)/rho;
                 }
                 else if (d_dim == tbox::Dimension(3))
                 {
                     epsilon = (E[idx_data] -
-                        0.5*(rho_u[idx_data]*rho_u[idx_data] +
+                        double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
                         rho_v[idx_data]*rho_v[idx_data] +
                         rho_w[idx_data]*rho_w[idx_data])/rho)/rho;
                 }
@@ -9260,22 +8748,22 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                     /*
                      * Compute the internal energy.
                      */
-                    double epsilon = 0.0;
+                    double epsilon = double(0);
                     if (d_dim == tbox::Dimension(1))
                     {
                         epsilon = (E[idx_data] -
-                            0.5*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
+                            double(1)/double(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
                     }
                     else if (d_dim == tbox::Dimension(2))
                     {
                         epsilon = (E[idx_data] -
-                            0.5*(rho_u[idx_data]*rho_u[idx_data] +
+                            double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
                             rho_v[idx_data]*rho_v[idx_data])/rho)/rho;
                     }
                     else if (d_dim == tbox::Dimension(3))
                     {
                         epsilon = (E[idx_data] -
-                            0.5*(rho_u[idx_data]*rho_u[idx_data] +
+                            double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
                             rho_v[idx_data]*rho_v[idx_data] +
                             rho_w[idx_data]*rho_w[idx_data])/rho)/rho;
                     }
@@ -9344,22 +8832,22 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                         /*
                          * Compute the internal energy.
                          */
-                        double epsilon = 0.0;
+                        double epsilon = double(0);
                         if (d_dim == tbox::Dimension(1))
                         {
                             epsilon = (E[idx_data] -
-                                0.5*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
+                                double(1)/double(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
                         }
                         else if (d_dim == tbox::Dimension(2))
                         {
                             epsilon = (E[idx_data] -
-                                0.5*(rho_u[idx_data]*rho_u[idx_data] +
+                                double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
                                 rho_v[idx_data]*rho_v[idx_data])/rho)/rho;
                         }
                         else if (d_dim == tbox::Dimension(3))
                         {
                             epsilon = (E[idx_data] -
-                                0.5*(rho_u[idx_data]*rho_u[idx_data] +
+                                double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
                                 rho_v[idx_data]*rho_v[idx_data] +
                                 rho_w[idx_data]*rho_w[idx_data])/rho)/rho;
                         }
@@ -9405,9 +8893,9 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
     }
     else if (variable_name == "sound speed")
     {
-        boost::shared_ptr<pdat::CellData<double> > data_partial_density(
+        boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(s_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_momentum(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
@@ -9417,23 +8905,23 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(s_variable_total_energy, d_plot_context)));
         
-        boost::shared_ptr<pdat::CellData<double> > data_volume_fraction(
+        boost::shared_ptr<pdat::CellData<double> > data_volume_fractions(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(s_variable_volume_fraction, d_plot_context)));
+                patch.getPatchData(s_variable_volume_fractions, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        TBOX_ASSERT(data_partial_density);
+        TBOX_ASSERT(data_partial_densities);
         TBOX_ASSERT(data_momentum);
         TBOX_ASSERT(data_total_energy);
-        TBOX_ASSERT(data_volume_fraction);
-        TBOX_ASSERT(data_partial_density->getGhostBox().isSpatiallyEqual(patch.getBox()));
+        TBOX_ASSERT(data_volume_fractions);
+        TBOX_ASSERT(data_partial_densities->getGhostBox().isSpatiallyEqual(patch.getBox()));
         TBOX_ASSERT(data_momentum->getGhostBox().isSpatiallyEqual(patch.getBox()));
         TBOX_ASSERT(data_total_energy->getGhostBox().isSpatiallyEqual(patch.getBox()));
-        TBOX_ASSERT(data_volume_fraction->getGhostBox().isSpatiallyEqual(patch.getBox()));
+        TBOX_ASSERT(data_volume_fractions->getGhostBox().isSpatiallyEqual(patch.getBox()));
 #endif
         
         // Get the dimensions of box that covers the data.
-        const hier::Box data_box = data_partial_density->getGhostBox();
+        const hier::Box data_box = data_partial_densities->getGhostBox();
         const hier::IntVector data_dims = data_box.numberCells();
         
         // Get the pointers to the conservative variables.
@@ -9441,7 +8929,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
         Z_rho.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            Z_rho.push_back(data_partial_density->getPointer(si));
+            Z_rho.push_back(data_partial_densities->getPointer(si));
         }
         const double* const rho_u = data_momentum->getPointer(0);
         const double* const rho_v = d_dim > tbox::Dimension(1) ? data_momentum->getPointer(1) : NULL;
@@ -9451,7 +8939,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
         Z.reserve(d_num_species - 1);
         for (int si = 0; si < d_num_species - 1; si++)
         {
-            Z.push_back(data_volume_fraction->getPointer(si));
+            Z.push_back(data_volume_fractions->getPointer(si));
         }
         
         size_t offset_data = data_box.offset(region.lower());
@@ -9476,22 +8964,22 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                 /*
                  * Compute the internal energy.
                  */
-                double epsilon = 0.0;
+                double epsilon = double(0);
                 if (d_dim == tbox::Dimension(1))
                 {
                     epsilon = (E[idx_data] -
-                        0.5*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
+                        double(1)/double(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
                 }
                 else if (d_dim == tbox::Dimension(2))
                 {
                     epsilon = (E[idx_data] -
-                        0.5*(rho_u[idx_data]*rho_u[idx_data] +
+                        double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
                         rho_v[idx_data]*rho_v[idx_data])/rho)/rho;
                 }
                 else if (d_dim == tbox::Dimension(3))
                 {
                     epsilon = (E[idx_data] -
-                        0.5*(rho_u[idx_data]*rho_u[idx_data] +
+                        double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
                         rho_v[idx_data]*rho_v[idx_data] +
                         rho_w[idx_data]*rho_w[idx_data])/rho)/rho;
                 }
@@ -9562,22 +9050,22 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                     /*
                      * Compute the internal energy.
                      */
-                    double epsilon = 0.0;
+                    double epsilon = double(0);
                     if (d_dim == tbox::Dimension(1))
                     {
                         epsilon = (E[idx_data] -
-                            0.5*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
+                            double(1)/double(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
                     }
                     else if (d_dim == tbox::Dimension(2))
                     {
                         epsilon = (E[idx_data] -
-                            0.5*(rho_u[idx_data]*rho_u[idx_data] +
+                            double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
                             rho_v[idx_data]*rho_v[idx_data])/rho)/rho;
                     }
                     else if (d_dim == tbox::Dimension(3))
                     {
                         epsilon = (E[idx_data] -
-                            0.5*(rho_u[idx_data]*rho_u[idx_data] +
+                            double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
                             rho_v[idx_data]*rho_v[idx_data] +
                             rho_w[idx_data]*rho_w[idx_data])/rho)/rho;
                     }
@@ -9653,22 +9141,22 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
                         /*
                          * Compute the internal energy.
                          */
-                        double epsilon = 0.0;
+                        double epsilon = double(0);
                         if (d_dim == tbox::Dimension(1))
                         {
                             epsilon = (E[idx_data] -
-                                0.5*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
+                                double(1)/double(2)*rho_u[idx_data]*rho_u[idx_data]/rho)/rho;
                         }
                         else if (d_dim == tbox::Dimension(2))
                         {
                             epsilon = (E[idx_data] -
-                                0.5*(rho_u[idx_data]*rho_u[idx_data] +
+                                double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
                                 rho_v[idx_data]*rho_v[idx_data])/rho)/rho;
                         }
                         else if (d_dim == tbox::Dimension(3))
                         {
                             epsilon = (E[idx_data] -
-                                0.5*(rho_u[idx_data]*rho_u[idx_data] +
+                                double(1)/double(2)*(rho_u[idx_data]*rho_u[idx_data] +
                                 rho_v[idx_data]*rho_v[idx_data] +
                                 rho_w[idx_data]*rho_w[idx_data])/rho)/rho;
                         }
@@ -9721,23 +9209,23 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
     }
     else if (variable_name == "velocity")
     {
-        boost::shared_ptr<pdat::CellData<double> > data_partial_density(
+        boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(s_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
         boost::shared_ptr<pdat::CellData<double> > data_momentum(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
                 patch.getPatchData(s_variable_momentum, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        TBOX_ASSERT(data_partial_density);
+        TBOX_ASSERT(data_partial_densities);
         TBOX_ASSERT(data_momentum);
-        TBOX_ASSERT(data_partial_density->getGhostBox().isSpatiallyEqual(patch.getBox()));
+        TBOX_ASSERT(data_partial_densities->getGhostBox().isSpatiallyEqual(patch.getBox()));
         TBOX_ASSERT(data_momentum->getGhostBox().isSpatiallyEqual(patch.getBox()));
 #endif
         
         // Get the dimensions of box that covers the data.
-        const hier::Box data_box = data_partial_density->getGhostBox();
+        const hier::Box data_box = data_partial_densities->getGhostBox();
         const hier::IntVector data_dims = data_box.numberCells();
         
         // Get the pointers to the conservative variables.
@@ -9745,7 +9233,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
         Z_rho.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            Z_rho.push_back(data_partial_density->getPointer(si));
+            Z_rho.push_back(data_partial_densities->getPointer(si));
         }
         const double* const m = data_momentum->getPointer(depth_id);
         
@@ -9838,17 +9326,17 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
     {
         int species_idx = std::stoi(variable_name.substr(14));
         
-        boost::shared_ptr<pdat::CellData<double> > data_partial_density(
+        boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
             BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-                patch.getPatchData(s_variable_partial_density, d_plot_context)));
+                patch.getPatchData(s_variable_partial_densities, d_plot_context)));
         
 #ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
-        TBOX_ASSERT(data_partial_density);
-        TBOX_ASSERT(data_partial_density->getGhostBox().isSpatiallyEqual(patch.getBox()));
+        TBOX_ASSERT(data_partial_densities);
+        TBOX_ASSERT(data_partial_densities->getGhostBox().isSpatiallyEqual(patch.getBox()));
 #endif
         
         // Get the dimensions of box that covers the data.
-        const hier::Box data_box = data_partial_density->getGhostBox();
+        const hier::Box data_box = data_partial_densities->getGhostBox();
         const hier::IntVector data_dims = data_box.numberCells();
         
         // Get the pointers to conservative variables.
@@ -9856,7 +9344,7 @@ FlowModelFiveEqnAllaire::packDerivedDataIntoDoubleBuffer(
         Z_rho.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            Z_rho.push_back(data_partial_density->getPointer(si));
+            Z_rho.push_back(data_partial_densities->getPointer(si));
         }
         
         size_t offset_data = data_box.offset(region.lower());
@@ -9981,14 +9469,14 @@ FlowModelFiveEqnAllaire::registerPlotQuantities(
     /*
     for (int si = 0; si < d_num_species; si++)
     {
-        std::string partial_density_name =
+        std::string partial_densities_name =
             "partial density " + tbox::Utilities::intToString(si);
         
         visit_writer->registerPlotQuantity(
-            partial_density_name,
+            partial_densities_name,
             "SCALAR",
             vardb->mapVariableAndContextToIndex(
-                s_variable_partial_density,
+                s_variable_partial_densities,
                 d_plot_context),
             si);
     }
@@ -10010,14 +9498,14 @@ FlowModelFiveEqnAllaire::registerPlotQuantities(
     
     for (int si = 0; si < d_num_species - 1; si++)
     {
-        std::string volume_fraction_name =
+        std::string volume_fractions_name =
             "volume fraction " + tbox::Utilities::intToString(si);
             
         visit_writer->registerPlotQuantity(
-            volume_fraction_name,
+            volume_fractions_name,
             "SCALAR",
             vardb->mapVariableAndContextToIndex(
-               s_variable_volume_fraction,
+               s_variable_volume_fractions,
                d_plot_context),
             si);
     }
@@ -10040,10 +9528,10 @@ FlowModelFiveEqnAllaire::registerPlotQuantities(
     
     for (int si = 0; si < d_num_species - 1; si++)
     {
-        std::string mass_fraction_name =
+        std::string mass_fractions_name =
             "mass fraction " + tbox::Utilities::intToString(si);
             
-        visit_writer->registerDerivedPlotQuantity(mass_fraction_name,
+        visit_writer->registerDerivedPlotQuantity(mass_fractions_name,
             "SCALAR",
             this);
     }
@@ -10089,11 +9577,11 @@ FlowModelFiveEqnAllaire::setNumberOfSubGhosts(
             d_num_subghosts_density = num_subghosts;
         }
     }
-    else if (variable_name == "MASS_FRACTION")
+    else if (variable_name == "MASS_FRACTIONS")
     {
-        if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
+        if (d_num_subghosts_mass_fractions > -hier::IntVector::getOne(d_dim))
         {
-            if (num_subghosts > d_num_subghosts_mass_fraction)
+            if (num_subghosts > d_num_subghosts_mass_fractions)
             {
                 /*
                 TBOX_ERROR(d_object_name
@@ -10107,12 +9595,12 @@ FlowModelFiveEqnAllaire::setNumberOfSubGhosts(
                     << std::endl);
                 */
                 
-                d_num_subghosts_mass_fraction = num_subghosts;
+                d_num_subghosts_mass_fractions = num_subghosts;
             }
         }
         else
         {
-            d_num_subghosts_mass_fraction = num_subghosts;
+            d_num_subghosts_mass_fractions = num_subghosts;
         }
         
         setNumberOfSubGhosts(num_subghosts, "DENSITY", parent_variable_name);
@@ -10201,7 +9689,7 @@ FlowModelFiveEqnAllaire::setNumberOfSubGhosts(
         }
         
         setNumberOfSubGhosts(num_subghosts, "DENSITY", parent_variable_name);
-        setNumberOfSubGhosts(num_subghosts, "MASS_FRACTION", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "MASS_FRACTIONS", parent_variable_name);
         setNumberOfSubGhosts(num_subghosts, "INTERNAL_ENERGY", parent_variable_name);
     }
     else if (variable_name == "SOUND_SPEED")
@@ -10231,14 +9719,14 @@ FlowModelFiveEqnAllaire::setNumberOfSubGhosts(
         }
         
         setNumberOfSubGhosts(num_subghosts, "DENSITY", parent_variable_name);
-        setNumberOfSubGhosts(num_subghosts, "MASS_FRACTION", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "MASS_FRACTIONS", parent_variable_name);
         setNumberOfSubGhosts(num_subghosts, "PRESSURE", parent_variable_name);
     }
-    else if (variable_name == "TEMPERATURE")
+    else if (variable_name == "SPECIES_TEMPERATURE")
     {
-        if (d_num_subghosts_temperature > -hier::IntVector::getOne(d_dim))
+        if (d_num_subghosts_species_temperatures > -hier::IntVector::getOne(d_dim))
         {
-            if (num_subghosts > d_num_subghosts_temperature)
+            if (num_subghosts > d_num_subghosts_species_temperatures)
             {
                 /*
                 TBOX_ERROR(d_object_name
@@ -10252,101 +9740,15 @@ FlowModelFiveEqnAllaire::setNumberOfSubGhosts(
                     << std::endl);
                 */
                 
-                d_num_subghosts_temperature = num_subghosts;
+                d_num_subghosts_species_temperatures = num_subghosts;
             }
         }
         else
         {
-            d_num_subghosts_temperature = num_subghosts;
+            d_num_subghosts_species_temperatures = num_subghosts;
         }
         
         setNumberOfSubGhosts(num_subghosts, "PRESSURE", parent_variable_name);
-    }
-    else if (variable_name == "DILATATION")
-    {
-        if (d_num_subghosts_dilatation > -hier::IntVector::getOne(d_dim))
-        {
-            if (num_subghosts > d_num_subghosts_dilatation)
-            {
-                /*
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFiveEqnAllaire::setNumberOfSubGhosts()\n"
-                    << "Number of ghosts of '"
-                    << parent_variable_name
-                    << "' exceeds"
-                    << " number of ghosts of '"
-                    << variable_name
-                    << "'."
-                    << std::endl);
-                */
-                
-                d_num_subghosts_dilatation = num_subghosts;
-            }
-        }
-        else
-        {
-            d_num_subghosts_dilatation = num_subghosts;
-        }
-        
-        setNumberOfSubGhosts(num_subghosts, "DENSITY", parent_variable_name);
-        setNumberOfSubGhosts(num_subghosts, "VELOCITY", parent_variable_name);
-    }
-    else if (variable_name == "VORTICITY")
-    {
-        if (d_num_subghosts_vorticity > -hier::IntVector::getOne(d_dim))
-        {
-            if (num_subghosts > d_num_subghosts_vorticity)
-            {
-                /*
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFiveEqnAllaire::setNumberOfSubGhosts()\n"
-                    << "Number of ghosts of '"
-                    << parent_variable_name
-                    << "' exceeds"
-                    << " number of ghosts of '"
-                    << variable_name
-                    << "'."
-                    << std::endl);
-                */
-                
-                d_num_subghosts_vorticity = num_subghosts;
-            }
-        }
-        else
-        {
-            d_num_subghosts_vorticity = num_subghosts;
-        }
-        
-        setNumberOfSubGhosts(num_subghosts, "DENSITY", parent_variable_name);
-        setNumberOfSubGhosts(num_subghosts, "VELOCITY", parent_variable_name);
-    }
-    else if (variable_name == "ENSTROPHY")
-    {
-        if (d_num_subghosts_enstrophy > -hier::IntVector::getOne(d_dim))
-        {
-            if (num_subghosts > d_num_subghosts_enstrophy)
-            {
-                /*
-                TBOX_ERROR(d_object_name
-                    << ": FlowModelFiveEqnAllaire::setNumberOfSubGhosts()\n"
-                    << "Number of ghosts of '"
-                    << parent_variable_name
-                    << "' exceeds"
-                    << " number of ghosts of '"
-                    << variable_name
-                    << "'."
-                    << std::endl);
-                */
-                
-                d_num_subghosts_enstrophy = num_subghosts;
-            }
-        }
-        else
-        {
-            d_num_subghosts_enstrophy = num_subghosts;
-        }
-        
-        setNumberOfSubGhosts(num_subghosts, "VORTICITY", parent_variable_name);
     }
     else if (variable_name == "CONVECTIVE_FLUX_X")
     {
@@ -10554,9 +9956,9 @@ FlowModelFiveEqnAllaire::setNumberOfSubGhosts(
         }
         
         setNumberOfSubGhosts(num_subghosts, "DENSITY", parent_variable_name);
-        setNumberOfSubGhosts(num_subghosts, "MASS_FRACTION", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "MASS_FRACTIONS", parent_variable_name);
         setNumberOfSubGhosts(num_subghosts, "PRESSURE", parent_variable_name);
-        setNumberOfSubGhosts(num_subghosts, "TEMPERATURE", parent_variable_name);
+        setNumberOfSubGhosts(num_subghosts, "SPECIES_TEMPERATURE", parent_variable_name);
     }
 }
 
@@ -10574,11 +9976,11 @@ FlowModelFiveEqnAllaire::setGhostBoxesAndDimensionsDerivedCellVariables()
         d_subghostcell_dims_density = d_subghost_box_density.numberCells();
     }
     
-    if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
+    if (d_num_subghosts_mass_fractions > -hier::IntVector::getOne(d_dim))
     {
-        d_subghost_box_mass_fraction = d_interior_box;
-        d_subghost_box_mass_fraction.grow(d_num_subghosts_mass_fraction);
-        d_subghostcell_dims_mass_fraction = d_subghost_box_mass_fraction.numberCells();
+        d_subghost_box_mass_fractions = d_interior_box;
+        d_subghost_box_mass_fractions.grow(d_num_subghosts_mass_fractions);
+        d_subghostcell_dims_mass_fractions = d_subghost_box_mass_fractions.numberCells();
     }
     
     if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
@@ -10609,32 +10011,11 @@ FlowModelFiveEqnAllaire::setGhostBoxesAndDimensionsDerivedCellVariables()
         d_subghostcell_dims_sound_speed = d_subghost_box_sound_speed.numberCells();
     }
     
-    if (d_num_subghosts_temperature > -hier::IntVector::getOne(d_dim))
+    if (d_num_subghosts_species_temperatures > -hier::IntVector::getOne(d_dim))
     {
-        d_subghost_box_temperature = d_interior_box;
-        d_subghost_box_temperature.grow(d_num_subghosts_temperature);
-        d_subghostcell_dims_temperature = d_subghost_box_temperature.numberCells();
-    }
-    
-    if (d_num_subghosts_dilatation > -hier::IntVector::getOne(d_dim))
-    {
-        d_subghost_box_dilatation = d_interior_box;
-        d_subghost_box_dilatation.grow(d_num_subghosts_dilatation);
-        d_subghostcell_dims_dilatation = d_subghost_box_dilatation.numberCells();
-    }
-    
-    if (d_num_subghosts_vorticity > -hier::IntVector::getOne(d_dim))
-    {
-        d_subghost_box_vorticity = d_interior_box;
-        d_subghost_box_vorticity.grow(d_num_subghosts_vorticity);
-        d_subghostcell_dims_vorticity = d_subghost_box_vorticity.numberCells();
-    }
-    
-    if (d_num_subghosts_enstrophy > -hier::IntVector::getOne(d_dim))
-    {
-        d_subghost_box_enstrophy = d_interior_box;
-        d_subghost_box_enstrophy.grow(d_num_subghosts_enstrophy);
-        d_subghostcell_dims_enstrophy = d_subghost_box_enstrophy.numberCells();
+        d_subghost_box_species_temperatures = d_interior_box;
+        d_subghost_box_species_temperatures.grow(d_num_subghosts_species_temperatures);
+        d_subghostcell_dims_species_temperatures = d_subghost_box_species_temperatures.numberCells();
     }
     
     if (d_num_subghosts_convective_flux_x > -hier::IntVector::getOne(d_dim))
@@ -10696,17 +10077,17 @@ FlowModelFiveEqnAllaire::setGhostBoxesAndDimensionsDerivedCellVariables()
 
 
 /*
- * Get the global cell data of partial density in the registered patch.
+ * Get the global cell data of partial densities in the registered patch.
  */
 boost::shared_ptr<pdat::CellData<double> >
-FlowModelFiveEqnAllaire::getGlobalCellDataPartialDensity()
+FlowModelFiveEqnAllaire::getGlobalCellDataPartialDensities()
 {
-    // Get the cell data of the registered variable partial density.
-    boost::shared_ptr<pdat::CellData<double> > data_partial_density(
+    // Get the cell data of the registered variable partial densities.
+    boost::shared_ptr<pdat::CellData<double> > data_partial_densities(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(s_variable_partial_density, getDataContext())));
+            d_patch->getPatchData(s_variable_partial_densities, getDataContext())));
     
-    return data_partial_density;
+    return data_partial_densities;
 }
 
 
@@ -10741,17 +10122,17 @@ FlowModelFiveEqnAllaire::getGlobalCellDataTotalEnergy()
 
 
 /*
- * Get the global cell data of volume fraction in the registered patch.
+ * Get the global cell data of volume fractions in the registered patch.
  */
 boost::shared_ptr<pdat::CellData<double> >
-FlowModelFiveEqnAllaire::getGlobalCellDataVolumeFraction()
+FlowModelFiveEqnAllaire::getGlobalCellDataVolumeFractions()
 {
-    // Get the cell data of the registered variable volume fraction.
-    boost::shared_ptr<pdat::CellData<double> > data_volume_fraction(
+    // Get the cell data of the registered variable volume fractions.
+    boost::shared_ptr<pdat::CellData<double> > data_volume_fractions(
         BOOST_CAST<pdat::CellData<double>, hier::PatchData>(
-            d_patch->getPatchData(s_variable_volume_fraction, getDataContext())));
+            d_patch->getPatchData(s_variable_volume_fractions, getDataContext())));
     
-    return data_volume_fraction;
+    return data_volume_fractions;
 }
 
 
@@ -10760,7 +10141,7 @@ FlowModelFiveEqnAllaire::getGlobalCellDataVolumeFraction()
  */
 void
 FlowModelFiveEqnAllaire::computeGlobalCellDataDensity(
-    const COMPUTING_OPTION::TYPE& computing_option)
+    const hier::Box& domain)
 {
     if (d_num_subghosts_density > -hier::IntVector::getOne(d_dim))
     {
@@ -10768,111 +10149,15 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataDensity(
         d_data_density.reset(
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_density));
         
-        // Get the cell data of the variable partial density.
-        boost::shared_ptr<pdat::CellData<double> > data_partial_density =
-            getGlobalCellDataPartialDensity();
+        // Get the cell data of the variable partial densities.
+        boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+            getGlobalCellDataPartialDensities();
         
-        // Get the pointers to the cell data of density and partial density.
-        double* rho = d_data_density->getPointer(0);
-        std::vector<double*> Z_rho;
-        Z_rho.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Z_rho.push_back(data_partial_density->getPointer(si));
-        }
-        
-        if (d_dim == tbox::Dimension(1))
-        {
-            // Compute the density field.
-            for (int i = -d_num_subghosts_density[0];
-                 i < d_interior_dims[0] + d_num_subghosts_density[0];
-                 i++)
-            {
-                // Compute the linear indices.
-                const int idx = i + d_num_ghosts[0];
-                const int idx_density = i + d_num_subghosts_density[0];
-                
-                std::vector<const double*> Z_rho_ptr;
-                Z_rho_ptr.reserve(d_num_species);
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    Z_rho_ptr.push_back(&Z_rho[si][idx]);
-                }
-                
-                rho[idx_density] = d_equation_of_state_mixing_rules->
-                    getMixtureDensity(
-                        Z_rho_ptr);
-            }
-        }
-        else if (d_dim == tbox::Dimension(2))
-        {
-            // Compute the density field.
-            for (int j = -d_num_subghosts_density[1];
-                 j < d_interior_dims[1] + d_num_subghosts_density[1];
-                 j++)
-            {
-                for (int i = -d_num_subghosts_density[0];
-                     i < d_interior_dims[0] + d_num_subghosts_density[0];
-                     i++)
-                {
-                    // Compute the linear indices.
-                    const int idx = (i + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
-                    
-                    const int idx_density = (i + d_num_subghosts_density[0]) +
-                        (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
-                    
-                    std::vector<const double*> Z_rho_ptr;
-                    Z_rho_ptr.reserve(d_num_species);
-                    for (int si = 0; si < d_num_species; si++)
-                    {
-                        Z_rho_ptr.push_back(&Z_rho[si][idx]);
-                    }
-                    
-                    rho[idx_density] = d_equation_of_state_mixing_rules->
-                        getMixtureDensity(
-                            Z_rho_ptr);
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            // Compute the density field.
-            for (int k = -d_num_subghosts_density[2];
-                 k < d_interior_dims[2] + d_num_subghosts_density[2];
-                 k++)
-            {
-                for (int j = -d_num_subghosts_density[1];
-                     j < d_interior_dims[1] + d_num_subghosts_density[1];
-                     j++)
-                {
-                    for (int i = -d_num_subghosts_density[0];
-                         i < d_interior_dims[0] + d_num_subghosts_density[0];
-                         i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
-                        
-                        const int idx_density = (i + d_num_subghosts_density[0]) +
-                            (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
-                            (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*d_subghostcell_dims_density[1];
-                        
-                        std::vector<const double*> Z_rho_ptr;
-                        Z_rho_ptr.reserve(d_num_species);
-                        for (int si = 0; si < d_num_species; si++)
-                        {
-                            Z_rho_ptr.push_back(&Z_rho[si][idx]);
-                        }
-                        
-                        rho[idx_density] = d_equation_of_state_mixing_rules->
-                            getMixtureDensity(
-                                Z_rho_ptr);
-                    }
-                }
-            }
-        }
+        // Compute the density field.
+        d_equation_of_state_mixing_rules->computeMixtureDensity(
+            d_data_density,
+            data_partial_densities,
+            domain);
     }
     else
     {
@@ -10885,119 +10170,201 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataDensity(
 
 
 /*
- * Compute the global cell data of mass fraction with density in the registered patch.
+ * Compute the global cell data of mass fractions with density in the registered patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataMassFractionWithDensity(
-    const COMPUTING_OPTION::TYPE& computing_option)
+FlowModelFiveEqnAllaire::computeGlobalCellDataMassFractionsWithDensity(
+    const hier::Box& domain)
 {
-    if (d_num_subghosts_mass_fraction > -hier::IntVector::getOne(d_dim))
+    if (d_num_subghosts_mass_fractions > -hier::IntVector::getOne(d_dim))
     {
-        // Create the cell data of mass fraction.
-        d_data_mass_fraction.reset(
-            new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_mass_fraction));
+        // Create the cell data of mass fractions.
+        d_data_mass_fractions.reset(
+            new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_mass_fractions));
         
-        // Get the cell data of the variable partial density.
-        boost::shared_ptr<pdat::CellData<double> > data_partial_density =
-            getGlobalCellDataPartialDensity();
+        /*
+         * Get the local lower indices and number of cells in each direction of the domain.
+         */
+        
+        hier::IntVector domain_lo(d_dim);
+        hier::IntVector domain_dims(d_dim);
+        
+        if (domain.empty())
+        {
+            domain_lo = -d_num_subghosts_mass_fractions;
+            domain_dims = d_subghostcell_dims_mass_fractions;
+        }
+        else
+        {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(d_subghost_box_mass_fractions.contains(domain));
+#endif
+            
+            domain_lo = domain.lower() - d_interior_box.lower();
+            domain_dims = domain.numberCells();
+        }
+        
+        // Get the cell data of the variable partial densities.
+        boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+            getGlobalCellDataPartialDensities();
         
         if (!d_data_density)
         {
-            computeGlobalCellDataDensity();
+            computeGlobalCellDataDensity(domain);
         }
         
-        // Get the pointers to the cell data of mass fraction, density and partial density.
+        // Get the pointers to the cell data of mass fractions, density and partial densities.
         std::vector<double*> Y;
         Y.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            Y.push_back(d_data_mass_fraction->getPointer(si));
+            Y.push_back(d_data_mass_fractions->getPointer(si));
         }
         double* rho = d_data_density->getPointer(0);
         std::vector<double*> Z_rho;
         Z_rho.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            Z_rho.push_back(data_partial_density->getPointer(si));
+            Z_rho.push_back(data_partial_densities->getPointer(si));
         }
         
         if (d_dim == tbox::Dimension(1))
         {
+            /*
+             * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_dim_0 = domain_dims[0];
+            
+            const int num_ghosts_0 = d_num_ghosts[0];
+            const int num_subghosts_0_density = d_num_subghosts_density[0];
+            const int num_subghosts_0_mass_fractions = d_num_subghosts_mass_fractions[0];
+            
             // Compute the mass fraction field.
-            for (int i = -d_num_subghosts_mass_fraction[0];
-                 i < d_interior_dims[0] + d_num_subghosts_mass_fraction[0];
-                 i++)
+            for (int si = 0; si < d_num_species; si++)
             {
-                // Compute the linear indices.
-                const int idx = i + d_num_ghosts[0];
-                const int idx_density = i + d_num_subghosts_density[0];
-                const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
-                
-                for (int si = 0; si < d_num_species; si++)
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
-                    Y[si][idx_mass_fraction] = Z_rho[si][idx]/rho[idx_density];
+                    // Compute the linear indices.
+                    const int idx = i + num_ghosts_0;
+                    const int idx_density = i + num_subghosts_0_density;
+                    const int idx_mass_fractions = i + num_subghosts_0_mass_fractions;
+                    
+                    Y[si][idx_mass_fractions] = Z_rho[si][idx]/rho[idx_density];
                 }
             }
         }
         else if (d_dim == tbox::Dimension(2))
         {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            
+            const int num_ghosts_0 = d_num_ghosts[0];
+            const int num_ghosts_1 = d_num_ghosts[1];
+            const int ghostcell_dim_0 = d_ghostcell_dims[0];
+            
+            const int num_subghosts_0_density = d_num_subghosts_density[0];
+            const int num_subghosts_1_density = d_num_subghosts_density[1];
+            const int subghostcell_dim_0_density = d_subghostcell_dims_density[0];
+            
+            const int num_subghosts_0_mass_fractions = d_num_subghosts_mass_fractions[0];
+            const int num_subghosts_1_mass_fractions = d_num_subghosts_mass_fractions[1];
+            const int subghostcell_dim_0_mass_fractions = d_subghostcell_dims_mass_fractions[0];
+            
             // Compute the mass fraction field.
-            for (int j = -d_num_subghosts_mass_fraction[1];
-                 j < d_interior_dims[1] + d_num_subghosts_mass_fraction[1];
-                 j++)
+            for (int si = 0; si < d_num_species; si++)
             {
-                for (int i = -d_num_subghosts_mass_fraction[0];
-                     i < d_interior_dims[0] + d_num_subghosts_mass_fraction[0];
-                     i++)
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-                    // Compute the linear indices.
-                    const int idx = (i + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
-                    
-                    const int idx_density = (i + d_num_subghosts_density[0]) +
-                        (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
-                    
-                    const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                        (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
-                    
-                    for (int si = 0; si < d_num_species; si++)
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
-                        Y[si][idx_mass_fraction] = Z_rho[si][idx]/rho[idx_density];
+                        // Compute the linear indices.
+                        const int idx = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0;
+                        
+                        const int idx_density = (i + num_subghosts_0_density) +
+                            (j + num_subghosts_1_density)*subghostcell_dim_0_density;
+                        
+                        const int idx_mass_fractions = (i + num_subghosts_0_mass_fractions) +
+                            (j + num_subghosts_1_mass_fractions)*subghostcell_dim_0_mass_fractions;
+                        
+                        Y[si][idx_mass_fractions] = Z_rho[si][idx]/rho[idx_density];
                     }
                 }
             }
         }
         else if (d_dim == tbox::Dimension(3))
         {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_lo_2 = domain_lo[2];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            const int domain_dim_2 = domain_dims[2];
+            
+            const int num_ghosts_0 = d_num_ghosts[0];
+            const int num_ghosts_1 = d_num_ghosts[1];
+            const int num_ghosts_2 = d_num_ghosts[2];
+            const int ghostcell_dim_0 = d_ghostcell_dims[0];
+            const int ghostcell_dim_1 = d_ghostcell_dims[1];
+            
+            const int num_subghosts_0_density = d_num_subghosts_density[0];
+            const int num_subghosts_1_density = d_num_subghosts_density[1];
+            const int num_subghosts_2_density = d_num_subghosts_density[2];
+            const int subghostcell_dim_0_density = d_subghostcell_dims_density[0];
+            const int subghostcell_dim_1_density = d_subghostcell_dims_density[1];
+            
+            const int num_subghosts_0_mass_fractions = d_num_subghosts_mass_fractions[0];
+            const int num_subghosts_1_mass_fractions = d_num_subghosts_mass_fractions[1];
+            const int num_subghosts_2_mass_fractions = d_num_subghosts_mass_fractions[2];
+            const int subghostcell_dim_0_mass_fractions = d_subghostcell_dims_mass_fractions[0];
+            const int subghostcell_dim_1_mass_fractions = d_subghostcell_dims_mass_fractions[1];
+            
             // Compute the mass fraction field.
-            for (int k = -d_num_subghosts_mass_fraction[2];
-                 k < d_interior_dims[2] + d_num_subghosts_mass_fraction[2];
-                 k++)
+            for (int si = 0; si < d_num_species; si++)
             {
-                for (int j = -d_num_subghosts_mass_fraction[1];
-                     j < d_interior_dims[1] + d_num_subghosts_mass_fraction[1];
-                     j++)
+                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
                 {
-                    for (int i = -d_num_subghosts_mass_fraction[0];
-                         i < d_interior_dims[0] + d_num_subghosts_mass_fraction[0];
-                         i++)
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-                        // Compute the linear indices.
-                        const int idx = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
-                        
-                        const int idx_density = (i + d_num_subghosts_density[0]) +
-                            (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
-                            (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*d_subghostcell_dims_density[1];
-                        
-                        const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                            (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
-                            (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*d_subghostcell_dims_mass_fraction[1];
-                        
-                        for (int si = 0; si < d_num_species; si++)
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
-                            Y[si][idx_mass_fraction] = Z_rho[si][idx]/rho[idx_density];
+                            // Compute the linear indices.
+                            const int idx = (i + num_ghosts_0) +
+                                (j + num_ghosts_1)*ghostcell_dim_0 +
+                                (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
+                            
+                            const int idx_density = (i + num_subghosts_0_density) +
+                                (j + num_subghosts_1_density)*subghostcell_dim_0_density +
+                                (k + num_subghosts_2_density)*subghostcell_dim_0_density*
+                                    subghostcell_dim_1_density;
+                            
+                            const int idx_mass_fractions = (i + num_subghosts_0_mass_fractions) +
+                                (j + num_subghosts_1_mass_fractions)*subghostcell_dim_0_mass_fractions +
+                                (k + num_subghosts_2_mass_fractions)*subghostcell_dim_0_mass_fractions*
+                                    subghostcell_dim_1_mass_fractions;
+                            
+                            Y[si][idx_mass_fractions] = Z_rho[si][idx]/rho[idx_density];
                         }
                     }
                 }
@@ -11007,7 +10374,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMassFractionWithDensity(
     else
     {
         TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::computeGlobalCellDataMassFractionWithDensity()\n"
+            << ": FlowModelFiveEqnAllaire::computeGlobalCellDataMassFractionsWithDensity()\n"
             << "Cell data of 'MASS_FRACTION' is not yet registered."
             << std::endl);
     }
@@ -11019,7 +10386,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMassFractionWithDensity(
  */
 void
 FlowModelFiveEqnAllaire::computeGlobalCellDataVelocityWithDensity(
-    const COMPUTING_OPTION::TYPE& computing_option)
+    const hier::Box& domain)
 {
     if (d_num_subghosts_velocity > -hier::IntVector::getOne(d_dim))
     {
@@ -11027,13 +10394,35 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataVelocityWithDensity(
         d_data_velocity.reset(
             new pdat::CellData<double>(d_interior_box, d_dim.getValue(), d_num_subghosts_velocity));
         
+        /*
+         * Get the local lower indices and number of cells in each direction of the domain.
+         */
+        
+        hier::IntVector domain_lo(d_dim);
+        hier::IntVector domain_dims(d_dim);
+        
+        if (domain.empty())
+        {
+            domain_lo = -d_num_subghosts_velocity;
+            domain_dims = d_subghostcell_dims_velocity;
+        }
+        else
+        {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(d_subghost_box_velocity.contains(domain));
+#endif
+            
+            domain_lo = domain.lower() - d_interior_box.lower();
+            domain_dims = domain.numberCells();
+        }
+        
         // Get the cell data of the variable momentum.
         boost::shared_ptr<pdat::CellData<double> > data_momentum =
             getGlobalCellDataMomentum();
         
         if (!d_data_density)
         {
-            computeGlobalCellDataDensity();
+            computeGlobalCellDataDensity(domain);
         }
         
         // Get the pointer to the cell data of density.
@@ -11041,6 +10430,18 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataVelocityWithDensity(
         
         if (d_dim == tbox::Dimension(1))
         {
+            /*
+             * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_dim_0 = domain_dims[0];
+            
+            const int num_ghosts_0 = d_num_ghosts[0];
+            const int num_subghosts_0_density = d_num_subghosts_density[0];
+            const int num_subghosts_0_velocity = d_num_subghosts_velocity[0];
+            
+            
             // Get the pointer to the cell data of velocity.
             double* u = d_data_velocity->getPointer(0);
             
@@ -11048,20 +10449,42 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataVelocityWithDensity(
             double* rho_u = data_momentum->getPointer(0);
             
             // Compute the velocity field.
-            for (int i = -d_num_subghosts_velocity[0];
-                 i < d_interior_dims[0] + d_num_subghosts_velocity[0];
-                 i++)
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx = i + d_num_ghosts[0];
-                const int idx_density = i + d_num_subghosts_density[0];
-                const int idx_velocity = i + d_num_subghosts_velocity[0];
+                const int idx = i + num_ghosts_0;
+                const int idx_density = i + num_subghosts_0_density;
+                const int idx_velocity = i + num_subghosts_0_velocity;
                 
                 u[idx_velocity] = rho_u[idx]/rho[idx_density];
             }
         }
         else if (d_dim == tbox::Dimension(2))
         {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            
+            const int num_ghosts_0 = d_num_ghosts[0];
+            const int num_ghosts_1 = d_num_ghosts[1];
+            const int ghostcell_dim_0 = d_ghostcell_dims[0];
+            
+            const int num_subghosts_0_density = d_num_subghosts_density[0];
+            const int num_subghosts_1_density = d_num_subghosts_density[1];
+            const int subghostcell_dim_0_density = d_subghostcell_dims_density[0];
+            
+            const int num_subghosts_0_velocity = d_num_subghosts_velocity[0];
+            const int num_subghosts_1_velocity = d_num_subghosts_velocity[1];
+            const int subghostcell_dim_0_velocity = d_subghostcell_dims_velocity[0];
+            
             // Get the pointers to the cell data of velocity.
             double* u = d_data_velocity->getPointer(0);
             double* v = d_data_velocity->getPointer(1);
@@ -11071,23 +10494,22 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataVelocityWithDensity(
             double* rho_v = data_momentum->getPointer(1);
             
             // Compute the velocity field.
-            for (int j = -d_num_subghosts_velocity[1];
-                 j < d_interior_dims[1] + d_num_subghosts_velocity[1];
-                 j++)
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-                for (int i = -d_num_subghosts_velocity[0];
-                     i < d_interior_dims[0] + d_num_subghosts_velocity[0];
-                     i++)
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx = (i + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
+                    const int idx = (i + num_ghosts_0) +
+                        (j + num_ghosts_1)*ghostcell_dim_0;
                     
-                    const int idx_density = (i + d_num_subghosts_density[0]) +
-                        (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
+                    const int idx_density = (i + num_subghosts_0_density) +
+                        (j + num_subghosts_1_density)*subghostcell_dim_0_density;
                     
-                    const int idx_velocity = (i + d_num_subghosts_velocity[0]) +
-                        (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
+                    const int idx_velocity = (i + num_subghosts_0_velocity) +
+                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
                     
                     u[idx_velocity] = rho_u[idx]/rho[idx_density];
                     v[idx_velocity] = rho_v[idx]/rho[idx_density];
@@ -11096,6 +10518,35 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataVelocityWithDensity(
         }
         else if (d_dim == tbox::Dimension(3))
         {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_lo_2 = domain_lo[2];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            const int domain_dim_2 = domain_dims[2];
+            
+            const int num_ghosts_0 = d_num_ghosts[0];
+            const int num_ghosts_1 = d_num_ghosts[1];
+            const int num_ghosts_2 = d_num_ghosts[2];
+            const int ghostcell_dim_0 = d_ghostcell_dims[0];
+            const int ghostcell_dim_1 = d_ghostcell_dims[1];
+            
+            const int num_subghosts_0_density = d_num_subghosts_density[0];
+            const int num_subghosts_1_density = d_num_subghosts_density[1];
+            const int num_subghosts_2_density = d_num_subghosts_density[2];
+            const int subghostcell_dim_0_density = d_subghostcell_dims_density[0];
+            const int subghostcell_dim_1_density = d_subghostcell_dims_density[1];
+            
+            const int num_subghosts_0_velocity = d_num_subghosts_velocity[0];
+            const int num_subghosts_1_velocity = d_num_subghosts_velocity[1];
+            const int num_subghosts_2_velocity = d_num_subghosts_velocity[2];
+            const int subghostcell_dim_0_velocity = d_subghostcell_dims_velocity[0];
+            const int subghostcell_dim_1_velocity = d_subghostcell_dims_velocity[1];
+            
             // Get the pointers to the cell data of velocity.
             double* u = d_data_velocity->getPointer(0);
             double* v = d_data_velocity->getPointer(1);
@@ -11107,30 +10558,29 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataVelocityWithDensity(
             double* rho_w = data_momentum->getPointer(2);
             
             // Compute the velocity field.
-            for (int k = -d_num_subghosts_velocity[2];
-                 k < d_interior_dims[2] + d_num_subghosts_velocity[2];
-                 k++)
+            for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
-                for (int j = -d_num_subghosts_velocity[1];
-                     j < d_interior_dims[1] + d_num_subghosts_velocity[1];
-                     j++)
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-                    for (int i = -d_num_subghosts_velocity[0];
-                         i < d_interior_dims[0] + d_num_subghosts_velocity[0];
-                         i++)
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
+                        const int idx = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0 +
+                            (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
                         
-                        const int idx_density = (i + d_num_subghosts_density[0]) +
-                            (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
-                            (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*d_subghostcell_dims_density[1];
+                        const int idx_density = (i + num_subghosts_0_density) +
+                            (j + num_subghosts_1_density)*subghostcell_dim_0_density +
+                            (k + num_subghosts_2_density)*subghostcell_dim_0_density*
+                                subghostcell_dim_1_density;
                         
-                        const int idx_velocity = (i + d_num_subghosts_velocity[0]) +
-                            (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                            (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*d_subghostcell_dims_velocity[1];
+                        const int idx_velocity = (i + num_subghosts_0_velocity) +
+                            (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                            (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                subghostcell_dim_1_velocity;
                         
                         u[idx_velocity] = rho_u[idx]/rho[idx_density];
                         v[idx_velocity] = rho_v[idx]/rho[idx_density];
@@ -11156,7 +10606,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataVelocityWithDensity(
  */
 void
 FlowModelFiveEqnAllaire::computeGlobalCellDataInternalEnergyWithDensityAndVelocity(
-    const COMPUTING_OPTION::TYPE& computing_option)
+    const hier::Box& domain)
 {
     if (d_num_subghosts_internal_energy > -hier::IntVector::getOne(d_dim))
     {
@@ -11164,18 +10614,40 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataInternalEnergyWithDensityAndVeloci
         d_data_internal_energy.reset(
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_internal_energy));
         
-        // Get the cell data of the variables total energy and volume fraction.
+        /*
+         * Get the local lower indices and number of cells in each direction of the domain.
+         */
+        
+        hier::IntVector domain_lo(d_dim);
+        hier::IntVector domain_dims(d_dim);
+        
+        if (domain.empty())
+        {
+            domain_lo = -d_num_subghosts_internal_energy;
+            domain_dims = d_subghostcell_dims_internal_energy;
+        }
+        else
+        {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(d_subghost_box_internal_energy.contains(domain));
+#endif
+            
+            domain_lo = domain.lower() - d_interior_box.lower();
+            domain_dims = domain.numberCells();
+        }
+        
+        // Get the cell data of the variables total energy and volume fractions.
         boost::shared_ptr<pdat::CellData<double> > data_total_energy =
             getGlobalCellDataTotalEnergy();
         
         if (!d_data_density)
         {
-            computeGlobalCellDataDensity();
+            computeGlobalCellDataDensity(domain);
         }
         
         if (!d_data_velocity)
         {
-            computeGlobalCellDataVelocityWithDensity();
+            computeGlobalCellDataVelocityWithDensity(domain);
         }
         
         // Get the pointers to the cell data of internal energy, total energy and density.
@@ -11185,99 +10657,168 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataInternalEnergyWithDensityAndVeloci
         
         if (d_dim == tbox::Dimension(1))
         {
-            /// Get the pointer to cell data of velocity.
+            /*
+             * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_dim_0 = domain_dims[0];
+            
+            const int num_ghosts_0 = d_num_ghosts[0];
+            const int num_subghosts_0_density = d_num_subghosts_density[0];
+            const int num_subghosts_0_velocity = d_num_subghosts_velocity[0];
+            const int num_subghosts_0_internal_energy = d_num_subghosts_internal_energy[0];
+            
+            // Get the pointer to cell data of velocity.
             double* u = d_data_velocity->getPointer(0);
             
             // Compute the internal energy field.
-            for (int i = -d_num_subghosts_internal_energy[0];
-                 i < d_interior_dims[0] + d_num_subghosts_internal_energy[0];
-                 i++)
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx = i + d_num_ghosts[0];
-                const int idx_density = i + d_num_subghosts_density[0];
-                const int idx_velocity = i + d_num_subghosts_velocity[0];
-                const int idx_internal_energy = i + d_num_subghosts_internal_energy[0];
+                const int idx = i + num_ghosts_0;
+                const int idx_density = i + num_subghosts_0_density;
+                const int idx_velocity = i + num_subghosts_0_velocity;
+                const int idx_internal_energy = i + num_subghosts_0_internal_energy;
                 
                 epsilon[idx_internal_energy] = E[idx]/rho[idx_density] -
-                    0.5*u[idx_velocity]*u[idx_velocity];
+                    double(1)/double(2)*u[idx_velocity]*u[idx_velocity];
             }
         }
         else if (d_dim == tbox::Dimension(2))
         {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            
+            const int num_ghosts_0 = d_num_ghosts[0];
+            const int num_ghosts_1 = d_num_ghosts[1];
+            const int ghostcell_dim_0 = d_ghostcell_dims[0];
+            
+            const int num_subghosts_0_density = d_num_subghosts_density[0];
+            const int num_subghosts_1_density = d_num_subghosts_density[1];
+            const int subghostcell_dim_0_density = d_subghostcell_dims_density[0];
+            
+            const int num_subghosts_0_velocity = d_num_subghosts_velocity[0];
+            const int num_subghosts_1_velocity = d_num_subghosts_velocity[1];
+            const int subghostcell_dim_0_velocity = d_subghostcell_dims_velocity[0];
+            
+            const int num_subghosts_0_internal_energy = d_num_subghosts_internal_energy[0];
+            const int num_subghosts_1_internal_energy = d_num_subghosts_internal_energy[1];
+            const int subghostcell_dim_0_internal_energy = d_subghostcell_dims_internal_energy[0];
+            
             // Get the pointers to the cell data of velocity.
             double* u = d_data_velocity->getPointer(0);
             double* v = d_data_velocity->getPointer(1);
             
             // Compute the internal energy field.
-            for (int j = -d_num_subghosts_internal_energy[1];
-                 j < d_interior_dims[1] + d_num_subghosts_internal_energy[1];
-                 j++)
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-                for (int i = -d_num_subghosts_internal_energy[0];
-                     i < d_interior_dims[0] + d_num_subghosts_internal_energy[0];
-                     i++)
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx = (i + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
+                    const int idx = (i + num_ghosts_0) +
+                        (j + num_ghosts_1)*ghostcell_dim_0;
                     
-                    const int idx_density = (i + d_num_subghosts_density[0]) +
-                        (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
+                    const int idx_density = (i + num_subghosts_0_density) +
+                        (j + num_subghosts_1_density)*subghostcell_dim_0_density;
                     
-                    const int idx_velocity = (i + d_num_subghosts_velocity[0]) +
-                        (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
+                    const int idx_velocity = (i + num_subghosts_0_velocity) +
+                        (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
                     
-                    const int idx_internal_energy = (i + d_num_subghosts_internal_energy[0]) +
-                        (j + d_num_subghosts_internal_energy[1])*d_subghostcell_dims_internal_energy[0];
+                    const int idx_internal_energy = (i + num_subghosts_0_internal_energy) +
+                        (j + num_subghosts_1_internal_energy)*subghostcell_dim_0_internal_energy;
                     
                     epsilon[idx_internal_energy] = E[idx]/rho[idx_density] -
-                        0.5*(u[idx_velocity]*u[idx_velocity] + v[idx_velocity]*v[idx_velocity]);
+                        double(1)/double(2)*(u[idx_velocity]*u[idx_velocity] + v[idx_velocity]*v[idx_velocity]);
                 }
             }
         }
         else if (d_dim == tbox::Dimension(3))
         {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_lo_2 = domain_lo[2];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            const int domain_dim_2 = domain_dims[2];
+            
+            const int num_ghosts_0 = d_num_ghosts[0];
+            const int num_ghosts_1 = d_num_ghosts[1];
+            const int num_ghosts_2 = d_num_ghosts[2];
+            const int ghostcell_dim_0 = d_ghostcell_dims[0];
+            const int ghostcell_dim_1 = d_ghostcell_dims[1];
+            
+            const int num_subghosts_0_density = d_num_subghosts_density[0];
+            const int num_subghosts_1_density = d_num_subghosts_density[1];
+            const int num_subghosts_2_density = d_num_subghosts_density[2];
+            const int subghostcell_dim_0_density = d_subghostcell_dims_density[0];
+            const int subghostcell_dim_1_density = d_subghostcell_dims_density[1];
+            
+            const int num_subghosts_0_velocity = d_num_subghosts_velocity[0];
+            const int num_subghosts_1_velocity = d_num_subghosts_velocity[1];
+            const int num_subghosts_2_velocity = d_num_subghosts_velocity[2];
+            const int subghostcell_dim_0_velocity = d_subghostcell_dims_velocity[0];
+            const int subghostcell_dim_1_velocity = d_subghostcell_dims_velocity[1];
+            
+            const int num_subghosts_0_internal_energy = d_num_subghosts_internal_energy[0];
+            const int num_subghosts_1_internal_energy = d_num_subghosts_internal_energy[1];
+            const int num_subghosts_2_internal_energy = d_num_subghosts_internal_energy[2];
+            const int subghostcell_dim_0_internal_energy = d_subghostcell_dims_internal_energy[0];
+            const int subghostcell_dim_1_internal_energy = d_subghostcell_dims_internal_energy[1];
+            
             // Get the pointers to the cell data of velocity.
             double* u = d_data_velocity->getPointer(0);
             double* v = d_data_velocity->getPointer(1);
             double* w = d_data_velocity->getPointer(2);
             
             // Compute the internal energy field.
-            for (int k = -d_num_subghosts_internal_energy[2];
-                 k < d_interior_dims[2] + d_num_subghosts_internal_energy[2];
-                 k++)
+            for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
-                for (int j = -d_num_subghosts_internal_energy[1];
-                     j < d_interior_dims[1] + d_num_subghosts_internal_energy[1];
-                     j++)
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-                    for (int i = -d_num_subghosts_internal_energy[0];
-                         i < d_interior_dims[0] + d_num_subghosts_internal_energy[0];
-                         i++)
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
+                        const int idx = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0 +
+                            (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
                         
-                        const int idx_density = (i + d_num_subghosts_density[0]) +
-                            (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
-                            (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
-                                d_subghostcell_dims_density[1];
+                        const int idx_density = (i + num_subghosts_0_density) +
+                            (j + num_subghosts_1_density)*subghostcell_dim_0_density +
+                            (k + num_subghosts_2_density)*subghostcell_dim_0_density*
+                                subghostcell_dim_1_density;
                         
-                        const int idx_velocity = (i + d_num_subghosts_velocity[0]) +
-                            (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                            (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                d_subghostcell_dims_velocity[1];
+                        const int idx_velocity = (i + num_subghosts_0_velocity) +
+                            (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                            (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                subghostcell_dim_1_velocity;
                         
-                        const int idx_internal_energy = (i + d_num_subghosts_internal_energy[0]) +
-                            (j + d_num_subghosts_internal_energy[1])*d_subghostcell_dims_internal_energy[0] +
-                            (k + d_num_subghosts_internal_energy[2])*d_subghostcell_dims_internal_energy[0]*
-                                d_subghostcell_dims_internal_energy[1];
+                        const int idx_internal_energy = (i + num_subghosts_0_internal_energy) +
+                            (j + num_subghosts_1_internal_energy)*subghostcell_dim_0_internal_energy +
+                            (k + num_subghosts_2_internal_energy)*subghostcell_dim_0_internal_energy*
+                                subghostcell_dim_1_internal_energy;
                         
                         epsilon[idx_internal_energy] = E[idx]/rho[idx_density] -
-                            0.5*(u[idx_velocity]*u[idx_velocity] + v[idx_velocity]*v[idx_velocity] +
+                            double(1)/double(2)*(u[idx_velocity]*u[idx_velocity] + v[idx_velocity]*v[idx_velocity] +
                             w[idx_velocity]*w[idx_velocity]);
                     }
                 }
@@ -11295,12 +10836,12 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataInternalEnergyWithDensityAndVeloci
 
 
 /*
- * Compute the global cell data of pressure with density, mass fraction and internal energy in
+ * Compute the global cell data of pressure with density, mass fractions and internal energy in
  * the registered patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy(
-    const COMPUTING_OPTION::TYPE& computing_option)
+FlowModelFiveEqnAllaire::computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy(
+    const hier::Box& domain)
 {
     if (d_num_subghosts_pressure > -hier::IntVector::getOne(d_dim))
     {
@@ -11308,199 +10849,39 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataPressureWithDensityMassFractionAnd
         d_data_pressure.reset(
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_pressure));
         
-        // Get the cell data of the variable volume fraction.
-        boost::shared_ptr<pdat::CellData<double> > data_volume_fraction =
-            getGlobalCellDataVolumeFraction();
+        // Get the cell data of the variable volume fractions.
+        boost::shared_ptr<pdat::CellData<double> > data_volume_fractions =
+            getGlobalCellDataVolumeFractions();
         
         if (!d_data_density)
         {
-            computeGlobalCellDataDensity();
+            computeGlobalCellDataDensity(domain);
         }
         
-        if (!d_data_mass_fraction)
+        if (!d_data_mass_fractions)
         {
-            computeGlobalCellDataMassFractionWithDensity();
+            computeGlobalCellDataMassFractionsWithDensity(domain);
         }
         
         if (!d_data_internal_energy)
         {
-            computeGlobalCellDataInternalEnergyWithDensityAndVelocity();
+            computeGlobalCellDataInternalEnergyWithDensityAndVelocity(domain);
         }
         
-        // Get the pointers to the cell data of pressure, volume fraction, density, mass fraction
-        // and internal energy.
-        double* p   = d_data_pressure->getPointer(0);
-        std::vector<double*> Z;
-        Z.reserve(d_num_species - 1);
-        for (int si = 0; si < d_num_species - 1; si++)
-        {
-            Z.push_back(data_volume_fraction->getPointer(si));
-        }
-        double* rho = d_data_density->getPointer(0);
-        std::vector<double*> Y;
-        Y.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y.push_back(d_data_mass_fraction->getPointer(si));
-        }
-        double* epsilon = d_data_internal_energy->getPointer(0);
-        
-        if (d_dim == tbox::Dimension(1))
-        {
-            // Compute the pressure field.
-            for (int i = -d_num_subghosts_pressure[0];
-                 i < d_interior_dims[0] + d_num_subghosts_pressure[0];
-                 i++)
-            {
-                // Compute the linear indices.
-                const int idx = i + d_num_ghosts[0];
-                const int idx_density = i + d_num_subghosts_density[0];
-                const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
-                const int idx_internal_energy = i + d_num_subghosts_internal_energy[0];
-                const int idx_pressure = i + d_num_subghosts_pressure[0];
-                
-                std::vector<const double*> Y_ptr;
-                Y_ptr.reserve(d_num_species);
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    Y_ptr.push_back(&Y[si][idx_mass_fraction]);
-                }
-                
-                std::vector<const double*> Z_ptr;
-                Z_ptr.reserve(d_num_species - 1);
-                for (int si = 0; si < d_num_species - 1; si++)
-                {
-                    Z_ptr.push_back(&Z[si][idx]);
-                }
-                
-                p[idx_pressure] = d_equation_of_state_mixing_rules->
-                    getPressure(
-                        &rho[idx_density],
-                        &epsilon[idx_internal_energy],
-                        Y_ptr,
-                        Z_ptr);
-            }
-        }
-        else if (d_dim == tbox::Dimension(2))
-        {
-            // Compute the pressure field.
-            for (int j = -d_num_subghosts_pressure[1];
-                 j < d_interior_dims[1] + d_num_subghosts_pressure[1];
-                 j++)
-            {
-                for (int i = -d_num_subghosts_pressure[0];
-                     i < d_interior_dims[0] + d_num_subghosts_pressure[0];
-                     i++)
-                {
-                    // Compute the linear indices.
-                    const int idx = (i + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
-                    
-                    const int idx_density = (i + d_num_subghosts_density[0]) +
-                        (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
-                    
-                    const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                        (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
-                    
-                    const int idx_internal_energy = (i + d_num_subghosts_internal_energy[0]) +
-                        (j + d_num_subghosts_internal_energy[1])*d_subghostcell_dims_internal_energy[0];
-                    
-                    const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                        (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
-                    
-                    std::vector<const double*> Y_ptr;
-                    Y_ptr.reserve(d_num_species);
-                    for (int si = 0; si < d_num_species; si++)
-                    {
-                        Y_ptr.push_back(&Y[si][idx_mass_fraction]);
-                    }
-                    
-                    std::vector<const double*> Z_ptr;
-                    Z_ptr.reserve(d_num_species - 1);
-                    for (int si = 0; si < d_num_species - 1; si++)
-                    {
-                        Z_ptr.push_back(&Z[si][idx]);
-                    }
-                    
-                    p[idx_pressure] = d_equation_of_state_mixing_rules->
-                        getPressure(
-                            &rho[idx_density],
-                            &epsilon[idx_internal_energy],
-                            Y_ptr,
-                            Z_ptr);
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            // Compute the pressure field.
-            for (int k = -d_num_subghosts_pressure[2];
-                 k < d_interior_dims[2] + d_num_subghosts_pressure[2];
-                 k++)
-            {
-                for (int j = -d_num_subghosts_pressure[1];
-                     j < d_interior_dims[1] + d_num_subghosts_pressure[1];
-                     j++)
-                {
-                    for (int i = -d_num_subghosts_pressure[0];
-                         i < d_interior_dims[0] + d_num_subghosts_pressure[0];
-                         i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
-                        
-                        const int idx_density = (i + d_num_subghosts_density[0]) +
-                            (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
-                            (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
-                                d_subghostcell_dims_density[1];
-                        
-                        const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                            (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
-                            (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*
-                                d_subghostcell_dims_mass_fraction[1];
-                        
-                        const int idx_internal_energy = (i + d_num_subghosts_internal_energy[0]) +
-                            (j + d_num_subghosts_internal_energy[1])*d_subghostcell_dims_internal_energy[0] +
-                            (k + d_num_subghosts_internal_energy[2])*d_subghostcell_dims_internal_energy[0]*
-                                d_subghostcell_dims_internal_energy[1];
-                        
-                        const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                            (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
-                            (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
-                                d_subghostcell_dims_pressure[1];
-                        
-                        std::vector<const double*> Y_ptr;
-                        Y_ptr.reserve(d_num_species);
-                        for (int si = 0; si < d_num_species; si++)
-                        {
-                            Y_ptr.push_back(&Y[si][idx_mass_fraction]);
-                        }
-                        
-                        std::vector<const double*> Z_ptr;
-                        Z_ptr.reserve(d_num_species - 1);
-                        for (int si = 0; si < d_num_species - 1; si++)
-                        {
-                            Z_ptr.push_back(&Z[si][idx]);
-                        }
-                        
-                        p[idx_pressure] = d_equation_of_state_mixing_rules->
-                            getPressure(
-                                &rho[idx_density],
-                                &epsilon[idx_internal_energy],
-                                Y_ptr,
-                                Z_ptr);
-                    }
-                }
-            }
-        }
+        // Compute the pressure field.
+        d_equation_of_state_mixing_rules->computePressure(
+            d_data_pressure,
+            d_data_density,
+            d_data_internal_energy,
+            d_data_mass_fractions,
+            data_volume_fractions,
+            domain);
     }
     else
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFiveEqnAllaire::"
-            << "computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy()\n"
+            << "computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy()\n"
             << "Cell data of 'PRESSURE' is not yet registered."
             << std::endl);
     }
@@ -11508,12 +10889,12 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataPressureWithDensityMassFractionAnd
 
 
 /*
- * Compute the global cell data of sound speed with density, mass fraction and pressure in the
+ * Compute the global cell data of sound speed with density, mass fractions and pressure in the
  * registered patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure(
-    const COMPUTING_OPTION::TYPE& computing_option)
+FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure(
+    const hier::Box& domain)
 {
     if (d_num_subghosts_sound_speed > -hier::IntVector::getOne(d_dim))
     {
@@ -11521,199 +10902,39 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityMassFractionA
         d_data_sound_speed.reset(
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_sound_speed));
         
-        // Get the cell data of the variable volume fraction.
-        boost::shared_ptr<pdat::CellData<double> > data_volume_fraction =
-            getGlobalCellDataVolumeFraction();
+        // Get the cell data of the variable volume fractions.
+        boost::shared_ptr<pdat::CellData<double> > data_volume_fractions =
+            getGlobalCellDataVolumeFractions();
         
         if (!d_data_density)
         {
-            computeGlobalCellDataDensity();
+            computeGlobalCellDataDensity(domain);
         }
         
-        if (!d_data_mass_fraction)
+        if (!d_data_mass_fractions)
         {
-            computeGlobalCellDataMassFractionWithDensity();
+            computeGlobalCellDataMassFractionsWithDensity(domain);
         }
         
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+            computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy(domain);
         }
         
-        // Get the pointers to the cell data of sound speed, density, mass fraction, pressure and
-        // volume fraction.
-        double* c   = d_data_sound_speed->getPointer(0);
-        double* rho = d_data_density->getPointer(0);
-        std::vector<double*> Y;
-        Y.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y.push_back(d_data_mass_fraction->getPointer(si));
-        }
-        double* p   = d_data_pressure->getPointer(0);
-        std::vector<double*> Z;
-        Z.reserve(d_num_species - 1);
-        for (int si = 0; si < d_num_species - 1; si++)
-        {
-            Z.push_back(data_volume_fraction->getPointer(si));
-        }
-        
-        if (d_dim == tbox::Dimension(1))
-        {
-            // Compute the sound speed field.
-            for (int i = -d_num_subghosts_sound_speed[0];
-                 i < d_interior_dims[0] + d_num_subghosts_sound_speed[0];
-                 i++)
-            {
-                // Compute the linear indices.
-                const int idx = i + d_num_ghosts[0];
-                const int idx_density = i + d_num_subghosts_density[0];
-                const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
-                const int idx_pressure = i + d_num_subghosts_pressure[0];
-                const int idx_sound_speed = i + d_num_subghosts_sound_speed[0];
-                
-                std::vector<const double*> Y_ptr;
-                Y_ptr.reserve(d_num_species);
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    Y_ptr.push_back(&Y[si][idx_mass_fraction]);
-                }
-                
-                std::vector<const double*> Z_ptr;
-                Z_ptr.reserve(d_num_species - 1);
-                for (int si = 0; si < d_num_species - 1; si++)
-                {
-                    Z_ptr.push_back(&Z[si][idx]);
-                }
-                
-                c[idx_sound_speed] = d_equation_of_state_mixing_rules->
-                    getSoundSpeed(
-                        &rho[idx_density],
-                        &p[idx_pressure],
-                        Y_ptr,
-                        Z_ptr);
-            }
-        }
-        else if (d_dim == tbox::Dimension(2))
-        {
-            // Compute the sound speed field.
-            for (int j = -d_num_subghosts_sound_speed[1];
-                 j < d_interior_dims[1] + d_num_subghosts_sound_speed[1];
-                 j++)
-            {
-                for (int i = -d_num_subghosts_sound_speed[0];
-                     i < d_interior_dims[0] + d_num_subghosts_sound_speed[0];
-                     i++)
-                {
-                    // Compute the linear indices.
-                    const int idx = (i + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
-                    
-                    const int idx_density = (i + d_num_subghosts_density[0]) +
-                        (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
-                    
-                    const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                        (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
-                    
-                    const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                        (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
-                    
-                    const int idx_sound_speed = (i + d_num_subghosts_sound_speed[0]) +
-                        (j + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
-                    
-                    std::vector<const double*> Y_ptr;
-                    Y_ptr.reserve(d_num_species);
-                    for (int si = 0; si < d_num_species; si++)
-                    {
-                        Y_ptr.push_back(&Y[si][idx_mass_fraction]);
-                    }
-                    
-                    std::vector<const double*> Z_ptr;
-                    Z_ptr.reserve(d_num_species - 1);
-                    for (int si = 0; si < d_num_species - 1; si++)
-                    {
-                        Z_ptr.push_back(&Z[si][idx]);
-                    }
-                    
-                    c[idx_sound_speed] = d_equation_of_state_mixing_rules->
-                        getSoundSpeed(
-                            &rho[idx_density],
-                            &p[idx_pressure],
-                            Y_ptr,
-                            Z_ptr);
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            // Compute the sound speed field.
-            for (int k = -d_num_subghosts_sound_speed[2];
-                 k < d_interior_dims[2] + d_num_subghosts_sound_speed[2];
-                 k++)
-            {
-                for (int j = -d_num_subghosts_sound_speed[1];
-                     j < d_interior_dims[1] + d_num_subghosts_sound_speed[1];
-                     j++)
-                {
-                    for (int i = -d_num_subghosts_sound_speed[0];
-                         i < d_interior_dims[0] + d_num_subghosts_sound_speed[0];
-                         i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
-                        
-                        const int idx_density = (i + d_num_subghosts_density[0]) +
-                            (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
-                            (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
-                                d_subghostcell_dims_density[1];
-                        
-                        const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                            (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
-                            (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*
-                                d_subghostcell_dims_mass_fraction[1];
-                        
-                        const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                            (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
-                            (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
-                                d_subghostcell_dims_pressure[1];
-                        
-                        const int idx_sound_speed = (i + d_num_subghosts_sound_speed[0]) +
-                            (j + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
-                            (k + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
-                                d_subghostcell_dims_sound_speed[1];
-                        
-                        std::vector<const double*> Y_ptr;
-                        Y_ptr.reserve(d_num_species);
-                        for (int si = 0; si < d_num_species; si++)
-                        {
-                            Y_ptr.push_back(&Y[si][idx_mass_fraction]);
-                        }
-                        
-                        std::vector<const double*> Z_ptr;
-                        Z_ptr.reserve(d_num_species - 1);
-                        for (int si = 0; si < d_num_species - 1; si++)
-                        {
-                            Z_ptr.push_back(&Z[si][idx]);
-                        }
-                        
-                        c[idx_sound_speed] = d_equation_of_state_mixing_rules->
-                            getSoundSpeed(
-                                &rho[idx_density],
-                                &p[idx_pressure],
-                                Y_ptr,
-                                Z_ptr);
-                    }
-                }
-            }
-        }
+        // Compute the sound speed field.
+        d_equation_of_state_mixing_rules->computeSoundSpeed(
+            d_data_sound_speed,
+            d_data_density,
+            d_data_pressure,
+            d_data_mass_fractions,
+            data_volume_fractions,
+            domain);
     }
     else
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFiveEqnAllaire::"
-            << "computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure()\n"
+            << "computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure()\n"
             << "Cell data of 'SOUND_SPEED' is not yet registered."
             << std::endl);
     }
@@ -11721,216 +10942,282 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataSoundSpeedWithDensityMassFractionA
 
 
 /*
- * Compute the global cell data of temperature with pressure in the registered patch.
+ * Compute the global cell data of species temperatures with pressure in the registered patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataTemperatureWithPressure(
-    const COMPUTING_OPTION::TYPE& computing_option)
+FlowModelFiveEqnAllaire::computeGlobalCellDataSpeciesTemperaturesWithPressure(
+    const hier::Box& domain)
 {
-    if (d_num_subghosts_temperature > -hier::IntVector::getOne(d_dim))
+    if (d_num_subghosts_species_temperatures > -hier::IntVector::getOne(d_dim))
     {
-        // Create the cell data of temperature.
-        d_data_temperature.reset(
-            new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_temperature));
+        // Create the cell data of species temperatures.
+        d_data_species_temperatures.reset(
+            new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_species_temperatures));
+        
+        /*
+         * Get the local lower indices and number of cells in each direction of the domain.
+         */
+        
+        hier::IntVector domain_lo(d_dim);
+        hier::IntVector domain_dims(d_dim);
+        
+        if (domain.empty())
+        {
+            domain_lo = -d_num_subghosts_species_temperatures;
+            domain_dims = d_subghostcell_dims_species_temperatures;
+        }
+        else
+        {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(d_subghost_box_species_temperatures.contains(domain));
+#endif
+            
+            domain_lo = domain.lower() - d_interior_box.lower();
+            domain_dims = domain.numberCells();
+        }
         
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+            computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy(domain);
         }
         
-        // Get the cell data of the variable partial density.
-        boost::shared_ptr<pdat::CellData<double> > data_partial_density =
-            getGlobalCellDataPartialDensity();
+        // Get the cell data of the variable partial densities.
+        boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+            getGlobalCellDataPartialDensities();
         
-        // Get the cell data of the variable volume fraction.
-        boost::shared_ptr<pdat::CellData<double> > data_volume_fraction =
-            getGlobalCellDataVolumeFraction();
+        // Get the cell data of the variable volume fractions.
+        boost::shared_ptr<pdat::CellData<double> > data_volume_fractions =
+            getGlobalCellDataVolumeFractions();
         
-        // Get the pointers to the cell data of temperature, pressure, partial density and
-        // volume fraction.
-        std::vector<double*> T;
-        T.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            T.push_back(d_data_temperature->getPointer(si));
-        }
-        double* p = d_data_pressure->getPointer(0);
+        // Get the pointers to the cell data of partial densities and volume fractions.
         std::vector<double*> Z_rho;
         Z_rho.reserve(d_num_species);
         for (int si = 0; si < d_num_species; si++)
         {
-            Z_rho.push_back(data_partial_density->getPointer(si));
+            Z_rho.push_back(data_partial_densities->getPointer(si));
         }
         std::vector<double*> Z;
         Z.reserve(d_num_species - 1);
         for (int si = 0; si < d_num_species - 1; si++)
         {
-            Z.push_back(data_volume_fraction->getPointer(si));
+            Z.push_back(data_volume_fractions->getPointer(si));
         }
         
         // Compute the density of each species.
-        boost::shared_ptr<pdat::CellData<double> > data_density(
-            new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_temperature));
+        std::vector<boost::shared_ptr<pdat::CellData<double> > > data_species_densities;
+        data_species_densities.resize(d_num_species);
         
         std::vector<double*> rho;
         rho.reserve(d_num_species);
+        
         for (int si = 0; si < d_num_species; si++)
         {
-            rho.push_back(data_density->getPointer(si));
+            data_species_densities[si].reset(
+                new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_species_temperatures));
+            
+            rho.push_back(data_species_densities[si]->getPointer(0));
         }
         
-        boost::shared_ptr<pdat::CellData<double> > data_volume_fraction_last(
+        boost::shared_ptr<pdat::CellData<double> > data_volume_fractions_last(
             new pdat::CellData<double>(d_interior_box, 1, d_num_ghosts));
         
-        data_volume_fraction_last->fillAll(1.0);
+        data_volume_fractions_last->fillAll(double(1));
         
-        double* Z_last = data_volume_fraction_last->getPointer(0);
+        double* Z_last = data_volume_fractions_last->getPointer(0);
         
         if (d_dim == tbox::Dimension(1))
         {
+            /*
+             * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_dim_0 = domain_dims[0];
+            
+            const int num_ghosts_0 = d_num_ghosts[0];
+            const int num_subghosts_0_species_temperatures = d_num_subghosts_species_temperatures[0];
+            
             // Compute the species density field.
             for (int si = 0; si < d_num_species - 1; si++)
             {
-                for (int i = -d_num_subghosts_temperature[0];
-                     i < d_interior_dims[0] + d_num_subghosts_temperature[0];
-                     i++)
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx = i + d_num_ghosts[0];
-                    const int idx_temperature = i + d_num_subghosts_temperature[0];
+                    const int idx = i + num_ghosts_0;
+                    const int idx_species_temperatures = i + num_subghosts_0_species_temperatures;
                     
-                    rho[si][idx_temperature] = Z_rho[si][idx]/Z[si][idx];
+                    rho[si][idx_species_temperatures] = Z_rho[si][idx]/Z[si][idx];
                     Z_last[idx] -= Z[si][idx];
                 }
             }
             
-            for (int i = -d_num_subghosts_temperature[0];
-                     i < d_interior_dims[0] + d_num_subghosts_temperature[0];
-                     i++)
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx = i + d_num_ghosts[0];
-                const int idx_temperature = i + d_num_subghosts_temperature[0];
+                const int idx = i + num_ghosts_0;
+                const int idx_species_temperatures = i + num_subghosts_0_species_temperatures;
                 
-                rho[d_num_species - 1][idx_temperature] = Z_rho[d_num_species - 1][idx]/Z_last[idx];
+                rho[d_num_species - 1][idx_species_temperatures] = Z_rho[d_num_species - 1][idx]/Z_last[idx];
             }
         }
         else if (d_dim == tbox::Dimension(2))
         {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            
+            const int num_ghosts_0 = d_num_ghosts[0];
+            const int num_ghosts_1 = d_num_ghosts[1];
+            const int ghostcell_dim_0 = d_ghostcell_dims[0];
+            
+            const int num_subghosts_0_species_temperatures = d_num_subghosts_species_temperatures[0];
+            const int num_subghosts_1_species_temperatures = d_num_subghosts_species_temperatures[1];
+            const int subghostcell_dim_0_species_temperatures = d_subghostcell_dims_species_temperatures[0];
+            
             // Compute the species density field.
             for (int si = 0; si < d_num_species - 1; si++)
             {
-                for (int j = -d_num_subghosts_temperature[1];
-                     j < d_interior_dims[1] + d_num_subghosts_temperature[1];
-                     j++)
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-                    for (int i = -d_num_subghosts_temperature[0];
-                         i < d_interior_dims[0] + d_num_subghosts_temperature[0];
-                         i++)
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*d_ghostcell_dims[0];
+                        const int idx = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0;
                         
-                        const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                            (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0];
+                        const int idx_species_temperatures = (i + num_subghosts_0_species_temperatures) +
+                            (j + num_subghosts_1_species_temperatures)*subghostcell_dim_0_species_temperatures;
                         
-                        rho[si][idx_temperature] = Z_rho[si][idx]/Z[si][idx];
+                        rho[si][idx_species_temperatures] = Z_rho[si][idx]/Z[si][idx];
                         Z_last[idx] -= Z[si][idx];
                     }
                 }
             }
             
-            for (int j = -d_num_subghosts_temperature[1];
-                     j < d_interior_dims[1] + d_num_subghosts_temperature[1];
-                     j++)
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-                for (int i = -d_num_subghosts_temperature[0];
-                     i < d_interior_dims[0] + d_num_subghosts_temperature[0];
-                     i++)
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx = (i + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
+                    const int idx = (i + num_ghosts_0) +
+                        (j + num_ghosts_1)*ghostcell_dim_0;
                     
-                    const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                        (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0];
+                    const int idx_species_temperatures = (i + num_subghosts_0_species_temperatures) +
+                        (j + num_subghosts_1_species_temperatures)*subghostcell_dim_0_species_temperatures;
                     
-                    rho[d_num_species - 1][idx_temperature] = Z_rho[d_num_species - 1][idx]/Z_last[idx];
+                    rho[d_num_species - 1][idx_species_temperatures] = Z_rho[d_num_species - 1][idx]/Z_last[idx];
                 }
             }
         }
         else if (d_dim == tbox::Dimension(3))
         {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_lo_2 = domain_lo[2];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            const int domain_dim_2 = domain_dims[2];
+            
+            const int num_ghosts_0 = d_num_ghosts[0];
+            const int num_ghosts_1 = d_num_ghosts[1];
+            const int num_ghosts_2 = d_num_ghosts[2];
+            const int ghostcell_dim_0 = d_ghostcell_dims[0];
+            const int ghostcell_dim_1 = d_ghostcell_dims[1];
+            
+            const int num_subghosts_0_species_temperatures = d_num_subghosts_species_temperatures[0];
+            const int num_subghosts_1_species_temperatures = d_num_subghosts_species_temperatures[1];
+            const int num_subghosts_2_species_temperatures = d_num_subghosts_species_temperatures[2];
+            const int subghostcell_dim_0_species_temperatures = d_subghostcell_dims_species_temperatures[0];
+            const int subghostcell_dim_1_species_temperatures = d_subghostcell_dims_species_temperatures[1];
+            
             // Compute the species density field.
             for (int si = 0; si < d_num_species - 1; si++)
             {
-                for (int k = -d_num_subghosts_temperature[2];
-                     k < d_interior_dims[2] + d_num_subghosts_temperature[2];
-                     k++)
+                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
                 {
-                    for (int j = -d_num_subghosts_temperature[1];
-                         j < d_interior_dims[1] + d_num_subghosts_temperature[1];
-                         j++)
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-                        for (int i = -d_num_subghosts_temperature[0];
-                             i < d_interior_dims[0] + d_num_subghosts_temperature[0];
-                             i++)
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
-                            const int idx = (i + d_num_ghosts[0]) +
-                                (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
-                                (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
+                            const int idx = (i + num_ghosts_0) +
+                                (j + num_ghosts_1)*ghostcell_dim_0 +
+                                (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
                             
-                            const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                                (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0] +
-                                (k + d_num_subghosts_temperature[2])*d_subghostcell_dims_temperature[0]*
-                                    d_subghostcell_dims_temperature[1];
+                            const int idx_species_temperatures = (i + num_subghosts_0_species_temperatures) +
+                                (j + num_subghosts_1_species_temperatures)*subghostcell_dim_0_species_temperatures +
+                                (k + num_subghosts_2_species_temperatures)*subghostcell_dim_0_species_temperatures*
+                                    subghostcell_dim_1_species_temperatures;
                             
-                            rho[si][idx_temperature] = Z_rho[si][idx]/Z[si][idx];
+                            rho[si][idx_species_temperatures] = Z_rho[si][idx]/Z[si][idx];
                             Z_last[idx] -= Z[si][idx];
                         }
                     }
                 }
             }
             
-            for (int k = -d_num_subghosts_temperature[2];
-                 k < d_interior_dims[2] + d_num_subghosts_temperature[2];
-                 k++)
+            for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
-                for (int j = -d_num_subghosts_temperature[1];
-                     j < d_interior_dims[1] + d_num_subghosts_temperature[1];
-                     j++)
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-                    for (int i = -d_num_subghosts_temperature[0];
-                         i < d_interior_dims[0] + d_num_subghosts_temperature[0];
-                         i++)
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
+                        const int idx = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0 +
+                            (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
                         
-                        const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                            (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0] +
-                            (k + d_num_subghosts_temperature[2])*d_subghostcell_dims_temperature[0]*
-                                d_subghostcell_dims_temperature[1];
+                        const int idx_species_temperatures = (i + num_subghosts_0_species_temperatures) +
+                            (j + num_subghosts_1_species_temperatures)*subghostcell_dim_0_species_temperatures +
+                            (k + num_subghosts_2_species_temperatures)*subghostcell_dim_0_species_temperatures*
+                                subghostcell_dim_1_species_temperatures;
                         
-                        rho[d_num_species - 1][idx_temperature] = Z_rho[d_num_species - 1][idx]/Z_last[idx];
+                        rho[d_num_species - 1][idx_species_temperatures] = Z_rho[d_num_species - 1][idx]/Z_last[idx];
                     }
                 }
             }
         }
         
         // Compute the temperature of each species.
-        if (d_dim == tbox::Dimension(1))
+        
+        boost::shared_ptr<pdat::CellData<double> > data_temperature_species(
+            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_species_temperatures));
+        
+        for (int si = 0; si < d_num_species; si++)
         {
             std::vector<double> species_thermo_properties;
             std::vector<double*> species_thermo_properties_ptr;
             std::vector<const double*> species_thermo_properties_const_ptr;
             
             const int num_thermo_properties = d_equation_of_state_mixing_rules->
-                getNumberOfSpeciesThermodynamicProperties();
+                getNumberOfSpeciesThermodynamicProperties(si);
             
             species_thermo_properties.resize(num_thermo_properties);
             species_thermo_properties_ptr.reserve(num_thermo_properties);
@@ -11942,949 +11229,27 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataTemperatureWithPressure(
                 species_thermo_properties_const_ptr.push_back(&species_thermo_properties[ti]);
             }
             
-            for (int si = 0; si < d_num_species; si++)
-            {
-                d_equation_of_state_mixing_rules->getSpeciesThermodynamicProperties(
-                    species_thermo_properties_ptr,
-                    si);
-                
-                for (int i = -d_num_subghosts_temperature[0];
-                     i < d_interior_dims[0] + d_num_subghosts_temperature[0];
-                     i++)
-                {
-                    // Compute the linear indices.
-                    const int idx_temperature = i + d_num_subghosts_temperature[0];
-                    const int idx_pressure = i + d_num_subghosts_pressure[0];
-                    
-                    T[si][idx_temperature] =
-                        d_equation_of_state_mixing_rules->getEquationOfState()->
-                            getTemperature(
-                                &rho[si][idx_temperature],
-                                &p[idx_pressure],
-                                species_thermo_properties_const_ptr);
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(2))
-        {
-            std::vector<double> species_thermo_properties;
-            std::vector<double*> species_thermo_properties_ptr;
-            std::vector<const double*> species_thermo_properties_const_ptr;
+            d_equation_of_state_mixing_rules->getSpeciesThermodynamicProperties(
+                species_thermo_properties_ptr,
+                si);
             
-            const int num_thermo_properties = d_equation_of_state_mixing_rules->
-                getNumberOfSpeciesThermodynamicProperties();
+            d_equation_of_state_mixing_rules->getEquationOfState(si)->
+                computeTemperature(
+                    data_temperature_species,
+                    data_species_densities[si],
+                    d_data_pressure,
+                    species_thermo_properties_const_ptr,
+                    domain);
             
-            species_thermo_properties.resize(num_thermo_properties);
-            species_thermo_properties_ptr.reserve(num_thermo_properties);
-            species_thermo_properties_const_ptr.reserve(num_thermo_properties);
-            
-            for (int ti = 0; ti < num_thermo_properties; ti++)
-            {
-                species_thermo_properties_ptr.push_back(&species_thermo_properties[ti]);
-                species_thermo_properties_const_ptr.push_back(&species_thermo_properties[ti]);
-            }
-            
-            for (int si = 0; si < d_num_species; si++)
-            {
-                d_equation_of_state_mixing_rules->getSpeciesThermodynamicProperties(
-                    species_thermo_properties_ptr,
-                    si);
-                
-                for (int j = -d_num_subghosts_temperature[1];
-                         j < d_interior_dims[1] + d_num_subghosts_temperature[1];
-                         j++)
-                {
-                    for (int i = -d_num_subghosts_temperature[0];
-                         i < d_interior_dims[0] + d_num_subghosts_temperature[0];
-                         i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                            (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0];
-                        
-                        const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                            (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
-                        
-                        T[si][idx_temperature] =
-                            d_equation_of_state_mixing_rules->getEquationOfState()->
-                                getTemperature(
-                                    &rho[si][idx_temperature],
-                                    &p[idx_pressure],
-                                    species_thermo_properties_const_ptr);
-                    }
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            std::vector<double> species_thermo_properties;
-            std::vector<double*> species_thermo_properties_ptr;
-            std::vector<const double*> species_thermo_properties_const_ptr;
-            
-            const int num_thermo_properties = d_equation_of_state_mixing_rules->
-                getNumberOfSpeciesThermodynamicProperties();
-            
-            species_thermo_properties.resize(num_thermo_properties);
-            species_thermo_properties_ptr.reserve(num_thermo_properties);
-            species_thermo_properties_const_ptr.reserve(num_thermo_properties);
-            
-            for (int ti = 0; ti < num_thermo_properties; ti++)
-            {
-                species_thermo_properties_ptr.push_back(&species_thermo_properties[ti]);
-                species_thermo_properties_const_ptr.push_back(&species_thermo_properties[ti]);
-            }
-            
-            for (int si = 0; si < d_num_species; si++)
-            {
-                d_equation_of_state_mixing_rules->getSpeciesThermodynamicProperties(
-                    species_thermo_properties_ptr,
-                    si);
-                
-                for (int k = -d_num_subghosts_temperature[2];
-                         k < d_interior_dims[2] + d_num_subghosts_temperature[2];
-                         k++)
-                {
-                    for (int j = -d_num_subghosts_temperature[1];
-                         j < d_interior_dims[1] + d_num_subghosts_temperature[1];
-                         j++)
-                    {
-                        for (int i = -d_num_subghosts_temperature[0];
-                             i < d_interior_dims[0] + d_num_subghosts_temperature[0];
-                             i++)
-                        {
-                            // Compute the linear indices.
-                            const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                                (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0] +
-                                (k + d_num_subghosts_temperature[2])*d_subghostcell_dims_temperature[0]*
-                                    d_subghostcell_dims_temperature[1];
-                            
-                            const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                                (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
-                                (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
-                                    d_subghostcell_dims_pressure[1];
-                            
-                            T[si][idx_temperature] =
-                                d_equation_of_state_mixing_rules->getEquationOfState()->
-                                    getTemperature(
-                                        &rho[si][idx_temperature],
-                                        &p[idx_pressure],
-                                        species_thermo_properties_const_ptr);
-                        }
-                    }
-                }
-            }
+            d_data_species_temperatures->copyDepth(si, *data_temperature_species, 0);
         }
     }
     else
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFiveEqnAllaire::"
-            << "computeGlobalCellDataTemperatureWithPressure()\n"
-            << "Cell data of 'TEMPERATURE' is not yet registered."
-            << std::endl);
-    }
-}
-
-
-/*
- * Compute the global cell data of dilatation with density and velocity in the registered patch.
- */
-void
-FlowModelFiveEqnAllaire::computeGlobalCellDataDilatationWithDensityAndVelocity(
-    const COMPUTING_OPTION::TYPE& computing_option)
-{
-    if (d_num_subghosts_dilatation > -hier::IntVector::getOne(d_dim))
-    {
-        // Get the grid spacing.
-        const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-            BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-                d_patch->getPatchGeometry()));
-        
-        const double* const dx = patch_geom->getDx();
-        
-        // Create the cell data of dilatation.
-        d_data_dilatation.reset(
-            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_dilatation));
-        
-        if (!d_data_density)
-        {
-            computeGlobalCellDataDensity();
-        }
-        
-        if (!d_data_velocity)
-        {
-            computeGlobalCellDataVelocityWithDensity();
-        }
-        
-        // Get the pointer to the cell data of dilatation.
-        double* theta = d_data_dilatation->getPointer(0);
-        
-        if (d_dim == tbox::Dimension(1))
-        {
-            // Get the pointer to cell data of velocity.
-            double* u = d_data_velocity->getPointer(0);
-            
-            // Compute the dilatation field.
-            if (d_num_subghosts_dilatation < d_num_subghosts_velocity)
-            {
-                for (int i = -d_num_subghosts_dilatation[0];
-                     i < d_interior_dims[0] + d_num_subghosts_dilatation[0];
-                     i++)
-                {
-                    // Compute indices of current and neighboring cells.
-                    const int idx_x_L = i - 1 + d_num_subghosts_velocity[0];
-                    const int idx_x_R = i + 1 + d_num_subghosts_velocity[0];
-                    const int idx_dilatation = i + d_num_subghosts_dilatation[0];
-                    
-                    theta[idx_dilatation] = (u[idx_x_R] - u[idx_x_L])/(2*dx[0]);
-                }
-            }
-            else
-            {
-                for (int i = -d_num_subghosts_dilatation[0];
-                     i < d_interior_dims[0] + d_num_subghosts_dilatation[0];
-                     i++)
-                {
-                    // Compute indices of current and neighboring cells.
-                    const int idx = i + d_num_subghosts_velocity[0];
-                    const int idx_x_L = i - 1 + d_num_subghosts_velocity[0];
-                    const int idx_x_R = i + 1 + d_num_subghosts_velocity[0];
-                    const int idx_dilatation = i + d_num_subghosts_dilatation[0];
-                    
-                    if (i == -d_num_subghosts_velocity[0])
-                    {
-                        theta[idx_dilatation] = (u[idx_x_R] - u[idx])/(dx[0]);
-                    }
-                    else if (i == d_interior_dims[0] + d_num_subghosts_velocity[0] - 1)
-                    {
-                        theta[idx_dilatation] = (u[idx] - u[idx_x_L])/(dx[0]);
-                    }
-                    else
-                    {
-                        theta[idx_dilatation] = (u[idx_x_R] - u[idx_x_L])/(2*dx[0]);
-                    }
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(2))
-        {
-            // Get the pointers to the cell data of velocity.
-            double* u = d_data_velocity->getPointer(0);
-            double* v = d_data_velocity->getPointer(1);
-            
-            // Compute the dilatation field.
-            if (d_num_subghosts_dilatation < d_num_subghosts_velocity)
-            {
-                for (int j = -d_num_subghosts_dilatation[1];
-                     j < d_interior_dims[1] + d_num_subghosts_dilatation[1];
-                     j++)
-                {
-                    for (int i = -d_num_subghosts_dilatation[0];
-                         i < d_interior_dims[0] + d_num_subghosts_dilatation[0];
-                         i++)
-                    {
-                        // Compute indices of current and neighboring cells.
-                        const int idx_x_L = (i - 1 + d_num_subghosts_velocity[0]) +
-                            (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
-                        
-                        const int idx_x_R = (i + 1 + d_num_subghosts_velocity[0]) +
-                            (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
-                        
-                        const int idx_y_B = (i + d_num_subghosts_velocity[0]) +
-                            (j - 1 + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
-                        
-                        const int idx_y_T = (i + d_num_subghosts_velocity[0]) +
-                            (j + 1 + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
-                        
-                        const int idx_dilatation = (i + d_num_subghosts_dilatation[0]) +
-                            (j + d_num_subghosts_dilatation[1])*d_subghostcell_dims_dilatation[0];
-                        
-                        double dudx = (u[idx_x_R] - u[idx_x_L])/(2*dx[0]);
-                        double dvdy = (v[idx_y_T] - v[idx_y_B])/(2*dx[1]);
-                        
-                        theta[idx_dilatation] = dudx + dvdy;
-                    }
-                }
-            }
-            else
-            {
-                for (int j = -d_num_subghosts_dilatation[1];
-                     j < d_interior_dims[1] + d_num_subghosts_dilatation[1];
-                     j++)
-                {
-                    for (int i = -d_num_subghosts_dilatation[0];
-                         i < d_interior_dims[0] + d_num_subghosts_dilatation[0];
-                         i++)
-                    {
-                        // Compute indices of current and neighboring cells.
-                        const int idx = (i + d_num_subghosts_velocity[0]) +
-                            (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
-                        
-                        const int idx_x_L = (i - 1 + d_num_subghosts_velocity[0]) +
-                            (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
-                        
-                        const int idx_x_R = (i + 1 + d_num_subghosts_velocity[0]) +
-                            (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
-                        
-                        const int idx_y_B = (i + d_num_subghosts_velocity[0]) +
-                            (j - 1 + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
-                        
-                        const int idx_y_T = (i + d_num_subghosts_velocity[0]) +
-                            (j + 1 + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
-                        
-                        const int idx_dilatation = (i + d_num_subghosts_dilatation[0]) +
-                            (j + d_num_subghosts_dilatation[1])*d_subghostcell_dims_dilatation[0];
-                        
-                        double dudx, dvdy;
-                        
-                        if (i == -d_num_subghosts_velocity[0])
-                        {
-                            dudx = (u[idx_x_R] - u[idx])/(dx[0]);
-                        }
-                        else if (i == d_interior_dims[0] + d_num_subghosts_velocity[0] - 1)
-                        {
-                            dudx = (u[idx] - u[idx_x_L])/(dx[0]);
-                        }
-                        else
-                        {
-                            dudx = (u[idx_x_R] - u[idx_x_L])/(2*dx[0]);
-                        }
-                        
-                        if (j == -d_num_subghosts_velocity[1])
-                        {
-                            dvdy = (v[idx_y_T] - v[idx])/(dx[1]);
-                        }
-                        else if (j == d_interior_dims[1] + d_num_subghosts_velocity[1] - 1)
-                        {
-                            dvdy = (v[idx] - v[idx_y_B])/(dx[1]);
-                        }
-                        else
-                        {
-                            dvdy = (v[idx_y_T] - v[idx_y_B])/(2*dx[1]);
-                        }
-                        
-                        theta[idx_dilatation] = dudx + dvdy;
-                    }
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            // Get the pointers to the cell data of velocity.
-            double* u = d_data_velocity->getPointer(0);
-            double* v = d_data_velocity->getPointer(1);
-            double* w = d_data_velocity->getPointer(2);
-            
-            // Compute the dilatation field.
-            if (d_num_subghosts_dilatation < d_num_subghosts_velocity)
-            {
-                for (int k = -d_num_subghosts_dilatation[2];
-                     k < d_interior_dims[2] + d_num_subghosts_dilatation[2];
-                     k++)
-                {
-                    for (int j = -d_num_subghosts_dilatation[1];
-                         j < d_interior_dims[1] + d_num_subghosts_dilatation[1];
-                         j++)
-                    {
-                        for (int i = -d_num_subghosts_dilatation[0];
-                             i < d_interior_dims[0] + d_num_subghosts_dilatation[0];
-                             i++)
-                        {
-                            // Compute indices of current and neighboring cells.
-                            const int idx_x_L = (i - 1 + d_num_subghosts_velocity[0]) +
-                                (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_x_R = (i + 1 + d_num_subghosts_velocity[0]) +
-                                (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_y_B = (i + d_num_subghosts_velocity[0]) +
-                                (j - 1 + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_y_T = (i + d_num_subghosts_velocity[0]) +
-                                (j + 1 + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_z_B = (i + d_num_subghosts_velocity[0]) +
-                                (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k - 1 + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_z_F = (i + d_num_subghosts_velocity[0]) +
-                                (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + 1 + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_dilatation = (i + d_num_subghosts_dilatation[0]) +
-                                (j + d_num_subghosts_dilatation[1])*d_subghostcell_dims_dilatation[0] +
-                                (k + d_num_subghosts_dilatation[2])*d_subghostcell_dims_dilatation[0]*
-                                    d_subghostcell_dims_dilatation[1];
-                            
-                            double dudx = (u[idx_x_R] - u[idx_x_L])/(2*dx[0]);
-                            double dvdy = (v[idx_y_T] - v[idx_y_B])/(2*dx[1]);
-                            double dwdz = (w[idx_z_F] - w[idx_z_B])/(2*dx[2]);
-                            
-                            theta[idx_dilatation] = dudx + dvdy + dwdz;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                for (int k = -d_num_subghosts_dilatation[2];
-                     k < d_interior_dims[2] + d_num_subghosts_dilatation[2];
-                     k++)
-                {
-                    for (int j = -d_num_subghosts_dilatation[1];
-                         j < d_interior_dims[1] + d_num_subghosts_dilatation[1];
-                         j++)
-                    {
-                        for (int i = -d_num_subghosts_dilatation[0];
-                             i < d_interior_dims[0] + d_num_subghosts_dilatation[0];
-                             i++)
-                        {
-                            // Compute indices of current and neighboring cells.
-                            const int idx = (i + d_num_subghosts_velocity[0]) +
-                                (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_x_L = (i - 1 + d_num_subghosts_velocity[0]) +
-                                (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_x_R = (i + 1 + d_num_subghosts_velocity[0]) +
-                                (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_y_B = (i + d_num_subghosts_velocity[0]) +
-                                (j - 1 + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_y_T = (i + d_num_subghosts_velocity[0]) +
-                                (j + 1 + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_z_B = (i + d_num_subghosts_velocity[0]) +
-                                (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k - 1 + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_z_F = (i + d_num_subghosts_velocity[0]) +
-                                (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + 1 + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_dilatation = (i + d_num_subghosts_dilatation[0]) +
-                                (j + d_num_subghosts_dilatation[1])*d_subghostcell_dims_dilatation[0] +
-                                (k + d_num_subghosts_dilatation[2])*d_subghostcell_dims_dilatation[0]*
-                                    d_subghostcell_dims_dilatation[1];
-                            
-                            double dudx, dvdy, dwdz;
-                            
-                            if (i == -d_num_subghosts_velocity[0])
-                            {
-                                dudx = (u[idx_x_R] - u[idx])/(dx[0]);
-                            }
-                            else if (i == d_interior_dims[0] + d_num_subghosts_velocity[0] - 1)
-                            {
-                                dudx = (u[idx] - u[idx_x_L])/(dx[0]);
-                            }
-                            else
-                            {
-                                dudx = (u[idx_x_R] - u[idx_x_L])/(2*dx[0]);
-                            }
-                            
-                            if (j == -d_num_subghosts_velocity[1])
-                            {
-                                dvdy = (v[idx_y_T] - v[idx])/(dx[1]);
-                            }
-                            else if (j == d_interior_dims[1] + d_num_subghosts_velocity[1] - 1)
-                            {
-                                dvdy = (v[idx] - v[idx_y_B])/(dx[1]);
-                            }
-                            else
-                            {
-                                dvdy = (v[idx_y_T] - v[idx_y_B])/(2*dx[1]);
-                            }
-                            
-                            if (k == -d_num_subghosts_velocity[2])
-                            {
-                                dwdz = (w[idx_z_F] - w[idx])/(dx[2]);
-                            }
-                            else if (k == d_interior_dims[2] + d_num_subghosts_velocity[2] - 1)
-                            {
-                                dwdz = (w[idx] - w[idx_z_B])/(dx[2]);
-                            }
-                            else
-                            {
-                                dwdz = (w[idx_z_F] - w[idx_z_B])/(2*dx[2]);
-                            }
-                            
-                            theta[idx_dilatation] = dudx + dvdy + dwdz;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    else
-    {
-        TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::computeGlobalCellDataDilatationWithDensityAndVelocity()\n"
-            << "Cell data of 'DILATATION' is not yet registered."
-            << std::endl);
-    }
-}
-
-
-/*
- * Compute the global cell data of vorticity with density and velocity in the registered patch.
- */
-void
-FlowModelFiveEqnAllaire::computeGlobalCellDataVorticityWithDensityAndVelocity(
-    const COMPUTING_OPTION::TYPE& computing_option)
-{
-    if (d_num_subghosts_vorticity > -hier::IntVector::getOne(d_dim))
-    {
-        // Get the grid spacing.
-        const boost::shared_ptr<geom::CartesianPatchGeometry> patch_geom(
-            BOOST_CAST<geom::CartesianPatchGeometry, hier::PatchGeometry>(
-                d_patch->getPatchGeometry()));
-        
-        const double* const dx = patch_geom->getDx();
-        
-        if (!d_data_density)
-        {
-            computeGlobalCellDataDensity();
-        }
-        
-        if (!d_data_velocity)
-        {
-            computeGlobalCellDataVelocityWithDensity();
-        }
-        
-        if (d_dim == tbox::Dimension(1))
-        {
-            TBOX_ERROR(d_object_name
-                << ": FlowModelFiveEqnAllaire::computeGlobalCellDataVorticityWithDensityAndVelocity()\n"
-                << "Vorticity cannot be found for one-dimensional flow."
-                << std::endl);
-        }
-        else if (d_dim == tbox::Dimension(2))
-        {
-            d_data_vorticity.reset(
-                new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_vorticity));
-            
-            // Get the pointer to the cell data of vorticity.
-            double* omega = d_data_vorticity->getPointer(0);
-            
-            // Get the pointers to the cell data of velocity.
-            double* u = d_data_velocity->getPointer(0);
-            double* v = d_data_velocity->getPointer(1);
-            
-            // Compute the vorticity field.
-            if (d_num_subghosts_vorticity < d_num_subghosts_velocity)
-            {
-                for (int j = -d_num_subghosts_vorticity[1];
-                     j < d_interior_dims[1] + d_num_subghosts_vorticity[1];
-                     j++)
-                {
-                    for (int i = -d_num_subghosts_vorticity[0];
-                         i < d_interior_dims[0] + d_num_subghosts_vorticity[0];
-                         i++)
-                    {
-                        // Compute indices of current and neighboring cells.
-                        const int idx_x_L = (i - 1 + d_num_subghosts_velocity[0]) +
-                            (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
-                        
-                        const int idx_x_R = (i + 1 + d_num_subghosts_velocity[0]) +
-                            (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
-                        
-                        const int idx_y_B = (i + d_num_subghosts_velocity[0]) +
-                            (j - 1 + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
-                        
-                        const int idx_y_T = (i + d_num_subghosts_velocity[0]) +
-                            (j + 1 + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
-                        
-                        const int idx_vorticity = (i + d_num_subghosts_vorticity[0]) +
-                            (j + d_num_subghosts_vorticity[1])*d_subghostcell_dims_vorticity[0];
-                        
-                        double dvdx = (v[idx_x_R] - v[idx_x_L])/(2*dx[0]);
-                        double dudy = (u[idx_y_T] - u[idx_y_B])/(2*dx[1]);
-                        
-                        omega[idx_vorticity] = dvdx - dudy;
-                    }
-                }
-            }
-            else
-            {
-                for (int j = -d_num_subghosts_vorticity[1];
-                     j < d_interior_dims[1] + d_num_subghosts_vorticity[1];
-                     j++)
-                {
-                    for (int i = -d_num_subghosts_vorticity[0];
-                         i < d_interior_dims[0] + d_num_subghosts_vorticity[0];
-                         i++)
-                    {
-                        // Compute indices of current and neighboring cells.
-                        const int idx = (i + d_num_subghosts_velocity[0]) +
-                            (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
-                        
-                        const int idx_x_L = (i - 1 + d_num_subghosts_velocity[0]) +
-                            (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
-                        
-                        const int idx_x_R = (i + 1 + d_num_subghosts_velocity[0]) +
-                            (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
-                        
-                        const int idx_y_B = (i + d_num_subghosts_velocity[0]) +
-                            (j - 1 + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
-                        
-                        const int idx_y_T = (i + d_num_subghosts_velocity[0]) +
-                            (j + 1 + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
-                        
-                        const int idx_vorticity = (i + d_num_subghosts_vorticity[0]) +
-                            (j + d_num_subghosts_vorticity[1])*d_subghostcell_dims_vorticity[0];
-                        
-                        double dudy, dvdx;
-                        
-                        if (i == -d_num_subghosts_velocity[0])
-                        {
-                            dvdx = (v[idx_x_R] - v[idx])/(dx[0]);
-                        }
-                        else if (i == d_interior_dims[0] + d_num_subghosts_velocity[0] - 1)
-                        {
-                            dvdx = (v[idx] - v[idx_x_L])/(dx[0]);
-                        }
-                        else
-                        {
-                            dvdx = (v[idx_x_R] - v[idx_x_L])/(2*dx[0]);
-                        }
-                        
-                        if (j == -d_num_subghosts_velocity[1])
-                        {
-                            dudy = (u[idx_y_T] - u[idx])/(dx[1]);
-                        }
-                        else if (j == d_interior_dims[1] + d_num_subghosts_velocity[1] - 1)
-                        {
-                            dudy = (u[idx] - u[idx_y_B])/(dx[1]);
-                        }
-                        else
-                        {
-                            dudy = (u[idx_y_T] - u[idx_y_B])/(2*dx[1]);
-                        }
-                        
-                        omega[idx_vorticity] = dvdx - dudy;
-                    }
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            d_data_vorticity.reset(
-                new pdat::CellData<double>(d_interior_box, 3, d_num_subghosts_vorticity));
-            
-            // Get the pointers to the cell data of vorticity.
-            double* omega_x = d_data_vorticity->getPointer(0);
-            double* omega_y = d_data_vorticity->getPointer(1);
-            double* omega_z = d_data_vorticity->getPointer(2);
-            
-            // Get the pointers to the cell data of velocity.
-            double* u = d_data_velocity->getPointer(0);
-            double* v = d_data_velocity->getPointer(1);
-            double* w = d_data_velocity->getPointer(2);
-            
-            // Compute the vorticity field.
-            if (d_num_subghosts_vorticity < d_num_subghosts_velocity)
-            {
-                for (int k = -d_num_subghosts_vorticity[2];
-                     k < d_interior_dims[2] + d_num_subghosts_vorticity[2];
-                     k++)
-                {
-                    for (int j = -d_num_subghosts_vorticity[1];
-                         j < d_interior_dims[1] + d_num_subghosts_vorticity[1];
-                         j++)
-                    {
-                        for (int i = -d_num_subghosts_vorticity[0];
-                             i < d_interior_dims[0] + d_num_subghosts_vorticity[0];
-                             i++)
-                        {
-                            // Compute indices of current and neighboring cells.
-                            const int idx_x_L = (i - 1 + d_num_subghosts_velocity[0]) +
-                                (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_x_R = (i + 1 + d_num_subghosts_velocity[0]) +
-                                (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_y_B = (i + d_num_subghosts_velocity[0]) +
-                                (j - 1 + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_y_T = (i + d_num_subghosts_velocity[0]) +
-                                (j + 1 + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_z_B = (i + d_num_subghosts_velocity[0]) +
-                                (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k - 1 + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_z_F = (i + d_num_subghosts_velocity[0]) +
-                                (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + 1 + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_vorticity = (i + d_num_subghosts_vorticity[0]) +
-                                (j + d_num_subghosts_vorticity[1])*d_subghostcell_dims_vorticity[0] +
-                                (k + d_num_subghosts_vorticity[2])*d_subghostcell_dims_vorticity[0]*
-                                    d_subghostcell_dims_vorticity[1];
-                            
-                            double dvdx = (v[idx_x_R] - v[idx_x_L])/(2*dx[0]);
-                            double dwdx = (w[idx_x_R] - w[idx_x_L])/(2*dx[0]);
-                            double dudy = (u[idx_y_T] - u[idx_y_B])/(2*dx[1]);
-                            double dwdy = (w[idx_y_T] - w[idx_y_B])/(2*dx[1]);
-                            double dudz = (u[idx_z_F] - u[idx_z_B])/(2*dx[2]);
-                            double dvdz = (v[idx_z_F] - v[idx_z_B])/(2*dx[2]);
-                            
-                            omega_x[idx_vorticity] = dwdy - dvdz;
-                            omega_y[idx_vorticity] = dudz - dwdx;
-                            omega_z[idx_vorticity] = dvdx - dudy;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                for (int k = -d_num_subghosts_vorticity[2]; k < d_interior_dims[2] + d_num_subghosts_vorticity[2]; k++)
-                {
-                    for (int j = -d_num_subghosts_vorticity[1]; j < d_interior_dims[1] + d_num_subghosts_vorticity[1]; j++)
-                    {
-                        for (int i = -d_num_subghosts_vorticity[0]; i < d_interior_dims[0] + d_num_subghosts_vorticity[0]; i++)
-                        {
-                            // Compute indices of current and neighboring cells.
-                            const int idx = (i + d_num_subghosts_velocity[0]) +
-                                (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_x_L = (i - 1 + d_num_subghosts_velocity[0]) +
-                                (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_x_R = (i + 1 + d_num_subghosts_velocity[0]) +
-                                (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_y_B = (i + d_num_subghosts_velocity[0]) +
-                                (j - 1 + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_y_T = (i + d_num_subghosts_velocity[0]) +
-                                (j + 1 + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_z_B = (i + d_num_subghosts_velocity[0]) +
-                                (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k - 1 + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_z_F = (i + d_num_subghosts_velocity[0]) +
-                                (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + 1 + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_vorticity = (i + d_num_subghosts_vorticity[0]) +
-                                (j + d_num_subghosts_vorticity[1])*d_subghostcell_dims_vorticity[0] +
-                                (k + d_num_subghosts_vorticity[2])*d_subghostcell_dims_vorticity[0]*
-                                    d_subghostcell_dims_vorticity[1];
-                            
-                            double dudy, dudz, dvdx, dvdz, dwdx, dwdy;
-                            
-                            if (i == -d_num_subghosts_velocity[0])
-                            {
-                                dvdx = (v[idx_x_R] - v[idx])/(dx[0]);
-                                dwdx = (w[idx_x_R] - w[idx])/(dx[0]);
-                            }
-                            else if (i == d_interior_dims[0] + d_num_subghosts_velocity[0] - 1)
-                            {
-                                dvdx = (v[idx] - v[idx_x_L])/(dx[0]);
-                                dwdx = (w[idx] - w[idx_x_L])/(dx[0]);
-                            }
-                            else
-                            {
-                                dvdx = (v[idx_x_R] - v[idx_x_L])/(2*dx[0]);
-                                dwdx = (w[idx_x_R] - w[idx_x_L])/(2*dx[0]);
-                            }
-                            
-                            if (j == -d_num_subghosts_velocity[1])
-                            {
-                                dudy = (u[idx_y_T] - u[idx])/(dx[1]);
-                                dwdy = (w[idx_y_T] - w[idx])/(dx[1]);
-                            }
-                            else if (j == d_interior_dims[1] + d_num_subghosts_velocity[1] - 1)
-                            {
-                                dudy = (u[idx] - u[idx_y_B])/(dx[1]);
-                                dwdy = (w[idx] - w[idx_y_B])/(dx[1]);
-                            }
-                            else
-                            {
-                                dudy = (u[idx_y_T] - u[idx_y_B])/(2*dx[1]);
-                                dwdy = (w[idx_y_T] - w[idx_y_B])/(2*dx[1]);
-                            }
-                            
-                            if (k == -d_num_subghosts_velocity[2])
-                            {
-                                dudz = (u[idx_z_F] - u[idx])/(dx[2]);
-                                dvdz = (v[idx_z_F] - v[idx])/(dx[2]);
-                            }
-                            else if (k == d_interior_dims[2] + d_num_subghosts_velocity[2] - 1)
-                            {
-                                dudz = (u[idx] - u[idx_z_B])/(dx[2]);
-                                dvdz = (v[idx] - v[idx_z_B])/(dx[2]);
-                            }
-                            else
-                            {
-                                dudz = (u[idx_z_F] - u[idx_z_B])/(2*dx[2]);
-                                dvdz = (v[idx_z_F] - v[idx_z_B])/(2*dx[2]);
-                            }
-                            
-                            omega_x[idx_vorticity] = dwdy - dvdz;
-                            omega_y[idx_vorticity] = dudz - dwdx;
-                            omega_z[idx_vorticity] = dvdx - dudy;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    else
-    {
-        TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::computeGlobalCellDataVorticityWithDensityAndVelocity()\n"
-            << "Cell data of 'VORTICITY' is not yet registered."
-            << std::endl);
-    }
-}
-
-
-/*
- * Compute the global cell data of enstrophy with vorticity in the registered patch.
- */
-void
-FlowModelFiveEqnAllaire::computeGlobalCellDataEnstrophyWithVorticity(
-    const COMPUTING_OPTION::TYPE& computing_option)
-{
-    if (d_num_subghosts_enstrophy > -hier::IntVector::getOne(d_dim))
-    {
-        // Create the cell data of enstrophy.
-        d_data_enstrophy.reset(
-            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_enstrophy));
-        
-        // Get the cell data of the vorticity.
-        if (!d_data_vorticity) // If the pointer is null.
-        {
-            computeGlobalCellDataVorticityWithDensityAndVelocity();
-        }
-        
-        // Get the pointer to the cell data of enstrophy.
-        double* Omega = d_data_enstrophy->getPointer(0);
-        
-        if (d_dim == tbox::Dimension(1))
-        {
-            TBOX_ERROR(d_object_name
-                << ": "
-                << "Enstrophy cannot be found for one-dimensional flow."
-                << std::endl);
-        }
-        else if (d_dim == tbox::Dimension(2))
-        {
-            // Get the pointer to the cell data of vorticity.
-            double* omega = d_data_vorticity->getPointer(0);
-            
-            // Compute the enstrophy field.
-            for (int j = -d_num_subghosts_enstrophy[1];
-                 j < d_interior_dims[1] + d_num_subghosts_enstrophy[1];
-                 j++)
-            {
-                for (int i = -d_num_subghosts_enstrophy[0];
-                     i < d_interior_dims[0] + d_num_subghosts_enstrophy[0];
-                     i++)
-                {
-                    // Compute the linear indices.
-                    const int idx_vorticity = (i + d_num_subghosts_vorticity[0]) +
-                        (j + d_num_subghosts_vorticity[1])*d_subghostcell_dims_vorticity[0];
-                    
-                    const int idx_enstrophy = (i + d_num_subghosts_enstrophy[0]) +
-                        (j + d_num_subghosts_enstrophy[1])*d_subghostcell_dims_enstrophy[0];
-                    
-                    Omega[idx_enstrophy] = omega[idx_vorticity]*omega[idx_vorticity];
-                }
-            }
-        }
-        else if (d_dim == tbox::Dimension(3))
-        {
-            // Get the pointers to the cell data of vorticity.
-            double* omega_x = d_data_vorticity->getPointer(0);
-            double* omega_y = d_data_vorticity->getPointer(1);
-            double* omega_z = d_data_vorticity->getPointer(2);
-            
-            // Compute the enstrophy field.
-            for (int k = -d_num_subghosts_enstrophy[2];
-                 k < d_interior_dims[2] + d_num_subghosts_enstrophy[2];
-                 k++)
-            {
-                for (int j = -d_num_subghosts_enstrophy[1];
-                     j < d_interior_dims[1] + d_num_subghosts_enstrophy[1];
-                     j++)
-                {
-                    for (int i = -d_num_subghosts_enstrophy[0];
-                         i < d_interior_dims[0] + d_num_subghosts_enstrophy[0];
-                         i++)
-                    {
-                        // Compute the linear indices.
-                        const int idx_vorticity = (i + d_num_subghosts_vorticity[0]) +
-                                (j + d_num_subghosts_vorticity[1])*d_subghostcell_dims_vorticity[0] +
-                                (k + d_num_subghosts_vorticity[2])*d_subghostcell_dims_vorticity[0]*
-                                    d_subghostcell_dims_vorticity[1];
-                        
-                        const int idx_enstrophy = (i + d_num_subghosts_enstrophy[0]) +
-                                (j + d_num_subghosts_enstrophy[1])*d_subghostcell_dims_enstrophy[0] +
-                                (k + d_num_subghosts_enstrophy[2])*d_subghostcell_dims_enstrophy[0]*
-                                    d_subghostcell_dims_enstrophy[1];
-                        
-                        Omega[idx_enstrophy] = (omega_x[idx_vorticity]*omega_x[idx_vorticity] +
-                            omega_y[idx_vorticity]*omega_y[idx_vorticity] +
-                            omega_z[idx_vorticity]*omega_z[idx_vorticity]);
-                    }
-                }
-            }
-        }
-    }
-    else
-    {
-        TBOX_ERROR(d_object_name
-            << ": FlowModelFiveEqnAllaire::computeGlobalCellDataEnstrophyWithVorticity()\n"
-            << "Cell data of 'ENSTROPHY' is not yet registered."
+            << "computeGlobalCellDataSpeciesTemperaturesWithPressure()\n"
+            << "Cell data of 'SPECIES_TEMPERATURE' is not yet registered."
             << std::endl);
     }
 }
@@ -12897,7 +11262,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataEnstrophyWithVorticity(
 void
 FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPressure(
     const DIRECTION::TYPE& direction,
-    const COMPUTING_OPTION::TYPE& computing_option)
+    const hier::Box& domain)
 {
     if (direction == DIRECTION::X_DIRECTION)
     {
@@ -12907,6 +11272,28 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
             d_data_convective_flux_x.reset(
                 new pdat::CellData<double>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_x));
             
+            /*
+             * Get the local lower indices and number of cells in each direction of the domain.
+             */
+            
+            hier::IntVector domain_lo(d_dim);
+            hier::IntVector domain_dims(d_dim);
+            
+            if (domain.empty())
+            {
+                domain_lo = -d_num_subghosts_convective_flux_x;
+                domain_dims = d_subghostcell_dims_convective_flux_x;
+            }
+            else
+            {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+                TBOX_ASSERT(d_subghost_box_convective_flux_x.contains(domain));
+#endif
+                
+                domain_lo = domain.lower() - d_interior_box.lower();
+                domain_dims = domain.numberCells();
+            }
+            
             // Get the pointers to the components of the convective flux in the x-direction.
             std::vector<double*> F_x;
             F_x.reserve(d_num_eqn);
@@ -12915,8 +11302,8 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
                 F_x.push_back(d_data_convective_flux_x->getPointer(ei));
             }
             
-            boost::shared_ptr<pdat::CellData<double> > data_partial_density =
-                getGlobalCellDataPartialDensity();
+            boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+                getGlobalCellDataPartialDensities();
             
             boost::shared_ptr<pdat::CellData<double> > data_momentum =
                 getGlobalCellDataMomentum();
@@ -12924,38 +11311,50 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
             boost::shared_ptr<pdat::CellData<double> > data_total_energy =
                 getGlobalCellDataTotalEnergy();
             
-            boost::shared_ptr<pdat::CellData<double> > data_volume_fraction =
-                getGlobalCellDataVolumeFraction();
+            boost::shared_ptr<pdat::CellData<double> > data_volume_fractions =
+                getGlobalCellDataVolumeFractions();
             
             if (!d_data_velocity)
             {
-                computeGlobalCellDataVelocityWithDensity();
+                computeGlobalCellDataVelocityWithDensity(domain);
             }
             
             if (!d_data_pressure)
             {
-                computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+                computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy(domain);
             }
             
-            // Get the pointers to the cell data of partial density, total energy, volume fraction
+            // Get the pointers to the cell data of partial densities, total energy, volume fractions
             // and pressure.
             std::vector<double*> Z_rho;
             Z_rho.reserve(d_num_species);
             for (int si = 0; si < d_num_species; si++)
             {
-                Z_rho.push_back(data_partial_density->getPointer(si));
+                Z_rho.push_back(data_partial_densities->getPointer(si));
             }
             double* E = data_total_energy->getPointer(0);
             std::vector<double*> Z;
             Z.reserve(d_num_species - 1);
             for (int si = 0; si < d_num_species - 1; si++)
             {
-                Z.push_back(data_volume_fraction->getPointer(si));
+                Z.push_back(data_volume_fractions->getPointer(si));
             }
             double* p = d_data_pressure->getPointer(0);
             
             if (d_dim == tbox::Dimension(1))
             {
+                /*
+                 * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+                 */
+                
+                const int domain_lo_0 = domain_lo[0];
+                const int domain_dim_0 = domain_dims[0];
+                
+                const int num_ghosts_0 = d_num_ghosts[0];
+                const int num_subghosts_0_pressure = d_num_subghosts_pressure[0];
+                const int num_subghosts_0_velocity = d_num_subghosts_velocity[0];
+                const int num_subghosts_0_convective_flux_x = d_num_subghosts_convective_flux_x[0];
+                
                 // Get the pointer to the cell data of momentum.
                 double* rho_u = data_momentum->getPointer(0);
                 
@@ -12963,30 +11362,80 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
                 double* u = d_data_velocity->getPointer(0);
                 
                 // Compute the convective flux in the x-direction.
-                for (int i = -d_num_subghosts_convective_flux_x[0];
-                     i < d_interior_dims[0] + d_num_subghosts_convective_flux_x[0];
-                     i++)
+                for (int si = 0; si < d_num_species; si++)
                 {
-                    // Compute the linear indices.
-                    const int idx = i + d_num_ghosts[0];
-                    const int idx_pressure = i + d_num_subghosts_pressure[0];
-                    const int idx_velocity = i + d_num_subghosts_velocity[0];
-                    const int idx_convective_flux_x = i + d_num_subghosts_convective_flux_x[0];
-                    
-                    for (int si = 0; si < d_num_species; si++)
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
+                        // Compute the linear indices.
+                        const int idx = i + num_ghosts_0;
+                        const int idx_velocity = i + num_subghosts_0_velocity;
+                        const int idx_convective_flux_x = i + num_subghosts_0_convective_flux_x;
+                        
                         F_x[si][idx_convective_flux_x] = u[idx_velocity]*Z_rho[si][idx];
                     }
+                }
+                
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx = i + num_ghosts_0;
+                    const int idx_pressure = i + num_subghosts_0_pressure;
+                    const int idx_velocity = i + num_subghosts_0_velocity;
+                    const int idx_convective_flux_x = i + num_subghosts_0_convective_flux_x;
+                    
                     F_x[d_num_species][idx_convective_flux_x] = u[idx_velocity]*rho_u[idx] + p[idx_pressure];
                     F_x[d_num_species + 1][idx_convective_flux_x] = u[idx_velocity]*(E[idx] + p[idx_pressure]);
-                    for (int si = 0; si < d_num_species - 1; si++)
+                }
+                
+                for (int si = 0; si < d_num_species - 1; si++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
+                        // Compute the linear indices.
+                        const int idx = i + num_ghosts_0;
+                        const int idx_velocity = i + num_subghosts_0_velocity;
+                        const int idx_convective_flux_x = i + num_subghosts_0_convective_flux_x;
+                        
                         F_x[d_num_species + 2 + si][idx_convective_flux_x] = u[idx_velocity]*Z[si][idx];
                     }
                 }
             }
             else if (d_dim == tbox::Dimension(2))
             {
+                /*
+                 * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+                 */
+                
+                const int domain_lo_0 = domain_lo[0];
+                const int domain_lo_1 = domain_lo[1];
+                const int domain_dim_0 = domain_dims[0];
+                const int domain_dim_1 = domain_dims[1];
+                
+                const int num_ghosts_0 = d_num_ghosts[0];
+                const int num_ghosts_1 = d_num_ghosts[1];
+                const int ghostcell_dim_0 = d_ghostcell_dims[0];
+                
+                const int num_subghosts_0_pressure = d_num_subghosts_pressure[0];
+                const int num_subghosts_1_pressure = d_num_subghosts_pressure[1];
+                const int subghostcell_dim_0_pressure = d_subghostcell_dims_pressure[0];
+                
+                const int num_subghosts_0_velocity = d_num_subghosts_velocity[0];
+                const int num_subghosts_1_velocity = d_num_subghosts_velocity[1];
+                const int subghostcell_dim_0_velocity = d_subghostcell_dims_velocity[0];
+                
+                const int num_subghosts_0_convective_flux_x = d_num_subghosts_convective_flux_x[0];
+                const int num_subghosts_1_convective_flux_x = d_num_subghosts_convective_flux_x[1];
+                const int subghostcell_dim_0_convective_flux_x = d_subghostcell_dims_convective_flux_x[0];
+                
                 // Get the pointers to the cell data of momentum.
                 double* rho_u = data_momentum->getPointer(0);
                 double* rho_v = data_momentum->getPointer(1);
@@ -12995,35 +11444,72 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
                 double* u = d_data_velocity->getPointer(0);
                 
                 // Compute the convective flux in the x-direction.
-                for (int j = -d_num_subghosts_convective_flux_x[1];
-                     j < d_interior_dims[1] + d_num_subghosts_convective_flux_x[1];
-                     j++)
+                for (int si = 0; si < d_num_species; si++)
                 {
-                    for (int i = -d_num_subghosts_convective_flux_x[0];
-                         i < d_interior_dims[0] + d_num_subghosts_convective_flux_x[0];
-                         i++)
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-                        const int idx = (i + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
-                        
-                        const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                            (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
-                        
-                        const int idx_velocity = (i + d_num_subghosts_velocity[0]) +
-                            (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
-                        
-                        const int idx_convective_flux_x = (i + d_num_subghosts_convective_flux_x[0]) +
-                            (j + d_num_subghosts_convective_flux_x[1])*d_subghostcell_dims_convective_flux_x[0];
-                        
-                        for (int si = 0; si < d_num_species; si++)
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
+                            const int idx = (i + num_ghosts_0) +
+                                (j + num_ghosts_1)*ghostcell_dim_0;
+                            
+                            const int idx_velocity = (i + num_subghosts_0_velocity) +
+                                (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                            
+                            const int idx_convective_flux_x = (i + num_subghosts_0_convective_flux_x) +
+                                (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x;
+                            
                             F_x[si][idx_convective_flux_x] = u[idx_velocity]*Z_rho[si][idx];
                         }
+                    }
+                }
+                
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                    {
+                        const int idx = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0;
+                        
+                        const int idx_pressure = (i + num_subghosts_0_pressure) +
+                            (j + num_subghosts_1_pressure)*subghostcell_dim_0_pressure;
+                        
+                        const int idx_velocity = (i + num_subghosts_0_velocity) +
+                            (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                        
+                        const int idx_convective_flux_x = (i + num_subghosts_0_convective_flux_x) +
+                            (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x;
+                        
                         F_x[d_num_species][idx_convective_flux_x] = u[idx_velocity]*rho_u[idx] + p[idx_pressure];
                         F_x[d_num_species + 1][idx_convective_flux_x] = u[idx_velocity]*rho_v[idx];
                         F_x[d_num_species + 2][idx_convective_flux_x] = u[idx_velocity]*(E[idx] + p[idx_pressure]);
-                        for (int si = 0; si < d_num_species - 1; si++)
+                    }
+                }
+                
+                for (int si = 0; si < d_num_species - 1; si++)
+                {
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
+                            const int idx = (i + num_ghosts_0) +
+                                (j + num_ghosts_1)*ghostcell_dim_0;
+                            
+                            const int idx_velocity = (i + num_subghosts_0_velocity) +
+                                (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                            
+                            const int idx_convective_flux_x = (i + num_subghosts_0_convective_flux_x) +
+                                (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x;
+                            
                             F_x[d_num_species + 3 + si][idx_convective_flux_x] = u[idx_velocity]*Z[si][idx];
                         }
                     }
@@ -13031,6 +11517,41 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
             }
             else if (d_dim == tbox::Dimension(3))
             {
+                /*
+                 * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+                 */
+                
+                const int domain_lo_0 = domain_lo[0];
+                const int domain_lo_1 = domain_lo[1];
+                const int domain_lo_2 = domain_lo[2];
+                const int domain_dim_0 = domain_dims[0];
+                const int domain_dim_1 = domain_dims[1];
+                const int domain_dim_2 = domain_dims[2];
+                
+                const int num_ghosts_0 = d_num_ghosts[0];
+                const int num_ghosts_1 = d_num_ghosts[1];
+                const int num_ghosts_2 = d_num_ghosts[2];
+                const int ghostcell_dim_0 = d_ghostcell_dims[0];
+                const int ghostcell_dim_1 = d_ghostcell_dims[1];
+                
+                const int num_subghosts_0_pressure = d_num_subghosts_pressure[0];
+                const int num_subghosts_1_pressure = d_num_subghosts_pressure[1];
+                const int num_subghosts_2_pressure = d_num_subghosts_pressure[2];
+                const int subghostcell_dim_0_pressure = d_subghostcell_dims_pressure[0];
+                const int subghostcell_dim_1_pressure = d_subghostcell_dims_pressure[1];
+                
+                const int num_subghosts_0_velocity = d_num_subghosts_velocity[0];
+                const int num_subghosts_1_velocity = d_num_subghosts_velocity[1];
+                const int num_subghosts_2_velocity = d_num_subghosts_velocity[2];
+                const int subghostcell_dim_0_velocity = d_subghostcell_dims_velocity[0];
+                const int subghostcell_dim_1_velocity = d_subghostcell_dims_velocity[1];
+                
+                const int num_subghosts_0_convective_flux_x = d_num_subghosts_convective_flux_x[0];
+                const int num_subghosts_1_convective_flux_x = d_num_subghosts_convective_flux_x[1];
+                const int num_subghosts_2_convective_flux_x = d_num_subghosts_convective_flux_x[2];
+                const int subghostcell_dim_0_convective_flux_x = d_subghostcell_dims_convective_flux_x[0];
+                const int subghostcell_dim_1_convective_flux_x = d_subghostcell_dims_convective_flux_x[1];
+                
                 // Get the pointers to the cell data of momentum.
                 double* rho_u = data_momentum->getPointer(0);
                 double* rho_v = data_momentum->getPointer(1);
@@ -13040,48 +11561,101 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
                 double* u = d_data_velocity->getPointer(0);
                 
                 // Compute the convective flux in the x-direction.
-                for (int k = -d_num_subghosts_convective_flux_x[2];
-                     k < d_interior_dims[2] + d_num_subghosts_convective_flux_x[2];
-                     k++)
+                for (int si = 0; si < d_num_species; si++)
                 {
-                    for (int j = -d_num_subghosts_convective_flux_x[1];
-                         j < d_interior_dims[1] + d_num_subghosts_convective_flux_x[1];
-                         j++)
+                    for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
                     {
-                        for (int i = -d_num_subghosts_convective_flux_x[0];
-                             i < d_interior_dims[0] + d_num_subghosts_convective_flux_x[0];
-                             i++)
+                        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-                            // Compute the linear indices.
-                            const int idx = (i + d_num_ghosts[0]) +
-                                (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
-                                (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
-                            
-                            const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                                (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
-                                (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
-                                    d_subghostcell_dims_pressure[1];
-                            
-                            const int idx_velocity = (i + d_num_subghosts_velocity[0]) +
-                                (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_convective_flux_x = (i + d_num_subghosts_convective_flux_x[0]) +
-                                (j + d_num_subghosts_convective_flux_x[1])*d_subghostcell_dims_convective_flux_x[0] +
-                                (k + d_num_subghosts_convective_flux_x[2])*d_subghostcell_dims_convective_flux_x[0]*
-                                    d_subghostcell_dims_convective_flux_x[1];
-                            
-                            for (int si = 0; si < d_num_species; si++)
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
+                                // Compute the linear indices.
+                                const int idx = (i + num_ghosts_0) +
+                                    (j + num_ghosts_1)*ghostcell_dim_0 +
+                                    (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
+                                
+                                const int idx_velocity = (i + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                    (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                        subghostcell_dim_1_velocity;
+                                
+                                const int idx_convective_flux_x = (i + num_subghosts_0_convective_flux_x) +
+                                    (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x +
+                                    (k + num_subghosts_2_convective_flux_x)*subghostcell_dim_0_convective_flux_x*
+                                        subghostcell_dim_1_convective_flux_x;
+                                
                                 F_x[si][idx_convective_flux_x] = u[idx_velocity]*Z_rho[si][idx];
                             }
+                        }
+                    }
+                }
+                
+                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+                {
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx = (i + num_ghosts_0) +
+                                (j + num_ghosts_1)*ghostcell_dim_0 +
+                                (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
+                            
+                            const int idx_pressure = (i + num_subghosts_0_pressure) +
+                                (j + num_subghosts_1_pressure)*subghostcell_dim_0_pressure +
+                                (k + num_subghosts_2_pressure)*subghostcell_dim_0_pressure*
+                                    subghostcell_dim_1_pressure;
+                            
+                            const int idx_velocity = (i + num_subghosts_0_velocity) +
+                                (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                    subghostcell_dim_1_velocity;
+                            
+                            const int idx_convective_flux_x = (i + num_subghosts_0_convective_flux_x) +
+                                (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x +
+                                (k + num_subghosts_2_convective_flux_x)*subghostcell_dim_0_convective_flux_x*
+                                    subghostcell_dim_1_convective_flux_x;
+                            
                             F_x[d_num_species][idx_convective_flux_x] = u[idx_velocity]*rho_u[idx] + p[idx_pressure];
                             F_x[d_num_species + 1][idx_convective_flux_x] = u[idx_velocity]*rho_v[idx];
                             F_x[d_num_species + 2][idx_convective_flux_x] = u[idx_velocity]*rho_w[idx];
                             F_x[d_num_species + 3][idx_convective_flux_x] = u[idx_velocity]*(E[idx] + p[idx_pressure]);
-                            for (int si = 0; si < d_num_species - 1; si++)
+                        }
+                    }
+                }
+                
+                for (int si = 0; si < d_num_species - 1; si++)
+                {
+                    for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+                    {
+                        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                        {
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
+                                // Compute the linear indices.
+                                const int idx = (i + num_ghosts_0) +
+                                    (j + num_ghosts_1)*ghostcell_dim_0 +
+                                    (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
+                                
+                                const int idx_velocity = (i + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                    (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                        subghostcell_dim_1_velocity;
+                                
+                                const int idx_convective_flux_x = (i + num_subghosts_0_convective_flux_x) +
+                                    (j + num_subghosts_1_convective_flux_x)*subghostcell_dim_0_convective_flux_x +
+                                    (k + num_subghosts_2_convective_flux_x)*subghostcell_dim_0_convective_flux_x*
+                                        subghostcell_dim_1_convective_flux_x;
+                                
                                 F_x[d_num_species + 4 + si][idx_convective_flux_x] = u[idx_velocity]*Z[si][idx];
                             }
                         }
@@ -13106,6 +11680,28 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
             d_data_convective_flux_y.reset(
                 new pdat::CellData<double>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_y));
             
+            /*
+             * Get the local lower indices and number of cells in each direction of the domain.
+             */
+            
+            hier::IntVector domain_lo(d_dim);
+            hier::IntVector domain_dims(d_dim);
+            
+            if (domain.empty())
+            {
+                domain_lo = -d_num_subghosts_convective_flux_y;
+                domain_dims = d_subghostcell_dims_convective_flux_y;
+            }
+            else
+            {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+                TBOX_ASSERT(d_subghost_box_convective_flux_y.contains(domain));
+#endif
+                
+                domain_lo = domain.lower() - d_interior_box.lower();
+                domain_dims = domain.numberCells();
+            }
+            
             // Get the pointers to the components of the convective flux in the y-direction.
             std::vector<double*> F_y;
             F_y.reserve(d_num_eqn);
@@ -13114,8 +11710,8 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
                 F_y.push_back(d_data_convective_flux_y->getPointer(ei));
             }
             
-            boost::shared_ptr<pdat::CellData<double> > data_partial_density =
-                getGlobalCellDataPartialDensity();
+            boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+                getGlobalCellDataPartialDensities();
             
             boost::shared_ptr<pdat::CellData<double> > data_momentum =
                 getGlobalCellDataMomentum();
@@ -13123,33 +11719,33 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
             boost::shared_ptr<pdat::CellData<double> > data_total_energy =
                 getGlobalCellDataTotalEnergy();
             
-            boost::shared_ptr<pdat::CellData<double> > data_volume_fraction =
-                getGlobalCellDataVolumeFraction();
+            boost::shared_ptr<pdat::CellData<double> > data_volume_fractions =
+                getGlobalCellDataVolumeFractions();
             
             if (!d_data_pressure)
             {
-                computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+                computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy(domain);
             }
             
             if (!d_data_velocity)
             {
-                computeGlobalCellDataVelocityWithDensity();
+                computeGlobalCellDataVelocityWithDensity(domain);
             }
             
-            // Get the pointers to the cell data of partial density, total energy, volume fraction
+            // Get the pointers to the cell data of partial densities, total energy, volume fractions
             // and pressure.
             std::vector<double*> Z_rho;
             Z_rho.reserve(d_num_species);
             for (int si = 0; si < d_num_species; si++)
             {
-                Z_rho.push_back(data_partial_density->getPointer(si));
+                Z_rho.push_back(data_partial_densities->getPointer(si));
             }
             double* E = data_total_energy->getPointer(0);
             std::vector<double*> Z;
             Z.reserve(d_num_species - 1);
             for (int si = 0; si < d_num_species - 1; si++)
             {
-                Z.push_back(data_volume_fraction->getPointer(si));
+                Z.push_back(data_volume_fractions->getPointer(si));
             }
             double* p = d_data_pressure->getPointer(0);
             
@@ -13163,6 +11759,31 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
             }
             else if (d_dim == tbox::Dimension(2))
             {
+                /*
+                 * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+                 */
+                
+                const int domain_lo_0 = domain_lo[0];
+                const int domain_lo_1 = domain_lo[1];
+                const int domain_dim_0 = domain_dims[0];
+                const int domain_dim_1 = domain_dims[1];
+                
+                const int num_ghosts_0 = d_num_ghosts[0];
+                const int num_ghosts_1 = d_num_ghosts[1];
+                const int ghostcell_dim_0 = d_ghostcell_dims[0];
+                
+                const int num_subghosts_0_pressure = d_num_subghosts_pressure[0];
+                const int num_subghosts_1_pressure = d_num_subghosts_pressure[1];
+                const int subghostcell_dim_0_pressure = d_subghostcell_dims_pressure[0];
+                
+                const int num_subghosts_0_velocity = d_num_subghosts_velocity[0];
+                const int num_subghosts_1_velocity = d_num_subghosts_velocity[1];
+                const int subghostcell_dim_0_velocity = d_subghostcell_dims_velocity[0];
+                
+                const int num_subghosts_0_convective_flux_y = d_num_subghosts_convective_flux_y[0];
+                const int num_subghosts_1_convective_flux_y = d_num_subghosts_convective_flux_y[1];
+                const int subghostcell_dim_0_convective_flux_y = d_subghostcell_dims_convective_flux_y[0];
+                
                 // Get the pointers to the cell data of momentum.
                 double* rho_u = data_momentum->getPointer(0);
                 double* rho_v = data_momentum->getPointer(1);
@@ -13171,36 +11792,72 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
                 double* v = d_data_velocity->getPointer(1);
                 
                 // Compute the convective flux in the y-direction.
-                for (int j = -d_num_subghosts_convective_flux_y[1];
-                     j < d_interior_dims[1] + d_num_subghosts_convective_flux_y[1];
-                     j++)
+                for (int si = 0; si < d_num_species; si++)
                 {
-                    for (int i = -d_num_subghosts_convective_flux_y[0];
-                         i < d_interior_dims[0] + d_num_subghosts_convective_flux_y[0];
-                         i++)
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-                        // Compute the linear indices.
-                        const int idx = (i + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
-                        
-                        const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                            (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
-                        
-                        const int idx_velocity = (i + d_num_subghosts_velocity[0]) +
-                            (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
-                        
-                        const int idx_convective_flux_y = (i + d_num_subghosts_convective_flux_y[0]) +
-                            (j + d_num_subghosts_convective_flux_y[1])*d_subghostcell_dims_convective_flux_y[0];
-                        
-                        for (int si = 0; si < d_num_species; si++)
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
+                            const int idx = (i + num_ghosts_0) +
+                                (j + num_ghosts_1)*ghostcell_dim_0;
+                            
+                            const int idx_velocity = (i + num_subghosts_0_velocity) +
+                                (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                            
+                            const int idx_convective_flux_y = (i + num_subghosts_0_convective_flux_y) +
+                                (j + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y;
+                            
                             F_y[si][idx_convective_flux_y] = v[idx_velocity]*Z_rho[si][idx];
                         }
+                    }
+                }
+                
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                    {
+                        const int idx = (i + num_ghosts_0) +
+                            (j + num_ghosts_1)*ghostcell_dim_0;
+                        
+                        const int idx_pressure = (i + num_subghosts_0_pressure) +
+                            (j + num_subghosts_1_pressure)*subghostcell_dim_0_pressure;
+                        
+                        const int idx_velocity = (i + num_subghosts_0_velocity) +
+                            (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                        
+                        const int idx_convective_flux_y = (i + num_subghosts_0_convective_flux_y) +
+                            (j + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y;
+                        
                         F_y[d_num_species][idx_convective_flux_y] = v[idx_velocity]*rho_u[idx];
                         F_y[d_num_species + 1][idx_convective_flux_y] = v[idx_velocity]*rho_v[idx] + p[idx_pressure];
                         F_y[d_num_species + 2][idx_convective_flux_y] = v[idx_velocity]*(E[idx] + p[idx_pressure]);
-                        for (int si = 0; si < d_num_species - 1; si++)
+                    }
+                }
+                
+                for (int si = 0; si < d_num_species - 1; si++)
+                {
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
+                            const int idx = (i + num_ghosts_0) +
+                                (j + num_ghosts_1)*ghostcell_dim_0;
+                            
+                            const int idx_velocity = (i + num_subghosts_0_velocity) +
+                                (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
+                            
+                            const int idx_convective_flux_y = (i + num_subghosts_0_convective_flux_y) +
+                                (j + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y;
+                            
                             F_y[d_num_species + 3 + si][idx_convective_flux_y] = v[idx_velocity]*Z[si][idx];
                         }
                     }
@@ -13208,6 +11865,41 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
             }
             else if (d_dim == tbox::Dimension(3))
             {
+                /*
+                 * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+                 */
+                
+                const int domain_lo_0 = domain_lo[0];
+                const int domain_lo_1 = domain_lo[1];
+                const int domain_lo_2 = domain_lo[2];
+                const int domain_dim_0 = domain_dims[0];
+                const int domain_dim_1 = domain_dims[1];
+                const int domain_dim_2 = domain_dims[2];
+                
+                const int num_ghosts_0 = d_num_ghosts[0];
+                const int num_ghosts_1 = d_num_ghosts[1];
+                const int num_ghosts_2 = d_num_ghosts[2];
+                const int ghostcell_dim_0 = d_ghostcell_dims[0];
+                const int ghostcell_dim_1 = d_ghostcell_dims[1];
+                
+                const int num_subghosts_0_pressure = d_num_subghosts_pressure[0];
+                const int num_subghosts_1_pressure = d_num_subghosts_pressure[1];
+                const int num_subghosts_2_pressure = d_num_subghosts_pressure[2];
+                const int subghostcell_dim_0_pressure = d_subghostcell_dims_pressure[0];
+                const int subghostcell_dim_1_pressure = d_subghostcell_dims_pressure[1];
+                
+                const int num_subghosts_0_velocity = d_num_subghosts_velocity[0];
+                const int num_subghosts_1_velocity = d_num_subghosts_velocity[1];
+                const int num_subghosts_2_velocity = d_num_subghosts_velocity[2];
+                const int subghostcell_dim_0_velocity = d_subghostcell_dims_velocity[0];
+                const int subghostcell_dim_1_velocity = d_subghostcell_dims_velocity[1];
+                
+                const int num_subghosts_0_convective_flux_y = d_num_subghosts_convective_flux_y[0];
+                const int num_subghosts_1_convective_flux_y = d_num_subghosts_convective_flux_y[1];
+                const int num_subghosts_2_convective_flux_y = d_num_subghosts_convective_flux_y[2];
+                const int subghostcell_dim_0_convective_flux_y = d_subghostcell_dims_convective_flux_y[0];
+                const int subghostcell_dim_1_convective_flux_y = d_subghostcell_dims_convective_flux_y[1];
+                
                 // Get the pointers to the cell data of momentum.
                 double* rho_u = data_momentum->getPointer(0);
                 double* rho_v = data_momentum->getPointer(1);
@@ -13217,48 +11909,101 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
                 double* v = d_data_velocity->getPointer(1);
                 
                 // Compute the convective flux in the y-direction.
-                for (int k = -d_num_subghosts_convective_flux_y[2];
-                     k < d_interior_dims[2] + d_num_subghosts_convective_flux_y[2];
-                     k++)
+                for (int si = 0; si < d_num_species; si++)
                 {
-                    for (int j = -d_num_subghosts_convective_flux_y[1];
-                         j < d_interior_dims[1] + d_num_subghosts_convective_flux_y[1];
-                         j++)
+                    for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
                     {
-                        for (int i = -d_num_subghosts_convective_flux_y[0];
-                             i < d_interior_dims[0] + d_num_subghosts_convective_flux_y[0];
-                             i++)
+                        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-                            // Compute the linear indices.
-                            const int idx = (i + d_num_ghosts[0]) +
-                                (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
-                                (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
-                            
-                            const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                                (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
-                                (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
-                                    d_subghostcell_dims_pressure[1];
-                            
-                            const int idx_velocity = (i + d_num_subghosts_velocity[0]) +
-                                (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_convective_flux_y = (i + d_num_subghosts_convective_flux_y[0]) +
-                                (j + d_num_subghosts_convective_flux_y[1])*d_subghostcell_dims_convective_flux_y[0] +
-                                (k + d_num_subghosts_convective_flux_y[2])*d_subghostcell_dims_convective_flux_y[0]*
-                                    d_subghostcell_dims_convective_flux_y[1];
-                            
-                            for (int si = 0; si < d_num_species; si++)
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
+                                // Compute the linear indices.
+                                const int idx = (i + num_ghosts_0) +
+                                    (j + num_ghosts_1)*ghostcell_dim_0 +
+                                    (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
+                                
+                                const int idx_velocity = (i + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                    (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                        subghostcell_dim_1_velocity;
+                                
+                                const int idx_convective_flux_y = (i + num_subghosts_0_convective_flux_y) +
+                                    (j + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y +
+                                    (k + num_subghosts_2_convective_flux_y)*subghostcell_dim_0_convective_flux_y*
+                                        subghostcell_dim_1_convective_flux_y;
+                                
                                 F_y[si][idx_convective_flux_y] = v[idx_velocity]*Z_rho[si][idx];
                             }
+                        }
+                    }
+                }
+                
+                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+                {
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx = (i + num_ghosts_0) +
+                                (j + num_ghosts_1)*ghostcell_dim_0 +
+                                (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
+                            
+                            const int idx_pressure = (i + num_subghosts_0_pressure) +
+                                (j + num_subghosts_1_pressure)*subghostcell_dim_0_pressure +
+                                (k + num_subghosts_2_pressure)*subghostcell_dim_0_pressure*
+                                    subghostcell_dim_1_pressure;
+                            
+                            const int idx_velocity = (i + num_subghosts_0_velocity) +
+                                (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                    subghostcell_dim_1_velocity;
+                            
+                            const int idx_convective_flux_y = (i + num_subghosts_0_convective_flux_y) +
+                                (j + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y +
+                                (k + num_subghosts_2_convective_flux_y)*subghostcell_dim_0_convective_flux_y*
+                                    subghostcell_dim_1_convective_flux_y;
+                            
                             F_y[d_num_species][idx_convective_flux_y] = v[idx_velocity]*rho_u[idx];
                             F_y[d_num_species + 1][idx_convective_flux_y] = v[idx_velocity]*rho_v[idx] + p[idx_pressure];
                             F_y[d_num_species + 2][idx_convective_flux_y] = v[idx_velocity]*rho_w[idx];
                             F_y[d_num_species + 3][idx_convective_flux_y] = v[idx_velocity]*(E[idx] + p[idx_pressure]);
-                            for (int si = 0; si < d_num_species - 1; si++)
+                        }
+                    }
+                }
+                
+                for (int si = 0; si < d_num_species - 1; si++)
+                {
+                    for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+                    {
+                        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                        {
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
+                                // Compute the linear indices.
+                                const int idx = (i + num_ghosts_0) +
+                                    (j + num_ghosts_1)*ghostcell_dim_0 +
+                                    (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
+                                
+                                const int idx_velocity = (i + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                    (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                        subghostcell_dim_1_velocity;
+                                
+                                const int idx_convective_flux_y = (i + num_subghosts_0_convective_flux_y) +
+                                    (j + num_subghosts_1_convective_flux_y)*subghostcell_dim_0_convective_flux_y +
+                                    (k + num_subghosts_2_convective_flux_y)*subghostcell_dim_0_convective_flux_y*
+                                        subghostcell_dim_1_convective_flux_y;
+                                
                                 F_y[d_num_species + 4 + si][idx_convective_flux_y] = v[idx_velocity]*Z[si][idx];
                             }
                         }
@@ -13283,6 +12028,28 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
             d_data_convective_flux_z.reset(
                 new pdat::CellData<double>(d_interior_box, d_num_eqn, d_num_subghosts_convective_flux_z));
             
+            /*
+             * Get the local lower indices and number of cells in each direction of the domain.
+             */
+            
+            hier::IntVector domain_lo(d_dim);
+            hier::IntVector domain_dims(d_dim);
+            
+            if (domain.empty())
+            {
+                domain_lo = -d_num_subghosts_convective_flux_z;
+                domain_dims = d_subghostcell_dims_convective_flux_z;
+            }
+            else
+            {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+                TBOX_ASSERT(d_subghost_box_convective_flux_z.contains(domain));
+#endif
+                
+                domain_lo = domain.lower() - d_interior_box.lower();
+                domain_dims = domain.numberCells();
+            }
+            
             // Get the pointers to the components of the convective flux in the z-direction.
             std::vector<double*> F_z;
             F_z.reserve(d_num_eqn);
@@ -13291,8 +12058,8 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
                 F_z.push_back(d_data_convective_flux_z->getPointer(ei));
             }
             
-            boost::shared_ptr<pdat::CellData<double> > data_partial_density =
-                getGlobalCellDataPartialDensity();
+            boost::shared_ptr<pdat::CellData<double> > data_partial_densities =
+                getGlobalCellDataPartialDensities();
             
             boost::shared_ptr<pdat::CellData<double> > data_momentum =
                 getGlobalCellDataMomentum();
@@ -13300,33 +12067,33 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
             boost::shared_ptr<pdat::CellData<double> > data_total_energy =
                 getGlobalCellDataTotalEnergy();
             
-            boost::shared_ptr<pdat::CellData<double> > data_volume_fraction =
-                getGlobalCellDataVolumeFraction();
+            boost::shared_ptr<pdat::CellData<double> > data_volume_fractions =
+                getGlobalCellDataVolumeFractions();
             
             if (!d_data_pressure)
             {
-                computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+                computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy(domain);
             }
             
             if (!d_data_velocity)
             {
-                computeGlobalCellDataVelocityWithDensity();
+                computeGlobalCellDataVelocityWithDensity(domain);
             }
             
-            // Get the pointers to the cell data of partial density, total energy, volume fraction
+            // Get the pointers to the cell data of partial densities, total energy, volume fractions
             // and pressure.
             std::vector<double*> Z_rho;
             Z_rho.reserve(d_num_species);
             for (int si = 0; si < d_num_species; si++)
             {
-                Z_rho.push_back(data_partial_density->getPointer(si));
+                Z_rho.push_back(data_partial_densities->getPointer(si));
             }
             double* E = data_total_energy->getPointer(0);
             std::vector<double*> Z;
             Z.reserve(d_num_species - 1);
             for (int si = 0; si < d_num_species - 1; si++)
             {
-                Z.push_back(data_volume_fraction->getPointer(si));
+                Z.push_back(data_volume_fractions->getPointer(si));
             }
             double* p = d_data_pressure->getPointer(0);
             
@@ -13340,6 +12107,41 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
             }
             else if (d_dim == tbox::Dimension(3))
             {
+                /*
+                 * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+                 */
+                
+                const int domain_lo_0 = domain_lo[0];
+                const int domain_lo_1 = domain_lo[1];
+                const int domain_lo_2 = domain_lo[2];
+                const int domain_dim_0 = domain_dims[0];
+                const int domain_dim_1 = domain_dims[1];
+                const int domain_dim_2 = domain_dims[2];
+                
+                const int num_ghosts_0 = d_num_ghosts[0];
+                const int num_ghosts_1 = d_num_ghosts[1];
+                const int num_ghosts_2 = d_num_ghosts[2];
+                const int ghostcell_dim_0 = d_ghostcell_dims[0];
+                const int ghostcell_dim_1 = d_ghostcell_dims[1];
+                
+                const int num_subghosts_0_pressure = d_num_subghosts_pressure[0];
+                const int num_subghosts_1_pressure = d_num_subghosts_pressure[1];
+                const int num_subghosts_2_pressure = d_num_subghosts_pressure[2];
+                const int subghostcell_dim_0_pressure = d_subghostcell_dims_pressure[0];
+                const int subghostcell_dim_1_pressure = d_subghostcell_dims_pressure[1];
+                
+                const int num_subghosts_0_velocity = d_num_subghosts_velocity[0];
+                const int num_subghosts_1_velocity = d_num_subghosts_velocity[1];
+                const int num_subghosts_2_velocity = d_num_subghosts_velocity[2];
+                const int subghostcell_dim_0_velocity = d_subghostcell_dims_velocity[0];
+                const int subghostcell_dim_1_velocity = d_subghostcell_dims_velocity[1];
+                
+                const int num_subghosts_0_convective_flux_z = d_num_subghosts_convective_flux_z[0];
+                const int num_subghosts_1_convective_flux_z = d_num_subghosts_convective_flux_z[1];
+                const int num_subghosts_2_convective_flux_z = d_num_subghosts_convective_flux_z[2];
+                const int subghostcell_dim_0_convective_flux_z = d_subghostcell_dims_convective_flux_z[0];
+                const int subghostcell_dim_1_convective_flux_z = d_subghostcell_dims_convective_flux_z[1];
+                
                 // Get the pointers to the cell data of momentum.
                 double* rho_u = data_momentum->getPointer(0);
                 double* rho_v = data_momentum->getPointer(1);
@@ -13349,49 +12151,102 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
                 double* w = d_data_velocity->getPointer(2);
                 
                 // Compute the convective flux in the z-direction.
-                for (int k = -d_num_subghosts_convective_flux_z[2];
-                     k < d_interior_dims[2] + d_num_subghosts_convective_flux_z[2];
-                     k++)
+                for (int si = 0; si < d_num_species; si++)
                 {
-                    for (int j = -d_num_subghosts_convective_flux_z[1];
-                         j < d_interior_dims[1] + d_num_subghosts_convective_flux_z[1];
-                         j++)
+                    for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
                     {
-                        for (int i = -d_num_subghosts_convective_flux_z[0];
-                             i < d_interior_dims[0] + d_num_subghosts_convective_flux_z[0];
-                             i++)
+                        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                         {
-                            // Compute the linear indices.
-                            const int idx = (i + d_num_ghosts[0]) +
-                                (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
-                                (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
-                            
-                            const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                                (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
-                                (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
-                                    d_subghostcell_dims_pressure[1];
-                            
-                            const int idx_velocity = (i + d_num_subghosts_velocity[0]) +
-                                (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
-                            
-                            const int idx_convective_flux_z = (i + d_num_subghosts_convective_flux_z[0]) +
-                                (j + d_num_subghosts_convective_flux_z[1])*d_subghostcell_dims_convective_flux_z[0] +
-                                (k + d_num_subghosts_convective_flux_z[2])*d_subghostcell_dims_convective_flux_z[0]*
-                                    d_subghostcell_dims_convective_flux_z[1];
-                            
-                            for (int si = 0; si < d_num_species; si++)
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
+                                // Compute the linear indices.
+                                const int idx = (i + num_ghosts_0) +
+                                    (j + num_ghosts_1)*ghostcell_dim_0 +
+                                    (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
+                                
+                                const int idx_velocity = (i + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                    (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                        subghostcell_dim_1_velocity;
+                                
+                                const int idx_convective_flux_z = (i + num_subghosts_0_convective_flux_z) +
+                                    (j + num_subghosts_1_convective_flux_z)*subghostcell_dim_0_convective_flux_z +
+                                    (k + num_subghosts_2_convective_flux_z)*subghostcell_dim_0_convective_flux_z*
+                                        subghostcell_dim_1_convective_flux_z;
+                                
                                 F_z[si][idx_convective_flux_z] = w[idx_velocity]*Z_rho[si][idx];
                             }
+                        }
+                    }
+                }
+                
+                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+                {
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx = (i + num_ghosts_0) +
+                                (j + num_ghosts_1)*ghostcell_dim_0 +
+                                (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
+                            
+                            const int idx_pressure = (i + num_subghosts_0_pressure) +
+                                (j + num_subghosts_1_pressure)*subghostcell_dim_0_pressure +
+                                (k + num_subghosts_2_pressure)*subghostcell_dim_0_pressure*
+                                    subghostcell_dim_1_pressure;
+                            
+                            const int idx_velocity = (i + num_subghosts_0_velocity) +
+                                (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                    subghostcell_dim_1_velocity;
+                            
+                            const int idx_convective_flux_z = (i + num_subghosts_0_convective_flux_z) +
+                                (j + num_subghosts_1_convective_flux_z)*subghostcell_dim_0_convective_flux_z +
+                                (k + num_subghosts_2_convective_flux_z)*subghostcell_dim_0_convective_flux_z*
+                                    subghostcell_dim_1_convective_flux_z;
+                            
                             F_z[d_num_species][idx_convective_flux_z] = w[idx_velocity]*rho_u[idx];
                             F_z[d_num_species + 1][idx_convective_flux_z] = w[idx_velocity]*rho_v[idx];
                             F_z[d_num_species + 2][idx_convective_flux_z] = w[idx_velocity]*rho_w[idx] + p[idx_pressure];
                             F_z[d_num_species + 3][idx_convective_flux_z] = w[idx_velocity]*(E[idx] + p[idx_pressure]);
-                            for (int si = 0; si < d_num_species - 1; si++)
+                        }
+                    }
+                }
+                
+                for (int si = 0; si < d_num_species - 1; si++)
+                {
+                    for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+                    {
+                        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                        {
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                             {
-                                F_z[d_num_species + 4 + si][idx_convective_flux_z] = w[idx]*Z[si][idx];
+                                // Compute the linear indices.
+                                const int idx = (i + num_ghosts_0) +
+                                    (j + num_ghosts_1)*ghostcell_dim_0 +
+                                    (k + num_ghosts_2)*ghostcell_dim_0*ghostcell_dim_1;
+                                
+                                const int idx_velocity = (i + num_subghosts_0_velocity) +
+                                    (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                    (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                        subghostcell_dim_1_velocity;
+                                
+                                const int idx_convective_flux_z = (i + num_subghosts_0_convective_flux_z) +
+                                    (j + num_subghosts_1_convective_flux_z)*subghostcell_dim_0_convective_flux_z +
+                                    (k + num_subghosts_2_convective_flux_z)*subghostcell_dim_0_convective_flux_z*
+                                        subghostcell_dim_1_convective_flux_z;
+                                
+                                F_z[d_num_species + 4 + si][idx_convective_flux_z] = w[idx_velocity]*Z[si][idx];
                             }
                         }
                     }
@@ -13417,7 +12272,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataConvectiveFluxWithVelocityAndPress
 void
 FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSpeed(
     const DIRECTION::TYPE& direction,
-    const COMPUTING_OPTION::TYPE& computing_option)
+    const hier::Box& domain)
 {
     if (direction == DIRECTION::X_DIRECTION)
     {
@@ -13427,14 +12282,36 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSp
             d_data_max_wave_speed_x.reset(
                 new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_wave_speed_x));
             
+            /*
+             * Get the local lower indices and number of cells in each direction of the domain.
+             */
+            
+            hier::IntVector domain_lo(d_dim);
+            hier::IntVector domain_dims(d_dim);
+            
+            if (domain.empty())
+            {
+                domain_lo = -d_num_subghosts_max_wave_speed_x;
+                domain_dims = d_subghostcell_dims_max_wave_speed_x;
+            }
+            else
+            {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+                TBOX_ASSERT(d_subghost_box_max_wave_speed_x.contains(domain));
+#endif
+                
+                domain_lo = domain.lower() - d_interior_box.lower();
+                domain_dims = domain.numberCells();
+            }
+            
             if (!d_data_velocity)
             {
-                computeGlobalCellDataVelocityWithDensity();
+                computeGlobalCellDataVelocityWithDensity(domain);
             }
             
             if (!d_data_sound_speed)
             {
-                computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
+                computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure(domain);
             }
             
             // Get the pointers to the cell data of maximum wave speed and velocity in x-direction, and sound speed.
@@ -13444,39 +12321,71 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSp
             
             if (d_dim == tbox::Dimension(1))
             {
+                /*
+                 * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+                 */
+                
+                const int domain_lo_0 = domain_lo[0];
+                const int domain_dim_0 = domain_dims[0];
+                
+                const int num_subghosts_0_sound_speed = d_num_subghosts_sound_speed[0];
+                const int num_subghosts_0_velocity = d_num_subghosts_velocity[0];
+                const int num_subghosts_0_max_wave_speed_x = d_num_subghosts_max_wave_speed_x[0];
+                
                 // Compute the maximum wave speed in the x-direction.
-                for (int i = -d_num_subghosts_max_wave_speed_x[0];
-                     i < d_interior_dims[0] + d_num_subghosts_max_wave_speed_x[0];
-                     i++)
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx_sound_speed = i + d_num_subghosts_sound_speed[0];
-                    const int idx_velocity = i + d_num_subghosts_velocity[0];
-                    const int idx_max_wave_speed_x = i + d_num_subghosts_max_wave_speed_x[0];
+                    const int idx_sound_speed = i + num_subghosts_0_sound_speed;
+                    const int idx_velocity = i + num_subghosts_0_velocity;
+                    const int idx_max_wave_speed_x = i + num_subghosts_0_max_wave_speed_x;
                     
                     lambda_max_x[idx_max_wave_speed_x] = fabs(u[idx_velocity]) + c[idx_sound_speed];
                 }
             }
             else if (d_dim == tbox::Dimension(2))
             {
+                /*
+                 * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+                 */
+                
+                const int domain_lo_0 = domain_lo[0];
+                const int domain_lo_1 = domain_lo[1];
+                const int domain_dim_0 = domain_dims[0];
+                const int domain_dim_1 = domain_dims[1];
+                
+                const int num_subghosts_0_sound_speed = d_num_subghosts_sound_speed[0];
+                const int num_subghosts_1_sound_speed = d_num_subghosts_sound_speed[1];
+                const int subghostcell_dim_0_sound_speed = d_subghostcell_dims_sound_speed[0];
+                
+                const int num_subghosts_0_velocity = d_num_subghosts_velocity[0];
+                const int num_subghosts_1_velocity = d_num_subghosts_velocity[1];
+                const int subghostcell_dim_0_velocity = d_subghostcell_dims_velocity[0];
+                
+                const int num_subghosts_0_max_wave_speed_x = d_num_subghosts_max_wave_speed_x[0];
+                const int num_subghosts_1_max_wave_speed_x = d_num_subghosts_max_wave_speed_x[1];
+                const int subghostcell_dim_0_max_wave_speed_x = d_subghostcell_dims_max_wave_speed_x[0];
+                
                 // Compute the maximum wave speed in the x-direction.
-                for (int j = -d_num_subghosts_max_wave_speed_x[1];
-                     j < d_interior_dims[1] + d_num_subghosts_max_wave_speed_x[1];
-                     j++)
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-                    for (int i = -d_num_subghosts_max_wave_speed_x[0];
-                         i < d_interior_dims[0] + d_num_subghosts_max_wave_speed_x[0];
-                         i++)
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx_sound_speed = (i + d_num_subghosts_sound_speed[0]) +
-                            (j + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
+                        const int idx_sound_speed = (i + num_subghosts_0_sound_speed) +
+                            (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed;
                         
-                        const int idx_velocity = (i + d_num_subghosts_velocity[0]) +
-                            (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
+                        const int idx_velocity = (i + num_subghosts_0_velocity) +
+                            (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
                         
-                        const int idx_max_wave_speed_x = (i + d_num_subghosts_max_wave_speed_x[0]) +
-                            (j + d_num_subghosts_max_wave_speed_x[1])*d_subghostcell_dims_max_wave_speed_x[0];
+                        const int idx_max_wave_speed_x = (i + num_subghosts_0_max_wave_speed_x) +
+                            (j + num_subghosts_1_max_wave_speed_x)*subghostcell_dim_0_max_wave_speed_x;
                         
                         lambda_max_x[idx_max_wave_speed_x] = fabs(u[idx_velocity]) + c[idx_sound_speed];
                     }
@@ -13484,34 +12393,60 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSp
             }
             else if (d_dim == tbox::Dimension(3))
             {
+                /*
+                 * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+                 */
+                
+                const int domain_lo_0 = domain_lo[0];
+                const int domain_lo_1 = domain_lo[1];
+                const int domain_lo_2 = domain_lo[2];
+                const int domain_dim_0 = domain_dims[0];
+                const int domain_dim_1 = domain_dims[1];
+                const int domain_dim_2 = domain_dims[2];
+                
+                const int num_subghosts_0_sound_speed = d_num_subghosts_sound_speed[0];
+                const int num_subghosts_1_sound_speed = d_num_subghosts_sound_speed[1];
+                const int num_subghosts_2_sound_speed = d_num_subghosts_sound_speed[2];
+                const int subghostcell_dim_0_sound_speed = d_subghostcell_dims_sound_speed[0];
+                const int subghostcell_dim_1_sound_speed = d_subghostcell_dims_sound_speed[1];
+                
+                const int num_subghosts_0_velocity = d_num_subghosts_velocity[0];
+                const int num_subghosts_1_velocity = d_num_subghosts_velocity[1];
+                const int num_subghosts_2_velocity = d_num_subghosts_velocity[2];
+                const int subghostcell_dim_0_velocity = d_subghostcell_dims_velocity[0];
+                const int subghostcell_dim_1_velocity = d_subghostcell_dims_velocity[1];
+                
+                const int num_subghosts_0_max_wave_speed_x = d_num_subghosts_max_wave_speed_x[0];
+                const int num_subghosts_1_max_wave_speed_x = d_num_subghosts_max_wave_speed_x[1];
+                const int num_subghosts_2_max_wave_speed_x = d_num_subghosts_max_wave_speed_x[2];
+                const int subghostcell_dim_0_max_wave_speed_x = d_subghostcell_dims_max_wave_speed_x[0];
+                const int subghostcell_dim_1_max_wave_speed_x = d_subghostcell_dims_max_wave_speed_x[1];
+                
                 // Compute the maximum wave speed in the x-direction.
-                for (int k = -d_num_subghosts_max_wave_speed_x[2];
-                     k < d_interior_dims[2] + d_num_subghosts_max_wave_speed_x[2];
-                     k++)
+                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
                 {
-                    for (int j = -d_num_subghosts_max_wave_speed_x[1];
-                         j < d_interior_dims[1] + d_num_subghosts_max_wave_speed_x[1];
-                         j++)
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-                        for (int i = -d_num_subghosts_max_wave_speed_x[0];
-                             i < d_interior_dims[0] + d_num_subghosts_max_wave_speed_x[0];
-                             i++)
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
-                            const int idx_sound_speed = (i + d_num_subghosts_sound_speed[0]) +
-                                (j + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
-                                (k + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
-                                    d_subghostcell_dims_sound_speed[1];
+                            const int idx_sound_speed = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
                             
-                            const int idx_velocity = (i + d_num_subghosts_velocity[0]) +
-                                (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
+                            const int idx_velocity = (i + num_subghosts_0_velocity) +
+                                (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                    subghostcell_dim_1_velocity;
                             
-                            const int idx_max_wave_speed_x = (i + d_num_subghosts_max_wave_speed_x[0]) +
-                                (j + d_num_subghosts_max_wave_speed_x[1])*d_subghostcell_dims_max_wave_speed_x[0] +
-                                (k + d_num_subghosts_max_wave_speed_x[2])*d_subghostcell_dims_max_wave_speed_x[0]*
-                                    d_subghostcell_dims_max_wave_speed_x[1];
+                            const int idx_max_wave_speed_x = (i + num_subghosts_0_max_wave_speed_x) +
+                                (j + num_subghosts_1_max_wave_speed_x)*subghostcell_dim_0_max_wave_speed_x +
+                                (k + num_subghosts_2_max_wave_speed_x)*subghostcell_dim_0_max_wave_speed_x*
+                                    subghostcell_dim_1_max_wave_speed_x;
                             
                             lambda_max_x[idx_max_wave_speed_x] = fabs(u[idx_velocity]) + c[idx_sound_speed];
                         }
@@ -13536,14 +12471,36 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSp
             d_data_max_wave_speed_y.reset(
                 new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_wave_speed_y));
             
+            /*
+             * Get the local lower indices and number of cells in each direction of the domain.
+             */
+            
+            hier::IntVector domain_lo(d_dim);
+            hier::IntVector domain_dims(d_dim);
+            
+            if (domain.empty())
+            {
+                domain_lo = -d_num_subghosts_max_wave_speed_y;
+                domain_dims = d_subghostcell_dims_max_wave_speed_y;
+            }
+            else
+            {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+                TBOX_ASSERT(d_subghost_box_max_wave_speed_y.contains(domain));
+#endif
+                
+                domain_lo = domain.lower() - d_interior_box.lower();
+                domain_dims = domain.numberCells();
+            }
+            
             if (!d_data_sound_speed)
             {
-                computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
+                computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure(domain);
             }
             
             if (!d_data_velocity)
             {
-                computeGlobalCellDataVelocityWithDensity();
+                computeGlobalCellDataVelocityWithDensity(domain);
             }
             
             // Get the pointers to the cell data of maximum wave speed and velocity in y-direction, and sound speed.
@@ -13561,24 +12518,44 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSp
             }
             else if (d_dim == tbox::Dimension(2))
             {
+                /*
+                 * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+                 */
+                
+                const int domain_lo_0 = domain_lo[0];
+                const int domain_lo_1 = domain_lo[1];
+                const int domain_dim_0 = domain_dims[0];
+                const int domain_dim_1 = domain_dims[1];
+                
+                const int num_subghosts_0_sound_speed = d_num_subghosts_sound_speed[0];
+                const int num_subghosts_1_sound_speed = d_num_subghosts_sound_speed[1];
+                const int subghostcell_dim_0_sound_speed = d_subghostcell_dims_sound_speed[0];
+                
+                const int num_subghosts_0_velocity = d_num_subghosts_velocity[0];
+                const int num_subghosts_1_velocity = d_num_subghosts_velocity[1];
+                const int subghostcell_dim_0_velocity = d_subghostcell_dims_velocity[0];
+                
+                const int num_subghosts_0_max_wave_speed_y = d_num_subghosts_max_wave_speed_y[0];
+                const int num_subghosts_1_max_wave_speed_y = d_num_subghosts_max_wave_speed_y[1];
+                const int subghostcell_dim_0_max_wave_speed_y = d_subghostcell_dims_max_wave_speed_y[0];
+                
                 // Compute the maximum wave speed in the y-direction.
-                for (int j = -d_num_subghosts_max_wave_speed_y[1];
-                     j < d_interior_dims[1] + d_num_subghosts_max_wave_speed_y[1];
-                     j++)
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-                    for (int i = -d_num_subghosts_max_wave_speed_y[0];
-                         i < d_interior_dims[0] + d_num_subghosts_max_wave_speed_y[0];
-                         i++)
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx_sound_speed = (i + d_num_subghosts_sound_speed[0]) +
-                            (j + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0];
+                        const int idx_sound_speed = (i + num_subghosts_0_sound_speed) +
+                            (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed;
                         
-                        const int idx_velocity = (i + d_num_subghosts_velocity[0]) +
-                            (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0];
+                        const int idx_velocity = (i + num_subghosts_0_velocity) +
+                            (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity;
                         
-                        const int idx_max_wave_speed_y = (i + d_num_subghosts_max_wave_speed_y[0]) +
-                            (j + d_num_subghosts_max_wave_speed_y[1])*d_subghostcell_dims_max_wave_speed_y[0];
+                        const int idx_max_wave_speed_y = (i + num_subghosts_0_max_wave_speed_y) +
+                            (j + num_subghosts_1_max_wave_speed_y)*subghostcell_dim_0_max_wave_speed_y;
                         
                         lambda_max_y[idx_max_wave_speed_y] = fabs(v[idx_velocity]) + c[idx_sound_speed];
                     }
@@ -13586,34 +12563,60 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSp
             }
             else if (d_dim == tbox::Dimension(3))
             {
+                /*
+                 * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+                 */
+                
+                const int domain_lo_0 = domain_lo[0];
+                const int domain_lo_1 = domain_lo[1];
+                const int domain_lo_2 = domain_lo[2];
+                const int domain_dim_0 = domain_dims[0];
+                const int domain_dim_1 = domain_dims[1];
+                const int domain_dim_2 = domain_dims[2];
+                
+                const int num_subghosts_0_sound_speed = d_num_subghosts_sound_speed[0];
+                const int num_subghosts_1_sound_speed = d_num_subghosts_sound_speed[1];
+                const int num_subghosts_2_sound_speed = d_num_subghosts_sound_speed[2];
+                const int subghostcell_dim_0_sound_speed = d_subghostcell_dims_sound_speed[0];
+                const int subghostcell_dim_1_sound_speed = d_subghostcell_dims_sound_speed[1];
+                
+                const int num_subghosts_0_velocity = d_num_subghosts_velocity[0];
+                const int num_subghosts_1_velocity = d_num_subghosts_velocity[1];
+                const int num_subghosts_2_velocity = d_num_subghosts_velocity[2];
+                const int subghostcell_dim_0_velocity = d_subghostcell_dims_velocity[0];
+                const int subghostcell_dim_1_velocity = d_subghostcell_dims_velocity[1];
+                
+                const int num_subghosts_0_max_wave_speed_y = d_num_subghosts_max_wave_speed_y[0];
+                const int num_subghosts_1_max_wave_speed_y = d_num_subghosts_max_wave_speed_y[1];
+                const int num_subghosts_2_max_wave_speed_y = d_num_subghosts_max_wave_speed_y[2];
+                const int subghostcell_dim_0_max_wave_speed_y = d_subghostcell_dims_max_wave_speed_y[0];
+                const int subghostcell_dim_1_max_wave_speed_y = d_subghostcell_dims_max_wave_speed_y[1];
+                
                 // Compute the maximum wave speed in the y-direction.
-                for (int k = -d_num_subghosts_max_wave_speed_y[2];
-                     k < d_interior_dims[2] + d_num_subghosts_max_wave_speed_y[2];
-                     k++)
+                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
                 {
-                    for (int j = -d_num_subghosts_max_wave_speed_y[1];
-                         j < d_interior_dims[1] + d_num_subghosts_max_wave_speed_y[1];
-                         j++)
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-                        for (int i = -d_num_subghosts_max_wave_speed_y[0];
-                             i < d_interior_dims[0] + d_num_subghosts_max_wave_speed_y[0];
-                             i++)
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
-                            const int idx_sound_speed = (i + d_num_subghosts_sound_speed[0]) +
-                                (j + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
-                                (k + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
-                                    d_subghostcell_dims_sound_speed[1];
+                            const int idx_sound_speed = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
                             
-                            const int idx_velocity = (i + d_num_subghosts_velocity[0]) +
-                                (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
+                            const int idx_velocity = (i + num_subghosts_0_velocity) +
+                                (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                    subghostcell_dim_1_velocity;
                             
-                            const int idx_max_wave_speed_y = (i + d_num_subghosts_max_wave_speed_y[0]) +
-                                (j + d_num_subghosts_max_wave_speed_y[1])*d_subghostcell_dims_max_wave_speed_y[0] +
-                                (k + d_num_subghosts_max_wave_speed_y[2])*d_subghostcell_dims_max_wave_speed_y[0]*
-                                    d_subghostcell_dims_max_wave_speed_y[1];
+                            const int idx_max_wave_speed_y = (i + num_subghosts_0_max_wave_speed_y) +
+                                (j + num_subghosts_1_max_wave_speed_y)*subghostcell_dim_0_max_wave_speed_y +
+                                (k + num_subghosts_2_max_wave_speed_y)*subghostcell_dim_0_max_wave_speed_y*
+                                    subghostcell_dim_1_max_wave_speed_y;
                             
                             lambda_max_y[idx_max_wave_speed_y] = fabs(v[idx_velocity]) + c[idx_sound_speed];
                         }
@@ -13638,14 +12641,36 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSp
             d_data_max_wave_speed_z.reset(
                 new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_wave_speed_z));
             
+            /*
+             * Get the local lower indices and number of cells in each direction of the domain.
+             */
+            
+            hier::IntVector domain_lo(d_dim);
+            hier::IntVector domain_dims(d_dim);
+            
+            if (domain.empty())
+            {
+                domain_lo = -d_num_subghosts_max_wave_speed_z;
+                domain_dims = d_subghostcell_dims_max_wave_speed_z;
+            }
+            else
+            {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+                TBOX_ASSERT(d_subghost_box_max_wave_speed_z.contains(domain));
+#endif
+                
+                domain_lo = domain.lower() - d_interior_box.lower();
+                domain_dims = domain.numberCells();
+            }
+            
             if (!d_data_sound_speed)
             {
-                computeGlobalCellDataSoundSpeedWithDensityMassFractionAndPressure();
+                computeGlobalCellDataSoundSpeedWithDensityMassFractionsAndPressure(domain);
             }
             
             if (!d_data_velocity)
             {
-                computeGlobalCellDataVelocityWithDensity();
+                computeGlobalCellDataVelocityWithDensity(domain);
             }
             
             // Get the pointers to the cell data of maximum wave speed and velocity in z-direction, and sound speed.
@@ -13663,34 +12688,60 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSp
             }
             else if (d_dim == tbox::Dimension(3))
             {
+                /*
+                 * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+                 */
+                
+                const int domain_lo_0 = domain_lo[0];
+                const int domain_lo_1 = domain_lo[1];
+                const int domain_lo_2 = domain_lo[2];
+                const int domain_dim_0 = domain_dims[0];
+                const int domain_dim_1 = domain_dims[1];
+                const int domain_dim_2 = domain_dims[2];
+                
+                const int num_subghosts_0_sound_speed = d_num_subghosts_sound_speed[0];
+                const int num_subghosts_1_sound_speed = d_num_subghosts_sound_speed[1];
+                const int num_subghosts_2_sound_speed = d_num_subghosts_sound_speed[2];
+                const int subghostcell_dim_0_sound_speed = d_subghostcell_dims_sound_speed[0];
+                const int subghostcell_dim_1_sound_speed = d_subghostcell_dims_sound_speed[1];
+                
+                const int num_subghosts_0_velocity = d_num_subghosts_velocity[0];
+                const int num_subghosts_1_velocity = d_num_subghosts_velocity[1];
+                const int num_subghosts_2_velocity = d_num_subghosts_velocity[2];
+                const int subghostcell_dim_0_velocity = d_subghostcell_dims_velocity[0];
+                const int subghostcell_dim_1_velocity = d_subghostcell_dims_velocity[1];
+                
+                const int num_subghosts_0_max_wave_speed_z = d_num_subghosts_max_wave_speed_z[0];
+                const int num_subghosts_1_max_wave_speed_z = d_num_subghosts_max_wave_speed_z[1];
+                const int num_subghosts_2_max_wave_speed_z = d_num_subghosts_max_wave_speed_z[2];
+                const int subghostcell_dim_0_max_wave_speed_z = d_subghostcell_dims_max_wave_speed_z[0];
+                const int subghostcell_dim_1_max_wave_speed_z = d_subghostcell_dims_max_wave_speed_z[1];
+                
                 // Compute the maximum wave speed in the z-direction.
-                for (int k = -d_num_subghosts_max_wave_speed_z[2];
-                     k < d_interior_dims[2] + d_num_subghosts_max_wave_speed_z[2];
-                     k++)
+                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
                 {
-                    for (int j = -d_num_subghosts_max_wave_speed_z[1];
-                         j < d_interior_dims[1] + d_num_subghosts_max_wave_speed_z[1];
-                         j++)
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                     {
-                        for (int i = -d_num_subghosts_max_wave_speed_z[0];
-                             i < d_interior_dims[0] + d_num_subghosts_max_wave_speed_z[0];
-                             i++)
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                         {
                             // Compute the linear indices.
-                            const int idx_sound_speed = (i + d_num_subghosts_sound_speed[0]) +
-                                (j + d_num_subghosts_sound_speed[1])*d_subghostcell_dims_sound_speed[0] +
-                                (k + d_num_subghosts_sound_speed[2])*d_subghostcell_dims_sound_speed[0]*
-                                    d_subghostcell_dims_sound_speed[1];
+                            const int idx_sound_speed = (i + num_subghosts_0_sound_speed) +
+                                (j + num_subghosts_1_sound_speed)*subghostcell_dim_0_sound_speed +
+                                (k + num_subghosts_2_sound_speed)*subghostcell_dim_0_sound_speed*
+                                    subghostcell_dim_1_sound_speed;
                             
-                            const int idx_velocity = (i + d_num_subghosts_velocity[0]) +
-                                (j + d_num_subghosts_velocity[1])*d_subghostcell_dims_velocity[0] +
-                                (k + d_num_subghosts_velocity[2])*d_subghostcell_dims_velocity[0]*
-                                    d_subghostcell_dims_velocity[1];
+                            const int idx_velocity = (i + num_subghosts_0_velocity) +
+                                (j + num_subghosts_1_velocity)*subghostcell_dim_0_velocity +
+                                (k + num_subghosts_2_velocity)*subghostcell_dim_0_velocity*
+                                    subghostcell_dim_1_velocity;
                             
-                            const int idx_max_wave_speed_z = (i + d_num_subghosts_max_wave_speed_z[0]) +
-                                (j + d_num_subghosts_max_wave_speed_z[1])*d_subghostcell_dims_max_wave_speed_z[0] +
-                                (k + d_num_subghosts_max_wave_speed_z[2])*d_subghostcell_dims_max_wave_speed_z[0]*
-                                    d_subghostcell_dims_max_wave_speed_z[1];
+                            const int idx_max_wave_speed_z = (i + num_subghosts_0_max_wave_speed_z) +
+                                (j + num_subghosts_1_max_wave_speed_z)*subghostcell_dim_0_max_wave_speed_z +
+                                (k + num_subghosts_2_max_wave_speed_z)*subghostcell_dim_0_max_wave_speed_z*
+                                    subghostcell_dim_1_max_wave_speed_z;
                             
                             lambda_max_z[idx_max_wave_speed_z] = fabs(w[idx_velocity]) + c[idx_sound_speed];
                         }
@@ -13711,19 +12762,19 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxWaveSpeedWithVelocityAndSoundSp
 
 
 /*
- * Compute the global cell data of maximum diffusivity with density, mass fraction, pressure
+ * Compute the global cell data of maximum diffusivity with density, mass fractions, pressure
  * and temperature in the registered patch.
  */
 void
-FlowModelFiveEqnAllaire::computeGlobalCellDataMaxDiffusivityWithDensityMassFractionPressureAndTemperature(
-    const COMPUTING_OPTION::TYPE& computing_option)
+FlowModelFiveEqnAllaire::computeGlobalCellDataMaxDiffusivityWithDensityMassFractionsPressureAndTemperature(
+    const hier::Box& domain)
 {
     if (!d_equation_of_shear_viscosity_mixing_rules ||
         !d_equation_of_bulk_viscosity_mixing_rules)
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFiveEqnAllaire::"
-            << "computeGlobalCellDataMaxDiffusivityWithDensityMassFractionPressureAndTemperature()\n"
+            << "computeGlobalCellDataMaxDiffusivityWithDensityMassFractionsPressureAndTemperature()\n"
             << "Either mixing rule of shear diffusivity or bulk viscosity"
             << " is not initialized."
             << std::endl);
@@ -13735,254 +12786,197 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxDiffusivityWithDensityMassFract
         d_data_max_diffusivity.reset(
             new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
         
-        if (!d_data_density)
+        /*
+         * Get the local lower indices and number of cells in each direction of the domain.
+         */
+        
+        hier::IntVector domain_lo(d_dim);
+        hier::IntVector domain_dims(d_dim);
+        
+        if (domain.empty())
         {
-            computeGlobalCellDataDensity();
+            domain_lo = -d_num_subghosts_max_diffusivity;
+            domain_dims = d_subghostcell_dims_max_diffusivity;
+        }
+        else
+        {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(d_subghost_box_max_diffusivity.contains(domain));
+#endif
+            
+            domain_lo = domain.lower() - d_interior_box.lower();
+            domain_dims = domain.numberCells();
         }
         
-        if (!d_data_mass_fraction)
+        if (!d_data_density)
         {
-            computeGlobalCellDataMassFractionWithDensity();
+            computeGlobalCellDataDensity(domain);
+        }
+        
+        if (!d_data_mass_fractions)
+        {
+            computeGlobalCellDataMassFractionsWithDensity(domain);
         }
         
         if (!d_data_pressure)
         {
-            computeGlobalCellDataPressureWithDensityMassFractionAndInternalEnergy();
+            computeGlobalCellDataPressureWithDensityMassFractionsAndInternalEnergy(domain);
         }
         
-        if (!d_data_temperature)
+        if (!d_data_species_temperatures)
         {
-            computeGlobalCellDataTemperatureWithPressure();
+            computeGlobalCellDataSpeciesTemperaturesWithPressure(domain);
         }
         
-        // Get the cell data of the variable volume fraction.
-        boost::shared_ptr<pdat::CellData<double> > data_volume_fraction =
-            getGlobalCellDataVolumeFraction();
+        // Get the cell data of the variable volume fractions.
+        boost::shared_ptr<pdat::CellData<double> > data_volume_fractions =
+            getGlobalCellDataVolumeFractions();
         
-        // Get the pointers to the cell data of maximum diffusivity, density, mass fraction, pressure,
-        // temperature and volume fraction.
+        /*
+         * Create temporary cell data of shear viscosity and bulk viscosity.
+         */
+        
+        boost::shared_ptr<pdat::CellData<double> > data_shear_viscosity(
+            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
+        
+        boost::shared_ptr<pdat::CellData<double> > data_bulk_viscosity(
+            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_max_diffusivity));
+        
+        // Get the pointers to the cell data of maximum diffusivity, density, shear viscosity and
+        // bulk viscosity.
         double* D_max = d_data_max_diffusivity->getPointer(0);
-        double* rho = d_data_density->getPointer(0);
-        std::vector<double*> Y;
-        Y.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            Y.push_back(d_data_mass_fraction->getPointer(si));
-        }
-        double* p = d_data_pressure->getPointer(0);
-        std::vector<double*> T;
-        T.reserve(d_num_species);
-        for (int si = 0; si < d_num_species; si++)
-        {
-            T.push_back(d_data_temperature->getPointer(si));
-        }
-        std::vector<double*> Z;
-        Z.reserve(d_num_species - 1);
-        for (int si = 0; si < d_num_species - 1; si++)
-        {
-            Z.push_back(data_volume_fraction->getPointer(si));
-        }
+        double* rho   = d_data_density->getPointer(0);
+        double* mu    = data_shear_viscosity->getPointer(0);
+        double* mu_v  = data_bulk_viscosity->getPointer(0);
+        
+        // Compute the shear viscosity field.
+        d_equation_of_shear_viscosity_mixing_rules->computeShearViscosity(
+            data_shear_viscosity,
+            d_data_pressure,
+            d_data_species_temperatures,
+            d_data_mass_fractions,
+            data_volume_fractions,
+            domain);
+        
+        // Compute the bulk viscosity field.
+        d_equation_of_bulk_viscosity_mixing_rules->computeBulkViscosity(
+            data_bulk_viscosity,
+            d_data_pressure,
+            d_data_species_temperatures,
+            d_data_mass_fractions,
+            data_volume_fractions,
+            domain);
         
         if (d_dim == tbox::Dimension(1))
         {
-            for (int i = -d_num_subghosts_max_diffusivity[0];
-                 i < d_interior_dims[0] + d_num_subghosts_max_diffusivity[0];
-                 i++)
+            /*
+             * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_dim_0 = domain_dims[0];
+            
+            const int num_subghosts_0_max_diffusivity = d_num_subghosts_max_diffusivity[0];
+            const int num_subghosts_0_density = d_num_subghosts_density[0];
+            
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
             {
                 // Compute the linear indices.
-                const int idx = i + d_num_ghosts[0];
-                const int idx_max_diffusivity = i + d_num_subghosts_max_diffusivity[0];
-                const int idx_density = i + d_num_subghosts_density[0];
-                const int idx_mass_fraction = i + d_num_subghosts_mass_fraction[0];
-                const int idx_pressure = i + d_num_subghosts_pressure[0];
-                const int idx_temperature = i + d_num_subghosts_temperature[0];
+                const int idx_max_diffusivity = i + num_subghosts_0_max_diffusivity;
+                const int idx_density = i + num_subghosts_0_density;
                 
-                std::vector<const double*> T_ptr;
-                T_ptr.reserve(d_num_species);
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    T_ptr.push_back(&T[si][idx_temperature]);
-                }
-                
-                std::vector<const double*> Y_ptr;
-                Y_ptr.reserve(d_num_species);
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    Y_ptr.push_back(&Y[si][idx_mass_fraction]);
-                }
-                
-                std::vector<const double*> Z_ptr;
-                Z_ptr.reserve(d_num_species);
-                for (int si = 0; si < d_num_species; si++)
-                {
-                    Z_ptr.push_back(&Z[si][idx]);
-                }
-                
-                const double mu = d_equation_of_shear_viscosity_mixing_rules->
-                    getShearViscosity(
-                        &p[idx_pressure],
-                        T_ptr,
-                        Y_ptr,
-                        Z_ptr);
-                
-                const double mu_v = d_equation_of_bulk_viscosity_mixing_rules->
-                    getBulkViscosity(
-                        &p[idx_pressure],
-                        T_ptr,
-                        Y_ptr,
-                        Z_ptr);
-                
-                D_max[idx_max_diffusivity] = fmax(mu/rho[idx_density], mu_v/rho[idx_density]);
+                D_max[idx_max_diffusivity] = fmax(mu[idx_max_diffusivity]/rho[idx_density],
+                    mu_v[idx_max_diffusivity]/rho[idx_density]);
             }
         }
         else if (d_dim == tbox::Dimension(2))
         {
-            for (int j = -d_num_subghosts_max_diffusivity[1];
-                 j < d_interior_dims[1] + d_num_subghosts_max_diffusivity[1];
-                 j++)
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            
+            const int num_subghosts_0_max_diffusivity = d_num_subghosts_max_diffusivity[0];
+            const int num_subghosts_1_max_diffusivity = d_num_subghosts_max_diffusivity[1];
+            const int subghostcell_dim_0_max_diffusivity = d_subghostcell_dims_max_diffusivity[0];
+            
+            const int num_subghosts_0_density = d_num_subghosts_density[0];
+            const int num_subghosts_1_density = d_num_subghosts_density[1];
+            const int subghostcell_dim_0_density = d_subghostcell_dims_density[0];
+            
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
             {
-                for (int i = -d_num_subghosts_max_diffusivity[0];
-                     i < d_interior_dims[0] + d_num_subghosts_max_diffusivity[0];
-                     i++)
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                 {
                     // Compute the linear indices.
-                    const int idx = (i + d_num_ghosts[0]) +
-                        (j + d_num_ghosts[1])*d_ghostcell_dims[0];
+                    const int idx_max_diffusivity = (i + num_subghosts_0_max_diffusivity) +
+                        (j + num_subghosts_1_max_diffusivity)*subghostcell_dim_0_max_diffusivity;
                     
-                    const int idx_max_diffusivity = (i + d_num_subghosts_max_diffusivity[0]) +
-                        (j + d_num_subghosts_max_diffusivity[1])*d_subghostcell_dims_max_diffusivity[0];
+                    const int idx_density = (i + num_subghosts_0_density) +
+                        (j + num_subghosts_1_density)*subghostcell_dim_0_density;
                     
-                    const int idx_density = (i + d_num_subghosts_density[0]) +
-                        (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0];
-                    
-                    const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                        (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0];
-                    
-                    const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                        (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0];
-                    
-                    const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                        (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0];
-                    
-                    std::vector<const double*> T_ptr;
-                    T_ptr.reserve(d_num_species);
-                    for (int si = 0; si < d_num_species; si++)
-                    {
-                        T_ptr.push_back(&T[si][idx_temperature]);
-                    }
-                    
-                    std::vector<const double*> Y_ptr;
-                    Y_ptr.reserve(d_num_species);
-                    for (int si = 0; si < d_num_species; si++)
-                    {
-                        Y_ptr.push_back(&Y[si][idx_mass_fraction]);
-                    }
-                    
-                    std::vector<const double*> Z_ptr;
-                    Z_ptr.reserve(d_num_species);
-                    for (int si = 0; si < d_num_species; si++)
-                    {
-                        Z_ptr.push_back(&Z[si][idx]);
-                    }
-                    
-                    const double mu = d_equation_of_shear_viscosity_mixing_rules->
-                        getShearViscosity(
-                            &p[idx_pressure],
-                            T_ptr,
-                            Y_ptr,
-                            Z_ptr);
-                    
-                    const double mu_v = d_equation_of_bulk_viscosity_mixing_rules->
-                        getBulkViscosity(
-                            &p[idx_pressure],
-                            T_ptr,
-                            Y_ptr,
-                            Z_ptr);
-                    
-                    D_max[idx_max_diffusivity] = fmax(mu/rho[idx_density], mu_v/rho[idx_density]);
+                    D_max[idx_max_diffusivity] = fmax(mu[idx_max_diffusivity]/rho[idx_density],
+                        mu_v[idx_max_diffusivity]/rho[idx_density]);
                 }
             }
         }
         else if (d_dim == tbox::Dimension(3))
         {
-            for (int k = -d_num_subghosts_max_diffusivity[2];
-                 k < d_interior_dims[2] + d_num_subghosts_max_diffusivity[2];
-                 k++)
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_lo_2 = domain_lo[2];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            const int domain_dim_2 = domain_dims[2];
+            
+            const int num_subghosts_0_max_diffusivity = d_num_subghosts_max_diffusivity[0];
+            const int num_subghosts_1_max_diffusivity = d_num_subghosts_max_diffusivity[1];
+            const int num_subghosts_2_max_diffusivity = d_num_subghosts_max_diffusivity[2];
+            const int subghostcell_dim_0_max_diffusivity = d_subghostcell_dims_max_diffusivity[0];
+            const int subghostcell_dim_1_max_diffusivity = d_subghostcell_dims_max_diffusivity[1];
+            
+            const int num_subghosts_0_density = d_num_subghosts_density[0];
+            const int num_subghosts_1_density = d_num_subghosts_density[1];
+            const int num_subghosts_2_density = d_num_subghosts_density[2];
+            const int subghostcell_dim_0_density = d_subghostcell_dims_density[0];
+            const int subghostcell_dim_1_density = d_subghostcell_dims_density[1];
+            
+            for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
             {
-                for (int j = -d_num_subghosts_max_diffusivity[1];
-                     j < d_interior_dims[1] + d_num_subghosts_max_diffusivity[1];
-                     j++)
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
                 {
-                    for (int i = -d_num_subghosts_max_diffusivity[0];
-                         i < d_interior_dims[0] + d_num_subghosts_max_diffusivity[0];
-                         i++)
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
                     {
                         // Compute the linear indices.
-                        const int idx = (i + d_num_ghosts[0]) +
-                            (j + d_num_ghosts[1])*d_ghostcell_dims[0] +
-                            (k + d_num_ghosts[2])*d_ghostcell_dims[0]*d_ghostcell_dims[1];
+                        const int idx_max_diffusivity = (i + num_subghosts_0_max_diffusivity) +
+                            (j + num_subghosts_1_max_diffusivity)*subghostcell_dim_0_max_diffusivity +
+                            (k + num_subghosts_2_max_diffusivity)*subghostcell_dim_0_max_diffusivity*
+                                subghostcell_dim_1_max_diffusivity;
                         
-                        const int idx_max_diffusivity = (i + d_num_subghosts_max_diffusivity[0]) +
-                            (j + d_num_subghosts_max_diffusivity[1])*d_subghostcell_dims_max_diffusivity[0] +
-                            (k + d_num_subghosts_max_diffusivity[2])*d_subghostcell_dims_max_diffusivity[0]*
-                                d_subghostcell_dims_max_diffusivity[1];
+                        const int idx_density = (i + num_subghosts_0_density) +
+                            (j + num_subghosts_1_density)*subghostcell_dim_0_density +
+                            (k + num_subghosts_2_density)*subghostcell_dim_0_density*
+                                subghostcell_dim_1_density;
                         
-                        const int idx_density = (i + d_num_subghosts_density[0]) +
-                            (j + d_num_subghosts_density[1])*d_subghostcell_dims_density[0] +
-                            (k + d_num_subghosts_density[2])*d_subghostcell_dims_density[0]*
-                                d_subghostcell_dims_density[1];
-                        
-                        const int idx_mass_fraction = (i + d_num_subghosts_mass_fraction[0]) +
-                            (j + d_num_subghosts_mass_fraction[1])*d_subghostcell_dims_mass_fraction[0] +
-                            (k + d_num_subghosts_mass_fraction[2])*d_subghostcell_dims_mass_fraction[0]*
-                                d_subghostcell_dims_mass_fraction[1];
-                        
-                        const int idx_pressure = (i + d_num_subghosts_pressure[0]) +
-                            (j + d_num_subghosts_pressure[1])*d_subghostcell_dims_pressure[0] +
-                            (k + d_num_subghosts_pressure[2])*d_subghostcell_dims_pressure[0]*
-                                d_subghostcell_dims_pressure[1];
-                        
-                        const int idx_temperature = (i + d_num_subghosts_temperature[0]) +
-                            (j + d_num_subghosts_temperature[1])*d_subghostcell_dims_temperature[0] +
-                            (k + d_num_subghosts_temperature[2])*d_subghostcell_dims_temperature[0]*
-                                d_subghostcell_dims_temperature[1];
-                        
-                        std::vector<const double*> T_ptr;
-                        T_ptr.reserve(d_num_species);
-                        for (int si = 0; si < d_num_species; si++)
-                        {
-                            T_ptr.push_back(&T[si][idx_temperature]);
-                        }
-                        
-                        std::vector<const double*> Y_ptr;
-                        Y_ptr.reserve(d_num_species);
-                        for (int si = 0; si < d_num_species; si++)
-                        {
-                            Y_ptr.push_back(&Y[si][idx_mass_fraction]);
-                        }
-                        
-                        std::vector<const double*> Z_ptr;
-                        Z_ptr.reserve(d_num_species);
-                        for (int si = 0; si < d_num_species; si++)
-                        {
-                            Z_ptr.push_back(&Z[si][idx]);
-                        }
-                        
-                        const double mu = d_equation_of_shear_viscosity_mixing_rules->
-                            getShearViscosity(
-                                &p[idx_pressure],
-                                T_ptr,
-                                Y_ptr,
-                                Z_ptr);
-                        
-                        const double mu_v = d_equation_of_bulk_viscosity_mixing_rules->
-                            getBulkViscosity(
-                                &p[idx_pressure],
-                                T_ptr,
-                                Y_ptr,
-                                Z_ptr);
-                        
-                        D_max[idx_max_diffusivity] = fmax(mu/rho[idx_density], mu_v/rho[idx_density]);
+                        D_max[idx_max_diffusivity] = fmax(mu[idx_max_diffusivity]/rho[idx_density],
+                            mu_v[idx_max_diffusivity]/rho[idx_density]);
                     }
                 }
             }
@@ -13992,7 +12986,7 @@ FlowModelFiveEqnAllaire::computeGlobalCellDataMaxDiffusivityWithDensityMassFract
     {
         TBOX_ERROR(d_object_name
             << ": FlowModelFiveEqnAllaire::"
-            << "computeGlobalCellDataMaxDiffusivityWithDensityMassFractionPressureAndTemperature()\n"
+            << "computeGlobalCellDataMaxDiffusivityWithDensityMassFractionsPressureAndTemperature()\n"
             << "Cell data of 'MAX_DIFFUSIVITY' is not yet registered."
             << std::endl);
     }

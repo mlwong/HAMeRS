@@ -2,7 +2,9 @@
 
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 
-#define EPSILON 1e-40
+#include <cfloat>
+
+#define EPSILON DBL_EPSILON
 
 GradientSensorJameson::GradientSensorJameson(
     const std::string& object_name,
@@ -81,8 +83,8 @@ GradientSensorJameson::computeGradient(
             const int idx_x   = i + num_ghosts_0_cell_data;
             const int idx_x_R = i + 1 + num_ghosts_0_cell_data;
             
-            psi_x[idx] = f[idx_x_R] - 2.0*f[idx_x] + f[idx_x_L];
-            mean_x[idx] = f[idx_x_R] + 2.0*f[idx_x] + f[idx_x_L];
+            psi_x[idx]  = f[idx_x_R] - double(2)*f[idx_x] + f[idx_x_L];
+            mean_x[idx] = f[idx_x_R] + double(2)*f[idx_x] + f[idx_x_L];
         }
         
 #ifdef HAMERS_ENABLE_SIMD
@@ -93,7 +95,7 @@ GradientSensorJameson::computeGradient(
             // Compute the linear index.
             const int idx = i + num_ghosts_0_gradient;
             
-            psi[idx] = fabs(psi_x[idx])/(mean_x[idx] + EPSILON);
+            psi[idx] = fabs(psi_x[idx])/(mean_x[idx] + double(EPSILON));
         }
     }
     else if (d_dim == tbox::Dimension(2))
@@ -144,8 +146,8 @@ GradientSensorJameson::computeGradient(
                 const int idx_x_R = (i + 1 + num_ghosts_0_cell_data) +
                     (j + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                 
-                psi_x[idx] = f[idx_x_R] - 2.0*f[idx_x] + f[idx_x_L];
-                mean_x[idx] = f[idx_x_R] + 2.0*f[idx_x] + f[idx_x_L];
+                psi_x[idx]  = f[idx_x_R] - double(2)*f[idx_x] + f[idx_x_L];
+                mean_x[idx] = f[idx_x_R] + double(2)*f[idx_x] + f[idx_x_L];
             }
         }
         
@@ -169,8 +171,8 @@ GradientSensorJameson::computeGradient(
                 const int idx_y_T = (i + num_ghosts_0_cell_data) +
                     (j + 1 + num_ghosts_1_cell_data)*ghostcell_dim_0_cell_data;
                 
-                psi_y[idx] = f[idx_y_T] - 2.0*f[idx_y] + f[idx_y_B];
-                mean_y[idx] = f[idx_y_T] + 2.0*f[idx_y] + f[idx_y_B];
+                psi_y[idx]  = f[idx_y_T] - double(2)*f[idx_y] + f[idx_y_B];
+                mean_y[idx] = f[idx_y_T] + double(2)*f[idx_y] + f[idx_y_B];
             }
         }
         
@@ -186,7 +188,7 @@ GradientSensorJameson::computeGradient(
                     (j + num_ghosts_1_gradient)*ghostcell_dim_0_gradient;
                 
                 psi[idx] = sqrt(psi_x[idx]*psi_x[idx] + psi_y[idx]*psi_y[idx])/
-                    (sqrt(mean_x[idx]*mean_x[idx] + mean_y[idx]*mean_y[idx]) + EPSILON);
+                    (sqrt(mean_x[idx]*mean_x[idx] + mean_y[idx]*mean_y[idx]) + double(EPSILON));
             }
         }
     }
@@ -259,8 +261,8 @@ GradientSensorJameson::computeGradient(
                         (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
                             ghostcell_dim_1_cell_data;
                     
-                    psi_x[idx] = f[idx_x_R] - 2.0*f[idx_x] + f[idx_x_L];
-                    mean_x[idx] = f[idx_x_R] + 2.0*f[idx_x] + f[idx_x_L];
+                    psi_x[idx]  = f[idx_x_R] - double(2)*f[idx_x] + f[idx_x_L];
+                    mean_x[idx] = f[idx_x_R] + double(2)*f[idx_x] + f[idx_x_L];
                 }
             }
         }
@@ -295,8 +297,8 @@ GradientSensorJameson::computeGradient(
                         (k + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
                             ghostcell_dim_1_cell_data;
                     
-                    psi_y[idx] = f[idx_y_T] - 2.0*f[idx_y] + f[idx_y_B];
-                    mean_y[idx] = f[idx_y_T] + 2.0*f[idx_y] + f[idx_y_B];
+                    psi_y[idx]  = f[idx_y_T] - double(2)*f[idx_y] + f[idx_y_B];
+                    mean_y[idx] = f[idx_y_T] + double(2)*f[idx_y] + f[idx_y_B];
                 }
             }
         }
@@ -331,8 +333,8 @@ GradientSensorJameson::computeGradient(
                         (k + 1 + num_ghosts_2_cell_data)*ghostcell_dim_0_cell_data*
                             ghostcell_dim_1_cell_data;
                     
-                    psi_z[idx] = f[idx_z_F] - 2.0*f[idx_z] + f[idx_z_B];
-                    mean_z[idx] = f[idx_z_F] + 2.0*f[idx_z] + f[idx_z_B];
+                    psi_z[idx]  = f[idx_z_F] - double(2)*f[idx_z] + f[idx_z_B];
+                    mean_z[idx] = f[idx_z_F] + double(2)*f[idx_z] + f[idx_z_B];
                 }
             }
         }
@@ -354,7 +356,7 @@ GradientSensorJameson::computeGradient(
                     
                     psi[idx] = sqrt(psi_x[idx]*psi_x[idx] + psi_y[idx]*psi_y[idx] + psi_z[idx]*psi_z[idx])/
                         (sqrt(mean_x[idx]*mean_x[idx] + mean_y[idx]*mean_y[idx] + mean_z[idx]*mean_z[idx]) +
-                         EPSILON);
+                         double(EPSILON));
                 }
             }
         }

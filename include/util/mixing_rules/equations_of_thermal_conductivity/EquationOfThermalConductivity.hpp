@@ -1,6 +1,9 @@
 #ifndef EQUATION_OF_THERMAL_CONDUCTIVITY_HPP
 #define EQUATION_OF_THERMAL_CONDUCTIVITY_HPP
 
+#include "HAMeRS_config.hpp"
+
+#include "SAMRAI/pdat/CellData.h"
 #include "SAMRAI/tbox/Dimension.h"
 
 #include <string>
@@ -18,6 +21,8 @@ class EquationOfThermalConductivity
                 d_dim(dim)
         {}
         
+        virtual ~EquationOfThermalConductivity() {}
+        
         /*
          * Print all characteristics of the equation of thermal conductivity class.
          */
@@ -32,6 +37,66 @@ class EquationOfThermalConductivity
             const double* const pressure,
             const double* const temperature,
             const std::vector<const double*>& molecular_properties) const = 0;
+        
+        /*
+         * Compute the thermal conductivity.
+         */
+        void
+        computeThermalConductivity(
+            boost::shared_ptr<pdat::CellData<double> >& data_thermal_conductivity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const std::vector<const double*>& molecular_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeThermalConductivity(
+                data_thermal_conductivity,
+                data_pressure,
+                data_temperature,
+                molecular_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the thermal conductivity.
+         */
+        virtual void
+        computeThermalConductivity(
+            boost::shared_ptr<pdat::CellData<double> >& data_thermal_conductivity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const std::vector<const double*>& molecular_properties,
+            const hier::Box& domain) const = 0;
+        
+        /*
+         * Compute the thermal conductivity.
+         */
+        void
+        computeThermalConductivity(
+            boost::shared_ptr<pdat::CellData<double> >& data_thermal_conductivity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::CellData<double> >& data_molecular_properties) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeThermalConductivity(
+                data_thermal_conductivity,
+                data_pressure,
+                data_temperature,
+                data_molecular_properties,
+                empty_box);
+        }
+        
+        /*
+         * Compute the thermal conductivity.
+         */
+        virtual void
+        computeThermalConductivity(
+            boost::shared_ptr<pdat::CellData<double> >& data_thermal_conductivity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::CellData<double> >& data_molecular_properties,
+            const hier::Box& domain) const = 0;
         
     protected:
         /*

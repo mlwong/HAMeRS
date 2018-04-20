@@ -11,7 +11,6 @@ class ConvectiveFluxReconstructorFirstOrderHLLC: public ConvectiveFluxReconstruc
             const tbox::Dimension& dim,
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_eqn,
-            const int& num_species,
             const boost::shared_ptr<FlowModel>& flow_model,
             const boost::shared_ptr<tbox::Database>& convective_flux_reconstructor_db);
         
@@ -44,6 +43,13 @@ class ConvectiveFluxReconstructorFirstOrderHLLC: public ConvectiveFluxReconstruc
             const int RK_step_number);
         
     private:
+        std::vector<EQN_FORM::TYPE> d_eqn_form;
+        bool d_has_advective_eqn_form;
+        
+        /*
+         * boost::shared_ptr to the Riemann solver object.
+         */
+        boost::shared_ptr<FlowModelRiemannSolver> d_riemann_solver;
         
 };
 

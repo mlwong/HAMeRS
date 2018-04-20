@@ -5,19 +5,22 @@ set(flow_models_source_files
     FlowModel.cpp
     ./single-species/FlowModelSingleSpecies.cpp
     ./single-species/FlowModelBoundaryUtilitiesSingleSpecies.cpp
+    ./single-species/FlowModelRiemannSolverSingleSpecies.cpp
     ./single-species/FlowModelStatisticsUtilitiesSingleSpecies.cpp
-    ./single-species/Riemann_solvers/RiemannSolverSingleSpeciesHLLC.cpp
-    ./single-species/Riemann_solvers/RiemannSolverSingleSpeciesHLLC_HLL.cpp
+    ./single-species/Riemann_solvers/FlowModelRiemannSolverSingleSpeciesHLLC.cpp
+    ./single-species/Riemann_solvers/FlowModelRiemannSolverSingleSpeciesHLLC-HLL.cpp
     ./four-eqn_conservative/FlowModelFourEqnConservative.cpp
     ./four-eqn_conservative/FlowModelBoundaryUtilitiesFourEqnConservative.cpp
+    ./four-eqn_conservative/FlowModelRiemannSolverFourEqnConservative.cpp
     ./four-eqn_conservative/FlowModelStatisticsUtilitiesFourEqnConservative.cpp
-    ./four-eqn_conservative/Riemann_solvers/RiemannSolverFourEqnConservativeHLLC.cpp
-    ./four-eqn_conservative/Riemann_solvers/RiemannSolverFourEqnConservativeHLLC_HLL.cpp
+    ./four-eqn_conservative/Riemann_solvers/FlowModelRiemannSolverFourEqnConservativeHLLC.cpp
+    ./four-eqn_conservative/Riemann_solvers/FlowModelRiemannSolverFourEqnConservativeHLLC-HLL.cpp
     ./five-eqn_Allaire/FlowModelFiveEqnAllaire.cpp
     ./five-eqn_Allaire/FlowModelBoundaryUtilitiesFiveEqnAllaire.cpp
+    ./five-eqn_Allaire/FlowModelRiemannSolverFiveEqnAllaire.cpp
     ./five-eqn_Allaire/FlowModelStatisticsUtilitiesFiveEqnAllaire.cpp
-    ./five-eqn_Allaire/Riemann_solvers/RiemannSolverFiveEqnAllaireHLLC.cpp
-    ./five-eqn_Allaire/Riemann_solvers/RiemannSolverFiveEqnAllaireHLLC_HLL.cpp
+    ./five-eqn_Allaire/Riemann_solvers/FlowModelRiemannSolverFiveEqnAllaireHLLC.cpp
+    ./five-eqn_Allaire/Riemann_solvers/FlowModelRiemannSolverFiveEqnAllaireHLLC-HLL.cpp
 )
 
 # Create a library called flow_models which includes the 

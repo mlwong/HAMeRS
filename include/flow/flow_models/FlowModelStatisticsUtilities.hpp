@@ -4,6 +4,7 @@
 #include "HAMeRS_config.hpp"
 
 #include "flow/flow_models/FlowModel.hpp"
+#include "util/derivatives/DerivativeFirstOrder.hpp"
 
 #include "SAMRAI/geom/CartesianGridGeometry.h"
 
@@ -38,6 +39,8 @@ class FlowModelStatisticsUtilities
                 d_statistical_quantities = flow_model_db->getStringVector("d_statistical_quantities");
             }
         }
+        
+        virtual ~FlowModelStatisticsUtilities() {}
         
         /*
          * Set the weak pointer to the flow model from the parent FlowModel class.
@@ -106,7 +109,7 @@ class FlowModelStatisticsUtilities
          * Names of statistical quantities to output.
          */
         std::vector<std::string> d_statistical_quantities;
-    
+        
 };
 
 #endif /* FLOW_MODEL_STATISTICS_UTILITIES_HPP */

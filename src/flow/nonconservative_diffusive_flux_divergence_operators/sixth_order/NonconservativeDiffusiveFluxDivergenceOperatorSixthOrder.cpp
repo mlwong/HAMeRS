@@ -9,7 +9,6 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::NonconservativeDiffusi
     const tbox::Dimension& dim,
     const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
     const int& num_eqn,
-    const int& num_species,
     const boost::shared_ptr<FlowModel>& flow_model,
     const boost::shared_ptr<tbox::Database>& nonconservative_diffusive_flux_divergence_operator_db):
         NonconservativeDiffusiveFluxDivergenceOperator(
@@ -17,7 +16,6 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::NonconservativeDiffusi
             dim,
             grid_geometry,
             num_eqn,
-            num_species,
             flow_model,
             nonconservative_diffusive_flux_divergence_operator_db)
 {
@@ -98,7 +96,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeNonconservative
 #endif
     
     // Initialize the data of diffusive flux to zero.
-    diffusive_flux_divergence->fillAll(0.0);
+    diffusive_flux_divergence->fillAll(double(0));
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -2410,9 +2408,9 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                         const int idx_data_RR  = i + 2 + num_subghosts_0_data;
                         const int idx_data_RRR = i + 3 + num_subghosts_0_data;
                         
-                        dudx[idx] = (-1.0/60.0*u[idx_data_LLL] + 3.0/20.0*u[idx_data_LL]
-                                     - 3.0/4.0*u[idx_data_L] + 3.0/4.0*u[idx_data_R]
-                                     - 3.0/20.0*u[idx_data_RR] + 1.0/60.0*u[idx_data_RRR])/
+                        dudx[idx] = (double(3)/double(4)*(u[idx_data_R] - u[idx_data_L]) +
+                                     double(-3)/double(20)*(u[idx_data_RR] - u[idx_data_LL]) +
+                                     double(1)/double(60)*(u[idx_data_RRR] - u[idx_data_LLL]))/
                                         dx_0;
                     }
                     
@@ -2509,9 +2507,9 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                             const int idx_data_RRR = (i + 3 + num_subghosts_0_data) +
                                 (j + num_subghosts_1_data)*subghostcell_dim_0_data;
                             
-                            dudx[idx] = (-1.0/60.0*u[idx_data_LLL] + 3.0/20.0*u[idx_data_LL]
-                                         - 3.0/4.0*u[idx_data_L] + 3.0/4.0*u[idx_data_R]
-                                         - 3.0/20.0*u[idx_data_RR] + 1.0/60.0*u[idx_data_RRR])/
+                            dudx[idx] = (double(3)/double(4)*(u[idx_data_R] - u[idx_data_L]) +
+                                         double(-3)/double(20)*(u[idx_data_RR] - u[idx_data_LL]) +
+                                         double(1)/double(60)*(u[idx_data_RRR] - u[idx_data_LLL]))/
                                             dx_0;
                         }
                     }
@@ -2630,9 +2628,9 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                                     (k + num_subghosts_2_data)*subghostcell_dim_0_data*
                                         subghostcell_dim_1_data;
                                 
-                                dudx[idx] = (-1.0/60.0*u[idx_data_LLL] + 3.0/20.0*u[idx_data_LL]
-                                             - 3.0/4.0*u[idx_data_L] + 3.0/4.0*u[idx_data_R]
-                                             - 3.0/20.0*u[idx_data_RR] + 1.0/60.0*u[idx_data_RRR])/
+                                dudx[idx] = (double(3)/double(4)*(u[idx_data_R] - u[idx_data_L]) +
+                                             double(-3)/double(20)*(u[idx_data_RR] - u[idx_data_LL]) +
+                                             double(1)/double(60)*(u[idx_data_RRR] - u[idx_data_LLL]))/
                                                 dx_0;
                             }
                         }
@@ -2782,9 +2780,9 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                             const int idx_data_TTT = (i + num_subghosts_0_data) +
                                 (j + 3 + num_subghosts_1_data)*subghostcell_dim_0_data;
                             
-                            dudy[idx] = (-1.0/60.0*u[idx_data_BBB] + 3.0/20.0*u[idx_data_BB]
-                                         - 3.0/4.0*u[idx_data_B] + 3.0/4.0*u[idx_data_T]
-                                         - 3.0/20.0*u[idx_data_TT] + 1.0/60.0*u[idx_data_TTT])/
+                            dudy[idx] = (double(3)/double(4)*(u[idx_data_T] - u[idx_data_B]) +
+                                         double(-3)/double(20)*(u[idx_data_TT] - u[idx_data_BB]) +
+                                         double(1)/double(60)*(u[idx_data_TTT] - u[idx_data_BBB]))/
                                             dx_1;
                         }
                     }
@@ -2903,9 +2901,9 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                                     (k + num_subghosts_2_data)*subghostcell_dim_0_data*
                                         subghostcell_dim_1_data;
                                 
-                                dudy[idx] = (-1.0/60.0*u[idx_data_BBB] + 3.0/20.0*u[idx_data_BB]
-                                             - 3.0/4.0*u[idx_data_B] + 3.0/4.0*u[idx_data_T]
-                                             - 3.0/20.0*u[idx_data_TT] + 1.0/60.0*u[idx_data_TTT])/
+                                dudy[idx] = (double(3)/double(4)*(u[idx_data_T] - u[idx_data_B]) +
+                                             double(-3)/double(20)*(u[idx_data_TT] - u[idx_data_BB]) +
+                                             double(1)/double(60)*(u[idx_data_TTT] - u[idx_data_BBB]))/
                                                 dx_1;
                             }
                         }
@@ -3084,9 +3082,9 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeFirstDerivative
                                     (k + 3 + num_subghosts_2_data)*subghostcell_dim_0_data*
                                         subghostcell_dim_1_data;
                                 
-                                dudz[idx] = (-1.0/60.0*u[idx_data_BBB] + 3.0/20.0*u[idx_data_BB]
-                                             - 3.0/4.0*u[idx_data_B] + 3.0/4.0*u[idx_data_F] -
-                                             3.0/20.0*u[idx_data_FF] + 1.0/60.0*u[idx_data_FFF])/
+                                dudz[idx] = (double(3)/double(4)*(u[idx_data_F] - u[idx_data_B]) +
+                                             double(-3)/double(20)*(u[idx_data_FF] - u[idx_data_BB]) +
+                                             double(1)/double(60)*(u[idx_data_FFF] - u[idx_data_BBB]))/
                                                 dx_2;
                             }
                         }
@@ -3146,7 +3144,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
     
     const double* const dx = patch_geom->getDx();
     
-    const double dx_0 = dx[0];
+    const double dx_sq = dx[0]*dx[0];
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -3179,7 +3177,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                             interior_box, 1, d_num_diff_ghosts));
                     
                     // Get the pointer to the derivative.
-                    double* dudx = derivative->getPointer(0);
+                    double* d2udx2 = derivative->getPointer(0);
                     
                     /*
                      * Get the sub-ghost cell width of the variable.
@@ -3206,10 +3204,11 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                         const int idx_data_RR  = i + 2 + num_subghosts_0_data;
                         const int idx_data_RRR = i + 3 + num_subghosts_0_data;
                         
-                        dudx[idx] = (1.0/90.0*u[idx_data_LLL] - 3.0/20.0*u[idx_data_LL]
-                                     + 3.0/2.0*u[idx_data_L] - 49.0/18.0*u[idx_data]
-                                     + 3.0/2.0*u[idx_data_R] - 3.0/20.0*u[idx_data_RR]
-                                     + 1.0/90.0*u[idx_data_RRR])/(dx_0*dx_0);
+                        d2udx2[idx] = (double(-49)/double(18)*u[idx_data] +
+                                       double(3)/double(2)*(u[idx_data_L] + u[idx_data_R]) +
+                                       double(-3)/double(20)*(u[idx_data_LL] + u[idx_data_RR]) +
+                                       double(1)/double(90)*(u[idx_data_LLL] + u[idx_data_RRR]))/
+                                        dx_sq;
                     }
                     
                     std::pair<double*, boost::shared_ptr<pdat::CellData<double> > > derivative_pair(
@@ -3260,7 +3259,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                             interior_box, 1, d_num_diff_ghosts));
                     
                     // Get the pointer to the derivative.
-                    double* dudx = derivative->getPointer(0);
+                    double* d2udx2 = derivative->getPointer(0);
                     
                     /*
                      * Get the sub-ghost cell width and ghost box dimensions of the variable.
@@ -3308,10 +3307,11 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                             const int idx_data_RRR = (i + 3 + num_subghosts_0_data) +
                                 (j + num_subghosts_1_data)*subghostcell_dim_0_data;
                             
-                            dudx[idx] = (1.0/90.0*u[idx_data_LLL] - 3.0/20.0*u[idx_data_LL]
-                                         + 3.0/2.0*u[idx_data_L] - 49.0/18.0*u[idx_data]
-                                         + 3.0/2.0*u[idx_data_R] - 3.0/20.0*u[idx_data_RR]
-                                         + 1.0/90.0*u[idx_data_RRR])/(dx_0*dx_0);
+                            d2udx2[idx] = (double(-49)/double(18)*u[idx_data] +
+                                           double(3)/double(2)*(u[idx_data_L] + u[idx_data_R]) +
+                                           double(-3)/double(20)*(u[idx_data_LL] + u[idx_data_RR]) +
+                                           double(1)/double(90)*(u[idx_data_LLL] + u[idx_data_RRR]))/
+                                            dx_sq;
                         }
                     }
                     
@@ -3366,7 +3366,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                             interior_box, 1, d_num_diff_ghosts));
                     
                     // Get the pointer to the derivative.
-                    double* dudx = derivative->getPointer(0);
+                    double* d2udx2 = derivative->getPointer(0);
                     
                     /*
                      * Get the sub-ghost cell width and ghost box dimensions of the variable.
@@ -3434,10 +3434,11 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                                     (k + num_subghosts_2_data)*subghostcell_dim_0_data*
                                         subghostcell_dim_1_data;
                                 
-                                dudx[idx] = (1.0/90.0*u[idx_data_LLL] - 3.0/20.0*u[idx_data_LL]
-                                             + 3.0/2.0*u[idx_data_L] - 49.0/18.0*u[idx_data]
-                                             + 3.0/2.0*u[idx_data_R] - 3.0/20.0*u[idx_data_RR]
-                                             + 1.0/90.0*u[idx_data_RRR])/(dx_0*dx_0);
+                                d2udx2[idx] = (double(-49)/double(18)*u[idx_data] +
+                                               double(3)/double(2)*(u[idx_data_L] + u[idx_data_R]) +
+                                               double(-3)/double(20)*(u[idx_data_LL] + u[idx_data_RR]) +
+                                               double(1)/double(90)*(u[idx_data_LLL] + u[idx_data_RRR]))/
+                                                dx_sq;
                             }
                         }
                     }
@@ -3496,7 +3497,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
     
     const double* const dx = patch_geom->getDx();
     
-    const double dx_1 = dx[1];
+    const double dy_sq = dx[1]*dx[1];
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -3541,7 +3542,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                             interior_box, 1, d_num_diff_ghosts));
                     
                     // Get the pointer to the derivative.
-                    double* dudy = derivative->getPointer(0);
+                    double* d2udy2 = derivative->getPointer(0);
                     
                     /*
                      * Get the sub-ghost cell width and ghost box dimensions of the variable.
@@ -3589,10 +3590,11 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                             const int idx_data_TTT = (i + num_subghosts_0_data) +
                                 (j + 3 + num_subghosts_1_data)*subghostcell_dim_0_data;
                             
-                            dudy[idx] = (1.0/90.0*u[idx_data_BBB] - 3.0/20.0*u[idx_data_BB]
-                                         + 3.0/2.0*u[idx_data_B] - 49.0/18.0*u[idx_data]
-                                         + 3.0/2.0*u[idx_data_T] - 3.0/20.0*u[idx_data_TT]
-                                         + 1.0/90.0*u[idx_data_TTT])/(dx_1*dx_1);
+                            d2udy2[idx] = (double(-49)/double(18)*u[idx_data] +
+                                           double(3)/double(2)*(u[idx_data_B] + u[idx_data_T]) +
+                                           double(-3)/double(20)*(u[idx_data_BB] + u[idx_data_TT]) +
+                                           double(1)/double(90)*(u[idx_data_BBB] + u[idx_data_TTT]))/
+                                            dy_sq;
                         }
                     }
                     
@@ -3647,7 +3649,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                             interior_box, 1, d_num_diff_ghosts));
                     
                     // Get the pointer to the derivative.
-                    double* dudy = derivative->getPointer(0);
+                    double* d2udy2 = derivative->getPointer(0);
                     
                     /*
                      * Get the sub-ghost cell width and ghost box dimensions of the variable.
@@ -3715,10 +3717,11 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                                     (k + num_subghosts_2_data)*subghostcell_dim_0_data*
                                         subghostcell_dim_1_data;
                                 
-                                dudy[idx] = (1.0/90.0*u[idx_data_BBB] - 3.0/20.0*u[idx_data_BB]
-                                             + 3.0/2.0*u[idx_data_B] - 49.0/18.0*u[idx_data]
-                                             + 3.0/2.0*u[idx_data_T] - 3.0/20.0*u[idx_data_TT]
-                                             + 1.0/90.0*u[idx_data_TTT])/(dx_1*dx_1);
+                                d2udy2[idx] = (double(-49)/double(18)*u[idx_data] +
+                                               double(3)/double(2)*(u[idx_data_B] + u[idx_data_T]) +
+                                               double(-3)/double(20)*(u[idx_data_BB] + u[idx_data_TT]) +
+                                               double(1)/double(90)*(u[idx_data_BBB] + u[idx_data_TTT]))/
+                                                dy_sq;
                             }
                         }
                     }
@@ -3777,7 +3780,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
     
     const double* const dx = patch_geom->getDx();
     
-    const double dx_2 = dx[2];
+    const double dz_sq = dx[2]*dx[2];
     
     if (d_dim == tbox::Dimension(1))
     {
@@ -3833,7 +3836,7 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                             interior_box, 1, d_num_diff_ghosts));
                     
                     // Get the pointer to the derivative.
-                    double* dudz = derivative->getPointer(0);
+                    double* d2udz2 = derivative->getPointer(0);
                     
                     /*
                      * Get the sub-ghost cell width and ghost box dimensions of the variable.
@@ -3901,10 +3904,11 @@ NonconservativeDiffusiveFluxDivergenceOperatorSixthOrder::computeSecondDerivativ
                                     (k + 3 + num_subghosts_2_data)*subghostcell_dim_0_data*
                                         subghostcell_dim_1_data;
                                 
-                                dudz[idx] = (1.0/90.0*u[idx_data_BBB] - 3.0/20.0*u[idx_data_BB]
-                                             + 3.0/2.0*u[idx_data_B] - 49.0/18.0*u[idx_data]
-                                             + 3.0/2.0*u[idx_data_F] - 3.0/20.0*u[idx_data_FF]
-                                             + 1.0/90.0*u[idx_data_FFF])/(dx_2*dx_2);
+                                d2udz2[idx] = (double(-49)/double(18)*u[idx_data] +
+                                               double(3)/double(2)*(u[idx_data_B] + u[idx_data_F]) +
+                                               double(-3)/double(20)*(u[idx_data_BB] + u[idx_data_FF]) +
+                                               double(1)/double(90)*(u[idx_data_BBB] + u[idx_data_FFF]))/
+                                                dz_sq;
                             }
                         }
                     }

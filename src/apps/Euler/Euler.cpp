@@ -127,7 +127,6 @@ Euler::Euler(
         d_dim,
         d_grid_geometry,
         d_flow_model->getNumberOfEquations(),
-        d_num_species,
         d_flow_model,
         d_convective_flux_reconstructor_db,
         d_convective_flux_reconstructor_str));
@@ -144,7 +143,7 @@ Euler::Euler(
         d_dim,
         d_grid_geometry,
         d_flow_model_manager->getFlowModelType(),
-        d_num_species));
+        d_flow_model));
     
     /*
      * Initialize d_Euler_boundary_conditions.
@@ -155,7 +154,6 @@ Euler::Euler(
         d_project_name,
         d_dim,
         d_grid_geometry,
-        d_num_species,
         d_flow_model_manager->getFlowModelType(),
         d_flow_model,
         d_Euler_boundary_conditions_db,
@@ -171,7 +169,6 @@ Euler::Euler(
             "d_value_tagger",
             d_dim,
             d_grid_geometry,
-            d_num_species,
             d_flow_model,
             d_value_tagger_db));
     }
@@ -186,7 +183,6 @@ Euler::Euler(
             "d_gradient_tagger",
             d_dim,
             d_grid_geometry,
-            d_num_species,
             d_flow_model,
             d_gradient_tagger_db));
     }
@@ -201,7 +197,6 @@ Euler::Euler(
             "d_multiresolution_tagger",
             d_dim,
             d_grid_geometry,
-            d_num_species,
             d_flow_model,
             d_multiresolution_tagger_db));
     }

@@ -21,7 +21,6 @@ class NonconservativeDiffusiveFluxDivergenceOperatorManager
             const tbox::Dimension& dim,
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_eqn,
-            const int& num_species,
             const boost::shared_ptr<FlowModel>& flow_model,
             const boost::shared_ptr<tbox::Database>& nonconservative_diffusive_flux_divergence_operator_db,
             const std::string& nonconservative_diffusive_flux_divergence_operator_str);

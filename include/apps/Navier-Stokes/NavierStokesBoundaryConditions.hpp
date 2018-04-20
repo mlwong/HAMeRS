@@ -25,11 +25,12 @@ class NavierStokesBoundaryConditions:
             const std::string& project_name,
             const tbox::Dimension& dim,
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
-            const int& num_species,
             const FLOW_MODEL::TYPE& flow_model_type,
             const boost::shared_ptr<FlowModel>& flow_model,
             const boost::shared_ptr<tbox::Database>& boundary_conditions_db,
             const bool& is_from_restart);
+        
+        ~NavierStokesBoundaryConditions() {};
         
         /*
          * Print all characteristics of the boundary conditions class.
@@ -114,11 +115,6 @@ class NavierStokesBoundaryConditions:
          * boost::shared_ptr to the grid geometry.
          */
         const boost::shared_ptr<geom::CartesianGridGeometry> d_grid_geometry;
-        
-        /*
-         * Number of species.
-         */
-        const int d_num_species;
         
         /*
          * Flow model type.

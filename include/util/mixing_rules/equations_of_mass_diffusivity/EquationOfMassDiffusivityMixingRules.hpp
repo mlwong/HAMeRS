@@ -1,8 +1,11 @@
 #ifndef EQUATION_OF_MASS_DIFFUSIVITY_MIXING_RULES_HPP
 #define EQUATION_OF_MASS_DIFFUSIVITY_MIXING_RULES_HPP
 
+#include "HAMeRS_config.hpp"
+
 #include "util/mixing_rules/MixingClosureModels.hpp"
 
+#include "SAMRAI/pdat/CellData.h"
 #include "SAMRAI/tbox/Database.h"
 #include "SAMRAI/tbox/Dimension.h"
 
@@ -27,6 +30,8 @@ class EquationOfMassDiffusivityMixingRules
                 d_equation_of_mass_diffusivity_mixing_rules_db(equation_of_mass_diffusivity_mixing_rules_db)
         {}
         
+        virtual ~EquationOfMassDiffusivityMixingRules() {}
+        
         /*
          * Print all characteristics of the equation of mass diffusivity mixing rules class.
          */
@@ -42,20 +47,50 @@ class EquationOfMassDiffusivityMixingRules
             const boost::shared_ptr<tbox::Database>& restart_db) const = 0;
         
         /*
-         * Compute the mass diffusivities of the mixture with isothermal and isobaric assumptions.
+         * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibria assumptions.
          */
         virtual void
         getMassDiffusivities(
             std::vector<double*>& mass_diffusivities,
             const double* const pressure,
             const double* const temperature,
-            const std::vector<const double*>& mass_fraction) const = 0;
+            const std::vector<const double*>& mass_fractions) const = 0;
+        
+        /*
+         * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibria assumptions.
+         */
+        void
+        computeMassDiffusivities(
+            boost::shared_ptr<pdat::CellData<double> >& data_mass_diffusivities,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions) const
+        {
+            const hier::Box empty_box(d_dim);
+            computeMassDiffusivities(
+                data_mass_diffusivities,
+                data_pressure,
+                data_temperature,
+                data_mass_fractions,
+                empty_box);
+        }
+        
+        /*
+         * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibria assumptions.
+         */
+        virtual void
+        computeMassDiffusivities(
+            boost::shared_ptr<pdat::CellData<double> >& data_mass_diffusivities,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            const hier::Box& domain) const = 0;
         
         /*
          * Get the number of molecular properties of a species.
          */
         virtual int
-        getNumberOfSpeciesMolecularProperties() const = 0;
+        getNumberOfSpeciesMolecularProperties(const int species_index = 0) const = 0;
         
         /*
          * Get the molecular properties of a species.
@@ -63,7 +98,7 @@ class EquationOfMassDiffusivityMixingRules
         virtual void
         getSpeciesMolecularProperties(
             std::vector<double*>& species_molecular_properties,
-            const int& species_index) const = 0;
+            const int species_index = 0) const = 0;
         
     protected:
         /*

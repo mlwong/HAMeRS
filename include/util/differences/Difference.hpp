@@ -3,14 +3,13 @@
 
 #include "HAMeRS_config.hpp"
 
+#include "SAMRAI/hier/Box.h"
 #include "SAMRAI/hier/IntVector.h"
-#include "SAMRAI/hier/Patch.h"
 #include "SAMRAI/pdat/CellData.h"
 #include "SAMRAI/tbox/Dimension.h"
 
 #include "boost/shared_ptr.hpp"
 #include <string>
-#include <vector>
 
 using namespace SAMRAI;
 
@@ -43,7 +42,16 @@ class Difference
         computeDifference(
             boost::shared_ptr<pdat::CellData<double> >& difference,
             const boost::shared_ptr<pdat::CellData<double> >& cell_data,
-            hier::Patch& patch,
+            const int depth = 0) = 0;
+        
+        /*
+         * Compute the difference with the given cell data.
+         */
+        virtual void
+        computeDifference(
+            boost::shared_ptr<pdat::CellData<double> >& difference,
+            const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+            const hier::Box& domain,
             const int depth = 0) = 0;
         
         /*
@@ -54,7 +62,17 @@ class Difference
             boost::shared_ptr<pdat::CellData<double> >& difference,
             boost::shared_ptr<pdat::CellData<double> >& variable_local_mean,
             const boost::shared_ptr<pdat::CellData<double> >& cell_data,
-            hier::Patch& patch,
+            const int depth = 0) = 0;
+        
+        /*
+         * Compute the difference and the local mean of the given cell data.
+         */
+        virtual void
+        computeDifferenceWithVariableLocalMean(
+            boost::shared_ptr<pdat::CellData<double> >& difference,
+            boost::shared_ptr<pdat::CellData<double> >& variable_local_mean,
+            const boost::shared_ptr<pdat::CellData<double> >& cell_data,
+            const hier::Box& domain,
             const int depth = 0) = 0;
         
     protected:

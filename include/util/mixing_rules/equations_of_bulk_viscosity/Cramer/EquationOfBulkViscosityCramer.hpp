@@ -14,6 +14,8 @@ class EquationOfBulkViscosityCramer: public EquationOfBulkViscosity
                     dim)
         {}
         
+        ~EquationOfBulkViscosityCramer() {}
+        
         /*
          * Print all characteristics of the equation of thermal conductivity class.
          */
@@ -28,6 +30,28 @@ class EquationOfBulkViscosityCramer: public EquationOfBulkViscosity
             const double* const pressure,
             const double* const temperature,
             const std::vector<const double*>& molecular_properties) const;
+        
+        /*
+         * Compute the bulk viscosity.
+         */
+        void
+        computeBulkViscosity(
+            boost::shared_ptr<pdat::CellData<double> >& data_bulk_viscosity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const std::vector<const double*>& molecular_properties,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the bulk viscosity.
+         */
+        void
+        computeBulkViscosity(
+            boost::shared_ptr<pdat::CellData<double> >& data_bulk_viscosity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::CellData<double> >& data_molecular_properties,
+            const hier::Box& domain) const;
         
     private:
         

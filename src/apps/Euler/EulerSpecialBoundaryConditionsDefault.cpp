@@ -15,4 +15,6 @@ EulerSpecialBoundaryConditions::setSpecialBoundaryConditions(
     NULL_USE(conservative_variables);
     NULL_USE(fill_time);
     NULL_USE(ghost_width_to_fill);
+    
+    NULL_USE(d_flow_model_type);
 }

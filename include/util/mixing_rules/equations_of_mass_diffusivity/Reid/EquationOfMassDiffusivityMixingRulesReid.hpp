@@ -13,6 +13,8 @@ class EquationOfMassDiffusivityMixingRulesReid: public EquationOfMassDiffusivity
             const MIXING_CLOSURE_MODEL::TYPE& mixing_closure_model,
             const boost::shared_ptr<tbox::Database>& equation_of_mass_diffusivity_mixing_rules_db);
         
+        ~EquationOfMassDiffusivityMixingRulesReid() {}
+        
         /*
          * Print all characteristics of the equation of mass diffusivity mixing rules class.
          */
@@ -28,20 +30,35 @@ class EquationOfMassDiffusivityMixingRulesReid: public EquationOfMassDiffusivity
             const boost::shared_ptr<tbox::Database>& restart_db) const;
         
         /*
-         * Compute the mass diffusivities of the mixture with isothermal and isobaric assumptions.
+         * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibria assumptions.
          */
         void
         getMassDiffusivities(
             std::vector<double*>& mass_diffusivities,
             const double* const pressure,
             const double* const temperature,
-            const std::vector<const double*>& mass_fraction) const;
+            const std::vector<const double*>& mass_fractions) const;
+        
+        /*
+         * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibria assumptions.
+         */
+        void
+        computeMassDiffusivities(
+            boost::shared_ptr<pdat::CellData<double> >& data_mass_diffusivities,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+            const hier::Box& domain) const;
         
         /*
          * Get the number of molecular properties of a species.
          */
         int
-        getNumberOfSpeciesMolecularProperties() const { return 3; }
+        getNumberOfSpeciesMolecularProperties(const int species_index = 0) const
+        {
+            NULL_USE(species_index);
+            return 3;
+        }
         
         /*
          * Get the molecular properties of a species.
@@ -49,7 +66,7 @@ class EquationOfMassDiffusivityMixingRulesReid: public EquationOfMassDiffusivity
         void
         getSpeciesMolecularProperties(
             std::vector<double*>& species_molecular_properties,
-            const int& species_index) const;
+            const int species_index = 0) const;
         
     private:
         /*

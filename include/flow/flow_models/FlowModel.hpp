@@ -6,6 +6,7 @@
 #include "algs/integrator/RungeKuttaLevelIntegrator.hpp"
 #include "extn/visit_data_writer/ExtendedVisItDataWriter.hpp"
 #include "flow/flow_models/FlowModelBoundaryUtilities.hpp"
+#include "flow/flow_models/FlowModelRiemannSolver.hpp"
 #include "flow/flow_models/FlowModelStatisticsUtilities.hpp"
 #include "util/Directions.hpp"
 #include "util/mixing_rules/equations_of_state/EquationOfStateMixingRulesManager.hpp"
@@ -16,7 +17,6 @@
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 #include "SAMRAI/pdat/CellData.h"
 #include "SAMRAI/pdat/CellVariable.h"
-#include "SAMRAI/pdat/FaceData.h"
 #include "SAMRAI/pdat/SideData.h"
 
 #include "boost/enable_shared_from_this.hpp"
@@ -45,28 +45,13 @@ namespace AVERAGING
                 ROE };
 }
 
-namespace RIEMANN_SOLVER
-{
-    enum TYPE { HLLC,
-                HLLC_HLL };
-}
-
-namespace COMPUTING_OPTION
-{
-    enum TYPE { ALL,
-                INTERIOR,
-                GHOST_X,
-                GHOST_Y,
-                GHOST_Z,
-                GHOST_CORNERS };
-}
-
+class FlowModelRiemannSolver;
 class FlowModelStatisticsUtilities;
 
 /*
  * The class should at least be able to register, compute and get the following cell data of the single-species/mixture:
- * DENSITY, MOMENTUM, TOTAL_ENERGY, PRESSURE, VELOCITY, SOUND_SPEED, DILATATION, VORTICITY, ENSTROPHY, PRIMITIVE_VARIABLES
- * CONVECTIVE_FLUX_X, CONVECTIVE_FLUX_Y, CONVECTIVE_FLUX_Z, MAX_WAVE_SPEED_X, MAX_WAVE_SPEED_Y, MAX_WAVE_SPEED_Z
+ * DENSITY, MOMENTUM, TOTAL_ENERGY, PRESSURE, VELOCITY, SOUND_SPEED, PRIMITIVE_VARIABLES, CONVECTIVE_FLUX_X,
+ * CONVECTIVE_FLUX_Y, CONVECTIVE_FLUX_Z, MAX_WAVE_SPEED_X, MAX_WAVE_SPEED_Y, MAX_WAVE_SPEED_Z.
  */
 class FlowModel:
     public appu::VisDerivedDataStrategy,
@@ -100,6 +85,14 @@ class FlowModel:
         }
         
         virtual ~FlowModel() {}
+        
+        /*
+         * Get the total number of species.
+         */
+        int getNumberOfSpecies() const
+        {
+            return d_num_species;
+        }
         
         /*
          * Get the total number of equations.
@@ -142,6 +135,15 @@ class FlowModel:
         getEquationOfStateMixingRules() const
         {
             return d_equation_of_state_mixing_rules;
+        }
+        
+        /*
+         * Return the boost::shared_ptr to the Riemann solver object.
+         */
+        const boost::shared_ptr<FlowModelRiemannSolver>&
+        getFlowModelRiemannSolver() const
+        {
+            return d_flow_model_riemann_solver;
         }
         
         /*
@@ -262,9 +264,18 @@ class FlowModel:
         /*
          * Compute global cell data of different registered derived variables with the registered data context.
          */
+        void
+        computeGlobalDerivedCellData()
+        {
+            const hier::Box empty_box(d_dim);
+            computeGlobalDerivedCellData(empty_box);
+        }
+        
+        /*
+         * Compute global cell data of different registered derived variables with the registered data context.
+         */
         virtual void
-        computeGlobalDerivedCellData(
-            const COMPUTING_OPTION::TYPE& computing_option = COMPUTING_OPTION::ALL) = 0;
+        computeGlobalDerivedCellData(const hier::Box& domain) = 0;
         
         /*
          * Get the global cell data of one cell variable in the registered patch.
@@ -371,38 +382,6 @@ class FlowModel:
             const std::vector<boost::shared_ptr<pdat::SideData<double> > >& projection_variables) = 0;
         
         /*
-         * Compute the local intercell quantities with conservative variables on each side of the face
-         * from Riemann solver at face.
-         * fluxes_face: Convective flux at face.
-         * velocity_face: Velocity at face.
-         * The FlowModelSingleSpecies class modifies nothing for velocity_face.
-         */
-        virtual void
-        computeLocalFaceFluxAndVelocityFromRiemannSolverWithConservativeVariables(
-            std::vector<boost::reference_wrapper<double> >& flux_face,
-            std::vector<boost::reference_wrapper<double> >& velocity_face,
-            const std::vector<boost::reference_wrapper<double> >& conservative_variables_minus,
-            const std::vector<boost::reference_wrapper<double> >& conservative_variables_plus,
-            const DIRECTION::TYPE& direction,
-            const RIEMANN_SOLVER::TYPE& Riemann_solver) = 0;
-        
-        /*
-         * Compute the local intercell quantities with primitive variables on each side of the face
-         * from Riemann solver at face.
-         * fluxes_face: Convective flux at face.
-         * velocity_face: Velocity at face.
-         * The FlowModelSingleSpecies class modify nothing for velocity_face.
-         */
-        virtual void
-        computeLocalFaceFluxAndVelocityFromRiemannSolverWithPrimitiveVariables(
-            std::vector<boost::reference_wrapper<double> >& flux_face,
-            std::vector<boost::reference_wrapper<double> >& velocity_face,
-            const std::vector<boost::reference_wrapper<double> >& primitive_variables_minus,
-            const std::vector<boost::reference_wrapper<double> >& primitive_variables_plus,
-            const DIRECTION::TYPE& direction,
-            const RIEMANN_SOLVER::TYPE& Riemann_solver) = 0;
-        
-        /*
          * Check whether the given side conservative variables are within the bounds.
          */
         virtual void
@@ -463,6 +442,12 @@ class FlowModel:
         {
             d_plot_context = plot_context;
         }
+        
+        /*
+         * Setup the Riemann solver object.
+         */
+        void
+        setupRiemannSolver();
         
         /*
          * Setup the statistics utilties object.
@@ -612,6 +597,11 @@ class FlowModel:
          * boost::shared_ptr to the plotting context.
          */
         boost::shared_ptr<hier::VariableContext> d_plot_context;
+        
+        /*
+         * boost::shared_ptr to the Riemann solver object for the flow model.
+         */
+        boost::shared_ptr<FlowModelRiemannSolver> d_flow_model_riemann_solver;
         
         /*
          * boost::shared_ptr to the boundary utilities object for the flow model.

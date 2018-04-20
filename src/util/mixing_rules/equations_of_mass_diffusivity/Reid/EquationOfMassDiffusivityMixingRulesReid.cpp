@@ -237,76 +237,78 @@ EquationOfMassDiffusivityMixingRulesReid::putToRestart(
 
 
 /*
- * Compute the mass diffusivities of the mixture with isothermal and isobaric assumptions.
+ * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibria assumptions.
  */
 void
 EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivities(
     std::vector<double*>& mass_diffusivities,
     const double* const pressure,
     const double* const temperature,
-    const std::vector<const double*>& mass_fraction) const
+    const std::vector<const double*>& mass_fractions) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
-    TBOX_ASSERT(static_cast<int>(mass_diffusivities.size()) == d_num_species);
     TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
                 (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
-    TBOX_ASSERT((static_cast<int>(mass_fraction.size()) == d_num_species) ||
-                (static_cast<int>(mass_fraction.size()) == d_num_species - 1));
+    
+    TBOX_ASSERT(static_cast<int>(mass_diffusivities.size()) == d_num_species);
+    TBOX_ASSERT((static_cast<int>(mass_fractions.size()) == d_num_species) ||
+                (static_cast<int>(mass_fractions.size()) == d_num_species - 1));
 #endif
     
     if (d_num_species > 1)
     {
         /*
          * Initialize the containers and pointers to the containers for the molecular properties
-         * of species 1 and 2.
+         * of species i and j.
          */
         
-        std::vector<double> species_molecular_properties_1;
-        std::vector<double> species_molecular_properties_2;
-        std::vector<double*> species_molecular_properties_ptr_1;
-        std::vector<double*> species_molecular_properties_ptr_2;
-        std::vector<const double*> species_molecular_properties_const_ptr_1;
-        std::vector<const double*> species_molecular_properties_const_ptr_2;
+        std::vector<double> species_molecular_properties_i;
+        std::vector<double> species_molecular_properties_j;
+        std::vector<double*> species_molecular_properties_ptr_i;
+        std::vector<double*> species_molecular_properties_ptr_j;
+        std::vector<const double*> species_molecular_properties_const_ptr_i;
+        std::vector<const double*> species_molecular_properties_const_ptr_j;
         
         const int num_molecular_properties = getNumberOfSpeciesMolecularProperties();
         
-        species_molecular_properties_1.resize(num_molecular_properties);
-        species_molecular_properties_2.resize(num_molecular_properties);
-        species_molecular_properties_ptr_1.reserve(num_molecular_properties);
-        species_molecular_properties_ptr_2.reserve(num_molecular_properties);
-        species_molecular_properties_const_ptr_1.reserve(num_molecular_properties);
-        species_molecular_properties_const_ptr_2.reserve(num_molecular_properties);
+        species_molecular_properties_i.resize(num_molecular_properties);
+        species_molecular_properties_j.resize(num_molecular_properties);
+        species_molecular_properties_ptr_i.reserve(num_molecular_properties);
+        species_molecular_properties_ptr_j.reserve(num_molecular_properties);
+        species_molecular_properties_const_ptr_i.reserve(num_molecular_properties);
+        species_molecular_properties_const_ptr_j.reserve(num_molecular_properties);
         
         for (int mi = 0; mi < num_molecular_properties; mi++)
         {
-            species_molecular_properties_ptr_1.push_back(&species_molecular_properties_1[mi]);
-            species_molecular_properties_ptr_2.push_back(&species_molecular_properties_2[mi]);
-            species_molecular_properties_const_ptr_1.push_back(&species_molecular_properties_1[mi]);
-            species_molecular_properties_const_ptr_2.push_back(&species_molecular_properties_2[mi]);
+            species_molecular_properties_ptr_i.push_back(&species_molecular_properties_i[mi]);
+            species_molecular_properties_ptr_j.push_back(&species_molecular_properties_j[mi]);
+            species_molecular_properties_const_ptr_i.push_back(&species_molecular_properties_i[mi]);
+            species_molecular_properties_const_ptr_j.push_back(&species_molecular_properties_j[mi]);
         }
         
         /*
-         * Get the mass diffusion coefficient for each pair of species.
+         * Get the binary mass diffusivity for each pair of species.
          */
         
-        std::vector<double> D_ij(0.5*(d_num_species - 1)*d_num_species);
+        std::vector<double> D_ij((d_num_species - 1)*d_num_species/2);
         
         for (int i = 0; i < d_num_species; i++)
         {
+            getSpeciesMolecularProperties(species_molecular_properties_ptr_i, i);
+            
             for (int j = i + 1; j < d_num_species; j++)
             {
-                const int idx = 0.5*(d_num_species - 1)*d_num_species -
-                    0.5*(d_num_species - 1 - i)*(d_num_species - i) +
+                const int idx_ij = (d_num_species - 1)*d_num_species/2 -
+                    (d_num_species - 1 - i)*(d_num_species - i)/2 +
                     (j - (i + 1));
                 
-                getSpeciesMolecularProperties(species_molecular_properties_ptr_1, i);
-                getSpeciesMolecularProperties(species_molecular_properties_ptr_2, j);
+                getSpeciesMolecularProperties(species_molecular_properties_ptr_j, j);
                 
-                D_ij[idx] = getMassDiffusivity(
-                        pressure,
-                        temperature,
-                        species_molecular_properties_const_ptr_1,
-                        species_molecular_properties_const_ptr_2);
+                D_ij[idx_ij] = getMassDiffusivity(
+                    pressure,
+                    temperature,
+                    species_molecular_properties_const_ptr_i,
+                    species_molecular_properties_const_ptr_j);
             }
         }
         
@@ -317,35 +319,45 @@ EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivities(
         std::vector<double> X;
         X.reserve(d_num_species);
         
-        double sum = 0.0;
+        double sum = double(0);
         
-        if (static_cast<int>(mass_fraction.size()) == d_num_species - 1)
+        if (static_cast<int>(mass_fractions.size()) == d_num_species)
         {
-            double Y_last = 1.0;
+            for (int si = 0; si < d_num_species; si++)
+            {
+                getSpeciesMolecularProperties(species_molecular_properties_ptr_i, si);
+                X.push_back((*(mass_fractions[si]))/(species_molecular_properties_i[2]));
+                X[si] = std::max(double(0), X[si]);
+                sum += X[si];
+            }
+        }
+        else if (static_cast<int>(mass_fractions.size()) == d_num_species - 1)
+        {
+            double Y_last = double(1);
             
             for (int si = 0; si < d_num_species - 1; si++)
             {
-                getSpeciesMolecularProperties(species_molecular_properties_ptr_1, si);
-                X.push_back((*(mass_fraction[si]))/(species_molecular_properties_1[2]));
+                getSpeciesMolecularProperties(species_molecular_properties_ptr_i, si);
+                X.push_back((*(mass_fractions[si]))/(species_molecular_properties_i[2]));
+                X[si] = std::max(double(0), X[si]);
                 sum += X[si];
                 
                 // Compute the mass fraction of the last species.
-                Y_last -= *(mass_fraction[si]);
+                Y_last -= *(mass_fractions[si]);
             }
             
-            getSpeciesMolecularProperties(species_molecular_properties_ptr_1, d_num_species - 1);
-            X.push_back(Y_last/(species_molecular_properties_1[2]));
+            getSpeciesMolecularProperties(species_molecular_properties_ptr_i, d_num_species - 1);
+            X.push_back(Y_last/(species_molecular_properties_i[2]));
+            X[d_num_species - 1] = std::max(double(0), X[d_num_species - 1]);
             sum += X[d_num_species - 1];
         }
         else
         {
-            for (int si = 0; si < d_num_species; si++)
-            {
-                getSpeciesMolecularProperties(species_molecular_properties_ptr_1, si);
-                X.push_back((*(mass_fraction[si]))/(species_molecular_properties_1[2]));
-                X[si] = std::max(0.0, X[si]);
-                sum += X[si];
-            }
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Number of mass fractions provided is not"
+                << " equal to the total number of species or (total number of species - 1)."
+                << std::endl);
         }
         
         for (int si = 0; si < d_num_species; si++)
@@ -354,42 +366,1200 @@ EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivities(
         }
         
         /*
-         * Compute the effective binary diffusion coefficients for each species.
+         * Compute the effective binary diffusivity for each species.
          */
         
         for (int si = 0; si < d_num_species; si++)
         {
             double& D = *(mass_diffusivities[si]);
-            D = 0.0;
+            D = double(0);
             
             for (int sj = 0; sj < d_num_species; sj++)
             {
                 if (si != sj)
                 {
-                    int idx = 0.0;
+                    int idx = 0;
                     if (sj > si)
                     {
-                        idx = 0.5*(d_num_species - 1)*d_num_species -
-                            0.5*(d_num_species - 1 - si)*(d_num_species - si) +
+                        idx = (d_num_species - 1)*d_num_species/2 -
+                            (d_num_species - 1 - si)*(d_num_species - si)/2 +
                             (sj - (si + 1));
                     }
                     else
                     {
-                        idx = 0.5*(d_num_species - 1)*d_num_species -
-                            0.5*(d_num_species - 1 - sj)*(d_num_species - sj) +
+                        idx = (d_num_species - 1)*d_num_species/2 -
+                            (d_num_species - 1 - sj)*(d_num_species - sj)/2 +
                             (si - (sj + 1));
                     }
                     
-                    D += (X[sj] + EPSILON)/(D_ij[idx] + EPSILON);
+                    D += (X[sj] + double(EPSILON))/(D_ij[idx] + double(EPSILON));
                 }
             }
             
-            D = (1.0 - X[si] + EPSILON)/D;
+            D = (double(1) - X[si] + double(EPSILON))/D;
         }
     }
     else
     {
-        *(mass_diffusivities[0]) = 0.0;
+        *(mass_diffusivities[0]) = double(0);
+    }
+}
+
+
+/*
+ * Compute the mass diffusivities of the mixture with isothermal and isobaric equilibria assumptions.
+ */
+void
+EquationOfMassDiffusivityMixingRulesReid::computeMassDiffusivities(
+    boost::shared_ptr<pdat::CellData<double> >& data_mass_diffusivities,
+    const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+    const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+    const boost::shared_ptr<pdat::CellData<double> >& data_mass_fractions,
+    const hier::Box& domain) const
+{
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+    TBOX_ASSERT((d_mixing_closure_model == MIXING_CLOSURE_MODEL::ISOTHERMAL_AND_ISOBARIC) ||
+                (d_mixing_closure_model == MIXING_CLOSURE_MODEL::NO_MODEL && d_num_species == 1));
+    
+    TBOX_ASSERT(data_mass_diffusivities->getDepth() == d_num_species);
+    TBOX_ASSERT(data_mass_fractions->getDepth() == d_num_species ||
+                data_mass_fractions->getDepth() == d_num_species - 1);
+#endif
+    
+    // Get the dimensions of box that covers the interior of patch.
+    const hier::Box interior_box = data_mass_diffusivities->getBox();
+    const hier::IntVector interior_dims = interior_box.numberCells();
+    
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(data_pressure->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_temperature->getBox().numberCells() == interior_dims);
+    TBOX_ASSERT(data_mass_fractions->getBox().numberCells() == interior_dims);
+#endif
+    
+    if (d_num_species == 1)
+    {
+        if (domain.empty())
+        {
+            data_mass_diffusivities->fillAll(double(0));
+        }
+        else
+        {
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+            TBOX_ASSERT(data_mass_diffusivities->getGhostBox().contains(domain));
+#endif
+            
+            data_mass_diffusivities->fillAll(double(0), domain);
+        }
+        
+        return;
+    }
+    
+    /*
+     * Get the numbers of ghost cells and the dimensions of the ghost cell boxes.
+     */
+    
+    const hier::IntVector num_ghosts_mass_diffusivities = data_mass_diffusivities->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_mass_diffusivities =
+        data_mass_diffusivities->getGhostBox().numberCells();
+    
+    const hier::IntVector num_ghosts_pressure = data_pressure->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_pressure =
+        data_pressure->getGhostBox().numberCells();
+    
+    const hier::IntVector num_ghosts_temperature = data_temperature->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_temperature =
+        data_temperature->getGhostBox().numberCells();
+    
+    const hier::IntVector num_ghosts_mass_fractions = data_mass_fractions->getGhostCellWidth();
+    const hier::IntVector ghostcell_dims_mass_fractions =
+        data_mass_fractions->getGhostBox().numberCells();
+    
+    /*
+     * Get the minimum number of ghost cells and the dimensions of the ghost cell box for binary
+     * mass diffusivities and mole fractions.
+     */
+    
+    hier::IntVector num_ghosts_min(d_dim);
+    
+    num_ghosts_min = num_ghosts_mass_diffusivities;
+    num_ghosts_min = hier::IntVector::min(num_ghosts_pressure, num_ghosts_min);
+    num_ghosts_min = hier::IntVector::min(num_ghosts_temperature, num_ghosts_min);
+    num_ghosts_min = hier::IntVector::min(num_ghosts_mass_fractions, num_ghosts_min);
+    
+    const hier::IntVector ghostcell_dims_min = interior_dims + num_ghosts_min*2;
+    
+    /*
+     * Get the local lower indices and number of cells in each direction of the domain.
+     */
+    
+    hier::IntVector domain_lo(d_dim);
+    hier::IntVector domain_dims(d_dim);
+    
+    if (domain.empty())
+    {
+        hier::Box ghost_box = interior_box;
+        ghost_box.grow(num_ghosts_min);
+        
+        domain_lo = -num_ghosts_min;
+        domain_dims = ghost_box.numberCells();
+    }
+    else
+    {
+#ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
+        TBOX_ASSERT(data_mass_diffusivities->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_pressure->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_temperature->getGhostBox().contains(domain));
+        TBOX_ASSERT(data_mass_fractions->getGhostBox().contains(domain));
+#endif
+        
+        domain_lo = domain.lower() - interior_box.lower();
+        domain_dims = domain.numberCells();
+    }
+    
+    /*
+     * Delcare data containers for binary mass diffusivities and mole fractions.
+     */
+    
+    boost::shared_ptr<pdat::CellData<double> > data_binary_mass_diffusivities(
+        new pdat::CellData<double>(interior_box, (d_num_species - 1)*d_num_species/2, num_ghosts_min));
+    
+    boost::shared_ptr<pdat::CellData<double> > data_mole_fractions(
+        new pdat::CellData<double>(interior_box, d_num_species, num_ghosts_min));
+    
+    boost::shared_ptr<pdat::CellData<double> > data_sum(
+        new pdat::CellData<double>(interior_box, 1, num_ghosts_min));
+    
+    if (domain.empty())
+    {
+        data_sum->fillAll(double(0));
+    }
+    else
+    {
+        data_sum->fillAll(double(0), domain);
+    }
+    
+    /*
+     * Get the pointers to the cell data.
+     */
+    
+    std::vector<double*> D;
+    D.reserve(d_num_species);
+    for (int si = 0; si < d_num_species; si++)
+    {
+        D.push_back(data_mass_diffusivities->getPointer(si));
+    }
+    double* p = data_pressure->getPointer(0);
+    double* T = data_temperature->getPointer(0);
+    std::vector<double*> D_ij;
+    D_ij.reserve((d_num_species - 1)*d_num_species/2);
+    for (int si = 0; si < (d_num_species - 1)*d_num_species/2; si++)
+    {
+        D_ij.push_back(data_binary_mass_diffusivities->getPointer(si));
+    }
+    std::vector<double*> X;
+    X.reserve(d_num_species);
+    for (int si = 0; si < d_num_species; si++)
+    {
+        X.push_back(data_mole_fractions->getPointer(si));
+    }
+    double* sum = data_sum->getPointer(0);
+    
+    /*
+     * Compute the binary mass diffusivities.
+     */
+    
+    {
+        const double A = double(1.06036);
+        const double B = double(-0.1561);
+        const double C = double(0.19300);
+        const double D = double(-0.47635);
+        const double E = double(1.03587);
+        const double F = double(-1.52996);
+        const double G = double(1.76474);
+        const double H = double(-3.89411);
+        
+        /*
+         * Initialize the containers and pointers to the containers for the molecular properties of
+         * species i and j.
+         */
+        
+        std::vector<double> species_molecular_properties_i;
+        std::vector<double> species_molecular_properties_j;
+        std::vector<double*> species_molecular_properties_ptr_i;
+        std::vector<double*> species_molecular_properties_ptr_j;
+        
+        const int num_molecular_properties = getNumberOfSpeciesMolecularProperties();
+        
+        species_molecular_properties_i.resize(num_molecular_properties);
+        species_molecular_properties_j.resize(num_molecular_properties);
+        species_molecular_properties_ptr_i.reserve(num_molecular_properties);
+        species_molecular_properties_ptr_j.reserve(num_molecular_properties);
+        
+        for (int mi = 0; mi < num_molecular_properties; mi++)
+        {
+            species_molecular_properties_ptr_i.push_back(&species_molecular_properties_i[mi]);
+            species_molecular_properties_ptr_j.push_back(&species_molecular_properties_j[mi]);
+        }
+                
+        for (int si = 0; si < d_num_species; si++)
+        {
+            getSpeciesMolecularProperties(species_molecular_properties_ptr_i, si);
+            
+            const double& epsilon_by_k_i = species_molecular_properties_i[0];
+            const double& sigma_i = species_molecular_properties_i[1];
+            const double& M_i = species_molecular_properties_i[2];
+            
+            for (int sj = si + 1; sj < d_num_species; sj++)
+            {
+                getSpeciesMolecularProperties(species_molecular_properties_ptr_j, sj);
+                
+                const double& epsilon_by_k_j = species_molecular_properties_j[0];
+                const double& sigma_j = species_molecular_properties_j[1];
+                const double& M_j = species_molecular_properties_j[2];
+                
+                const double T_epsilon_ij = sqrt(epsilon_by_k_i*epsilon_by_k_j);
+                const double sigma_ij = double(1)/double(2)*(sigma_i + sigma_j);
+                const double sigma_ij_sq = sigma_ij*sigma_ij;
+                const double M_ij = double(2)/(double(1)/M_i + double(1)/M_j);
+                const double M_ij_sqrt = sqrt(M_ij);
+                
+                const int idx_ij = (d_num_species - 1)*d_num_species/2 -
+                    (d_num_species - 1 - si)*(d_num_species - si)/2 +
+                    (sj - (si + 1));
+                
+                if (d_dim == tbox::Dimension(1))
+                {
+                    /*
+                     * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+                     */
+                    
+                    const int domain_lo_0 = domain_lo[0];
+                    const int domain_dim_0 = domain_dims[0];
+                    
+                    const int num_ghosts_0_min = num_ghosts_min[0];
+                    const int num_ghosts_0_pressure = num_ghosts_pressure[0];
+                    const int num_ghosts_0_temperature = num_ghosts_temperature[0];
+                    
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_min = i + num_ghosts_0_min;
+                        const int idx_pressure = i + num_ghosts_0_pressure;
+                        const int idx_temperature = i + num_ghosts_0_temperature;
+                        
+                        const double T_star_ij = T[idx_temperature]/T_epsilon_ij;
+                        const double Omega_D_ij = A*pow(T_star_ij, B) + C*exp(D*T_star_ij) + E*exp(F*T_star_ij) +
+                            G*exp(H*T_star_ij);
+                        
+                        D_ij[idx_ij][idx_min] = double(0.0266)*pow(T[idx_temperature], double(3)/double(2))/
+                            (Omega_D_ij*p[idx_pressure]*M_ij_sqrt*sigma_ij_sq);
+                    }
+                }
+                else if (d_dim == tbox::Dimension(2))
+                {
+                    /*
+                     * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+                     */
+                    
+                    const int domain_lo_0 = domain_lo[0];
+                    const int domain_lo_1 = domain_lo[1];
+                    const int domain_dim_0 = domain_dims[0];
+                    const int domain_dim_1 = domain_dims[1];
+                    
+                    const int num_ghosts_0_min = num_ghosts_min[0];
+                    const int num_ghosts_1_min = num_ghosts_min[1];
+                    const int ghostcell_dim_0_min = ghostcell_dims_min[0];
+                    
+                    const int num_ghosts_0_pressure = num_ghosts_pressure[0];
+                    const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+                    const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
+                    
+                    const int num_ghosts_0_temperature = num_ghosts_temperature[0];
+                    const int num_ghosts_1_temperature = num_ghosts_temperature[1];
+                    const int ghostcell_dim_0_temperature = ghostcell_dims_temperature[0];
+                    
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_min = (i + num_ghosts_0_min) +
+                                (j + num_ghosts_1_min)*ghostcell_dim_0_min;
+                            
+                            const int idx_pressure = (i + num_ghosts_0_pressure) +
+                                (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure;
+                            
+                            const int idx_temperature = (i + num_ghosts_0_temperature) +
+                                (j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature;
+                            
+                            const double T_star_ij = T[idx_temperature]/T_epsilon_ij;
+                            const double Omega_D_ij = A*pow(T_star_ij, B) + C*exp(D*T_star_ij) + E*exp(F*T_star_ij) +
+                                G*exp(H*T_star_ij);
+                            
+                            D_ij[idx_ij][idx_min] = double(0.0266)*pow(T[idx_temperature], double(3)/double(2))/
+                                (Omega_D_ij*p[idx_pressure]*M_ij_sqrt*sigma_ij_sq);
+                        }
+                    }
+                }
+                else if (d_dim == tbox::Dimension(3))
+                {
+                    /*
+                     * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+                     */
+                    
+                    const int domain_lo_0 = domain_lo[0];
+                    const int domain_lo_1 = domain_lo[1];
+                    const int domain_lo_2 = domain_lo[2];
+                    const int domain_dim_0 = domain_dims[0];
+                    const int domain_dim_1 = domain_dims[1];
+                    const int domain_dim_2 = domain_dims[2];
+                    
+                    const int num_ghosts_0_min = num_ghosts_min[0];
+                    const int num_ghosts_1_min = num_ghosts_min[1];
+                    const int num_ghosts_2_min = num_ghosts_min[2];
+                    const int ghostcell_dim_0_min = ghostcell_dims_min[0];
+                    const int ghostcell_dim_1_min = ghostcell_dims_min[1];
+                    
+                    const int num_ghosts_0_pressure = num_ghosts_pressure[0];
+                    const int num_ghosts_1_pressure = num_ghosts_pressure[1];
+                    const int num_ghosts_2_pressure = num_ghosts_pressure[2];
+                    const int ghostcell_dim_0_pressure = ghostcell_dims_pressure[0];
+                    const int ghostcell_dim_1_pressure = ghostcell_dims_pressure[1];
+                    
+                    const int num_ghosts_0_temperature = num_ghosts_temperature[0];
+                    const int num_ghosts_1_temperature = num_ghosts_temperature[1];
+                    const int num_ghosts_2_temperature = num_ghosts_temperature[2];
+                    const int ghostcell_dim_0_temperature = ghostcell_dims_temperature[0];
+                    const int ghostcell_dim_1_temperature = ghostcell_dims_temperature[1];
+                    
+                    for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+                    {
+                        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                        {
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                            {
+                                // Compute the linear indices.
+                                const int idx_min = (i + num_ghosts_0_min) +
+                                    (j + num_ghosts_1_min)*ghostcell_dim_0_min +
+                                    (k + num_ghosts_2_min)*ghostcell_dim_0_min*
+                                        ghostcell_dim_1_min;
+                                
+                                const int idx_pressure = (i + num_ghosts_0_pressure) +
+                                    (j + num_ghosts_1_pressure)*ghostcell_dim_0_pressure +
+                                    (k + num_ghosts_2_pressure)*ghostcell_dim_0_pressure*
+                                        ghostcell_dim_1_pressure;
+                                
+                                const int idx_temperature = (i + num_ghosts_0_temperature) +
+                                    (j + num_ghosts_1_temperature)*ghostcell_dim_0_temperature +
+                                    (k + num_ghosts_2_temperature)*ghostcell_dim_0_temperature*
+                                        ghostcell_dim_1_temperature;
+                                
+                                const double T_star_ij = T[idx_temperature]/T_epsilon_ij;
+                                const double Omega_D_ij = A*pow(T_star_ij, B) + C*exp(D*T_star_ij) +
+                                    E*exp(F*T_star_ij) + G*exp(H*T_star_ij);
+                                
+                                D_ij[idx_ij][idx_min] = double(0.0266)*pow(T[idx_temperature], double(3)/double(2))/
+                                    (Omega_D_ij*p[idx_pressure]*M_ij_sqrt*sigma_ij_sq);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    /*
+     * Compute the mole fractions.
+     */
+    
+    if (data_mass_fractions->getDepth() == d_num_species)
+    {
+        /*
+         * Get the pointers to the cell data of mass fractions.
+         */
+        
+        std::vector<double*> Y;
+        Y.reserve(d_num_species);
+        for (int si = 0; si < d_num_species; si++)
+        {
+            Y.push_back(data_mass_fractions->getPointer(si));
+        }
+        
+        /*
+         * Initialize the container and pointer to the container for the molecular properties.
+         */
+        
+        std::vector<double> species_molecular_properties;
+        std::vector<double*> species_molecular_properties_ptr;
+        
+        const int num_molecular_properties = getNumberOfSpeciesMolecularProperties();
+        
+        species_molecular_properties.resize(num_molecular_properties);
+        species_molecular_properties_ptr.reserve(num_molecular_properties);
+        
+        for (int mi = 0; mi < num_molecular_properties; mi++)
+        {
+            species_molecular_properties_ptr.push_back(&species_molecular_properties[mi]);
+        }
+        
+        if (d_dim == tbox::Dimension(1))
+        {
+            /*
+             * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_dim_0 = domain_dims[0];
+            
+            const int num_ghosts_0_min = num_ghosts_min[0];
+            const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+            
+            for (int si = 0; si < d_num_species; si++)
+            {
+                getSpeciesMolecularProperties(species_molecular_properties_ptr, si);
+                
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_min = i + num_ghosts_0_min;
+                    const int idx_mass_fractions = i + num_ghosts_0_mass_fractions;
+                    
+                    X[si][idx_min] = Y[si][idx_mass_fractions]/species_molecular_properties[2];
+                    X[si][idx_min] = std::max(double(0), X[si][idx_min]);
+                    sum[idx_min] += X[si][idx_min];
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            
+            const int num_ghosts_0_min = num_ghosts_min[0];
+            const int num_ghosts_1_min = num_ghosts_min[1];
+            const int ghostcell_dim_0_min = ghostcell_dims_min[0];
+            
+            const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+            const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
+            const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
+            
+            for (int si = 0; si < d_num_species; si++)
+            {
+                getSpeciesMolecularProperties(species_molecular_properties_ptr, si);
+                
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_min = (i + num_ghosts_0_min) +
+                            (j + num_ghosts_1_min)*ghostcell_dim_0_min;
+                        
+                        const int idx_mass_fractions = (i + num_ghosts_0_mass_fractions) +
+                            (j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
+                        
+                        X[si][idx_min] = Y[si][idx_mass_fractions]/species_molecular_properties[2];
+                        X[si][idx_min] = std::max(double(0), X[si][idx_min]);
+                        sum[idx_min] += X[si][idx_min];
+                    }
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_lo_2 = domain_lo[2];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            const int domain_dim_2 = domain_dims[2];
+            
+            const int num_ghosts_0_min = num_ghosts_min[0];
+            const int num_ghosts_1_min = num_ghosts_min[1];
+            const int num_ghosts_2_min = num_ghosts_min[2];
+            const int ghostcell_dim_0_min = ghostcell_dims_min[0];
+            const int ghostcell_dim_1_min = ghostcell_dims_min[1];
+            
+            const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+            const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
+            const int num_ghosts_2_mass_fractions = num_ghosts_mass_fractions[2];
+            const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
+            const int ghostcell_dim_1_mass_fractions = ghostcell_dims_mass_fractions[1];
+            
+            for (int si = 0; si < d_num_species; si++)
+            {
+                getSpeciesMolecularProperties(species_molecular_properties_ptr, si);
+                
+                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+                {
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_min = (i + num_ghosts_0_min) +
+                                (j + num_ghosts_1_min)*ghostcell_dim_0_min +
+                                (k + num_ghosts_2_min)*ghostcell_dim_0_min*
+                                    ghostcell_dim_1_min;
+                            
+                            const int idx_mass_fractions = (i + num_ghosts_0_mass_fractions) +
+                                (j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                (k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                    ghostcell_dim_1_mass_fractions;
+                            
+                            X[si][idx_min] = Y[si][idx_mass_fractions]/species_molecular_properties[2];
+                            X[si][idx_min] = std::max(double(0), X[si][idx_min]);
+                            sum[idx_min] += X[si][idx_min];
+                        }
+                    }
+                }
+            }
+        }
+    }
+    else if (data_mass_fractions->getDepth() == d_num_species - 1)
+    {
+        boost::shared_ptr<pdat::CellData<double> > data_mass_fractions_last(
+            new pdat::CellData<double>(interior_box, 1, num_ghosts_mass_fractions));
+        
+        if (domain.empty())
+        {
+            data_mass_fractions_last->fillAll(double(1));
+        }
+        else
+        {
+            data_mass_fractions_last->fillAll(double(1), domain);
+        }
+        
+        /*
+         * Get the pointers to the cell data of mass fractions.
+         */
+        
+        std::vector<double*> Y;
+        Y.reserve(d_num_species - 1);
+        for (int si = 0; si < d_num_species - 1; si++)
+        {
+            Y.push_back(data_mass_fractions->getPointer(si));
+        }
+        
+        double* Y_last = data_mass_fractions_last->getPointer(0);
+        
+        /*
+         * Initialize the container and pointer to the container for the molecular properties.
+         */
+        
+        std::vector<double> species_molecular_properties;
+        std::vector<double*> species_molecular_properties_ptr;
+        
+        const int num_molecular_properties = getNumberOfSpeciesMolecularProperties();
+        
+        species_molecular_properties.resize(num_molecular_properties);
+        species_molecular_properties_ptr.reserve(num_molecular_properties);
+        
+        for (int mi = 0; mi < num_molecular_properties; mi++)
+        {
+            species_molecular_properties_ptr.push_back(&species_molecular_properties[mi]);
+        }
+        
+        if (d_dim == tbox::Dimension(1))
+        {
+            /*
+             * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_dim_0 = domain_dims[0];
+            
+            const int num_ghosts_0_min = num_ghosts_min[0];
+            const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+            
+            for (int si = 0; si < d_num_species - 1; si++)
+            {
+                getSpeciesMolecularProperties(species_molecular_properties_ptr, si);
+                
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_min = i + num_ghosts_0_min;
+                    const int idx_mass_fractions = i + num_ghosts_0_mass_fractions;
+                    
+                    X[si][idx_min] = Y[si][idx_mass_fractions]/species_molecular_properties[2];
+                    X[si][idx_min] = std::max(double(0), X[si][idx_min]);
+                    sum[idx_min] += X[si][idx_min];
+                    
+                    // Compute the mass fraction of the last species.
+                    Y_last[idx_mass_fractions] -= Y[si][idx_mass_fractions];
+                }
+            }
+            
+            getSpeciesMolecularProperties(species_molecular_properties_ptr, d_num_species - 1);
+            
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx_min = i + num_ghosts_0_min;
+                const int idx_mass_fractions = i + num_ghosts_0_mass_fractions;
+                
+                X[d_num_species - 1][idx_min] = Y_last[idx_mass_fractions]/species_molecular_properties[2];
+                X[d_num_species - 1][idx_min] = std::max(double(0), X[d_num_species - 1][idx_min]);
+                sum[idx_min] += X[d_num_species - 1][idx_min];
+            }
+        }
+        else if (d_dim == tbox::Dimension(2))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            
+            const int num_ghosts_0_min = num_ghosts_min[0];
+            const int num_ghosts_1_min = num_ghosts_min[1];
+            const int ghostcell_dim_0_min = ghostcell_dims_min[0];
+            
+            const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+            const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
+            const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
+            
+            for (int si = 0; si < d_num_species - 1; si++)
+            {
+                getSpeciesMolecularProperties(species_molecular_properties_ptr, si);
+                
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_min = (i + num_ghosts_0_min) +
+                            (j + num_ghosts_1_min)*ghostcell_dim_0_min;
+                        
+                        const int idx_mass_fractions = (i + num_ghosts_0_mass_fractions) +
+                            (j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
+                        
+                        X[si][idx_min] = Y[si][idx_mass_fractions]/species_molecular_properties[2];
+                        X[si][idx_min] = std::max(double(0), X[si][idx_min]);
+                        sum[idx_min] += X[si][idx_min];
+                        
+                        // Compute the mass fraction of the last species.
+                        Y_last[idx_mass_fractions] -= Y[si][idx_mass_fractions];
+                    }
+                }
+            }
+            
+            getSpeciesMolecularProperties(species_molecular_properties_ptr, d_num_species - 1);
+            
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_min = (i + num_ghosts_0_min) +
+                        (j + num_ghosts_1_min)*ghostcell_dim_0_min;
+                    
+                    const int idx_mass_fractions = (i + num_ghosts_0_mass_fractions) +
+                        (j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions;
+                    
+                    X[d_num_species - 1][idx_min] = Y_last[idx_mass_fractions]/species_molecular_properties[2];
+                    X[d_num_species - 1][idx_min] = std::max(double(0), X[d_num_species - 1][idx_min]);
+                    sum[idx_min] += X[d_num_species - 1][idx_min];
+                }
+            }
+        }
+        else if (d_dim == tbox::Dimension(3))
+        {
+            /*
+             * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+             */
+            
+            const int domain_lo_0 = domain_lo[0];
+            const int domain_lo_1 = domain_lo[1];
+            const int domain_lo_2 = domain_lo[2];
+            const int domain_dim_0 = domain_dims[0];
+            const int domain_dim_1 = domain_dims[1];
+            const int domain_dim_2 = domain_dims[2];
+            
+            const int num_ghosts_0_min = num_ghosts_min[0];
+            const int num_ghosts_1_min = num_ghosts_min[1];
+            const int num_ghosts_2_min = num_ghosts_min[2];
+            const int ghostcell_dim_0_min = ghostcell_dims_min[0];
+            const int ghostcell_dim_1_min = ghostcell_dims_min[1];
+            
+            const int num_ghosts_0_mass_fractions = num_ghosts_mass_fractions[0];
+            const int num_ghosts_1_mass_fractions = num_ghosts_mass_fractions[1];
+            const int num_ghosts_2_mass_fractions = num_ghosts_mass_fractions[2];
+            const int ghostcell_dim_0_mass_fractions = ghostcell_dims_mass_fractions[0];
+            const int ghostcell_dim_1_mass_fractions = ghostcell_dims_mass_fractions[1];
+            
+            for (int si = 0; si < d_num_species - 1; si++)
+            {
+                getSpeciesMolecularProperties(species_molecular_properties_ptr, si);
+                
+                for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+                {
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_min = (i + num_ghosts_0_min) +
+                                (j + num_ghosts_1_min)*ghostcell_dim_0_min +
+                                (k + num_ghosts_2_min)*ghostcell_dim_0_min*
+                                    ghostcell_dim_1_min;
+                            
+                            const int idx_mass_fractions = (i + num_ghosts_0_mass_fractions) +
+                                (j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                                (k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                    ghostcell_dim_1_mass_fractions;
+                            
+                            X[si][idx_min] = Y[si][idx_mass_fractions]/species_molecular_properties[2];
+                            X[si][idx_min] = std::max(double(0), X[si][idx_min]);
+                            sum[idx_min] += X[si][idx_min];
+                            
+                            // Compute the mass fraction of the last species.
+                            Y_last[idx_mass_fractions] -= Y[si][idx_mass_fractions];
+                        }
+                    }
+                }
+            }
+            
+            getSpeciesMolecularProperties(species_molecular_properties_ptr, d_num_species - 1);
+            
+            for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+            {
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_min = (i + num_ghosts_0_min) +
+                            (j + num_ghosts_1_min)*ghostcell_dim_0_min +
+                            (k + num_ghosts_2_min)*ghostcell_dim_0_min*
+                                ghostcell_dim_1_min;
+                        
+                        const int idx_mass_fractions = (i + num_ghosts_0_mass_fractions) +
+                            (j + num_ghosts_1_mass_fractions)*ghostcell_dim_0_mass_fractions +
+                            (k + num_ghosts_2_mass_fractions)*ghostcell_dim_0_mass_fractions*
+                                ghostcell_dim_1_mass_fractions;
+                        
+                        X[d_num_species - 1][idx_min] = Y_last[idx_mass_fractions]/species_molecular_properties[2];
+                        X[d_num_species - 1][idx_min] = std::max(double(0), X[d_num_species - 1][idx_min]);
+                        sum[idx_min] += X[d_num_species - 1][idx_min];
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        TBOX_ERROR(d_object_name
+            << ": "
+            << "Number of components in the data of mass fractions provided is not"
+            << " equal to the total number of species or (total number of species - 1)."
+            << std::endl);
+    }
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        /*
+         * Get the local lower index, numbers of cells in each dimension and number of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_dim_0 = domain_dims[0];
+        
+        const int num_ghosts_0_min = num_ghosts_min[0];
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {
+                // Compute the linear index.
+                const int idx_min = i + num_ghosts_0_min;
+                
+                X[si][idx_min] = X[si][idx_min]/sum[idx_min];
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        /*
+         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        
+        const int num_ghosts_0_min = num_ghosts_min[0];
+        const int num_ghosts_1_min = num_ghosts_min[1];
+        const int ghostcell_dim_0_min = ghostcell_dims_min[0];
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear index.
+                    const int idx_min = (i + num_ghosts_0_min) +
+                        (j + num_ghosts_1_min)*ghostcell_dim_0_min;
+                    
+                    X[si][idx_min] = X[si][idx_min]/sum[idx_min];
+                }
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        /*
+         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_lo_2 = domain_lo[2];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        const int domain_dim_2 = domain_dims[2];
+        
+        const int num_ghosts_0_min = num_ghosts_min[0];
+        const int num_ghosts_1_min = num_ghosts_min[1];
+        const int num_ghosts_2_min = num_ghosts_min[2];
+        const int ghostcell_dim_0_min = ghostcell_dims_min[0];
+        const int ghostcell_dim_1_min = ghostcell_dims_min[1];
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+            {
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                    {
+                        // Compute the linear index.
+                        const int idx_min = (i + num_ghosts_0_min) +
+                            (j + num_ghosts_1_min)*ghostcell_dim_0_min +
+                            (k + num_ghosts_2_min)*ghostcell_dim_0_min*
+                                ghostcell_dim_1_min;
+                        
+                        X[si][idx_min] = X[si][idx_min]/sum[idx_min];
+                    }
+                }
+            }
+        }
+    }
+    
+    /*
+     * Compute the effective binary diffusivity for each species.
+     */
+    
+    if (domain.empty())
+    {
+        data_mass_diffusivities->fillAll(double(0));
+    }
+    else
+    {
+        data_mass_diffusivities->fillAll(double(0), domain);
+    }
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        /*
+         * Get the local lower index, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_dim_0 = domain_dims[0];
+        
+        const int num_ghosts_0_mass_diffusivities = num_ghosts_mass_diffusivities[0];
+        const int num_ghosts_0_min = num_ghosts_min[0];
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int sj = 0; sj < d_num_species; sj++)
+            {
+                if (si != sj)
+                {
+                    int idx_ij = 0;
+                    if (sj > si)
+                    {
+                        idx_ij = (d_num_species - 1)*d_num_species/2 -
+                            (d_num_species - 1 - si)*(d_num_species - si)/2 +
+                            (sj - (si + 1));
+                    }
+                    else
+                    {
+                        idx_ij = (d_num_species - 1)*d_num_species/2 -
+                            (d_num_species - 1 - sj)*(d_num_species - sj)/2 +
+                            (si - (sj + 1));
+                    }
+                    
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_mass_diffusivities = i + num_ghosts_0_mass_diffusivities;
+                        const int idx_min = i + num_ghosts_0_min;
+                        
+                        D[si][idx_mass_diffusivities] += (X[sj][idx_min] + double(EPSILON))/
+                            (D_ij[idx_ij][idx_min] + double(EPSILON));
+                    }
+                }
+            }
+            
+#ifdef HAMERS_ENABLE_SIMD
+            #pragma omp simd
+#endif
+            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+            {
+                // Compute the linear indices.
+                const int idx_mass_diffusivities = i + num_ghosts_0_mass_diffusivities;
+                const int idx_min = i + num_ghosts_0_min;
+                
+                D[si][idx_mass_diffusivities] = (double(1) - X[si][idx_min] + double(EPSILON))/
+                    D[si][idx_mass_diffusivities];
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        /*
+         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        
+        const int num_ghosts_0_mass_diffusivities = num_ghosts_mass_diffusivities[0];
+        const int num_ghosts_1_mass_diffusivities = num_ghosts_mass_diffusivities[1];
+        const int ghostcell_dim_0_mass_diffusivities = ghostcell_dims_mass_diffusivities[0];
+        
+        const int num_ghosts_0_min = num_ghosts_min[0];
+        const int num_ghosts_1_min = num_ghosts_min[1];
+        const int ghostcell_dim_0_min = ghostcell_dims_min[0];
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int sj = 0; sj < d_num_species; sj++)
+            {
+                if (si != sj)
+                {
+                    int idx_ij = 0;
+                    if (sj > si)
+                    {
+                        idx_ij = (d_num_species - 1)*d_num_species/2 -
+                            (d_num_species - 1 - si)*(d_num_species - si)/2 +
+                            (sj - (si + 1));
+                    }
+                    else
+                    {
+                        idx_ij = (d_num_species - 1)*d_num_species/2 -
+                            (d_num_species - 1 - sj)*(d_num_species - sj)/2 +
+                            (si - (sj + 1));
+                    }
+                    
+                    for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                    {
+#ifdef HAMERS_ENABLE_SIMD
+                        #pragma omp simd
+#endif
+                        for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                        {
+                            // Compute the linear indices.
+                            const int idx_mass_diffusivities = (i + num_ghosts_0_mass_diffusivities) +
+                                (j + num_ghosts_1_mass_diffusivities)*ghostcell_dim_0_mass_diffusivities;
+                            
+                            const int idx_min = (i + num_ghosts_0_min) +
+                                (j + num_ghosts_1_min)*ghostcell_dim_0_min;
+                            
+                            D[si][idx_mass_diffusivities] += (X[sj][idx_min] + double(EPSILON))/
+                                (D_ij[idx_ij][idx_min] + double(EPSILON));
+                        }
+                    }
+                }
+            }
+            
+            for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+            {
+#ifdef HAMERS_ENABLE_SIMD
+                #pragma omp simd
+#endif
+                for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                {
+                    // Compute the linear indices.
+                    const int idx_mass_diffusivities = (i + num_ghosts_0_mass_diffusivities) +
+                        (j + num_ghosts_1_mass_diffusivities)*ghostcell_dim_0_mass_diffusivities;
+                    
+                    const int idx_min = (i + num_ghosts_0_min) +
+                        (j + num_ghosts_1_min)*ghostcell_dim_0_min;
+                    
+                    D[si][idx_mass_diffusivities] = (double(1) - X[si][idx_min] + double(EPSILON))/
+                        D[si][idx_mass_diffusivities];
+                }
+            }
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        /*
+         * Get the local lower indices, numbers of cells in each dimension and numbers of ghost cells.
+         */
+        
+        const int domain_lo_0 = domain_lo[0];
+        const int domain_lo_1 = domain_lo[1];
+        const int domain_lo_2 = domain_lo[2];
+        const int domain_dim_0 = domain_dims[0];
+        const int domain_dim_1 = domain_dims[1];
+        const int domain_dim_2 = domain_dims[2];
+        
+        const int num_ghosts_0_mass_diffusivities = num_ghosts_mass_diffusivities[0];
+        const int num_ghosts_1_mass_diffusivities = num_ghosts_mass_diffusivities[1];
+        const int num_ghosts_2_mass_diffusivities = num_ghosts_mass_diffusivities[2];
+        const int ghostcell_dim_0_mass_diffusivities = ghostcell_dims_mass_diffusivities[0];
+        const int ghostcell_dim_1_mass_diffusivities = ghostcell_dims_mass_diffusivities[1];
+        
+        const int num_ghosts_0_min = num_ghosts_min[0];
+        const int num_ghosts_1_min = num_ghosts_min[1];
+        const int num_ghosts_2_min = num_ghosts_min[2];
+        const int ghostcell_dim_0_min = ghostcell_dims_min[0];
+        const int ghostcell_dim_1_min = ghostcell_dims_min[1];
+        
+        for (int si = 0; si < d_num_species; si++)
+        {
+            for (int sj = 0; sj < d_num_species; sj++)
+            {
+                if (si != sj)
+                {
+                    int idx_ij = 0;
+                    if (sj > si)
+                    {
+                        idx_ij = (d_num_species - 1)*d_num_species/2 -
+                            (d_num_species - 1 - si)*(d_num_species - si)/2 +
+                            (sj - (si + 1));
+                    }
+                    else
+                    {
+                        idx_ij = (d_num_species - 1)*d_num_species/2 -
+                            (d_num_species - 1 - sj)*(d_num_species - sj)/2 +
+                            (si - (sj + 1));
+                    }
+                    
+                    for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+                    {
+                        for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                        {
+#ifdef HAMERS_ENABLE_SIMD
+                            #pragma omp simd
+#endif
+                            for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                            {
+                                // Compute the linear indices.
+                                const int idx_mass_diffusivities = (i + num_ghosts_0_mass_diffusivities) +
+                                    (j + num_ghosts_1_mass_diffusivities)*ghostcell_dim_0_mass_diffusivities +
+                                    (k + num_ghosts_2_mass_diffusivities)*ghostcell_dim_0_mass_diffusivities*
+                                        ghostcell_dim_1_mass_diffusivities;
+                                
+                                const int idx_min = (i + num_ghosts_0_min) +
+                                    (j + num_ghosts_1_min)*ghostcell_dim_0_min +
+                                    (k + num_ghosts_2_min)*ghostcell_dim_0_min*
+                                        ghostcell_dim_1_min;
+                                
+                                D[si][idx_mass_diffusivities] += (X[sj][idx_min] + double(EPSILON))/
+                                    (D_ij[idx_ij][idx_min] + double(EPSILON));
+                            }
+                        }
+                    }
+                }
+            }
+            
+            for (int k = domain_lo_2; k < domain_lo_2 + domain_dim_2; k++)
+            {
+                for (int j = domain_lo_1; j < domain_lo_1 + domain_dim_1; j++)
+                {
+#ifdef HAMERS_ENABLE_SIMD
+                    #pragma omp simd
+#endif
+                    for (int i = domain_lo_0; i < domain_lo_0 + domain_dim_0; i++)
+                    {
+                        // Compute the linear indices.
+                        const int idx_mass_diffusivities = (i + num_ghosts_0_mass_diffusivities) +
+                            (j + num_ghosts_1_mass_diffusivities)*ghostcell_dim_0_mass_diffusivities +
+                            (k + num_ghosts_2_mass_diffusivities)*ghostcell_dim_0_mass_diffusivities*
+                                ghostcell_dim_1_mass_diffusivities;
+                        
+                        const int idx_min = (i + num_ghosts_0_min) +
+                            (j + num_ghosts_1_min)*ghostcell_dim_0_min +
+                            (k + num_ghosts_2_min)*ghostcell_dim_0_min*
+                                ghostcell_dim_1_min;
+                        
+                        D[si][idx_mass_diffusivities] = (double(1) - X[si][idx_min] + double(EPSILON))/
+                            D[si][idx_mass_diffusivities];
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -400,7 +1570,7 @@ EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivities(
 void
 EquationOfMassDiffusivityMixingRulesReid::getSpeciesMolecularProperties(
     std::vector<double*>& species_molecular_properties,
-    const int& species_index) const
+    const int species_index) const
 {
 #ifdef HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
     TBOX_ASSERT(static_cast<int>(species_molecular_properties.size()) >= 3);
@@ -429,7 +1599,14 @@ EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivity(
     TBOX_ASSERT(static_cast<int>(molecular_properties_2.size()) >= 3);
 #endif
     
-    double D_12 = 0.0;
+    const double A = double(1.06036);
+    const double B = double(-0.1561);
+    const double C = double(0.19300);
+    const double D = double(-0.47635);
+    const double E = double(1.03587);
+    const double F = double(-1.52996);
+    const double G = double(1.76474);
+    const double H = double(-3.89411);
     
     const double& epsilon_by_k_1 = *(molecular_properties_1[0]);
     const double& sigma_1 = *(molecular_properties_1[1]);
@@ -439,26 +1616,17 @@ EquationOfMassDiffusivityMixingRulesReid::getMassDiffusivity(
     const double& sigma_2 = *(molecular_properties_2[1]);
     const double& M_2 = *(molecular_properties_2[2]);
     
-    const double& T = *temperature;
-    const double& p = *pressure;
-    
-    const double A = 1.06036;
-    const double B = -0.1561;
-    const double C = 0.19300;
-    const double D = -0.47635;
-    const double E = 1.03587;
-    const double F = -1.52996;
-    const double G = 1.76474;
-    const double H = -3.89411;
-    
     const double T_epsilon_12 = sqrt(epsilon_by_k_1*epsilon_by_k_2);
+    const double sigma_12 = double(1)/double(2)*(sigma_1 + sigma_2);
+    const double M_12 = double(2)/(double(1)/M_1 + double(1)/M_2);
+    
+    const double& p = *pressure;
+    const double& T = *temperature;
+    
     const double T_star_12 = T/T_epsilon_12;
     const double Omega_D_12 = A*pow(T_star_12, B) + C*exp(D*T_star_12) + E*exp(F*T_star_12) + G*exp(H*T_star_12);
     
-    const double M_12 = 2.0/(1.0/M_1 + 1.0/M_2);
-    const double sigma_12 = 0.5*(sigma_1 + sigma_2);
-    
-    D_12 = 0.0266*pow(T, 1.5)/(Omega_D_12*p*sqrt(M_12)*sigma_12*sigma_12);
+    double D_12 = double(0.0266)*pow(T, double(3)/double(2))/(Omega_D_12*p*sqrt(M_12)*sigma_12*sigma_12);
     
     return D_12;
 }

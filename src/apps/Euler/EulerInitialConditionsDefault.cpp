@@ -15,6 +15,8 @@ EulerInitialConditions::initializeDataOnPatch(
     NULL_USE(data_time);
     NULL_USE(initial_time);
     
+    NULL_USE(d_flow_model_type);
+    
     TBOX_ERROR(d_object_name
         << ": "
         << "No initial conditon is implemented yet!\n"

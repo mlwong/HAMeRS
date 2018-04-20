@@ -5,20 +5,18 @@
 
 // #define HAMERS_PLOTTING_MULTIRESOLUTION_TAGGER
 
-#define EPSILON 1e-40
+#define EPSILON DBL_EPSILON
 
 MultiresolutionTagger::MultiresolutionTagger(
     const std::string& object_name,
     const tbox::Dimension& dim,
     const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
-    const int& num_species,
     const boost::shared_ptr<FlowModel>& flow_model,
     const boost::shared_ptr<tbox::Database>& multiresolution_tagger_db):
         d_object_name(object_name),
         d_dim(dim),
         d_grid_geometry(grid_geometry),
         d_num_multiresolution_ghosts(hier::IntVector::getZero(d_dim)),
-        d_num_species(num_species),
         d_flow_model(flow_model)
 {
     if (multiresolution_tagger_db != nullptr)

@@ -13,7 +13,6 @@ NavierStokesBoundaryConditions::NavierStokesBoundaryConditions(
     const std::string& project_name,
     const tbox::Dimension& dim,
     const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
-    const int& num_species,
     const FLOW_MODEL::TYPE& flow_model_type,
     const boost::shared_ptr<FlowModel>& flow_model,
     const boost::shared_ptr<tbox::Database>& boundary_conditions_db,
@@ -22,7 +21,6 @@ NavierStokesBoundaryConditions::NavierStokesBoundaryConditions(
         d_project_name(project_name),
         d_dim(dim),
         d_grid_geometry(grid_geometry),
-        d_num_species(num_species),
         d_flow_model_type(flow_model_type),
         d_flow_model(flow_model)
 {
@@ -321,7 +319,7 @@ NavierStokesBoundaryConditions::NavierStokesBoundaryConditions(
         d_dim,
         d_grid_geometry,
         d_flow_model_type,
-        d_num_species));
+        d_flow_model));
 }
 
 

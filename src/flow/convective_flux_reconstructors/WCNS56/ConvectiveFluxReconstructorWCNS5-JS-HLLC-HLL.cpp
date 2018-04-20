@@ -1,6 +1,8 @@
 #include "flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-JS-HLLC-HLL.hpp"
 
-#define EPSILON 1e-40
+#include <cfloat>
+
+#define EPSILON DBL_EPSILON
 
 
 /*
@@ -28,17 +30,20 @@ static inline __attribute__((always_inline)) void computeLocalBeta(
     double** U_array,
     int idx_side)
 {
-    *beta_0 = 1.0/3.0*(U_array[0][idx_side]*(4.0*U_array[0][idx_side] - 19.0*U_array[1][idx_side] +
-         11.0*U_array[2][idx_side]) + U_array[1][idx_side]*(25.0*U_array[1][idx_side] -
-         31.0*U_array[2][idx_side]) + 10.0*U_array[2][idx_side]*U_array[2][idx_side]);
+    *beta_0 = double(1)/double(3)*(U_array[0][idx_side]*(double(4)*U_array[0][idx_side] -
+         double(19)*U_array[1][idx_side] + double(11)*U_array[2][idx_side]) +
+         U_array[1][idx_side]*(double(25)*U_array[1][idx_side] - double(31)*U_array[2][idx_side]) +
+         double(10)*U_array[2][idx_side]*U_array[2][idx_side]);
     
-    *beta_1 = 1.0/3.0*(U_array[1][idx_side]*(4.0*U_array[1][idx_side] - 13.0*U_array[2][idx_side] +
-         5.0*U_array[3][idx_side]) + 13.0*U_array[2][idx_side]*(U_array[2][idx_side] -
-         U_array[3][idx_side]) + 4.0*U_array[3][idx_side]*U_array[3][idx_side]);
+    *beta_1 = double(1)/double(3)*(U_array[1][idx_side]*(double(4)*U_array[1][idx_side] -
+         double(13)*U_array[2][idx_side] + double(5)*U_array[3][idx_side]) +
+         double(13)*U_array[2][idx_side]*(U_array[2][idx_side] - U_array[3][idx_side]) +
+         double(4)*U_array[3][idx_side]*U_array[3][idx_side]);
     
-    *beta_2 = 1.0/3.0*(U_array[2][idx_side]*(10.0*U_array[2][idx_side] - 31.0*U_array[3][idx_side] +
-         11.0*U_array[4][idx_side]) + U_array[3][idx_side]*(25.0*U_array[3][idx_side] -
-         19.0*U_array[4][idx_side]) + 4.0*U_array[4][idx_side]*U_array[4][idx_side]);
+    *beta_2 = double(1)/double(3)*(U_array[2][idx_side]*(double(10)*U_array[2][idx_side] -
+         double(31)*U_array[3][idx_side] + double(11)*U_array[4][idx_side]) +
+         U_array[3][idx_side]*(double(25)*U_array[3][idx_side] - double(19)*U_array[4][idx_side]) +
+         double(4)*U_array[4][idx_side]*U_array[4][idx_side]);
 }
 
 
@@ -52,17 +57,20 @@ static inline __attribute__((always_inline)) void computeLocalBetaTilde(
     double** U_array,
     int idx_side)
 {
-    *beta_tilde_0 = 1.0/3.0*(U_array[5][idx_side]*(4.0*U_array[5][idx_side] - 19.0*U_array[4][idx_side] +
-         11.0*U_array[3][idx_side]) + U_array[4][idx_side]*(25.0*U_array[4][idx_side] -
-         31.0*U_array[3][idx_side]) + 10.0*U_array[3][idx_side]*U_array[3][idx_side]);
+    *beta_tilde_0 = double(1)/double(3)*(U_array[5][idx_side]*(double(4)*U_array[5][idx_side] -
+         double(19)*U_array[4][idx_side] + double(11)*U_array[3][idx_side]) +
+         U_array[4][idx_side]*(double(25)*U_array[4][idx_side] - double(31)*U_array[3][idx_side]) +
+         double(10)*U_array[3][idx_side]*U_array[3][idx_side]);
     
-    *beta_tilde_1 = 1.0/3.0*(U_array[4][idx_side]*(4.0*U_array[4][idx_side] - 13.0*U_array[3][idx_side] +
-         5.0*U_array[2][idx_side]) + 13.0*U_array[3][idx_side]*(U_array[3][idx_side] -
-         U_array[2][idx_side]) + 4.0*U_array[2][idx_side]*U_array[2][idx_side]);
+    *beta_tilde_1 = double(1)/double(3)*(U_array[4][idx_side]*(double(4)*U_array[4][idx_side] -
+         double(13)*U_array[3][idx_side] + double(5)*U_array[2][idx_side]) +
+         double(13)*U_array[3][idx_side]*(U_array[3][idx_side] - U_array[2][idx_side]) +
+         double(4)*U_array[2][idx_side]*U_array[2][idx_side]);
     
-    *beta_tilde_2 = 1.0/3.0*(U_array[3][idx_side]*(10.0*U_array[3][idx_side] - 31.0*U_array[2][idx_side] +
-         11.0*U_array[1][idx_side]) + U_array[2][idx_side]*(25.0*U_array[2][idx_side] -
-         19.0*U_array[1][idx_side]) + 4.0*U_array[1][idx_side]*U_array[1][idx_side]);
+    *beta_tilde_2 = double(1)/double(3)*(U_array[3][idx_side]*(double(10)*U_array[3][idx_side] -
+         double(31)*U_array[2][idx_side] + double(11)*U_array[1][idx_side]) +
+         U_array[2][idx_side]*(double(25)*U_array[2][idx_side] - double(19)*U_array[1][idx_side]) +
+         double(4)*U_array[1][idx_side]*U_array[1][idx_side]);
 }
 
 
@@ -89,9 +97,9 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationM
     
     double omega_0, omega_1, omega_2;
     
-    omega_0 = 1.0/16.0/ipow((beta_0 + EPSILON), p);
-    omega_1 = 5.0/8.0/ipow((beta_1 + EPSILON), p);
-    omega_2 = 5.0/16.0/ipow((beta_2 + EPSILON), p);
+    omega_0 = double(1.0)/double(16)/ipow((beta_0 + EPSILON), p);
+    omega_1 = double(5.0)/double(8)/ipow((beta_1 + EPSILON), p);
+    omega_2 = double(5.0)/double(16)/ipow((beta_2 + EPSILON), p);
     
     double omega_sum = omega_0 + omega_1 + omega_2;
     
@@ -103,11 +111,12 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationM
      * Compute U_minus.
      */
     
-    U_minus[idx_side] = 3.0/8.0*omega_0*U_array[0][idx_side] +
-        (-10.0/8.0*omega_0 - 1.0/8.0*omega_1)*U_array[1][idx_side] +
-        (15.0/8.0*omega_0 + 6.0/8.0*omega_1 + 3.0/8.0*omega_2)*U_array[2][idx_side] +
-        (3.0/8.0*omega_1 + 6.0/8.0*omega_2)*U_array[3][idx_side] -
-        1.0/8.0*omega_2*U_array[4][idx_side];
+    U_minus[idx_side] = double(3)/double(8)*omega_0*U_array[0][idx_side] +
+        (-double(10)/double(8)*omega_0 - double(1)/double(8)*omega_1)*U_array[1][idx_side] +
+        (double(15)/double(8)*omega_0 + double(6)/double(8)*omega_1 +
+        double(3)/double(8)*omega_2)*U_array[2][idx_side] +
+        (double(3)/double(8)*omega_1 + double(6)/double(8)*omega_2)*U_array[3][idx_side] -
+        double(1)/double(8)*omega_2*U_array[4][idx_side];
 }
 
 
@@ -134,9 +143,9 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationP
     
     double omega_tilde_0, omega_tilde_1, omega_tilde_2;
     
-    omega_tilde_0 = 1.0/16.0/ipow((beta_tilde_0 + EPSILON), p);
-    omega_tilde_1 = 5.0/8.0/ipow((beta_tilde_1 + EPSILON), p);
-    omega_tilde_2 = 5.0/16.0/ipow((beta_tilde_2 + EPSILON), p);
+    omega_tilde_0 = double(1)/double(16)/ipow((beta_tilde_0 + EPSILON), p);
+    omega_tilde_1 = double(5)/double(8)/ipow((beta_tilde_1 + EPSILON), p);
+    omega_tilde_2 = double(5)/double(16)/ipow((beta_tilde_2 + EPSILON), p);
     
     double omega_tilde_sum = omega_tilde_0 + omega_tilde_1 + omega_tilde_2;
     
@@ -148,11 +157,12 @@ static inline __attribute__((always_inline)) void performLocalWENOInterpolationP
      * Compute U_plus.
      */
     
-    U_plus[idx_side] = 3.0/8.0*omega_tilde_0*U_array[5][idx_side] +
-        (-10.0/8.0*omega_tilde_0 - 1.0/8.0*omega_tilde_1)*U_array[4][idx_side] +
-        (15.0/8.0*omega_tilde_0 + 6.0/8.0*omega_tilde_1 + 3.0/8.0*omega_tilde_2)*U_array[3][idx_side] +
-        (3.0/8.0*omega_tilde_1 + 6.0/8.0*omega_tilde_2)*U_array[2][idx_side] -
-        1.0/8.0*omega_tilde_2*U_array[1][idx_side];
+    U_plus[idx_side] = double(3)/double(8)*omega_tilde_0*U_array[5][idx_side] +
+        (-double(10)/double(8)*omega_tilde_0 - double(1)/double(8)*omega_tilde_1)*U_array[4][idx_side] +
+        (double(15)/double(8)*omega_tilde_0 + double(6)/double(8)*omega_tilde_1 +
+        double(3)/double(8)*omega_tilde_2)*U_array[3][idx_side] +
+        (double(3)/double(8)*omega_tilde_1 + double(6)/double(8)*omega_tilde_2)*U_array[2][idx_side] -
+        double(1)/double(8)*omega_tilde_2*U_array[1][idx_side];
 }
 
 
@@ -161,7 +171,6 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::ConvectiveFluxReconstructorWCNS5_J
     const tbox::Dimension& dim,
     const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
     const int& num_eqn,
-    const int& num_species,
     const boost::shared_ptr<FlowModel>& flow_model,
     const boost::shared_ptr<tbox::Database>& convective_flux_reconstructor_db):
         ConvectiveFluxReconstructorWCNS56(
@@ -169,7 +178,6 @@ ConvectiveFluxReconstructorWCNS5_JS_HLLC_HLL::ConvectiveFluxReconstructorWCNS5_J
             dim,
             grid_geometry,
             num_eqn,
-            num_species,
             flow_model,
             convective_flux_reconstructor_db)
 {

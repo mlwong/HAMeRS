@@ -16,6 +16,8 @@ class EquationOfShearViscosityChapmanEnskog: public EquationOfShearViscosity
                     dim)
         {}
         
+        ~EquationOfShearViscosityChapmanEnskog() {}
+        
         /*
          * Print all characteristics of the equation of shear viscosity class.
          */
@@ -30,6 +32,28 @@ class EquationOfShearViscosityChapmanEnskog: public EquationOfShearViscosity
             const double* const pressure,
             const double* const temperature,
             const std::vector<const double*>& molecular_properties) const;
+        
+        /*
+         * Compute the shear viscosity.
+         */
+        void
+        computeShearViscosity(
+            boost::shared_ptr<pdat::CellData<double> >& data_shear_viscosity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const std::vector<const double*>& molecular_properties,
+            const hier::Box& domain) const;
+        
+        /*
+         * Compute the shear viscosity.
+         */
+        void
+        computeShearViscosity(
+            boost::shared_ptr<pdat::CellData<double> >& data_shear_viscosity,
+            const boost::shared_ptr<pdat::CellData<double> >& data_pressure,
+            const boost::shared_ptr<pdat::CellData<double> >& data_temperature,
+            const boost::shared_ptr<pdat::CellData<double> >& data_molecular_properties,
+            const hier::Box& domain) const;
         
     private:
         

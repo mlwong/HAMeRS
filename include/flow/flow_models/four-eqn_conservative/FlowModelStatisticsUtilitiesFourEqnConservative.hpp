@@ -2,7 +2,11 @@
 #define FLOW_MODEL_STATISTICS_UTILITIES_FOUR_EQN_CONSERVATIVE_HPP
 
 #include "flow/flow_models/FlowModelStatisticsUtilities.hpp"
+#include "util/mixing_rules/equations_of_bulk_viscosity/EquationOfBulkViscosityMixingRulesManager.hpp"
 #include "util/mixing_rules/equations_of_mass_diffusivity/EquationOfMassDiffusivityMixingRulesManager.hpp"
+#include "util/mixing_rules/equations_of_shear_viscosity/EquationOfShearViscosityMixingRulesManager.hpp"
+#include "util/mixing_rules/equations_of_state/EquationOfStateMixingRulesManager.hpp"
+#include "util/mixing_rules/equations_of_thermal_conductivity/EquationOfThermalConductivityMixingRulesManager.hpp"
 
 class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatisticsUtilities
 {
@@ -13,15 +17,25 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_species,
             const boost::shared_ptr<tbox::Database>& flow_model_db,
-            const boost::shared_ptr<EquationOfMassDiffusivityMixingRules> equation_of_mass_diffusivity_mixing_rules):
+            const boost::shared_ptr<EquationOfStateMixingRules> equation_of_state_mixing_rules,
+            const boost::shared_ptr<EquationOfMassDiffusivityMixingRules> equation_of_mass_diffusivity_mixing_rules,
+            const boost::shared_ptr<EquationOfShearViscosityMixingRules> equation_of_shear_viscosity_mixing_rules,
+            const boost::shared_ptr<EquationOfBulkViscosityMixingRules> equation_of_bulk_viscosity_mixing_rules,
+            const boost::shared_ptr<EquationOfThermalConductivityMixingRules> equation_of_thermal_conductivity_mixing_rules):
                 FlowModelStatisticsUtilities(
                     object_name,
                     dim,
                     grid_geometry,
                     num_species,
                     flow_model_db),
-                d_equation_of_mass_diffusivity_mixing_rules(equation_of_mass_diffusivity_mixing_rules)
+                d_equation_of_state_mixing_rules(equation_of_state_mixing_rules),
+                d_equation_of_mass_diffusivity_mixing_rules(equation_of_mass_diffusivity_mixing_rules),
+                d_equation_of_shear_viscosity_mixing_rules(equation_of_shear_viscosity_mixing_rules),
+                d_equation_of_bulk_viscosity_mixing_rules(equation_of_bulk_viscosity_mixing_rules),
+                d_equation_of_thermal_conductivity_mixing_rules(equation_of_thermal_conductivity_mixing_rules)
         {}
+        
+        ~FlowModelStatisticsUtilitiesFourEqnConservative() {}
         
         /*
          * Output names of statistical quantities to output to a file.
@@ -41,145 +55,34 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
         
     private:
         /*
-         * Output mixing width in x-direction to a file.
+         * boost::shared_ptr to EquationOfStateMixingRules.
          */
-        void
-        outputMixingWidthInXDirection(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
-        
-        /*
-         * Output mixing width in y-direction to a file.
-         */
-        void
-        outputMixingWidthInYDirection(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
-        
-        /*
-         * Output mixing width in z-direction to a file.
-         */
-        void
-        outputMixingWidthInZDirection(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
-        
-        /*
-         * Output mixedness in x-direction to a file.
-         */
-        void
-        outputMixednessInXDirection(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
-        
-        /*
-         * Output mixedness in y-direction to a file.
-         */
-        void
-        outputMixednessInYDirection(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
-        
-        /*
-         * Output mixedness in z-direction to a file.
-         */
-        void
-        outputMixednessInZDirection(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
-        
-        /*
-         * Output TKE integrated with assumed homogeneity in x-direction to a file.
-         */
-        void
-        outputTKEIntegratedWithHomogeneityInXDirection(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
-        
-        /*
-         * Output TKE integrated with assumed homogeneity in y-direction to a file.
-         */
-        void
-        outputTKEIntegratedWithHomogeneityInYDirection(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
-        
-        /*
-         * Output TKE integrated with assumed homogeneity in z-direction to a file.
-         */
-        void
-        outputTKEIntegratedWithHomogeneityInZDirection(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
-        
-        /*
-         * Output TKE integrated with assumed homogeneity in xy-plane to a file.
-         */
-        void
-        outputTKEIntegratedWithHomogeneityInXYPlane(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
-        
-        /*
-         * Output TKE integrated with assumed homogeneity in yz-plane to a file.
-         */
-        void
-        outputTKEIntegratedWithHomogeneityInYZPlane(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
-        
-        /*
-         * Output TKE integrated with assumed homogeneity in xz-plane to a file.
-         */
-        void
-        outputTKEIntegratedWithHomogeneityInXZPlane(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
-        
-        /*
-         * Output enstrophy integrated to a file.
-         */
-        void
-        outputEnstrophyIntegrated(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
-        
-        /*
-         * Output scalar dissipation rate of first species integrated to a file.
-         */
-        void
-        outputScalarDissipationRateIntegrated(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
-        
-        /*
-         * Output numerical interface thickness to a file.
-         */
-        void
-        outputNumericalInterfaceThickness(
-            const std::string& stat_dump_filename,
-            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
-            const boost::shared_ptr<hier::VariableContext>& data_context);
+        const boost::shared_ptr<EquationOfStateMixingRules>
+            d_equation_of_state_mixing_rules;
         
         /*
          * boost::shared_ptr to EquationOfMassDiffusivityMixingRules.
          */
         const boost::shared_ptr<EquationOfMassDiffusivityMixingRules>
             d_equation_of_mass_diffusivity_mixing_rules;
+        
+        /*
+         * boost::shared_ptr to EquationOfShearViscosityMixingRules.
+         */
+        const boost::shared_ptr<EquationOfShearViscosityMixingRules>
+            d_equation_of_shear_viscosity_mixing_rules;
+        
+        /*
+         * boost::shared_ptr to EquationOfBulkViscosityMixingRules.
+         */
+        const boost::shared_ptr<EquationOfBulkViscosityMixingRules>
+            d_equation_of_bulk_viscosity_mixing_rules;
+        
+        /*
+         * boost::shared_ptr to EquationOfThermalConductivityMixingRules.
+         */
+        const boost::shared_ptr<EquationOfThermalConductivityMixingRules>
+            d_equation_of_thermal_conductivity_mixing_rules;
         
 };
 

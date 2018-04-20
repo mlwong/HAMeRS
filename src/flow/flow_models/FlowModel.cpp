@@ -59,6 +59,17 @@ FlowModel::getDiffusiveFluxDiffusivities(
         << std::endl);
 }
 
+
+/*
+ * Setup the Riemann solver object.
+ */
+void
+FlowModel::setupRiemannSolver()
+{
+    d_flow_model_riemann_solver->setFlowModel(shared_from_this());
+}
+
+
 /*
  * Setup the statistics utilties object.
  */

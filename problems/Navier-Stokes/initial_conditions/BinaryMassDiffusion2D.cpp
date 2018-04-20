@@ -43,7 +43,7 @@ NavierStokesInitialConditions::initializeDataOnPatch(
             << std::endl);
     }
     
-    if (d_num_species != 2)
+    if (d_flow_model->getNumberOfSpecies() != 2)
     {
         TBOX_ERROR(d_object_name
             << ": "

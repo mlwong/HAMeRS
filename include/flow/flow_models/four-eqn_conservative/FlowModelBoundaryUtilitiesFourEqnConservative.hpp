@@ -13,6 +13,8 @@ class FlowModelBoundaryUtilitiesFourEqnConservative: public FlowModelBoundaryUti
             const int& num_eqn,
             const boost::shared_ptr<EquationOfStateMixingRules>& equation_of_state_mixing_rules);
         
+        ~FlowModelBoundaryUtilitiesFourEqnConservative() {}
+        
         /*
          * Function to read 1d boundary data from input database.
          * Node locations that have boundary conditions identified are removed from the container.

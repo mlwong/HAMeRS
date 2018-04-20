@@ -27,7 +27,6 @@ class ConvectiveFluxReconstructor
             const tbox::Dimension& dim,
             const boost::shared_ptr<geom::CartesianGridGeometry>& grid_geometry,
             const int& num_eqn,
-            const int& num_species,
             const boost::shared_ptr<FlowModel>& flow_model,
             const boost::shared_ptr<tbox::Database>& convective_flux_reconstructor_db):
                 d_object_name(object_name),
@@ -35,7 +34,6 @@ class ConvectiveFluxReconstructor
                 d_grid_geometry(grid_geometry),
                 d_num_conv_ghosts(hier::IntVector::getZero(d_dim)),
                 d_num_eqn(num_eqn),
-                d_num_species(num_species),
                 d_flow_model(flow_model),
                 d_convective_flux_reconstructor_db(convective_flux_reconstructor_db)
         {}
@@ -104,11 +102,6 @@ class ConvectiveFluxReconstructor
          * Number of equations.
          */
         const int d_num_eqn;
-        
-        /*
-         * Number of species.
-         */
-        const int d_num_species;
         
         /*
          * Flow model.
