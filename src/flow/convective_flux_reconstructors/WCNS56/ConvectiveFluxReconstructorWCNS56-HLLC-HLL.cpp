@@ -2,7 +2,7 @@
 
 #include <cfloat>
 
-#define EPSILON DBL_EPSILON
+#define EPSILON HAMERS_EPSILON
 
 ConvectiveFluxReconstructorWCNS56::ConvectiveFluxReconstructorWCNS56(
     const std::string& object_name,

@@ -12,4 +12,7 @@
 /* Enable HAMeRS developer assertion checking */
 #cmakedefine HAMERS_DEBUG_CHECK_DEV_ASSERTIONS
 
+/* Define epsilon to prevent divisoin by zero */
+#define HAMERS_EPSILON 1.0e-16
+
 #endif /* HAMERS_CONFIG_HPP */

@@ -4,7 +4,7 @@
 
 // #define HAMERS_PLOTTING_GRADIENT_TAGGER
 
-#define EPSILON DBL_EPSILON
+#define EPSILON HAMERS_EPSILON
 
 GradientTagger::GradientTagger(
     const std::string& object_name,

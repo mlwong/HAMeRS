@@ -2,7 +2,7 @@
 
 #include <cfloat>
 
-#define EPSILON DBL_EPSILON
+#define EPSILON HAMERS_EPSILON
 
 /*
  * Timers interspersed throughout the class.

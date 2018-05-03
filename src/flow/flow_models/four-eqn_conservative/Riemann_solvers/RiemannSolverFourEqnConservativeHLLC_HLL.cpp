@@ -2,7 +2,7 @@
 
 #include <cfloat>
 
-#define EPSILON DBL_EPSILON
+#define EPSILON HAMERS_EPSILON
 
 /*
  * Compute the flux at the intercell face from conservative variables.

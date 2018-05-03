@@ -3,7 +3,7 @@
 #include <cfloat>
 #include <cmath>
 
-#define EPSILON DBL_EPSILON
+#define EPSILON HAMERS_EPSILON
 
 EquationOfMassDiffusivityMixingRulesReid::EquationOfMassDiffusivityMixingRulesReid(
     const std::string& object_name,

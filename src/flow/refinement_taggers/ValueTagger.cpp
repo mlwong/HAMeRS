@@ -5,7 +5,7 @@
 
 // #define HAMERS_PLOTTING_VALUE_TAGGER
 
-#define EPSILON DBL_EPSILON
+#define EPSILON HAMERS_EPSILON
 
 ValueTagger::ValueTagger(
     const std::string& object_name,
