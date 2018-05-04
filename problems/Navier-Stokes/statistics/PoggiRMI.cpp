@@ -683,6 +683,24 @@ class RMIStatisticsUtilities
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
+        /*
+         * Output number of cells to a file.
+         */
+        void
+        outputNumberOfCells(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output weighted number of cells to a file.
+         */
+        void
+        outputWeightedNumberOfCells(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
     private:
         /*
          * The object name is used for error/warning reporting.
@@ -46696,6 +46714,446 @@ RMIStatisticsUtilities::outputNumericalInterfaceThickness(
 
 
 /*
+ * Output number of cells to a file.
+ */
+void
+RMIStatisticsUtilities::outputNumberOfCells(
+    const std::string& stat_dump_filename,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context)
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        int num_cells_local = 0;
+        int num_cells_global = 0;
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                /*
+                 * Add the number of cells in current patch.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::IntVector interior_dims = patch_box.numberCells();
+                
+                num_cells_local += interior_dims[0];
+            }
+        }
+        
+        /*
+         * Reduction to get the global number of cells.
+         */
+        
+        mpi.Reduce(
+            &num_cells_local,
+            &num_cells_global,
+            1,
+            MPI_INT,
+            MPI_SUM,
+            0);
+        
+        /*
+         * Output the number of cells (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << double(num_cells_global);
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        int num_cells_local = 0;
+        int num_cells_global = 0;
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                /*
+                 * Add the number of cells in current patch.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::IntVector interior_dims = patch_box.numberCells();
+                
+                num_cells_local += interior_dims[0]*interior_dims[1];
+            }
+        }
+        
+        /*
+         * Reduction to get the global number of cells.
+         */
+        
+        mpi.Reduce(
+            &num_cells_local,
+            &num_cells_global,
+            1,
+            MPI_INT,
+            MPI_SUM,
+            0);
+        
+        /*
+         * Output the number of cells (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << double(num_cells_global);
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        int num_cells_local = 0;
+        int num_cells_global = 0;
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                /*
+                 * Add the number of cells in current patch.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::IntVector interior_dims = patch_box.numberCells();
+                
+                num_cells_local += interior_dims[0]*interior_dims[1]*interior_dims[2];
+            }
+        }
+        
+        /*
+         * Reduction to get the global number of cells.
+         */
+        
+        mpi.Reduce(
+            &num_cells_local,
+            &num_cells_global,
+            1,
+            MPI_INT,
+            MPI_SUM,
+            0);
+        
+        /*
+         * Output the number of cells (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << double(num_cells_global);
+        }
+    }
+}
+
+
+/*
+ * Output weighted number of cells to a file.
+ */
+void
+RMIStatisticsUtilities::outputWeightedNumberOfCells(
+    const std::string& stat_dump_filename,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context)
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        int weighted_num_cells_local = 0;
+        int weighted_num_cells_global = 0;
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the refinement ratio from the current level to the coarest level.
+             */
+            
+            hier::IntVector ratioCurrentLevelToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioCurrentLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            if (li == 0)
+            {
+                ratioCurrentLevelToCoarestLevel = hier::IntVector::getOne(d_dim);
+            }
+            
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                /*
+                 * Add the number of cells in current patch.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::IntVector interior_dims = patch_box.numberCells();
+                
+                weighted_num_cells_local += interior_dims[0]*ratioCurrentLevelToCoarestLevel[0];;
+            }
+        }
+        
+        /*
+         * Reduction to get the global number of cells.
+         */
+        
+        mpi.Reduce(
+            &weighted_num_cells_local,
+            &weighted_num_cells_global,
+            1,
+            MPI_INT,
+            MPI_SUM,
+            0);
+        
+        /*
+         * Output the number of cells (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << double(weighted_num_cells_global);
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        int weighted_num_cells_local = 0;
+        int weighted_num_cells_global = 0;
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the refinement ratio from the current level to the coarest level.
+             */
+            
+            hier::IntVector ratioCurrentLevelToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioCurrentLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            if (li == 0)
+            {
+                ratioCurrentLevelToCoarestLevel = hier::IntVector::getOne(d_dim);
+            }
+            
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                /*
+                 * Add the number of cells in current patch.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::IntVector interior_dims = patch_box.numberCells();
+                
+                weighted_num_cells_local += interior_dims[0]*interior_dims[1]*ratioCurrentLevelToCoarestLevel[0];
+            }
+        }
+        
+        /*
+         * Reduction to get the global number of cells.
+         */
+        
+        mpi.Reduce(
+            &weighted_num_cells_local,
+            &weighted_num_cells_global,
+            1,
+            MPI_INT,
+            MPI_SUM,
+            0);
+        
+        /*
+         * Output the number of cells (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << double(weighted_num_cells_global);
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        int weighted_num_cells_local = 0;
+        int weighted_num_cells_global = 0;
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the refinement ratio from the current level to the coarest level.
+             */
+            
+            hier::IntVector ratioCurrentLevelToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioCurrentLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            if (li == 0)
+            {
+                ratioCurrentLevelToCoarestLevel = hier::IntVector::getOne(d_dim);
+            }
+            
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                /*
+                 * Add the number of cells in current patch.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::IntVector interior_dims = patch_box.numberCells();
+                
+                weighted_num_cells_local += interior_dims[0]*interior_dims[1]*interior_dims[2]*ratioCurrentLevelToCoarestLevel[0];
+            }
+        }
+        
+        /*
+         * Reduction to get the global number of cells.
+         */
+        
+        mpi.Reduce(
+            &weighted_num_cells_local,
+            &weighted_num_cells_global,
+            1,
+            MPI_INT,
+            MPI_SUM,
+            0);
+        
+        /*
+         * Output the number of cells (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << double(weighted_num_cells_global);
+        }
+    }
+}
+
+
+/*
  * Output names of statistical quantities to output to a file.
  */
 void
@@ -47013,6 +47471,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             else if (statistical_quantity_key == "NUM_INTEF_THICK")
             {
                 f_out << "\t" << "NUM_INTEF_THICK      ";
+            }
+            else if (statistical_quantity_key == "NUM_CELLS")
+            {
+                f_out << "\t" << "NUM_CELLS            ";
+            }
+            else if (statistical_quantity_key == "WEIGHTED_NUM_CELLS")
+            {
+                f_out << "\t" << "WEIGHTED_NUM_CELLS   ";
             }
         }
         
@@ -47532,6 +47998,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
         else if (statistical_quantity_key == "NUM_INTEF_THICK")
         {
             rmi_statistics_utilities->outputNumericalInterfaceThickness(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "NUM_CELLS")
+        {
+            rmi_statistics_utilities->outputNumberOfCells(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "WEIGHTED_NUM_CELLS")
+        {
+            rmi_statistics_utilities->outputWeightedNumberOfCells(
                 stat_dump_filename,
                 patch_hierarchy,
                 data_context);
