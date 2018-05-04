@@ -2573,7 +2573,7 @@ Euler::outputDataStatistics(
                     << std::endl);
             }
             
-            f_out << std::fixed << std::setprecision(std::numeric_limits<double>::digits10) << output_time;
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10) << output_time;
             f_out.close();
         }
         
