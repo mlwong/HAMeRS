@@ -1,6 +1,7 @@
 #include "flow/flow_models/five-eqn_Allaire/FlowModelRiemannSolverFiveEqnAllaire.hpp"
 
-#define EPSILON 1e-40
+#define EPSILON HAMERS_EPSILON
+
 
 /*
  * Compute the local convective flux in the x-direction from conservative variables with
