@@ -2,9 +2,7 @@
 
 #include "SAMRAI/geom/CartesianPatchGeometry.h"
 
-#include <cfloat>
-
-#define EPSILON DBL_EPSILON
+#define EPSILON HAMERS_EPSILON
 
 GradientSensorJameson::GradientSensorJameson(
     const std::string& object_name,

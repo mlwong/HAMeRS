@@ -1,8 +1,7 @@
 #include "flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS6-Test.hpp"
 
-#include <cfloat>
+#define EPSILON HAMERS_EPSILON
 
-#define EPSILON DBL_EPSILON
 
 /*
  * Timers interspersed throughout the class.

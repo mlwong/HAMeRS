@@ -1,8 +1,6 @@
 #include "flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS56-HLLC-HLL.hpp"
 
-#include <cfloat>
-
-#define EPSILON DBL_EPSILON
+#define EPSILON HAMERS_EPSILON
 
 ConvectiveFluxReconstructorWCNS56::ConvectiveFluxReconstructorWCNS56(
     const std::string& object_name,

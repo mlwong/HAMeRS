@@ -1,8 +1,6 @@
 #include "flow/convective_flux_reconstructors/WCNS56/ConvectiveFluxReconstructorWCNS5-JS-HLLC-HLL.hpp"
 
-#include <cfloat>
-
-#define EPSILON DBL_EPSILON
+#define EPSILON HAMERS_EPSILON
 
 
 /*

@@ -1,6 +1,7 @@
 #include "flow/flow_models/four-eqn_conservative/FlowModelRiemannSolverFourEqnConservative.hpp"
 
-#define EPSILON 1e-40
+#define EPSILON HAMERS_EPSILON
+
 
 /*
  * Compute the local convective flux in the x-direction from conservative variables with
