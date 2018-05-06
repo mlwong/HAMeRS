@@ -1498,6 +1498,11 @@ RMIStatisticsUtilities::outputMixingWidthInXDirection(
         std::free(Y_avg_local);
         std::free(Y_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -2042,6 +2047,11 @@ RMIStatisticsUtilities::outputMixingWidthInYDirection(
         std::free(Y_avg_local);
         std::free(Y_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -2374,6 +2384,11 @@ RMIStatisticsUtilities::outputMixingWidthInZDirection(
         
         std::free(Y_avg_local);
         std::free(Y_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -3175,6 +3190,11 @@ RMIStatisticsUtilities::outputMixednessInXDirection(
         std::free(Y_product_avg_local);
         std::free(Y_product_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -3765,6 +3785,11 @@ RMIStatisticsUtilities::outputMixednessInYDirection(
         std::free(Y_product_avg_local);
         std::free(Y_product_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -4120,6 +4145,11 @@ RMIStatisticsUtilities::outputMixednessInZDirection(
         std::free(Y_avg_global);
         std::free(Y_product_avg_local);
         std::free(Y_product_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -4658,6 +4688,11 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXDirection(
             << "'TKE_INT_HOMO_X' is not implemented for three-dimensional problem."
             << std::endl);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -5194,6 +5229,11 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYDirection(
             << ": "
             << "'TKE_INT_HOMO_Y' is not implemented for three-dimensional problem."
             << std::endl);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -5815,6 +5855,11 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXYPlane(
         std::free(rho_w_avg_local);
         std::free(rho_w_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -6401,6 +6446,11 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYZPlane(
         std::free(rho_v_avg_global);
         std::free(rho_w_avg_local);
         std::free(rho_w_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -6989,6 +7039,11 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXZPlane(
         std::free(rho_w_avg_local);
         std::free(rho_w_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -7532,6 +7587,11 @@ outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
         std::free(rho_avg_global);
         std::free(rho_u_avg_local);
         std::free(rho_u_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -8080,6 +8140,11 @@ outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
         std::free(rho_v_avg_local);
         std::free(rho_v_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -8626,6 +8691,11 @@ outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
         std::free(rho_avg_global);
         std::free(rho_w_avg_local);
         std::free(rho_w_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -9210,6 +9280,11 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
                   << "\t" << Omega_integrated_global;
         }
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -10111,7 +10186,12 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
                   << "\t" << Chi_integrated_global;
         }
-}
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -10783,6 +10863,11 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
             << ": "
             << "'RE_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -11513,6 +11598,11 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
         std::free(TKE_avg_local);
         std::free(TKE_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -12119,6 +12209,11 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
             << "'TKE_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -12707,6 +12802,11 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
             << "'TKE_X_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -13294,6 +13394,11 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
             << ": "
             << "'TKE_Y_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -13954,6 +14059,11 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
         std::free(TKE_avg_local);
         std::free(TKE_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -14574,6 +14684,11 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         std::free(rho_u_avg_global);
         std::free(TKE_x_avg_local);
         std::free(TKE_x_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -15196,6 +15311,11 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         std::free(TKE_y_avg_local);
         std::free(TKE_y_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -15817,6 +15937,11 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         std::free(TKE_z_avg_local);
         std::free(TKE_z_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -16406,6 +16531,11 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
             << "'R11_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -16994,6 +17124,11 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
             << ": "
             << "'R22_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -17617,6 +17752,11 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         std::free(rho_u_pp_u_pp_avg_local);
         std::free(rho_u_pp_u_pp_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -18238,6 +18378,11 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         std::free(rho_v_avg_global);
         std::free(rho_v_pp_v_pp_avg_local);
         std::free(rho_v_pp_v_pp_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -18861,6 +19006,11 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         std::free(rho_w_pp_w_pp_avg_local);
         std::free(rho_w_pp_w_pp_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -19469,6 +19619,11 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
             << ": "
             << "'R12_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -20112,6 +20267,11 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
         std::free(rho_u_pp_v_pp_avg_local);
         std::free(rho_u_pp_v_pp_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -20753,6 +20913,11 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
         std::free(rho_w_avg_global);
         std::free(rho_u_pp_w_pp_avg_local);
         std::free(rho_u_pp_w_pp_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -21396,6 +21561,11 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
         std::free(rho_v_pp_w_pp_avg_local);
         std::free(rho_v_pp_w_pp_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -22025,6 +22195,11 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
             << "'b11_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -22653,6 +22828,11 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
             << ": "
             << "'b22_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -23354,6 +23534,11 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
         std::free(rho_w_pp_w_pp_avg_local);
         std::free(rho_w_pp_w_pp_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -24053,6 +24238,11 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
         std::free(rho_v_pp_v_pp_avg_global);
         std::free(rho_w_pp_w_pp_avg_local);
         std::free(rho_w_pp_w_pp_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -24754,6 +24944,11 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
         std::free(rho_w_pp_w_pp_avg_local);
         std::free(rho_w_pp_w_pp_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -25403,6 +25598,11 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
             << ": "
             << "'b12_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -26125,6 +26325,11 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
         std::free(rho_u_pp_v_pp_avg_local);
         std::free(rho_u_pp_v_pp_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -26845,6 +27050,11 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
         std::free(rho_w_pp_w_pp_avg_global);
         std::free(rho_u_pp_w_pp_avg_local);
         std::free(rho_u_pp_w_pp_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -27567,6 +27777,11 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
         std::free(rho_v_pp_w_pp_avg_local);
         std::free(rho_v_pp_w_pp_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -28153,6 +28368,11 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
             << ": "
             << "'a1_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -28774,6 +28994,11 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         std::free(rho_p_u_p_avg_local);
         std::free(rho_p_u_p_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -29326,6 +29551,11 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
             << ": "
             << "'b_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -29905,6 +30135,11 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
         std::free(rho_p_v_p_avg_local);
         std::free(rho_p_v_p_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -30259,6 +30494,11 @@ RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYDirectio
             << ": "
             << "'DEN_MEAN_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -30629,6 +30869,11 @@ RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYZPlane(
         std::free(Y_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -31201,6 +31446,11 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
             << ": "
             << "'BOUSS_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -31798,6 +32048,11 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
         std::free(rho_p_rho_p_avg_global);
         std::free(rho_p_v_p_avg_local);
         std::free(rho_p_v_p_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -32767,6 +33022,11 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
         std::free(D_avg_local);
         std::free(D_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -33701,6 +33961,11 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
         std::free(Y_avg_global);
         std::free(mu_avg_local);
         std::free(mu_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -34694,6 +34959,11 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
         std::free(nu_avg_local);
         std::free(nu_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -35628,6 +35898,11 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
         std::free(Y_avg_global);
         std::free(mu_v_avg_local);
         std::free(mu_v_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -36621,6 +36896,11 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
         std::free(nu_v_avg_local);
         std::free(nu_v_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -37555,6 +37835,11 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
         std::free(Y_avg_global);
         std::free(kappa_avg_local);
         std::free(kappa_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -38566,6 +38851,11 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
         std::free(alpha_avg_local);
         std::free(alpha_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -39346,6 +39636,11 @@ RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
         
         std::free(Y_avg_local);
         std::free(Y_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -40128,6 +40423,11 @@ RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
         std::free(Y_avg_local);
         std::free(Y_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -40908,6 +41208,11 @@ RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
         
         std::free(Y_avg_local);
         std::free(Y_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -41690,6 +41995,11 @@ RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
         std::free(Y_avg_local);
         std::free(Y_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -42428,6 +42738,11 @@ RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
         
         std::free(Y_avg_local);
         std::free(Y_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -43168,6 +43483,11 @@ RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
         std::free(Y_avg_local);
         std::free(Y_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -43906,6 +44226,11 @@ RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
         
         std::free(Y_avg_local);
         std::free(Y_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -44646,6 +44971,11 @@ RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
         std::free(Y_avg_local);
         std::free(Y_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -45384,6 +45714,11 @@ RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
         
         std::free(Y_avg_local);
         std::free(Y_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -46710,6 +47045,11 @@ RMIStatisticsUtilities::outputNumericalInterfaceThickness(
                   << "\t" << 1.0/(dx_finest*grad_mag_max_global);
         }
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -46905,6 +47245,11 @@ RMIStatisticsUtilities::outputNumberOfCells(
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
                   << "\t" << double(num_cells_global);
         }
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -47149,6 +47494,11 @@ RMIStatisticsUtilities::outputWeightedNumberOfCells(
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
                   << "\t" << double(weighted_num_cells_global);
         }
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -48025,22 +48375,5 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 << " found."
                 << std::endl);
         }
-    }
-    
-    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
-    if (mpi.getRank() == 0)
-    {
-        std::ofstream f_out;
-        f_out.open(stat_dump_filename.c_str(), std::ios::app);
-        
-        if (!f_out.is_open())
-        {
-            TBOX_ERROR(d_object_name
-                << ": "
-                << "Failed to open file to output statistics!"
-                << std::endl);
-        }
-        
-        f_out.close();
     }
 }
