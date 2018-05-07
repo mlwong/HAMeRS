@@ -8798,7 +8798,7 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, density and enstrophy in the flow model and compute the
+                 * Register the patch, density and velocity in the flow model and compute the
                  * corresponding cell data.
                  */
                 
@@ -9028,7 +9028,7 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, density and enstrophy in the flow model and compute the
+                 * Register the patch, density and velocity in the flow model and compute the
                  * corresponding cell data.
                  */
                 
