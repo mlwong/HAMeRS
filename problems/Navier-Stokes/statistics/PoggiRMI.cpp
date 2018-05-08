@@ -683,6 +683,24 @@ class RMIStatisticsUtilities
             const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
+        /*
+         * Output number of cells to a file.
+         */
+        void
+        outputNumberOfCells(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output weighted number of cells to a file.
+         */
+        void
+        outputWeightedNumberOfCells(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
     private:
         /*
          * The object name is used for error/warning reporting.
@@ -1480,6 +1498,11 @@ RMIStatisticsUtilities::outputMixingWidthInXDirection(
         std::free(Y_avg_local);
         std::free(Y_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -2024,6 +2047,11 @@ RMIStatisticsUtilities::outputMixingWidthInYDirection(
         std::free(Y_avg_local);
         std::free(Y_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -2356,6 +2384,11 @@ RMIStatisticsUtilities::outputMixingWidthInZDirection(
         
         std::free(Y_avg_local);
         std::free(Y_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -3157,6 +3190,11 @@ RMIStatisticsUtilities::outputMixednessInXDirection(
         std::free(Y_product_avg_local);
         std::free(Y_product_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -3747,6 +3785,11 @@ RMIStatisticsUtilities::outputMixednessInYDirection(
         std::free(Y_product_avg_local);
         std::free(Y_product_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -4102,6 +4145,11 @@ RMIStatisticsUtilities::outputMixednessInZDirection(
         std::free(Y_avg_global);
         std::free(Y_product_avg_local);
         std::free(Y_product_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -4640,6 +4688,11 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXDirection(
             << "'TKE_INT_HOMO_X' is not implemented for three-dimensional problem."
             << std::endl);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -5176,6 +5229,11 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYDirection(
             << ": "
             << "'TKE_INT_HOMO_Y' is not implemented for three-dimensional problem."
             << std::endl);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -5797,6 +5855,11 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXYPlane(
         std::free(rho_w_avg_local);
         std::free(rho_w_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -6383,6 +6446,11 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInYZPlane(
         std::free(rho_v_avg_global);
         std::free(rho_w_avg_local);
         std::free(rho_w_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -6971,6 +7039,11 @@ RMIStatisticsUtilities::outputTKEIntegratedWithHomogeneityInXZPlane(
         std::free(rho_w_avg_local);
         std::free(rho_w_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -7514,6 +7587,11 @@ outputTKEInXDirectionIntegratedWithHomogeneityInYZPlane(
         std::free(rho_avg_global);
         std::free(rho_u_avg_local);
         std::free(rho_u_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -8062,6 +8140,11 @@ outputTKEInYDirectionIntegratedWithHomogeneityInYZPlane(
         std::free(rho_v_avg_local);
         std::free(rho_v_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -8609,6 +8692,11 @@ outputTKEInZDirectionIntegratedWithHomogeneityInYZPlane(
         std::free(rho_w_avg_local);
         std::free(rho_w_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -8710,7 +8798,7 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, density and enstrophy in the flow model and compute the
+                 * Register the patch, density and velocity in the flow model and compute the
                  * corresponding cell data.
                  */
                 
@@ -8940,7 +9028,7 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
                 const double* const dx = patch_geom->getDx();
                 
                 /*
-                 * Register the patch, density and enstrophy in the flow model and compute the
+                 * Register the patch, density and velocity in the flow model and compute the
                  * corresponding cell data.
                  */
                 
@@ -9192,6 +9280,11 @@ RMIStatisticsUtilities::outputEnstrophyIntegrated(
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
                   << "\t" << Omega_integrated_global;
         }
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -10093,7 +10186,12 @@ RMIStatisticsUtilities::outputScalarDissipationRateIntegrated(
             f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
                   << "\t" << Chi_integrated_global;
         }
-}
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -10765,6 +10863,11 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYDirection(
             << ": "
             << "'RE_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -11495,6 +11598,11 @@ outputReynoldsNumberMeanInMixingLayerWithHomogeneityInYZPlane(
         std::free(TKE_avg_local);
         std::free(TKE_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -12101,6 +12209,11 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYDirection(
             << "'TKE_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -12689,6 +12802,11 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
             << "'TKE_X_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -13276,6 +13394,11 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYDirection(
             << ": "
             << "'TKE_Y_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -13936,6 +14059,11 @@ RMIStatisticsUtilities::outputTKEMeanInMixingLayerWithHomogeneityInYZPlane(
         std::free(TKE_avg_local);
         std::free(TKE_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -14556,6 +14684,11 @@ outputTKEInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         std::free(rho_u_avg_global);
         std::free(TKE_x_avg_local);
         std::free(TKE_x_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -15178,6 +15311,11 @@ outputTKEInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         std::free(TKE_y_avg_local);
         std::free(TKE_y_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -15799,6 +15937,11 @@ outputTKEInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         std::free(TKE_z_avg_local);
         std::free(TKE_z_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -16388,6 +16531,11 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYDirecti
             << "'R11_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -16976,6 +17124,11 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYDirecti
             << ": "
             << "'R22_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -17599,6 +17752,11 @@ outputReynoldsNormalStressInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         std::free(rho_u_pp_u_pp_avg_local);
         std::free(rho_u_pp_u_pp_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -18220,6 +18378,11 @@ outputReynoldsNormalStressInYDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         std::free(rho_v_avg_global);
         std::free(rho_v_pp_v_pp_avg_local);
         std::free(rho_v_pp_v_pp_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -18843,6 +19006,11 @@ outputReynoldsNormalStressInZDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         std::free(rho_w_pp_w_pp_avg_local);
         std::free(rho_w_pp_w_pp_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -19451,6 +19619,11 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYDirect
             << ": "
             << "'R12_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -20094,6 +20267,11 @@ outputReynoldsShearStressInXYDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
         std::free(rho_u_pp_v_pp_avg_local);
         std::free(rho_u_pp_v_pp_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -20735,6 +20913,11 @@ outputReynoldsShearStressInXZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
         std::free(rho_w_avg_global);
         std::free(rho_u_pp_w_pp_avg_local);
         std::free(rho_u_pp_w_pp_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -21378,6 +21561,11 @@ outputReynoldsShearStressInYZDirectionsMeanInMixingLayerWithHomogeneityInYZPlane
         std::free(rho_v_pp_w_pp_avg_local);
         std::free(rho_v_pp_w_pp_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -22007,6 +22195,11 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
             << "'b11_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -22635,6 +22828,11 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
             << ": "
             << "'b22_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -23336,6 +23534,11 @@ outputReynoldsNormalStressAnisotropyInXDirectionMeanInMixingLayerWithHomogeneity
         std::free(rho_w_pp_w_pp_avg_local);
         std::free(rho_w_pp_w_pp_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -24035,6 +24238,11 @@ outputReynoldsNormalStressAnisotropyInYDirectionMeanInMixingLayerWithHomogeneity
         std::free(rho_v_pp_v_pp_avg_global);
         std::free(rho_w_pp_w_pp_avg_local);
         std::free(rho_w_pp_w_pp_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -24736,6 +24944,11 @@ outputReynoldsNormalStressAnisotropyInZDirectionMeanInMixingLayerWithHomogeneity
         std::free(rho_w_pp_w_pp_avg_local);
         std::free(rho_w_pp_w_pp_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -25385,6 +25598,11 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
             << ": "
             << "'b12_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -26107,6 +26325,11 @@ outputReynoldsShearStressAnisotropyInXYDirectionsMeanInMixingLayerWithHomogeneit
         std::free(rho_u_pp_v_pp_avg_local);
         std::free(rho_u_pp_v_pp_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -26827,6 +27050,11 @@ outputReynoldsShearStressAnisotropyInXZDirectionsMeanInMixingLayerWithHomogeneit
         std::free(rho_w_pp_w_pp_avg_global);
         std::free(rho_u_pp_w_pp_avg_local);
         std::free(rho_u_pp_w_pp_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -27549,6 +27777,11 @@ outputReynoldsShearStressAnisotropyInYZDirectionsMeanInMixingLayerWithHomogeneit
         std::free(rho_v_pp_w_pp_avg_local);
         std::free(rho_v_pp_w_pp_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -28135,6 +28368,11 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYDirection(
             << ": "
             << "'a1_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -28756,6 +28994,11 @@ outputTurbulentMassFluxInXDirectionMeanInMixingLayerWithHomogeneityInYZPlane(
         std::free(rho_p_u_p_avg_local);
         std::free(rho_p_u_p_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -29308,6 +29551,11 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYDirectio
             << ": "
             << "'b_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -29887,6 +30135,11 @@ outputDensitySpecificVolumeCovarianceMeanInMixingLayerWithHomogeneityInYZPlane(
         std::free(rho_p_v_p_avg_local);
         std::free(rho_p_v_p_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -30241,6 +30494,11 @@ RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYDirectio
             << ": "
             << "'DEN_MEAN_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -30611,6 +30869,11 @@ RMIStatisticsUtilities::outputDensityMeanInMixingLayerWithHomogeneityInYZPlane(
         std::free(Y_avg_global);
         std::free(rho_avg_local);
         std::free(rho_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -31183,6 +31446,11 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYDirection(
             << ": "
             << "'BOUSS_HOMO_Y_IN_ML_X' is not implemented for three-dimensional problem."
             << std::endl);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -31780,6 +32048,11 @@ outputBoussinesqDeviationMeanInMixingLayerWithHomogeneityInYZPlane(
         std::free(rho_p_rho_p_avg_global);
         std::free(rho_p_v_p_avg_local);
         std::free(rho_p_v_p_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -32749,6 +33022,11 @@ RMIStatisticsUtilities::outputMassDiffusivityMeanInMixingLayerInXDirection(
         std::free(D_avg_local);
         std::free(D_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -33683,6 +33961,11 @@ RMIStatisticsUtilities::outputDynamicShearViscosityMeanInMixingLayerInXDirection
         std::free(Y_avg_global);
         std::free(mu_avg_local);
         std::free(mu_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -34676,6 +34959,11 @@ RMIStatisticsUtilities::outputKinematicShearViscosityMeanInMixingLayerInXDirecti
         std::free(nu_avg_local);
         std::free(nu_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -35610,6 +35898,11 @@ RMIStatisticsUtilities::outputDynamicBulkViscosityMeanInMixingLayerInXDirection(
         std::free(Y_avg_global);
         std::free(mu_v_avg_local);
         std::free(mu_v_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -36603,6 +36896,11 @@ RMIStatisticsUtilities::outputKinematicBulkViscosityMeanInMixingLayerInXDirectio
         std::free(nu_v_avg_local);
         std::free(nu_v_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -37537,6 +37835,11 @@ RMIStatisticsUtilities::outputThermalConductivityMeanInMixingLayerInXDirection(
         std::free(Y_avg_global);
         std::free(kappa_avg_local);
         std::free(kappa_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -38548,6 +38851,11 @@ RMIStatisticsUtilities::outputThermalDiffusivityMeanInMixingLayerInXDirection(
         std::free(alpha_avg_local);
         std::free(alpha_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -39328,6 +39636,11 @@ RMIStatisticsUtilities::outputMixingLayerWidth1InXDirection(
         
         std::free(Y_avg_local);
         std::free(Y_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -40110,6 +40423,11 @@ RMIStatisticsUtilities::outputMixingLayerWidth2InXDirection(
         std::free(Y_avg_local);
         std::free(Y_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -40890,6 +41208,11 @@ RMIStatisticsUtilities::outputMixingLayerWidth3InXDirection(
         
         std::free(Y_avg_local);
         std::free(Y_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -41672,6 +41995,11 @@ RMIStatisticsUtilities::outputMixingLayerWidth4InXDirection(
         std::free(Y_avg_local);
         std::free(Y_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -42410,6 +42738,11 @@ RMIStatisticsUtilities::outputMixingLayerWidth5InXDirection(
         
         std::free(Y_avg_local);
         std::free(Y_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -43150,6 +43483,11 @@ RMIStatisticsUtilities::outputMixingLayerWidth6InXDirection(
         std::free(Y_avg_local);
         std::free(Y_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -43888,6 +44226,11 @@ RMIStatisticsUtilities::outputMixingLayerWidth7InXDirection(
         
         std::free(Y_avg_local);
         std::free(Y_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -44628,6 +44971,11 @@ RMIStatisticsUtilities::outputMixingLayerWidth8InXDirection(
         std::free(Y_avg_local);
         std::free(Y_avg_global);
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -45366,6 +45714,11 @@ RMIStatisticsUtilities::outputMixingLayerWidth9InXDirection(
         
         std::free(Y_avg_local);
         std::free(Y_avg_global);
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
     }
 }
 
@@ -46692,6 +47045,461 @@ RMIStatisticsUtilities::outputNumericalInterfaceThickness(
                   << "\t" << 1.0/(dx_finest*grad_mag_max_global);
         }
     }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output number of cells to a file.
+ */
+void
+RMIStatisticsUtilities::outputNumberOfCells(
+    const std::string& stat_dump_filename,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context)
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        int num_cells_local = 0;
+        int num_cells_global = 0;
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                /*
+                 * Add the number of cells in current patch.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::IntVector interior_dims = patch_box.numberCells();
+                
+                num_cells_local += interior_dims[0];
+            }
+        }
+        
+        /*
+         * Reduction to get the global number of cells.
+         */
+        
+        mpi.Reduce(
+            &num_cells_local,
+            &num_cells_global,
+            1,
+            MPI_INT,
+            MPI_SUM,
+            0);
+        
+        /*
+         * Output the number of cells (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << double(num_cells_global);
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        int num_cells_local = 0;
+        int num_cells_global = 0;
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                /*
+                 * Add the number of cells in current patch.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::IntVector interior_dims = patch_box.numberCells();
+                
+                num_cells_local += interior_dims[0]*interior_dims[1];
+            }
+        }
+        
+        /*
+         * Reduction to get the global number of cells.
+         */
+        
+        mpi.Reduce(
+            &num_cells_local,
+            &num_cells_global,
+            1,
+            MPI_INT,
+            MPI_SUM,
+            0);
+        
+        /*
+         * Output the number of cells (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << double(num_cells_global);
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        int num_cells_local = 0;
+        int num_cells_global = 0;
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                /*
+                 * Add the number of cells in current patch.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::IntVector interior_dims = patch_box.numberCells();
+                
+                num_cells_local += interior_dims[0]*interior_dims[1]*interior_dims[2];
+            }
+        }
+        
+        /*
+         * Reduction to get the global number of cells.
+         */
+        
+        mpi.Reduce(
+            &num_cells_local,
+            &num_cells_global,
+            1,
+            MPI_INT,
+            MPI_SUM,
+            0);
+        
+        /*
+         * Output the number of cells (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << double(num_cells_global);
+        }
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
+}
+
+
+/*
+ * Output weighted number of cells to a file.
+ */
+void
+RMIStatisticsUtilities::outputWeightedNumberOfCells(
+    const std::string& stat_dump_filename,
+    const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+    const boost::shared_ptr<hier::VariableContext>& data_context)
+{
+#ifdef HAMERS_DEBUG_CHECK_ASSERTIONS
+    TBOX_ASSERT(!stat_dump_filename.empty());
+#endif
+    
+    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
+    
+    std::ofstream f_out;
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.open(stat_dump_filename.c_str(), std::ios::app);
+        if (!f_out.is_open())
+        {
+            TBOX_ERROR(d_object_name
+                << ": "
+                << "Failed to open file to output statistics!"
+                << std::endl);
+        }
+    }
+    
+    const int num_levels = patch_hierarchy->getNumberOfLevels();
+    
+    if (d_dim == tbox::Dimension(1))
+    {
+        int weighted_num_cells_local = 0;
+        int weighted_num_cells_global = 0;
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the refinement ratio from the current level to the coarest level.
+             */
+            
+            hier::IntVector ratioCurrentLevelToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioCurrentLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            if (li == 0)
+            {
+                ratioCurrentLevelToCoarestLevel = hier::IntVector::getOne(d_dim);
+            }
+            
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                /*
+                 * Add the number of cells in current patch.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::IntVector interior_dims = patch_box.numberCells();
+                
+                weighted_num_cells_local += interior_dims[0]*ratioCurrentLevelToCoarestLevel[0];;
+            }
+        }
+        
+        /*
+         * Reduction to get the global number of cells.
+         */
+        
+        mpi.Reduce(
+            &weighted_num_cells_local,
+            &weighted_num_cells_global,
+            1,
+            MPI_INT,
+            MPI_SUM,
+            0);
+        
+        /*
+         * Output the number of cells (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << double(weighted_num_cells_global);
+        }
+    }
+    else if (d_dim == tbox::Dimension(2))
+    {
+        int weighted_num_cells_local = 0;
+        int weighted_num_cells_global = 0;
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the refinement ratio from the current level to the coarest level.
+             */
+            
+            hier::IntVector ratioCurrentLevelToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioCurrentLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            if (li == 0)
+            {
+                ratioCurrentLevelToCoarestLevel = hier::IntVector::getOne(d_dim);
+            }
+            
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                /*
+                 * Add the number of cells in current patch.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::IntVector interior_dims = patch_box.numberCells();
+                
+                weighted_num_cells_local += interior_dims[0]*interior_dims[1]*ratioCurrentLevelToCoarestLevel[0];
+            }
+        }
+        
+        /*
+         * Reduction to get the global number of cells.
+         */
+        
+        mpi.Reduce(
+            &weighted_num_cells_local,
+            &weighted_num_cells_global,
+            1,
+            MPI_INT,
+            MPI_SUM,
+            0);
+        
+        /*
+         * Output the number of cells (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << double(weighted_num_cells_global);
+        }
+    }
+    else if (d_dim == tbox::Dimension(3))
+    {
+        int weighted_num_cells_local = 0;
+        int weighted_num_cells_global = 0;
+        
+        for (int li = 0; li < num_levels; li++)
+        {
+            /*
+             * Get the refinement ratio from the current level to the coarest level.
+             */
+            
+            hier::IntVector ratioCurrentLevelToCoarestLevel =
+                patch_hierarchy->getRatioToCoarserLevel(li);
+            for (int lii = li - 1; lii > 0 ; lii--)
+            {
+                ratioCurrentLevelToCoarestLevel *= patch_hierarchy->getRatioToCoarserLevel(lii);
+            }
+            
+            if (li == 0)
+            {
+                ratioCurrentLevelToCoarestLevel = hier::IntVector::getOne(d_dim);
+            }
+            
+            /*
+             * Get the current patch level.
+             */
+            
+            boost::shared_ptr<hier::PatchLevel> patch_level(
+                patch_hierarchy->getPatchLevel(li));
+            
+            for (hier::PatchLevel::iterator ip(patch_level->begin());
+                 ip != patch_level->end();
+                 ip++)
+            {
+                const boost::shared_ptr<hier::Patch> patch = *ip;
+                
+                /*
+                 * Add the number of cells in current patch.
+                 */
+                
+                const hier::Box& patch_box = patch->getBox();
+                
+                const hier::IntVector interior_dims = patch_box.numberCells();
+                
+                weighted_num_cells_local += interior_dims[0]*interior_dims[1]*interior_dims[2]*ratioCurrentLevelToCoarestLevel[0];
+            }
+        }
+        
+        /*
+         * Reduction to get the global number of cells.
+         */
+        
+        mpi.Reduce(
+            &weighted_num_cells_local,
+            &weighted_num_cells_global,
+            1,
+            MPI_INT,
+            MPI_SUM,
+            0);
+        
+        /*
+         * Output the number of cells (only done by process 0).
+         */
+        
+        if (mpi.getRank() == 0)
+        {
+            f_out << std::scientific << std::setprecision(std::numeric_limits<double>::digits10)
+                  << "\t" << double(weighted_num_cells_global);
+        }
+    }
+    
+    if (mpi.getRank() == 0)
+    {
+        f_out.close();
+    }
 }
 
 
@@ -47013,6 +47821,14 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             else if (statistical_quantity_key == "NUM_INTEF_THICK")
             {
                 f_out << "\t" << "NUM_INTEF_THICK      ";
+            }
+            else if (statistical_quantity_key == "NUM_CELLS")
+            {
+                f_out << "\t" << "NUM_CELLS            ";
+            }
+            else if (statistical_quantity_key == "WEIGHTED_NUM_CELLS")
+            {
+                f_out << "\t" << "WEIGHTED_NUM_CELLS   ";
             }
         }
         
@@ -47536,6 +48352,20 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 patch_hierarchy,
                 data_context);
         }
+        else if (statistical_quantity_key == "NUM_CELLS")
+        {
+            rmi_statistics_utilities->outputNumberOfCells(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
+        else if (statistical_quantity_key == "WEIGHTED_NUM_CELLS")
+        {
+            rmi_statistics_utilities->outputWeightedNumberOfCells(
+                stat_dump_filename,
+                patch_hierarchy,
+                data_context);
+        }
         else
         {
             TBOX_ERROR(d_object_name
@@ -47545,22 +48375,5 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantities(
                 << " found."
                 << std::endl);
         }
-    }
-    
-    const tbox::SAMRAI_MPI& mpi(tbox::SAMRAI_MPI::getSAMRAIWorld());
-    if (mpi.getRank() == 0)
-    {
-        std::ofstream f_out;
-        f_out.open(stat_dump_filename.c_str(), std::ios::app);
-        
-        if (!f_out.is_open())
-        {
-            TBOX_ERROR(d_object_name
-                << ": "
-                << "Failed to open file to output statistics!"
-                << std::endl);
-        }
-        
-        f_out.close();
     }
 }
