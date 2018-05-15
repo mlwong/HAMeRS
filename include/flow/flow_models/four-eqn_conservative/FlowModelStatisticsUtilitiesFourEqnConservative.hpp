@@ -705,6 +705,24 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
+         * Output number of cells to a file.
+         */
+        void
+        outputNumberOfCells(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output weighted number of cells to a file.
+         */
+        void
+        outputWeightedNumberOfCells(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
          * boost::shared_ptr to EquationOfStateMixingRules.
          */
         const boost::shared_ptr<EquationOfStateMixingRules>

@@ -1,6 +1,8 @@
 #ifndef EQUATION_OF_MASS_DIFFUSIVITY_MIXING_RULES_HPP
 #define EQUATION_OF_MASS_DIFFUSIVITY_MIXING_RULES_HPP
 
+#include "HAMeRS_config.hpp"
+
 #include "util/mixing_rules/MixingClosureModels.hpp"
 
 #include "SAMRAI/tbox/Database.h"
