@@ -131,10 +131,6 @@ FlowModelStatisticsUtilitiesFourEqnConservative::outputStatisticalQuantitiesName
             {
                 f_out << "\t" << "TKE_Y_HOMO_Y_IN_ML_X ";
             }
-            else if (statistical_quantity_key == "TKE_Z_HOMO_Y_IN_ML_X")
-            {
-                f_out << "\t" << "TKE_Z_HOMO_Y_IN_ML_X ";
-            }
             else if (statistical_quantity_key == "TKE_HOMO_YZ_IN_ML_X")
             {
                 f_out << "\t" << "TKE_HOMO_YZ_IN_ML_X  ";
