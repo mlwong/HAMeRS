@@ -161,6 +161,24 @@ class FlowModelStatisticsUtilitiesFourEqnConservative: public FlowModelStatistic
             const boost::shared_ptr<hier::VariableContext>& data_context);
         
         /*
+         * Output TKE in x-direction integrated with assumed homogeneity in y-direction to a file.
+         */
+        void
+        outputTKEInXDirectionIntegratedWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
+         * Output TKE in y-direction integrated with assumed homogeneity in y-direction to a file.
+         */
+        void
+        outputTKEInYDirectionIntegratedWithHomogeneityInYDirection(
+            const std::string& stat_dump_filename,
+            const boost::shared_ptr<hier::PatchHierarchy>& patch_hierarchy,
+            const boost::shared_ptr<hier::VariableContext>& data_context);
+        
+        /*
          * Output TKE in x-direction integrated with assumed homogeneity in yz-plane to a file.
          */
         void
