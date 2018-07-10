@@ -169,6 +169,13 @@ class EquationOfStateMixingRules
             const int& species_index) const = 0;
         
         /*
+         * Get the molecular weight of a species.
+         */
+        virtual double
+        getSpeciesMolecularWeight(
+            const int& species_index) const = 0;
+        
+        /*
          * Helper function to compute the density of mixture given the partial densities.
          */
         double
