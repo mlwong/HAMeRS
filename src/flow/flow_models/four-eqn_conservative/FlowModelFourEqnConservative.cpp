@@ -765,6 +765,14 @@ FlowModelFourEqnConservative::registerDerivedCellVariable(
             "MASS_FRACTION");
     }
     
+    if (num_subghosts_of_data.find("MOLE_FRACTION") != num_subghosts_of_data.end())
+    {
+        setNumberOfSubGhosts(
+            num_subghosts_of_data.find("MOLE_FRACTION")->second,
+            "MOLE_FRACTION",
+            "MOLE_FRACTION");
+    }
+    
     if (num_subghosts_of_data.find("VELOCITY") != num_subghosts_of_data.end())
     {
         setNumberOfSubGhosts(
@@ -11093,7 +11101,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMoleFractionWithMassFraction(
     {
         // Create the cell data of mole fraction.
         d_data_mole_fraction.reset(
-            new pdat::CellData<double>(d_interior_box, 1, d_num_subghosts_mole_fraction));
+            new pdat::CellData<double>(d_interior_box, d_num_species, d_num_subghosts_mole_fraction));
         
         if (!d_data_mass_fraction)
         {
