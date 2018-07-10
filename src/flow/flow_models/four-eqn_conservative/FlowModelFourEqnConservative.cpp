@@ -11166,6 +11166,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMoleFractionWithMassFraction(
                          i < d_interior_dims[0] + d_num_subghosts_mole_fraction[0];
                          i++)
                     {
+                        // Compute the linear indices.
                         const int idx_mole_fraction = (i + d_num_subghosts_mole_fraction[0]) +
                             (j + d_num_subghosts_mole_fraction[1])*d_subghostcell_dims_mole_fraction[0];
                         
@@ -11188,6 +11189,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMoleFractionWithMassFraction(
                      i < d_interior_dims[0] + d_num_subghosts_mole_fraction[0];
                      i++)
                 {
+                    // Compute the linear index.
                     const int idx_mole_fraction = (i + d_num_subghosts_mole_fraction[0]) +
                         (j + d_num_subghosts_mole_fraction[1])*d_subghostcell_dims_mole_fraction[0];
                     
@@ -11212,6 +11214,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMoleFractionWithMassFraction(
                              i < d_interior_dims[0] + d_num_subghosts_mole_fraction[0];
                              i++)
                         {
+                            // Compute the linear indices.
                             const int idx_mole_fraction = (i + d_num_subghosts_mole_fraction[0]) +
                                 (j + d_num_subghosts_mole_fraction[1])*d_subghostcell_dims_mole_fraction[0] +
                                 (k + d_num_subghosts_mole_fraction[2])*d_subghostcell_dims_mole_fraction[0]*
@@ -11243,6 +11246,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMoleFractionWithMassFraction(
                          i < d_interior_dims[0] + d_num_subghosts_mole_fraction[0];
                          i++)
                     {
+                        // Compute the linear index.
                         const int idx_mole_fraction = (i + d_num_subghosts_mole_fraction[0]) +
                             (j + d_num_subghosts_mole_fraction[1])*d_subghostcell_dims_mole_fraction[0] +
                             (k + d_num_subghosts_mole_fraction[2])*d_subghostcell_dims_mole_fraction[0]*
@@ -11272,7 +11276,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMoleFractionWithMassFraction(
                     const double M_i = d_equation_of_state_mixing_rules->
                         getSpeciesMolecularWeight(si);
                     
-                    X[si][idx_mole_fraction] += Y[si][idx_mass_fraction]*M[idx_mole_fraction]/M_i;
+                    X[si][idx_mole_fraction] = Y[si][idx_mass_fraction]*M[idx_mole_fraction]/M_i;
                 }
             }
         }
@@ -11289,6 +11293,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMoleFractionWithMassFraction(
                          i < d_interior_dims[0] + d_num_subghosts_mole_fraction[0];
                          i++)
                     {
+                        // Compute the linear indices.
                         const int idx_mole_fraction = (i + d_num_subghosts_mole_fraction[0]) +
                             (j + d_num_subghosts_mole_fraction[1])*d_subghostcell_dims_mole_fraction[0];
                         
@@ -11298,7 +11303,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMoleFractionWithMassFraction(
                         const double M_i = d_equation_of_state_mixing_rules->
                             getSpeciesMolecularWeight(si);
                         
-                        X[si][idx_mole_fraction] += Y[si][idx_mass_fraction]*M[idx_mole_fraction]/M_i;
+                        X[si][idx_mole_fraction] = Y[si][idx_mass_fraction]*M[idx_mole_fraction]/M_i;
                     }
                 }
             }
@@ -11320,6 +11325,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMoleFractionWithMassFraction(
                              i < d_interior_dims[0] + d_num_subghosts_mole_fraction[0];
                              i++)
                         {
+                            // Compute the linear indices.
                             const int idx_mole_fraction = (i + d_num_subghosts_mole_fraction[0]) +
                                 (j + d_num_subghosts_mole_fraction[1])*d_subghostcell_dims_mole_fraction[0] +
                                 (k + d_num_subghosts_mole_fraction[2])*d_subghostcell_dims_mole_fraction[0]*
@@ -11333,7 +11339,7 @@ FlowModelFourEqnConservative::computeGlobalCellDataMoleFractionWithMassFraction(
                             const double M_i = d_equation_of_state_mixing_rules->
                                 getSpeciesMolecularWeight(si);
                             
-                            X[si][idx_mole_fraction] += Y[si][idx_mass_fraction]*M[idx_mole_fraction]/M_i;
+                            X[si][idx_mole_fraction] = Y[si][idx_mass_fraction]*M[idx_mole_fraction]/M_i;
                         }
                     }
                 }
